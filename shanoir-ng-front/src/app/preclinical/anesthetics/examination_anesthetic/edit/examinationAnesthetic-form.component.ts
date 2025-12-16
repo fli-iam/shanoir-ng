@@ -80,33 +80,28 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         this.getEnums();
         this.examinationAnesthetic = new ExaminationAnesthetic();
 
-        return this.loadData().then(() => {
-            if (this.id) {
-                return this.fetchEntity().then(entity => {
-                    if (entity) {
-                        this.examinationAnesthetic = entity;
-                    }
-                });
-            }
+        return this.loadAllData().then(() => {
+            if (this.id)
+                return this.loadExistingAnesthetic();
         });
     }
 
 
     initEdit(): Promise<void> {
         this.getEnums();
-        return this.loadData().then(() => {
-            // Set references after both are loaded
-            this.references = this.units;
 
-            // Now that data is loaded, get the anesthetic by ID
-            this.examinationAnesthetic.doseUnit = this.getReferenceById(this.examinationAnesthetic.doseUnit);
-            this.examinationAnesthetic.anesthetic = this.getAnestheticById(this.examinationAnesthetic.anesthetic);
+        return this.loadAllData().then(() => {
+            if (this.examinationAnesthetic.doseUnit)
+                this.examinationAnesthetic.doseUnit = this.findReferenceById(this.examinationAnesthetic.doseUnit);
+
+            if (this.examinationAnesthetic.anesthetic)
+                this.examinationAnesthetic.anesthetic = this.findAnestheticById(this.examinationAnesthetic.anesthetic);
         });
     }
 
     initCreate(): Promise<void> {
         this.getEnums();
-        this.loadData();
+        this.loadAllData();
         this.examinationAnesthetic = new ExaminationAnesthetic();
         this.examinationAnesthetic.examinationId = this.id;
         return Promise.resolve();
@@ -131,38 +126,63 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         return form;
     }
 
+    private loadAllData(): Promise<void> {
+        const loadUnits = this.loadUnits();
+        const loadAnesthetics = this.loadAnesthetics();
 
-    loadData(): Promise<void> {
-        return this.loadReferences();
-    }
-
-    loadReferences(): Promise<void> {
-        // Load units and anesthetics in parallel, wait for BOTH
-        const unitsPromise = this.referenceService.getReferencesByCategoryAndType(
-            PreclinicalUtils.PRECLINICAL_CAT_UNIT,
-            PreclinicalUtils.PRECLINICAL_UNIT_VOLUME
-        ).then(units => {
-            this.units = units;
-        });
-
-        const anestheticsPromise = this.loadAnesthetics();
-
-        // Wait for BOTH promises to complete
-        return Promise.all([unitsPromise, anestheticsPromise]).then(() => {
+        return Promise.all([loadUnits, loadAnesthetics]).then(() => {
+            // Les deux sont maintenant chargées, on peut configurer references
+            this.references = this.units || [];
         });
     }
 
-    loadAnesthetics() {
-        // Make this return a Promise!
-        return this.anestheticService.getAll().then(anesthetics => {
-            this.anesthetics = anesthetics;
-            // Don't rely on this.units here since they load in parallel
-            if (this.units) {
-                this.references = this.units;
+    private loadUnits(): Promise<void> {
+        return this.referenceService
+            .getReferencesByCategoryAndType(
+                PreclinicalUtils.PRECLINICAL_CAT_UNIT,
+                PreclinicalUtils.PRECLINICAL_UNIT_VOLUME
+            )
+            .then(units => {
+                this.units = units || [];
+            })
+            .catch(error => {
+                console.error('Error loading units:', error);
+                this.units = [];
+            });
+    }
+
+    private loadAnesthetics(): Promise<void> {
+        return this.anestheticService
+            .getAll()
+            .then(anesthetics => {
+                this.anesthetics = anesthetics || [];
+            })
+            .catch(error => {
+                console.error('Error loading anesthetics:', error);
+                this.anesthetics = [];
+            });
+    }
+
+    private loadExistingAnesthetic(): Promise<void> {
+        return this.fetchEntity().then(entity => {
+            if (entity) {
+                this.examinationAnesthetic = entity;
             }
-        }).catch(error => {
-            this.anesthetics = [];
         });
+    }
+
+    private findReferenceById(reference: any): Reference {
+        if (!reference || !this.references) return null;
+
+        const refId = typeof reference === 'object' ? reference.id : reference;
+        return this.references.find(ref => ref.id === refId) || null;
+    }
+
+    private findAnestheticById(anesthetic: any): Anesthetic {
+        if (!anesthetic || !this.anesthetics) return null;
+
+        const anestheticId = typeof anesthetic === 'object' ? anesthetic.id : anesthetic;
+        return this.anesthetics.find(anest => anest.id === anestheticId) || null;
     }
 
     getEnums(): void {
@@ -171,37 +191,11 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         this.injtypes = InjectionType.all();
     }
 
-
-    getReferenceById(reference: any): Reference {
-        if (reference) {
-            for (const ref of this.references) {
-                if (reference.id == ref.id) {
-                    return ref;
-                }
-            }
-        }
-        return null;
-    }
-
-    getAnestheticById(anesthetic: any): Anesthetic {
-        if (anesthetic) {
-            for (const anest of this.anesthetics) {
-                if (anesthetic.id == anest.id) {
-                    return anest;
-                }
-            }
-        }
-        return null;
-    }
-
-
     eaChange() {
         if(!this.isStandalone && this.examinationAnesthetic) {
             this.examAnestheticChange.emit(this.examinationAnesthetic);
         }
     }
-
-
 
     goToAddAnesthetic() {
         this.router.navigate(['/preclinical-anesthetic/create']);
