@@ -113,6 +113,7 @@ public class StudySecurityService {
         return hasAnyPrivilege(study, rights);
     }
 
+    @Cacheable(value = CacheNames.STUDY_ID_RIGHTS, key = "#studyId + '-' + #rightStr")
     public boolean hasRightOnStudyTag(Long id, String rightStr) throws EntityNotFoundException {
         StudyTag tag = studyTagRepository.findById(id)
                 .orElseThrow(() ->

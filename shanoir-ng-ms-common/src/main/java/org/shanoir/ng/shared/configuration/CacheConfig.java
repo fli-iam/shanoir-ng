@@ -16,6 +16,8 @@ package org.shanoir.ng.shared.configuration;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -34,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 )
 public class CacheConfig {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CacheConfig.class);
+
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
@@ -45,6 +49,7 @@ public class CacheConfig {
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterWrite(6, TimeUnit.HOURS)
                 .maximumSize(10000));
+        LOG.info("CaffeineCacheManager loaded.");
         return cacheManager;
     }
 
