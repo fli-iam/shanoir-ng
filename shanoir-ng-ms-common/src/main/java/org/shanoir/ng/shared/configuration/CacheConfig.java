@@ -27,7 +27,11 @@ import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableCaching
-@ConditionalOnProperty(name = "spring.cache.type", havingValue = "none", matchIfMissing = false)
+@ConditionalOnProperty(
+        name = "cache.enabled",
+        havingValue = "true",
+        matchIfMissing = false
+)
 public class CacheConfig {
 
     @Bean

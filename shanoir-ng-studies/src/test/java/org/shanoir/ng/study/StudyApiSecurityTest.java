@@ -55,8 +55,7 @@ import org.springframework.validation.BindingResult;
  * @author jlouis
  *
  */
-
-@SpringBootTest(properties = "spring.cache.type=none")
+@SpringBootTest(properties = "cache.enabled=false")
 @ActiveProfiles("test")
 public class StudyApiSecurityTest {
 
