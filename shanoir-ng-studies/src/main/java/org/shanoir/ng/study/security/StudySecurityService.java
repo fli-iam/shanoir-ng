@@ -79,7 +79,10 @@ public class StudySecurityService {
      * @return true or false
      * @throws EntityNotFoundException
      */
+    @Cacheable(value = CacheNames.STUDY_ID_RIGHTS, key = "#studyId + '-' + #rightStr")
     public boolean hasRightOnStudy(Long studyId, String rightStr) throws EntityNotFoundException {
+        LOG.info("Cache miss - query executed for studyId={}, right={}",
+                studyId, rightStr);
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         Study study = studyRepository.findById(studyId).orElse(null);
         if (study == null) {
@@ -140,10 +143,13 @@ public class StudySecurityService {
      * @return true or false
      * @throws EntityNotFoundException
      */
+    @Cacheable(value = CacheNames.STUDY_ID_RIGHTS, key = "#study.id + '-' + #rightStr")
     public boolean hasRightOnStudy(Study study, String rightStr) throws EntityNotFoundException {
         if (study == null) {
             throw new IllegalArgumentException("study cannot be null here.");
         }
+        LOG.info("Cache miss - query executed for studyId={}, right={}",
+                study.getId(), rightStr);
         return this.hasRightOnStudy(study.getId(), rightStr);
     }
 
@@ -199,6 +205,8 @@ public class StudySecurityService {
      */
     @Cacheable(value = CacheNames.STUDY_ID_RIGHTS, key = "#dto.id + '-' + #rightStr")
     public boolean hasRightOnTrustedStudyDTO(StudyDTO dto, String rightStr) {
+        LOG.info("Cache miss - query executed for studyId={}, right={}",
+                dto.getId(), rightStr);
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         return hasPrivilege(dto.getStudyUserList(), right);
     }
