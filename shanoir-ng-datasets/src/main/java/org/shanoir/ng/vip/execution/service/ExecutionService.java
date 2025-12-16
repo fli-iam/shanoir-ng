@@ -49,13 +49,6 @@ public interface ExecutionService {
     List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters);
 
     /**
-     * Get datasets from JSON id values
-     *
-     * @param datasets
-     */
-    void checkRightsForExecution(List<Dataset> datasets) throws EntityNotFoundException, RestServiceException;
-
-    /**
      *
      * Get execution from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getExecution">VIP API</a>
      *
