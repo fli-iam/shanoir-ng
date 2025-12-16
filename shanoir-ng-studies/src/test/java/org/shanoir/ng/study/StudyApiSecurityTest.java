@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -40,7 +41,6 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -106,10 +106,8 @@ public class StudyApiSecurityTest {
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
     public void testAsUser() throws ShanoirException, RestServiceException {
         testRead();
-
         assertAccessDenied(api::saveNewStudy, mockNew, mockBindingResult);
         assertAccessDenied(api::updateStudy, 1L, buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL), mockBindingResult);
-
         assertAccessDenied(api::deleteStudy, ENTITY_ID);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
         assertAccessDenied(api::deleteStudy, ENTITY_ID);
@@ -117,19 +115,16 @@ public class StudyApiSecurityTest {
         assertAccessDenied(api::deleteStudy, ENTITY_ID);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE)));
         assertAccessDenied(api::deleteStudy, ENTITY_ID);
-
     }
 
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
     public void testAsExpert() throws ShanoirException, RestServiceException {
         testRead();
-
         assertAccessAuthorized(api::saveNewStudy, mockNew, mockBindingResult);
         assertAccessDenied(api::updateStudy, 1L, buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL), mockBindingResult);
         given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE)));
         assertAccessAuthorized(api::updateStudy, 1L, buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD), mockBindingResult);
-
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
         assertAccessDenied(api::deleteStudy, ENTITY_ID);
         given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID, StudyUserRight.CAN_SEE_ALL)));

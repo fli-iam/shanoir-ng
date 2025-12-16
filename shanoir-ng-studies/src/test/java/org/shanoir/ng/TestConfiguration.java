@@ -16,7 +16,11 @@ package org.shanoir.ng;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.support.NoOpCacheManager;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 
 @Configuration
@@ -25,4 +29,11 @@ public class TestConfiguration {
 
     @MockBean
     private RabbitTemplate rabbitTemplate;
+
+    @Bean
+    @Primary
+    CacheManager cacheManager() {
+        return new NoOpCacheManager();
+    }
+
 }
