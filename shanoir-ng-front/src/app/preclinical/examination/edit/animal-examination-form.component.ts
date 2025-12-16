@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { NgModule, Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
