@@ -22,8 +22,8 @@ import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetDownloadDataInput;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
-import org.shanoir.ng.dataset.dto.OverallStatisticsDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -365,7 +365,7 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "404", description = "no statistics found"),
         @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/overallStatistics", produces = { "application/json" })
-    ResponseEntity<OverallStatisticsDTO> getOverallStatistics() throws RestServiceException, EntityNotFoundException, IOException;
+    ResponseEntity<OverallStatistics> getOverallStatistics() throws RestServiceException, EntityNotFoundException, IOException;
 
     @Operation(summary = "", description = "Get data before downloading acquisitions and examinations")
     @ApiResponses(value = {

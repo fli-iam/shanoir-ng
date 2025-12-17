@@ -21,6 +21,7 @@ import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -172,9 +173,8 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Query(value = "UPDATE overall_statistics os SET os.storage_size = :totalStorageVolume WHERE os.stats_date = CURDATE()", nativeQuery = true)
     void addTotalStorageVolume(@Param("totalStorageVolume") Long totalStorageVolume);
 
-    @Query(value = "SELECT studies_count, subjects_count, dataset_acquisitions_count, storage_size "
-            + "from overall_statistics WHERE stats_date = CURDATE()", nativeQuery = true)
-    List<Object[]> getOverallStatistics();
+    @Query(value = "SELECT os from OverallStatistics os WHERE statsDate = CURDATE()")
+    List<OverallStatistics> getOverallStatistics();
 
     @Query("SELECT new org.shanoir.ng.dataset.dto.DatasetStudyCenter("
             + "ds.id, ex.study.id, ex.centerId) "

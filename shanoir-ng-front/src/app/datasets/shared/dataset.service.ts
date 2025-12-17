@@ -32,7 +32,7 @@ import { DatasetType } from './dataset-type.model';
 
 export type Format = 'nii' | 'dcm';
 export type DatasetLight = {id: number, name: string, type: DatasetType, subject: IdName, hasProcessings: boolean, study: IdName, creationDate: Date};
-export type OverallStatisticsDTO = {
+export type OverallStatistics = {
     studiesCount: number;
     subjectsCount: number;
     datasetAcquisitionsCount: number;
@@ -203,8 +203,8 @@ export class DatasetService extends EntityService<Dataset> {
         return JSON.stringify(dto, this.customReplacer);
     }
 
-    getOverallStatistics(): Promise<OverallStatisticsDTO> {
-        return this.http.get<OverallStatisticsDTO>(AppUtils.BACKEND_API_OVERALL_STATISTICS_URL)
+    getOverallStatistics(): Promise<OverallStatistics> {
+        return this.http.get<OverallStatistics>(AppUtils.BACKEND_API_OVERALL_STATISTICS_URL)
             .toPromise();
     }
 }

@@ -28,12 +28,12 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
-import org.shanoir.ng.dataset.dto.OverallStatisticsDTO;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -508,25 +508,21 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
-    public OverallStatisticsDTO getOverallStatistics() {
-        List<Object[]> result = repository.getOverallStatistics();
+    public OverallStatistics getOverallStatistics() {
+        List<OverallStatistics> result = repository.getOverallStatistics();
         if (result == null || result.isEmpty()) {
             LOG.error("No overall statistics found in database.");
-            return new OverallStatisticsDTO(0L, 0L, 0L, 0D);
+            return null;
         // handle the case where storage_size is null
-        } else if (result.get(0) != null && result.get(0)[3] == null) {
-            result.get(0)[3] = 0D;
+        } else if (result.get(0) != null && result.get(0).getStorageSize() == null) {
+            result.get(0).setStorageSize(0D);
         }
         // We get only one row with 4 columns so we select the first row
-        Object[] stats = result.get(0);
+        OverallStatistics stats = result.get(0);
         // We convert the byte value of storage_size to gigabytes
-        double storageInGb = Math.round(((Number) stats[3]).doubleValue() / (1024 * 1024 * 1024));
-        return new OverallStatisticsDTO(
-            ((Number) stats[0]).longValue(),
-            ((Number) stats[1]).longValue(),
-            ((Number) stats[2]).longValue(),
-            storageInGb
-        );
+        double storageInGb = Math.round(stats.getStorageSize() / (1024 * 1024 * 1024));
+        stats.setStorageSize(storageInGb);
+        return stats;
     }
 
     public List<DatasetDownloadData> getDownloadDataByAcquisitionAndExaminationIds(List<Long> acquisitionIds,

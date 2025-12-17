@@ -12,21 +12,34 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.dataset.dto;
+package org.shanoir.ng.dataset.model;
 
-public class OverallStatisticsDTO {
+import java.time.LocalDate;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "overall_statistics")
+public class OverallStatistics {
+
+    @Id
+    @Column(name = "stats_date")
+    private LocalDate statsDate;
+
+    @Column(name = "studies_count")
     private Long studiesCount;
-    private Long subjectsCount;
-    private Long datasetAcquisitionsCount;
-    private Double storageSize;
 
-    public OverallStatisticsDTO(Long studiesCount, Long subjectsCount, Long datasetAcquisitionsCount, Double storageSize) {
-        this.studiesCount = studiesCount;
-        this.subjectsCount = subjectsCount;
-        this.datasetAcquisitionsCount = datasetAcquisitionsCount;
-        this.storageSize = storageSize;
-    }
+    @Column(name = "subjects_count")
+    private Long subjectsCount;
+
+    @Column(name = "dataset_acquisitions_count")
+    private Long datasetAcquisitionsCount;
+
+    @Column(name = "storage_size")
+    private Double storageSize;
 
     public Long getStudiesCount() {
         return studiesCount;
@@ -42,5 +55,9 @@ public class OverallStatisticsDTO {
 
     public Double getStorageSize() {
         return storageSize;
+    }
+
+    public void setStorageSize(Double storageSize) {
+        this.storageSize = storageSize;
     }
 }

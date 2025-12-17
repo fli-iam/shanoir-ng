@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
-import org.shanoir.ng.dataset.dto.OverallStatisticsDTO;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetDownloadDataInput;
@@ -45,6 +44,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -650,8 +650,8 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public ResponseEntity<OverallStatisticsDTO> getOverallStatistics() throws IOException {
-        OverallStatisticsDTO statistics = datasetService.getOverallStatistics();
+    public ResponseEntity<OverallStatistics> getOverallStatistics() throws IOException {
+        OverallStatistics statistics = datasetService.getOverallStatistics();
         if (statistics == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
