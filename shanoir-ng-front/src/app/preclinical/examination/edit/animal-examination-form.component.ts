@@ -177,12 +177,14 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             'subjectWeight': [this.examination.subjectWeight, [Validators.pattern(numericRegex)]],
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
+
         this.subscriptions.push(
             form.get('study').valueChanges.subscribe((study: IdName) => {
                 this.examination.study = study;
                 this.getSubjects();
             })
         );
+
         return form;
     }
 
@@ -331,6 +333,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     onExamAnestheticChange(event) {
         this.examAnesthetic = event;
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     onAgentChange(event) {

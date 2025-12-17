@@ -121,11 +121,10 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
             'startDate': [this.examinationAnesthetic.startDate],
             'endDate': [this.examinationAnesthetic.endDate]
         });
-        this.subscriptions.push(
-            form.valueChanges.subscribe(() => {
-                this.eaChange();
-            })
-        );
+
+        // Subscribe to form changes
+        this.subscriptions.push(form.valueChanges.subscribe((values) => this.eaChange()));
+
         return form;
     }
 
