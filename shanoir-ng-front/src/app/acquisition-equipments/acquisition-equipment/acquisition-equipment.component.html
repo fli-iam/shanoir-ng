@@ -92,7 +92,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" id="serialNumber" formControlName="serialNumber"/>
-								<label *ngIf="hasError('serialNumber', ['unique'])" class="form-validation-alert" i18n="Edit acqEquip|Model number unique error@@acqEqptDetailModelNumberUniqueError">This equipment (same manufacturer model and same serial number) already exists!</label>
+								<label *ngIf="hasError('serialNumber', ['unique']) || hasError('manufacturerModel', ['unique']) || hasError('center', ['unique'])" class="form-validation-alert" i18n="Edit acqEquip|Model number unique error@@acqEqptDetailModelNumberUniqueError">This equipment (same manufacturer model, serial number and center) already exists!</label>
 								<label *ngIf="hasError('serialNumber', ['spaces'])" class="form-validation-alert">There can't be spaces at the beginning neither at the end of the serial number !</label>
 							</ng-template>
 						</span>

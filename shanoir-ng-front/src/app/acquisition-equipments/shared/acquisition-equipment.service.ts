@@ -22,6 +22,7 @@ import { StudyCard } from "../../study-cards/shared/study-card.model";
 
 import { AcquisitionEquipment } from './acquisition-equipment.model';
 import { ManufacturerModel } from "./manufacturer-model.model";
+import { Center } from 'src/app/centers/shared/center.model';
 
 @Injectable()
 export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipment> {
@@ -72,15 +73,16 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
         })
     }
 
-    checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel): Promise<boolean> {
+    checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel, center: Center): Promise<boolean> {
         return firstValueFrom(
             this.http.get<AcquisitionEquipment[]>(
                 `${AppUtils.BACKEND_API_ACQ_EQUIP_URL}/bySerialNumber/${serialNumber}`
             )
         ).then(equipments => {
             return equipments.some(equipment =>
-                equipment.manufacturerModel.id === manufacturerModel.id &&
-                equipment.serialNumber === serialNumber
+                equipment.manufacturerModel.id === manufacturerModel.id
+                && equipment.serialNumber === serialNumber
+                && equipment.center.id === center.id
             );
         }).catch(error => {
             if (error instanceof HttpErrorResponse && error.status === 404) {
