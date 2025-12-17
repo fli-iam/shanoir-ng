@@ -72,11 +72,8 @@ public interface StudyService {
     @PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
     List<Study> findAll();
 
-
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-    @PostFilter("@studySecurityService.filterStudyIdNameDTOsHasRight(filterObject, 'CAN_SEE_ALL')")
     List<IdName> findAllNames();
-
 
     /**
      * Get all the challenges
