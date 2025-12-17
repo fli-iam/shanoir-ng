@@ -21,7 +21,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.shanoir.ng.shared.configuration.CacheNames;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -45,7 +44,6 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -79,10 +77,10 @@ public class StudySecurityService {
      * @return true or false
      * @throws EntityNotFoundException
      */
-    @Cacheable(value = CacheNames.STUDY_ID_RIGHTS, key = "#studyId + '-' + #rightStr")
     public boolean hasRightOnStudy(Long studyId, String rightStr) throws EntityNotFoundException {
-        LOG.info("Cache miss - query executed for studyId={}, right={}",
-                studyId, rightStr);
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         Study study = studyRepository.findById(studyId).orElse(null);
         if (study == null) {
@@ -113,17 +111,21 @@ public class StudySecurityService {
         return hasAnyPrivilege(study, rights);
     }
 
-    @Cacheable(value = CacheNames.STUDY_ID_RIGHTS, key = "#studyId + '-' + #rightStr")
     public boolean hasRightOnStudyTag(Long id, String rightStr) throws EntityNotFoundException {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         StudyTag tag = studyTagRepository.findById(id)
                 .orElseThrow(() ->
                         new EntityNotFoundException("Cannot find study tag with id [" + id + "]"));
         return this.hasRightOnStudy(tag.getStudy().getId(), rightStr)
                 && this.studyUsersMatchStudy(tag.getStudy());
-
     }
 
     public boolean filterVolumesHasRightOnStudies(List<Long> studyIds, String rightStr) throws EntityNotFoundException {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         List<Long> invalidStudyIds = new ArrayList<>();
         for (Long id : studyIds) {
             if (!this.hasRightOnStudy(id, rightStr)) {
@@ -144,13 +146,13 @@ public class StudySecurityService {
      * @return true or false
      * @throws EntityNotFoundException
      */
-    @Cacheable(value = CacheNames.STUDY_ID_RIGHTS, key = "#study.id + '-' + #rightStr")
     public boolean hasRightOnStudy(Study study, String rightStr) throws EntityNotFoundException {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         if (study == null) {
             throw new IllegalArgumentException("study cannot be null here.");
         }
-        LOG.info("Cache miss - query executed for studyId={}, right={}",
-                study.getId(), rightStr);
         return this.hasRightOnStudy(study.getId(), rightStr);
     }
 
@@ -162,6 +164,9 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean hasRightOnOneStudy(String rightStr) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         List<StudyUser> studyUsers = studyUserRepository.findByUserId(KeycloakUtil.getTokenUserId());
         for (StudyUser su : studyUsers) {
@@ -184,10 +189,10 @@ public class StudySecurityService {
      *            the right
      * @return true or false
      */
-    @Cacheable(value = CacheNames.STUDY_ID_RIGHTS, key = "#study.id + '-' + #rightStr")
     public boolean hasRightOnTrustedStudy(Study study, String rightStr) {
-        LOG.info("Cache miss - query executed for studyId={}, right={}",
-                study.getId(), rightStr);
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         return hasPrivilege(study, right);
     }
@@ -204,10 +209,10 @@ public class StudySecurityService {
      *            the right
      * @return true or false
      */
-    @Cacheable(value = CacheNames.STUDY_ID_RIGHTS, key = "#dto.id + '-' + #rightStr")
     public boolean hasRightOnTrustedStudyDTO(StudyDTO dto, String rightStr) {
-        LOG.info("Cache miss - query executed for studyId={}, right={}",
-                dto.getId(), rightStr);
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         return hasPrivilege(dto.getStudyUserList(), right);
     }
@@ -224,6 +229,9 @@ public class StudySecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnSubjectForOneStudy(Long subjectId, String rightStr) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         Subject subject = subjectRepository.findById(subjectId).orElse(null);
         if (subject == null) {
             LOG.error("Subject not found with id: " + subjectId);
@@ -248,6 +256,9 @@ public class StudySecurityService {
     }
 
     public boolean hasRightOnSubjectForOneStudy(Subject subject, String rightStr) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         return hasRightOnSubjectForOneStudy(subject.getId(), rightStr);
     }
 
@@ -262,6 +273,9 @@ public class StudySecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnSubjectsForOneStudy(List<SimpleSubjectDTO> subjectDTOs, String rightStr) throws EntityNotFoundException {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         if (subjectDTOs == null || subjectDTOs.isEmpty()) return true;
         List<Long> subjectIds = new ArrayList<>();
         for (SimpleSubjectDTO dto : subjectDTOs) {
@@ -304,6 +318,9 @@ public class StudySecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnSubjectForEveryStudy(Long subjectId, String rightStr) throws EntityNotFoundException {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         Subject subject = subjectRepository.findById(subjectId).orElse(null);
         if (subject == null) {
             throw new EntityNotFoundException("Subject not found with id: " + subjectId);
@@ -339,6 +356,9 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean hasRightOnTrustedSubjectForOneStudy(Subject subject, String rightStr) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         if (subject == null || rightStr == null) {
             return false;
         }
@@ -383,6 +403,9 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean hasRightOnSubjectForEveryStudies(SubjectDTO subjectDto, String rightStr) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         boolean res = false;
         Subject subject = subjectRepository.findById(subjectDto.getId()).orElse(null);
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
@@ -415,6 +438,9 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean filterSubjectDTOsHasRightInOneStudy(List<SubjectDTO> dtos, String rightStr) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         if (dtos == null) {
             return true;
         }
@@ -441,6 +467,9 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean filterSimpleSubjectDTOsHasRightInOneStudy(List<SimpleSubjectDTO> dtos, String rightStr) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         if (dtos == null) {
             return true;
         }
@@ -467,6 +496,9 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean filterSubjectIdNamesDTOsHasRightInOneStudy(List<IdName> dtos, String rightStr) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         if (dtos == null) {
             return true;
         }
@@ -493,6 +525,9 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean filterStudyIdNameDTOsHasRight(List<IdName> dtos, String rightStr) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         if (dtos == null) {
             return true;
@@ -520,6 +555,9 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean filterStudiesHasRight(List<Long> ids, String rightStr) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         if (ids == null) {
             return true;
@@ -614,13 +652,10 @@ public class StudySecurityService {
      * @return true or false
      */
     private boolean hasPrivilege(List<StudyUser> studyUserList, StudyUserRight neededRight) {
-        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            return true;
-        }
-        Long userId = KeycloakUtil.getTokenUserId();
         if (studyUserList == null) {
             return false;
         }
+        Long userId = KeycloakUtil.getTokenUserId();
         StudyUser studyUser = studyUserList.stream().filter(su -> userId.equals(su.getUserId())).findAny().orElse(null);
         if (studyUser == null) {
             return false;
@@ -635,8 +670,10 @@ public class StudySecurityService {
      * @return
      */
     public boolean filterCenters(List<IdName> centers, Long studyId) {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
         Long userId = KeycloakUtil.getTokenUserId();
-
         StudyUser su = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
         if (su == null || userId == null) {
             return false;

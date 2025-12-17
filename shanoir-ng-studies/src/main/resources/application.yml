@@ -117,9 +117,6 @@ logging:
     org.springframework.web: ERROR
     org.hibernate: ERROR
 
-cache:
-  enabled: true
-
 ---
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #

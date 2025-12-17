@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 @ConditionalOnProperty(
         name = "cache.enabled",
         havingValue = "true",
-        matchIfMissing = false
+        matchIfMissing = true
 )
 public class CacheConfig {
 
