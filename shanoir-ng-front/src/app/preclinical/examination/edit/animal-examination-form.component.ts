@@ -311,6 +311,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.extraData.extradatatype = "Extra data"
         this.examinationExtradatas.push(this.extraData);
         //this.examinationExtradatas = null;
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     onUploadPhysiologicalData(event) {
@@ -322,6 +324,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.physioData.has_respiratory_rate = this.physioDataFile.has_respiratory_rate;
         this.physioData.has_sao2 = this.physioDataFile.has_sao2;
         this.physioData.has_temperature = this.physioDataFile.has_temperature;
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     onUploadBloodGasData(event) {
@@ -329,6 +333,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.bloodGasData = new BloodGasData();
         this.bloodGasData.filename =  this.bloodGasDataFile.filename;
         this.bloodGasData.extradatatype = "Blood gas data"
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     onExamAnestheticChange(event) {
@@ -339,6 +345,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     onAgentChange(event) {
         this.contrastAgent = event;
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
     public exportBruker() {

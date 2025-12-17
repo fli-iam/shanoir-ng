@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -38,7 +38,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     @Input() examinationId:number;
     @Input() isStandalone:boolean = false;
     @Input() canModify: boolean = false;
-  
+
     fileToUpload: File = null;
     @Output() bloodGasDataReady = new EventEmitter();
 
@@ -51,7 +51,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
 
     get bloodGasData(): BloodGasData { return this.entity; }
     set bloodGasData(bloodGasData: BloodGasData) { this.entity = bloodGasData; }
-    
+
     getService(): EntityService<BloodGasData> {
         return this.extradatasService;
     }
@@ -61,7 +61,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
             return this.loadExaminationExtraDatas(extradatas);
         });
     }
-   
+
     initView(): Promise<void> {
         return Promise.resolve();
     }
@@ -90,7 +90,6 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
         });
     }
 
-
     public save(): Promise<BloodGasData> {
         return this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA,this.bloodGasData).then((bloodGasData) => {
             this.chooseRouteAfterSave(this.bloodGasData);
@@ -98,7 +97,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
             return bloodGasData;
         });
     }
-    
+
     downloadFile() {
         this.extradatasService.downloadFile(this.entity.id);
     }
@@ -118,6 +117,4 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
-
-    
 }

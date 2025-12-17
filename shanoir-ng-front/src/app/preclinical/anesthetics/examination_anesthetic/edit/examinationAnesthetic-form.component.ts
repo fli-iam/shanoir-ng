@@ -122,8 +122,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
             'endDate': [this.examinationAnesthetic.endDate]
         });
 
-        // Subscribe to form changes
-        this.subscriptions.push(form.valueChanges.subscribe((values) => this.eaChange()));
+        this.subscriptions.push(form.valueChanges.subscribe(() => this.eaChange()));
 
         return form;
     }
@@ -133,7 +132,6 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         const loadAnesthetics = this.loadAnesthetics();
 
         return Promise.all([loadUnits, loadAnesthetics]).then(() => {
-            // Les deux sont maintenant chargées, on peut configurer references
             this.references = this.units || [];
         });
     }
