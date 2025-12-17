@@ -24,8 +24,6 @@ public final class CacheNames {
 
     public static final String USER_ID_STUDY_ID_RIGHTS = "userIdStudyIdRights";
 
-    public static final String STUDY_ID_RIGHTS = "studyIdRights";
-
     public static final String USER_ID_RIGHTS = "userRights";
 
 }

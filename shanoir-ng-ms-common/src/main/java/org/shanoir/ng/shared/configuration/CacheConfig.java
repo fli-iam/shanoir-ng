@@ -44,7 +44,6 @@ public class CacheConfig {
                 CacheNames.USER_ID_STUDY_ID,
                 CacheNames.STUDY_USER_CENTER_IDS,
                 CacheNames.USER_ID_STUDY_ID_RIGHTS,
-                CacheNames.STUDY_ID_RIGHTS,
                 CacheNames.USER_ID_RIGHTS);
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .expireAfterWrite(6, TimeUnit.HOURS)

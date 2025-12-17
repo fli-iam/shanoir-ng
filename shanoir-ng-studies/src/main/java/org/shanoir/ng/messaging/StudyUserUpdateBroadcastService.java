@@ -40,7 +40,7 @@ public class StudyUserUpdateBroadcastService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @CacheEvict(value = {CacheNames.USER_ID_STUDY_ID, CacheNames.STUDY_USER_CENTER_IDS, CacheNames.USER_ID_STUDY_ID_RIGHTS, CacheNames.USER_ID_RIGHTS, CacheNames.STUDY_ID_RIGHTS}, allEntries = true)
+    @CacheEvict(value = {CacheNames.USER_ID_STUDY_ID, CacheNames.STUDY_USER_CENTER_IDS, CacheNames.USER_ID_STUDY_ID_RIGHTS, CacheNames.USER_ID_RIGHTS}, allEntries = true)
     public void broadcast(Iterable<StudyUserCommand> commands) throws MicroServiceCommunicationException {
         try {
             String str = objectMapper.writeValueAsString(commands);
