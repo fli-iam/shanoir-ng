@@ -38,8 +38,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.ParameterMode;
 import jakarta.persistence.PersistenceContext;
@@ -53,12 +51,6 @@ public class CreateStatisticsService {
 
     @Autowired
     private DatasetRepository datasetRepository;
-
-    @Autowired
-    private DatasetService datasetService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @PersistenceContext
     private EntityManager entityManager;
