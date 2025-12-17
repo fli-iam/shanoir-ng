@@ -69,6 +69,6 @@ export class TaskService extends EntityService<Task> {
 
     public downloadProcessingOutputs(item: Task) {
         const downloadService = this.injector.get(MassDownloadService);
-        downloadService.downloadProcessingOutputs(item.message.match(/sorted by\s+([^,]+)/i)?.[1], {datasetIds: item.message.replace(/^[^:]*:\s*/, "").split(",").map(Number)}, new TaskState())
+        downloadService.downloadProcessingOutputsByIds(item.message.replace(/^[^:]*:\s*/, "").split(",").map(Number), new TaskState(), item.message.match(/sorted by\s+([^,]+)/i)?.[1])
     }
 }

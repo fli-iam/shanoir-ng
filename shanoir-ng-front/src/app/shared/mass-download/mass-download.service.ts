@@ -112,29 +112,18 @@ export class MassDownloadService {
         return this.downloadByDatasets({datasetIds: datasetIds}, downloadState);
     }
 
-    /**
-     * This method is the specific entry to download processing output datasets.
-     */
-    downloadProcessingOutputs(sorting: string, inputIds: DownloadInputIds, downloadState?: TaskState): Promise<void> {
-        return this.openAltModal(inputIds).then(ret => {
-            if (ret != 'cancel' && ret.datasets) {
-                return this._downloadProcessingOutputs(sorting, ret.datasets.map(ds => ds.id), ret.format, ret.converter, downloadState).catch(() => {
-                    if (ret.datasets.length > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
-                        this.dialogService.error('Too many datasets', 'You are trying to download '
-                            + ret.datasets.length + ' datasets while Shanoir sets a limit to ' + this.datasetService.MAX_DATASETS_IN_ZIP_DL
-                            + ' in a single zip. Please confider using a browser compatible with the Shanoir unlimited download functionality. See link below.',
-                            "https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility" );
-                    }
-                });
-            } else return Promise.resolve();
-        });
+    downloadProcessingOutputsByIds(datasetIds: number[], downloadState?: TaskState, sorting?: string) {
+        return this.downloadByDatasets({datasetIds: datasetIds}, downloadState, 0, sorting);
     }
 
     /**
      * This method is the generic entry to download multiple datasets.
      */
-    private downloadByDatasets(inputIds: DownloadInputIds, downloadState?: TaskState, totalSize?: number): Promise<void> {
+    private downloadByDatasets(inputIds: DownloadInputIds, downloadState?: TaskState, totalSize?: number, sorting?: string): Promise<void> {
         return this.openModal(inputIds, totalSize).then(ret => {
+            if(sorting) {
+                throw this.BROWSER_COMPAT_ERROR_MSG
+            }
             if (ret != 'cancel') {
                 return this._downloadDatasets(ret, downloadState);
             } else return Promise.resolve();
@@ -142,7 +131,7 @@ export class MassDownloadService {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
                 return this.openAltModal(inputIds).then(ret => {
                     if (ret != 'cancel' && ret.datasets) {
-                        return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, ret.converter, downloadState).catch(() => {
+                        return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, sorting, ret.converter, downloadState).catch(() => {
                             if (ret.datasets.length > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
                                 this.dialogService.error('Too many datasets', 'You are trying to download '
                                     + ret.datasets.length + ' datasets while Shanoir sets a limit to ' + this.datasetService.MAX_DATASETS_IN_ZIP_DL
@@ -162,7 +151,7 @@ export class MassDownloadService {
     }
 
     // This method is used to download in
-    private _downloadAlt(datasetIds: number[], format: Format, converter? : number, downloadState?: TaskState): Promise<void> {
+    private _downloadAlt(datasetIds: number[], format: Format, sorting?: string , converter? : number, downloadState?: TaskState): Promise<void> {
         const task: Task = this.createTask(datasetIds.length, TaskStatus.QUEUED);
         downloadState = new TaskState();
         downloadState.status = task.status;
@@ -173,66 +162,7 @@ export class MassDownloadService {
                 task.status = 2;
                 task.lastUpdate = new Date();
                 const start: number = Date.now();
-                const downloadObs: Observable<TaskState> = this.datasetService.downloadDatasets(datasetIds, format, converter);
-
-                const endPromise: SuperPromise<void> = new SuperPromise();
-
-                const errorFunction = error => {
-                    task.lastUpdate = new Date();
-                    task.status = -1;
-                    task.message = 'error while downloading : ' + (error?.message || error?.toString() || 'see logs');
-                    this.notificationService.pushLocalTask(task);
-                    releaseQueue();
-                    endPromise.reject(error);
-                }
-
-                const flowSubscription: Subscription = downloadObs.subscribe(state => {
-                    task.lastUpdate = new Date();
-                    task.progress = state?.progress;
-                    if (downloadState) {
-                        downloadState.progress = task?.progress;
-                    }
-                    task.status = state?.status;
-                    this.notificationService.pushLocalTask(task);
-                }, errorFunction);
-
-                const endSubscription: Subscription = downloadObs.pipe(last()).subscribe(state => {
-                    flowSubscription.unsubscribe();
-                    const duration: number = Date.now() - start;
-                    task.message = 'download completed in ' + duration + 'ms for ' + datasetIds.length + ' datasets';
-                    task.lastUpdate = new Date();
-                    task.status = state.status;
-                    task.progress = 1;
-                    task.report = state.errors;
-                    downloadState.progress = task.progress;
-                    this.notificationService.pushLocalTask(task);
-                    endPromise.resolve();
-                }, errorFunction);
-
-                return endPromise.finally(() => {
-                    flowSubscription.unsubscribe();
-                    endSubscription.unsubscribe();
-                    releaseQueue();
-                });
-            } catch (error) {
-                releaseQueue();
-                throw error;
-            }
-        });
-    }
-
-    private _downloadProcessingOutputs(sorting: string, datasetIds: number[], format: Format, converter? : number, downloadState?: TaskState): Promise<void> {
-        const task: Task = this.createTask(datasetIds.length, TaskStatus.QUEUED);
-        downloadState = new TaskState();
-        downloadState.status = task.status;
-        downloadState.progress = 0;
-
-        return this.downloadQueue.waitForTurn().then(releaseQueue => {
-            try {
-                task.status = 2;
-                task.lastUpdate = new Date();
-                const start: number = Date.now();
-                const downloadObs: Observable<TaskState> = this.datasetService.downloadProcessingOuputDatasets(sorting, datasetIds, format, converter);
+                const downloadObs: Observable<TaskState> = this.datasetService.downloadDatasets(datasetIds, format, sorting, converter);
 
                 const endPromise: SuperPromise<void> = new SuperPromise();
 

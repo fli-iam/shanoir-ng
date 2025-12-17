@@ -107,8 +107,14 @@ public class DatasetDownloaderServiceImpl {
     }
 
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId) throws RestServiceException {
+        massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, null);
+    }
+
+    public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting) throws RestServiceException {
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
+        Map<Long, String> datasetDownloadPath;
+
         // Prepare the HTTP response for a zip download
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "attachment;filename=" + getFileName(datasets));
@@ -117,16 +123,25 @@ public class DatasetDownloaderServiceImpl {
             Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
 
             for (Dataset dataset : datasets) {
-                // Prepare folder structure
+                String datasetFilePath = "";
                 String subjectName = getSubjectName(dataset).replace(File.separator, "_");
-                String studyName = studyRepository.findById(dataset.getStudyId())
-                        .map(Study::getName)
-                        .orElse("Unknown_study");
 
-                // Determine dataset file path if multiple datasets are downloaded
-                String datasetFilePath = datasets.size() != 1
-                        ? getDatasetFilepath(dataset, studyName, subjectName, withShanoirId)
-                        : null;
+                if (Objects.isNull(sorting)) {
+                    // Prepare folder structure
+                    String studyName = studyRepository.findById(dataset.getStudyId())
+                            .map(Study::getName)
+                            .orElse("Unknown_study");
+
+                    // Determine dataset file path if multiple datasets are downloaded
+                    datasetFilePath = datasets.size() != 1
+                            ? getDatasetFilepath(dataset, studyName, subjectName, withShanoirId)
+                            : null;
+                } else {
+
+                    datasetDownloadPath = getDatasetDownloadPath(datasets, sorting);
+                    datasetFilePath = datasetDownloadPath.get(dataset.getId());
+                }
+
 
                 // Download the dataset into the zip
                 manageDatasetDownload(
@@ -135,75 +150,6 @@ public class DatasetDownloaderServiceImpl {
                         zipOutputStream,
                         subjectName,
                         datasetFilePath,
-                        outputFormat,
-                        withManifest,
-                        filesByAcquisitionId,
-                        converterId,
-                        datasetDownloadNameListPerPath
-                );
-            }
-
-            // Write manifest if any files exist
-            if (!filesByAcquisitionId.isEmpty())
-                DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
-
-            // Write download errors into a JSON file in the zip
-            if (!downloadResults.isEmpty()) {
-                ZipEntry zipEntry = new ZipEntry(JSON_RESULT_FILENAME);
-                zipEntry.setTime(System.currentTimeMillis());
-                zipOutputStream.putNextEntry(zipEntry);
-
-                String errorsJson = objectMapper.writeValueAsString(downloadResults);
-                zipOutputStream.write(errorsJson.getBytes());
-                zipOutputStream.closeEntry();
-            }
-
-            // Publish download event
-            String ids = String.join(",", datasets.stream()
-                    .map(dataset -> dataset.getId().toString())
-                    .collect(Collectors.toList()));
-
-            ShanoirEvent event = new ShanoirEvent(
-                    ShanoirEventType.DOWNLOAD_DATASET_EVENT,
-                    ids,
-                    KeycloakUtil.getTokenUserId(),
-                    ids + "." + outputFormat,
-                    ShanoirEvent.IN_PROGRESS
-            );
-            event.setStatus(ShanoirEvent.SUCCESS);
-            eventService.publishEvent(event);
-        } catch (Exception e) {
-            response.setContentType(null);
-            LOG.error("Unexpected error while downloading dataset files.", e);
-            throw new RestServiceException(new ErrorModel(
-                    HttpStatus.UNPROCESSABLE_ENTITY.value(), "Unexpected error while downloading dataset files"
-            ));
-        }
-    }
-
-    public void massiveProcessingOutputsDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, String sorting) throws RestServiceException {
-        Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
-        Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
-        Map<Long, String> datasetDownloadPath = getDatasetDownloadPath(datasets, sorting);
-
-        // Prepare the HTTP response for a zip download
-        response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", "attachment;filename=" + getFileName(datasets));
-
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
-            Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
-
-            for (Dataset dataset : datasets) {
-                // Prepare folder structure
-                String subjectName = getSubjectName(dataset).replace(File.separator, "_");
-
-                // Download the dataset into the zip
-                manageDatasetDownload(
-                        dataset,
-                        downloadResults,
-                        zipOutputStream,
-                        subjectName,
-                        datasetDownloadPath.get(dataset.getId()),
                         outputFormat,
                         withManifest,
                         filesByAcquisitionId,

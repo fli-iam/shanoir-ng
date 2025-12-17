@@ -116,8 +116,11 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
                     ShanoirEventType.MASSIVE_OUTPUTS_DOWNLOAD,
                     null,
                     KeycloakUtil.getTokenUserId(),
-                    "Output extraction, sorted by " + StreamSupport.stream(jsonRequest.get("sorting").spliterator(), false)
-                            .map(JsonNode::asText).collect(Collectors.joining("/")) + ", part " + count  + " / " + maxCount + " : " + partition.stream().map(String::valueOf).collect(Collectors.joining(",")),
+                    "Output extraction" + Optional.ofNullable(jsonRequest.get("sorting"))
+                            .filter(node -> !node.isNull() && !node.isEmpty())
+                            .map(sorting -> ", sorted by " + StreamSupport.stream(sorting.spliterator(), false)
+                                    .map(JsonNode::asText).collect(Collectors.joining("/")))
+                            .orElse("") + ", part " + count  + " / " + maxCount + " : " + partition.stream().map(String::valueOf).collect(Collectors.joining(",")),
                     ShanoirEvent.SUCCESS,
                     1f,
                     null);
