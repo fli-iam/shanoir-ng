@@ -23,8 +23,8 @@ delete from animal_subject where id < 1000000;
 insert into animal_subject (biotype_id, id, provider_id, specie_id, stabulation_id, strain_id, subject_id)
     select biotype_id, subject_id - 1000000, provider_id, specie_id, stabulation_id, strain_id, subject_id - 1000000 from animal_subject;
 -- Update related tables to point to new animal_subject ids
-update subject_pathology set animal_subject_id = (select id - 1000000 from animal_subject where subject_id = animal_subject_id);
-update subject_therapy set animal_subject_id = (select id - 1000000 from animal_subject where subject_id = animal_subject_id);
+update subject_pathology set animal_subject_id = (select subject_id - 1000000 from animal_subject where animal_subject.id = animal_subject_id);
+update subject_therapy set animal_subject_id = (select subject_id - 1000000 from animal_subject where animal_subject.id = animal_subject_id);
 -- Remove duplicated animal_subject entries
 delete from animal_subject where id > 1000000;
 -- Remove subject_id column (now the id is synced with subject.id)
