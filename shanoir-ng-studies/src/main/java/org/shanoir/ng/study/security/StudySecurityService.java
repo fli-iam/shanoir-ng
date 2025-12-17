@@ -524,36 +524,6 @@ public class StudySecurityService {
      * @param rightStr
      * @return true or false
      */
-    public boolean filterStudyIdNameDTOsHasRight(List<IdName> dtos, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            return true;
-        }
-        StudyUserRight right = StudyUserRight.valueOf(rightStr);
-        if (dtos == null) {
-            return true;
-        }
-        List<IdName> newList = new ArrayList<>();
-        Map<Long, IdName> map = new HashMap<>();
-        for (IdName dto : dtos) {
-            map.put(dto.getId(), dto);
-        }
-        for (Study study : studyRepository.findAllById(new ArrayList<>(map.keySet()))) {
-            if (hasPrivilege(study, right)) {
-                newList.add(map.get(study.getId()));
-            }
-        }
-        dtos = newList;
-        return true;
-    }
-
-    /**
-     * For every study of the list, check that the connected user has the given
-     * right.
-     *
-     * @param dtos
-     * @param rightStr
-     * @return true or false
-     */
     public boolean filterStudiesHasRight(List<Long> ids, String rightStr) {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             return true;
