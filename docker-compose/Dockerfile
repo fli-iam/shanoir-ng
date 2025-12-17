@@ -316,8 +316,6 @@ FROM ohif/app:v3.11.0 AS nginx-viewer
 
 FROM nginx AS nginx
 
-RUN apt-get update && apt-get install -y gzip
-
 COPY --link \
     nginx/http.conf \
     nginx/https.conf \
