@@ -15,6 +15,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
+import { Center } from 'src/app/centers/shared/center.model';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ShanoirError } from "../../shared/models/error.model";
@@ -22,7 +24,6 @@ import { StudyCard } from "../../study-cards/shared/study-card.model";
 
 import { AcquisitionEquipment } from './acquisition-equipment.model';
 import { ManufacturerModel } from "./manufacturer-model.model";
-import { Center } from 'src/app/centers/shared/center.model';
 
 @Injectable()
 export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipment> {

@@ -44,7 +44,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     public centersFromStudyCard;
     public datasetModalityTypeStr: string;
     private currentManufAndSerialAndCenter: ManufacturerAndSerialAndCenter;
-    fromImport: string;
+    private fromImport: string;
 
     get acqEquip(): AcquisitionEquipment { return this.entity; }
     set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
@@ -118,30 +118,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     buildForm(): UntypedFormGroup {
         const form: UntypedFormGroup = this.formBuilder.group({
-            'serialNumber': [
-                this.acqEquip.serialNumber,
-                {
-                    validators: [this.noSpacesStartAndEndValidator],
-                    asyncValidators: [this.uniqueEquipmentValidator],
-                    updateOn: 'change'
-                }
-            ],
-            'manufacturerModel': [this.acqEquip.manufacturerModel,
-                {
-                    validators: [Validators.required],
-                    asyncValidators: [this.uniqueEquipmentValidator],
-                    updateOn: 'change'
-                }
-            ],
-            'center': [this.acqEquip.center,
-                {
-                    validators: [Validators.required],
-                    asyncValidators: [this.uniqueEquipmentValidator],
-                    updateOn: 'change'
-                }
-            ],
+            'serialNumber': [this.acqEquip.serialNumber, [this.noSpacesStartAndEndValidator]],
+            'manufacturerModel': [this.acqEquip.manufacturerModel,[Validators.required]],
+            'center': [this.acqEquip.center, [Validators.required]],
+        },
+        {
+            asyncValidators: [this.uniqueEquipmentValidator]
         });
-        this.registerManufAndSerialUnicityValidator(form);
         return form;
     }
 
@@ -158,27 +141,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         this.navigateToAttributeCreateStep('/manufacturer-model/create', 'manufacturerModel');
     }
 
-    private registerManufAndSerialUnicityValidator(form: UntypedFormGroup) {
-        this.onSubmitValidatedFields.push('serialNumber');
-        this.subscriptions.push(
-            form.get('manufacturerModel').valueChanges.subscribe(() => {
-                form.get('serialNumber').updateValueAndValidity({ onlySelf: true, emitEvent: false });
-                form.get('center').updateValueAndValidity({ onlySelf: true, emitEvent: false });
-                form.updateValueAndValidity();
-            }),
-            form.get('center').valueChanges.subscribe(() => {
-                form.get('serialNumber').updateValueAndValidity({ onlySelf: true, emitEvent: false });
-                form.get('manufacturerModel').updateValueAndValidity({ onlySelf: true, emitEvent: false });
-                form.updateValueAndValidity();
-            }),
-            form.get('serialNumber').valueChanges.subscribe(() => {
-                form.get('manufacturerModel').updateValueAndValidity({ onlySelf: true, emitEvent: false });
-                form.get('center').updateValueAndValidity({ onlySelf: true, emitEvent: false });
-                form.updateValueAndValidity();
-            })
-        );
-    }
-
     private noSpacesStartAndEndValidator = (control: AbstractControl): ValidationErrors | null => {
         const valueStr: string = control.value;
         if (valueStr && (valueStr.startsWith(' ') || valueStr.endsWith(' '))) {
@@ -187,16 +149,16 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return null;
     }
 
-    private uniqueEquipmentValidator: AsyncValidatorFn = async (control: AbstractControl): Promise<ValidationErrors | null> => {
-        if (!control.parent) return of(null);
+    private uniqueEquipmentValidator: AsyncValidatorFn = async (form: AbstractControl): Promise<ValidationErrors | null> => {
+        if (!form) return of(null);
 
-        const serialNumber = control.parent.get('serialNumber')?.value as string;
-        const manufacturerModel = control.parent.get('manufacturerModel')?.value as ManufacturerModel;
-        const center = control.parent.get('center')?.value as Center;
+        const serialNumber = form.get('serialNumber')?.value as string;
+        const manufacturerModel = form.get('manufacturerModel')?.value as ManufacturerModel;
+        const center = form.get('center')?.value as Center;
 
         if (!serialNumber || !manufacturerModel || !center) return null;
         if (serialNumber == this.currentManufAndSerialAndCenter?.serial && manufacturerModel.id == this.currentManufAndSerialAndCenter?.manuf.id && center.id == this.currentManufAndSerialAndCenter?.center.id) return null;
-
+        
         try {
             if (typeof serialNumber == 'string') {
                 const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel, center);
