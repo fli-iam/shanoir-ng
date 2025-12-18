@@ -23,10 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -399,7 +396,7 @@ public class DatasetApiController implements DatasetApi {
         }
         int size = datasetIds.size();
 
-        if (size > DATASET_LIMIT) {
+        if (size > DATASET_LIMIT && Objects.isNull(sortingForProcessingOutputs)) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.FORBIDDEN.value(), "This selection includes " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
         }

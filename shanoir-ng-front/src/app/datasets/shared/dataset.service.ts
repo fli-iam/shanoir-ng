@@ -122,7 +122,7 @@ export class DatasetService extends EntityService<Dataset> {
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
         if (sorting) {
-            formData.set('sorting', sorting)
+            formData.set('sortingForProcessingOutputs', sorting)
 
         }
         if (converter) {
