@@ -173,7 +173,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Query(value = "UPDATE overall_statistics os SET os.storage_size = :totalStorageVolume WHERE os.stats_date = CURDATE()", nativeQuery = true)
     void addTotalStorageVolume(@Param("totalStorageVolume") Long totalStorageVolume);
 
-    @Query(value = "SELECT os from OverallStatistics os WHERE statsDate = CURDATE()")
+    @Query(value = "SELECT os from OverallStatistics os WHERE os.statsDate = (SELECT MAX(os2.statsDate) FROM OverallStatistics os2)")
     List<OverallStatistics> getOverallStatistics();
 
     @Query("SELECT new org.shanoir.ng.dataset.dto.DatasetStudyCenter("

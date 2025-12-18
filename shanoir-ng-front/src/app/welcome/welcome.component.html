@@ -30,9 +30,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</div>
 	</div>
     <div class="stats">
-        This instance of Shanoir has {{ usersCount }} active users. {{ eventsCount }} queries were made during the last month.<br>
-        It has {{ studiesCount }} data collections containing {{ datasetAcquisitionsCount }} imaging datasets of {{ subjectsCount }} subjects, representing a total storage volume of {{ storageSize }} Gb.<br>
-        {{ publicStudies?.length }} data collections are public and detailed below.
+        {{ welcomeIntroduction }}<br>
+        It has {{ studiesSentence }} containing {{ datasetAcquisitionsSentence }} of {{ subjectsSentence }}, for a total of {{ storageSize }} GB.<br>
+        {{ publicStudiesSentence }}<br>
+        There {{ usersSentence }} and {{ eventsSentence }} run during the last month.
     </div>
     <div class="study-tab-parent">
         <div *ngIf="publicStudies?.length > 0" class="study-tab">

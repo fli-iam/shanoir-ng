@@ -163,6 +163,9 @@ export const BACKEND_API_VIP_PIPE_URL : string = BACKEND_API_VIP_URL + "/pipelin
 
 export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/execution-monitoring';
 
+// Custom sentence to introduce the Shanoir instance on welcome page
+export const FRONTEND_WELCOME_INTRODUCTION: string = "This is an instance of the Shanoir database.";
+
 declare let JSZip: any;
 
 export function hasUniqueError(error: any, fieldName: string): boolean {

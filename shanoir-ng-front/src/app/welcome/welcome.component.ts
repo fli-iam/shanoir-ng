@@ -42,6 +42,13 @@ export class WelcomeComponent implements OnInit {
   public storageSize: number = 0;
 	public StudyType = StudyType;
 	public show: number = 10;
+  public welcomeIntroduction: string = AppUtils.FRONTEND_WELCOME_INTRODUCTION;
+  public studiesSentence: string = "no collection";
+  public datasetAcquisitionsSentence: string = "no image";
+  public subjectsSentence: string = "no subject";
+  public publicStudiesSentence: string = "No collection is public.";
+  public usersSentence: string = "is no active user";
+  public eventsSentence: string = "no query was";
 	@ViewChild('showMore', { static: false }) showMore: ElementRef<HTMLElement>;
 
 	constructor(
@@ -58,6 +65,7 @@ export class WelcomeComponent implements OnInit {
         this.fetchPublicStudies();
         this.fetchUsersCount();
         this.fetchEventsCount();
+        this.constructSentences();
         this.addSchemaToDOM();
     }
 
@@ -376,6 +384,62 @@ export class WelcomeComponent implements OnInit {
       this.addSchemaToDOM();
 		});
 	}
+
+  private constructSentences() {
+    // studies count sentence
+    if (this.studiesCount != null && this.studiesCount > 0) {
+      if (this.studiesCount === 1) {
+        this.studiesSentence = "1 collection";
+      } else {
+        this.studiesSentence = this.studiesCount + " collections";
+      }
+    }
+
+    // dataset acquisitions count sentence
+    if (this.datasetAcquisitionsCount != null && this.datasetAcquisitionsCount > 0) {
+      if (this.datasetAcquisitionsCount === 1) {
+        this.datasetAcquisitionsSentence = "1 image";
+      } else {
+        this.datasetAcquisitionsSentence = this.datasetAcquisitionsCount + " images";
+      }
+    }
+
+    // subjects sentence
+    if (this.subjectsCount != null && this.subjectsCount > 0) {
+      if (this.subjectsCount === 1) {
+        this.subjectsSentence = "1 subject";
+      } else {
+        this.subjectsSentence = this.subjectsCount + " subjects";
+      }
+    }
+
+    // public studies count sentence
+    if (this.publicStudies != null && this.publicStudies.length > 0) {
+      if (this.publicStudies.length === 1) {
+        this.publicStudiesSentence = "1 collection is public (see below).";
+      } else {
+        this.publicStudiesSentence = this.publicStudies.length + " collections are public (see below).";
+      }
+    }
+
+    // users count sentence
+    if (this.usersCount != null && this.usersCount > 0) {
+      if (this.usersCount === 1) {
+        this.usersSentence = "is 1 active user";
+      } else {
+        this.usersSentence = "are " + this.usersCount + " active users";
+      }
+    }
+
+    // queries count sentence
+    if (this.eventsCount != null && this.eventsCount > 0) {
+      if (this.eventsCount === 1) {
+        this.eventsSentence = "1 query was";
+      } else {
+        this.eventsSentence = this.eventsCount + " queries were";
+      }
+    }
+  }
 
 	increaseShow() {
 		this.show += 10;
