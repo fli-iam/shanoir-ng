@@ -43,12 +43,6 @@ export class WelcomeComponent implements OnInit {
 	public StudyType = StudyType;
 	public show: number = 10;
   public welcomeIntroduction: string = AppUtils.FRONTEND_WELCOME_INTRODUCTION;
-  public studiesSentence: string = "no collection";
-  public datasetAcquisitionsSentence: string = "no image";
-  public subjectsSentence: string = "no subject";
-  public publicStudiesSentence: string = "No collection is public.";
-  public usersSentence: string = "is no active user";
-  public eventsSentence: string = "no query was";
 	@ViewChild('showMore', { static: false }) showMore: ElementRef<HTMLElement>;
 
 	constructor(
@@ -62,11 +56,6 @@ export class WelcomeComponent implements OnInit {
 
 	ngOnInit(): void {
         this.fetchOverallStats();
-        this.fetchPublicStudies();
-        this.fetchUsersCount();
-        this.fetchEventsCount();
-        this.constructSentences();
-        this.addSchemaToDOM();
     }
 
     addSchemaToDOM(): void {
@@ -369,7 +358,12 @@ export class WelcomeComponent implements OnInit {
             this.subjectsCount = stats.subjectsCount;
             this.datasetAcquisitionsCount = stats.datasetAcquisitionsCount;
             this.storageSize = stats.storageSize;
+            this.fetchPublicStudies();
+            this.fetchUsersCount();
+            this.fetchEventsCount();
+            this.addSchemaToDOM();
         });
+
     }
 
 	private fetchPublicStudies() {
@@ -381,64 +375,67 @@ export class WelcomeComponent implements OnInit {
 				// return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
 				return (b.nbExaminations) - (a.nbExaminations);
 			})
-      this.addSchemaToDOM();
 		});
 	}
 
-  private constructSentences() {
-    // studies count sentence
-    if (this.studiesCount != null && this.studiesCount > 0) {
-      if (this.studiesCount === 1) {
-        this.studiesSentence = "1 collection";
-      } else {
-        this.studiesSentence = this.studiesCount + " collections";
-      }
+  get studiesSentence(): string {
+    if (this.studiesCount == null || this.studiesCount === 0) {
+      return '<strong>no collection</strong>';
     }
+    if (this.studiesCount === 1) {
+      return '<strong>1 collection</strong>';
+    }
+    return `<strong>${this.studiesCount} collections</strong>`;
+  }
 
-    // dataset acquisitions count sentence
-    if (this.datasetAcquisitionsCount != null && this.datasetAcquisitionsCount > 0) {
-      if (this.datasetAcquisitionsCount === 1) {
-        this.datasetAcquisitionsSentence = "1 image";
-      } else {
-        this.datasetAcquisitionsSentence = this.datasetAcquisitionsCount + " images";
-      }
+  get subjectsSentence(): string {
+    if (this.subjectsCount == null || this.subjectsCount === 0) {
+      return '<strong>no subject</strong>';
     }
+    if (this.subjectsCount === 1) {
+      return '<strong>1 subject</strong>';
+    }
+    return `<strong>${this.subjectsCount} subjects</strong>`;
+  }
 
-    // subjects sentence
-    if (this.subjectsCount != null && this.subjectsCount > 0) {
-      if (this.subjectsCount === 1) {
-        this.subjectsSentence = "1 subject";
-      } else {
-        this.subjectsSentence = this.subjectsCount + " subjects";
-      }
+  get datasetAcquisitionsSentence(): string {
+    if (this.datasetAcquisitionsCount == null || this.datasetAcquisitionsCount === 0) {
+      return '<strong>no image</strong>';
     }
+    if (this.datasetAcquisitionsCount === 1) {
+      return '<strong>1 image</strong>';
+    }
+    return `<strong>${this.datasetAcquisitionsCount} images</strong>`;
+  }
 
-    // public studies count sentence
-    if (this.publicStudies != null && this.publicStudies.length > 0) {
-      if (this.publicStudies.length === 1) {
-        this.publicStudiesSentence = "1 collection is public (see below).";
-      } else {
-        this.publicStudiesSentence = this.publicStudies.length + " collections are public (see below).";
-      }
+  get publicStudiesSentence(): string {
+    if (this.publicStudies == null || this.publicStudies.length === 0) {
+      return '<strong>No collection</strong> is public.';
     }
+    if (this.publicStudies.length === 1) {
+      return '<strong>1 collection</strong> is public (see below).';
+    }
+    return `<strong>${this.publicStudies.length} collections</strong> are public (see below).`;
+  }
 
-    // users count sentence
-    if (this.usersCount != null && this.usersCount > 0) {
-      if (this.usersCount === 1) {
-        this.usersSentence = "is 1 active user";
-      } else {
-        this.usersSentence = "are " + this.usersCount + " active users";
-      }
+  get usersSentence(): string {
+    if (this.usersCount == null || this.usersCount === 0) {
+      return 'is <strong>no active user</strong>';
     }
+    if (this.usersCount === 1) {
+      return 'is <strong>1 active user</strong>';
+    }
+    return `are <strong>${this.usersCount} active users</strong>`;
+  }
 
-    // queries count sentence
-    if (this.eventsCount != null && this.eventsCount > 0) {
-      if (this.eventsCount === 1) {
-        this.eventsSentence = "1 query was";
-      } else {
-        this.eventsSentence = this.eventsCount + " queries were";
-      }
+  get eventsSentence(): string {
+    if (this.eventsCount == null || this.eventsCount === 0) {
+      return '<strong>no query</strong> was';
     }
+    if (this.eventsCount === 1) {
+      return '<strong>1 query</strong> was';
+    }
+    return `<strong>${this.eventsCount} queries</strong> were`;
   }
 
 	increaseShow() {
