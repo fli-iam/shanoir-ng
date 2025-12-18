@@ -170,7 +170,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
         } catch (IOException e) {
             LOG.error("An error occured while reading files in VIP tracking file", e);
         }
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile))) {
             List<String> updatedLines = lines.subList(0, Math.max(1, lines.size() - MAX_LAST_LINES_TO_CHECK));
             updatedLines.addAll(lastLines);
 
