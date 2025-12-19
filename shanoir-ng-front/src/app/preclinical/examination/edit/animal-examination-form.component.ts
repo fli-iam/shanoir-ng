@@ -21,7 +21,6 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { Selection } from 'src/app/studies/study/tree.service';
 
 import { ContrastAgent }    from '../../contrastAgent/shared/contrastAgent.model';
-import { ContrastAgentService } from '../../contrastAgent/shared/contrastAgent.service';
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationAnesthetic }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService }    from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
@@ -84,7 +83,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         private animalExaminationService: AnimalExaminationService,
         private examAnestheticService: ExaminationAnestheticService,
         private extradatasService: ExtraDataService,
-        private contrastAgentsService: ContrastAgentService,
         private animalSubjectService: AnimalSubjectService,
         private centerService: CenterService,
         private studyService: StudyService,

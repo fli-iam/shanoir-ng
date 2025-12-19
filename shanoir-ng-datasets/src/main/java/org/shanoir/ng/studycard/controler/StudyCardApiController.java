@@ -16,9 +16,6 @@ package org.shanoir.ng.studycard.controler;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.dcm4che3.data.StandardElementDictionary;
-import org.dcm4che3.data.Tag;
-import org.dcm4che3.data.VR;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -27,10 +24,8 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.DicomTag;
-import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
-import org.shanoir.ng.studycard.model.VM;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
@@ -45,7 +40,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -176,38 +170,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<List<DicomTag>> findDicomTags() throws RestServiceException {
-        Field[] declaredFields = Tag.class.getDeclaredFields();
-        List<DicomTag> dicomTags = new ArrayList<DicomTag>();
-        try {
-            for (Field field : declaredFields) {
-                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
-                    if (field.getType().getName() == "int") {
-                        int tagCode = field.getInt(null);
-                        VR tagVr = StandardElementDictionary.INSTANCE.vrOf(tagCode);
-                        VM tagVm = VM.of(tagCode);
-                        DicomTagType tagType = DicomTagType.valueOf(tagVr, tagVm);
-                        dicomTags.add(new DicomTag(tagCode, field.getName(), tagType, tagVm));
-                    } else if (field.getType().getName() == "long") {
-                        // longs actually code a date and a time, see Tag.class
-                        String name = field.getName().replace("DateAndTime", "");
-                        String hexStr = String.format("%016X", field.getLong(null));
-                        String dateStr = hexStr.substring(0, 8);
-                        String timeStr = hexStr.substring(8);
-                        int dateTagCode = Integer.parseInt(dateStr, 16);
-                        int timeTagCode = Integer.parseInt(timeStr, 16);
-                        VM dateVm = VM.of(dateTagCode);
-                        VM timeVm = VM.of(timeTagCode);
-                        DicomTagType dateTagType = DicomTagType.valueOf(StandardElementDictionary.INSTANCE.vrOf(dateTagCode), dateVm);
-                        DicomTagType timeTagType = DicomTagType.valueOf(StandardElementDictionary.INSTANCE.vrOf(timeTagCode), timeVm);
-                        dicomTags.add(new DicomTag(dateTagCode, name + "Date", dateTagType, dateVm));
-                        dicomTags.add(new DicomTag(timeTagCode, name + "Time", timeTagType, timeVm));
-                    }
-                }
-            }
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Cannot parse the dcm4che lib Tag class static fields", e));
-        }
-        return new ResponseEntity<>(dicomTags, HttpStatus.OK);
+        return new ResponseEntity<>(studyCardService.findDicomTags(), HttpStatus.OK);
     }
 
     /**
