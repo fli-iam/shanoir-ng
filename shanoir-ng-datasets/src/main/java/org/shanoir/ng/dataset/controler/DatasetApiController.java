@@ -75,6 +75,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -656,5 +658,34 @@ public class DatasetApiController implements DatasetApi {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(statistics, HttpStatus.OK);
+    public ResponseEntity<Resource> extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws RestServiceException {
+        File file = null;
+        try {
+            file = datasetService.extractDicomMetadata(datasetIds, metadataKeys);
+        } catch (Exception e) {
+            ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while creating metadata csv file.", e.getMessage());
+            throw new RestServiceException(e, error);
+        }
+
+        if (file == null || !file.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Resource resource = new FileSystemResource(file);
+
+        try {
+            String contentType = Files.probeContentType(file.toPath());
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+            LOG.info("Metadata file download ended.");
+            return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                    .body(resource);
+        } catch (IOException e) {
+            ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while shaping HTTP response.", e.getMessage());
+            throw new RestServiceException(e, error);
+        }
+
     }
 }
