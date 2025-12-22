@@ -666,18 +666,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     copyToStudy() {
         const modalRef: ComponentRef<DatasetCopyDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(DatasetCopyDialogComponent);
-        modalRef.instance.title = "Copy of datasets to study";
-        modalRef.instance.studies = this.studies;
-        modalRef.instance.datasetsIds = Array.from(this.selectedDatasetIds);
-        modalRef.instance.message = "You need admin rights on dataset's study AND destination study. Also, note that the dataset's center will be added to destination study.";
-        modalRef.instance.statusMessage = 'Ready';
-        modalRef.instance.ownRef = modalRef;
-        modalRef.instance.canCopy = this.hasCopyRight;
-        modalRef.instance.lines = this.selectedLines;
-    }
-
-    private isProcessed(doc: SolrDocument) {
-        return doc.processed == true;
+        modalRef.instance.setUp(this.studies, this.selectedLines, this.hasCopyRight, modalRef);
     }
 }
 

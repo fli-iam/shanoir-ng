@@ -15,6 +15,8 @@
 import { HttpClient } from '@angular/common/http';
 import {Component, OnInit} from '@angular/core';
 
+import { SolrDocument } from 'src/app/solr/solr.document.model';
+
 import {Study} from "../../../studies/shared/study.model";
 import * as AppUtils from "../../../utils/app.utils";
 import {KeycloakService} from "../../keycloak/keycloak.service";
@@ -23,7 +25,13 @@ import {StudyRightsService} from "../../../studies/shared/study-rights.service";
 import {ServiceLocator} from "../../../utils/locator.service";
 import {ConsoleService} from "../../console/console.service";
 import {StudyService} from "../../../studies/shared/study.service";
-import {SolrDocument} from "../../../solr/solr.document.model";
+
+export type InputDataset = {
+    datasetId: number,
+    centerId: string,
+    subjectId: string,
+    studyId: number
+};
 
 @Component({
     selector: 'user-action-dialog',
@@ -32,19 +40,17 @@ import {SolrDocument} from "../../../solr/solr.document.model";
     standalone: false
 })
 export class DatasetCopyDialogComponent implements OnInit {
-    title: string;
-    message: string;
-    studies: Study[];
-    selectedStudy: Study;
-    datasetsIds: number[];
-    statusMessage: string;
+
+    public studies: Study[];
+    inputDatasets: InputDataset[] = [];
+    protected selectedStudy: Study;
+    protected statusMessage: string;
     ownRef: any;
     hasRight: boolean = false;
     isDatasetInStudy: boolean = false;
     canCopy: boolean;
     centerIds: string[]=[];
     subjectIds: string[]=[];
-    lines: SolrDocument[];
     subjectIdStudyId: string[]=[];
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
     constructor(private http: HttpClient,
@@ -53,17 +59,33 @@ export class DatasetCopyDialogComponent implements OnInit {
                 private keycloakService: KeycloakService) {
     }
 
+    public setUp(studies: Study[], inputDatasets: SolrDocument[], canCopyRight: boolean, modalRef: any) {
+        this.studies = studies;
+        this.ownRef = modalRef;
+        this.canCopy = canCopyRight;
+        this.inputDatasets = inputDatasets.map(line => {
+            return {
+                datasetId: Number(line.datasetId),
+                centerId: line.centerId,
+                subjectId: line.subjectId,
+                studyId: Number(line.studyId)
+            };
+        });
+    }
+
     ngOnInit() {
         // sort studies by alphabetical order
         this.studies.sort((a: any, b: any) => { return a.name.localeCompare(b.name, undefined, {sensitivity: 'base'})});
-        for (const line of this.lines) {
+        const ids: number[] = [];
+        for (const line of this.inputDatasets) {
             if (!this.centerIds.includes(line.centerId)) {
                 this.centerIds.push(line.centerId);
             }
             if (!this.subjectIds.includes(line.subjectId) && line.subjectId != null) {
                 this.subjectIds.push(line.subjectId);
             } else if (line.subjectId == null) {
-                this.statusMessage = "Be careful, some of the selected datasets have a null subject.";
+                ids.push(line.datasetId);
+                this.statusMessage = "Some of the selected datasets (id = " + ids.join(", ") + ") have no subject, can't proceed with the copy.";
                 this.canCopy = false;
             }
             if (!this.subjectIdStudyId.includes(line.subjectId + "/" + line.studyId)) {
@@ -71,10 +93,11 @@ export class DatasetCopyDialogComponent implements OnInit {
             }
         }
     }
+
     public copy() {
         this.canCopy = false;
         this.checkRightsOnSelectedStudies(this.selectedStudy.id).then( () => {
-            this.isDatasetInStudy = this.checkDatasetBelongToStudy(this.lines, this.selectedStudy.id);
+            this.isDatasetInStudy = this.checkDatasetBelongToStudy(this.inputDatasets, this.selectedStudy.id);
 
             if (!this.hasRight) {
                 this.statusMessage = 'Missing rights for study ' + this.selectedStudy.name + ' please make sure you have ADMIN right.';
@@ -82,7 +105,7 @@ export class DatasetCopyDialogComponent implements OnInit {
                 this.statusMessage = 'Selected dataset(s) already belong to selected study.';
             } else {
                 const formData: FormData = new FormData();
-                formData.set('datasetIds', Array.from(this.datasetsIds).join(","));
+                formData.set('datasetIds', Array.from(this.inputDatasets.map(d => d.datasetId)).join(","));
                 formData.set('studyId', this.selectedStudy.id.toString());
                 formData.set('centerIds', Array.from(this.centerIds).join(","));
                 formData.set('subjectIdStudyId', Array.from(this.subjectIdStudyId).join(","));
@@ -90,7 +113,7 @@ export class DatasetCopyDialogComponent implements OnInit {
                     .toPromise()
                     .then( () => {
                         this.close();
-                        this.consoleService.log('info', 'The copy of ' + this.datasetsIds.length + ' datasets towards study ' + this.selectedStudy.name + ' has started.');
+                        this.consoleService.log('info', 'The copy of ' + this.inputDatasets.length + ' datasets towards study ' + this.selectedStudy.name + ' has started.');
                     }).catch(reason => {
                         this.canCopy = true;
                         if (reason.status == 403) {
@@ -101,7 +124,7 @@ export class DatasetCopyDialogComponent implements OnInit {
         });
     }
 
-    public checkDatasetBelongToStudy(lines: SolrDocument[], studyId: number) {
+    public checkDatasetBelongToStudy(lines: InputDataset[], studyId: number) {
         return lines.some((line) => {
             return (studyId == Number(line.studyId));
         });
@@ -128,6 +151,7 @@ export class DatasetCopyDialogComponent implements OnInit {
     }
 
     close() {
+        console.log("Closing dialog");
         this.ownRef.destroy();
     }
 }
