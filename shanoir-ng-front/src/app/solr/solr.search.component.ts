@@ -13,7 +13,7 @@
  */
 import { Clipboard } from '@angular/cdk/clipboard';
 import { formatDate } from '@angular/common';
-import { AfterContentInit, AfterViewChecked, Component, ComponentRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterContentInit, AfterViewChecked, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -27,7 +27,7 @@ import { DatasetService } from '../datasets/shared/dataset.service';
 import { dateDisplay } from "../shared/./localLanguage/localDate.abstract";
 import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
-import { DatasetCopyDialogComponent } from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
+import { DatasetCopyDialogService } from '../shared/components/dataset-copy-dialog/dataset-copy-dialog.service';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { Page, Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
@@ -38,9 +38,7 @@ import { MassDownloadService } from '../shared/mass-download/mass-download.servi
 import { Range } from '../shared/models/range.model';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
-import { Study } from "../studies/shared/study.model";
 import { StudyService } from "../studies/shared/study.service";
-import { ServiceLocator } from "../utils/locator.service";
 import { ExecutionDataService } from '../vip/execution.data-service';
 
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
@@ -86,7 +84,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     solrRequest: SolrRequest = new SolrRequest();
     private facetPageable: Map<string, FacetPageable>;
     contentPage: SolrResultPage[] = [];
-    studies: Study[];
     selectedStudies: string[]=[];
     hasCopyRight: boolean = false;
     selectedLines: SolrDocument[]=[];
@@ -94,10 +91,21 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     private subscriptions: Subscription[] = [];
 
     constructor(
-            private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
-            private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
-            private keycloakService: KeycloakService, private studyRightsService: StudyRightsService, private downloadService: MassDownloadService, private clipboard: Clipboard,
-            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ExecutionDataService, private studyService: StudyService) {
+        private breadcrumbsService: BreadcrumbsService, 
+        private formBuilder: UntypedFormBuilder,
+        private solrService: SolrService, 
+        private router: Router, 
+        private datasetService: DatasetService, 
+        private datasetAcquisitionService: DatasetAcquisitionService,
+        private keycloakService: KeycloakService, 
+        private studyRightsService: StudyRightsService,
+        private downloadService: MassDownloadService, 
+        private clipboard: Clipboard,
+        private confirmDialogService: ConfirmDialogService, 
+        private consoleService: ConsoleService, 
+        private processingService: ExecutionDataService, 
+        private studyService: StudyService,
+        private datasetCopyDialogService: DatasetCopyDialogService) {
 
         this.getRole();
         if (this.role != 'admin') this.getRights();
@@ -110,9 +118,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.selectionColumnDefs = this.getSelectionColumnDefs();
         this.customActionDefs = this.getCustomActionsDefs();
         this.selectionCustomActionDefs = this.getSelectionCustomActionsDefs();
-        this.studyService.getAll().then(studies => {
-            this.studies = studies;
-        });
 
         const input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['input'] : null;
         if (input) {
@@ -665,8 +670,16 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     copyToStudy() {
-        const modalRef: ComponentRef<DatasetCopyDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(DatasetCopyDialogComponent);
-        modalRef.instance.setUp(this.studies, this.selectedLines, this.hasCopyRight, modalRef);
+        if (this.hasCopyRight) {
+            this.datasetCopyDialogService.open(this.selectedLines.map(line => ({
+                datasetId: Number(line.datasetId),
+                centerId: Number(line.centerId),
+                subjectId: Number(line.subjectId),
+                studyId: Number(line.studyId)
+            })));
+        } else {
+            this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to copy datasets from studies that you don\'t administrate.');
+        }
     }
 }
 

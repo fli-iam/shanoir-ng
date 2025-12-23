@@ -475,8 +475,8 @@ public class DatasetApiSecurityTest {
         given(datasetRepository.findByDatasetAcquisitionExaminationId(4L)).willReturn(Arrays.asList(new Dataset[]{dataset4}));
 
         try {
-            DatasetLight datasetLight1 = new DatasetLight(1L, "ds1", MrDataset.class, 1L, "study1", 1L, "subject1", LocalDate.now(), false);
-            DatasetLight datasetLight3 = new DatasetLight(3L, "ds3", MrDataset.class, 1L, "study1", 1L, "subject1", LocalDate.now(), false);
+            DatasetLight datasetLight1 = new DatasetLight(1L, "ds1", MrDataset.class, 1L, "study1", 1L, "subject1", LocalDate.now(), false, 1L);
+            DatasetLight datasetLight3 = new DatasetLight(3L, "ds3", MrDataset.class, 1L, "study1", 1L, "subject1", LocalDate.now(), false, 1L);
             given(datasetRepository.findAllLightByStudyId(1L)).willReturn(Arrays.asList(new DatasetLight[]{datasetLight1, datasetLight3}));
         } catch (NoSuchMethodException | InstantiationException | IllegalArgumentException | IllegalAccessException | InvocationTargetException ex) {
             fail("exception raised : ", ex);

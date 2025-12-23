@@ -13,23 +13,23 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import {Component, OnInit} from '@angular/core';
+import { Component } from '@angular/core';
 
-import { SolrDocument } from 'src/app/solr/solr.document.model';
+import { StudyService } from 'src/app/studies/shared/study.service';
 
-import {Study} from "../../../studies/shared/study.model";
+import { StudyRightsService } from "../../../studies/shared/study-rights.service";
+import { StudyUserRight } from "../../../studies/shared/study-user-right.enum";
 import * as AppUtils from "../../../utils/app.utils";
-import {KeycloakService} from "../../keycloak/keycloak.service";
-import {StudyUserRight} from "../../../studies/shared/study-user-right.enum";
-import {StudyRightsService} from "../../../studies/shared/study-rights.service";
-import {ServiceLocator} from "../../../utils/locator.service";
-import {ConsoleService} from "../../console/console.service";
-import {StudyService} from "../../../studies/shared/study.service";
+import { ServiceLocator } from "../../../utils/locator.service";
+import { ConsoleService } from "../../console/console.service";
+import { KeycloakService } from "../../keycloak/keycloak.service";
+import { IdName } from '../../models/id-name.model';
+
 
 export type InputDataset = {
     datasetId: number,
-    centerId: string,
-    subjectId: string,
+    centerId: number,
+    subjectId: number,
     studyId: number
 };
 
@@ -39,43 +39,44 @@ export type InputDataset = {
     styleUrls: ['dataset-copy-dialog.component.css'],
     standalone: false
 })
-export class DatasetCopyDialogComponent implements OnInit {
+export class DatasetCopyDialogComponent {
 
-    public studies: Study[];
-    inputDatasets: InputDataset[] = [];
-    protected selectedStudy: Study;
+    protected studies: IdName[];
+    protected inputDatasets: InputDataset[] = [];
+    protected ownRef: any;
+    protected selectedStudy: IdName;
     protected statusMessage: string;
-    ownRef: any;
-    hasRight: boolean = false;
-    isDatasetInStudy: boolean = false;
-    canCopy: boolean;
-    centerIds: string[]=[];
-    subjectIds: string[]=[];
-    subjectIdStudyId: string[]=[];
+    protected hasRight: boolean = false;
+    protected isDatasetInStudy: boolean = false;
+    protected canCopy: boolean = true;
+    protected centerIds: number[] = [];
+    protected subjectIds: number[] = [];
+    protected subjectIdStudyId: string[] = [];
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
+
     constructor(private http: HttpClient,
-                private studyRightsService: StudyRightsService,
-                private studyService: StudyService,
-                private keycloakService: KeycloakService) {
+        private studyRightsService: StudyRightsService,
+        private studyService: StudyService,
+        private keycloakService: KeycloakService) {
     }
 
-    public setUp(studies: Study[], inputDatasets: SolrDocument[], canCopyRight: boolean, modalRef: any) {
-        this.studies = studies;
+    public setUp(inputDatasets: InputDataset[], modalRef: any) {
+        this.fetchStudies().then(() => {
+            this.sortStudies();
+            this.checkAdminRightsOnDatasets();
+        });
         this.ownRef = modalRef;
-        this.canCopy = canCopyRight;
-        this.inputDatasets = inputDatasets.map(line => {
-            return {
-                datasetId: Number(line.datasetId),
-                centerId: line.centerId,
-                subjectId: line.subjectId,
-                studyId: Number(line.studyId)
-            };
+        this.inputDatasets = inputDatasets;
+    }
+
+    private fetchStudies(): Promise<void> {
+        return this.studyService.findStudyIdNamesIcanAdmin().then(studies => {
+            this.studies = studies;
         });
     }
 
-    ngOnInit() {
-        // sort studies by alphabetical order
-        this.studies.sort((a: any, b: any) => { return a.name.localeCompare(b.name, undefined, {sensitivity: 'base'})});
+    private sortStudies() {
+        this.studies.sort((a: any, b: any) => { return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) });
         const ids: number[] = [];
         for (const line of this.inputDatasets) {
             if (!this.centerIds.includes(line.centerId)) {
@@ -94,9 +95,19 @@ export class DatasetCopyDialogComponent implements OnInit {
         }
     }
 
+    private checkAdminRightsOnDatasets() {
+        const hasEveryForAll: boolean = this.inputDatasets.every(ds => {
+            return this.studies.find(s => s.id === ds.studyId);
+        });
+        if (!hasEveryForAll) {
+            this.statusMessage = "You must have ADMIN right on all the studies of the selected datasets to proceed with the copy.";
+            this.canCopy = false;
+        }
+    }
+
     public copy() {
         this.canCopy = false;
-        this.checkRightsOnSelectedStudies(this.selectedStudy.id).then( () => {
+        this.checkRightsOnSelectedStudies(this.selectedStudy.id).then(() => {
             this.isDatasetInStudy = this.checkDatasetBelongToStudy(this.inputDatasets, this.selectedStudy.id);
 
             if (!this.hasRight) {
@@ -109,9 +120,9 @@ export class DatasetCopyDialogComponent implements OnInit {
                 formData.set('studyId', this.selectedStudy.id.toString());
                 formData.set('centerIds', Array.from(this.centerIds).join(","));
                 formData.set('subjectIdStudyId', Array.from(this.subjectIdStudyId).join(","));
-                return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'})
+                return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json' })
                     .toPromise()
-                    .then( () => {
+                    .then(() => {
                         this.close();
                         this.consoleService.log('info', 'The copy of ' + this.inputDatasets.length + ' datasets towards study ' + this.selectedStudy.name + ' has started.');
                     }).catch(reason => {
@@ -146,7 +157,7 @@ export class DatasetCopyDialogComponent implements OnInit {
         }
     }
 
-    pickStudy(study: Study) {
+    pickStudy(study: IdName) {
         this.selectedStudy = study;
     }
 
