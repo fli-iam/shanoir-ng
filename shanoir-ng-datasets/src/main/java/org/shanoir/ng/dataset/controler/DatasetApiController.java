@@ -658,6 +658,8 @@ public class DatasetApiController implements DatasetApi {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(statistics, HttpStatus.OK);
+    }
+
     public ResponseEntity<Resource> extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws RestServiceException {
         File file = null;
         try {
