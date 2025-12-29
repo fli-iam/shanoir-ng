@@ -16,6 +16,7 @@ package org.shanoir.ng.studycard.service;
 
 import org.dcm4che3.data.StandardElementDictionary;
 import org.dcm4che3.data.VR;
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -26,7 +27,6 @@ import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.VM;
 import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -137,8 +137,6 @@ public class StudyCardServiceImpl implements StudyCardService {
     public StudyCard findByName(String name) {
         return studyCardRepository.findByName(name);
     }
-
-
 
     @Override
     public List<DicomTag> findDicomTags() throws RestServiceException {
