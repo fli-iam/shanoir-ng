@@ -1,4 +1,5 @@
 /**
+ * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  *
@@ -10,6 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+
 package org.shanoir.ng.importer.bids;
 
 import java.io.File;
@@ -67,301 +69,301 @@ import io.swagger.v3.oas.annotations.Parameter;
 @Controller
 public class BidsImporterApiController implements BidsImporterApi {
 
-	@Value("${shanoir.import.directory}")
-	private String importDir;
+    @Value("${shanoir.import.directory}")
+    private String importDir;
 
-	private static final String WRONG_CONTENT_FILE_UPLOAD = "Wrong content type of file upload, .zip required.";
+    private static final String WRONG_CONTENT_FILE_UPLOAD = "Wrong content type of file upload, .zip required.";
 
-	private static final String NO_FILE_UPLOADED = "No file uploaded.";
+    private static final String NO_FILE_UPLOADED = "No file uploaded.";
 
-	private static final String NOT_SUBJECT_BASED_SUBJECT = "The zip has to contain an unique 'sub-XXX' subject folder with data following the BIDS specification.";
+    private static final String NOT_SUBJECT_BASED_SUBJECT = "The zip has to contain an unique 'sub-XXX' subject folder with data following the BIDS specification.";
 
-	private static final String SUBJECT_CREATION_ERROR = "An error occured during the subject creation, please check your rights.";
+    private static final String SUBJECT_CREATION_ERROR = "An error occured during the subject creation, please check your rights.";
 
-	private static final String EXAMINATION_CREATION_ERROR = "An error occured during the examination creation, please check your rights.";
+    private static final String EXAMINATION_CREATION_ERROR = "An error occured during the examination creation, please check your rights.";
 
-	private static final String CSV_SEPARATOR = "\t";
+    private static final String CSV_SEPARATOR = "\t";
 
-	@Autowired
-	ImporterApiController importer;
+    @Autowired
+    private ImporterApiController importer;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Autowired
-	private ShanoirEventService eventService;
+    @Autowired
+    private ShanoirEventService eventService;
 
-	private static final Logger LOG = LoggerFactory.getLogger(BidsImporterApiController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BidsImporterApiController.class);
+
+    /**
+     * This method import a BIDS subject folder.
+     */
+    @Override
+    public ResponseEntity<ImportJob> importAsBids(
+            @Parameter(name = "file detail") @RequestPart("file") final MultipartFile bidsFile,
+            @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(name = "name of the study", required = true) @PathVariable("studyName") String studyName,
+            @Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId)
+                    throws RestServiceException, ShanoirException, IOException {
+
+        // STEP 1: Analyze folder and unzip it.
+        if (bidsFile == null) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
+        }
+        if (!ImportUtils.isZipFile(bidsFile)) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
+        }
+        ImportJob importJob = new ImportJob();
+        importJob.setStudyId(studyId);
+        importJob.setStudyName(studyName);
+        importJob.setUserId(KeycloakUtil.getTokenUserId());
+        importJob.setUsername(KeycloakUtil.getTokenUserName());
+
+        // Create tmp folder and unzip archive
+        final File userImportDir = ImportUtils.getUserImportDir(importDir);
+        File tempFile = ImportUtils.saveTempFile(userImportDir, bidsFile);
+        File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, bidsFile, false);
+
+        // Get equipment from file if existing, otherwise, set the "UNKNOWN EQUIPMENT"
+        importJob.setAcquisitionEquipmentId(0L);
+        importJob.setWorkFolder(importJobDir.getAbsolutePath());
+
+        // STEP 2: Subject level, analyze and create the new subject if necessary
+        Long subjectId = null;
+        // Exclude MACOS automatically added metadata files and directories (AppleDouble and Finder)
+        for (File subjectFile : importJobDir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File arg0, String name) {
+                return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
+            } })) {
+            String fileName = subjectFile.getName();
+            String subjectName = null;
+            if (fileName.startsWith("sub-")) {
+                // We found a subject
+                subjectName = subjectFile.getName().split("sub-")[1];
+                Subject subject = new Subject();
+                subject.setName(subjectName);
+                subject.setStudy(new IdName(studyId, studyName));
+                importJob.setSubjectName(subjectName);
+
+                // Create subject
+                subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, objectMapper.writeValueAsString(subject));
+                if (subjectId == null) {
+                    throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
+                }
+            } else {
+                throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NOT_SUBJECT_BASED_SUBJECT, null));
+            }
 
 
-	/**
-	 * This method import a BIDS subject folder.
-	 */
-	@Override
-	public ResponseEntity<ImportJob> importAsBids(
-			@Parameter(name = "file detail") @RequestPart("file") final MultipartFile bidsFile,
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@Parameter(name = "name of the study", required = true) @PathVariable("studyName") String studyName,
-			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId)
-					throws RestServiceException, ShanoirException, IOException {
+            // STEP 3: Examination level, check if there are session, otherwise create examinations
+            Map<String, LocalDate> examDates = checkDatesFromSessionFile(subjectFile);
+            // Filter out scans.tsv and sessions.tsv files
+            File[] examFiles = subjectFile.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File arg0, String name) {
+                    return !name.endsWith("_scans.tsv") && !name.endsWith("_sessions.tsv") && !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
+                }
+            });
 
-		// STEP 1: Analyze folder and unzip it.
-		if (bidsFile == null) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
-		}
-		if (!ImportUtils.isZipFile(bidsFile)) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
-		}
-		ImportJob importJob = new ImportJob();
-		importJob.setStudyId(studyId);
-		importJob.setStudyName(studyName);
-		importJob.setUserId(KeycloakUtil.getTokenUserId());
-		importJob.setUsername(KeycloakUtil.getTokenUserName());
+            // Iterate over session files
+            boolean examCreated = false;
+            for (File sessionFile : examFiles) {
+                FileTime creationTime = (FileTime) Files.getAttribute(Paths.get(sessionFile.getAbsolutePath()), "creationTime");
+                ExaminationDTO examination;
+                Long examId;
 
-		// Create tmp folder and unzip archive
-		final File userImportDir = ImportUtils.getUserImportDir(importDir);
-		File tempFile = ImportUtils.saveTempFile(userImportDir, bidsFile);
-		File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, bidsFile, false);
+                // STEP 3.1 There is a session level
+                if (sessionFile.getName().startsWith("ses-")) {
+                    String sessionLabel = sessionFile.getName().substring(sessionFile.getName().indexOf("ses-") + "ses-".length());
+                    LocalDate examDate = examDates.get(sessionLabel);
 
-		// Get equipment from file if existing, otherwise, set the "UNKNOWN EQUIPMENT"
-		importJob.setAcquisitionEquipmentId(0L);
-		importJob.setWorkFolder(importJobDir.getAbsolutePath());
+                    // Check for scans.tsv if session does not exist
+                    if (examDate == null) {
+                        examDate = checkDateFromScansFile(sessionFile);
+                    }
 
-		// STEP 2: Subject level, analyze and create the new subject if necessary
-		Long subjectId = null;
-		// Exclude MACOS automatically added metadata files and directories (AppleDouble and Finder)
-		for (File subjectFile : importJobDir.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File arg0, String name) {
-				return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble") ;
-			}})) {
-			String fileName = subjectFile.getName();
-			String subjectName = null;
-			if (fileName.startsWith("sub-")) {
-				// We found a subject
-				subjectName = subjectFile.getName().split("sub-")[1];
-				Subject subject = new Subject();
-				subject.setName(subjectName);
-				subject.setStudy(new IdName(studyId, studyName));
-				importJob.setSubjectName(subjectName);
+                    // Set file creation as default
+                    if (examDate == null) {
+                        examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneId.systemDefault());
+                    }
+                    examination = ImportUtils.createExam(studyId, centerId, subjectId, sessionLabel, examDate, subjectName);
+                    examCreated = true;
 
-				// Create subject
-				subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, objectMapper.writeValueAsString(subject));
-				if (subjectId == null) {
-					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
-				}
-			} else {
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NOT_SUBJECT_BASED_SUBJECT, null));
-			}
+                    // Create multiple examinations for every session folder
+                    examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
 
+                    if (examId == null) {
+                        throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
+                    }
+                    eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 
-			// STEP 3: Examination level, check if there are session, otherwise create examinations
-			Map<String, LocalDate> examDates = checkDatesFromSessionFile(subjectFile);
-			// Filter out scans.tsv and sessions.tsv files
-			File[] examFiles = subjectFile.listFiles(new FilenameFilter() {
-				@Override
-				public boolean accept(File arg0, String name) {
-					return !name.endsWith("_scans.tsv") && !name.endsWith("_sessions.tsv") && !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
-				}
-			});
+                    importJob.setExaminationId(examId);
 
-			// Iterate over session files
-			boolean examCreated = false;
-			for (File sessionFile : examFiles) {
-				FileTime creationTime = (FileTime) Files.getAttribute(Paths.get(sessionFile.getAbsolutePath()), "creationTime");
-				ExaminationDTO examination;
-				Long examId;
+                    // STEP 4: Finish import from every bids data folder
+                    for (File dataTypeFile : sessionFile.listFiles(
+                            new FilenameFilter() {
+                                @Override
+                                public boolean accept(File arg0, String name) {
+                                    return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
+                                }
+                            }
+                    )) {
+                        importSession(dataTypeFile, importJob);
+                    }
+                } else {
+                    // STEP 3.2 No session level
+                    if (!examCreated) {
+                        // Try to find acqusition_time in _scans.tsv file
+                        LocalDate examDate = checkDateFromScansFile(sessionFile);
+                        if (examDate == null) {
+                            // Set exam date by default using file creation date
+                            examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneOffset.UTC);
+                        }
+                        examination = ImportUtils.createExam(studyId, centerId, subjectId, "", examDate, subjectName);
+                        examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
 
-				// STEP 3.1 There is a session level
-				if (sessionFile.getName().startsWith("ses-")) {
-					String sessionLabel = sessionFile.getName().substring(sessionFile.getName().indexOf("ses-") + "ses-".length());
-					LocalDate examDate = examDates.get(sessionLabel);
+                        if (examId == null) {
+                            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
+                        }
+                        eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 
-					// Check for scans.tsv if session does not exist
-					if (examDate == null) {
-						examDate = checkDateFromScansFile(sessionFile);
-					}
+                        importJob.setExaminationId(examId);
+                        examCreated = true;
+                    }
+                    // STEP 4: Finish impor from bids data folder
+                    importSession(sessionFile, importJob);
+                }
+            }
+        }
 
-					// Set file creation as default
-					if (examDate == null) {
-						examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneId.systemDefault());
-					}
-					examination = ImportUtils.createExam(studyId, centerId, subjectId, sessionLabel, examDate, subjectName);
-					examCreated = true;
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
 
-					// Create multiple examinations for every session folder
-					examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
+    /**
+     * This methods check if a _scans.tsv exists in the folder, and load the date of the first reference
+     * @param parentFile the parent folder where the scancs.tsv file can be found
+     * @return the first found date in the tsv file, null otherwise
+     * @throws IOException when the file reading fails.
+     */
+    private LocalDate checkDateFromScansFile(File parentFile) throws IOException {
+        File[] scansFiles = parentFile.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith("_scans.tsv");
+            }
+        });
 
-					if (examId == null) {
-						throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
-					}
-					eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
+        // We found _scans.tsv file
+        if (scansFiles.length != 1) {
+            return null;
+        }
 
-					importJob.setExaminationId(examId);
+        File scanFile = scansFiles[0];
 
-					// STEP 4: Finish import from every bids data folder
-					for (File dataTypeFile : sessionFile.listFiles(
-							new FilenameFilter() {
-								@Override
-								public boolean accept(File arg0, String name) {
-									return !name.startsWith(".DS_Store") && !name.startsWith("__MAC") && !name.startsWith("._") && !name.startsWith(".AppleDouble");
-								}}
-					)) {
-						importSession(dataTypeFile, importJob);
-					}
-				} else {
-					// STEP 3.2 No session level
-					if (!examCreated) {
-						// Try to find acqusition_time in _scans.tsv file
-						LocalDate examDate = checkDateFromScansFile(sessionFile);
-						if (examDate == null) {
-							// Set exam date by default using file creation date
-							examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneOffset.UTC);
-						}
-						examination = ImportUtils.createExam(studyId, centerId, subjectId, "", examDate, subjectName);
-						examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
+        CsvMapper mapper = new CsvMapper();
+        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+        MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(scanFile);
 
-						if (examId == null) {
-							throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
-						}
-						eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
+        // Check that the list of column is known
+        List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
 
-						importJob.setExaminationId(examId);
-						examCreated = true;
-					}
-					// STEP 4: Finish impor from bids data folder
-					importSession(sessionFile, importJob);
-				}
-			}
-		}
+        int dateIndex = columns.indexOf("acq_time");
 
-		return new ResponseEntity<>(null, HttpStatus.OK);
-	}
+        // If there is no date, just give up
+        if (dateIndex == -1) {
+            return null;
+        }
+        // Legal format in BIDS (are we up to date ? I don't think so)
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSSSSS][X]");
+        String[] row = it.next()[0].split(CSV_SEPARATOR);
+        String dateAsString = row[dateIndex];
+        try {
+            TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from, LocalDateTime::from);
+            return LocalDate.from(date);
+        } catch (Exception e) {
+            LOG.error("Could not parse date [{}] for csv.", dateAsString);
+            return null;
+        }
+    }
 
-	/**
-	 * This methods check if a _scans.tsv exists in the folder, and load the date of the first reference
-	 * @param parentFile the parent folder where the scancs.tsv file can be found
-	 * @return the first found date in the tsv file, null otherwise
-	 * @throws IOException when the file reading fails.
-	 */
-	private LocalDate checkDateFromScansFile(File parentFile) throws IOException {
-		File[] scansFiles = parentFile.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.endsWith("_scans.tsv");
-			}
-		});
+    /**
+     * This methods check if a _sessions.tsv file exists in the folder, and load the dates for every referenced session
+     * @param parentFile the parent folder where the sessions.tsv file can be found
+     * @return a Map of sessionID -> Date, an empty Hashset otherwise.
+     * @throws IOException when the file reading fails.
+     */
+    private Map<String, LocalDate> checkDatesFromSessionFile(File parentFile) throws IOException {
+        // Try to find sub-<label>_sessions.tsv file
+        Map<String, LocalDate> examDates = new HashMap<String, LocalDate>();
+        File[] sessionFiles = parentFile.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith("_sessions.tsv");
+            }
+        });
 
-		// We found _scans.tsv file
-		if (scansFiles.length != 1) {
-			return null;
-		}
+        // We found session_tsv file
+        if (sessionFiles.length != 1) {
+            return examDates;
+        }
+        File sessionFile = sessionFiles[0];
 
-		File scanFile = scansFiles[0];
+        // session_id;acq_time;pathology
+        // analyze date for every session
+        CsvMapper mapper = new CsvMapper();
+        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+        MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(sessionFile);
 
-		CsvMapper mapper = new CsvMapper();
-		mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
-		MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(scanFile);
+        // Check File is not empty
+        if (sessionFile.length() > 0) {
+            LOG.error("We found a non empty session.tsv file ");
+            // Check that the list of column is known
+            List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
+            int sessionIdIndex = columns.indexOf("session_id");
+            int dateIndex = columns.indexOf("acq_time");
 
-		// Check that the list of column is known
-		List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
+            // If there is no date, just give up
+            if (dateIndex == -1) {
+                return examDates;
+            }
 
-		int dateIndex = columns.indexOf("acq_time");
+            // Legal format in BIDS (are we up to date ? I don't think so)
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-DDThh:mm:ss[.000000][Z]");
 
-		// If there is no date, just give up
-		if (dateIndex == -1) {
-			return null;
-		}
-		// Legal format in BIDS (are we up to date ? I don't think so)
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSSSSS][X]");
-		String[] row = it.next()[0].split(CSV_SEPARATOR);
-		String dateAsString = row[dateIndex];
-		try {
-			TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from, LocalDateTime::from);
-			return LocalDate.from(date);
-		} catch (Exception e) {
-			LOG.error("Could not parse date [{}] for csv.", dateAsString);
-			return null;
-		}
-	}
+            while (it.hasNext()) {
+                String[] row = it.next()[0].split(CSV_SEPARATOR);
+                String sessionLabel = row[sessionIdIndex];
+                String dateAsString = row[dateIndex];
+                TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from);
+                examDates.put(sessionLabel, LocalDate.from(date));
+            }
+        } else {
+            LOG.error("We found an empty session.tsv file ");
+            return examDates;
+        }
 
-	/**
-	 * This methods check if a _sessions.tsv file exists in the folder, and load the dates for every referenced session
-	 * @param parentFile the parent folder where the sessions.tsv file can be found
-	 * @return a Map of sessionID -> Date, an empty Hashset otherwise.
-	 * @throws IOException when the file reading fails.
-	 */
-	private Map<String, LocalDate> checkDatesFromSessionFile(File parentFile) throws IOException {
-		// Try to find sub-<label>_sessions.tsv file
-		Map<String, LocalDate> examDates = new HashMap<String, LocalDate>();
-		File[] sessionFiles = parentFile.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.endsWith("_sessions.tsv");
-			}
-		});
+        return examDates;
+    }
 
-		// We found session_tsv file
-		if (sessionFiles.length != 1) {
-			return examDates;
-		}
-		File sessionFile = sessionFiles[0];
-
-		// session_id;acq_time;pathology
-		// analyze date for every session
-		CsvMapper mapper = new CsvMapper();
-		mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
-		MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(sessionFile);
-
-		// Check File is not empty
-		if (sessionFile.length() > 0) {
-			LOG.error("We found a non empty session.tsv file ");
-			// Check that the list of column is known
-			List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
-			int sessionIdIndex = columns.indexOf("session_id");
-			int dateIndex = columns.indexOf("acq_time");
-
-			// If there is no date, just give up
-			if (dateIndex == -1) {
-				return examDates;
-			}
-
-			// Legal format in BIDS (are we up to date ? I don't think so)
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-DDThh:mm:ss[.000000][Z]");
-
-			while (it.hasNext()) {
-				String[] row = it.next()[0].split(CSV_SEPARATOR);
-				String sessionLabel = row[sessionIdIndex];
-				String dateAsString = row[dateIndex];
-				TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from);
-				examDates.put(sessionLabel, LocalDate.from(date));
-			}
-		} else {
-			LOG.error("We found an empty session.tsv file ");
-			return examDates;
-		}
-
-		return examDates;
-	}
-
-	/**
-	 * Import a session from a data type file.
-	 * @param dataTypeFile
-	 * @param importJob
-	 */
-	private void importSession(File dataTypeFile, ImportJob importJob) throws AmqpException, JsonProcessingException {
-		if (dataTypeFile.isDirectory()) {
-			importJob.setWorkFolder(dataTypeFile.getAbsolutePath());
-			LOG.debug("We found a data folder " + dataTypeFile.getName());
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, objectMapper.writeValueAsString(importJob));
-		} else {
-			LOG.debug("We found an examination extra-data " + dataTypeFile.getAbsolutePath());
-			IdName extraData = new IdName(importJob.getExaminationId(), dataTypeFile.getAbsolutePath());
-			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, objectMapper.writeValueAsString(extraData));
-		}
-	}
+    /**
+     * Import a session from a data type file.
+     * @param dataTypeFile
+     * @param importJob
+     */
+    private void importSession(File dataTypeFile, ImportJob importJob) throws AmqpException, JsonProcessingException {
+        if (dataTypeFile.isDirectory()) {
+            importJob.setWorkFolder(dataTypeFile.getAbsolutePath());
+            LOG.debug("We found a data folder " + dataTypeFile.getName());
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, objectMapper.writeValueAsString(importJob));
+        } else {
+            LOG.debug("We found an examination extra-data " + dataTypeFile.getAbsolutePath());
+            IdName extraData = new IdName(importJob.getExaminationId(), dataTypeFile.getAbsolutePath());
+            this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, objectMapper.writeValueAsString(extraData));
+        }
+    }
 
 }

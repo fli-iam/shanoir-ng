@@ -2,27 +2,25 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.shared.exception;
+package org.shanoir.ng.shared.repository;
 
-/**
- * List of error codes.
- * 
- * @author msimon
- *
- */
-public class ErrorModelCode {
+import java.util.Optional;
 
-	/** Bad request */
-	public static final Integer BAD_REQUEST = 10;
+import org.shanoir.ng.shared.model.StudyCenter;
+import org.springframework.data.repository.CrudRepository;
+
+public interface StudyCenterRepository extends CrudRepository<StudyCenter, Long> {
+
+    Optional<StudyCenter> findByStudy_IdAndCenter_Id(Long studyId, Long centerId);
 
 }

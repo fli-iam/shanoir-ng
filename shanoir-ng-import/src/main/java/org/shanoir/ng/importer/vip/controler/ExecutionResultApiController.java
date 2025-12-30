@@ -48,7 +48,7 @@ import jakarta.validation.Valid;
 
 /**
  * VIP execution upload results from VIP to tmp folder endpoint
- * 
+ *
  * @author KhalilKes
  */
 @Controller
@@ -128,7 +128,7 @@ public class ExecutionResultApiController implements ExecutionResultApi {
 
     /**
      * get the path from the URI aftrer path prefix /carmin-data/path
-     * 
+     *
      * @param request
      * @return
      */

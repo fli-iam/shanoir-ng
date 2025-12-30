@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -40,12 +40,13 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.PostLoad;
 import jakarta.validation.constraints.NotNull;
 
 /**
  * Examination.
- * 
+ *
  * @author ifakhfakh
  *
  */
@@ -71,6 +72,7 @@ public class Examination extends HalEntity {
     /** Dataset acquisitions. */
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = CascadeType.ALL)
+    @OrderBy("id ASC")
     private List<DatasetAcquisition> datasetAcquisitions;
 
     /** Examination date. */
@@ -108,7 +110,7 @@ public class Examination extends HalEntity {
     private Long investigatorId;
 
     /** Notes about this examination. */
-	@JdbcTypeCode(Types.LONGVARCHAR)
+    @JdbcTypeCode(Types.LONGVARCHAR)
     private String note;
 
     /** Study. */
@@ -133,8 +135,8 @@ public class Examination extends HalEntity {
     /** The unit of weight, can be in kg or g */
     private Integer weightUnitOfMeasure;
 
-    /** Flag to set the examination as pre-clinical  */ 
-    @Column(nullable=false)
+    /** Flag to set the examination as pre-clinical  */
+    @Column(nullable = false)
     @ColumnDefault("false")
     private boolean preclinical;
 
@@ -367,7 +369,7 @@ public class Examination extends HalEntity {
     public Long getStudyId() {
         return getStudy() != null ? getStudy().getId() : null;
     }
-    
+
     public Study getStudy() {
         return study;
     }
@@ -377,14 +379,14 @@ public class Examination extends HalEntity {
     }
 
     public String getStudyInstanceUID() {
-		return studyInstanceUID;
-	}
+        return studyInstanceUID;
+    }
 
-	public void setStudyInstanceUID(String studyInstanceUID) {
-		this.studyInstanceUID = studyInstanceUID;
-	}
+    public void setStudyInstanceUID(String studyInstanceUID) {
+        this.studyInstanceUID = studyInstanceUID;
+    }
 
-	public Subject getSubject() {
+    public Subject getSubject() {
         return subject;
     }
 
@@ -440,7 +442,7 @@ public class Examination extends HalEntity {
             this.weightUnitOfMeasure = weightUnitOfMeasure.getId();
         }
     }
-    
+
     public boolean isPreclinical() {
         return preclinical;
     }
