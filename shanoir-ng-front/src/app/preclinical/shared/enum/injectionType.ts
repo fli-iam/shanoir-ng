@@ -12,7 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { allOfEnum } from "src/app/utils/app.utils";
+
 export enum InjectionType {
-    BOLUS = "Bolus",
-    INFUSION = "Infusion"
+    BOLUS = "BOLUS",
+    INFUSION = "INFUSION"
+}
+export namespace InjectionType {
+    export function all(): InjectionType[] {
+        return allOfEnum<InjectionType>(InjectionType);
+    }
 }
