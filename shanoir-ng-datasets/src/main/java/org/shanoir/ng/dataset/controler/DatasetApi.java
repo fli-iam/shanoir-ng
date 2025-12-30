@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.core.io.Resource;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -382,4 +383,20 @@ public interface DatasetApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
     ResponseEntity<List<DatasetLight>> findDatasetsByIds(
             @RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
+
+    @Operation(summary = "", description = "Returns a .csv with the fields from the dicom metadata of the required dicom.")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "/dicomMetadataExtraction", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
+    ResponseEntity<Resource> extractDicomMetadata(
+            @Parameter(description = "Ids of the datasets", required = true) @Valid
+            @RequestBody List<Long> datasetIds,
+            @Parameter(description = "Keys of the metadata to extract", required = true) @Valid
+            @RequestParam List<String> metadataKeys) throws Exception;
 }
+
+
