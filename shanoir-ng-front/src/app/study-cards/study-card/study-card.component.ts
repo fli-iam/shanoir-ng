@@ -102,6 +102,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
     initEdit(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
+        this.fetchAcqEq(this.studyCard.study.id).then(() => {
+            this.centerService.getCentersNamesByStudyId(this.studyCard.study.id).then(centers => {
+                this.centers = centers;
+            });
+        });
         return Promise.resolve();
     }
 
@@ -112,6 +117,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
             if (studyId) {
                 this.lockStudy = true;
                 this.studyCard.study = this.studies.find(st => st.id == studyId) as unknown as Study;
+                this.onStudyChange(this.studyCard.study as IdName, this.form);
             }
         });
         this.studyCard = new StudyCard();
