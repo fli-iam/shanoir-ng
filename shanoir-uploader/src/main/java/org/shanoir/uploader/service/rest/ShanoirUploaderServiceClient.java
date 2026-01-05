@@ -80,7 +80,11 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_STUDIES_CREATE = "service.studies.create";
 
-    private static final String SERVICE_STUDIES_NAMES_CENTERS = "service.studies.names.centers";
+    private static final String SERVICE_STUDIES = "service.studies.find";
+
+    private static final String SERVICE_STUDIES_NAMES_CENTERS = "service.studies.find.names.centers";
+
+    private static final String SERVICE_STUDIES_PUBLIC_DATA = "service.studies.find.public.data";
 
     private static final String SERVICE_STUDYCARDS_CREATE = "service.studycards.create";
 
@@ -136,7 +140,11 @@ public class ShanoirUploaderServiceClient {
 
     private String serviceURLStudiesCreate;
 
-    private String serviceURLStudiesNamesAndCenters;
+    private String serviceURLStudiesFind;
+
+    private String serviceURLStudiesFindNamesAndCenters;
+
+    private String serviceURLStudiesFindPublicData;
 
     private String serviceURLStudyCardsCreate;
 
@@ -199,8 +207,12 @@ public class ShanoirUploaderServiceClient {
 
         this.serviceURLStudiesCreate = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_CREATE);
-        this.serviceURLStudiesNamesAndCenters = this.serverURL
+        this.serviceURLStudiesFind = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES);
+        this.serviceURLStudiesFindNamesAndCenters = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
+        this.serviceURLStudiesFindPublicData = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_PUBLIC_DATA);
         this.serviceURLStudyCardsCreate = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_CREATE);
         this.serviceURLStudyCardsByStudyIds = this.serverURL
@@ -350,18 +362,54 @@ public class ShanoirUploaderServiceClient {
         executor.scheduleAtFixedRate(task, 0, 240, TimeUnit.SECONDS);
     }
 
-    public List<Study> findStudiesNamesAndCenters() throws Exception {
+    public List<Study> findStudies() throws Exception {
         long startTime = System.currentTimeMillis();
-        try (CloseableHttpResponse response = httpService.get(this.serviceURLStudiesNamesAndCenters)) {
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLStudiesFind)) {
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
-            LOG.info("findStudiesNamesAndCenters: " + elapsedTime + "ms");
+            LOG.debug("findStudies: " + elapsedTime + "ms");
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                List<Study> studies = Util.getMappedList(response, Study.class);
+                return studies;
+            } else {
+                LOG.error("Could not get studies (status code: " + code + ", message: "
+                        + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                return null;
+            }
+        }
+    }
+
+    public List<Study> findStudiesNamesAndCenters() throws Exception {
+        long startTime = System.currentTimeMillis();
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLStudiesFindNamesAndCenters)) {
+            long stopTime = System.currentTimeMillis();
+            long elapsedTime = stopTime - startTime;
+            LOG.debug("findStudiesNamesAndCenters: " + elapsedTime + "ms");
             int code = response.getCode();
             if (code == HttpStatus.SC_OK) {
                 List<Study> studies = Util.getMappedList(response, Study.class);
                 return studies;
             } else {
                 LOG.error("Could not get study names and centers (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                return null;
+            }
+        }
+    }
+
+    public List<Study> findStudiesPublicData() throws Exception {
+        long startTime = System.currentTimeMillis();
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLStudiesFindPublicData)) {
+            long stopTime = System.currentTimeMillis();
+            long elapsedTime = stopTime - startTime;
+            LOG.debug("findStudiesPublicData: " + elapsedTime + "ms");
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                List<Study> studies = Util.getMappedList(response, Study.class);
+                return studies;
+            } else {
+                LOG.error("Could not get study public data (status code: " + code + ", message: "
+                        + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
                 return null;
             }
         }
@@ -467,11 +515,11 @@ public class ShanoirUploaderServiceClient {
         try (CloseableHttpResponse response = httpService.get(this.serviceURLExaminations)) {
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
-            LOG.info("findExaminations: " + elapsedTime + "ms");
+            LOG.debug("findExaminations: " + elapsedTime + "ms");
             int code = response.getCode();
             if (code == HttpStatus.SC_OK) {
                 List<Examination> examinations = Util.getMappedPageContent(response, Examination.class);
-                LOG.info("findExaminations: " + examinations.size() + " examinations.");
+                LOG.debug("findExaminations: " + examinations.size() + " examinations.");
                 return examinations;
             } else {
                 LOG.info("Exam(s) not found (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
