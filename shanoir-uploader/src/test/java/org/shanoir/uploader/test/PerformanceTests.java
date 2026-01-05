@@ -72,7 +72,7 @@ public class PerformanceTests extends AbstractTest {
 
     @Test
     public void findExaminationsTest() throws Exception {
-        logger.info("Starting examinationsTest");
+        logger.info("Starting findExaminationsTest");
         long totalTime = 0;
         int numberOfCalls = 100;
         for (int i = 0; i < numberOfCalls; i++) {
