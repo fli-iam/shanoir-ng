@@ -35,7 +35,8 @@ import * as AppUtils from "../../utils/app.utils";
 import { ExecutionService } from "../../vip/execution/execution.service";
 import { DatasetProcessingService } from '../shared/dataset-processing.service';
 import { Dataset } from '../shared/dataset.model';
-import { DatasetService } from '../shared/dataset.service';
+import { DatasetLight, DatasetService } from '../shared/dataset.service';
+import { Study } from "../../studies/shared/study.model";
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -93,6 +94,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.studyService.get(this.datasetProcessing.studyId, "lazy").then(study => {
             this.studyOptions = [new Option<number>(study.id, study.name)];
         });
+        this.completeDatasetsDetails();
         // checking if the datasetProcessing is not execution monitoring
         this.subscriptions.push(
             this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe(
@@ -217,6 +219,34 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         });
     }
 
+    completeDatasetsDetails(): Promise<void> {
+        return this.datasetService.getByIds(new Set<number>([
+            ...this.datasetProcessing.inputDatasets?.map(ds => ds.id) || [],
+            ...this.datasetProcessing.outputDatasets?.map(ds => ds.id) || []
+        ])).then(datasets => {
+            const datasetsMap: Map<number, DatasetLight> = new Map<number, DatasetLight>();
+            for (const dataset of datasets) {
+                datasetsMap.set(dataset.id, dataset);
+            }
+            this.datasetProcessing.inputDatasets?.forEach(ds => {
+                this.completeDatasetWith(ds, datasetsMap.get(ds.id));
+            });
+            this.datasetProcessing.outputDatasets?.forEach(ds => {
+                this.completeDatasetWith(ds, datasetsMap.get(ds.id));
+            });
+        });
+    }
+
+    private completeDatasetWith(ds: Dataset, dsLight: DatasetLight) {
+        ds.study = new Study();
+        ds.study.name = dsLight.study.name;
+        ds.study.id = dsLight.study.id;
+        ds.subject = new Subject();
+        ds.subject.name = dsLight.subject.name;
+        ds.subject.id = dsLight.subject.id;
+        ds.creationDate = dsLight.creationDate;
+    }
+
     buildForm(): UntypedFormGroup {
         const formGroup: UntypedFormGroup = this.formBuilder.group({
             'studyId': [{value: this.datasetProcessing?.studyId}, Validators.required],
@@ -279,30 +309,31 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             {headerName: "Subject", field: "subject.name"},
             {headerName: "Creation date", field: "creationDate", type: "date"}
         ];
-        this.outputDatasetsColumnDefs = [...this.inputDatasetsColumnDefs];
+        this.outputDatasetsColumnDefs = [
+            {headerName: "ID", field: "id", type: "number"},
+            {headerName: "Name", field: "name", route: (dataset : Dataset)=>{
+                return `/dataset/details/${dataset.id}`
+            }},
+            {headerName: "Dataset type", field: "type"},
+            {headerName: "Creation date", field: "creationDate", type: "date"}
+        ];
     }
 
     public downloadStdout() {
-
         if(!this.executionMonitoring){
             return;
         }
-
         const filename = this.executionMonitoring.name + ".stdout.log";
-
         this.vipClientService.getStdout(this.executionMonitoring.identifier).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
         });
     }
 
     public downloadStderr() {
-
         if(!this.executionMonitoring){
             return;
         }
-
         const filename = this.executionMonitoring.name + ".stderr.log";
-
         this.vipClientService.getStderr(this.executionMonitoring.identifier).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
         });
@@ -316,29 +347,23 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     public formatDate(millis: number) : string {
-        return millis ? formatDate(new Date(millis), 'dd/MM/YYYY HH:mm:ss', 'en-US') : "";
+        return millis ? formatDate(new Date(millis), 'dd/MM/yyyy HH:mm:ss', 'en-US') : "";
     }
 
     public getDuration(){
-
         const start = this.executionMonitoring?.startDate;
         const end = this.executionMonitoring?.endDate;
-
         if(!start || !end){
             return "";
         }
-
         const duration = end - start;
-
         if(duration <= 0){
             return "";
         }
-
         const milliseconds = Math.floor((duration % 1000));
         const seconds = Math.floor((duration / 1000) % 60);
         const minutes = Math.floor((duration / (1000 * 60)) % 60);
         const hours = Math.floor((duration / (1000 * 60 * 60)));
-
         return String(hours).padStart(2, "0") + ":" +
             String(minutes).padStart(2, "0") + ":" +
             String(seconds).padStart(2, "0") + "." +

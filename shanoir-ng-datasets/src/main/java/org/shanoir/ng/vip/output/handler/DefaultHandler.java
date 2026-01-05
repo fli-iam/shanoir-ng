@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.vip.output.handler;
 
 import jakarta.ws.rs.NotFoundException;
@@ -66,7 +80,7 @@ public class DefaultHandler extends OutputHandler {
     private ProcessingResourceRepository processingResourceRepository;
 
     @Autowired
-	private ProcessedDatasetImporterService processedDatasetImporterService;
+    private ProcessedDatasetImporterService processedDatasetImporterService;
 
     @Override
     public boolean canProcess(ExecutionMonitoring processing) {
@@ -78,7 +92,7 @@ public class DefaultHandler extends OutputHandler {
         try {
             List<File> outputFiles = new ArrayList<>();
             File resultJson = null;
-            for(File file : resultFiles){
+            for (File file : resultFiles) {
                 if (file.getAbsolutePath().endsWith("/" + resultFileName)) {
                     resultJson = file;
                 } else {
@@ -90,10 +104,10 @@ public class DefaultHandler extends OutputHandler {
 
             List<Dataset> inputDatasets = new ArrayList<>(monitoring.getInputDatasets());
 
-            if(inputDatasets.isEmpty()) {
+            if (inputDatasets.isEmpty()) {
                 throw new ResultHandlerException("No input datasets found.", null);
             }
-            if(outputFiles.isEmpty()){
+            if (outputFiles.isEmpty()) {
                 throw new ResultHandlerException("No processable file found in Tar result.", null);
             }
             DatasetProcessing newProcessing = createProcessedDatasets(outputFiles, monitoring, inputDatasets);
@@ -150,7 +164,7 @@ public class DefaultHandler extends OutputHandler {
     /**
      * Creates a list of processed dataset and a dataset processing associated to the list of files given in entry.
      */
-    private List<Dataset> getDatasetFromFilename(String name){
+    private List<Dataset> getDatasetFromFilename(String name) {
         Matcher matcher = Pattern.compile("resource_id\\+(.+)\\+.*").matcher(name);
         if (matcher.matches()) {
             return processingResourceRepository.findDatasetsByResourceId(matcher.group(1));
@@ -179,7 +193,7 @@ public class DefaultHandler extends OutputHandler {
             }
             processedDataset.setProcessedDatasetName(datasetName);
 
-            if(!inputDatasets.isEmpty()) {
+            if (!inputDatasets.isEmpty()) {
                 Long studyId = datasetService.getStudyId(inputDatasets.get(0));
                 Study study = studyRepository.findById(studyId)
                         .orElseThrow(() -> new NotFoundException("Study [" + studyId + "] not found."));
@@ -197,7 +211,7 @@ public class DefaultHandler extends OutputHandler {
                 }
             }
 
-            processedDataset.setDatasetType(DatasetType.Generic.name());
+            processedDataset.setDatasetType(DatasetType.GENERIC.name());
             processedDatasetImporterService.createProcessedDataset(processedDataset);
 
             LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), file.getAbsolutePath());

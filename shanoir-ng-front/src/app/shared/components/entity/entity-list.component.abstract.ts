@@ -59,7 +59,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
     private showId: boolean = true;
 
     abstract getService(): EntityService<T>;
-    getOnDeleteConfirmMessage?(entity: T): Promise<string>;
+    getOnDeleteConfirmMessage?(entity: T): string;
 
     constructor(
             protected readonly ROUTING_NAME: string) {
@@ -79,7 +79,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
         this.customActionDefs = this.getCustomActionsDefs();
         this.completeCustomActions();
     }
-    
+
     ngOnInit(): void {
         if (!this.embedded) {
             this.breadcrumbsService.markMilestone();
@@ -129,18 +129,16 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
         const dialogMsg : string = 'Are you sure you want to finally delete the ' + this.ROUTING_NAME
             + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?';
 
-        let promise: Promise<string>;
+        let deleteConfirmMsg: string;
         if (this.getOnDeleteConfirmMessage) {
-            promise = this.getOnDeleteConfirmMessage(entity);
+            deleteConfirmMsg = this.getOnDeleteConfirmMessage(entity);
         } else {
-            promise = Promise.resolve('');
+            deleteConfirmMsg = '';
         }
-        promise.then(studyListStr => {
-            this.confirmDialogService
-                .confirm(
-                    dialogTitle,
-                    dialogMsg + studyListStr
-                ).then(res => {
+            this.confirmDialogService.confirm(
+                dialogTitle,
+                dialogMsg + deleteConfirmMsg
+            ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
                         this.onDelete.next({entity: entity});
@@ -154,23 +152,21 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
                             });
                         }, 1000);
                         this.treeService.updateTree();
-                    }).catch(reason => {
-                        if (!reason){
-                            return;
-                        }
-                        if (reason instanceof ShanoirError && reason.code == 422) {
-                            this.dealWithDeleteError(reason, entity);
-                            return;
-                        } else if (reason.error){
-                            this.dealWithDeleteError(new ShanoirError(reason), entity);
-                            return;
-                        }
-                        throw Error(reason);
                     });
                 }
-            })
-        });
-
+            }).catch(reason => {
+                if (!reason) {
+                    return;
+                }
+                if (reason instanceof ShanoirError && reason.code == 422) {
+                    this.dealWithDeleteError(reason, entity);
+                    return;
+                } else if (reason.error) {
+                    this.dealWithDeleteError(new ShanoirError(reason), entity);
+                    return;
+                }
+                throw Error(reason);
+            });
     }
 
     private dealWithDeleteError(error: ShanoirError, entity: any) {
@@ -186,7 +182,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
      * Can be overriden to set options
      */
     protected getOptions(): any {
-        return {};
+        return { };
     }
 
     /**
