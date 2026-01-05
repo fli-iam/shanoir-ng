@@ -150,7 +150,7 @@ public class RabbitMQSubjectService {
         }
         Subject subjectOld = subjectRepository.findByStudyIdAndName(studyId, subject.getName());
         if (subjectOld == null) {
-            return subjectService.create(subject, false);
+            return subjectService.create(subject, true);
         } else {
             return subjectOld;
         }

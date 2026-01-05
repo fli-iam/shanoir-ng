@@ -230,6 +230,7 @@ public class DicomImporterService {
         if (!DicomUtils.checkSerieIsIgnored(attributes)) { // do nothing for files of ignored series
             Long subjectId = manageSubject(attributes, study);
             Long centerId = manageCenter(attributes, study.getId());
+
             Examination examination = manageExamination(attributes, study, subjectId, centerId);
             DatasetAcquisition acquisition = manageAcquisitionAndEquipment(attributes, examination, centerId, serie);
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition, serie);

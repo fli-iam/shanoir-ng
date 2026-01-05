@@ -12,15 +12,26 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.shared.security;
+package org.shanoir.ng.shared.core.model;
 
-import org.shanoir.ng.shared.core.model.AbstractEntityInterface;
-import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.springframework.stereotype.Service;
+import java.io.Serializable;
 
-@Service
-public interface FieldEditionSecurityManager<T extends AbstractEntityInterface> {
+/**
+ * Generic class used to manage entities common data.
+ *
+ * @author msimon
+ *
+ */
+public interface AbstractEntityInterface extends Serializable {
 
-    public FieldErrorMap validate(final T entity);
+    /**
+     * @return the id
+     */
+    public Long getId();
 
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id);
 }

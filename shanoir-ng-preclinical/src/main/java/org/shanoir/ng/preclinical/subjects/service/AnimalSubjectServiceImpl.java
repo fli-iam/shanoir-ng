@@ -16,10 +16,12 @@ package org.shanoir.ng.preclinical.subjects.service;
 
 import java.util.List;
 
+import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathology;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
+import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapy;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
@@ -57,8 +59,8 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
     private ObjectMapper mapper;
 
     @Override
-    public void deleteBySubjectId(final Long id) {
-        subjectsRepository.deleteBySubjectId(id);
+    public void deleteById(final Long id) {
+        subjectsRepository.deleteById(id);
     }
 
     @Override
@@ -67,7 +69,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
     }
 
     @Override
-    public AnimalSubject getBySubjectId(final Long id) {
+    public AnimalSubject getById(final Long id) {
         return subjectsRepository.findById(id).orElse(null);
     }
 
@@ -103,19 +105,36 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
         subjectDb.setSpecie(subject.getSpecie());
         subjectDb.setStabulation(subject.getStabulation());
         subjectDb.setStrain(subject.getStrain());
+        updateSubjectPathologiesValues(subjectDb.getSubjectPathologies(), subject.getSubjectPathologies());
+        updateSubjectTherapiesValues(subjectDb.getSubjectTherapies(), subject.getSubjectTherapies());
         return subjectDb;
+    }
+
+    private void updateSubjectPathologiesValues(List<SubjectPathology> existingSubjectPathologies, final List<SubjectPathology> newSubjectPathologies) {
+        Utils.syncList(existingSubjectPathologies, newSubjectPathologies, (target, src) -> {
+            target.setLocation(src.getLocation());
+            target.setPathology(src.getPathology());
+            target.setPathologyModel(src.getPathologyModel());
+            target.setStartDate(src.getStartDate());
+            target.setEndDate(src.getEndDate());
+        });
+    }
+
+    private void updateSubjectTherapiesValues(List<SubjectTherapy> existingSubjectTherapies, final List<SubjectTherapy> newSubjectTherapies) {
+        Utils.syncList(existingSubjectTherapies, newSubjectTherapies, (target, src) -> {
+            if (src.getTherapy() != null) target.setTherapy(src.getTherapy());
+            target.setDose(src.getDose());
+            target.setStartDate(src.getStartDate());
+            target.setEndDate(src.getEndDate());
+            target.setDoseUnit(src.getDoseUnit());
+            target.setFrequency(src.getFrequency());
+            target.setMolecule(src.getMolecule());
+        });
     }
 
     @Override
     public List<AnimalSubject> findByReference(Reference reference) {
         return Utils.toList(subjectsRepository.findByReference(reference));
-    }
-
-    @Override
-    public Long getIdBySubjectId(long subjectId) {
-        AnimalSubject sub = subjectsRepository.getBySubjectId(subjectId);
-
-        return sub != null ? sub.getId() : null;
     }
 
     @Override
@@ -140,8 +159,8 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
     }
 
     @Override
-    public List<AnimalSubject> findBySubjectIds(List<Long> subjectIds) {
-        return subjectsRepository.findBySubjectIdIn(subjectIds);
+    public List<AnimalSubject> findByIds(List<Long> ids) {
+        return Utils.toList(subjectsRepository.findAllById(ids));
     }
 
 }

@@ -14,6 +14,7 @@
 import { Component, Input, KeyValueDiffer, KeyValueDiffers } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import shajs from 'sha.js';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -22,6 +23,7 @@ import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.
 import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { Selection } from 'src/app/studies/study/tree.service';
+import { Step } from 'src/app/breadcrumbs/breadcrumbs.service';
 
 import { preventInitialChildAnimations, slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
@@ -42,8 +44,6 @@ import { SubjectTherapyService } from '../../therapies/subjectTherapy/shared/sub
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
-import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
-
 
 @Component({
     selector: 'animal-subject-form',
@@ -53,7 +53,7 @@ import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
     standalone: false
 })
 
-export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubject> {
+export class AnimalSubjectFormComponent extends EntityComponent<AnimalSubject> {
 
     public readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
@@ -104,35 +104,32 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     }
 
-    public get preclinicalSubject(): PreclinicalSubject { return this.entity; }
-    public set preclinicalSubject(preclinicalSubject: PreclinicalSubject) { this.entity = preclinicalSubject; }
+    public get animalSubject(): AnimalSubject { return this.entity; }
+    public set animalSubject(animalSubject: AnimalSubject) { this.entity = animalSubject; }
 
-    getService(): EntityService<PreclinicalSubject> {
+    getService(): EntityService<AnimalSubject> {
         return this.animalSubjectService;
     }
 
     protected getTreeSelection: () => Selection = () => {
-        return Selection.fromPreclinicalSubject(this.entity);
+        return Selection.fromAnimalSubject(this.entity);
     }
 
-    protected fetchEntity: () => Promise<PreclinicalSubject> = () => {
+    protected fetchEntity: () => Promise<AnimalSubject> = () => {
         return this.idPromise.then(id => {
-            return this.getService().get(id).then(ps => {
-                return Promise.all([
-                    this.animalSubjectService.getAnimalSubject(ps.id),
-                    this.subjectService.get(ps.id)
-                ]).then(([animalSubject, subject]) => {
-                    ps.animalSubject = animalSubject;
-                    ps.subject = subject;
-                    return ps;
+            return this.getService().get(id).then(animalSubject => {
+                return this.subjectService.get(id)
+                .then(subject => {
+                    animalSubject.subject = subject;
+                    return animalSubject;
                 });
             });
         });
     }
 
     initView(): Promise<void> {
-        this.studyService.get(this.preclinicalSubject.subject?.study?.id).then(study => {
-            this.preclinicalSubject.subject.study = study;
+        this.studyService.get(this.animalSubject.subject?.study?.id).then(study => {
+            this.animalSubject.subject.study = study;
         });
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
@@ -145,35 +142,34 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             });
         }
         return this.loadData().then(() => {
-            this.subjectTherapyService.getSubjectTherapies(this.preclinicalSubject).then(st => {
-                this.preclinicalSubject.therapies = st;
+            this.subjectTherapyService.getSubjectTherapies(this.animalSubject).then(st => {
+                this.animalSubject.subjectTherapies = st;
             });
-            this.subjectPathologyService.getSubjectPathologies(this.preclinicalSubject).then(sp => {
-                this.preclinicalSubject.pathologies = sp;
+            this.subjectPathologyService.getSubjectPathologies(this.animalSubject).then(sp => {
+                this.animalSubject.subjectPathologies = sp;
             });
         });
 
     }
 
     initEdit(): Promise<void> {
-        this.studyService.get(this.preclinicalSubject.subject?.study?.id).then(study => {
-            this.preclinicalSubject.subject.study = study;
+        this.studyService.get(this.animalSubject.subject?.study?.id).then(study => {
+            this.animalSubject.subject.study = study;
         });
         return this.loadData().then(() => {
-            this.preclinicalSubject.animalSubject.specie = this.getReferenceById(this.preclinicalSubject.animalSubject.specie);
-            this.preclinicalSubject.animalSubject.strain = this.getReferenceById(this.preclinicalSubject.animalSubject.strain);
-            this.preclinicalSubject.animalSubject.biotype = this.getReferenceById(this.preclinicalSubject.animalSubject.biotype);
-            this.preclinicalSubject.animalSubject.provider = this.getReferenceById(this.preclinicalSubject.animalSubject.provider);
-            this.preclinicalSubject.animalSubject.stabulation = this.getReferenceById(this.preclinicalSubject.animalSubject.stabulation);
+            this.animalSubject.specie = this.getReferenceById(this.animalSubject.specie);
+            this.animalSubject.strain = this.getReferenceById(this.animalSubject.strain);
+            this.animalSubject.biotype = this.getReferenceById(this.animalSubject.biotype);
+            this.animalSubject.provider = this.getReferenceById(this.animalSubject.provider);
+            this.animalSubject.stabulation = this.getReferenceById(this.animalSubject.stabulation);
         });
     }
 
     initCreate(): Promise<void> {
         return this.loadData().then(() => {
-            this.preclinicalSubject = new PreclinicalSubject();
-            this.preclinicalSubject.animalSubject = new AnimalSubject();
-            this.preclinicalSubject.subject = new Subject();
-            this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
+            this.animalSubject = new AnimalSubject();
+            this.animalSubject.subject = new Subject();
+            this.animalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
         });
     }
 
@@ -194,46 +190,74 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 	}
 
     public animalSelected(): boolean {
-        return this.preclinicalSubject && this.preclinicalSubject.subject && this.preclinicalSubject.subject.imagedObjectCategory != null
-            && (this.preclinicalSubject.subject.imagedObjectCategory.toString() != "PHANTOM"
-                && this.preclinicalSubject.subject.imagedObjectCategory.toString() != "ANATOMICAL_PIECE");
+        return this.animalSubject && this.animalSubject.subject && this.animalSubject.subject.imagedObjectCategory != null
+            && (this.animalSubject.subject.imagedObjectCategory.toString() != "PHANTOM"
+                && this.animalSubject.subject.imagedObjectCategory.toString() != "ANATOMICAL_PIECE");
     }
 
     buildForm(): UntypedFormGroup {
         const animal: boolean = this.animalSelected();
         // Sub-group for subject properties
         const subjectGroup = this.formBuilder.group({
-            'imagedObjectCategory': [this.preclinicalSubject.subject?.imagedObjectCategory, [Validators.required]],
-            'isAlreadyAnonymized': [this.preclinicalSubject.subject?.isAlreadyAnonymized],
-            'name': [this.preclinicalSubject.subject?.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'subject.name')])],
-            'sex': [this.preclinicalSubject.subject?.sex, animal ? [Validators.required] : []],
-            'studyIdentifier': [this.preclinicalSubject.subject.studyIdentifier],
-            'physicallyInvolved': [this.preclinicalSubject.subject.physicallyInvolved],
-            'tags': [this.preclinicalSubject.subject.tags],
-            'subjectType': [this.preclinicalSubject.subject.subjectType],
+            'imagedObjectCategory': [this.animalSubject.subject?.imagedObjectCategory, [Validators.required]],
+            'isAlreadyAnonymized': [this.animalSubject.subject?.isAlreadyAnonymized],
+            'name': [this.animalSubject.subject?.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'subject.name')])],
+            'sex': [this.animalSubject.subject?.sex, animal ? [Validators.required] : []],
+            'studyIdentifier': [this.animalSubject.subject.studyIdentifier],
+            'physicallyInvolved': [this.animalSubject.subject.physicallyInvolved],
+            'tags': [this.animalSubject.subject.tags],
+            'subjectType': [this.animalSubject.subject.subjectType],
         });
-        // Sub-group for animal subject properties
+        // Main group
         const animalSubjectGroup = this.formBuilder.group({
-            'specie': [this.preclinicalSubject.animalSubject?.specie, animal ? [Validators.required] : []],
-            'strain': [this.preclinicalSubject.animalSubject?.strain, animal ? [Validators.required] : []],
-            'biotype': [this.preclinicalSubject.animalSubject?.biotype, animal ? [Validators.required] : []],
-            'provider': [this.preclinicalSubject.animalSubject?.provider, animal ? [Validators.required] : []],
-            'stabulation': [this.preclinicalSubject.animalSubject?.stabulation, animal ? [Validators.required] : []]
-        });
-        // Main form with sub-groups
-        const subjectForm = this.formBuilder.group({
+            'specie': [this.animalSubject.specie, animal ? [Validators.required] : []],
+            'strain': [this.animalSubject.strain, animal ? [Validators.required] : []],
+            'biotype': [this.animalSubject.biotype, animal ? [Validators.required] : []],
+            'provider': [this.animalSubject.provider, animal ? [Validators.required] : []],
+            'stabulation': [this.animalSubject.stabulation, animal ? [Validators.required] : []],
+            'subjectTherapies': [this.animalSubject.subjectTherapies],
+            'subjectPathologies': [this.animalSubject.subjectPathologies],
             'subject': subjectGroup,
-            'animalSubject': animalSubjectGroup,
-            'therapies': [this.preclinicalSubject.therapies],
-            'pathologies': [this.preclinicalSubject.pathologies]
         });
         // Subscribe to category changes to update validators
         this.subscriptions.push(
             subjectGroup.get('imagedObjectCategory').valueChanges.subscribe(() => {
-                this.onChangeImagedObjectCategory(subjectForm);
+                this.onChangeImagedObjectCategory(animalSubjectGroup);
             })
         );
-        return subjectForm;
+        setTimeout(() => {
+            if (this.breadcrumbsService.currentStep.isPrefilled('entity.subjectTherapies')) {
+                animalSubjectGroup.get('subjectTherapies').markAsDirty();
+                animalSubjectGroup.get('subjectTherapies').updateValueAndValidity();
+            }
+            if (this.breadcrumbsService.currentStep.isPrefilled('entity.subjectPathologies')) {
+                animalSubjectGroup.get('subjectPathologies').markAsDirty();
+                animalSubjectGroup.get('subjectPathologies').updateValueAndValidity();
+            }
+        });
+        return animalSubjectGroup;
+    }
+
+    protected openCreateSubjectTherapy() {
+        const currentTherapies: SubjectTherapy[] = this.animalSubject.subjectTherapies || [];
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/preclinical-subject-therapy/create']).then(() => {
+            return firstValueFrom(currentStep.waitFor(this.breadcrumbsService.currentStep)).then(therapy => {
+                currentTherapies.push(therapy);
+                currentStep.addPrefilled('entity.subjectTherapies', currentTherapies);
+            });
+        });
+    }
+
+    protected openCreateSubjectPathology() {
+        const currentPathologies: SubjectPathology[] = this.animalSubject.subjectPathologies || [];
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/preclinical-subject-pathology/create']).then(() => {
+            return firstValueFrom(currentStep.waitFor(this.breadcrumbsService.currentStep)).then(pathology => {
+                currentPathologies.push(pathology);
+                currentStep.addPrefilled('entity.subjectPathologies', currentPathologies);
+            });
+        });
     }
 
     protected prefillProperties(): void {
@@ -241,30 +265,34 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         this.breadcrumbsService.currentStep.getPrefilledValue('newSubjectPathology').then((newSubjectPathology: SubjectPathology) => {
             this.breadcrumbsService.currentStep.removePrefilled('newSubjectPathology');
             if (newSubjectPathology) {
-                if (!this.preclinicalSubject.pathologies) {
-                    this.preclinicalSubject.pathologies = [newSubjectPathology];
+                if (!this.animalSubject.subjectPathologies) {
+                    this.animalSubject.subjectPathologies = [newSubjectPathology];
                 } else {
-                    this.preclinicalSubject.pathologies.push(newSubjectPathology);
-                    this.preclinicalSubject.pathologies = this.preclinicalSubject.pathologies.slice(); // Force array update
+                    this.animalSubject.subjectPathologies.push(newSubjectPathology);
+                    this.animalSubject.subjectPathologies = this.animalSubject.subjectPathologies.slice(); // Force array update
                 }
+                this.form.get('subjectPathologies').markAsDirty();
+                this.form.get('subjectPathologies').updateValueAndValidity();
             }
         });
         this.breadcrumbsService.currentStep.getPrefilledValue('newSubjectTherapy').then((newSubjectTherapy: SubjectTherapy) => {
             this.breadcrumbsService.currentStep.removePrefilled('newSubjectTherapy');
             if (newSubjectTherapy) {
-                if (!this.preclinicalSubject.therapies) {
-                    this.preclinicalSubject.therapies = [newSubjectTherapy];
+                if (!this.animalSubject.subjectTherapies) {
+                    this.animalSubject.subjectTherapies = [newSubjectTherapy];
                 } else {
-                    this.preclinicalSubject.therapies.push(newSubjectTherapy);
-                    this.preclinicalSubject.therapies = this.preclinicalSubject.therapies.slice(); // Force array update
+                    this.animalSubject.subjectTherapies.push(newSubjectTherapy);
+                    this.animalSubject.subjectTherapies = this.animalSubject.subjectTherapies.slice(); // Force array update
                 }
+                this.form.get('subjectTherapies').markAsDirty();
+                this.form.get('subjectTherapies').updateValueAndValidity();
             }
         });
     }
 
     onChangeImagedObjectCategory(formGroup: UntypedFormGroup){
         const subjectGroup = formGroup.get('subject') as UntypedFormGroup;
-        const animalSubjectGroup = formGroup.get('animalSubject') as UntypedFormGroup;
+        const animalSubjectGroup = formGroup;
 
         const newCategory: ImagedObjectCategory = subjectGroup.get('imagedObjectCategory').value;
         const animalSubjectRequiredProperties: string[] = ['specie', 'strain', 'biotype', 'provider', 'stabulation'];
@@ -304,30 +332,30 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     goToEdit(): void {
-        super.goToEdit(this.preclinicalSubject.id);
+        super.goToEdit(this.animalSubject.id);
     }
 
-    public save(): Promise<PreclinicalSubject> {
-        if (this.preclinicalSubject.animalSubject.id){
-            return this.updateSubject().then(() => {
-                this.onSave.next(this.preclinicalSubject);
-                this.chooseRouteAfterSave(this.entity.animalSubject);
-                this.consoleService.log('info', 'Preclinical subject n°' + this.preclinicalSubject.animalSubject.id + ' successfully updated');
-                return this.entity;
+    public save(): Promise<AnimalSubject> {
+        if (this.animalSubject.id){
+            return this.updateSubject().then(createdAnimal => {
+                this.onSave.next(createdAnimal);
+                this.chooseRouteAfterSave(createdAnimal);
+                this.consoleService.log('info', 'Preclinical subject n°' + this.animalSubject.id + ' successfully updated');
+                return createdAnimal;
             }).catch(reason => {
                 this.footerState.loading = false;
                 this.catchSavingErrors(reason);
                 return null;
             });
         } else {
-            this.preclinicalSubject.subject = { ...this.preclinicalSubject.subject, study: { id: this.preclinicalSubject.subject.study.id } as Study };
+            this.animalSubject.subject = { ...this.animalSubject.subject, study: { id: this.animalSubject.subject.study.id } as Study };
             return this.addSubject().then(subject => {
                 if (subject == null) {
                     return;
                 }
-                this.onSave.next(this.preclinicalSubject);
-                this.chooseRouteAfterSave(this.preclinicalSubject);
-                this.consoleService.log('info', 'New preclinical subject successfully saved with n° ' + this.preclinicalSubject.animalSubject.id);
+                this.onSave.next(subject);
+                this.chooseRouteAfterSave(subject);
+                this.consoleService.log('info', 'New preclinical subject successfully saved with n° ' + this.animalSubject.id);
                 return subject;
             }).catch(reason => {
                 this.footerState.loading = false;
@@ -337,30 +365,30 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         }
     }
 
-    addSubject(): Promise<PreclinicalSubject> {
-        if (!this.preclinicalSubject ) {
+    addSubject(): Promise<AnimalSubject> {
+        if (!this.animalSubject ) {
             return Promise.resolve(null);
         }
-        this.preclinicalSubject.subject.identifier = this.generateSubjectIdentifier();
-        return this.animalSubjectService.createPreclinicalSubject(this.preclinicalSubject).then((preclinicalSubject) => {
-            this.preclinicalSubject.id = preclinicalSubject.id;
-            this.preclinicalSubject.animalSubject = preclinicalSubject.animalSubject;
-            this.preclinicalSubject.subject = preclinicalSubject.subject;
-            this.preclinicalSubject.subject.id = preclinicalSubject.subject.id;
-            return this.preclinicalSubject;
+        this.animalSubject.subject.identifier = this.generateSubjectIdentifier();
+        return this.animalSubjectService.create(this.animalSubject).then((animalSubject) => {
+            this.animalSubject = animalSubject;
+            this.animalSubject.id = animalSubject.id;
+            this.animalSubject.subject = animalSubject.subject;
+            this.animalSubject.subject.id = animalSubject.subject.id;
+            return this.animalSubject;
         }, this.catchSavingErrors);
     }
 
     updateSubject(): Promise<AnimalSubject> {
-        if (!(this.preclinicalSubject && this.preclinicalSubject.subject)) {
+        if (!(this.animalSubject && this.animalSubject.subject)) {
             return;
         }
-        return this.subjectService.update(this.preclinicalSubject.id, this.preclinicalSubject.subject)
+        return this.subjectService.update(this.animalSubject.id, this.animalSubject.subject)
             .then(() => {
-                if (this.preclinicalSubject.animalSubject) {
-                    this.animalSubjectService.updateAnimalSubject(this.preclinicalSubject.animalSubject).catch(this.catchSavingErrors);
+                if (this.animalSubject) {
+                    this.animalSubjectService.updateAnimalSubject(this.animalSubject).catch(this.catchSavingErrors);
                 }
-                return this.preclinicalSubject.animalSubject;
+                return this.animalSubject;
             }).catch(this.catchSavingErrors);
     }
 
@@ -414,8 +442,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 
     generateSubjectIdentifier(): string {
         let hash;
-        if (this.preclinicalSubject && this.preclinicalSubject.subject) {
-            hash = this.preclinicalSubject.subject.name
+        if (this.animalSubject && this.animalSubject.subject) {
+            hash = this.animalSubject.subject.name
         }
         return this.getHash(hash);
     }
@@ -439,7 +467,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     download() {
-        this.downloadService.downloadAllByStudyIdAndSubjectId(this.treeService.study.id, this.preclinicalSubject.subject.id, this.downloadState);
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.treeService.study.id, this.animalSubject.subject.id, this.downloadState);
     }
 
     getFontColor(colorInp: string): boolean {

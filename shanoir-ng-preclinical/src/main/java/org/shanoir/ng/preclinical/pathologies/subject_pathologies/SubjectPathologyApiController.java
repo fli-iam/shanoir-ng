@@ -65,7 +65,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
             BindingResult result) throws RestServiceException {
 
         // First check if given user exists
-        AnimalSubject animalSubject = subjectService.getBySubjectId(id);
+        AnimalSubject animalSubject = subjectService.getById(id);
         if (animalSubject == null) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), "animalSubject not found", new ErrorDetails()));
@@ -109,7 +109,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
             throws RestServiceException {
 
         // First check if given subject exists
-        if (subjectService.getBySubjectId(id) == null) {
+        if (subjectService.getById(id) == null) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), "Subject not found", new ErrorDetails()));
         } else {
@@ -130,7 +130,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
     public ResponseEntity<Void> deleteSubjectPathologies(
             @Parameter(name = "animal subject id", required = true) @PathVariable("id") Long id)
             throws RestServiceException {
-        AnimalSubject animalSubject = subjectService.getBySubjectId(id);
+        AnimalSubject animalSubject = subjectService.getById(id);
         if (animalSubject == null) {
             return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
         } else {
@@ -149,7 +149,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
             @Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "ID of subject pathology that needs to be fetched", required = true) @PathVariable("pid") Long pid)
             throws RestServiceException {
-        if (subjectService.getBySubjectId(id) == null) {
+        if (subjectService.getById(id) == null) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), "Subject not found", new ErrorDetails()));
         } else {
@@ -165,7 +165,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
     public ResponseEntity<List<SubjectPathology>> getSubjectPathologies(
             @Parameter(name = "animalSubject id", required = true) @PathVariable("id") Long id)
             throws RestServiceException {
-        AnimalSubject animalSubject = subjectService.getBySubjectId(id);
+        AnimalSubject animalSubject = subjectService.getById(id);
         if (animalSubject == null) {
             return new ResponseEntity<List<SubjectPathology>>(HttpStatus.NOT_FOUND);
         } else {
@@ -209,7 +209,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
             @Parameter(name = "Subject pathology object that needs to be updated", required = true) @RequestBody SubjectPathology pathos,
             final BindingResult result) throws RestServiceException {
 
-        AnimalSubject animalSubject = subjectService.getBySubjectId(id);
+        AnimalSubject animalSubject = subjectService.getById(id);
         if (animalSubject == null) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), "animalSubject not found", new ErrorDetails()));
