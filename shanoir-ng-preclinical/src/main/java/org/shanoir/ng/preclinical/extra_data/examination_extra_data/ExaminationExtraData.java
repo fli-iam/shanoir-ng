@@ -36,7 +36,6 @@ import jakarta.validation.constraints.NotNull;
 @JsonPropertyOrder({"_links", "examination_id", "filename", "extradatatype"})
 public class ExaminationExtraData extends HalEntity {
 
-    @JsonProperty("examination_id")
     @NotNull
     private Long examinationId;
 

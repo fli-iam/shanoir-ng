@@ -21,13 +21,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(edit)="goToEdit()"
 				(back)="goBack()">
 			</form-footer>
-		</div>  
+		</div>
 
 		<span *ngIf="isStandalone" class="right-col" [ngSwitch]="mode">
-			<ng-template [ngSwitchCase]="'view'"> 
+			<ng-template [ngSwitchCase]="'view'">
 				<div class="header command-zone" i18n="View physiodata|Title">View physiological data</div>
 			</ng-template>
-			<ng-template ngSwitchDefault> 
+			<ng-template ngSwitchDefault>
 				<div class="header command-zone" i18n="Edit physiodata|Title">Add physiological data</div>
 			</ng-template>
 		</span>
@@ -35,57 +35,57 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<fieldset>
 			<legend *ngIf="!isStandalone">Physiological data</legend>
 			<ol>
-				<li>   
+				<li>
 					<label i18n="Edit physiodata|hasHeartRate label">Heart Rate data</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{isYesOrNo(physioData.has_heart_rate)}}
+						<ng-template [ngSwitchCase]="'view'">
+								{{isYesOrNo(physioData.hasHeartRate)}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="radio" formControlName="has_heart_rate" [value]="true" i18n="Edit physioData|hasHeartRate label" [checked]="physioData.has_heart_rate == true" (change)="changePhysio()" />Yes
-							<input type="radio" formControlName="has_heart_rate" [value]="false" i18n="Edit physioData|hasNotHeartRate label" [checked]="physioData.has_heart_rate" (change)="changePhysio()" />No
+							<input type="radio" formControlName="hasHeartRate" [value]="true" i18n="Edit physioData|hasHeartRate label" [checked]="physioData.hasHeartRate == true" (change)="changePhysio()" />Yes
+							<input type="radio" formControlName="hasHeartRate" [value]="false" i18n="Edit physioData|hasNotHeartRate label" [checked]="physioData.hasHeartRate" (change)="changePhysio()" />No
 						</ng-template>
-					</span>	
+					</span>
 				</li>
-				<li>   
+				<li>
 					<label i18n="Edit physiodata|hasRespiratoryRate label">Respiratory Rate data</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{isYesOrNo(physioData.has_respiratory_rate)}}
+						<ng-template [ngSwitchCase]="'view'">
+								{{isYesOrNo(physioData.hasRespiratoryRate)}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="radio" formControlName="has_respiratory_rate" [value]="true" i18n="Edit physioData|hasRespiratoryRate label" [checked]="physioData.has_respiratory_rate == true" (change)="changePhysio()" />Yes
-							<input type="radio" formControlName="has_respiratory_rate" [value]="false" i18n="Edit physioData|hasNotRespiratoryRate label" [checked]="physioData.has_respiratory_rate" (change)="changePhysio()"/>No
+							<input type="radio" formControlName="hasRespiratoryRate" [value]="true" i18n="Edit physioData|hasRespiratoryRate label" [checked]="physioData.hasRespiratoryRate == true" (change)="changePhysio()" />Yes
+							<input type="radio" formControlName="hasRespiratoryRate" [value]="false" i18n="Edit physioData|hasNotRespiratoryRate label" [checked]="physioData.hasRespiratoryRate" (change)="changePhysio()"/>No
 						</ng-template>
-					</span>	
+					</span>
 				</li>
-				<li>   
+				<li>
 					<label i18n="Edit physiodata|hasSao2 label">SaO2 data</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{isYesOrNo(physioData.has_sao2)}}
+						<ng-template [ngSwitchCase]="'view'">
+								{{isYesOrNo(physioData.hasSao2)}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="radio" formControlName="has_sao2" [value]="true" i18n="Edit physioData|hasSao2 label" [checked]="physioData.has_sao2 == true" (change)="changePhysio()" />Yes
-							<input type="radio" formControlName="has_sao2" [value]="false" i18n="Edit physioData|hasNotSao2 label" [checked]="physioData.has_sao2" (change)="changePhysio()" />No
+							<input type="radio" formControlName="hasSao2" [value]="true" i18n="Edit physioData|hasSao2 label" [checked]="physioData.hasSao2 == true" (change)="changePhysio()" />Yes
+							<input type="radio" formControlName="hasSao2" [value]="false" i18n="Edit physioData|hasNotSao2 label" [checked]="physioData.hasSao2" (change)="changePhysio()" />No
 						</ng-template>
-					</span>	
+					</span>
 					<span class="right-col">
 					</span>
 				</li>
-				<li>   
+				<li>
 					<label i18n="Edit physiodata|hasTemperature label">Temperature data</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{isYesOrNo(physioData.has_temperature)}}
+						<ng-template [ngSwitchCase]="'view'">
+								{{isYesOrNo(physioData.hasTemperature)}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="radio" formControlName="has_temperature" [value]="true" i18n="Edit physioData|hasTemperature label" [checked]="physioData.has_temperature == true" (change)="changePhysio()" />Yes
-							<input type="radio" formControlName="has_temperature" [value]="false" i18n="Edit physioData|hasNotTemperature label" [checked]="physioData.has_temperature" (change)="changePhysio()"/>No
+							<input type="radio" formControlName="hasTemperature" [value]="true" i18n="Edit physioData|hasTemperature label" [checked]="physioData.hasTemperature == true" (change)="changePhysio()" />Yes
+							<input type="radio" formControlName="hasTemperature" [value]="false" i18n="Edit physioData|hasNotTemperature label" [checked]="physioData.hasTemperature" (change)="changePhysio()"/>No
 						</ng-template>
 					</span>
 					<span class="right-col">
-						
+
 					</span>
 				</li>
 				<li  class="required">
@@ -105,9 +105,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<input type="file" id="physioDataFile" name="physioDataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
 						</ng-template>
 					</span>
-					
-				</li>				
+
+				</li>
 			</ol>
 		</fieldset>
-	</form>  
+	</form>
 </div>

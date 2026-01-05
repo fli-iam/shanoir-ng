@@ -16,8 +16,6 @@ package org.shanoir.ng.preclinical.subjects.service;
 
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
@@ -31,6 +29,9 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * AnimalSubjects service implementation.
@@ -67,7 +68,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 
     @Override
     public AnimalSubject getBySubjectId(final Long id) {
-        return subjectsRepository.getBySubjectId(id);
+        return subjectsRepository.findById(id).orElse(null);
     }
 
     @Override

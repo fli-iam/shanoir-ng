@@ -320,10 +320,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.physioData = new PhysiologicalData();
         this.physioData.filename =  this.physioDataFile.filename;
         this.physioData.extradatatype = "Physiological data";
-        this.physioData.has_heart_rate = this.physioDataFile.has_heart_rate;
-        this.physioData.has_respiratory_rate = this.physioDataFile.has_respiratory_rate;
-        this.physioData.has_sao2 = this.physioDataFile.has_sao2;
-        this.physioData.has_temperature = this.physioDataFile.has_temperature;
+        this.physioData.hasHeartRate = this.physioDataFile.hasHeartRate;
+        this.physioData.hasRespiratoryRate = this.physioDataFile.hasRespiratoryRate;
+        this.physioData.hasSao2 = this.physioDataFile.hasSao2;
+        this.physioData.hasTemperature = this.physioDataFile.hasTemperature;
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }

@@ -14,11 +14,11 @@
 
 package org.shanoir.ng.preclinical.subjects.dto;
 
-import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.springframework.stereotype.Service;
 
 @Service
 public class PreclinicalSubjectDtoService {

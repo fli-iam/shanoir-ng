@@ -90,10 +90,10 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
 
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
-            'has_heart_rate':[this.physioData.has_heart_rate],
-            'has_respiratory_rate':[this.physioData.has_respiratory_rate],
-            'has_sao2':[this.physioData.has_sao2],
-            'has_temperature':[this.physioData.has_temperature],
+            'hasHeartRate':[this.physioData.hasHeartRate],
+            'hasRespiratoryRate':[this.physioData.hasRespiratoryRate],
+            'hasSao2':[this.physioData.hasSao2],
+            'hasTemperature':[this.physioData.hasTemperature],
         });
     }
 
@@ -111,10 +111,10 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     	const physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
     	physioDataFile.filename = this.fileToUpload.name;
     	physioDataFile.physiologicalDataFile = this.fileToUpload;
-    	physioDataFile.has_heart_rate = this.physioData.has_heart_rate;
-    	physioDataFile.has_respiratory_rate = this.physioData.has_respiratory_rate;
-    	physioDataFile.has_sao2 = this.physioData.has_sao2;
-    	physioDataFile.has_temperature = this.physioData.has_temperature;
+    	physioDataFile.hasHeartRate = this.physioData.hasHeartRate;
+    	physioDataFile.hasRespiratoryRate = this.physioData.hasRespiratoryRate;
+    	physioDataFile.hasSao2 = this.physioData.hasSao2;
+    	physioDataFile.hasTemperature = this.physioData.hasTemperature;
     	this.emitEvent(physioDataFile);
       	this.physioData = new PhysiologicalData();
     }
@@ -137,10 +137,10 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     changePhysio(){
         const physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
         physioDataFile.filename = this.physioData.filename;
-        physioDataFile.has_heart_rate = this.physioData.has_heart_rate;
-        physioDataFile.has_respiratory_rate = this.physioData.has_respiratory_rate;
-        physioDataFile.has_sao2 = this.physioData.has_sao2;
-        physioDataFile.has_temperature = this.physioData.has_temperature;
+        physioDataFile.hasHeartRate = this.physioData.hasHeartRate;
+        physioDataFile.hasRespiratoryRate = this.physioData.hasRespiratoryRate;
+        physioDataFile.hasSao2 = this.physioData.hasSao2;
+        physioDataFile.hasTemperature = this.physioData.hasTemperature;
         this.emitEvent(physioDataFile);
     }
 
