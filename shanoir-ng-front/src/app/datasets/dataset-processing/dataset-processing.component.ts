@@ -347,7 +347,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     public formatDate(millis: number) : string {
-        return millis ? formatDate(new Date(millis), 'dd/MM/YYYY HH:mm:ss', 'en-US') : "";
+        return millis ? formatDate(new Date(millis), 'dd/MM/yyyy HH:mm:ss', 'en-US') : "";
     }
 
     public getDuration(){
