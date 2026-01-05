@@ -71,6 +71,38 @@ public class PerformanceTests extends AbstractTest {
     }
 
     @Test
+    public void findStudyCardsTest() throws Exception {
+        logger.info("Starting findStudyCardsTest");
+        long totalTime = 0;
+        int numberOfCalls = 100;
+        for (int i = 0; i < numberOfCalls; i++) {
+            long startTime = System.currentTimeMillis();
+            shUpClient.findStudyCards();
+            long stopTime = System.currentTimeMillis();
+            long elapsedTime = stopTime - startTime;
+            totalTime += elapsedTime;
+        }
+        long averageTime = totalTime / numberOfCalls;
+        logger.info("Average request time: " + averageTime + "ms (over " + numberOfCalls + " calls)");
+    }
+
+    @Test
+    public void findSubjectsTest() throws Exception {
+        logger.info("Starting findSubjectsTest");
+        long totalTime = 0;
+        int numberOfCalls = 100;
+        for (int i = 0; i < numberOfCalls; i++) {
+            long startTime = System.currentTimeMillis();
+            shUpClient.findSubjects();
+            long stopTime = System.currentTimeMillis();
+            long elapsedTime = stopTime - startTime;
+            totalTime += elapsedTime;
+        }
+        long averageTime = totalTime / numberOfCalls;
+        logger.info("Average request time: " + averageTime + "ms (over " + numberOfCalls + " calls)");
+    }
+
+    @Test
     public void findExaminationsTest() throws Exception {
         logger.info("Starting findExaminationsTest");
         long totalTime = 0;
@@ -78,6 +110,22 @@ public class PerformanceTests extends AbstractTest {
         for (int i = 0; i < numberOfCalls; i++) {
             long startTime = System.currentTimeMillis();
             shUpClient.findExaminations();
+            long stopTime = System.currentTimeMillis();
+            long elapsedTime = stopTime - startTime;
+            totalTime += elapsedTime;
+        }
+        long averageTime = totalTime / numberOfCalls;
+        logger.info("Average request time: " + averageTime + "ms (over " + numberOfCalls + " calls)");
+    }
+
+    @Test
+    public void findAcquisitionsTest() throws Exception {
+        logger.info("Starting findAcquisitionsTest");
+        long totalTime = 0;
+        int numberOfCalls = 100;
+        for (int i = 0; i < numberOfCalls; i++) {
+            long startTime = System.currentTimeMillis();
+            shUpClient.findAcquisitions();
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
             totalTime += elapsedTime;

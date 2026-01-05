@@ -37,6 +37,7 @@ import org.apache.hc.core5.net.URIBuilder;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.io.DicomInputStream;
 import org.json.JSONObject;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
@@ -88,6 +89,8 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_STUDYCARDS_CREATE = "service.studycards.create";
 
+    private static final String SERVICE_STUDYCARDS = "service.studycards.find";
+
     private static final String SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS = "service.studycards.find.by.study.ids";
 
     private static final String SERVICE_STUDYCARDS_APPLY_ON_STUDY = "service.studycards.apply.on.study";
@@ -108,9 +111,13 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_MANUFACTURERS = "service.manufacturers";
 
+    private static final String SERVICE_SUBJECTS = "service.subjects.find";
+
     private static final String SERVICE_SUBJECTS_FIND_BY_IDENTIFIER = "service.subjects.find.by.identifier";
 
     private static final String SERVICE_SUBJECTS_FIND_BY_NAME_AND_STUDY = "service.subjects.find.by.identifier";
+
+    private static final String SERVICE_ACQUISITIONS = "service.acquisitions.find";
 
     private static final String SERVICE_DATASETS = "service.datasets";
 
@@ -148,6 +155,8 @@ public class ShanoirUploaderServiceClient {
 
     private String serviceURLStudyCardsCreate;
 
+    private String serviceURLStudyCardsFind;
+
     private String serviceURLStudyCardsByStudyIds;
 
     private String serviceURLStudyCardsApplyOnStudy;
@@ -170,6 +179,8 @@ public class ShanoirUploaderServiceClient {
 
     private String serviceURLSubjectsCreate;
 
+    private String serviceURLSubjectsFind;
+
     private String serviceURLKeysFindValue;
 
     private String serviceURLSubjectsFindByIdentifier;
@@ -190,7 +201,9 @@ public class ShanoirUploaderServiceClient {
 
     private String serviceURLExaminationsBySubjectId;
 
-    private String serviceURLExaminations;
+    private String serviceURLExaminationsFind;
+
+    private String serviceURLAcquisitionsFind;
 
     private String serviceURLSubjectsByStudyId;
 
@@ -215,6 +228,8 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_PUBLIC_DATA);
         this.serviceURLStudyCardsCreate = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_CREATE);
+        this.serviceURLStudyCardsFind = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS);
         this.serviceURLStudyCardsByStudyIds = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
         this.serviceURLStudyCardsApplyOnStudy = this.serverURL
@@ -244,6 +259,8 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_DICOM_WEB_STUDIES);
         this.serviceURLSubjectsCreate = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_CREATE);
+        this.serviceURLSubjectsFind = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS);
         this.serviceURLKeysFindValue = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_KEYS_FIND_VALUE);
         this.serviceURLExaminationsCreate = this.serverURL
@@ -256,8 +273,10 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_UPLOAD_DICOM);
         this.serviceURLExaminationsBySubjectId = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
-        this.serviceURLExaminations = this.serverURL
+        this.serviceURLExaminationsFind = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS);
+        this.serviceURLAcquisitionsFind = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITIONS);
         this.serviceURLSubjectsByStudyId = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_BY_STUDY_ID);
 
@@ -415,6 +434,24 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
+    public List<Subject> findSubjects() throws Exception {
+        long startTime = System.currentTimeMillis();
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLSubjectsFind)) {
+            long stopTime = System.currentTimeMillis();
+            long elapsedTime = stopTime - startTime;
+            LOG.debug("findSubjects: " + elapsedTime + "ms");
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                List<Subject> subjects = Util.getMappedList(response, Subject.class);
+                return subjects;
+            } else {
+                LOG.error("Could not get subjects (status code: " + code + ", message: "
+                        + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                return null;
+            }
+        }
+    }
+
     public List<StudyCard> findStudyCardsByStudyIds(IdList studyIds) throws Exception {
         try {
             String json = Util.objectWriter.writeValueAsString(studyIds);
@@ -429,6 +466,28 @@ public class ShanoirUploaderServiceClient {
                     return studyCards;
                 } else {
                     LOG.error("Could not get study cards for studyIds (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                }
+            }
+        } catch (JsonProcessingException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public List<StudyCard> findStudyCards() throws Exception {
+        try {
+            long startTime = System.currentTimeMillis();
+            try (CloseableHttpResponse response = httpService.get(this.serviceURLStudyCardsFind)) {
+                long stopTime = System.currentTimeMillis();
+                long elapsedTime = stopTime - startTime;
+                LOG.debug("findStudyCards: " + elapsedTime + "ms");
+                int code = response.getCode();
+                if (code == HttpStatus.SC_OK) {
+                    List<StudyCard> studyCards = Util.getMappedList(response, StudyCard.class);
+                    return studyCards;
+                } else {
+                    LOG.error("Could not get study cards (status code: " + code + ", message: "
+                            + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
                 }
             }
         } catch (JsonProcessingException e) {
@@ -512,7 +571,7 @@ public class ShanoirUploaderServiceClient {
 
     public List<Examination> findExaminations() throws Exception {
         long startTime = System.currentTimeMillis();
-        try (CloseableHttpResponse response = httpService.get(this.serviceURLExaminations)) {
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLExaminationsFind)) {
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
             LOG.debug("findExaminations: " + elapsedTime + "ms");
@@ -523,6 +582,25 @@ public class ShanoirUploaderServiceClient {
                 return examinations;
             } else {
                 LOG.info("Exam(s) not found (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+            }
+        }
+        return null;
+    }
+
+    public List<DatasetAcquisition> findAcquisitions() throws Exception {
+        long startTime = System.currentTimeMillis();
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLAcquisitionsFind)) {
+            long stopTime = System.currentTimeMillis();
+            long elapsedTime = stopTime - startTime;
+            LOG.debug("findAcquisitions: " + elapsedTime + "ms");
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                List<DatasetAcquisition> acquisitions = Util.getMappedPageContent(response, DatasetAcquisition.class);
+                LOG.debug("findAcquisitions: " + acquisitions.size() + " acquisitions.");
+                return acquisitions;
+            } else {
+                LOG.info("Acquisition(s) not found (status code: " + code + ", message: "
+                        + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
             }
         }
         return null;
