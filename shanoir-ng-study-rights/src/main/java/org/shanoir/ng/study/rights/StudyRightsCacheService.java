@@ -53,6 +53,9 @@ public class StudyRightsCacheService {
         LOG.info("Cache miss - query executed for userId={}, studyId={}",
                 userId, studyId);
         StudyUser studyUser = repo.findByUserIdAndStudyId(userId, studyId);
+        if (studyUser == null) {
+            return null;
+        }
         studyUser.setCenterIds(repo.findCenterIdsByStudyUserId(studyUser.getId()));
         return studyUser;
     }
