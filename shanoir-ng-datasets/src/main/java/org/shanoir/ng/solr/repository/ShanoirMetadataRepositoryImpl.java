@@ -22,6 +22,9 @@ package org.shanoir.ng.solr.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,7 @@ import java.util.stream.Collectors;
 public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryCustom {
 
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirMetadataRepositoryImpl.class);
+
     public static final String MR_QUERY = "SELECT d.id as datasetId, "
             + "dm.name as datasetName, "
             + "dm.dataset_modality_type as datasetType, "
@@ -75,6 +79,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " , dataset_metadata dm, mr_dataset md"
             + " LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id"
             + " WHERE d.updated_metadata_id = dm.id AND md.id = d.id";
+
     public static final String PET_QUERY = "SELECT d.id as datasetId, "
             + "dm.name as datasetName, "
             + "dm.dataset_modality_type as datasetType, "
@@ -104,6 +109,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , pet_dataset pd, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND pd.id = d.id";
+
     public static final String CT_QUERY = "SELECT d.id as datasetId, "
             + "dm.name as datasetName, "
             + "dm.dataset_modality_type as datasetType, "
@@ -135,6 +141,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , ct_dataset cd, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
+
     public static final String GENERIC_QUERY = "SELECT d.id as datasetId, "
             + "dm.name as datasetName, "
             + "dm.dataset_modality_type as datasetType, "
@@ -167,6 +174,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , generic_dataset cd, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
+
     public static final String EEG_QUERY = "SELECT d.id as datasetId, "
             + "dm.name as datasetName, "
             + "dm.dataset_modality_type as datasetType, "
@@ -198,6 +206,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , eeg_dataset ed, dataset_metadata dm"
             + " WHERE d.origin_metadata_id = dm.id AND ed.id = d.id";
+
     public static final String BIDS_QUERY = "SELECT d.id as datasetId, "
             + "dm.name as datasetName, "
             + "dm.dataset_modality_type as datasetType, "
@@ -230,6 +239,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , bids_dataset ed, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND ed.id = d.id";
+
     public static final String PROCESSED_QUERY = "SELECT d.id as datasetId, "
             + "dm.name as datasetName, "
             + "dm.dataset_modality_type as datasetType, "
@@ -260,6 +270,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " , dataset_metadata dm"
             + " WHERE d.origin_metadata_id = dm.id"
             + " AND d.dataset_processing_id IS NOT NULL";
+
     public static final String MEASUREMENT_QUERY = "SELECT d.id as datasetId, "
             + "dm.name as datasetName, "
             + "dm.dataset_modality_type as datasetType, "
@@ -293,6 +304,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , measurement_dataset md, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND md.id = d.id";
+
     public static final String SEGMENTATION_QUERY = "SELECT d.id as datasetId, "
             + "dm.name as datasetName, "
             + "dm.dataset_modality_type as datasetType, "
@@ -326,6 +338,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , segmentation_dataset sd, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND sd.id = d.id";
+
     public static final String XA_QUERY = "SELECT d.id as datasetId, "
             + "dm.name as datasetName, "
             + "dm.dataset_modality_type as datasetType, "
@@ -358,6 +371,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , xa_dataset cd, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
+
     public static final String RESULTSET_MAPPING = "SolrResult";
 
     public static final String SUBJECT_TAG_QUERY = "SELECT d.id AS dataset_id, tag.name AS tag"
@@ -379,44 +393,34 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
     }
 
     @Override
-    public ShanoirMetadata findOneSolrDoc(Long datasetId) {
-
-        String clause = " AND d.id = " + datasetId;
-
-        List<ShanoirMetadata> processedResult = this.findSolr(clause);
-        if (!processedResult.isEmpty()) {
-            return processedResult.get(0);
-        }
-
-        List<ShanoirMetadata> result = this.findSolr(clause);
-
+    public ShanoirMetadata findOneSolrDoc(Dataset dataset) {
+        String clause = " AND d.id = " + dataset.getId();
+        String queryName = DatasetUtils.getMetadataQueryNameFromDataset(dataset);
+        List<ShanoirMetadata> result = new ArrayList<>();
+        Query mrQuery = em.createNativeQuery(queryName + clause, RESULTSET_MAPPING);
+        result.addAll(mrQuery.getResultList());
         if (result.isEmpty()) {
             return null;
         }
-
         if (result.size() > 1) {
-            LOG.error("Solr query returned multiple result for dataset [{}]. Please check database consistency.", datasetId);
+            LOG.error("Solr query returned multiple result for dataset [{}]. Please check database consistency.",
+                    dataset.getId());
             return null;
         }
-
         return result.get(0);
     }
 
     @Override
     public List<ShanoirMetadata> findSolrDocs(List<Long> datasetIds) {
-
         if (CollectionUtils.isEmpty(datasetIds)) {
             return Collections.emptyList();
         }
-
         String ids = datasetIds.stream().map(Object::toString).collect(Collectors.joining(","));
         String clause = " AND d.id IN (" + ids + ")";
-
         return this.findSolr(clause);
     }
 
     private List<ShanoirMetadata> findSolr(String clause) {
-
         List<ShanoirMetadata> result = new ArrayList<>();
 
         Query mrQuery = em.createNativeQuery(MR_QUERY + clause, RESULTSET_MAPPING);

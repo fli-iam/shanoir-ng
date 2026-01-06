@@ -32,8 +32,8 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
         security = { @SecurityRequirement(name = "BearerAuth"), @SecurityRequirement(name = "OAuth2Auth") }
 )
 public class ShanoirStudiesApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(ShanoirStudiesApplication.class, args);
     }
+
 }

@@ -73,7 +73,6 @@ import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyCenterRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectService;
-import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -160,9 +159,6 @@ public class DicomImporterService {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private SolrService solrService;
-
-    @Autowired
     private DatasetService datasetService;
 
     @Autowired
@@ -234,7 +230,6 @@ public class DicomImporterService {
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition, serie);
             DatasetExpression expression = manageDatasetExpression(attributes, dataset);
             datasetExpressionRepository.save(expression);
-            solrService.indexDataset(dataset.getId());
             sendToPacs(metaInformationAttributes, attributes);
             countNumberOfFiles(examination, acquisition, serie.getSeriesDescription());
         } else {
@@ -293,7 +288,7 @@ public class DicomImporterService {
             currentDataset = acquisitionContext.generateFlatDataset(
                     serie, dataset, datasetIndex, subjectId,
                     attributes);
-            acquisition.getDatasets().add(currentDataset);
+            datasets.add(currentDataset);
             currentDataset.setDatasetAcquisition(acquisition);
             currentDataset.setStudyId(studyId);
             currentDataset = datasetService.create(currentDataset);
@@ -377,7 +372,7 @@ public class DicomImporterService {
         DatasetAcquisition acquisition = null;
         final String userName = KeycloakUtil.getTokenUserName();
         Optional<DatasetAcquisition> existingAcquisition = acquisitionService
-                .findByExaminationAndSeriesInstanceUIDWithDatasets(
+                .findByExaminationIdAndSeriesInstanceUIDWithDatasets(
                         examination.getId(),
                         serie.getSeriesInstanceUID());
         if (existingAcquisition.isPresent()) {

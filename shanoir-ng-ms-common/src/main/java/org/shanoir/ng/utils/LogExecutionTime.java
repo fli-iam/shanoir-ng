@@ -12,18 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng;
+package org.shanoir.ng.utils;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ActiveProfiles;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Configuration
-@ActiveProfiles("test")
-public class TestConfiguration {
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface LogExecutionTime {
 
-    @MockBean
-    private RabbitTemplate rabbitTemplate;
+    String value() default "";
+
+    long thresholdMs() default 0;
 
 }

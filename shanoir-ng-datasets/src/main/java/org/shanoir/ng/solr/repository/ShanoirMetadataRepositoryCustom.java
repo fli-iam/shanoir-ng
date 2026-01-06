@@ -22,6 +22,7 @@ package org.shanoir.ng.solr.repository;
 import java.util.List;
 import java.util.Map;
 
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 
 /**
@@ -36,9 +37,10 @@ public interface ShanoirMetadataRepositoryCustom {
      */
     List<ShanoirMetadata> findAllAsSolrDoc();
 
-    ShanoirMetadata findOneSolrDoc(Long datasetId);
+    ShanoirMetadata findOneSolrDoc(Dataset dataset);
 
     List<ShanoirMetadata> findSolrDocs(List<Long> datasetIds);
 
     Map<Long, List<String>> findAllTags(List<Long> datasetIds);
+
 }

@@ -12,18 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng;
+package org.shanoir.ng.shared.configuration;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ActiveProfiles;
+public final class CacheNames {
 
-@Configuration
-@ActiveProfiles("test")
-public class TestConfiguration {
+    private CacheNames() { }
 
-    @MockBean
-    private RabbitTemplate rabbitTemplate;
+    public static final String USER_ID_STUDY_ID = "userIdStudyId";
+
+    public static final String STUDY_USER_CENTER_IDS = "studyUserCenterIds";
+
+    public static final String USER_ID_STUDY_ID_RIGHTS = "userIdStudyIdRights";
+
+    public static final String USER_ID_RIGHTS = "userRights";
 
 }

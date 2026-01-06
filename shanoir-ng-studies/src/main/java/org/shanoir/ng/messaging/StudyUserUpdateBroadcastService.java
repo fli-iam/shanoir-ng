@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.messaging;
 
+import org.shanoir.ng.shared.configuration.CacheNames;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,6 +40,7 @@ public class StudyUserUpdateBroadcastService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @CacheEvict(value = {CacheNames.USER_ID_STUDY_ID, CacheNames.STUDY_USER_CENTER_IDS, CacheNames.USER_ID_STUDY_ID_RIGHTS, CacheNames.USER_ID_RIGHTS}, allEntries = true)
     public void broadcast(Iterable<StudyUserCommand> commands) throws MicroServiceCommunicationException {
         try {
             String str = objectMapper.writeValueAsString(commands);
