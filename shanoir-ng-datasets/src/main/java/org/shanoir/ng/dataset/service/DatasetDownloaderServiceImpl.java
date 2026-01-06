@@ -173,11 +173,10 @@ public class DatasetDownloaderServiceImpl {
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
         } catch (Exception e) {
-            response.setContentType(null);
-            LOG.error("Unexpected error while downloading dataset files.", e);
-            throw new RestServiceException(new ErrorModel(
-                    HttpStatus.UNPROCESSABLE_ENTITY.value(), "Unexpected error while downloading dataset files"
-            ));
+            throw new RestServiceException(e, new ErrorModel(
+                                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                                "Unexpected error while downloading dataset files: " + e.getMessage()
+                        ));  // Pass the original exception as the cause
         }
     }
 
