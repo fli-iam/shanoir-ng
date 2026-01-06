@@ -19,7 +19,6 @@ import {  ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
-import { PhysiologicalData }    from '../shared/physiologicalData.model';
 import { PhysiologicalDataFile }    from '../shared/physiologicalDataFile.model';
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
@@ -33,16 +32,14 @@ import { ExtraData } from '../../extraData/shared/extradata.model';
     animations: [slideDown],
     standalone: false
 })
-export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalData> {
+export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalDataFile> {
 
     @Input() examinationId:number;
-    @Input() isStandalone:boolean = false;
     @Input() canModify: boolean = false;
-    @Output() physioDataReady = new EventEmitter();
+    @Output() physioDataReady: EventEmitter<PhysiologicalDataFile> = new EventEmitter();
 
     urlupload:string;
     fileToUpload: File = null;
-    @Output() bloodGasDataReady = new EventEmitter();
 
     constructor(
         private route: ActivatedRoute,
@@ -51,17 +48,19 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         super(route, 'preclinical-physiogicaldata');
     }
 
-    get physioData(): PhysiologicalData { return this.entity; }
-    set physioData(physioData: PhysiologicalData) { this.entity = physioData; }
+    get physioData(): PhysiologicalDataFile { return this.entity; }
+    set physioData(physioData: PhysiologicalDataFile) { this.entity = physioData; }
 
     // Note: should be getService(): EntityService<PhysiologicalData> {
     getService(): EntityService<any> {
         return this.extradatasService;
     }
 
-    protected fetchEntity: () => Promise<PhysiologicalData> = () => {
+    protected fetchEntity: () => Promise<PhysiologicalDataFile> = () => {
         return  this.extradatasService.getExtraDatas(this.examinationId).then(extradatas => {
-            return this.getExaminationExtraDatas(extradatas);
+            const physioData: PhysiologicalDataFile = this.getExaminationExtraDatas(extradatas);
+            this.emitEvent(physioData);
+            return physioData;
         });
     }
 
@@ -74,18 +73,18 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     }
 
     initCreate(): Promise<void> {
-        this.entity = new PhysiologicalData();
+        this.entity = new PhysiologicalDataFile();
         return Promise.resolve();
     }
 
-    getExaminationExtraDatas(extradatas: ExtraData[]): PhysiologicalData {
+    getExaminationExtraDatas(extradatas: ExtraData[]): PhysiologicalDataFile {
     	for (const ex of extradatas) {
     		// instanceof does not work??
     		if (ex.extradatatype == "Physiological data"){
-    			return this.physioData;
+    			return ex as PhysiologicalDataFile;
     		}
     	}
-        return new PhysiologicalData();
+        return new PhysiologicalDataFile();
     }
 
     buildForm(): UntypedFormGroup {
@@ -97,7 +96,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         });
     }
 
-    public save(): Promise<PhysiologicalData> {
+    public save(): Promise<PhysiologicalDataFile> {
         return this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.physioData).then((physioData) => {
             this.chooseRouteAfterSave(this.physioData);
             this.consoleService.log('info', 'New preclinical physiogicaldata successfully saved with n° ' + physioData.id);
@@ -107,16 +106,8 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
 
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
-    	this.physioData.filename= this.fileToUpload.name;
-    	const physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
-    	physioDataFile.filename = this.fileToUpload.name;
-    	physioDataFile.physiologicalDataFile = this.fileToUpload;
-    	physioDataFile.hasHeartRate = this.physioData.hasHeartRate;
-    	physioDataFile.hasRespiratoryRate = this.physioData.hasRespiratoryRate;
-    	physioDataFile.hasSao2 = this.physioData.hasSao2;
-    	physioDataFile.hasTemperature = this.physioData.hasTemperature;
-    	this.emitEvent(physioDataFile);
-      	this.physioData = new PhysiologicalData();
+    	this.physioData.filename = this.fileToUpload.name;
+    	this.emitEvent(this.physioData);
     }
 
     isYesOrNo(value:boolean): string{
@@ -124,24 +115,12 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         return 'No';
     }
 
-    emitEvent(physioDataFile : PhysiologicalDataFile) {
-        if(!this.isStandalone){
-            this.physioDataReady.emit(physioDataFile);
-        }
+    emitEvent(physioData: PhysiologicalDataFile = this.physioData) {
+        this.physioDataReady.emit(physioData);
     }
 
     downloadFile() {
         this.extradatasService.downloadFile(this.entity.id);
-    }
-
-    changePhysio(){
-        const physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
-        physioDataFile.filename = this.physioData.filename;
-        physioDataFile.hasHeartRate = this.physioData.hasHeartRate;
-        physioDataFile.hasRespiratoryRate = this.physioData.hasRespiratoryRate;
-        physioDataFile.hasSao2 = this.physioData.hasSao2;
-        physioDataFile.hasTemperature = this.physioData.hasTemperature;
-        this.emitEvent(physioDataFile);
     }
 
     public async hasDeleteRight(): Promise<boolean> {

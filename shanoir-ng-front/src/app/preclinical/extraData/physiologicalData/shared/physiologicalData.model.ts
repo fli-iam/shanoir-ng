@@ -12,11 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { Field } from 'src/app/shared/reflect/field.decorator';
+
 import { ExtraData } from '../../extraData/shared/extradata.model';
 
 export class PhysiologicalData extends ExtraData {
-  hasHeartRate:boolean = false;
-  hasRespiratoryRate:boolean = false;
-  hasSao2:boolean = false;
-  hasTemperature:boolean = false;
+    @Field() hasHeartRate:boolean = false;
+    @Field() hasRespiratoryRate:boolean = false;
+    @Field() hasSao2:boolean = false;
+    @Field() hasTemperature:boolean = false;
 }

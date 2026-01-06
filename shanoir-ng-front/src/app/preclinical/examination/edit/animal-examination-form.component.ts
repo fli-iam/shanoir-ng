@@ -30,7 +30,6 @@ import { ExaminationAnestheticService }    from '../../anesthetics/examination_a
 import { ExtraData }    from '../../extraData/extraData/shared/extradata.model';
 import { BloodGasData }    from '../../extraData/bloodGasData/shared/bloodGasData.model';
 import { BloodGasDataFile }    from '../../extraData/bloodGasData/shared/bloodGasDataFile.model';
-import { PhysiologicalData }    from '../../extraData/physiologicalData/shared/physiologicalData.model';
 import { PhysiologicalDataFile }    from '../../extraData/physiologicalData/shared/physiologicalDataFile.model';
 import { ExtraDataService } from '../../extraData/extraData/shared/extradata.service';
 import { CenterService } from '../../../centers/shared/center.service';
@@ -61,8 +60,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
 
     urlupload: string;
-    physioData: PhysiologicalData;
-    examinationPhysioData: PhysiologicalData = new PhysiologicalData();
     physioDataFile: PhysiologicalDataFile;
     bloodGasData: BloodGasData;
     examinationBloodGasData: BloodGasData = new BloodGasData();
@@ -218,7 +215,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             this.onSave.subscribe(response => {
                 this.manageExaminationAnesthetic(response.id);
                 //this.manageContrastAgent();
-                this.addExtraDataToExamination(response.id, false);
+                this.addExtraDataToExamination(response.id);
             })
         );
 
@@ -245,14 +242,14 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         }
     }
 
-    addExtraDataToExamination(examinationId: number, isUpdate: boolean) {
+    addExtraDataToExamination(examinationId: number) {
         if (!examinationId) return;
         // Set the upload URL model
-        if (this.physioData) {
-            this.physioData.examinationId = examinationId;
+        if (this.physioDataFile) {
+            this.physioDataFile.examinationId = examinationId;
             //Create physio data
-            if (isUpdate && this.examinationPhysioData && this.examinationPhysioData.id) {
-            	this.extradatasService.updateExtradata(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.examinationPhysioData.id, this.physioData)
+            if (this.physioDataFile?.id) {
+            	this.extradatasService.updateExtradata(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA, this.physioDataFile.id, this.physioDataFile    )
                 .then(physioData => {
                 	if (this.physioDataFile.physiologicalDataFile){
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
@@ -264,7 +261,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                     this.examinationExtradatas.push(physioData);
                 });
             } else {
-            	this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA, this.physioData)
+            	this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA, this.physioDataFile)
                 .then(physioData => {
                 if (this.physioDataFile.physiologicalDataFile){
                     this.extradatasService.postFile(this.physioDataFile.physiologicalDataFile, physioData)
@@ -280,7 +277,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         if (this.bloodGasData) {
             this.bloodGasData.examinationId = examinationId;
             //Create blood gas data
-             if (isUpdate && this.examinationBloodGasData && this.examinationBloodGasData.id) {
+             if (this.examinationBloodGasData && this.examinationBloodGasData.id) {
             	this.extradatasService.updateExtradata(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA, this.examinationBloodGasData.id, this.bloodGasData)
                 	.then(bloodGasData => {
                 	if (this.bloodGasDataFile.bloodGasDataFile){
@@ -317,13 +314,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     onUploadPhysiologicalData(event) {
         this.physioDataFile = event;
-        this.physioData = new PhysiologicalData();
-        this.physioData.filename =  this.physioDataFile.filename;
-        this.physioData.extradatatype = "Physiological data";
-        this.physioData.hasHeartRate = this.physioDataFile.hasHeartRate;
-        this.physioData.hasRespiratoryRate = this.physioDataFile.hasRespiratoryRate;
-        this.physioData.hasSao2 = this.physioDataFile.hasSao2;
-        this.physioData.hasTemperature = this.physioDataFile.hasTemperature;
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
