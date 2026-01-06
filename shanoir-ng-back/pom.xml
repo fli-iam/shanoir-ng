@@ -30,12 +30,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<packaging>pom</packaging>
 
 	<name>shanoir-ng-back</name>
-	<description>Shanoir-NG Microservices Backend Project</description>
+	<description>Shanoir microservices backend project</description>
 
 	<modules>
 		<module>../shanoir-ng-ms-common</module>
 		<module>../shanoir-ng-study-rights</module>
-		<module>../shanoir-ng-users</module>
 		<module>../shanoir-ng-anonymization</module>
 		<module>../shanoir-ng-studies</module>
 		<module>../shanoir-ng-datasets</module>
@@ -163,7 +162,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.8.5</version>
 		</dependency>
-		
+
 		<!-- DCM4CHE dependencies -->
 		<dependency>
 			<groupId>org.dcm4che</groupId>

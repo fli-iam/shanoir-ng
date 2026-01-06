@@ -33,7 +33,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.cors.CorsConfiguration;
@@ -71,7 +71,7 @@ public class SecurityConfiguration {
         http
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
-                .addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
+                .addFilterAfter(mdcFilter, AuthorizationFilter.class)
                 .authorizeHttpRequests(
                     matcher -> matcher.requestMatchers("/accountrequest", "/extensionrequest", "/last_login_date")
                         // the swagger API is not exposed here for security reasons (MK)

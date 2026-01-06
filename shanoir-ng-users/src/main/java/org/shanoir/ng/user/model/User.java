@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
 import org.shanoir.ng.role.model.Role;
@@ -42,6 +41,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
