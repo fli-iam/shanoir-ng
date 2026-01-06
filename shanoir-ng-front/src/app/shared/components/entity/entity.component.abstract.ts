@@ -436,6 +436,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         return false;
     }
 
+    hasFormError(error: string) {
+        return this.form.errors?.[error] && (this.form.dirty || this.form.touched);
+    }
+
     private modeSpecificSave(afterSave?: () => Promise<void>): Promise<T> {
         if (this.mode == 'create') {
             return this.getService().create(this.entity).then((entity) => {

@@ -44,7 +44,6 @@ public class ExecutionApiController implements ExecutionApi {
             @Parameter(description = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException {
 
         List<Dataset> inputDatasets = executionService.getDatasetsFromParams(candidate.getDatasetParameters());
-        executionService.checkRightsForExecution(inputDatasets);
         IdName createdMonitoring = executionService.createExecution(candidate, inputDatasets);
 
         return new ResponseEntity<>(createdMonitoring, HttpStatus.OK);

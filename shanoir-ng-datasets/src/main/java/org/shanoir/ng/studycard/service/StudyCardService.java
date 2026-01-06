@@ -18,6 +18,8 @@ import java.util.List;
 
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,4 +34,5 @@ public interface StudyCardService extends CardService<StudyCard> {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudyCard(#id, 'CAN_ADMINISTRATE'))")
     void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
 
+    List<DicomTag> findDicomTags() throws RestServiceException;
 }
