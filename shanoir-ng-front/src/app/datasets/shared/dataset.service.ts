@@ -31,7 +31,7 @@ import { DatasetUtils } from './dataset.utils';
 import { DatasetType } from './dataset-type.model';
 
 export type Format = 'nii' | 'dcm';
-export type DatasetLight = {id: number, name: string, type: DatasetType, subject: IdName, hasProcessings: boolean, study: IdName, creationDate: Date};
+export type DatasetLight = {id: number, name: string, type: DatasetType, subject: IdName, hasProcessings: boolean, study: IdName, creationDate: Date; centerId: number};
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
