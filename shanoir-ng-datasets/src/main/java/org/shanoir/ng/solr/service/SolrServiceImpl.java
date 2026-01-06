@@ -167,6 +167,7 @@ public class SolrServiceImpl implements SolrService {
             LOG.error("2. Metadata found for dataset {} : {}", datasetId, shanoirMetadata != null);
             ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
             LOG.error("3. Solr doc content: {}", doc);
+            LOG.error("4. Solr doc id = {}", doc.getId());
             Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(Collections.singletonList(datasetId));
             doc.setTags(tags.get(datasetId));
             solrJWrapper.addToIndex(doc);
