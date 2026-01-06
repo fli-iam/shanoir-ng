@@ -31,8 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	</div>
     <div class="stats">
         {{ welcomeIntroduction }}<br>
-        It has <span [innerHTML]="studiesSentence"></span> containing <span [innerHTML]="datasetAcquisitionsSentence"></span> of <span [innerHTML]="subjectsSentence"></span>, for a total of <strong>{{ storageSize }} GB</strong>.<br>
-        <span [innerHTML]="publicStudiesSentence"></span><br>
+        It has <span [innerHTML]="studiesSentence"></span> (<span [innerHTML]="publicStudiesSentence"></span>) containing <span [innerHTML]="datasetAcquisitionsSentence"></span> of <span [innerHTML]="subjectsSentence"></span>, for a total of <strong>{{ storageSize }} GB</strong>.<br>
         There <span [innerHTML]="usersSentence"></span> and <span [innerHTML]="eventsSentence"></span> run during the last month.
     </div>
     <div class="study-tab-parent">

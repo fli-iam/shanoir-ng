@@ -410,12 +410,9 @@ export class WelcomeComponent implements OnInit {
 
   get publicStudiesSentence(): string {
     if (this.publicStudies == null || this.publicStudies.length === 0) {
-      return '<strong>No collection</strong> is public.';
+      return '<strong>none public</strong>';
     }
-    if (this.publicStudies.length === 1) {
-      return '<strong>1 collection</strong> is public (see below).';
-    }
-    return `<strong>${this.publicStudies.length} collections</strong> are public (see below).`;
+    return `including <strong>${this.publicStudies.length} public</strong>`;
   }
 
   get usersSentence(): string {
