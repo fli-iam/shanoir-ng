@@ -442,7 +442,7 @@ public class ShanoirUploaderServiceClient {
             LOG.debug("findSubjects: " + elapsedTime + "ms");
             int code = response.getCode();
             if (code == HttpStatus.SC_OK) {
-                List<Subject> subjects = Util.getMappedList(response, Subject.class);
+                List<Subject> subjects = Util.getMappedPageContent(response, Subject.class);
                 return subjects;
             } else {
                 LOG.error("Could not get subjects (status code: " + code + ", message: "
