@@ -160,9 +160,13 @@ public class SolrServiceImpl implements SolrService {
     @Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
     public void indexDataset(Long datasetId) {
         try {
+            LOG.error("1. Indexing dataset {}", datasetId);
             ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
+            LOG.error("1.5.");
             if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
+            LOG.error("2. Metadata found for dataset {} : {}", datasetId, shanoirMetadata != null);
             ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
+            LOG.error("3. Solr doc content: {}", doc);
             Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(Collections.singletonList(datasetId));
             doc.setTags(tags.get(datasetId));
             solrJWrapper.addToIndex(doc);
