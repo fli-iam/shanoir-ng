@@ -31,12 +31,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<name>shanoir-ng-ms-common</name>
 	<description>Shanoir microservices common project</description>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-aop</artifactId>
-			<version>3.4.0</version>
-		</dependency>
-	</dependencies>
-
 </project>
