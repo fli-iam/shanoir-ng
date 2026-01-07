@@ -16,13 +16,23 @@ package org.shanoir.ng;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Shanoir-NG microservice users application.
- * MK: @EnableSwagger2 removed explicitly - only for ms users - to protect the best the interface.
+ * Shanoir users microservice application.
+ * MK: @EnableSwagger2 removed explicitly - only for ms users -
+ * to protect the interface at the best possible.
  */
 @SpringBootApplication
+@ComponentScan(
+    basePackages = "org.shanoir.ng",
+    excludeFilters = @ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = org.shanoir.ng.shared.configuration.CommonConfiguration.class
+    )
+)
 @EnableScheduling
 public class ShanoirUsersApplication {
 

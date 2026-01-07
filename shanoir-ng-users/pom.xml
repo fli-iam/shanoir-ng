@@ -41,17 +41,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </properties>
 
     <dependencies>
-        <!-- Common MS dependency -->
-        <dependency>
-            <groupId>org.shanoir-ng</groupId>
-            <artifactId>shanoir-ng-ms-common</artifactId>
-            <version>3.4.0</version>
-        </dependency>
-
         <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -62,6 +59,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Shanoir -->
+        <dependency>
+            <groupId>org.shanoir-ng</groupId>
+            <artifactId>shanoir-ng-ms-common</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.shanoir-ng</groupId>
+            <artifactId>shanoir-ng-study-rights</artifactId>
+            <version>3.4.0</version>
         </dependency>
 
         <!-- JWT -->
@@ -75,12 +89,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.13.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.shanoir-ng</groupId>
-            <artifactId>shanoir-ng-study-rights</artifactId>
-            <version>3.4.0</version>
         </dependency>
 
         <!-- Test -->

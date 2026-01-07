@@ -15,9 +15,6 @@
 ######################################
 server:
   port: 9901
-  error:
-    whitelabel:
-      enabled: false
   display-name: Shanoir
   administrator.email: ${SHANOIR_ADMIN_EMAIL}
 ##### Database #####
@@ -47,6 +44,10 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
+  web:
+    error:
+      whitelabel:
+        enabled: false
   sql:
     init:
       data-locations: classpath:/scripts/import.sql
@@ -179,6 +180,8 @@ spring:
   mail:
     host: localhost
     port: 3025
+    username: ${SHANOIR_SMTP_USERNAME:}
+    password: ${SHANOIR_SMTP_PASSWORD:}
     protocol: smtp
   autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   sql:
