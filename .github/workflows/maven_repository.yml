@@ -1,4 +1,5 @@
 name: Publish Shanoir Maven packages to GitHub Packages
+
 on:
   release:
     types: [created]
