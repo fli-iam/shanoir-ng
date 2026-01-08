@@ -45,7 +45,11 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         private route: ActivatedRoute,
         private extradatasService: ExtraDataService) {
 
-        super(route, 'preclinical-physiogicaldata');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'preclinical-physiogicaldata';
     }
 
     get physioData(): PhysiologicalDataFile { return this.entity; }
@@ -80,7 +84,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     getExaminationExtraDatas(extradatas: ExtraData[]): PhysiologicalDataFile {
     	for (const ex of extradatas) {
     		// instanceof does not work??
-    		if (ex.extradatatype == "Physiological data"){
+    		if (ex.extraDataType == "Physiological data"){
     			return ex as PhysiologicalDataFile;
     		}
     	}
@@ -107,6 +111,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
     	this.physioData.filename = this.fileToUpload.name;
+        this.physioData.physiologicalDataFile = this.fileToUpload;
     	this.emitEvent(this.physioData);
     }
 
@@ -126,6 +131,4 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
-
-
 }

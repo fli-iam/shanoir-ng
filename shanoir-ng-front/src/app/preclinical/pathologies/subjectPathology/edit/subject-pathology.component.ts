@@ -46,7 +46,11 @@ export class SubjectPathologyComponent extends EntityComponent<SubjectPathology>
             private modelService: PathologyModelService,
             private referenceService: ReferenceService,
             private pathologyService: PathologyService) {
-        super(route, 'subject-pathology');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'subject-pathology';
     }
 
     get subjectPathology(): SubjectPathology { return this.entity; }

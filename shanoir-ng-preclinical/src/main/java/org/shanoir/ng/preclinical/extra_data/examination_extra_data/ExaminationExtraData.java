@@ -33,7 +33,7 @@ import jakarta.validation.constraints.NotNull;
  */
 @Entity
 @Table(name = "examination_extradata")
-@JsonPropertyOrder({"_links", "examination_id", "filename", "extradatatype"})
+@JsonPropertyOrder({"_links", "examination_id", "filename", "extraDataType"})
 public class ExaminationExtraData extends HalEntity {
 
     @NotNull
@@ -48,9 +48,9 @@ public class ExaminationExtraData extends HalEntity {
     @JsonProperty("filepath")
     private String filepath;
 
-    @JsonProperty("extradatatype")
+    @JsonProperty("extraDataType")
     @NotNull
-    private String extradatatype;
+    private String extraDataType;
 
     /**
      * Init HATEOAS links
@@ -98,23 +98,23 @@ public class ExaminationExtraData extends HalEntity {
         this.filepath = filepath;
     }
 
-    public ExaminationExtraData extradatatype(String extradatatype) {
-        this.extradatatype = extradatatype;
+    public ExaminationExtraData extraDataType(String extraDataType) {
+        this.extraDataType = extraDataType;
         return this;
     }
 
     @Schema(name = "none")
-    public String getExtradatatype() {
-        return extradatatype;
+    public String getExtraDataType() {
+        return extraDataType;
     }
 
-    public void setExtradatatype(String extradatatype) {
-        this.extradatatype = extradatatype;
+    public void setExtraDataType(String extraDataType) {
+        this.extraDataType = extraDataType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(examinationId, filename, filepath, extradatatype);
+        return Objects.hash(examinationId, filename, filepath, extraDataType);
     }
 
     @Override
@@ -150,11 +150,11 @@ public class ExaminationExtraData extends HalEntity {
         } else if (!filepath.equals(other.filepath)) {
             return false;
         }
-        if (extradatatype == null) {
-            if (other.extradatatype != null) {
+        if (extraDataType == null) {
+            if (other.extraDataType != null) {
                 return false;
             }
-        } else if (!extradatatype.equals(other.extradatatype)) {
+        } else if (!extraDataType.equals(other.extraDataType)) {
             return false;
         }
         return true;
@@ -164,11 +164,12 @@ public class ExaminationExtraData extends HalEntity {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class ExaminationExtraData {\n");
-
+        sb.append("    id: ").append(toIndentedString(getId())).append("\n");
         sb.append("    examination_id: ").append(toIndentedString(examinationId)).append("\n");
         sb.append("    filename: ").append(toIndentedString(filename)).append("\n");
         sb.append("    filepath: ").append(toIndentedString(filepath)).append("\n");
-        sb.append("    extradatatype: ").append(toIndentedString(extradatatype)).append("\n");
+        sb.append("    extraDataType: ").append(toIndentedString(extraDataType)).append("\n");
+        sb.append("}\n");
         return sb.toString();
     }
 

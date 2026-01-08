@@ -188,10 +188,10 @@ public class ExaminationApiController implements ExaminationApi {
             return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             throw new RestServiceException(
-                new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                         "Couldn't create examination",
                         e
-                )
+                    )
             );
         }
     }
@@ -272,10 +272,10 @@ public class ExaminationApiController implements ExaminationApi {
             }
         } catch (EntityNotFoundException e) {
             throw new RestServiceException(
-                new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                         "Couldn't create examination",
                         e
-                )
+                    )
             );
         }
     }

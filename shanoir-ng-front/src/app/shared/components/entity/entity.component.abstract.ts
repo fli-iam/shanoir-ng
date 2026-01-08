@@ -69,6 +69,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected destroy$: Subject<void> = new Subject<void>();
     private form$: SuperPromise<void> = new SuperPromise<void>();
     protected showTreeByDefault: boolean = true;
+    protected abstract getRoutingName(): string;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -91,10 +92,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected fetchEntity: () => Promise<any>; // optional
 
     constructor(
-        protected activatedRoute: ActivatedRoute,
-        private readonly ROUTING_NAME: string) {
+        protected activatedRoute: ActivatedRoute) {
         this.confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
-        this.entityRoutes = new EntityRoutes(ROUTING_NAME);
+        this.entityRoutes = new EntityRoutes(this.getRoutingName());
         this.router = ServiceLocator.injector.get(Router);
         this.location = ServiceLocator.injector.get(Location);
         this.keycloakService = ServiceLocator.injector.get(KeycloakService);
@@ -343,9 +343,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private addBCStep() {
         if (!this.embedded) {
             let label: string;
-            if (this.mode == "create") label = 'New ' + this.ROUTING_NAME;
-            else if (this.mode == 'edit') label = 'Edit ' + this.ROUTING_NAME;
-            else if (this.mode == 'view') label = 'View ' + this.ROUTING_NAME;
+            if (this.mode == "create") label = 'New ' + this.getRoutingName();
+            else if (this.mode == 'edit') label = 'Edit ' + this.getRoutingName();
+            else if (this.mode == 'view') label = 'View ' + this.getRoutingName();
             this.breadcrumbsService.nameStep(label);
         }
     }
@@ -444,9 +444,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 return (afterSave ? afterSave() : Promise.resolve()).then(() => {
                     this.chooseRouteAfterSave(entity);
                     if (entity['name']) {
-                        this.consoleService.log('info', this.ROUTING_NAME[0].toUpperCase() + this.ROUTING_NAME.slice(1) + ' ' + entity['name'] + ' has been successfully saved under the id ' + entity.id);
+                        this.consoleService.log('info', this.getRoutingName()[0].toUpperCase() + this.getRoutingName().slice(1) + ' ' + entity['name'] + ' has been successfully saved under the id ' + entity.id);
                     } else {
-                        this.consoleService.log('info', 'New ' + this.ROUTING_NAME + ' successfully saved with n° ' + entity.id);
+                        this.consoleService.log('info', 'New ' + this.getRoutingName() + ' successfully saved with n° ' + entity.id);
                     }
                     this._entity.id = entity.id;
                     return entity;
@@ -457,7 +457,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 this.onSave.next(this.entity);
                 return (afterSave ? afterSave() : Promise.resolve()).then(() => {
                     this.chooseRouteAfterSave(this.entity);
-                    this.consoleService.log('info', this.ROUTING_NAME + ' n°' + this.entity.id + ' successfully updated');
+                    this.consoleService.log('info', this.getRoutingName() + ' n°' + this.entity.id + ' successfully updated');
                     return this.entity;
                 });
             });
@@ -655,7 +655,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     protected openDeleteConfirmDialog = (entity: T) => {
         const msg = this.getOnDeleteConfirmMessage ? this.getOnDeleteConfirmMessage(entity) : null;
-        this.getService().deleteWithConfirmDialog(this.ROUTING_NAME, entity, msg).then(deleted => {
+        this.getService().deleteWithConfirmDialog(this.getRoutingName(), entity, msg).then(deleted => {
             if (deleted) {
                 if (this.treeService.treeOpened && this.treeService.treeAvailable) {
                     this.goToParent();

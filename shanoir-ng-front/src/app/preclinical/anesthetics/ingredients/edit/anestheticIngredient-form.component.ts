@@ -51,7 +51,11 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
         private referenceService: ReferenceService)
     {
 
-        super(route, 'preclinical-anesthetic-ingredient');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'preclinical-anesthetic-ingredient';
     }
 
     get ingredient(): AnestheticIngredient { return this.entity; }

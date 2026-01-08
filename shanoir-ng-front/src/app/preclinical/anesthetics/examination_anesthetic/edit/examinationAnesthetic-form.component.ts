@@ -55,7 +55,11 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         private referenceService: ReferenceService,
         private anestheticService: AnestheticService
     ) {
-        super(route, 'preclinical-examination-anesthetics');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'preclinical-examination-anesthetics';
     }
 
     get examinationAnesthetic(): ExaminationAnesthetic { return this.entity; }

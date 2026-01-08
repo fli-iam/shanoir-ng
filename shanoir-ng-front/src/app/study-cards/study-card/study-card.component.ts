@@ -72,7 +72,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
             keycloakService: KeycloakService,
             private centerService: CenterService,
             coilService: CoilService) {
-        super(route, 'study-card');
+        super(route);
         coilService.getAll().then(coils => this.allCoils = coils);
         this.subscriptions.push(this.onSave.subscribe(() => {
             const studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
@@ -81,7 +81,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
                 DUAAssistantComponent.openCreateDialog(studyIdforDUA, this.confirmDialogService, this.router);
             }
         }));
-     }
+    }
+
+    protected getRoutingName(): string {
+        return 'study-card';
+    }
 
     getService(): EntityService<StudyCard> {
         return this.studyCardService;

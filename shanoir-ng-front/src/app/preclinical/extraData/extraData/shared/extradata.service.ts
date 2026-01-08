@@ -47,8 +47,8 @@ export class ExtraDataService extends EntityService<ExtraData>{
             .then((entity) => this.toRealObject(entity));
     }
 
-    downloadFile(examId: number): Promise<void> {
-        const endpoint = this.API_URL + '/extradata/download/' + examId;
+    downloadFile(id: number): Promise<void> {
+        const endpoint = this.API_URL + '/extradata/download/' + id;
         return this.downloadService.downloadSingleFile(endpoint).toPromise().then(() => null);
     }
 

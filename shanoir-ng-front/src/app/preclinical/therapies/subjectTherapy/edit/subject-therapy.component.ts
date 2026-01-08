@@ -44,7 +44,11 @@ export class SubjectTherapyComponent extends EntityComponent<SubjectTherapy> {
             private route: ActivatedRoute,
             private therapyService: TherapyService,
             private referenceService: ReferenceService) {
-        super(route, 'subject-pathology');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'subject-pathology';
     }
 
     get subjectTherapy(): SubjectTherapy { return this.entity; }

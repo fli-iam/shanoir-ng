@@ -71,15 +71,19 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
 
     constructor(
         private route: ActivatedRoute,
-        private examinationService: ExaminationService,
-        private centerService: CenterService,
-        private studyService: StudyService,
-        private studyRightsService: StudyRightsService,
+        protected examinationService: ExaminationService,
+        protected centerService: CenterService,
+        protected studyService: StudyService,
+        protected studyRightsService: StudyRightsService,
         public breadcrumbsService: BreadcrumbsService,
-        private downloadService: MassDownloadService
+        protected downloadService: MassDownloadService
     ) {
-        super(route, 'examination');
+        super(route);
         this.inImport = this.breadcrumbsService.isImporting();
+    }
+
+    protected getRoutingName(): string {
+        return 'examination';
     }
 
     public setFile() {

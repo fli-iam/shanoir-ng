@@ -19,7 +19,6 @@ import { ActivatedRoute } from '@angular/router';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
-import { BloodGasData } from '../shared/bloodGasData.model';
 import { BloodGasDataFile } from '../shared/bloodGasDataFile.model';
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
@@ -33,31 +32,34 @@ import { ExtraData } from '../../extraData/shared/extradata.model';
     animations: [slideDown],
     standalone: false
 })
-export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
+export class BloodGasDataFormComponent extends EntityComponent<BloodGasDataFile> {
 
     @Input() examinationId:number;
-    @Input() isStandalone:boolean = false;
     @Input() canModify: boolean = false;
 
-    fileToUpload: File = null;
     @Output() bloodGasDataReady = new EventEmitter();
 
     constructor(
         private route: ActivatedRoute,
         private extradatasService: ExtraDataService) {
 
-        super(route, 'preclinical-bloodgasdata');
+        super(route);
     }
 
-    get bloodGasData(): BloodGasData { return this.entity; }
-    set bloodGasData(bloodGasData: BloodGasData) { this.entity = bloodGasData; }
+    protected getRoutingName(): string {
+        return 'preclinical-bloodgasdata';
+    }
 
-    getService(): EntityService<BloodGasData> {
+    get bloodGasData(): BloodGasDataFile { return this.entity; }
+    set bloodGasData(bloodGasData: BloodGasDataFile) { this.entity = bloodGasData; }
+
+    getService(): EntityService<any> {
         return this.extradatasService;
     }
 
-    protected fetchEntity: () => Promise<BloodGasData> = () => {
+    protected fetchEntity: () => Promise<BloodGasDataFile> = () => {
         return  this.extradatasService.getExtraDatas(this.examinationId).then(extradatas => {
+            console.log("Fetched extra datas for examination ", this.examinationId, extradatas);
             return this.loadExaminationExtraDatas(extradatas);
         });
     }
@@ -71,18 +73,19 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     }
 
     initCreate(): Promise<void> {
-        this.entity = new BloodGasData();
+        this.entity = new BloodGasDataFile();
         return Promise.resolve();
     }
 
-    loadExaminationExtraDatas(extradatas: ExtraData[]): BloodGasData {
+    loadExaminationExtraDatas(extradatas: ExtraData[]): BloodGasDataFile {
     	for (const ex of extradatas) {
+            console.log("Exam extra data type: ", ex.extraDataType, ex.extraDataType == "Blood gas data");
     		// instanceof does not work??
-    		if (ex.extradatatype != "Physiological data"){
-    			return ex as BloodGasData;
+    		if (ex.extraDataType == "Blood gas data") {
+    			return ex as BloodGasDataFile;
     		}
     	}
-        return new BloodGasData();
+        return new BloodGasDataFile();
     }
 
     buildForm(): UntypedFormGroup {
@@ -90,7 +93,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
         });
     }
 
-    public save(): Promise<BloodGasData> {
+    public save(): Promise<BloodGasDataFile> {
         return this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA,this.bloodGasData).then((bloodGasData) => {
             this.chooseRouteAfterSave(this.bloodGasData);
             this.consoleService.log('info', 'New preclinical bloodgasdata successfully saved with n° ' + bloodGasData.id);
@@ -103,15 +106,11 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     }
 
     fileChangeEvent(files: FileList){
-    	this.fileToUpload = files.item(0);
-    	this.bloodGasData.filename= this.fileToUpload.name;
-    	const bloodGasDataFile: BloodGasDataFile = new BloodGasDataFile();
-    	bloodGasDataFile.filename = this.fileToUpload.name;
-    	bloodGasDataFile.bloodGasDataFile = this.fileToUpload;
-    	if(!this.isStandalone){
-    	 	this.bloodGasDataReady.emit(bloodGasDataFile);
-    	 }
-      	this.bloodGasData = new BloodGasData();
+    	this.bloodGasData.filename = files.item(0)?.name;
+    	this.bloodGasData.bloodGasDataFile = files.item(0);
+    	if(this.embedded){
+    	 	this.bloodGasDataReady.emit(this.bloodGasData);
+        }
     }
 
     public async hasDeleteRight(): Promise<boolean> {

@@ -107,8 +107,12 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
             protected downloadService: MassDownloadService) {
-        super(route, 'study');
+        super(route);
         this.activeTab = 'general';
+    }
+
+    protected getRoutingName(): string {
+        return 'study';
     }
 
     public set activeTab(param : string) {

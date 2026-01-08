@@ -133,7 +133,7 @@ public class ExtraDataApiController implements ExtraDataApi {
         }
         // Guarantees it is a creation, not an update
         extradata.setId(null);
-        extradata.setExtradatatype("Extra data");
+        extradata.setExtraDataType("Extra data");
         try {
             final ExaminationExtraData createdExtraData = extraDataService.save(extradata);
             return new ResponseEntity<>(createdExtraData, HttpStatus.OK);
@@ -162,7 +162,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 
         // Guarantees it is a creation, not an update
         extradata.setId(null);
-        extradata.setExtradatatype("Physiological data");
+        extradata.setExtraDataType("Physiological data");
 
         /* Save extradata in db. */
         try {
@@ -191,7 +191,7 @@ public class ExtraDataApiController implements ExtraDataApi {
         }
         // Guarantees it is a creation, not an update
         extradata.setId(null);
-        extradata.setExtradatatype("Blood gas data");
+        extradata.setExtraDataType("Blood gas data");
         try {
             final BloodGasData createdExtraData = bloodGasDataService.save(extradata);
             return new ResponseEntity<>(createdExtraData, HttpStatus.OK);

@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div #formContainer class="BloodGasDataFormComponent content-component" >
 	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
-		<div *ngIf="isStandalone" class="footer command-zone">
+		<div *ngIf="!embedded" class="footer command-zone">
 			<form-footer
 				[state]="footerState"
 				(save)="save()"
@@ -22,7 +22,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(back)="goBack()">
 			</form-footer>
 		</div>
-		<span *ngIf="isStandalone" class="right-col" [ngSwitch]="mode">
+		<span *ngIf="!embedded" class="right-col" [ngSwitch]="mode">
 			<ng-template [ngSwitchCase]="'view'"> 
 				<div class="header command-zone" i18n="View bloodgasdata|Title">View blood gas data</div>
 			</ng-template>
@@ -32,14 +32,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</span>
 
 		<fieldset>
-			<legend *ngIf="!isStandalone">Blood gas data</legend>
+			<legend *ngIf="embedded">Blood gas data</legend>
 			<ol>
 				<li  class="required">
 					<label i18n="Edit bloodgasdata|File label">File</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template  [ngSwitchCase]="'view'">
 							{{bloodGasData?.filename}}
-                           <button *ngIf="bloodGasData?.filename" class="button-picto clickable" (click)="downloadFile()">
+                           <button *ngIf="bloodGasData?.filename" class="download" (click)="downloadFile()">
                                 <i class="fas fa-download"></i>
                             </button>
 						</ng-template>
