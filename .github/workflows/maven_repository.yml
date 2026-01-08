@@ -1,8 +1,8 @@
 name: Publish Maven packages
 
 on:
-  release:
-    types: [created]
+  workflow_dispatch:
+
 jobs:
   publish:
     runs-on: ubuntu-latest
