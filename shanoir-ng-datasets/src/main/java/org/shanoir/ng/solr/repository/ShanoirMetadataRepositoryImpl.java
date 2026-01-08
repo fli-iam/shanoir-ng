@@ -380,25 +380,20 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 
     @Override
     public ShanoirMetadata findOneSolrDoc(Long datasetId) {
-
         String clause = " AND d.id = " + datasetId;
 
-        List<ShanoirMetadata> processedResult = this.findSolr(clause);
-        if (!processedResult.isEmpty()) {
+        // Check first if it's a dataset processing.
+        List<ShanoirMetadata> processedResult = this.findSolrProcessed(clause);
+        if (!processedResult.isEmpty())
             return processedResult.get(0);
-        }
 
         List<ShanoirMetadata> result = this.findSolr(clause);
-
-        if (result.isEmpty()) {
+        if (result.isEmpty())
             return null;
-        }
-
         if (result.size() > 1) {
             LOG.error("Solr query returned multiple result for dataset [{}]. Please check database consistency.", datasetId);
             return null;
         }
-
         return result.get(0);
     }
 
@@ -439,8 +434,6 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 
         Query bidsQuery = em.createNativeQuery(BIDS_QUERY + clause, RESULTSET_MAPPING);
         result.addAll(bidsQuery.getResultList());
-
-        result.addAll(this.findSolrProcessed(clause));
 
         Query measurementQuery = em.createNativeQuery(MEASUREMENT_QUERY + clause, RESULTSET_MAPPING);
         result.addAll(measurementQuery.getResultList());
