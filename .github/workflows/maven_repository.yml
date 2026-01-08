@@ -1,4 +1,4 @@
-name: Publish Shanoir Maven packages to GitHub Packages
+name: Publish Maven packages
 
 on:
   release:
