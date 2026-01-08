@@ -14,20 +14,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
       
-      - name: Set up JDK 21
+      - name: JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
-          
-      - name: Maven Cache
-        uses: actions/cache@v3
+
+      - name: Maven cache
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
       
-      - name: Publish package
+      - name: Publish Maven package
         run: mvn -f ./shanoir-ng-ms-common/pom.xml --batch-mode deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
