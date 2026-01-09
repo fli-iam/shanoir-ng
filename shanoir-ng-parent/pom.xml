@@ -24,7 +24,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<packaging>pom</packaging>
 
 	<name>shanoir-ng-parent</name>
-	<description>Parent project for Shanoir NG</description>
+	<description>Parent project for Shanoir</description>
 
 	<modules>
 		<module>../shanoir-ng-keycloak-auth</module>
