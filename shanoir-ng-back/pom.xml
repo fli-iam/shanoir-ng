@@ -18,12 +18,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.0</version>
-		<relativePath/>
-	</parent>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.1</version>
+        <relativePath />
+    </parent>
 
 	<groupId>org.shanoir-ng</groupId>
 	<artifactId>shanoir-ng-back</artifactId>
@@ -36,7 +36,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<module>../shanoir-ng-ms-common</module>
 		<module>../shanoir-ng-study-rights</module>
 		<module>../shanoir-ng-anonymization</module>
-		<module>../shanoir-ng-studies</module>
+        <module>../shanoir-ng-users</module>
+        <module>../shanoir-ng-studies</module>
 		<module>../shanoir-ng-datasets</module>
 		<module>../shanoir-ng-import</module>
 		<module>../shanoir-ng-preclinical</module>
@@ -65,11 +66,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	    </dependencies>
 	</dependencyManagement>
 	<dependencies>
-		<!-- Spring Boot dependencies -->
+        <!-- Spring Boot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-restclient</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
@@ -97,10 +102,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<!-- do not put scope test here: compile errors: org.json package will be missing -->
+            <!-- do not put scope test here: compile errors: org.json package will be missing -->
 		</dependency>
 
-		<!-- Spring dependencies -->
+        <!-- Spring dependencies -->
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-keyvalue</artifactId>
@@ -113,10 +118,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
-			<!-- do not put scope test here: compile errors -->
+            <!-- do not put scope test here: compile errors -->
 		</dependency>
 
-		<!-- duplicate definition, but only here to avoid warning in maven compile -->
+        <!-- duplicate definition, but only here to avoid warning in maven compile -->
 		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
@@ -127,14 +132,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>hibernate-ant</artifactId>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
+        <!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
 		<dependency>
 			<groupId>org.mapstruct</groupId>
 			<artifactId>mapstruct</artifactId>
 			<version>${mapstruct.version}</version>
 		</dependency>
 
-		<!-- Keycloak -->
+        <!-- Keycloak -->
 		<dependency>
 			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-admin-client</artifactId>
@@ -147,7 +152,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</exclusions>
 		</dependency>
 
-		<!-- Commons -->
+        <!-- Commons -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
@@ -163,7 +168,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<version>2.8.5</version>
 		</dependency>
 
-		<!-- DCM4CHE dependencies -->
+        <!-- DCM4CHE dependencies -->
 		<dependency>
 			<groupId>org.dcm4che</groupId>
 			<artifactId>dcm4che-core</artifactId>
@@ -202,7 +207,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		    <version>${dcm4che.version}</version>
 		</dependency>
 
-		<!-- Testing -->
+        <!-- Testing -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>

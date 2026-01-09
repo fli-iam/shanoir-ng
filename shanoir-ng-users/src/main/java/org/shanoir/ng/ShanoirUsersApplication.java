@@ -27,11 +27,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @SpringBootApplication
 @ComponentScan(
-    basePackages = "org.shanoir.ng",
-    excludeFilters = @ComponentScan.Filter(
-        type = FilterType.ASSIGNABLE_TYPE,
-        classes = org.shanoir.ng.shared.configuration.CommonConfiguration.class
-    )
+        basePackages = "org.shanoir.ng",
+        excludeFilters = @ComponentScan.Filter(
+            type = FilterType.ASSIGNABLE_TYPE,
+            classes = org.shanoir.ng.shared.configuration.CommonConfiguration.class
+        )
 )
 @EnableScheduling
 public class ShanoirUsersApplication {

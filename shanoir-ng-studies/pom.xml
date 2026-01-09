@@ -24,10 +24,10 @@
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-studies</name>
-	<description>Shanoir-NG Studies Microservice</description>
+	<description>Shanoir studies microservice</description>
 
 	<dependencies>
-		<!-- Common MS dependency -->
+		<!-- Shanoir -->
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
