@@ -26,8 +26,8 @@ jobs:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
-      
-      - name: Publish Maven package
-        run: mvn -f ./shanoir-ng-ms-common/pom.xml --batch-mode deploy
+
+      - name: Publish Maven package ng-back
+        run: mvn -f ./shanoir-ng-back/pom.xml --batch-mode deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

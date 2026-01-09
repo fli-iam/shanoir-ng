@@ -290,4 +290,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</repository>
 	</repositories>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/fli-iam/shanoir-ng</url>
+        </repository>
+    </distributionManagement>
+
 </project>
