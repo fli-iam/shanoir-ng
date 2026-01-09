@@ -375,7 +375,10 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
 
     @Override
     public List<ShanoirMetadata> findAllAsSolrDoc() {
-        return this.findSolr("");
+        List<ShanoirMetadata> allDocs = new ArrayList<>();
+        allDocs.addAll(this.findSolrProcessed(""));
+        allDocs.addAll(this.findSolr(" AND d.dataset_processing_id IS NULL"));
+        return allDocs;
     }
 
     @Override
