@@ -106,6 +106,8 @@ form { color: var(--dark-grey); position: relative; }
   form textarea { resize: vertical; }
   form button:not(.normal) { margin-top: 10px; margin-bottom: 10px; }
   form input:not([type]), form input[type='text'], form input[type='password'], form input[type='email'], form textarea, form select, form select-box { width: 220px; }
+  form input.small { width: 75px; }
+  form .units { margin-left: 20px; }
   form fieldset { border: 0; padding: 0; margin: 30px 0; display: block; min-width: 504px; }
   form fieldset.disabled { color: var(--grey); }
   form fieldset ~ fieldset { margin-right: 20px; }

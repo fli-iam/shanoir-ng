@@ -182,21 +182,22 @@ export class AnimalExaminationFormComponent extends ExaminationComponent {
     }
 
     onUploadPhysiologicalData(event) {
+        const firstInit: boolean = !this.physioDataFile;
         const fileChanged: boolean = this.physioDataFile?.physiologicalDataFile?.name != event?.physiologicalDataFile?.name;
         this.physioDataFile = event;
         this.physioDataFile.extraDataType = "Physiological data";
         if (fileChanged) {
-            this.examination.extraDataFilePathList.push(this.physioDataFile.physiologicalDataFile.name);
             this.files.push(this.physioDataFile.physiologicalDataFile);
         }
-        this.form.markAsDirty();
-        this.form.updateValueAndValidity();
+        if (!firstInit) {
+            this.form.markAsDirty();
+            this.form.updateValueAndValidity();
+        }
     }
 
     onUploadBloodGasData(event) {
         this.bloodGasDataFile = event;
         this.bloodGasDataFile.extraDataType = "Blood gas data";
-        this.examination.extraDataFilePathList.push(this.bloodGasDataFile.bloodGasDataFile.name);
         this.files.push(this.bloodGasDataFile.bloodGasDataFile);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();

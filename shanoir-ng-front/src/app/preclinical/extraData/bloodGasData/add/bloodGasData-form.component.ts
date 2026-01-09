@@ -59,7 +59,6 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasDataFile>
 
     protected fetchEntity: () => Promise<BloodGasDataFile> = () => {
         return  this.extradatasService.getExtraDatas(this.examinationId).then(extradatas => {
-            console.log("Fetched extra datas for examination ", this.examinationId, extradatas);
             return this.loadExaminationExtraDatas(extradatas);
         });
     }
@@ -79,7 +78,6 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasDataFile>
 
     loadExaminationExtraDatas(extradatas: ExtraData[]): BloodGasDataFile {
     	for (const ex of extradatas) {
-            console.log("Exam extra data type: ", ex.extraDataType, ex.extraDataType == "Blood gas data");
     		// instanceof does not work??
     		if (ex.extraDataType == "Blood gas data") {
     			return ex as BloodGasDataFile;

@@ -44,11 +44,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </button>
 						</ng-template>
 						<ng-template  [ngSwitchCase]="'create'">
-							<input type="file" id="bloodgasdataFile" name="bloodgasdataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+							<upload-file name="bloodgasdataFile" [noFilename]="true" (fileChange)="fileChangeEvent($event.target.files)"></upload-file>
 						</ng-template>
 						<ng-template  [ngSwitchCase]="'edit'">
 							{{bloodGasData?.filename}}
-							<input type="file" id="bloodgasdataFile" name="bloodgasdataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+							<upload-file name="bloodgasdataFile" [noFilename]="true" (fileChange)="fileChangeEvent($event.target.files)"></upload-file>
 						</ng-template>
 					</span>
 				</li>				

@@ -158,13 +158,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{examination.subjectWeight}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" id="subjectWeight" formControlName="subjectWeight"/>
+							<input class="small" type="text" id="subjectWeight" formControlName="subjectWeight"/>
 						</ng-template>
 
-                        <span class="right-col" *ngIf="mode != 'view'">
-                                <input id="{{unit.KG}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" value="{{unit.KG}}" />{{getUnit(unit.KG.toString())}}
+                        <span *ngIf="mode != 'view'" class="units">
+							<input id="{{unit.KG}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" value="{{unit.KG}}" />{{getUnit(unit.KG.toString())}}
                             <input id="{{unit.G}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" value="{{unit.G}}" />{{getUnit(unit.G.toString())}}
-                            </span>
+						</span>
 
 					</span>
 				</li>
