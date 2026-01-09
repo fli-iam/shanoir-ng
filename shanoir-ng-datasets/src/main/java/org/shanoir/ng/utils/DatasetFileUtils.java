@@ -21,10 +21,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -38,6 +35,8 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.DatasetDownloadError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.UriUtils;
@@ -56,6 +55,8 @@ public final class DatasetFileUtils {
     private static final String UNDERSCORE = "_";
 
     public static final String INPUT = "input.json";
+
+    protected static final Logger LOG = LoggerFactory.getLogger(DatasetFileUtils.class);
 
     public static File getUserImportDir(String importDir) {
         final Long userId = KeycloakUtil.getTokenUserId();
@@ -101,12 +102,12 @@ public final class DatasetFileUtils {
      * @param urls
      * @param subjectName         the subjectName
      * @param datasetFilePath
-     * @param datasetDownloadName
+     * @param datasetDownloadNameListPerPath
      * @return
      * @throws IOException
      * @throws MessagingException
      */
-    public static List<String> copyFilesForDownload(final List<URL> urls, final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName, String datasetFilePath, String datasetDownloadName)
+    public static List<String> copyFilesForDownload(final List<URL> urls, final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName, String datasetFilePath, Map<String, List<String>> datasetDownloadNameListPerPath)
             throws IOException {
 
         List<String> filesInZip = new ArrayList<>();
@@ -117,8 +118,19 @@ public final class DatasetFileUtils {
             String srcPath = srcFile.getAbsolutePath();
 
             // Generate the target file name
-            String fileName = getFileName(keepName, srcFile, subjectName, dataset, index, datasetDownloadName);
-            fileName = fileName.replace(File.separator, UNDERSCORE);
+            String fileName = getFileName(keepName, srcFile, subjectName, dataset, index);
+            fileName = fileName.replace(File.separator, UNDERSCORE); // avoid nested folders
+
+            if (!datasetDownloadNameListPerPath.containsKey(datasetFilePath)) {
+                datasetDownloadNameListPerPath.put(datasetFilePath, new ArrayList<>(List.of(fileName)));
+            } else {
+                List<String> nameListForFilePath = datasetDownloadNameListPerPath.get(datasetFilePath);
+                String finalFileName = fileName;
+                if (nameListForFilePath.contains(finalFileName)) {
+                    fileName = fileName.replaceFirst("\\.", "_" + nameListForFilePath.stream().filter(name -> Objects.equals(name, finalFileName)).count() + ".");
+                }
+                nameListForFilePath.add(finalFileName);
+            }
 
             // Add folder path if specified
             if (datasetFilePath != null)
@@ -173,12 +185,14 @@ public final class DatasetFileUtils {
         zipOutputStream.closeEntry();
     }
 
-    public static String getFileName(boolean keepName, File srcFile, String subjectName, Dataset dataset, int index, String datasetDownloadName) {
-        if (dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
-            return datasetDownloadName;
-        }
+    public static String getFileName(boolean keepName, File srcFile, String subjectName, Dataset dataset, int index) {
         if (keepName) {
-            return srcFile.getName();
+            String fileName = srcFile.getName();
+            String prefix = fileName.split("\\.", 2)[0];
+            if (prefix.matches("\\d+") || prefix.matches("\\d+_info")) {
+                fileName = dataset.getName() + "_" + fileName;
+            }
+            return fileName;
         }
 
         // Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
@@ -204,6 +218,7 @@ public final class DatasetFileUtils {
         } else {
             name.append(FilenameUtils.getExtension(srcFile.getName()));
         }
+
         return name.toString();
     }
 

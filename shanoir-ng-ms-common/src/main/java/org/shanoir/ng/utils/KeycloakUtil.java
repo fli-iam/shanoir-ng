@@ -46,6 +46,8 @@ public final class KeycloakUtil {
 
     public static final String USER_ID_TOKEN_ATT = "userId";
 
+    public static final String ROLE_ADMIN = "ROLE_ADMIN";
+
     /**
      * Get current user roles from Keycloak token.
      *
@@ -170,6 +172,10 @@ public final class KeycloakUtil {
 
     public static boolean isUserAnonymous() {
         return (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken);
+    }
+
+    public static boolean isAdmin() {
+        return getTokenRoles().contains(ROLE_ADMIN);
     }
 
 }

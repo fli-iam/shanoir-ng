@@ -56,6 +56,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
@@ -136,6 +137,10 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Autowired
     private StudyCardService studyCardService;
+
+    @Autowired
+    @Lazy
+    private SubjectRepository subjectRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
