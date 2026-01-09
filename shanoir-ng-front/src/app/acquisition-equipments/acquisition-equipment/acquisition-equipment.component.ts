@@ -43,8 +43,8 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     public centers: IdName[];
     public centersFromStudyCard;
     public datasetModalityTypeStr: string;
-    private currentManufAndSerial: ManufacturerAndSerial;
-    fromImport: string;
+    private currentManufAndSerialAndCenter: ManufacturerAndSerialAndCenter;
+    private fromImport: string;
 
     get acqEquip(): AcquisitionEquipment { return this.entity; }
     set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
@@ -79,7 +79,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     initEdit(): Promise<void> {
-        this.currentManufAndSerial = new ManufacturerAndSerial(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber);
+        this.currentManufAndSerialAndCenter = new ManufacturerAndSerialAndCenter(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber, this.acqEquip.center);
         this.getManufModels();
         return Promise.all([
             this.centerService.getCentersNames()
@@ -122,24 +122,13 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     buildForm(): UntypedFormGroup {
         const form: UntypedFormGroup = this.formBuilder.group({
-            'serialNumber': [
-                this.acqEquip.serialNumber,
-                {
-                    validators: [this.noSpacesStartAndEndValidator],
-                    asyncValidators: [this.uniqueEquipmentValidator],
-                    updateOn: 'change'
-                }
-            ],
-            'manufacturerModel': [this.acqEquip.manufacturerModel,
-                {
-                    validators: [Validators.required],
-                    asyncValidators: [this.uniqueEquipmentValidator],
-                    updateOn: 'change'
-                }
-            ],
-            'center': [this.acqEquip.center, Validators.required],
+            'serialNumber': [this.acqEquip.serialNumber, [this.noSpacesStartAndEndValidator]],
+            'manufacturerModel': [this.acqEquip.manufacturerModel,[Validators.required]],
+            'center': [this.acqEquip.center, [Validators.required]],
+        },
+        {
+            asyncValidators: [this.uniqueEquipmentValidator]
         });
-        this.registerManufAndSerialUnicityValidator(form);
         return form;
     }
 
@@ -156,15 +145,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         this.navigateToAttributeCreateStep('/manufacturer-model/create', 'manufacturerModel');
     }
 
-    private registerManufAndSerialUnicityValidator(form: UntypedFormGroup) {
-        this.onSubmitValidatedFields.push('serialNumber');
-        this.subscriptions.push(
-            form.get('manufacturerModel').valueChanges.subscribe(() => {
-                form.get('serialNumber').updateValueAndValidity();
-            })
-        );
-    }
-
     private noSpacesStartAndEndValidator = (control: AbstractControl): ValidationErrors | null => {
         const valueStr: string = control.value;
         if (valueStr && (valueStr.startsWith(' ') || valueStr.endsWith(' '))) {
@@ -173,18 +153,19 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         return null;
     }
 
-    private uniqueEquipmentValidator: AsyncValidatorFn = async (control: AbstractControl): Promise<ValidationErrors | null> => {
-        if (!control.parent) return of(null);
+    private uniqueEquipmentValidator: AsyncValidatorFn = async (form: AbstractControl): Promise<ValidationErrors | null> => {
+        if (!form) return of(null);
 
-        const serialNumber = control.value;
-        const manufacturerModel = control.parent.get('manufacturerModel')?.value as ManufacturerModel;
+        const serialNumber = form.get('serialNumber')?.value as string;
+        const manufacturerModel = form.get('manufacturerModel')?.value as ManufacturerModel;
+        const center = form.get('center')?.value as Center;
 
-        if (!serialNumber || !manufacturerModel) return null;
-        if (serialNumber == this.currentManufAndSerial?.serial && manufacturerModel.id == this.currentManufAndSerial?.manuf.id) return null;
-
+        if (!serialNumber || !manufacturerModel || !center) return null;
+        if (serialNumber == this.currentManufAndSerialAndCenter?.serial && manufacturerModel.id == this.currentManufAndSerialAndCenter?.manuf.id && center.id == this.currentManufAndSerialAndCenter?.center.id) return null;
+        
         try {
             if (typeof serialNumber == 'string') {
-                const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel);
+                const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel, center);
                 return exists ? {unique: true} : null;
             }
         } catch {
@@ -197,9 +178,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 }
 
-export class ManufacturerAndSerial {
+export class ManufacturerAndSerialAndCenter {
     constructor(
         public manuf: ManufacturerModel,
-        public serial: string
+        public serial: string,
+        public center: Center
     ) {}
 }

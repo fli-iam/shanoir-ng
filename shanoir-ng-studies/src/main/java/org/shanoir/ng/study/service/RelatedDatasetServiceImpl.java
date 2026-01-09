@@ -26,6 +26,7 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
@@ -116,14 +117,13 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
     }
 
     @Override
-    public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds) {
+    public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds) throws SecurityException {
         String result = "";
         Long userId = KeycloakUtil.getTokenUserId();
         Study study = studyService.findById(studyId);
         StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
-        if (studyUser == null) {
-            LOG.error("You must be part of both studies to copy datasets.");
-            return "You must be part of both studies to copy datasets.";
+        if (!KeycloakUtil.isAdmin() && studyUser == null) {
+            throw new SecurityException("User not member of study " + study.getName() + ".");
         } else {
             List<StudyUserRight> rights = studyUser.getStudyUserRights();
             if (rights.contains(StudyUserRight.CAN_ADMINISTRATE) || rights.contains(StudyUserRight.CAN_IMPORT)) {
@@ -134,8 +134,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                     throw new RuntimeException(e);
                 }
             } else {
-                LOG.error("Missing IMPORT or ADMIN rights on destination study " + study.getName());
-                return "Missing IMPORT or ADMIN rights on destination study " + study.getName();
+                throw new SecurityException("Missing IMPORT or ADMIN rights on destination study " + study.getName());
             }
             return result;
         }

@@ -15,6 +15,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
+import { Center } from 'src/app/centers/shared/center.model';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ShanoirError } from "../../shared/models/error.model";
@@ -72,15 +74,16 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
         })
     }
 
-    checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel): Promise<boolean> {
+    checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel, center: Center): Promise<boolean> {
         return firstValueFrom(
             this.http.get<AcquisitionEquipment[]>(
                 `${AppUtils.BACKEND_API_ACQ_EQUIP_URL}/bySerialNumber/${serialNumber}`
             )
         ).then(equipments => {
             return equipments.some(equipment =>
-                equipment.manufacturerModel.id === manufacturerModel.id &&
-                equipment.serialNumber === serialNumber
+                equipment.manufacturerModel.id === manufacturerModel.id
+                && equipment.serialNumber === serialNumber
+                && equipment.center.id === center.id
             );
         }).catch(error => {
             if (error instanceof HttpErrorResponse && error.status === 404) {
