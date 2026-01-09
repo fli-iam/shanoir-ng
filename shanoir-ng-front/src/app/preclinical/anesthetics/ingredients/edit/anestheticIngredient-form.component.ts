@@ -114,15 +114,6 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
         this.createAIMode = creation;
     }
 
-    ngOnChanges(){
-    if(this.ingredientSelected){
-        this.loadIngredientAttributesForSelect(this.ingredientSelected);
-        }
-        if(this.toggleForm){
-            this.buildForm();
-        }
-    }
-
     loadIngredientAttributesForSelect(ingredientSelected:AnestheticIngredient) {
         this.ingredient = ingredientSelected;
 
@@ -145,7 +136,6 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
                 }
         }
     }
-
 
     cancelIngredient(){
         this.toggleFormAI(false);
