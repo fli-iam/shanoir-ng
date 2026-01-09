@@ -36,8 +36,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <modules>
         <module>../shanoir-ng-ms-common</module>
         <module>../shanoir-ng-study-rights</module>
-        <module>../shanoir-ng-users</module>
         <module>../shanoir-ng-anonymization</module>
+        <module>../shanoir-ng-users</module>
         <module>../shanoir-ng-studies</module>
         <module>../shanoir-ng-datasets</module>
         <module>../shanoir-ng-import</module>
