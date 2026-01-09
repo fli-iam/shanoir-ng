@@ -66,11 +66,11 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         private referenceService: ReferenceService) {
 
         super(route);
+        this.manageSaveEntity();
     }
 
     protected getRoutingName(): string {
         return 'preclinical-anesthetic';
-        this.manageSaveEntity();
     }
 
     get anesthetic(): Anesthetic { return this.entity; }

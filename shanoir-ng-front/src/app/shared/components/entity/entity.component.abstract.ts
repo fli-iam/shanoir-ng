@@ -536,13 +536,11 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     /** Maps an entity to the current entity. Used when restoring an entity from a back navigation. */
     protected mapEntityToEntity(entity: T) {
-        if (this.entity && entity) {
-            const declaredFields: string[] = getDeclaredFields(this.entity);
+        if (this.entity && entity && this.entity.constructor.name === entity.constructor.name) {
+            const declaredFields: string[] = getDeclaredFields(entity);
             declaredFields.forEach((key) => {
                 if (entity[key] !== undefined) {
                     this.entity[key] = entity[key];
-                } else {
-                    this.entity[key] = null;
                 }
             });
         }
@@ -639,7 +637,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                         currentObj = currentObj[part];
                         currentFormObj = currentFormObj.get(part) as FormGroup;
                     });
-                    if (currentObj) {
+                    const declaredFields: string[] = getDeclaredFields(this.entity);
+                    if (currentObj && declaredFields.includes(lastPart)) {
                         currentObj[lastPart] = res.value;
                         currentFormObj.get(lastPart)?.setValue(res.value, {emitEvent: false});
                         if (res.readonly) currentFormObj?.get(lastPart)?.disable({emitEvent: false});

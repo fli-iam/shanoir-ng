@@ -202,7 +202,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     }
 
     goToAddAnesthetic() {
-        this.router.navigate(['/preclinical-anesthetic/create']);
+        this.navigateToAttributeCreateStep('preclinical-anesthetic/create', 'anesthetic');
     }
 
     public save(): Promise<ExaminationAnesthetic> {
@@ -238,5 +238,4 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
     public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
-
 }

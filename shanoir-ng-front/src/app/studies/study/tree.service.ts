@@ -35,8 +35,8 @@ import { QualityCard } from 'src/app/study-cards/shared/quality-card.model';
 import { StudyCard } from 'src/app/study-cards/shared/study-card.model';
 import { Subject } from "src/app/subjects/shared/subject.model";
 import { User } from 'src/app/users/shared/user.model';
-
 import { AnimalSubject } from "src/app/preclinical/animalSubject/shared/animalSubject.model";
+
 import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode, CoilNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, MembersNode, MetadataNode, AnimalSubjectNode, ProcessingNode, QualityCardNode, RightNode, ShanoirNode, StudyCardNode, StudyNode, SubjectNode, SubjectsNode, UNLOADED } from '../../tree/tree.model';
 import { SuperPromise } from '../../utils/super-promise';
 import { StudyRightsService } from "../shared/study-rights.service";

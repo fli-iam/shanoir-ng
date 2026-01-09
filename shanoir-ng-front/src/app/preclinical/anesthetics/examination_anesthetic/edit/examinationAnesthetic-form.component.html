@@ -45,9 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{examinationAnesthetic?.anesthetic?.name}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="anesthetic"  formControlName="anesthetic">
-								<option *ngFor="let anesthetic of anesthetics" [ngValue]="anesthetic">{{anesthetic.name}}</option>
-							</select>
+							<select-box id="anesthetic" formControlName="anesthetic" [optionArr]="anesthetics"></select-box>
 							<button i18n="Edit examAnesthetic|Add a new anesthetic" (click)="goToAddAnesthetic()">
 								<i class="fas fa-plus-square"></i>
 								new anesthetic
