@@ -57,8 +57,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class DatasetSecurityService {
 
-    private static final String ROLE_ADMIN = "ROLE_ADMIN";
-
     @Autowired
     private DatasetRepository datasetRepository;
 
@@ -91,7 +89,7 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean hasRightOnStudy(Long studyId, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (studyId == null) {
@@ -108,7 +106,7 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean hasRightOnStudies(List<Long> studyIds, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (studyIds == null || studyIds.isEmpty()) {
@@ -128,7 +126,7 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean hasRightOnSubjectId(Long subjectId, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         Optional<Subject> subject = subjectRepository.findById(subjectId);
@@ -150,7 +148,7 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean hasRightOnSubjectName(String subjectName, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         Subject subject = subjectRepository.findByName(subjectName);
@@ -306,7 +304,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnDataset(Long datasetId, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
@@ -325,7 +323,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnNewDataset(Dataset dataset, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (dataset == null) {
@@ -436,7 +434,7 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean hasRightOnTrustedDataset(Dataset dataset, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (dataset == null) {
@@ -484,7 +482,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasUpdateRightOnDataset(Dataset dataset, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (dataset == null) {
@@ -846,7 +844,7 @@ public class DatasetSecurityService {
     * @return true
     */
     public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (list == null || list.isEmpty()) {
@@ -988,7 +986,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnExamination(Long examinationId, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         Examination exam = examinationRepository.findById(examinationId).orElse(null);
@@ -1011,7 +1009,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnTrustedExaminationDTO(ExaminationDTO examination, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (examination == null) {
@@ -1030,7 +1028,7 @@ public class DatasetSecurityService {
     }
 
     public boolean hasRightOnEveryDatasetOfProcessings(List<Long> processingIds, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN) || processingIds == null || processingIds.isEmpty()) {
+        if (KeycloakUtil.isAdmin() || processingIds == null || processingIds.isEmpty()) {
             return true;
         }
         List<DatasetForRights> datasets = datasetRepository.findAllInputsByProcessingId(processingIds)
@@ -1057,7 +1055,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnExaminations(List<Long> examinationIds, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         List<ExaminationForRightsDTO> exams = examinationRepository.findExaminationsForRights(examinationIds);
@@ -1080,7 +1078,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnExecutionCandidate(ExecutionCandidateDTO executionCandidate) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (executionCandidate == null) {

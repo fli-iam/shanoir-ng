@@ -180,9 +180,9 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
             if (rootEx.getMessage().contains("model_number_idx")) {
                 FieldErrorMap errorMap = new FieldErrorMap();
                 List<FieldError> errors = new ArrayList<>();
-                errors.add(new FieldError("unique", "The given manufModel/serial value couple is already taken, choose another ",
-                        acquisitionEquipment.getManufacturerModel().getId() + " / " + acquisitionEquipment.getSerialNumber()));
-                errorMap.put("manufacturerModel - serialNumber", errors);
+                errors.add(new FieldError("unique", "The given manufModel/serial/center value tuple is already taken, choose another ",
+                        acquisitionEquipment.getManufacturerModel().getId() + " / " + acquisitionEquipment.getSerialNumber() + " / " + acquisitionEquipment.getCenter().getId()));
+                errorMap.put("manufacturerModel - serialNumber - center", errors);
                 ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errorMap));
                 throw new RestServiceException(error);
             }
