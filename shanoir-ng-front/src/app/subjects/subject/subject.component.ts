@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {Component, OnDestroy} from '@angular/core';
-import { AbstractControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, AsyncValidatorFn, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import shajs from 'sha.js';
 
@@ -165,7 +165,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         const subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [this.subject.isAlreadyAnonymized],
-            'name': [this.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')]).concat(this.forbiddenNameValidator([this.subjectNamePrefix])).concat([this.notEmptyValidator()])],
+            'name': [this.subject.name, this.nameValidators.concat([this.forbiddenNameValidator([this.subjectNamePrefix]), this.notEmptyValidator()]), this.uniqueSubjectNameValidatorOnName],
             'firstName': [this.firstName],
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
@@ -192,12 +192,27 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
                 this.updateFormControl(subjectForm);
             })
         );
+        this.subscriptions.push(
+            subjectForm.get('study')!.valueChanges.subscribe(() => {
+                subjectForm.get('name')!.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+            })
+        );
         if (!this.subject.name && this.subjectNamePrefix) {
             this.subject.name = this.subjectNamePrefix;
         }
 
         return subjectForm;
     }
+
+    private uniqueSubjectNameValidatorOnName: AsyncValidatorFn = async (control: AbstractControl) => {
+        const subjectName = (control.value ?? '').toString().trim();
+        const studyId = control.parent?.get('study')?.value?.id as number | undefined;
+
+        if (!subjectName || !studyId) return null;
+
+        const exists = await this.subjectService.isSubjectNameExistForStudy(subjectName, studyId);
+        return exists ? { unique: true } : null;
+    };
 
     public onSelectStudy() {
         this.studyService.get(this.subject.study?.id).then(study => {
