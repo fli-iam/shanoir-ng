@@ -213,7 +213,7 @@ export class DatasetDTO {
             this.source = dataset.source;
             this.copies = dataset.copies;
             this.name = dataset.name;
-            this.datasetProcessing = (new DatasetProcessingOutDTO(dataset.datasetProcessing));
+            this.datasetProcessing = dataset.datasetProcessing ? (new DatasetProcessingOutDTO(dataset.datasetProcessing)) : null;
             this.type = dataset.type;
             this.processings = dataset.processings.map( (p: DatasetProcessing) => { return new DatasetProcessingOutDTO(p)} );
             if(dataset.datasetAcquisition) {
