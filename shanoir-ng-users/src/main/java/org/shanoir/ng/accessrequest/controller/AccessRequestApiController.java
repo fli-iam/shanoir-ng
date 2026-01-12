@@ -14,9 +14,10 @@
 
 package org.shanoir.ng.accessrequest.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Parameter;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.EmailService;
@@ -49,9 +50,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Api for access request, to make a demand on
@@ -225,7 +228,7 @@ public class AccessRequestApiController implements AccessRequestApi {
             @Parameter(name = "The future function of the user in the study he is invited in", required = true)
                 @RequestParam(value = "function", required = false) String function,
             @Parameter(name = "The email or login of the invited user.")
-                @RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException {
+                @RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JacksonException, AmqpException {
 
         boolean isEmail = emailOrLogin.contains("@");
 

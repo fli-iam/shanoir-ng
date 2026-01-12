@@ -30,8 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+
 
 @Component
 public class RabbitMQEventService {
@@ -55,7 +56,7 @@ public class RabbitMQEventService {
 
         try {
             return objectMapper.writeValueAsString(events);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOG.error("Error while serializing ShanoirEvent list.", e);
             throw new AmqpRejectAndDontRequeueException(e);
         }

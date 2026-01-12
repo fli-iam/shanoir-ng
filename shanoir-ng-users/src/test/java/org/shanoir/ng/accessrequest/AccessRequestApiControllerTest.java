@@ -59,8 +59,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+
 
 @WebMvcTest(AccessRequestApiController.class)
 @ActiveProfiles("test")
@@ -109,7 +110,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void saveNewAccessRequestWithStudyNameTest() throws JsonProcessingException, Exception {
+    public void saveNewAccessRequestWithStudyNameTest() throws JacksonException, Exception {
         AccessRequest request = createAccessRequest();
 
         // Access request is saved
@@ -132,7 +133,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void saveNewAccessRequestWithNoStudyNameTest() throws JsonProcessingException, Exception {
+    public void saveNewAccessRequestWithNoStudyNameTest() throws JacksonException, Exception {
         AccessRequest request = createAccessRequest();
         // Only change: the study name is null, we have to load it.
         request.setStudyName(null);
@@ -263,7 +264,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void resolveNewAccessRequestRefuse() throws JsonProcessingException, Exception {
+    public void resolveNewAccessRequestRefuse() throws JacksonException, Exception {
         AccessRequest request = createAccessRequest();
         user.setAccountRequestDemand(Boolean.TRUE);
         request.setUser(user);
@@ -282,7 +283,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void resolveNewAccessRequestRefuseNoDemand() throws JsonProcessingException, Exception {
+    public void resolveNewAccessRequestRefuseNoDemand() throws JacksonException, Exception {
         AccessRequest request = createAccessRequest();
         // No demand
         user.setAccountRequestDemand(Boolean.FALSE);
@@ -302,7 +303,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void resolveNewAccessRequestNoRequestTest() throws JsonProcessingException, Exception {
+    public void resolveNewAccessRequestNoRequestTest() throws JacksonException, Exception {
         // no ogoing request
         Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.empty());
 
@@ -373,7 +374,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void inviteNotExistingUserMailTest() throws JsonProcessingException, Exception {
+    public void inviteNotExistingUserMailTest() throws JacksonException, Exception {
         // We invite an user that does not exists
         Mockito.when(this.userService.findByEmail("mail@mail")).thenReturn(Optional.empty());
         //Mockito.when(this.userService.findByUsername("mail")).thenReturn(Optional.empty());
@@ -401,7 +402,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void inviteNotExistingUserLoginTest() throws JsonProcessingException, Exception {
+    public void inviteNotExistingUserLoginTest() throws JacksonException, Exception {
         // We invite an user that does not exists using its login
         //Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.empty());
         Mockito.when(this.userService.findByUsernameForInvitation("login")).thenReturn(Optional.empty());
