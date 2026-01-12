@@ -17,7 +17,9 @@ import { Validators, UntypedFormGroup } from '@angular/forms';
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
 
 import { PathologyModel }    from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
@@ -38,15 +40,20 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
 
     pathologies: Pathology[];
     uploadUrl: string;
+    downloadUrl: string;
+    hasAdministrateRight: boolean = false;
+    hasDownloadRight: boolean = false;
+    downloadState: TaskState = new TaskState();
     fileToUpload: File = null;
 
-    public isModelUnique = true;
+    isModelUnique = true;
 
     constructor(
         private route: ActivatedRoute,
         private modelService: PathologyModelService,
         private pathologyService: PathologyService,
-        private pathologyModelService: PathologyModelService
+        private pathologyModelService: PathologyModelService,
+        private studyRightsService: StudyRightsService,
     ) {
         super(route);
     }
@@ -65,7 +72,14 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
     }
 
     initView(): Promise<void> {
-        return Promise.resolve();
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasAdministrateRight = true;
+            this.hasDownloadRight = true;
+            return;
+        } else {
+            this.hasAdministrateRight = this.keycloakService.isUserAdminOrExpert();
+            this.hasDownloadRight = this.keycloakService.isUserAdminOrExpert();
+        }
     }
 
     initEdit(): Promise<void> {
@@ -184,5 +198,17 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
         return this.pathologyModelService.update(this.pathologyModel.id, this.pathologyModel).then(() => {
             return this.pathologyModel;
         }).catch(this.catchSavingErrors);
+    }
+
+    downloadModelSpecifications() {
+        if (this.pathologyModel.filename) {
+        	this.pathologyModelService.downloadFile(this.pathologyModel);
+        } else {
+        	this.openInformationDialog(this.pathologyModel);
+        }
+    }
+
+    openInformationDialog = (pathologyModel: PathologyModel) => {
+        this.confirmDialogService .inform('Download Specifications', 'No specifications have been found for ' + pathologyModel.name);
     }
 }
