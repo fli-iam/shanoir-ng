@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
-
 @Component
 public class RabbitMQEventService {
 
@@ -49,11 +48,8 @@ public class RabbitMQEventService {
     @RabbitHandler
     @Transactional
     public String getExecutionMonitoringEventByObjectId(Long objectId) {
-
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-
         List<ShanoirEvent> events = service.getEventsByObjectIdAndTypeIn(objectId.toString(), ShanoirEventType.EXECUTION_MONITORING_EVENT);
-
         try {
             return objectMapper.writeValueAsString(events);
         } catch (JacksonException e) {
