@@ -24,10 +24,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				@switch (mode) {
 					@case ('view') {
 						<h2 class="header command-zone">Details on subject pathology</h2>
-					} 
+					}
 					@case ('edit') {
 						<h2 class="header command-zone">Edit subject pathology</h2>
-					} 
+					}
 					@case ('create') {
 						<h2 class="header command-zone">Create a pathology record for a subject</h2>
 					}
@@ -65,7 +65,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{subjectPathology?.location?.value}}
 								}
 								@default {
-									<select-box formControlName="location" [optionArr]="locations" (newOption)="isUserAdmin() ? goToAddLocation() : null"></select-box>
+									<select-box formControlName="location" [optionArr]="locations" (newClick)="goToAddLocation()"></select-box>
 									<label *ngIf="hasError('location', ['required'])" [@slideDown]="hasError('location', ['required'])" class="form-validation-alert">Location is required!</label>
 								}
 							}
