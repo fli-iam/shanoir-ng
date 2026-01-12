@@ -42,7 +42,11 @@ export class TherapyFormComponent extends EntityComponent<Therapy>{
         private therapyService: TherapyService,
         private referenceService: ReferenceService) {
 
-            super(route, 'preclinical-therapy');
+            super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'preclinical-therapy';
         }
 
     get therapy(): Therapy { return this.entity; }

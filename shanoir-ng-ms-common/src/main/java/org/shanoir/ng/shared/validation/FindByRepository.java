@@ -16,7 +16,7 @@ package org.shanoir.ng.shared.validation;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.core.model.AbstractEntityInterface;
 
 /**
  * Custom repository for entities.
@@ -24,7 +24,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
  * @author msimon
  *
  */
-public interface FindByRepository<T extends AbstractEntity> {
+public interface FindByRepository<T extends AbstractEntityInterface> {
 
     /**
      * Find entities by field value.
