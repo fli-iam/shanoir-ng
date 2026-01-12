@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -33,10 +33,10 @@ import { ShanoirError } from '../../../../shared/models/error.model';
 })
 export class PathologyModelsListComponent extends BrowserPaginEntityListComponent<PathologyModel> {
   @ViewChild('modelsTable') table: TableComponent;
-    
+
   constructor(
-    private modelService: PathologyModelService, 
-    private subjectPathologyService: SubjectPathologyService) 
+    private modelService: PathologyModelService,
+    private subjectPathologyService: SubjectPathologyService)
     {
         super('preclinical-pathology-model');
     }
@@ -44,7 +44,7 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     getService(): EntityService<PathologyModel> {
         return this.modelService;
     }
-    
+
     getEntities(): Promise<PathologyModel[]> {
         return this.modelService.getAll();
     }
@@ -54,13 +54,13 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
             {headerName: "Name", field: "name"},
             {headerName: "Pathology", field: "pathology.name"},
             {headerName: "Comment", field: "comment"},
-            {headerName: "Specifications file", field: "filename", type: "string"} 
-            
+            {headerName: "Specifications file", field: "filename", type: "string"}
+
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {
             colDef.push({headerName: "", type: "button", awesome: "fa-solid fa-download",action: item => this.downloadModelSpecifications(item) });
         }
-        return colDef;       
+        return colDef;
     }
 
     getCustomActionsDefs(): any[] {
@@ -70,13 +70,13 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     getOptions() {
         return {
             new: true,
-            view: true, 
-            edit: this.keycloakService.isUserAdminOrExpert(), 
+            view: true,
+            edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()
         };
     }
-    
-        
+
+
     downloadModelSpecifications = (model:PathologyModel) => {
     	if (model.filename){
         	this.modelService.downloadFile(model);
@@ -84,13 +84,13 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
         	this.openInformationDialog(model);
         }
     }
-    
+
     openInformationDialog = (model:PathologyModel) => {
         this.confirmDialogService
             .inform('Download Specifications', 'No specifications have been found for ' + model.name);
     }
-    
-    
+
+
     protected openDeleteConfirmDialog = (entity: PathologyModel) => {
         this.subjectPathologyService.getAllSubjectForPathologyModel(entity.id).then(subjectPathologies => {
     		if (subjectPathologies){
@@ -108,10 +108,10 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     	}).catch((error) => {
             this.openDeletePathologyModelConfirmDialog(entity);
             throw error;
-    	});     
-    }   
-    
- 
+    	});
+    }
+
+
     private openDeletePathologyModelConfirmDialog = (entity: PathologyModel) => {
         if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.confirmDialogService
@@ -128,9 +128,9 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
                             this.onDelete.next({entity: entity, error: new ShanoirError(reason)});
                             if (reason.error.code != 422) throw Error(reason);
                         }
-                    });                    
+                    });
                 }
-            }) 
+            })
  	}
- 
+
 }
