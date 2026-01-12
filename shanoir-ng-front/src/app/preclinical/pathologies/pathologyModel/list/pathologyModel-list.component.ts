@@ -77,17 +77,16 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     }
 
 
-    downloadModelSpecifications = (model:PathologyModel) => {
-    	if (model.filename){
+    downloadModelSpecifications = (model: PathologyModel) => {
+    	if (model.filename) {
         	this.modelService.downloadFile(model);
-        }else{
+        } else {
         	this.openInformationDialog(model);
         }
     }
 
-    openInformationDialog = (model:PathologyModel) => {
-        this.confirmDialogService
-            .inform('Download Specifications', 'No specifications have been found for ' + model.name);
+    openInformationDialog = (model: PathologyModel) => {
+        this.confirmDialogService .inform('Download Specifications', 'No specifications have been found for ' + model.name);
     }
 
 

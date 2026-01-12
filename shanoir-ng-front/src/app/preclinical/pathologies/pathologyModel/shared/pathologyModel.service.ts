@@ -45,6 +45,10 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
         return `${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/upload/specs/`+model_id;
     }
 
+    getDownloadUrl(model_id: number): string {
+        return `${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/download/specs/`+model_id;
+    }
+
     downloadFile(model: PathologyModel): Promise<void> {
         return this.http.get(`${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/download/specs/`+model.id,
             { observe: 'response', responseType: 'blob' }
