@@ -31,6 +31,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -53,13 +54,17 @@ public class RabbitMqStudyUserService {
     @Autowired
     private JsonMapper mapper;
 
+    @Bean
+    SimpleModule addSimpleModule() {
+        SimpleModule module = new SimpleModule();
+        module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
+        return module;
+    }
+
     public void receiveStudyUsers(String commandArrStr) throws AmqpRejectAndDontRequeueException {
         StudyUserCommand[] commands;
         try {
             LOG.debug("Received study-user commands : {}", commandArrStr);
-            SimpleModule module = new SimpleModule();
-            module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
-            mapper.registerModule(module);
             commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
             service.processCommands(Arrays.asList(commands));
         } catch (Exception e) {
