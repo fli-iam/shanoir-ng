@@ -36,7 +36,11 @@ export class PathologyFormComponent extends EntityComponent<Pathology>{
         private route: ActivatedRoute,
         private pathologyService: PathologyService) {
 
-            super(route, 'preclinical-pathology');
+            super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'preclinical-pathology';
     }
 
     get pathology(): Pathology { return this.entity; }

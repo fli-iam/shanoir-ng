@@ -53,7 +53,11 @@ export class DatasetComponent extends EntityComponent<Dataset> {
             private dicomArchiveService: DicomArchiveService,
             private studyRightsService: StudyRightsService,
             private downloadService: MassDownloadService) {
-        super(route, 'dataset');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'dataset';
     }
 
     get dataset(): Dataset { return this.entity; }

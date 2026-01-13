@@ -92,7 +92,7 @@ public class SubjectTherapyApiControllerTest {
 
         doNothing().when(subTherapiesServiceMock).deleteById(1L);
         given(subTherapiesServiceMock.findAll()).willReturn(Arrays.asList(new SubjectTherapy()));
-        given(subjectsServiceMock.getBySubjectId(1L)).willReturn(new AnimalSubject());
+        given(subjectsServiceMock.getById(1L)).willReturn(new AnimalSubject());
         given(therapiesServiceMock.findById(1L)).willReturn(new Therapy());
         given(subTherapiesServiceMock.findById(1L)).willReturn(new SubjectTherapy());
         given(subTherapiesServiceMock.findAllByTherapy(new Therapy())).willReturn(Arrays.asList(new SubjectTherapy()));

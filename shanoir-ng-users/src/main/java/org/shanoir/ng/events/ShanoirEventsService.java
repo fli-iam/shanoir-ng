@@ -71,6 +71,7 @@ public class ShanoirEventsService {
                 || ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())
                 || ShanoirEventType.DOWNLOAD_STATISTICS_EVENT.equals(event.getEventType())
                 || ShanoirEventType.DELETE_DATASET_EVENT.equals(event.getEventType())
+                || ShanoirEventType.MASSIVE_OUTPUTS_DOWNLOAD.equals(event.getEventType())
                 || ShanoirEventType.DELETE_EXAMINATION_EVENT.equals(event.getEventType())
                 || ShanoirEventType.DELETE_NIFTI_EVENT.equals(event.getEventType())) {
             sendSseEventsToUI(saved);
