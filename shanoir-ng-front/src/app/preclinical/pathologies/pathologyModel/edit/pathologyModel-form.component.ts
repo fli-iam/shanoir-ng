@@ -14,7 +14,6 @@
 
 import { Component } from '@angular/core';
 import { Validators, UntypedFormGroup } from '@angular/forms';
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -143,14 +142,14 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
     	this.pathologyModel.filename = this.fileToUpload.name;
     }
 
-    public save(afterSave?: () => Promise<void>): Promise<PathologyModel> {
+    public save(): Promise<PathologyModel> {
         if (this.pathologyModel.id) {
             return this.updatePathologyModel().then(pathologyModel => {
                 if (this.fileToUpload)
                     this.pathologyModelService.postFile(this.fileToUpload, pathologyModel.id)
                         .subscribe({
-                            next: res => this.consoleService.log('info', 'File uploaded successfully'),
-                            error: err => this.consoleService.log('error', 'File upload failed')
+                            next: () => this.consoleService.log('info', 'File uploaded successfully'),
+                            error: () => this.consoleService.log('error', 'File upload failed')
                         });
 
                 this.onSave.next(pathologyModel);
@@ -169,8 +168,8 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
                 if (this.fileToUpload)
                     this.pathologyModelService.postFile(this.fileToUpload, pathologyModel.id)
                         .subscribe({
-                            next: res => this.consoleService.log('info', 'File uploaded successfully'),
-                            error: err => this.consoleService.log('error', 'File upload failed')
+                            next: () => this.consoleService.log('info', 'File uploaded successfully'),
+                            error: () => this.consoleService.log('error', 'File upload failed')
                         });
 
                 this.onSave.next(pathologyModel);
