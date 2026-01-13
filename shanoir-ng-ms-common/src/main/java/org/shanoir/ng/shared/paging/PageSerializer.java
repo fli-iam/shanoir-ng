@@ -29,7 +29,7 @@ public class PageSerializer extends StdSerializer<PageImpl> {
     }
 
     @Override
-    public void serialize(PageImpl value, JsonGenerator gen, SerializationContext provider) {
+    public void serialize(PageImpl value, JsonGenerator gen, SerializationContext context) {
         gen.writeStartObject();
         gen.writeNumberProperty("number", value.getNumber());
         gen.writeNumberProperty("numberOfElements", value.getNumberOfElements());
@@ -37,7 +37,7 @@ public class PageSerializer extends StdSerializer<PageImpl> {
         gen.writeNumberProperty("totalPages", value.getTotalPages());
         gen.writeNumberProperty("size", value.getSize());
         gen.writeName("content");
-        provider.defaultSerializeValue(value.getContent(), gen);
+        context.writeValue(gen, value.getContent());
         gen.writeEndObject();
     }
 
