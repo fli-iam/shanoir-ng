@@ -19,19 +19,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.shared.paging.Page;
+
+import tools.jackson.databind.ValueDeserializer;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonTokenId;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
-import com.fasterxml.jackson.databind.type.CollectionType;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonTokenId;
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.deser.ContextualDeserializer;
+import tools.jackson.databind.type.CollectionType;
 
-public class PageDeserializer extends JsonDeserializer<Page<?>> implements ContextualDeserializer {
+public class PageDeserializer extends ValueDeserializer<Page<?>> implements ContextualDeserializer {
     private static final String CONTENT = "content";
     private static final String NUMBER = "number";
     private static final String SIZE = "size";
@@ -87,7 +88,7 @@ public class PageDeserializer extends JsonDeserializer<Page<?>> implements Conte
      * The PageDeserializer is created for each specific deserialization with concrete generic parameter type of Page.
      */
     @Override
-    public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
+    public ValueDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
         //This is the Page actually
         final JavaType wrapperType = ctxt.getContextualType();
         final PageDeserializer deserializer = new PageDeserializer();

@@ -16,8 +16,9 @@ package org.shanoir.ng.shared.exception;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+
+import tools.jackson.core.JacksonException;
 
 /**
  * REST service exception.
@@ -65,7 +66,7 @@ public class RestServiceException extends Exception {
     public String toString() {
         try {
             return objectMapper != null ? objectMapper.writeValueAsString(errorModel) : errorModel.toString();
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "error while serializing errorModel : " + e.toString();
         }
     }

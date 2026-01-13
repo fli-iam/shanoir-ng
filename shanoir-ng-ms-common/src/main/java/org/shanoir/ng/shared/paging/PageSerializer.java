@@ -17,11 +17,12 @@ package org.shanoir.ng.shared.paging;
 import java.io.IOException;
 
 import org.springframework.boot.jackson.JacksonComponent;
+
+import tools.jackson.databind.SerializationContext;
 import org.springframework.data.domain.PageImpl;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 @JacksonComponent
 public class PageSerializer extends StdSerializer<PageImpl> {
@@ -33,14 +34,14 @@ public class PageSerializer extends StdSerializer<PageImpl> {
     }
 
     @Override
-    public void serialize(PageImpl value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(PageImpl value, JsonGenerator gen, SerializationContext provider) throws IOException {
         gen.writeStartObject();
-        gen.writeNumberField("number", value.getNumber());
-        gen.writeNumberField("numberOfElements", value.getNumberOfElements());
-        gen.writeNumberField("totalElements", value.getTotalElements());
-        gen.writeNumberField("totalPages", value.getTotalPages());
-        gen.writeNumberField("size", value.getSize());
-        gen.writeFieldName("content");
+        gen.writeNumberProperty("number", value.getNumber());
+        gen.writeNumberProperty("numberOfElements", value.getNumberOfElements());
+        gen.writeNumberProperty("totalElements", value.getTotalElements());
+        gen.writeNumberProperty("totalPages", value.getTotalPages());
+        gen.writeNumberProperty("size", value.getSize());
+        gen.writeName("content");
         provider.defaultSerializeValue(value.getContent(), gen);
         gen.writeEndObject();
     }
