@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.study.rights.ampq;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
@@ -33,9 +35,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import tools.jackson.databind.module.SimpleModule;
+
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 public class RabbitMqStudyUserService {
@@ -49,17 +51,15 @@ public class RabbitMqStudyUserService {
     private StudyUserRightsRepository studyUserRightsRepository;
 
     @Autowired
-    private ObjectMapper mapper;
+    private JsonMapper mapper;
 
     public void receiveStudyUsers(String commandArrStr) throws AmqpRejectAndDontRequeueException {
         StudyUserCommand[] commands;
         try {
             LOG.debug("Received study-user commands : {}", commandArrStr);
-
             SimpleModule module = new SimpleModule();
             module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
             mapper.registerModule(module);
-
             commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
             service.processCommands(Arrays.asList(commands));
         } catch (Exception e) {
