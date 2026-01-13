@@ -98,7 +98,7 @@ VALUES (1,NULL,NULL,NULL,NULL,NULL,NULL,1,NULL,1),
 		(3,NULL,NULL,NULL,NULL,NULL,NULL,3,NULL,3);
 
 INSERT INTO examination_extradata
-	(dtype, id, examination_id, extradatatype, filename, filepath, has_heart_rate, has_respiratory_rate, has_sao2, has_temperature)
+	(dtype, id, examination_id, extra_data_type, filename, filepath, has_heart_rate, has_respiratory_rate, has_sao2, has_temperature)
 VALUES ('ExaminationExtraData',1,1,'Extra data','extradata.txt','/home/sloury/Documents/FLI-IAM/SHANOIR_NG/upload/1/physiologicaldata/dictionnaire_dicom.txt',NULL,NULL,NULL,NULL),
 		('PhysiologicalData',2,1,'Physiological data','physiologicaldata.txt','/home/sloury/Documents/FLI-IAM/SHANOIR_NG/upload/1/bloodgasdata/dictionnaire_dicom.txt',0,1,1,0),
 		('BloodGasData',3,1,'Blood gas data','bloodgasdata.txt','/home/sloury/Documents/FLI-IAM/SHANOIR_NG/upload/1/physiologicaldata/dictionnaire_dicom.txt',NULL,NULL,NULL,NULL);
