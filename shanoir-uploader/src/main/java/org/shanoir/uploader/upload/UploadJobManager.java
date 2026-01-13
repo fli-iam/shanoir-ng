@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.upload;
 
 import java.io.File;
@@ -16,79 +30,77 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class UploadJobManager {
-	
-	private static final Logger logger = LoggerFactory.getLogger(UploadJobManager.class);
 
-	public static final String UPLOAD_JOB_XML = "upload-job.xml";
-	
-	private File uploadJobFile;
-	
-	/**
-	 * Initialize UploadJobManager empty and reset uploadJobFile
-	 * with method setUploadJobFile.
-	 */
-	public UploadJobManager() {
-	}
-	
-	/**
-	 * Initialize UploadJobManager with current upload folder path.
-	 * @param uploadFolder
-	 */
-	public UploadJobManager(final String uploadFolderPath) {
-		this.uploadJobFile = new File(
-			uploadFolderPath
-			+ File.separatorChar
-			+ UPLOAD_JOB_XML);
-		logger.debug("UploadJobManager initialized with file: "
-			+ this.uploadJobFile.getAbsolutePath());
-	}
-	
-	/**
-	 * Initialize UploadJobManager with UploadJob file.
-	 * @param uploadFolder
-	 */
-	public UploadJobManager(final File uploadJobFile) {
-		this.uploadJobFile = uploadJobFile;
-		logger.debug("UploadJobManager initialized with file: "
-			+ this.uploadJobFile.getAbsolutePath());
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.shanoir.uploader.upload.IUploadJobManager#writeUploadJob(org.shanoir.uploader.upload.UploadJob)
-	 */
-	public void writeUploadJob(final UploadJob uploadJob) {
-		JAXBContext jaxbContext;
-		try {
-			jaxbContext = JAXBContext.newInstance(UploadJob.class);
-			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-			jaxbMarshaller.marshal(uploadJob, uploadJobFile);
-		} catch (JAXBException e) {
-			logger.error(e.getMessage());
-		}
-	}
+    private static final Logger LOG = LoggerFactory.getLogger(UploadJobManager.class);
 
-	/* (non-Javadoc)
-	 * @see org.shanoir.uploader.upload.IUploadJobManager#readUploadJob()
-	 */
-	public UploadJob readUploadJob() {
-		try {
-			final JAXBContext jaxbContext = JAXBContext.newInstance(UploadJob.class);
-			final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-			final UploadJob uploadJob = (UploadJob) jaxbUnmarshaller.unmarshal(uploadJobFile);
-			return uploadJob;
-		} catch (JAXBException e) {
-			logger.error(e.getMessage());
-		}
-		return null;
-	}
+    public static final String UPLOAD_JOB_XML = "upload-job.xml";
 
-	public File getUploadJobFile() {
-		return uploadJobFile;
-	}
+    private File uploadJobFile;
 
-	public void setUploadJobFile(File uploadJobFile) {
-		this.uploadJobFile = uploadJobFile;
-	}
-	
+    /**
+     * Initialize UploadJobManager empty and reset uploadJobFile
+     * with method setUploadJobFile.
+     */
+    public UploadJobManager() {
+    }
+
+    /**
+     * Initialize UploadJobManager with current upload folder path.
+     * @param uploadFolder
+     */
+    public UploadJobManager(final String uploadFolderPath) {
+        this.uploadJobFile = new File(
+            uploadFolderPath
+            + File.separatorChar
+            + UPLOAD_JOB_XML);
+        LOG.debug("UploadJobManager initialized with file: " + this.uploadJobFile.getAbsolutePath());
+    }
+
+    /**
+     * Initialize UploadJobManager with UploadJob file.
+     * @param uploadFolder
+     */
+    public UploadJobManager(final File uploadJobFile) {
+        this.uploadJobFile = uploadJobFile;
+        LOG.debug("UploadJobManager initialized with file: " + this.uploadJobFile.getAbsolutePath());
+    }
+
+    /* (non-Javadoc)
+     * @see org.shanoir.uploader.upload.IUploadJobManager#writeUploadJob(org.shanoir.uploader.upload.UploadJob)
+     */
+    public void writeUploadJob(final UploadJob uploadJob) {
+        JAXBContext jaxbContext;
+        try {
+            jaxbContext = JAXBContext.newInstance(UploadJob.class);
+            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            jaxbMarshaller.marshal(uploadJob, uploadJobFile);
+        } catch (JAXBException e) {
+            LOG.error(e.getMessage());
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.shanoir.uploader.upload.IUploadJobManager#readUploadJob()
+     */
+    public UploadJob readUploadJob() {
+        try {
+            final JAXBContext jaxbContext = JAXBContext.newInstance(UploadJob.class);
+            final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+            final UploadJob uploadJob = (UploadJob) jaxbUnmarshaller.unmarshal(uploadJobFile);
+            return uploadJob;
+        } catch (JAXBException e) {
+            LOG.error(e.getMessage());
+        }
+        return null;
+    }
+
+    public File getUploadJobFile() {
+        return uploadJobFile;
+    }
+
+    public void setUploadJobFile(File uploadJobFile) {
+        this.uploadJobFile = uploadJobFile;
+    }
+
 }

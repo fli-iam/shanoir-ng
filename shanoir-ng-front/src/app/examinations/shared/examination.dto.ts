@@ -73,6 +73,7 @@ export class ExaminationDTOService {
     static mapSyncFields(dto: ExaminationDTO, entity: Examination): Examination {
         entity.id = dto.id;
         entity.examinationDate = new Date(dto.examinationDate);
+        entity.studyInstanceUID = dto.studyInstanceUID;
         entity.comment = dto.comment;
         entity.source = dto.source;
         entity.copies = dto.copies;
@@ -104,9 +105,10 @@ export class ExaminationDTO {
     centerId: number;
 	comment: string;
     examinationDate: Date;
+    studyInstanceUID: string;
     note: string;
     studyId: number;
-    subject: IdName;
+    subject: IdName | Subject;
     subjectWeight: number;
     weightUnitOfMeasure: UnitOfMeasure;
     preclinical: boolean;
@@ -120,9 +122,10 @@ export class ExaminationDTO {
             this.centerId = examination.center ? examination.center.id : null;
             this.comment = examination.comment;
             this.examinationDate = examination.examinationDate;
+            this.studyInstanceUID = examination.studyInstanceUID;
             this.note = examination.note;
             this.studyId = examination.study ? examination.study.id : null;
-            this.subject = examination.subject ? new IdName(examination.subject.id, examination.subject.name) : null;
+            this.subject = examination.subject ? examination.subject : null;
             this.subjectWeight = examination.subjectWeight;
             this.weightUnitOfMeasure = examination.weightUnitOfMeasure;
             this.preclinical = examination.preclinical;

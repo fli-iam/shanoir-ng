@@ -13,6 +13,7 @@
  */
 
 import { Entity } from '../shared/components/entity/entity.abstract';
+import { Field } from '../shared/reflect/field.decorator';
 import { camelToSpaces } from '../utils/app.utils';
 
 export enum TaskStatus {
@@ -37,23 +38,23 @@ export class TaskState {
 
 export class Task extends Entity {
 
-    debugTs: number = Date.now();
-    id: number;
-    completeId: bigint;
-    creationDate: Date;
-    lastUpdate: Date;
-    report: string;
+    @Field() debugTs: number = Date.now();
+    @Field() id: number;
+    @Field() completeId: bigint;
+    @Field() creationDate: Date;
+    @Field() lastUpdate: Date;
+    @Field() report: string;
     private _status: TaskStatus;
     private _message: string;
     private _progress: number;
     _eventType: string;
-    eventLabel: string;
-    objectId: number;
-    route: string;
-    hasReport: boolean;
-    sessionId: string;
+    @Field() eventLabel: string;
+    @Field() objectId: number;
+    @Field() route: string;
+    @Field() hasReport: boolean;
+    @Field() sessionId: string;
     _idAsString: string;
-    hideFromMenu: boolean;
+    @Field() hideFromMenu: boolean;
     private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report', 'sessionId', '_idAsString'];
 
     set eventType(eventType: string) {
@@ -61,7 +62,7 @@ export class Task extends Entity {
         this.eventLabel = camelToSpaces(this.eventType.replace('.event', ''));
     }
 
-    get eventType(): string {
+    @Field() get eventType(): string {
         return this._eventType;
     }
 
@@ -70,7 +71,7 @@ export class Task extends Entity {
         if (status == -1) this._progress = -1;
     }
 
-    get status(): TaskStatus {
+    @Field() get status(): TaskStatus {
         return this._status;
     }
 
@@ -79,7 +80,7 @@ export class Task extends Entity {
         else this._progress = progress;
     }
 
-    get progress(): number {
+    @Field() get progress(): number {
         return this._progress;
     }
 
@@ -88,11 +89,11 @@ export class Task extends Entity {
         this.route = this.buildRoute();
     }
 
-    get message(): string {
+    @Field() get message(): string {
         return this._message;
     }
 
-    get idAsString(): string {
+    @Field() get idAsString(): string {
         return this._idAsString;
     }
 
@@ -118,6 +119,8 @@ export class Task extends Entity {
             return '/study/details/' + this.message.slice(this.message.lastIndexOf("[") + 1, this.message.lastIndexOf("]"));
         } else if (this.eventType === 'downloadStatistics.event' && this.status != -1 && this.status != 2) {
             return '/datasets/download/event/' + this.idAsString;
+        } else if (this.eventType === 'massiveOutputsDownload.event' && this.status != -1 && this.status != 2) {
+            return '/datasets/massiveProcessingOutputsDownload';
         }
         return null;
     }

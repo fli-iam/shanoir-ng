@@ -82,9 +82,9 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     public openCreateDatasetProcessing() {
         const importStep: Step = this.breadcrumbsService.currentStep;
         const createDatasetProcessingRoute: string = '/dataset-processing/create';
+        this.breadcrumbsService.addNextStepPrefilled('study', this.study, true);
+        this.breadcrumbsService.addNextStepPrefilled('subject', this.subject, true);
         this.router.navigate([createDatasetProcessingRoute]).then(() => {
-	        this.breadcrumbsService.currentStep.addPrefilled('study', this.study);
-            this.breadcrumbsService.currentStep.addPrefilled('subject', this.subject);
             this.subscriptions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.datasetProcessing = entity;
@@ -93,18 +93,6 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
                 })
             );
         });
-    }
-
-    protected fillCreateAcqEqStep() {
-        return;
-    }
-
-    protected fillCreateSubjectStep() {
-        return;
-    }
-
-    protected fillCreateExaminationStep() {
-        return;
     }
 
     protected reloadSavedData(): Promise<void> {

@@ -58,7 +58,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
         private http: HttpClient,
         private keycloakService: KeycloakService,
         private consoleService: ConsoleService
-    ) { }
+    ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.task && this.task) {
@@ -110,5 +110,10 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     downloadStats(event: MouseEvent) {
         event.preventDefault();
         this.taskService.downloadStats(this.task);
+    }
+
+    downloadProcessingOutputs(event: MouseEvent) {
+        event.preventDefault();
+        this.taskService.downloadProcessingOutputs(this.task);
     }
 }

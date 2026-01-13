@@ -149,16 +149,20 @@ import { SubjectListComponent } from './subjects/subject-list/subject-list.compo
 import { SubjectComponent } from './subjects/subject/subject.component';
 import { AccountRequestInfoComponent } from './users/account-request-info/account-request-info.component';
 import { AccountRequestComponent } from './users/account-request/account-request.component';
-// import { AccountEventsService } from './users/account/account-events.service';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserService } from './users/shared/user.service';
 import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
-import { GetValuesPipe, TimesPipe } from './utils/app.utils';
+import { CamelPipe, GetValuesPipe, TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
 // import { NotificationsComponent } from './shared/notifications/notifications.component';
 import { EquipmentNodeComponent } from './acquisition-equipments/tree/equipment-node.component';
 import { CenterNodeComponent } from './centers/tree/center-node.component';
+import { StudyRightsService } from './studies/shared/study-rights.service';
+import { LoaderComponent } from './shared/loader/loader.component';
+import { LoaderService } from './shared/loader/loader.service';
+import { SubjectNodeComponent } from './subjects/tree/subject-node.component';
+import { ReverseSubjectNodeComponent } from './subjects/tree/reverse-subject-node.component';
 import { DatasetAcquisitionNodeComponent } from './dataset-acquisitions/tree/dataset-acquisition-node.component';
 import { DatasetNodeComponent } from './datasets/tree/dataset-node.component';
 import { ProcessingNodeComponent } from './datasets/tree/processing-node.component';
@@ -174,43 +178,29 @@ import { ExaminationAnestheticService } from './preclinical/anesthetics/examinat
 import { AnestheticIngredientFormComponent } from './preclinical/anesthetics/ingredients/edit/anestheticIngredient-form.component';
 import { AnestheticIngredientsListComponent } from './preclinical/anesthetics/ingredients/list/anestheticIngredient-list.component';
 import { AnestheticIngredientService } from './preclinical/anesthetics/ingredients/shared/anestheticIngredient.service';
-import { AnimalSubjectFormComponent } from './preclinical/animalSubject/edit/animalSubject-form.component';
 import { AnimalSubjectsListComponent } from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService } from './preclinical/animalSubject/shared/animalSubject.service';
 import { ContrastAgentFormComponent } from './preclinical/contrastAgent/edit/contrastAgent-form.component';
 import { ContrastAgentsListComponent } from './preclinical/contrastAgent/list/contrastAgent-list.component';
-import { ContrastAgentService } from './preclinical/contrastAgent/shared/contrastAgent.service';
-import { AnimalExaminationFormComponent } from './preclinical/examination/edit/animal-examination-form.component';
-import { AnimalExaminationListComponent } from './preclinical/examination/list/animal-examination-list.component';
-import { AnimalExaminationService } from './preclinical/examination/shared/animal-examination.service';
-import { FileUploadComponent } from './preclinical/fileupload/fileupload.component';
 import { PathologyFormComponent } from './preclinical/pathologies/pathology/edit/pathology-form.component';
 import { PathologiesListComponent } from './preclinical/pathologies/pathology/list/pathology-list.component';
 import { PathologyService } from './preclinical/pathologies/pathology/shared/pathology.service';
 import { PathologyModelFormComponent } from './preclinical/pathologies/pathologyModel/edit/pathologyModel-form.component';
 import { PathologyModelsListComponent } from './preclinical/pathologies/pathologyModel/list/pathologyModel-list.component';
 import { PathologyModelService } from './preclinical/pathologies/pathologyModel/shared/pathologyModel.service';
-import { SubjectPathologyFormComponent } from './preclinical/pathologies/subjectPathology/edit/subjectPathology-form.component';
-import { SubjectPathologiesListComponent } from './preclinical/pathologies/subjectPathology/list/subjectPathology-list.component';
+import { SubjectPathologyComponent } from './preclinical/pathologies/subjectPathology/edit/subject-pathology.component';
 import { SubjectPathologyService } from './preclinical/pathologies/subjectPathology/shared/subjectPathology.service';
 import { ReferenceFormComponent } from './preclinical/reference/edit/reference-form.component';
 import { ReferencesListComponent } from './preclinical/reference/list/reference-list.component';
 import { ReferenceService } from './preclinical/reference/shared/reference.service';
-import { EnumUtils } from './preclinical/shared/enum/enumUtils';
-import { SubjectTherapyFormComponent } from './preclinical/therapies/subjectTherapy/edit/subjectTherapy-form.component';
-import { SubjectTherapiesListComponent } from './preclinical/therapies/subjectTherapy/list/subjectTherapy-list.component';
+import { SubjectTherapyComponent } from './preclinical/therapies/subjectTherapy/edit/subject-therapy.component';
 import { SubjectTherapyService } from './preclinical/therapies/subjectTherapy/shared/subjectTherapy.service';
 import { TherapyFormComponent } from './preclinical/therapies/therapy/edit/therapy-form.component';
 import { TherapiesListComponent } from './preclinical/therapies/therapy/list/therapy-list.component';
 import { TherapyService } from './preclinical/therapies/therapy/shared/therapy.service';
-import { LoaderComponent } from './shared/loader/loader.component';
-import { LoaderService } from './shared/loader/loader.service';
-import { StudyRightsService } from './studies/shared/study-rights.service';
 import { ReverseStudyNodeComponent } from './studies/tree/reverse-study-node.component';
 import { StudyNodeComponent } from './studies/tree/study-node.component';
 import { StudyCardNodeComponent } from './study-cards/tree/study-card-node.component';
-import { ReverseSubjectNodeComponent } from './subjects/tree/reverse-subject-node.component';
-import { SubjectNodeComponent } from './subjects/tree/subject-node.component';
 import { MemberNodeComponent } from './users/tree/member-node.component';
 import { ReplaceSpacePipe } from './utils/pipes';
 // import { ImportBrukerComponent }   from './preclinical/importBruker/importBruker.component';
@@ -227,11 +217,18 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
 import { DUAComponent } from './dua/dua.component';
 import { DuaService } from './dua/shared/dua.service';
 import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
+import { AnimalSubjectFormComponent } from './preclinical/animalSubject/edit/animal-subject-form.component';
+import { ContrastAgentService } from './preclinical/contrastAgent/shared/contrastAgent.service';
+import { AnimalExaminationFormComponent } from './preclinical/examination/edit/animal-examination-form.component';
+import { AnimalExaminationListComponent } from './preclinical/examination/list/animal-examination-list.component';
+import { AnimalExaminationService } from './preclinical/examination/shared/animal-examination.service';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { ExtraDataService } from './preclinical/extraData/extraData/shared/extradata.service';
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
+import { FileUploadComponent } from './preclinical/fileupload/fileupload.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
+import { SubjectTherapyListComponent } from './preclinical/therapies/subjectTherapy/list/subject-therapy-list.component';
 import { QualityControlComponent } from './quality-control/quality-control.component';
 import { DatasetCopyDialogComponent } from "./shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 import { ConsoleComponent } from './shared/console/console.component';
@@ -280,6 +277,8 @@ import { PipelineComponent } from './vip/pipelines/pipeline/pipeline.component';
 import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
 import { PipelinesComponent } from './vip/pipelines/pipelines.component';
 import { WelcomeComponent } from './welcome/welcome.component';
+import { SubjectPathologiesListComponent } from './preclinical/pathologies/subjectPathology/list/subject-pathology-list.component';
+import { DatasetCopyDialogService } from './shared/components/dataset-copy-dialog/dataset-copy-dialog.service';
 
 @NgModule({
     declarations: [
@@ -371,6 +370,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
         StudyCardConditionComponent,
         StudyCardActionComponent,
         GetValuesPipe,
+        CamelPipe,
         DatasetAcquisitionListComponent,
         DatasetAcquisitionComponent,
         MrProtocolComponent,
@@ -390,11 +390,11 @@ import { WelcomeComponent } from './welcome/welcome.component';
         PathologyModelsListComponent,
         PathologyModelFormComponent,
         SubjectPathologiesListComponent,
-        SubjectPathologyFormComponent,
+        SubjectPathologyComponent,
         TherapiesListComponent,
         TherapyFormComponent,
-        SubjectTherapiesListComponent,
-        SubjectTherapyFormComponent,
+        SubjectTherapyListComponent,
+        SubjectTherapyComponent,
         AnestheticsListComponent,
         AnestheticFormComponent,
         AnestheticIngredientsListComponent,
@@ -523,7 +523,6 @@ import { WelcomeComponent } from './welcome/welcome.component';
         AnimalExaminationService,
         AnestheticService,
         ImportBrukerService,
-        EnumUtils,
         { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
         BreadcrumbsService,
         GlobalService,
@@ -566,6 +565,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
         ShanoirEventService,
         TreeService,
         DuaService,
+        DatasetCopyDialogService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
     ]

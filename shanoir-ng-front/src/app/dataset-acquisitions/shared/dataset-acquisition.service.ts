@@ -86,8 +86,6 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
 
     public stringify(entity: DatasetAcquisition) {
         const dto = new DatasetAcquisitionDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

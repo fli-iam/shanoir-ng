@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.gui;
 
 import java.awt.BorderLayout;
@@ -39,7 +53,7 @@ public class ImportFromFolderWindow extends JFrame {
     public JButton uploadButton;
     public JButton openButton;
 
-    private static Logger logger = LoggerFactory.getLogger(ImportFromFolderWindow.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportFromFolderWindow.class);
 
     FolderImport folderImport;
 
@@ -193,7 +207,7 @@ public class ImportFromFolderWindow extends JFrame {
         gBCTableanchor.gridx = 0;
         gBCTableanchor.gridy = 7;
         tablePanel.setSize(1500, 500);
-        masterPanel.add(tablePanel , gBCTableanchor);
+        masterPanel.add(tablePanel, gBCTableanchor);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setSize(1500, 500);
@@ -218,7 +232,7 @@ public class ImportFromFolderWindow extends JFrame {
         uploadButton.addActionListener(importListener);
 
         // center the frame
-        // frame.setLocationRelativeTo( null );
+        // frame.setLocationRelativeTo(null );
         Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
         int windowWidth = 1600;
         int windowHeight = 700;

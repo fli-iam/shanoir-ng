@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.datasetacquisition.service;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +51,7 @@ public class EegImporterServiceTest {
 
     @InjectMocks
     @Spy
-    EegImporterService service = new EegImporterService();
+    private EegImporterService service = new EegImporterService();
 
     @Mock
     private ImporterMailService mailService;
@@ -57,7 +71,7 @@ public class EegImporterServiceTest {
     public void setUp() throws IOException {
         exam = new Examination();
         exam.setExaminationDate(LocalDate.now());
-        exam.setId(1l);
+        exam.setId(1L);
         given(examinationService.findById(Mockito.anyLong())).willReturn(exam);
     }
 
@@ -109,7 +123,7 @@ public class EegImporterServiceTest {
         assertTrue(task.getStatus() == 1);
 
         // Check what we save at the end
-        verify(datasetAcquisitionService).create(datasetAcquisitionCapturer.capture());
+        verify(datasetAcquisitionService).create(datasetAcquisitionCapturer.capture(), Mockito.anyBoolean());
         DatasetAcquisition hack = datasetAcquisitionCapturer.getValue();
 
         EegDataset ds = (EegDataset) hack.getDatasets().get(0);

@@ -13,9 +13,10 @@
  */
 import { Clipboard } from '@angular/cdk/clipboard';
 import { formatDate } from '@angular/common';
-import { AfterContentInit, AfterViewChecked, Component, ComponentRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterContentInit, AfterViewChecked, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 import { environment } from "../../environments/environment";
 import { TaskState } from '../async-tasks/task.model';
@@ -26,7 +27,7 @@ import { DatasetService } from '../datasets/shared/dataset.service';
 import { dateDisplay } from "../shared/./localLanguage/localDate.abstract";
 import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
-import { DatasetCopyDialogComponent } from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
+import { DatasetCopyDialogService } from '../shared/components/dataset-copy-dialog/dataset-copy-dialog.service';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { Page, Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
@@ -37,9 +38,7 @@ import { MassDownloadService } from '../shared/mass-download/mass-download.servi
 import { Range } from '../shared/models/range.model';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
-import { Study } from "../studies/shared/study.model";
 import { StudyService } from "../studies/shared/study.service";
-import { ServiceLocator } from "../utils/locator.service";
 import { ExecutionDataService } from '../vip/execution.data-service';
 
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
@@ -85,17 +84,28 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     solrRequest: SolrRequest = new SolrRequest();
     private facetPageable: Map<string, FacetPageable>;
     contentPage: SolrResultPage[] = [];
-    studies: Study[];
     selectedStudies: string[]=[];
     hasCopyRight: boolean = false;
     selectedLines: SolrDocument[]=[];
     dateDisplay = dateDisplay;
+    private subscriptions: Subscription[] = [];
 
     constructor(
-            private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
-            private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
-            private keycloakService: KeycloakService, private studyRightsService: StudyRightsService, private downloadService: MassDownloadService, private clipboard: Clipboard,
-            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ExecutionDataService, private studyService: StudyService) {
+        private breadcrumbsService: BreadcrumbsService, 
+        private formBuilder: UntypedFormBuilder,
+        private solrService: SolrService, 
+        private router: Router, 
+        private datasetService: DatasetService, 
+        private datasetAcquisitionService: DatasetAcquisitionService,
+        private keycloakService: KeycloakService, 
+        private studyRightsService: StudyRightsService,
+        private downloadService: MassDownloadService, 
+        private clipboard: Clipboard,
+        private confirmDialogService: ConfirmDialogService, 
+        private consoleService: ConsoleService, 
+        private processingService: ExecutionDataService, 
+        private studyService: StudyService,
+        private datasetCopyDialogService: DatasetCopyDialogService) {
 
         this.getRole();
         if (this.role != 'admin') this.getRights();
@@ -108,9 +118,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.selectionColumnDefs = this.getSelectionColumnDefs();
         this.customActionDefs = this.getCustomActionsDefs();
         this.selectionCustomActionDefs = this.getSelectionCustomActionsDefs();
-        this.studyService.getAll().then(studies => {
-            this.studies = studies;
-        });
 
         const input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['input'] : null;
         if (input) {
@@ -165,14 +172,23 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             'importStartDate': [this.solrRequest.importStartDate, [DatepickerComponent.validator]],
             'importEndDate': [this.solrRequest.importEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
         });
-
-        formGroup.valueChanges.subscribe(() => {
-            formGroup.get('importEndDate').updateValueAndValidity({ emitEvent: false });
-        });
-        formGroup.valueChanges.subscribe(() => {
-            formGroup.get('endDate').updateValueAndValidity({ emitEvent: false });
-        });
-
+        // binding the model
+        this.subscriptions.push(formGroup.get('startDate').valueChanges.subscribe(value => {
+            this.solrRequest.datasetStartDate = value;
+            this.onDateChange(value);
+        }));
+        this.subscriptions.push(formGroup.get('endDate').valueChanges.subscribe(value => {
+            this.solrRequest.datasetEndDate = value;
+            this.onDateChange(value);
+        }));
+        this.subscriptions.push(formGroup.get('importStartDate').valueChanges.subscribe(value => {
+            this.solrRequest.importStartDate = value;
+            this.onDateChange(value);
+        }));
+        this.subscriptions.push(formGroup.get('importEndDate').valueChanges.subscribe(value => {
+            this.solrRequest.importEndDate = value;
+            this.onDateChange(value);
+        }));
         return formGroup;
     }
 
@@ -224,25 +240,37 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         if (this.solrRequest.datasetStartDate && this.solrRequest.datasetStartDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
                 'from: ' + formatDate(this.solrRequest.datasetStartDate, 'dd/MM/yyy', 'en-US', 'UTC'),
-                () => this.solrRequest.datasetStartDate = null
+                () => {
+                    this.solrRequest.datasetStartDate = null;
+                    this.form.get('startDate').setValue(null);
+                }
             ));
         }
         if (this.solrRequest.datasetEndDate && this.solrRequest.datasetEndDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
                 'to: ' + formatDate(this.solrRequest.datasetEndDate, 'dd/MM/yyy', 'en-US', 'UTC'),
-                () => this.solrRequest.datasetEndDate = null
+                () => {
+                    this.solrRequest.datasetEndDate = null;
+                    this.form.get('endDate').setValue(null);
+                }
             ));
         }
         if (this.solrRequest.importStartDate && this.solrRequest.importStartDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
                 'from: ' + formatDate(this.solrRequest.importStartDate, 'dd/MM/yyy', 'en-US', 'UTC'),
-                () => this.solrRequest.importStartDate = null
+                () => {
+                    this.solrRequest.importStartDate = null;
+                    this.form.get('importStartDate').setValue(null);
+                }
             ));
         }
         if (this.solrRequest.importEndDate && this.solrRequest.importEndDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
                 'to: ' + formatDate(this.solrRequest.importEndDate, 'dd/MM/yyy', 'en-US', 'UTC'),
-                () => this.solrRequest.importEndDate = null
+                () => {
+                    this.solrRequest.importEndDate = null;
+                    this.form.get('importEndDate').setValue(null);
+                }
             ));
         }
         TextualFacetNames.forEach(facetName => {
@@ -620,14 +648,14 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     initExecutionMode() {
         this.datasetService.getByIds(this.selectedDatasetIds).then(datasets => {
-            const studyId = datasets[0]?.studyId;
+            const studyId = datasets[0]?.study?.id;
 
             if (!this.hasAdminRight(studyId)) {
                 this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to run pipelines on study [' + studyId + '] that you don\'t administrate.');
                 return;
             }
             for (const ds of datasets) {
-                if(ds.studyId != studyId){
+                if(ds.study?.id != studyId){
                     this.confirmDialogService.error('Invalid selection', 'All selected datasets must be of the same study.');
                     return;
                 }
@@ -642,19 +670,16 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     copyToStudy() {
-        const modalRef: ComponentRef<DatasetCopyDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(DatasetCopyDialogComponent);
-        modalRef.instance.title = "Copy of datasets to study";
-        modalRef.instance.studies = this.studies;
-        modalRef.instance.datasetsIds = Array.from(this.selectedDatasetIds);
-        modalRef.instance.message = "You need admin rights on dataset's study AND destination study. Also, note that the dataset's center will be added to destination study.";
-        modalRef.instance.statusMessage = 'Ready';
-        modalRef.instance.ownRef = modalRef;
-        modalRef.instance.canCopy = this.hasCopyRight;
-        modalRef.instance.lines = this.selectedLines;
-    }
-
-    private isProcessed(doc: SolrDocument) {
-        return doc.processed == true;
+        if (this.hasCopyRight) {
+            this.datasetCopyDialogService.open(this.selectedLines.map(line => ({
+                datasetId: Number(line.datasetId),
+                centerId: Number(line.centerId),
+                subjectId: Number(line.subjectId),
+                studyId: Number(line.studyId)
+            })));
+        } else {
+            this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to copy datasets from studies that you don\'t administrate.');
+        }
     }
 }
 

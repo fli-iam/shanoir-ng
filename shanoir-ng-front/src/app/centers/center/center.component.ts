@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -44,7 +44,11 @@ export class CenterComponent extends EntityComponent<Center> {
             private route: ActivatedRoute,
             private centerService: CenterService) {
 
-        super(route, 'center');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'center';
     }
 
     getService(): EntityService<Center> {
@@ -53,13 +57,6 @@ export class CenterComponent extends EntityComponent<Center> {
 
     protected getTreeSelection: () => Selection = () => {
         return Selection.fromCenter(this.center);
-    }
-
-    init() {
-        super.init();
-        if (this.mode == 'create' && this.breadcrumbsService.currentStep.isPrefilled("entity")) {
-            this.breadcrumbsService.currentStep.getPrefilledValue("entity").then( res => this.center = res);
-        }
     }
 
     initView(): Promise<void> {
@@ -79,7 +76,7 @@ export class CenterComponent extends EntityComponent<Center> {
         return this.formBuilder.group({
             'name': [this.center.name, [ShanoirValidators.required, ShanoirValidators.minLength(2), ShanoirValidators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'street': [this.center.street],
-            'postalCode': [this.center.postalCode],
+            'postalCode': [this.center.postalCode, [Validators.pattern(/^[0-9]*$/)]],
             'city': [this.center.city],
             'country': [this.center.country],
             'phoneNumber': [this.center.phoneNumber, ShanoirValidators.isPhoneNumber()],

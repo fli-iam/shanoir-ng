@@ -12,8 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 
@@ -23,6 +24,7 @@ import { Option } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
 import {DownloadInputIds, MassDownloadService} from '../mass-download.service';
 
+
 @Component({
     selector: 'download-setup-alt',
     templateUrl: 'download-setup-alt.component.html',
@@ -30,7 +32,7 @@ import {DownloadInputIds, MassDownloadService} from '../mass-download.service';
     standalone: false
 })
 
-export class DownloadSetupAltComponent implements OnInit {
+export class DownloadSetupAltComponent implements OnInit, OnDestroy {
 
     @Output() go: EventEmitter<{format: Format, converter: number, datasets: Dataset[] | DatasetLight[]}> = new EventEmitter();
     @Output() closeModal: EventEmitter<void> = new EventEmitter();
@@ -42,6 +44,7 @@ export class DownloadSetupAltComponent implements OnInit {
     converter: number;
     datasets: Dataset[] | DatasetLight[];
     hasDicom: boolean = false;
+    private subscriptions: Subscription[] = [];
 
     formatOptions: Option<Format>[] = [
         new Option<Format>('dcm', 'Dicom', null, null, null),
@@ -62,10 +65,16 @@ export class DownloadSetupAltComponent implements OnInit {
                 globalService: GlobalService,
                 protected massDownloadService: MassDownloadService,
                 private datasetService: DatasetService) {
-        globalService.onNavigate.subscribe(() => {
-            this.cancel();
-        });
+        this.subscriptions.push(
+            globalService.onNavigate.subscribe(() => {
+                this.cancel();
+            })
+        );
         this.form = this.buildForm();
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(subscription => subscription.unsubscribe());
     }
 
     ngOnInit(): void {

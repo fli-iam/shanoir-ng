@@ -12,7 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { allOfEnum } from "src/app/utils/app.utils";
+
 export enum InjectionSite {
-    CAUDAL_VEIN = "Caudal Vein",
-    INTRACEREBRAL = "Intracerebral"
+    CAUDAL_VEIN = "CAUDAL_VEIN",
+    INTRACEREBRAL = "INTRACEREBRAL"
+}
+export namespace InjectionSite {
+    export function all(): InjectionSite[] {
+        return allOfEnum<InjectionSite>(InjectionSite);
+    }
 }

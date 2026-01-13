@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * <p>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * <p>
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -17,6 +17,7 @@ package org.shanoir.ng.processing.controler;
 import java.io.IOException;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
@@ -148,7 +149,7 @@ public interface DatasetProcessingApi {
             @ApiResponse(responseCode = "404", description = "no dataset found"),
             @ApiResponse(responseCode = "500", description = "unexpected error")})
     @PostMapping(value = "/massiveDownloadByProcessingIds")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.HasRightOnEveryDatasetOfProcessings(#processingIds, 'CAN_DOWNLOAD'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDatasetOfProcessings(#processingIds, 'CAN_DOWNLOAD'))")
     void massiveDownloadByProcessingIds(
             @Parameter(description = "id of the processing", required = true) @Valid
             @RequestBody List<Long> processingIds,
@@ -172,4 +173,15 @@ public interface DatasetProcessingApi {
             @Parameter(description = "outputs to extract") @Valid
             @RequestParam(value = "resultOnly", defaultValue = "false") boolean resultOnly, HttpServletResponse response) throws RestServiceException;
 
+    @Operation(summary = "complexMassiveDownload", description = "Returns a zip file of the inputs/outputs according to the json params file in the HTTP request body. Datas are in the http response body, it must be written in a zip file.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no dataset found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @PostMapping(value = "/complexMassiveDownload")
+    ResponseEntity<String> complexMassiveDownload(
+            @Parameter(description = "parameters for download", required = true)
+            @Valid @RequestBody JsonNode request);
 }

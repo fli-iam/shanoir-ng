@@ -18,7 +18,6 @@ import { ActivatedRoute } from '@angular/router';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { ModesAware } from '../../../shared/mode/mode.decorator';
 import { Pathology } from '../shared/pathology.model';
 import { PathologyService } from '../shared/pathology.service';
 
@@ -28,7 +27,6 @@ import { PathologyService } from '../shared/pathology.service';
     templateUrl: 'pathology-form.component.html',
     standalone: false
 })
-@ModesAware
 export class PathologyFormComponent extends EntityComponent<Pathology>{
 
     public isPathologyUnique = true;
@@ -38,7 +36,11 @@ export class PathologyFormComponent extends EntityComponent<Pathology>{
         private route: ActivatedRoute,
         private pathologyService: PathologyService) {
 
-            super(route, 'preclinical-pathology');
+            super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'preclinical-pathology';
     }
 
     get pathology(): Pathology { return this.entity; }
