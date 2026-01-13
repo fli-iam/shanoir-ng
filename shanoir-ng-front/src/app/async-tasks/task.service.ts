@@ -17,9 +17,9 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../utils/app.utils';
+import {MassDownloadService} from "../shared/mass-download/mass-download.service";
 
 import {Task, TaskState} from './task.model';
-import {MassDownloadService} from "../shared/mass-download/mass-download.service";
 
 @Injectable()
 export class TaskService extends EntityService<Task> {
