@@ -29,7 +29,7 @@ import tools.jackson.databind.BeanDescription;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationConfig;
 import tools.jackson.databind.module.SimpleModule;
-import tools.jackson.databind.ser.BeanSerializerModifier;
+import tools.jackson.databind.ser.BeanSerializerFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
@@ -42,7 +42,8 @@ public class JacksonConfiguration {
      *            an instance of {@link ObjectMapper}.
      */
     @Autowired
-    public void configureJacksonObjectMapper(final ObjectMapper objectMapper) {objectMapper
+    public void configureJacksonObjectMapper(final ObjectMapper objectMapper) {
+        objectMapper
                 .registerModule(preparePageModule())
                 .registerModule(new JavaTimeModule());
     }
