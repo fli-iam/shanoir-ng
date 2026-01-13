@@ -115,16 +115,6 @@ public interface SubjectService {
     Subject findByIdentifierInStudiesWithRights(String identifier, List<Study> studies);
 
     /**
-     * Find a subject by its subject-study relationship id.
-     *
-     * @param id id
-     * @return a subject or null
-     */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
-    Subject findByIdWithSubjectStudies(Long subjectStudyId);
-
-    /**
      * Find a subject from a center code
      *
      * @param centerCode

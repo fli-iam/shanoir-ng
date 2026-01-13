@@ -83,6 +83,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="dateOpen" class="date-colapse"><i class="fas fa-chevron-up"></i></span>
             </div>
             <div class="date-content" *ngIf="dateOpen" @slideDown>
+                <div class="left-title" style="margin-bottom: 8px;">Both date included*</div>
                 <div class="date-from">
                     <span class="left-title">from :</span> <datepicker *ngIf="viewChecked" formControlName="startDate"></datepicker>
                     <label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: {{ dateDisplay }}</label>
@@ -104,6 +105,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="importDateOpen" class="date-colapse"><i class="fas fa-chevron-up"></i></span>
             </div>
             <div class="date-content" *ngIf="importDateOpen" @slideDown>
+                <div class="left-title" style="margin-bottom: 8px;">Both date included*</div>
                 <div class="date-from">
                     <span class="left-title">from :</span> <datepicker *ngIf="viewChecked" formControlName="importStartDate"></datepicker>
                     <label *ngIf="hasError('importStartDate', ['format'])" class="form-validation-alert">Date should be valid! Date format: {{ dateDisplay }}</label>

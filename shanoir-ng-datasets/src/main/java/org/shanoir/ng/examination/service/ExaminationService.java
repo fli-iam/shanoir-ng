@@ -137,7 +137,7 @@ public interface ExaminationService {
      * @return created examination.
      */
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudyCenter(#examination.getCenterId(), #examination.getStudyId(), 'CAN_IMPORT'))")
-    Examination save(Examination examination);
+    Examination save(Examination examination) throws EntityNotFoundException;
 
     /**
      * Update an examination.

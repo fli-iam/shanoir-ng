@@ -187,11 +187,6 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public Subject findByIdWithSubjectStudies(final Long id) {
-        return subjectRepository.findSubjectWithSubjectStudyById(id);
-    }
-
-    @Override
     @Transactional
     public Subject create(Subject subject, boolean withAMQP) throws ShanoirException {
         subject = mapSubjectStudyListToSubject(subject);
