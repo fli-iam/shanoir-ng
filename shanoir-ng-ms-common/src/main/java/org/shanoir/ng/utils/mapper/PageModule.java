@@ -25,4 +25,5 @@ public class PageModule extends SimpleModule {
     public PageModule() {
         addDeserializer(Page.class, new PageDeserializer());
     }
+
 }

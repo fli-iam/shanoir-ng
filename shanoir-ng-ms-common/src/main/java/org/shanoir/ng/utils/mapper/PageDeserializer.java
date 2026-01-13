@@ -40,7 +40,7 @@ public class PageDeserializer extends ValueDeserializer<Page<?>> implements Cont
     private JavaType valueType;
 
     @Override
-    public Page<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public Page<?> deserialize(JsonParser p, DeserializationContext ctxt) {
         final CollectionType valuesListType = ctxt.getTypeFactory().constructCollectionType(List.class, valueType);
 
         List<?> list = new ArrayList<>();
@@ -96,4 +96,5 @@ public class PageDeserializer extends ValueDeserializer<Page<?>> implements Cont
         deserializer.valueType = wrapperType.containedType(0);
         return deserializer;
     }
+
 }
