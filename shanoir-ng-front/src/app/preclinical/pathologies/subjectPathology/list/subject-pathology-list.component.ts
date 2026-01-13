@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, forwardRef, Input } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -39,9 +39,10 @@ import { SubjectPathology } from '../shared/subjectPathology.model';
     standalone: false
 })
 
-export class SubjectPathologiesListComponent implements ControlValueAccessor {
+export class SubjectPathologiesListComponent implements ControlValueAccessor, OnChanges {
 
     @Input() mode: Mode;
+    @Output() openCreationForm: EventEmitter<void> = new EventEmitter<void>();
     protected paging: BrowserPaging<SubjectPathology>;
     protected columnDefs: ColumnDefinition[];
     protected customActionDefs: any[];
@@ -59,7 +60,12 @@ export class SubjectPathologiesListComponent implements ControlValueAccessor {
 
         this.columnDefs = this.getColumnDefs();
         this.paging = new BrowserPaging<SubjectPathology>([], this.columnDefs);
-        this.completeCustomActions();
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['mode']) {
+            this.completeCustomActions();
+        }
     }
 
     writeValue(obj: any): void {
@@ -89,20 +95,26 @@ export class SubjectPathologiesListComponent implements ControlValueAccessor {
             { headerName: "Start Date", field: "startDate", type: "date" },
             { headerName: "End Date", field: "endDate", type: "date" },
         ];
-        if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-            columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeItem(item) });
-        }
+        setTimeout(() => {
+            if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
+                columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeItem(item) });
+            }
+        });
         return columnDefs;
     }
 
     private completeCustomActions(): void {
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
             this.customActionDefs = [{
-                title: "New", awesome: "fa-solid fa-plus", action: () => this.router.navigate(['/preclinical-subject-pathology/create'])
+                title: "New", awesome: "fa-solid fa-plus", action: () => this.openCreateSubjectPathology()
             }];
         } else {
             this.customActionDefs = [];
         }
+    }
+
+    protected openCreateSubjectPathology() {
+        this.openCreationForm.emit();
     }
 
     protected removeItem(item: SubjectPathology) {

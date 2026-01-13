@@ -1,66 +1,27 @@
 .overlay { position: fixed; top: 0; right: 0; bottom: 0; left: 0; content: ""; animation: entrance 0.3s; }
 
 .main { text-align: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); box-shadow: 0 0 var(--shadow-height) 0px var(--shadow-color);
-        background-color: var(--very-light-grey); color: var(--color-a); border-radius: 2px; width: 500px; height: 575px; }
+        background-color: var(--very-light-grey); border-radius: 2px; width: 500px; padding: 15px 20px; }
 
-.header { font-size: 20px; font-weight: bold; padding: 14px 10px 10px; }
+.header { padding: 10px 10px; color: var(--color-a); }
 
-.body { padding: 0 20px; max-width: 600px; }
+.body { padding: 0 20px; max-width: 600px; text-align: left; color: var(--dark-grey); }
 
 .footer { padding: 15px 20px 20px; }
 
-@keyframes entrance {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.error { color: darkred; }
+
+.info {
+    text-align: left;
+    margin-bottom: 30px;
+    background-color: var(--color-b-light);
+    padding: 10px;
+    border-radius: 2px;
+    line-height: 18px;
+    color: var(--color-a);
 }
 
-i { font-size: 30px; vertical-align: bottom; margin-right: 5px; }
-.error .header { color: darkred; }
-
-.titles {
-    display:flex;
-}
-
-.studies {
-    font-weight: bold;
-    padding-left: 10px;
-}
-
-.container {
-    display: flex;
-    padding-bottom: 10px;
-}
-
-.list {
-    max-height: 300px;
-    min-height: 250px;
-    overflow: auto;
-    flex: 50%;
-    border: solid;
-    border-width: 1px;
-    margin-left: 10px;
-    margin-right: 10px;
-}
-
-.studyRow {
-    display:flex;
-}
-
-.study-default:hover {
-    background-color: var(--color-b-light2);
-    color: white;
-}
-.study-default {
-    width: 100%;
-    text-align: center;
-}
-
-.study-change {
-    width: 100%;
-    text-align: center;
-    color: white;
-    background-color: var(--color-a);
-}
+.info i { color: var(--color-b); font-size: 16px; margin-right: 7px; }
 
 .status {
     text-align: left;
@@ -69,11 +30,16 @@ i { font-size: 30px; vertical-align: bottom; margin-right: 5px; }
     font-size: 15px;
 }
 
-.footer-position {
-    display:flex;
+p .label {
+    display: inline-block;
+    margin-right: 10px;
 }
-.footer {
-    position: fixed;
-    bottom: 0px;
-    right: 0px;
+p .content {
+    color: var(--color-a);
 }
+
+select-box {
+    width: 200px;
+}
+
+.footer { margin-top: 20px; }

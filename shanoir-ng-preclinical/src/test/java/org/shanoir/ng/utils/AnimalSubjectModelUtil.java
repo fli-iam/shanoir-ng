@@ -16,7 +16,6 @@ package org.shanoir.ng.utils;
 
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
-import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
 import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -51,7 +50,6 @@ public final class AnimalSubjectModelUtil {
 
     // Subject data
     public static final Long ID = 1L;
-    public static final Long SUBJECT_ID = 2L;
     public static final String SUBJECT_NAME = "subject_name";
 
     /**
@@ -62,7 +60,6 @@ public final class AnimalSubjectModelUtil {
     public static AnimalSubject createAnimalSubject() {
         final AnimalSubject subject = new AnimalSubject();
         subject.setId(ID);
-        subject.setSubjectId(SUBJECT_ID);
         subject.setSpecie(createSpecie());
         subject.setStrain(createStrain());
         subject.setStabulation(createStabulation());
@@ -73,22 +70,15 @@ public final class AnimalSubjectModelUtil {
 
     public static AnimalSubjectDto createAnimalSubjectDto() {
         final AnimalSubjectDto dto = new AnimalSubjectDto();
-        dto.setId(SUBJECT_ID);
+        dto.setSubject(new SubjectDto());
+        dto.getSubject().setName(SUBJECT_NAME);
+        dto.getSubject().setStudy(new IdName(1L, "testStudy"));
         dto.setSpecie(createSpecie());
         dto.setStrain(createStrain());
         dto.setStabulation(createStabulation());
         dto.setBiotype(createBiotype());
         dto.setProvider(createProvider());
-        return dto;
-    }
-
-    public static PreclinicalSubjectDto createPreclinicalSubjectDto() {
-        final PreclinicalSubjectDto dto = new PreclinicalSubjectDto();
-        dto.setSubject(new SubjectDto());
-        dto.getSubject().setName(SUBJECT_NAME);
-        dto.getSubject().setStudy(new IdName(1L, "testStudy"));
-        dto.setAnimalSubject(createAnimalSubjectDto());
-        dto.setId(SUBJECT_ID);
+        dto.setId(ID);
         return dto;
     }
 
