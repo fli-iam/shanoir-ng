@@ -15,6 +15,7 @@
 import { formatDate } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
 import { ComponentRef, EventEmitter, Injectable } from '@angular/core';
+import { AbstractControl, ValidatorFn } from "@angular/forms";
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Observable, race, Subscription } from 'rxjs';
 import { last, map, take } from 'rxjs/operators';
@@ -651,6 +652,19 @@ export class MassDownloadService {
         } catch (e) {
             this.consoleService.log('error', 'Can\'t parse the status from the recorded message', [e, task?.report]);
             return null;
+        }
+    }
+
+    requiredIfTypeIsNii(): ValidatorFn {
+        return (control: AbstractControl) => {
+            const format = control?.parent?.get('format')?.value
+            const isRequired = format === 'nii'
+            const value = control?.value
+
+            if (isRequired && !value) {
+                return {requiredIfTypeIsNii: true}
+            }
+            return null
         }
     }
 }
