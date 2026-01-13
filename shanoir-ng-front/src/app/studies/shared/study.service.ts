@@ -25,8 +25,8 @@ import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from '../../shared/models/profile.model';
 import * as AppUtils from '../../utils/app.utils';
-import {SubjectDTO} from "../../subjects/shared/subject.dto";
-import {Subject} from "../../subjects/shared/subject.model";
+import { SubjectDTO } from "../../subjects/shared/subject.dto";
+import { Subject } from "../../subjects/shared/subject.model";
 
 import { StudyUserRight } from './study-user-right.enum';
 import { StudyUser } from "./study-user.model";
@@ -235,15 +235,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         });
     }
 
-    protected getIgnoreList(): string[] {
+    protected static getIgnoreList(): string[] {
         return super.getIgnoreList().concat(['completeMembers']);
     }
 
     public stringify(entity: Study) {
         const dto = new StudyDTO(entity);
-        const test = JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        const test = JSON.stringify(dto, this.customReplacer);
         return test;
     }
 

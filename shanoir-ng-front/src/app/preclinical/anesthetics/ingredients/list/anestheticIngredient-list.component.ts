@@ -22,7 +22,6 @@ import { ColumnDefinition } from '../../../../shared/components/table/column.def
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { AnestheticType } from '../../../shared/enum/anestheticType';
-import { ModesAware } from '../../../shared/mode/mode.decorator';
 import { Anesthetic } from '../../anesthetic/shared/anesthetic.model';
 import { AnestheticIngredient } from '../shared/anestheticIngredient.model';
 import { AnestheticIngredientService } from '../shared/anestheticIngredient.service';
@@ -38,7 +37,6 @@ export type Mode =  "view" | "edit" | "create";
     standalone: false
 })
 
-@ModesAware
 export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListComponent<AnestheticIngredient> {
     
     @Input() mode:Mode ;
@@ -74,7 +72,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
         return [
             {headerName: "Name", field: "name.value"},
             {headerName: "Concentration", field: "concentration", type: "number"},
-            {headerName: "Concentration Unit", field: "concentration_unit.value"}    
+            {headerName: "Concentration Unit", field: "concentrationUnit.value"}    
         ];     
     }
 
@@ -92,7 +90,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
                     let strIngredient = '';
                     strIngredient = strIngredient.concat(ingredient.name.value.substring(0,3)).concat('. ');
                     if(ingredient.concentration) strIngredient = strIngredient.concat(String(ingredient.concentration));
-                    if(ingredient.concentration_unit) strIngredient = strIngredient.concat(ingredient.concentration_unit.value);
+                    if(ingredient.concentrationUnit) strIngredient = strIngredient.concat(ingredient.concentrationUnit.value);
                     strIngredient = strIngredient.concat(' ');
                     if(generatedName.indexOf(strIngredient) < 0){
                         generatedName = generatedName.concat(strIngredient);

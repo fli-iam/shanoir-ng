@@ -72,10 +72,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
             keycloakService: KeycloakService,
             private centerService: CenterService,
             coilService: CoilService) {
-        super(route, 'study-card');
-        this.mode = this.activatedRoute.snapshot.data['mode'];
-        this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
-        this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
+        super(route);
         coilService.getAll().then(coils => this.allCoils = coils);
         this.subscriptions.push(this.onSave.subscribe(() => {
             const studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
@@ -84,7 +81,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
                 DUAAssistantComponent.openCreateDialog(studyIdforDUA, this.confirmDialogService, this.router);
             }
         }));
-     }
+    }
+
+    protected getRoutingName(): string {
+        return 'study-card';
+    }
 
     getService(): EntityService<StudyCard> {
         return this.studyCardService;
@@ -105,6 +106,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
     initEdit(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
+        this.fetchAcqEq(this.studyCard.study.id).then(() => {
+            this.centerService.getCentersNamesByStudyId(this.studyCard.study.id).then(centers => {
+                this.centers = centers;
+            });
+        });
         return Promise.resolve();
     }
 
@@ -115,6 +121,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
             if (studyId) {
                 this.lockStudy = true;
                 this.studyCard.study = this.studies.find(st => st.id == studyId) as unknown as Study;
+                this.onStudyChange(this.studyCard.study as IdName, this.form);
             }
         });
         this.studyCard = new StudyCard();
@@ -191,7 +198,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
             form.get('acquisitionEquipment').enable();
             this.centerService.getCentersNamesByStudyId(study.id).then(centers => {
                 this.centers = centers;
-                this.breadcrumbsService.currentStep.addPrefilled("center", this.centers);
             });
         } else {
             form.get('acquisitionEquipment').disable();
@@ -264,18 +270,14 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
     }
 
     createAcqEq() {
-        const currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/acquisition-equipment/create']).then(() => {
-            this.breadcrumbsService.currentStep.addPrefilled("sc_center", this.centers);
-            if (this.centers.length == 1) {
-                this.breadcrumbsService.currentStep.addPrefilled('center', this.centers[0]);
+        const options: {propName: string, value: any}[] = [];
+        if (this.centers?.length > 0) {
+            options.push({propName: 'centers', value: this.centers});
+            if (this.centers?.length > 0) {
+                options.push({propName: 'center', value: this.centers[0]});
             }
-            this.subscriptions.push(
-                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    this.entity.acquisitionEquipment = entity as AcquisitionEquipment;
-                })
-            );
-        });
+        } 
+        this.navigateToAttributeCreateStep('/acquisition-equipment/create', 'acquisitionEquipment', options);
     }
 
 }

@@ -113,39 +113,57 @@ export class MassDownloadService {
         return this.downloadByDatasets({datasetIds: datasetIds}, downloadState);
     }
 
+    downloadProcessingOutputsByIds(datasetIds: number[], downloadState?: TaskState, sorting?: string) {
+        return this.downloadByDatasets({datasetIds: datasetIds}, downloadState, 0, sorting);
+    }
+
     /**
      * This method is the generic entry to download multiple datasets.
      */
-    private downloadByDatasets(inputIds: DownloadInputIds, downloadState?: TaskState, totalSize?: number): Promise<void> {
-        return this.openModal(inputIds, totalSize).then(ret => {
-            if (ret != 'cancel') {
-                return this._downloadDatasets(ret, downloadState);
-            } else return Promise.resolve();
-        }).catch(error => {
-            if (error == this.BROWSER_COMPAT_ERROR_MSG) {
-                    return this.openAltModal(inputIds).then(ret => {
-                        if (ret != 'cancel' && ret.datasets) {
-                            return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, ret.converter, downloadState).catch(() => {
-                                if (ret.datasets.length > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
-                                    this.dialogService.error('Too many datasets', 'You are trying to download '
-                                        + ret.datasets.length + ' datasets while Shanoir sets a limit to ' + this.datasetService.MAX_DATASETS_IN_ZIP_DL
-                                        + ' in a single zip. Please confider using a browser compatible with the Shanoir unlimited download functionality. See link below.',
-                                        "https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility" );
-                                }
-                            });
-                        } else return Promise.resolve();
+    private downloadByDatasets(inputIds: DownloadInputIds, downloadState?: TaskState, totalSize?: number, sorting?: string): Promise<void> {
+        if(sorting){
+            this.downloadAltByDatasets(inputIds, "special_download", downloadState, sorting)
+        } else {
+            return this.openModal(inputIds, totalSize).then(ret => {
+                if (ret != 'cancel') {
+                    return this._downloadDatasets(ret, downloadState);
+                } else return Promise.resolve();
+            }).catch(error => {
+                this.downloadAltByDatasets(inputIds, error, downloadState, sorting);
+            });
+        }
+    }
+
+    private downloadAltByDatasets(inputIds: DownloadInputIds, context: string, downloadState?: TaskState, sorting?: string) {
+        if (context == this.BROWSER_COMPAT_ERROR_MSG) {
+            return this.openAltModal(inputIds).then(ret => {
+                if (ret != 'cancel' && ret.datasets) {
+                    return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, sorting, ret.converter, downloadState).catch(() => {
+                        if (ret.datasets.length > this.datasetService.MAX_DATASETS_IN_ZIP_DL) {
+                            this.dialogService.error('Too many datasets', 'You are trying to download '
+                                + ret.datasets.length + ' datasets while Shanoir sets a limit to ' + this.datasetService.MAX_DATASETS_IN_ZIP_DL
+                                + ' in a single zip. Please confider using a browser compatible with the Shanoir unlimited download functionality. See link below.',
+                                "https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility" );
+                        }
                     });
-            } else throw error;
-        });
+                } else return Promise.resolve();
+            });
+        } else if (context == "special_download") {
+            return this.openAltModal(inputIds).then(ret => {
+                if (ret != 'cancel' && ret.datasets) {
+                    return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, sorting, ret.converter, downloadState)
+                } else return Promise.resolve();
+            });
+        } else throw context;
     }
 
     makeRootSubdirectory(handle: FileSystemDirectoryHandle, nbDatasets: number): Promise<FileSystemDirectoryHandle> {
-        const dirName: string = 'Shanoir-download_' + nbDatasets + 'ds_' + formatDate(new Date(), 'dd-MM-YYYY_HH\'h\'mm\'ss', 'en-US');
+        const dirName: string = 'Shanoir-download_' + nbDatasets + 'ds_' + formatDate(new Date(), 'dd-MM-yyyy_HH\'h\'mm\'ss', 'en-US');
         return handle.getDirectoryHandle(dirName, { create: true })
     }
 
     // This method is used to download in
-    private _downloadAlt(datasetIds: number[], format: Format, converter? : number, downloadState?: TaskState): Promise<void> {
+    private _downloadAlt(datasetIds: number[], format: Format, sorting?: string , converter? : number, downloadState?: TaskState): Promise<void> {
         const task: Task = this.createTask(datasetIds.length, TaskStatus.QUEUED);
         downloadState = new TaskState();
         downloadState.status = task.status;
@@ -156,7 +174,7 @@ export class MassDownloadService {
                 task.status = 2;
                 task.lastUpdate = new Date();
                 const start: number = Date.now();
-                const downloadObs: Observable<TaskState> = this.datasetService.downloadDatasets(datasetIds, format, converter);
+                const downloadObs: Observable<TaskState> = this.datasetService.downloadDatasets(datasetIds, format, sorting, converter);
 
                 const endPromise: SuperPromise<void> = new SuperPromise();
 

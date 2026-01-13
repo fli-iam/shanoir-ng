@@ -29,19 +29,19 @@ import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService } from 'src/app/datasets/shared/dataset.service';
 import { Examination } from 'src/app/examinations/shared/examination.model';
 import { ExaminationService } from 'src/app/examinations/shared/examination.service';
-import { PreclinicalSubject } from "src/app/preclinical/animalSubject/shared/preclinicalSubject.model";
 import { Entity } from "src/app/shared/components/entity/entity.abstract";
 import { KeycloakService } from "src/app/shared/keycloak/keycloak.service";
 import { QualityCard } from 'src/app/study-cards/shared/quality-card.model';
 import { StudyCard } from 'src/app/study-cards/shared/study-card.model';
 import { Subject } from "src/app/subjects/shared/subject.model";
 import { User } from 'src/app/users/shared/user.model';
+import { AnimalSubject } from "src/app/preclinical/animalSubject/shared/animalSubject.model";
 
+import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode, CoilNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, MembersNode, MetadataNode, AnimalSubjectNode, ProcessingNode, QualityCardNode, RightNode, ShanoirNode, StudyCardNode, StudyNode, SubjectNode, SubjectsNode, UNLOADED } from '../../tree/tree.model';
 import { SuperPromise } from '../../utils/super-promise';
-import { Study } from "../shared/study.model";
-import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode, CoilNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, MembersNode, MetadataNode, PreclinicalSubjectNode, ProcessingNode, QualityCardNode, RightNode, ShanoirNode, StudyCardNode, StudyNode, SubjectNode, SubjectsNode, UNLOADED } from '../../tree/tree.model';
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
+import { Study } from "../shared/study.model";
 import { StudyService } from '../shared/study.service';
 
 export type DatasetForChain =  {id: number, outProcessing?: ProcessingForChain, acqId?: number, examId?: number, subjectId?: number, studyId?: number};
@@ -49,14 +49,14 @@ export type ProcessingForChain =  {id: number, outDataset: DatasetForChain};
 
 @Injectable()
 export class TreeService {
-    
+
     private selection: Selection = null;
     public studyNode: StudyNode = null;
     studyNodeOpenPromise: SuperPromise<void> = new SuperPromise();
     study: Study;
     studyPromise: SuperPromise<Study> = new SuperPromise();
-    public studyNodeInit: SuperPromise<void> = new SuperPromise(); 
-    private studyRights: StudyUserRight[]; 
+    public studyNodeInit: SuperPromise<void> = new SuperPromise();
+    private studyRights: StudyUserRight[];
     private _treeOpened: boolean = true;
     private _treeAvailable: boolean = false;
     public previouslyOpened: boolean = false;
@@ -64,11 +64,11 @@ export class TreeService {
     onScrollToSelected: RxjsSubject<ShanoirNode> = new RxjsSubject();
     studyLoading: boolean = false;
     reopenAfterNavigation: boolean = false;
-    
+
     isSelected(id: number, type: NodeType): boolean {
         return this.selection?.isSelected(id, type);
     }
-    
+
     get treeOpened(): boolean {
         return this._treeOpened;
     }
@@ -96,7 +96,7 @@ export class TreeService {
     get canDownloadStudy(): boolean {
         return this.studyRights.includes(StudyUserRight.CAN_DOWNLOAD);
     }
- 
+
     get treeAvailable(): boolean {
         return this._treeAvailable;
     }
@@ -168,7 +168,7 @@ export class TreeService {
                 return node.close();
             }
         });
-        
+
     }
 
     scrollToSelected() {
@@ -206,7 +206,7 @@ export class TreeService {
     activateTree(activatedRoute: ActivatedRoute) {
         activatedRoute.snapshot.data['treeAvailable'] = true;
     }
-    
+
     private changeSelection(): Promise<ShanoirNode> {
         if (this.selection?.type == 'study') {
             return this.initStudy(this.selection.id).then(() => {
@@ -224,7 +224,7 @@ export class TreeService {
             } else {
                 this.treeAvailable = false;
             }
-            
+
             return Promise.all([studyLoaded]).then(() => {
                 return this.selectNode(this.selection)
             }).then(node => {
@@ -232,7 +232,7 @@ export class TreeService {
                 this.treeAvailable = !!this.selectedNode;
                 return node;
             });
-            
+
         }
     }
 
@@ -325,7 +325,7 @@ export class TreeService {
     }
 
     private openDatasetProcessingChain(dsNode: DatasetNode, chain: DatasetForChain): any {
-        if (chain.outProcessing) { // if sub processing/datasets 
+        if (chain.outProcessing) { // if sub processing/datasets
             if (dsNode.processings != UNLOADED) {
                 const procNode: ProcessingNode = dsNode.processings.find(proc => {
                     return proc.id == chain.outProcessing.id;
@@ -360,10 +360,10 @@ export class TreeService {
             datasetPromise = Promise.resolve(dataset);
         }
         return datasetPromise.then(ds => {
-            if (ds.hasProcessing) {
+            if (ds?.hasProcessing) {
                 return this.findDatasetChain({id: ds.datasetProcessing.inputDatasets[0].id, outProcessing: {id: ds.datasetProcessing.id, outDataset: {id: ds.id}}})
             } else {
-                return Promise.resolve({id: ds.id,
+                return Promise.resolve({id: ds?.id,
                     acqId: ds.datasetAcquisition?.id,
                     examId: ds.datasetAcquisition?.examination?.id,
                     subjectId: ds.datasetAcquisition?.examination?.subject?.id || ds.subject?.id,
@@ -395,7 +395,7 @@ export class TreeService {
             processingPromise = Promise.resolve(processing);
         }
         return processingPromise.then(proc => {
-            return this.selectDataset(proc.inputDatasets[0].id).then(parentDsNode => {
+            return this.selectDataset(proc.inputDatasets[0]?.id).then(parentDsNode => {
                 return parentDsNode?.open().then(() => {
                     if (parentDsNode.processings != UNLOADED) {
                         return parentDsNode.processings?.find(pnode => pnode.id == proc.id);
@@ -459,7 +459,7 @@ export class TreeService {
                                 }
                             });
                         }
-                    }                    
+                    }
                 });
             });
         });
@@ -488,7 +488,7 @@ export class TreeService {
     private selectEquipment(equipment: number | AcquisitionEquipment): Promise<AcquisitionEquipmentNode> {
         return this.studyNodeOpenPromise.then(() => {
             return this.studyNode.centersNode.open().then(() => {
-                return (typeof equipment == 'number' 
+                return (typeof equipment == 'number'
                     ? this.acquisitionEquipmentService.get(equipment)
                     : Promise.resolve(equipment)
                 ).then(acqEq => {
@@ -508,7 +508,7 @@ export class TreeService {
     private selectCoil(coil: number | Coil): Promise<CoilNode> {
         return this.studyNodeOpenPromise.then(() => {
             return this.studyNode.centersNode.open().then(() => {
-                return (typeof coil == 'number' 
+                return (typeof coil == 'number'
                     ? this.coilService.get(coil)
                     : Promise.resolve(coil)
                 ).then(coil => {
@@ -561,7 +561,7 @@ export class TreeService {
             return Promise.resolve();
         } else {
             this.studyLoading = true;
-            this.studyNodeOpenPromise = new SuperPromise(); 
+            this.studyNodeOpenPromise = new SuperPromise();
             this.studyNodeInit = new SuperPromise();
             const studyPromise: Promise<void> = this.studyService.get(id, null).then(study => {
                 this.study = study;
@@ -603,20 +603,19 @@ export class TreeService {
             null, //members
             rights
         );
-            
-        const subjects: SubjectNode[] = study.subjectStudyList.map(subjectStudy => {
-            if(subjectStudy.subject.preclinical){
-                return PreclinicalSubjectNode.fromSubjectStudy(
-                    subjectStudy, 
-                    studyNode, 
-                    this.canAdminStudy, 
+        const subjects: SubjectNode[] = study.subjects.map(subject => {
+            if(subject.preclinical){
+                return AnimalSubjectNode.fromSubject(
+                    subject,
+                    studyNode,
+                    this.canAdminStudy,
                     this.canDownloadStudy
                 );
             } else {
-                return ClinicalSubjectNode.fromSubjectStudy(
-                    subjectStudy, 
-                    studyNode, 
-                    this.canAdminStudy, 
+                return ClinicalSubjectNode.fromSubject(
+                    subject,
+                    studyNode,
+                    this.canAdminStudy,
                     this.canDownloadStudy
                 );
             }
@@ -650,7 +649,7 @@ export class TreeService {
 
     /**
      * Unselect a ShanoirNode and it's children
-     * @param node 
+     * @param node
      */
     unSelectNode(node: ShanoirNode) {
         node.selected = false;
@@ -665,7 +664,7 @@ export class TreeService {
 
     memberStudyOpenedAndTreeActive(userId: number): boolean {
         return this.treeOpened && this.treeAvailable
-            && this.studyNode?.membersNode?.members 
+            && this.studyNode?.membersNode?.members
             && this.studyNode?.membersNode?.members != UNLOADED
             && !!(this.studyNode?.membersNode?.members as MemberNode[])?.find(member => member.id == userId);
     }
@@ -701,11 +700,11 @@ export class Selection {
     }
 
     static fromSubject(subject: Subject): Selection {
-        return new Selection(subject.id, 'subject', subject.subjectStudyList.map(ss => ss.study.id), subject);
+        return new Selection(subject.id, 'subject', [subject.study.id], subject);
     }
 
-    static fromPreclinicalSubject(preclinicalSubject: PreclinicalSubject): Selection {
-        return new Selection(preclinicalSubject.subject.id, 'subject', preclinicalSubject.subject.subjectStudyList.map(ss => ss.study.id), preclinicalSubject.subject);
+    static fromAnimalSubject(animalSubject: AnimalSubject): Selection {
+        return new Selection(animalSubject.subject.id, 'subject', [animalSubject.subject.study.id], animalSubject.subject);
     }
 
     static fromExamination(examination: Examination): Selection {

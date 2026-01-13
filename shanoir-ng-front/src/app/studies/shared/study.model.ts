@@ -13,11 +13,12 @@
  */
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdName } from '../../shared/models/id-name.model';
+import { Profile } from '../../shared/models/profile.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Tag } from '../../tags/tag.model';
 import { User } from '../../users/shared/user.model';
-import {Profile} from '../../shared/models/profile.model';
+import { Field } from '../../shared/reflect/field.decorator';
+import { Subject } from "../../subjects/shared/subject.model";
 
 import { StudyCenter } from './study-center.model';
 import { StudyType } from './study-type.enum';
@@ -25,37 +26,36 @@ import { StudyUser } from './study-user.model';
 import { Timepoint } from './timepoint.model';
 
 export class Study extends Entity {
-    clinical: boolean;
-    downloadableByDefault: boolean;
-    endDate: Date;
-    experimentalGroupsOfSubjects: IdName[];
-    id: number;
-    challenge: boolean;
-    name: string;
-    nbExaminations: number;
-    nbSubjects: number;
-    nbMembers: number;
-    protocolFilePaths: string[];
-    dataUserAgreementPaths: string[];
-    startDate: Date;
-    studyCenterList: StudyCenter[] = [];
-    studyStatus: 'IN_PROGRESS' | 'FINISHED'  = 'IN_PROGRESS';
-    profile: Profile;
-    detailedSizes: Map<string, number> = null;
+    @Field() clinical: boolean;
+    @Field() downloadableByDefault: boolean;
+    @Field() endDate: Date;
+    @Field() experimentalGroupsOfSubjects: IdName[];
+    @Field() id: number;
+    @Field() challenge: boolean;
+    @Field() name: string;
+    @Field() nbExaminations: number;
+    @Field() nbSubjects: number;
+    @Field() nbMembers: number;
+    @Field() protocolFilePaths: string[];
+    @Field() dataUserAgreementPaths: string[];
+    @Field() startDate: Date;
+    @Field() studyCenterList: StudyCenter[] = [];
+    @Field() studyStatus: 'IN_PROGRESS' | 'FINISHED' = 'IN_PROGRESS';
+    @Field() profile: Profile;
+    @Field() detailedSizes: Map<string, number> = null;
     totalSize: number;
-    studyType: StudyType;
-    subjectStudyList: SubjectStudy[] = [];
-    studyUserList: StudyUser[] = [];
-    timepoints: Timepoint[];
-    visibleByDefault: boolean = false;
-    withExamination: boolean;
-    studyCardPolicy: string = "MANDATORY";
-    studyCardList: StudyCard[];
-    tags: Tag[];
-    studyTags: Tag[];
-    description: string;
-
-    license: string;
+    @Field() studyType: StudyType;
+    @Field() subjects: Subject[] = [];
+    @Field() studyUserList: StudyUser[] = [];
+    @Field() timepoints: Timepoint[];
+    @Field() visibleByDefault: boolean = false;
+    @Field() withExamination: boolean;
+    @Field() studyCardPolicy: string = "MANDATORY";
+    @Field() studyCardList: StudyCard[];
+    @Field() tags: Tag[];
+    @Field() studyTags: Tag[];
+    @Field() description: string;
+    @Field() license: string;
     accessRequestedByCurrentUser: boolean = false;
     locked: boolean = false; // current user has no access
 

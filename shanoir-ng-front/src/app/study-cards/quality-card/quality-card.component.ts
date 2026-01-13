@@ -90,11 +90,8 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
             keycloakService: KeycloakService,
             coilService: CoilService,
             private confirmService: ConfirmDialogService) {
-        super(route, 'quality-card');
+        super(route);
 
-        this.mode = this.activatedRoute.snapshot.data['mode'];
-        this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
-        this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
         coilService.getAll().then(coils => this.allCoils = coils);
 
         this.subscriptions.push(this.activatedRoute.params.subscribe(
@@ -102,7 +99,11 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
                 this.forceStudyId = +params['studyId'];
             }
         ));
-     }
+    }
+
+    protected getRoutingName(): string {
+        return 'quality-card';
+    }
 
     getService(): EntityService<QualityCard> {
         return this.qualityCardService;

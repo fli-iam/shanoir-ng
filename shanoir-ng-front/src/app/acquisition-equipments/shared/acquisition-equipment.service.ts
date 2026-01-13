@@ -12,15 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+
+import { Center } from 'src/app/centers/shared/center.model';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
-import {ShanoirError} from "../../shared/models/error.model";
-import {StudyCard} from "../../study-cards/shared/study-card.model";
+import { ShanoirError } from "../../shared/models/error.model";
+import { StudyCard } from "../../study-cards/shared/study-card.model";
 
 import { AcquisitionEquipment } from './acquisition-equipment.model';
-import {ManufacturerModel} from "./manufacturer-model.model";
+import { ManufacturerModel } from "./manufacturer-model.model";
 
 @Injectable()
 export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipment> {
@@ -31,7 +34,9 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
         super(http)
     }
 
-    getEntityInstance() { return new AcquisitionEquipment(); }
+    getEntityInstance() {
+        return new AcquisitionEquipment();
+    }
 
     getAllByCenter(centerId: number): Promise<AcquisitionEquipment[]> {
         return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/byCenter/' + centerId)
@@ -49,26 +54,44 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
     delete(id: number): Promise<void> {
 
         return this.http.get<StudyCard[]>(AppUtils.BACKEND_API_STUDY_CARD_URL + '/byAcqEq/' + id).toPromise().then(cards => {
-            if (cards?.length == 1){
-                throw new ShanoirError({error: {code: 422, message: 'This acquisition-equipment is linked to the study card n°' + cards[0].id + '.'}});
-            } else if (cards?.length > 1){
-                throw new ShanoirError({error: {
-                    code: 422,
-                    message: 'This acquisition-equipment is linked to ' + cards.length + ' study cards, more info in the details.',
-                    details: 'Study cards : ' + cards.map(card => card.id).join(', ')
-                }});
+            if (cards?.length == 1) {
+                throw new ShanoirError({
+                    error: {
+                        code: 422,
+                        message: 'This acquisition-equipment is linked to the study card n°' + cards[0].id + '.'
+                    }
+                });
+            } else if (cards?.length > 1) {
+                throw new ShanoirError({
+                    error: {
+                        code: 422,
+                        message: 'This acquisition-equipment is linked to ' + cards.length + ' study cards, more info in the details.',
+                        details: 'Study cards : ' + cards.map(card => card.id).join(', ')
+                    }
+                });
             }
             return super.delete(id);
         })
     }
 
-    checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel): Promise<boolean> {
-        return this.http.get<AcquisitionEquipment[]>(AppUtils.BACKEND_API_ACQ_EQUIP_URL + '/bySerialNumber/' + serialNumber).toPromise().then(
-            equipments => {
-                for (const equipment of equipments) {
-                    if (equipment.manufacturerModel.id == manufacturerModel.id && equipment.serialNumber == serialNumber) return true;
-                }
+    checkDuplicate(serialNumber: string, manufacturerModel: ManufacturerModel, center: Center): Promise<boolean> {
+        return firstValueFrom(
+            this.http.get<AcquisitionEquipment[]>(
+                `${AppUtils.BACKEND_API_ACQ_EQUIP_URL}/bySerialNumber/${serialNumber}`
+            )
+        ).then(equipments => {
+            return equipments.some(equipment =>
+                equipment.manufacturerModel.id === manufacturerModel.id
+                && equipment.serialNumber === serialNumber
+                && equipment.center.id === center.id
+            );
+        }).catch(error => {
+            if (error instanceof HttpErrorResponse && error.status === 404) {
+                console.log("catch 404 error: no equipments found for this serial number");
+                return false; // No equipments found, so no duplicates
             }
-        );
+            // Handle other errors
+            throw new ShanoirError({error: {code: error.status, message: error.message}});
+        });
     }
 }

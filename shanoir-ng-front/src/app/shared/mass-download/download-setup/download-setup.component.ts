@@ -69,10 +69,12 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
             deviceInformationService: AngularDeviceInformationService,
             private massDownloadService: MassDownloadService,
             private datasetService: DatasetService) {
-
-        globalService.onNavigate.subscribe(() => {
-            this.cancel();
-        });
+        
+        this.subscriptions.push(
+            globalService.onNavigate.subscribe(() => {
+                this.cancel();
+            })
+        );
         this.winOs = deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows');
         this.form = this.buildForm();
     }

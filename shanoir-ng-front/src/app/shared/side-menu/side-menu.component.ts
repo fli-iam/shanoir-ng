@@ -11,20 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { environment } from '../../../environments/environment';
+import { VERSION } from '../../../environments/version';
 import { SolrService } from '../../solr/solr.service';
+import { StudyService } from '../../studies/shared/study.service';
+import { UserService } from '../../users/shared/user.service';
 import { disapearUp, slideDown } from '../animations/animations';
-import { KeycloakService } from '../keycloak/keycloak.service';
+import { ConfirmDialogService } from "../components/confirm-dialog/confirm-dialog.service";
 import { ConsoleService } from '../console/console.service';
+import { KeycloakService } from '../keycloak/keycloak.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
-import { VERSION } from '../../../environments/version';
-import { StudyService } from '../../studies/shared/study.service';
-import { environment } from '../../../environments/environment';
-import { UserService } from '../../users/shared/user.service';
-import {ConfirmDialogService} from "../components/confirm-dialog/confirm-dialog.service";
-
 
 
 @Component({
@@ -53,7 +53,8 @@ export class SideMenuComponent {
             public notificationsService: NotificationsService,
             private studyService: StudyService,
             private userService: UserService,
-            private confirmDialogService: ConfirmDialogService) {
+            private confirmDialogService: ConfirmDialogService,
+            private destroyRef: DestroyRef) {
 
         if (KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed) {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
@@ -64,7 +65,9 @@ export class SideMenuComponent {
         if (storedState) this.state = JSON.parse(storedState) as SideMenuState;
         else this.state = new SideMenuState();
 
-        this.userService.accessRequets.subscribe(nb => {
+        this.userService.accessRequets
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(nb => {
             if (nb) {
                 this.accessRequestsToValidate = nb;
             } else {
