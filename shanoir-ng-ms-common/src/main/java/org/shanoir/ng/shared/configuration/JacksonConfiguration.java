@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.shared.configuration;
 
-import java.io.IOException;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Page;

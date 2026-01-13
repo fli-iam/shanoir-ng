@@ -14,27 +14,22 @@
 
 package org.shanoir.ng.shared.paging;
 
-import java.io.IOException;
-
 import org.springframework.boot.jackson.JacksonComponent;
-
-import tools.jackson.databind.SerializationContext;
 import org.springframework.data.domain.PageImpl;
 
 import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ser.std.StdSerializer;
 
 @JacksonComponent
 public class PageSerializer extends StdSerializer<PageImpl> {
-
-    private static final long serialVersionUID = 1L;
 
     public PageSerializer() {
         super(PageImpl.class);
     }
 
     @Override
-    public void serialize(PageImpl value, JsonGenerator gen, SerializationContext provider) throws IOException {
+    public void serialize(PageImpl value, JsonGenerator gen, SerializationContext provider) {
         gen.writeStartObject();
         gen.writeNumberProperty("number", value.getNumber());
         gen.writeNumberProperty("numberOfElements", value.getNumberOfElements());

@@ -14,13 +14,10 @@
 
 package org.shanoir.ng.utils.mapper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.shared.paging.Page;
-
-import tools.jackson.databind.ValueDeserializer;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
@@ -29,10 +26,11 @@ import tools.jackson.core.JsonTokenId;
 import tools.jackson.databind.BeanProperty;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.JavaType;
-import tools.jackson.databind.deser.ContextualDeserializer;
+import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.type.CollectionType;
 
-public class PageDeserializer extends ValueDeserializer<Page<?>> implements ContextualDeserializer {
+public class PageDeserializer extends ValueDeserializer<Page<?>> {
+
     private static final String CONTENT = "content";
     private static final String NUMBER = "number";
     private static final String SIZE = "size";
@@ -49,8 +47,8 @@ public class PageDeserializer extends ValueDeserializer<Page<?>> implements Cont
         long total = 0;
         if (p.isExpectedStartObjectToken()) {
             p.nextToken();
-            if (p.hasTokenId(JsonTokenId.ID_FIELD_NAME)) {
-                String propName = p.getCurrentName();
+            if (p.hasTokenId(JsonTokenId.ID_PROPERTY_NAME)) {
+                String propName = p.getString();
                 do {
                     p.nextToken();
                     switch (propName) {
@@ -70,7 +68,7 @@ public class PageDeserializer extends ValueDeserializer<Page<?>> implements Cont
                             p.skipChildren();
                             break;
                     }
-                } while (((propName = p.nextFieldName())) != null);
+                } while (((propName = p.nextName())) != null);
             } else {
                 ctxt.handleUnexpectedToken(handledType(), p);
             }

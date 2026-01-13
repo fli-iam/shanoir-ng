@@ -14,11 +14,9 @@
 
 package org.shanoir.ng.shared.dateTime;
 
-import java.io.IOException;
 import java.time.LocalDate;
 
 import tools.jackson.core.JsonGenerator;
-
 import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.ValueSerializer;
 
@@ -37,7 +35,7 @@ import tools.jackson.databind.ValueSerializer;
 public class LocalDateSerializer extends ValueSerializer<LocalDate> {
 
     @Override
-    public void serialize(LocalDate date, JsonGenerator generator, SerializationContext provider) throws IOException {
+    public void serialize(LocalDate date, JsonGenerator generator, SerializationContext provider) {
         generator.writeStartArray();
         generator.writeNumber(date.getYear());
         generator.writeNumber(date.getMonthValue());
