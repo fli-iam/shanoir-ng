@@ -19,7 +19,6 @@ import { KeycloakService } from '../keycloak/keycloak.service';
 import { ConsoleService } from '../console/console.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
-// eslint-disable-next-line import/no-unresolved
 import { VERSION } from '../../../environments/version';
 import { StudyService } from '../../studies/shared/study.service';
 import { environment } from '../../../environments/environment';

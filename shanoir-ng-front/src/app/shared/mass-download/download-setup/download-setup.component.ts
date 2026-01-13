@@ -18,12 +18,12 @@ import { AngularDeviceInformationService } from 'angular-device-information';
 import { Subscription } from 'rxjs';
 
 import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
-import {DownloadInputIds, DownloadSetup, MassDownloadService} from '../mass-download.service';
-import { Subscription } from 'rxjs';
+import { DownloadInputIds, DownloadSetup, MassDownloadService } from '../mass-download.service';
 
 @Component({
     selector: 'download-setup',
@@ -67,6 +67,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
             private formBuilder: UntypedFormBuilder,
             globalService: GlobalService,
             deviceInformationService: AngularDeviceInformationService,
+            private massDownloadService: MassDownloadService,
             private datasetService: DatasetService) {
 
         globalService.onNavigate.subscribe(() => {
