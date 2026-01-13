@@ -24,7 +24,6 @@ import org.mockito.Mockito;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.extensionrequest.controller.ExtensionRequestApiController;
 import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.security.UserFieldEditionSecurityManager;
@@ -42,6 +41,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Test class for ExtensionRequestApiController
@@ -82,6 +83,8 @@ public class ExtensionRequestApiControllerTest {
     @MockitoBean
     private UserUniqueConstraintManager uniqueConstraintManager;
 
+    @Autowired
+    private JsonMapper mapper;
 
     @Test
     @WithMockKeycloakUser(authorities = { "ROLE_ADMIN" }, id = 0)
@@ -99,7 +102,7 @@ public class ExtensionRequestApiControllerTest {
         extensionRequest.setEmail(EMAIL);
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH)
                 .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-                .content(JacksonUtils.serialize(extensionRequest)))
+                .content(mapper.writeValueAsString(extensionRequest)))
                 .andExpect(status().isOk());
 
         // THEN an extension is requested and password is changed
@@ -119,7 +122,7 @@ public class ExtensionRequestApiControllerTest {
         extensionRequest.setEmail(EMAIL);
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH)
                 .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-                .content(JacksonUtils.serialize(extensionRequest)))
+                .content(mapper.writeValueAsString(extensionRequest)))
                 .andExpect(status().isBadRequest());
 
         // THEN a 404 is returned
@@ -140,7 +143,7 @@ public class ExtensionRequestApiControllerTest {
         extensionRequest.setEmail(EMAIL);
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH)
                 .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-                .content(JacksonUtils.serialize(extensionRequest)))
+                .content(mapper.writeValueAsString(extensionRequest)))
                 .andExpect(status().isNotAcceptable());
 
         // THEN a NOT acceptable error is sent
@@ -161,7 +164,7 @@ public class ExtensionRequestApiControllerTest {
         extensionRequest.setEmail(EMAIL);
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH)
                 .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-                .content(JacksonUtils.serialize(extensionRequest)))
+                .content(mapper.writeValueAsString(extensionRequest)))
                 .andExpect(status().isNotAcceptable());
 
         // THEN a NOT acceptable error is sent

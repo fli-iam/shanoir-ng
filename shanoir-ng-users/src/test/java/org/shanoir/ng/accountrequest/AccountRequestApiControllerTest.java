@@ -25,7 +25,6 @@ import org.shanoir.ng.accountrequest.controller.AccountRequestApiController;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.security.UserFieldEditionSecurityManager;
@@ -40,6 +39,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Unit tests for user controller.
@@ -56,6 +57,9 @@ public class AccountRequestApiControllerTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private JsonMapper mapper;
 
     @MockitoBean
     private UserService userServiceMock;
@@ -95,7 +99,7 @@ public class AccountRequestApiControllerTest {
         given(userServiceMock.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
 
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
                 .andExpect(status().isNoContent());
     }
 
@@ -115,7 +119,7 @@ public class AccountRequestApiControllerTest {
         given(userServiceMock.createAccountRequest(Mockito.any(User.class))).willReturn(user);
 
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
                 .andExpect(status().isNoContent());
 
     }

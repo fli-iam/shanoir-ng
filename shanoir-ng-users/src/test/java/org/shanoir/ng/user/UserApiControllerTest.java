@@ -34,7 +34,6 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.shared.validation.FindByRepository;
 import org.shanoir.ng.user.controller.UserApiController;
@@ -58,6 +57,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Unit tests for user controller.
@@ -99,6 +100,9 @@ public class UserApiControllerTest {
 
     @MockitoBean
     private VIPUserService vipUserService;
+
+    @Autowired
+    private JsonMapper mapper;
 
     @BeforeAll
     public static void beforeClass() {
@@ -145,7 +149,7 @@ public class UserApiControllerTest {
     public void saveNewUserTest() throws Exception {
         given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), Mockito.any())).willReturn(new ArrayList<User>());
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser())))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(ModelsUtil.createUser())))
                 .andExpect(status().isOk());
     }
 
@@ -155,7 +159,7 @@ public class UserApiControllerTest {
         final IdList list = new IdList();
         list.getIdList().add(1L);
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH_SEARCH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(list)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(list)))
                 .andExpect(status().isOk());
     }
 
@@ -163,7 +167,7 @@ public class UserApiControllerTest {
     @WithMockUser(authorities = { "ROLE_ADMIN" })
     public void updateUserTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser(1L))))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(ModelsUtil.createUser(1L))))
                 .andExpect(status().isNoContent());
     }
 
@@ -172,12 +176,12 @@ public class UserApiControllerTest {
     public void fieldAccessTest() throws Exception {
         User user = ModelsUtil.createAdmin(1L);
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
                 .andExpect(status().isUnprocessableEntity());
         user = ModelsUtil.createUser(1L);
         user.setExpirationDate(LocalDate.now().plusYears(100));
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(user)))
                 .andExpect(status().isUnprocessableEntity());
     }
 
