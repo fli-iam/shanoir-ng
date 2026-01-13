@@ -7,5 +7,5 @@
     color: var(--greyer);
     border: 1px solid var(--grey) !important; 
 }
-.footer { position: fixed;  background-color: var(--very-light-grey); display: block; width: 100%; }
+.footer { position: fixed;  background-color: var(--very-light-grey); display: block; width: 100%; z-index: 2; }
 .spacer { height: 45px; }

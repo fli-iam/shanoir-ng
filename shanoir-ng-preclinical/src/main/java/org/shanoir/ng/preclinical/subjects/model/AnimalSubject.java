@@ -14,62 +14,58 @@
 
 package org.shanoir.ng.preclinical.subjects.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathology;
 import org.shanoir.ng.preclinical.references.Reference;
-import org.shanoir.ng.shared.hateoas.HalEntity;
+import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapy;
+import org.shanoir.ng.shared.core.model.AbstractEntityInterface;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Index;
 
 /**
  * Animal Subject
  */
 
 @Entity
-@Table(name = "animal_subject", indexes = @Index(name = "subject_id_idx", columnList = "subjectId", unique = true))
-@JsonPropertyOrder({ "_links", "subjectId", "specie", "strain", "biotype", "provider", "stabulation" })
-public class AnimalSubject extends HalEntity {
+@Table(name = "animal_subject")
+@JsonPropertyOrder({ "_links", "id", "specie", "strain", "biotype", "provider", "stabulation" })
+public class AnimalSubject implements AbstractEntityInterface {
 
-    private Long subjectId;
+    @Id
+    private Long id;
 
     @ManyToOne
-    // @RefValueExists
     private Reference specie = null;
 
     @ManyToOne
-    // @RefValueExists
     private Reference strain = null;
 
-    // @RefValueExists
     @ManyToOne
     private Reference biotype = null;
 
-    // @RefValueExists
     @ManyToOne
     private Reference provider = null;
 
-    // @RefValueExists
     @ManyToOne
     private Reference stabulation = null;
 
-    public AnimalSubject specie(Reference specie) {
-        this.specie = specie;
-        return this;
-    }
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "animalSubject", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SubjectPathology> subjectPathologies = new ArrayList<>();
 
-    public Long getSubjectId() {
-        return subjectId;
-    }
-
-    public void setSubjectId(Long subjectId) {
-        this.subjectId = subjectId;
-    }
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "animalSubject", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SubjectTherapy> subjectTherapies = new ArrayList<>();
 
     /**
      * none
@@ -83,11 +79,6 @@ public class AnimalSubject extends HalEntity {
 
     public void setSpecie(Reference specie) {
         this.specie = specie;
-    }
-
-    public AnimalSubject strain(Reference strain) {
-        this.strain = strain;
-        return this;
     }
 
     /**
@@ -104,11 +95,6 @@ public class AnimalSubject extends HalEntity {
         this.strain = strain;
     }
 
-    public AnimalSubject biotype(Reference biotype) {
-        this.biotype = biotype;
-        return this;
-    }
-
     /**
      * none
      *
@@ -121,11 +107,6 @@ public class AnimalSubject extends HalEntity {
 
     public void setBiotype(Reference biotype) {
         this.biotype = biotype;
-    }
-
-    public AnimalSubject provider(Reference provider) {
-        this.provider = provider;
-        return this;
     }
 
     /**
@@ -142,11 +123,6 @@ public class AnimalSubject extends HalEntity {
         this.provider = provider;
     }
 
-    public AnimalSubject stabulation(Reference stabulation) {
-        this.stabulation = stabulation;
-        return this;
-    }
-
     /**
      * none
      *
@@ -161,6 +137,28 @@ public class AnimalSubject extends HalEntity {
         this.stabulation = stabulation;
     }
 
+    public List<SubjectPathology> getSubjectPathologies() {
+        return subjectPathologies;
+    }
+
+    public void setSubjectPathologies(List<SubjectPathology> subjectPathologies) {
+        this.subjectPathologies = subjectPathologies;
+        for (SubjectPathology subjectPathology : subjectPathologies) {
+            subjectPathology.setAnimalSubject(this);
+        }
+    }
+
+    public List<SubjectTherapy> getSubjectTherapies() {
+        return subjectTherapies;
+    }
+
+    public void setSubjectTherapies(List<SubjectTherapy> subjectTherapies) {
+        this.subjectTherapies = subjectTherapies;
+        for (SubjectTherapy subjectTherapy : subjectTherapies) {
+            subjectTherapy.setAnimalSubject(this);
+        }
+    }
+
     @Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -171,11 +169,13 @@ public class AnimalSubject extends HalEntity {
         }
         AnimalSubject subject = (AnimalSubject) o;
         return Objects.equals(this.getId(), subject.getId())
-                && Objects.equals(this.subjectId, subject.getSubjectId())
+                && Objects.equals(this.id, subject.id)
                 && Objects.equals(this.specie, subject.specie)
                 && Objects.equals(this.strain, subject.strain) && Objects.equals(this.biotype, subject.biotype)
                 && Objects.equals(this.provider, subject.provider)
-                && Objects.equals(this.stabulation, subject.stabulation);
+                && Objects.equals(this.stabulation, subject.stabulation)
+                && Objects.equals(this.subjectTherapies, subject.subjectTherapies)
+                && Objects.equals(this.subjectPathologies, subject.subjectPathologies);
     }
 
     @Override
@@ -187,7 +187,7 @@ public class AnimalSubject extends HalEntity {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("class AnimalSubject {\n");
-        sb.append("    subjectId: ").append(toIndentedString(this.getSubjectId())).append("\n");
+        sb.append("    id: ").append(toIndentedString(this.getId())).append("\n");
         sb.append("    specie: ").append(toIndentedString(specie)).append("\n");
         sb.append("    strain: ").append(toIndentedString(strain)).append("\n");
         sb.append("    biotype: ").append(toIndentedString(biotype)).append("\n");
@@ -206,5 +206,13 @@ public class AnimalSubject extends HalEntity {
             return "null";
         }
         return o.toString().replace("\n", "\n    ");
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

@@ -64,7 +64,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
             BindingResult result) throws RestServiceException {
 
         // First check if given user exists
-        AnimalSubject animalSubject = subjectService.getBySubjectId(id);
+        AnimalSubject animalSubject = subjectService.getById(id);
         if (animalSubject == null) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), ANIMAL_SUBJECT_NOT_FOUND, new ErrorDetails()));
@@ -107,7 +107,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
             throws RestServiceException {
 
         // First check if given user exists
-        AnimalSubject animalSubject = subjectService.getBySubjectId(id);
+        AnimalSubject animalSubject = subjectService.getById(id);
         if (animalSubject == null) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), ANIMAL_SUBJECT_NOT_FOUND, new ErrorDetails()));
@@ -130,7 +130,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
     public ResponseEntity<Void> deleteSubjectTherapies(
             @Parameter(name = "animal subject id", required = true) @PathVariable("id") Long id)
             throws RestServiceException {
-        AnimalSubject animalSubject = subjectService.getBySubjectId(id);
+        AnimalSubject animalSubject = subjectService.getById(id);
         if (animalSubject == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
@@ -149,7 +149,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
             @Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
             @Parameter(name = "ID of subject therapy that needs to be fetched", required = true) @PathVariable("tid") Long tid)
             throws RestServiceException {
-        AnimalSubject animalSubject = subjectService.getBySubjectId(id);
+        AnimalSubject animalSubject = subjectService.getById(id);
         if (animalSubject == null) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), ANIMAL_SUBJECT_NOT_FOUND, new ErrorDetails()));
@@ -165,7 +165,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
     @Override
     public ResponseEntity<List<SubjectTherapy>> getSubjectTherapies(
             @Parameter(name = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException {
-        AnimalSubject animalSubject = subjectService.getBySubjectId(id);
+        AnimalSubject animalSubject = subjectService.getById(id);
         if (animalSubject == null) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.NOT_FOUND.value(), "Subject not found", new ErrorDetails()));
