@@ -219,6 +219,9 @@ public class DatasetDownloaderServiceImpl {
                 path += "/Exam_" + relevantDataset.getDatasetAcquisition().getExamination().getComment() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getId();
             }
 
+            if (sorting.contains("acquisition")) {
+                path += "/Acq_id_" + relevantDataset.getDatasetAcquisition().getId();
+            }
             datasetDownloadPath.put(dataset.getId(), path);
         }
         return datasetDownloadPath;
