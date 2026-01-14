@@ -88,7 +88,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
                 private downloadService: MassDownloadService,
                 private studyRightsService: StudyRightsService) {
 
-        super(route, 'subject');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'subject';
     }
 
     public get subject(): Subject { return this.entity; }
