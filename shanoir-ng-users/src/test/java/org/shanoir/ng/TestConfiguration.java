@@ -14,17 +14,18 @@
 
 package org.shanoir.ng;
 
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.web.client.RestClient;
 
 @Configuration
 @ActiveProfiles("test")
 public class TestConfiguration {
 
-    // Rabbit template is always mocked here
-    @MockitoBean
-    private RabbitTemplate rabbitTemplate;
+    @Bean
+    RestClient restClient() {
+        return RestClient.builder().build();
+    }
 
 }

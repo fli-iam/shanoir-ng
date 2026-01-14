@@ -183,7 +183,9 @@ spring:
     username: ${SHANOIR_SMTP_USERNAME:}
     password: ${SHANOIR_SMTP_PASSWORD:}
     protocol: smtp
-  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+  autoconfigure.exclude:
+    - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+    - org.springframework.boot.autoconfigure.amqp.RabbitAnnotationDrivenConfiguration
   sql:
     init:
       data-locations: classpath:/scripts/test-data-h2.sql
