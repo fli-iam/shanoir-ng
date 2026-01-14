@@ -25,6 +25,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,6 +55,9 @@ public class AccountRequestApiSecurityTest {
 
     @MockitoBean
     private RabbitTemplate rabbitTemplate;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     private User mockAccountReqUser;
 
