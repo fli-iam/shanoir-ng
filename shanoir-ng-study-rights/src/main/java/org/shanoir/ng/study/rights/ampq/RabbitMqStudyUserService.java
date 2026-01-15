@@ -32,6 +32,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -41,6 +42,7 @@ import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.databind.json.JsonMapper;
 
 @Service
+@Profile("!test")
 public class RabbitMqStudyUserService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMqStudyUserService.class);
@@ -96,4 +98,5 @@ public class RabbitMqStudyUserService {
             studyUser.getUserId()
         ).collect(Collectors.toList());
     }
+
 }

@@ -28,13 +28,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import tools.jackson.databind.ObjectMapper;
 
 @Component
+@Profile("!test")
 public class RabbitMQUserService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQUserService.class);
@@ -149,4 +155,5 @@ public class RabbitMQUserService {
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the dua draft event.", e);
         }
     }
+
 }
