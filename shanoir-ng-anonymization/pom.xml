@@ -16,8 +16,7 @@
 	<version>3.4.0</version>
 	<packaging>jar</packaging>
 
-	<name>anonymization</name>
-	<url>http://maven.apache.org</url>
+	<name>shanoir-ng-anonymization</name>
 
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>
