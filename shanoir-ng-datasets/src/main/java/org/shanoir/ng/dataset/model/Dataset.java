@@ -36,6 +36,7 @@ import org.shanoir.ng.dataset.modality.SpectDataset;
 import org.shanoir.ng.dataset.modality.StatisticalDataset;
 import org.shanoir.ng.dataset.modality.TemplateDataset;
 import org.shanoir.ng.dataset.modality.XaDataset;
+import org.shanoir.ng.dataset.modality.SrDataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -88,7 +89,8 @@ import jakarta.persistence.Transient;
         @JsonSubTypes.Type(value = TemplateDataset.class, name = DatasetType.Names.TEMPLATE),
         @JsonSubTypes.Type(value = BidsDataset.class, name = DatasetType.Names.BIDS),
         @JsonSubTypes.Type(value = MeasurementDataset.class, name = DatasetType.Names.MEASUREMENT),
-        @JsonSubTypes.Type(value = XaDataset.class, name = DatasetType.Names.XA) })
+        @JsonSubTypes.Type(value = XaDataset.class, name = DatasetType.Names.XA),
+        @JsonSubTypes.Type(value = SrDataset.class, name = DatasetType.Names.SR)})
 public abstract class Dataset extends AbstractEntity {
 
     /**

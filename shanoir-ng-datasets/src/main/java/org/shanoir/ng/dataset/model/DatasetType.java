@@ -32,7 +32,8 @@ public enum DatasetType {
     TEMPLATE(Names.TEMPLATE),
     BIDS(Names.BIDS),
     MEASUREMENT(Names.MEASUREMENT),
-    XA(Names.XA);
+    XA(Names.XA),
+    SR(Names.SR);
 
     // this is a hack to use the enum as string values in @JsonSubTypes as it takes no java expressions
     public final class Names {
@@ -56,6 +57,7 @@ public enum DatasetType {
         public static final String BIDS = "BIDS";
         public static final String MEASUREMENT = "Measurement";
         public static final String XA = "Xa";
+        public static final String SR = "SR";
     }
 
     private final String label;

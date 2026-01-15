@@ -16,6 +16,10 @@ package org.shanoir.ng.vip.output.handler;
 
 import jakarta.ws.rs.NotFoundException;
 import org.apache.commons.io.IOUtils;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.data.UID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -211,7 +215,9 @@ public class DefaultHandler extends OutputHandler {
                 }
             }
 
-            processedDataset.setDatasetType(DatasetType.GENERIC.name());
+            // Determine dataset type: DICOM → infer from modality/SOP class, otherwise GENERIC
+            String datasetType = determineDatasetType(file);
+            processedDataset.setDatasetType(datasetType);
             processedDatasetImporterService.createProcessedDataset(processedDataset);
 
             LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), file.getAbsolutePath());
@@ -234,4 +240,79 @@ public class DefaultHandler extends OutputHandler {
         return processing;
     }
 
+    /**
+     * Determines the dataset type based on file content.
+     * If DICOM: extracts modality/SOP class and maps to appropriate type
+     * If not DICOM: returns GENERIC
+     */
+    private String determineDatasetType(File file) {
+        try {
+            Attributes attributes = readDicomAttributes(file);
+            if (attributes != null) {
+                return mapDicomToDatasetType(attributes);
+            }
+        } catch (Exception e) {
+            LOG.debug("Could not read DICOM attributes from file [{}]: {}", file.getAbsolutePath(), e.getMessage());
+        }
+        return DatasetType.GENERIC.name();
+    }
+
+    /**
+     * Attempts to read DICOM attributes from file
+     */
+    private Attributes readDicomAttributes(File file) {
+        if (file.exists()) {
+            try (DicomInputStream dIS = new DicomInputStream(file)) {
+                return dIS.readDataset();
+            } catch (IOException e) {
+                // Not a DICOM file or error reading
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Maps DICOM SOP Class UID to Shanoir DatasetType
+     * Uses comprehensive SOP Class UID mapping for precise type detection
+     */
+    private String mapDicomToDatasetType(Attributes attributes) {
+        String sopClassUID = attributes.getString(Tag.SOPClassUID);
+
+        if (sopClassUID == null || sopClassUID.isEmpty()) {
+            return DatasetType.GENERIC.name();
+        }
+
+        if (UID.MRImageStorage.equals(sopClassUID)
+                || UID.MRImageStorage.equals(sopClassUID)
+                || UID.EnhancedMRImageStorage.equals(sopClassUID)
+                || UID.MRSpectroscopyStorage.equals(sopClassUID)
+                || UID.EnhancedMRColorImageStorage.equals(sopClassUID)) {
+            return DatasetType.MR.name();
+        } else if (UID.CTImageStorage.equals(sopClassUID) || UID.EnhancedCTImageStorage.equals(sopClassUID)) {
+            return DatasetType.CT.name();
+        } else if (UID.XRayAngiographicImageStorage.equals(sopClassUID)
+                || UID.EnhancedXAImageStorage.equals(sopClassUID)
+                || UID.XRayRadiofluoroscopicImageStorage.equals(sopClassUID)
+                || UID.EnhancedXRFImageStorage.equals(sopClassUID)
+                || UID.XRay3DAngiographicImageStorage.equals(sopClassUID)
+                || UID.XRay3DCraniofacialImageStorage.equals(sopClassUID)) {
+            return DatasetType.XA.name();
+        } else if (UID.PositronEmissionTomographyImageStorage.equals(sopClassUID) || UID.EnhancedPETImageStorage.equals(sopClassUID)) {
+            return DatasetType.PET.name();
+        } else if (UID.SegmentationStorage.equals(sopClassUID) || UID.SurfaceSegmentationStorage.equals(sopClassUID)) {
+            return DatasetType.SEGMENTATION.name();
+        } else if (UID.BasicTextSRStorage.equals(sopClassUID)
+                || UID.EnhancedSRStorage.equals(sopClassUID)
+                || UID.ComprehensiveSRStorage.equals(sopClassUID)
+                || UID.MammographyCADSRStorage.equals(sopClassUID)
+                || UID.ChestCADSRStorage.equals(sopClassUID)
+                || UID.XRayRadiationDoseSRStorage.equals(sopClassUID)
+                || UID.ColonCADSRStorage.equals(sopClassUID)
+                || UID.ImplantationPlanSRStorage.equals(sopClassUID)) {
+            return DatasetType.SR.name();
+        } else {
+            return DatasetType.GENERIC.name();
+        }
+    }
 }
