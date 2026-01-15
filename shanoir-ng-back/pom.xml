@@ -76,6 +76,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-restclient</artifactId>
         </dependency>
         <dependency>
@@ -209,44 +214,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		    <artifactId>dcm4che-json</artifactId>
 		    <version>${dcm4che.version}</version>
 		</dependency>
-        <!-- DCM4CHE -->
-        <dependency>
-            <groupId>org.dcm4che</groupId>
-            <artifactId>dcm4che-core</artifactId>
-            <version>${dcm4che.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.dcm4che</groupId>
-            <artifactId>dcm4che-dcmr</artifactId>
-            <version>${dcm4che.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.dcm4che</groupId>
-            <artifactId>dcm4che-emf</artifactId>
-            <version>${dcm4che.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.dcm4che.tool</groupId>
-            <artifactId>dcm4che-tool-storescu</artifactId>
-            <version>${dcm4che.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.dcm4che</groupId>
-            <artifactId>dcm4che-json</artifactId>
-            <version>${dcm4che.version}</version>
-        </dependency>
 
         <!-- Testing -->
         <dependency>
