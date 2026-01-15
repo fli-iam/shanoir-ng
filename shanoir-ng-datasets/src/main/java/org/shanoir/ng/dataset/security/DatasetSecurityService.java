@@ -99,6 +99,22 @@ public class DatasetSecurityService {
     }
 
     /**
+     * Check that the connected user has the given right for the given study.
+     *
+     * @param studyId the study id
+     * @return true or false
+     */
+    public boolean hasAnyRightOnStudy(Long studyId) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        if (studyId == null) {
+            return false;
+        }
+        return commService.hasAnyRightOnStudy(studyId);
+    }
+
+    /**
      * Check that the connected user has the given right for all the given studies.
      *
      * @param studyIds the studies ids

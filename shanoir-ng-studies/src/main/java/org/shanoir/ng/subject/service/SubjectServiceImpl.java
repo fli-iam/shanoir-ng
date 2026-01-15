@@ -480,6 +480,11 @@ public class SubjectServiceImpl implements SubjectService {
         return this.subjectRepository.existsByName(name);
     }
 
+    @Override
+    public boolean isSubjectNameExistForStudy(Long studyId, String subjectName) {
+        return this.subjectRepository.existsBySubjectStudyListStudyIdAndName(studyId, subjectName);
+    }
+
     /**
      * Use this method to avoid two bags violation exception and load subjectStudyTags.
      *
