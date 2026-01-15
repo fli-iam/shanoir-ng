@@ -257,9 +257,6 @@ public class DefaultHandler extends OutputHandler {
         return DatasetType.GENERIC.name();
     }
 
-    /**
-     * Attempts to read DICOM attributes from file
-     */
     private Attributes readDicomAttributes(File file) {
         if (file.exists()) {
             try (DicomInputStream dIS = new DicomInputStream(file)) {
@@ -272,47 +269,87 @@ public class DefaultHandler extends OutputHandler {
         return null;
     }
 
-    /**
-     * Maps DICOM SOP Class UID to Shanoir DatasetType
-     * Uses comprehensive SOP Class UID mapping for precise type detection
-     */
     private String mapDicomToDatasetType(Attributes attributes) {
         String sopClassUID = attributes.getString(Tag.SOPClassUID);
 
-        if (sopClassUID == null || sopClassUID.isEmpty()) {
-            return DatasetType.GENERIC.name();
-        }
+        if (sopClassUID == null || sopClassUID.isEmpty()) return DatasetType.GENERIC.name();
+        if (isMr(sopClassUID)) return DatasetType.MR.name();
+        if (isCt(sopClassUID)) return DatasetType.CT.name();
+        if (isXa(sopClassUID)) return DatasetType.XA.name();
+        if (isPet(sopClassUID)) return DatasetType.PET.name();
+        if (isSpect(sopClassUID)) return DatasetType.SPECT.name();
+        if (isSegmentation(sopClassUID)) return DatasetType.SEGMENTATION.name();
+        if (isRegistration(sopClassUID)) return DatasetType.REGISTRATION.name();
+        if (isSr(sopClassUID)) return DatasetType.SR.name();
 
-        if (UID.MRImageStorage.equals(sopClassUID)
-                || UID.MRImageStorage.equals(sopClassUID)
-                || UID.EnhancedMRImageStorage.equals(sopClassUID)
-                || UID.MRSpectroscopyStorage.equals(sopClassUID)
-                || UID.EnhancedMRColorImageStorage.equals(sopClassUID)) {
-            return DatasetType.MR.name();
-        } else if (UID.CTImageStorage.equals(sopClassUID) || UID.EnhancedCTImageStorage.equals(sopClassUID)) {
-            return DatasetType.CT.name();
-        } else if (UID.XRayAngiographicImageStorage.equals(sopClassUID)
-                || UID.EnhancedXAImageStorage.equals(sopClassUID)
-                || UID.XRayRadiofluoroscopicImageStorage.equals(sopClassUID)
-                || UID.EnhancedXRFImageStorage.equals(sopClassUID)
-                || UID.XRay3DAngiographicImageStorage.equals(sopClassUID)
-                || UID.XRay3DCraniofacialImageStorage.equals(sopClassUID)) {
-            return DatasetType.XA.name();
-        } else if (UID.PositronEmissionTomographyImageStorage.equals(sopClassUID) || UID.EnhancedPETImageStorage.equals(sopClassUID)) {
-            return DatasetType.PET.name();
-        } else if (UID.SegmentationStorage.equals(sopClassUID) || UID.SurfaceSegmentationStorage.equals(sopClassUID)) {
-            return DatasetType.SEGMENTATION.name();
-        } else if (UID.BasicTextSRStorage.equals(sopClassUID)
-                || UID.EnhancedSRStorage.equals(sopClassUID)
-                || UID.ComprehensiveSRStorage.equals(sopClassUID)
-                || UID.MammographyCADSRStorage.equals(sopClassUID)
-                || UID.ChestCADSRStorage.equals(sopClassUID)
-                || UID.XRayRadiationDoseSRStorage.equals(sopClassUID)
-                || UID.ColonCADSRStorage.equals(sopClassUID)
-                || UID.ImplantationPlanSRStorage.equals(sopClassUID)) {
-            return DatasetType.SR.name();
-        } else {
-            return DatasetType.GENERIC.name();
-        }
+        return DatasetType.GENERIC.name();
+
+    }
+
+    private boolean isMr(String uid) {
+        return Set.of(
+            UID.MRImageStorage,
+            UID.EnhancedMRImageStorage,
+            UID.MRSpectroscopyStorage,
+            UID.EnhancedMRColorImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isCt(String uid) {
+        return Set.of(
+            UID.CTImageStorage,
+            UID.EnhancedCTImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isXa(String uid) {
+        return Set.of(
+            UID.XRayAngiographicImageStorage,
+            UID.EnhancedXAImageStorage,
+            UID.XRayRadiofluoroscopicImageStorage,
+            UID.EnhancedXRFImageStorage,
+            UID.XRay3DAngiographicImageStorage,
+            UID.XRay3DCraniofacialImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isPet(String uid) {
+        return Set.of(
+            UID.PositronEmissionTomographyImageStorage,
+            UID.EnhancedPETImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isSpect(String uid) {
+        return Set.of(
+            UID.NuclearMedicineImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isSegmentation(String uid) {
+        return Set.of(
+            UID.SegmentationStorage,
+            UID.SurfaceSegmentationStorage
+        ).contains(uid);
+    }
+
+    private boolean isRegistration(String uid) {
+        return Set.of(
+            UID.SpatialRegistrationStorage,
+            UID.DeformableSpatialRegistrationStorage
+        ).contains(uid);
+    }
+
+    private boolean isSr(String uid) {
+        return Set.of(
+            UID.BasicTextSRStorage,
+            UID.EnhancedSRStorage,
+            UID.ComprehensiveSRStorage,
+            UID.MammographyCADSRStorage,
+            UID.ChestCADSRStorage,
+            UID.XRayRadiationDoseSRStorage,
+            UID.ColonCADSRStorage,
+            UID.ImplantationPlanSRStorage
+        ).contains(uid);
     }
 }
