@@ -162,7 +162,6 @@ export class DatasetCopyDialogComponent {
     }
 
     close() {
-        console.log("Closing dialog");
         this.ownRef.destroy();
     }
 }

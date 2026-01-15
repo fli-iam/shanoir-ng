@@ -188,4 +188,5 @@ public interface SubjectService {
 
     public void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew);
 
+    boolean isSubjectNameExistForStudy(Long studyId, String subjectName);
 }
