@@ -28,6 +28,7 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class EventsApiController implements EventsApi {
+
     @Autowired
     private ShanoirEventsService shanoirEventsService;
 
@@ -48,4 +49,5 @@ public class EventsApiController implements EventsApi {
         }
 
     }
+
 }
