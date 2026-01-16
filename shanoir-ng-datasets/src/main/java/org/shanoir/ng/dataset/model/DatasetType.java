@@ -57,7 +57,7 @@ public enum DatasetType {
         public static final String BIDS = "BIDS";
         public static final String MEASUREMENT = "Measurement";
         public static final String XA = "Xa";
-        public static final String SR = "SR";
+        public static final String SR = "Sr";
     }
 
     private final String label;

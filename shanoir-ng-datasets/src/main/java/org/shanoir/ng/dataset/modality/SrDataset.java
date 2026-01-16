@@ -20,9 +20,9 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
- * Segmentation dataset.
+ * SR (Structured Report) dataset.
  *
- * @author afragkia
+ * @author Adam Fragkiadakis
  *
  */
 @Entity
