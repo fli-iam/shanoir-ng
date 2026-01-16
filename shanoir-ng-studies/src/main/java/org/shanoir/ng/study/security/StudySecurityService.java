@@ -108,6 +108,25 @@ public class StudySecurityService {
         return hasAnyPrivilege(study, rights);
     }
 
+    /**
+     * Check that the connected user has any right for the given study.
+     *
+     * @param studyId  the study id
+     * @param rightStr the right
+     * @return true or false
+     */
+    public boolean hasAnyRightOnStudy(Long studyId) {
+        Long userId = KeycloakUtil.getTokenUserId();
+        if (userId == null) {
+            throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
+        }
+        StudyUser founded = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
+        return founded != null
+                && founded.getStudyUserRights() != null
+                && !founded.getStudyUserRights().isEmpty()
+                && founded.isConfirmed();
+    }
+
     public boolean hasRightOnStudyTag(Long id, String rightStr) throws EntityNotFoundException {
         StudyTag tag = studyTagRepository.findById(id)
                 .orElseThrow(() ->
