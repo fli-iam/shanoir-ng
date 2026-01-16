@@ -59,7 +59,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template [ngIf]="mode == 'create' || (mode=='edit' && isAdmin())">
-								<select-box formControlName="study" [(ngModel)]="examination.study" (userChange)="onStudyChange()" [optionArr]="studies">
+								<select-box [formControl]="form.controls['study']" [(ngModel)]="examination.study" (userChange)="onStudyChange()" [optionArr]="studies">
 								</select-box>
 								<label *ngIf="hasError('study', ['required'])" class="form-validation-alert" i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">Study is required!</label>
 							</ng-template>
@@ -89,7 +89,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </a>
                             </ng-template>
                             <ng-template [ngIf]="mode == 'create' || (mode=='edit' && isAdmin())">
-                                <select-box formControlName="center" [(ngModel)]="examination.center" [optionArr]="centers">
+                                <select-box [formControl]="form.controls['center']" [(ngModel)]="examination.center" [optionArr]="centers">
                                 </select-box>
                                 <label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">Center is required!</label>
                             </ng-template>
@@ -99,11 +99,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate">Examination date</label>
                                                 <span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{examination?.examinationDate | date: 'dd/MM/yyyy'}}
+								{{examination?.examinationDate | localDateFormatPipe}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<datepicker [disabled]="inImport && examination.examinationDate" [(ngModel)]="examination.examinationDate" formControlName="examinationDate" required></datepicker>
-								<label *ngIf="hasError('examinationDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid ! Date format: dd/mm/yyyy</label>
+								<label *ngIf="hasError('examinationDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid ! Date format: {{ dateDisplay }}</label>
 								<label *ngIf="hasError('examinationDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">Required</label>
 							</ng-template>
 						</span>
@@ -156,15 +156,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </ng-template>
                         </span>
                     </li>
-                    <li *ngIf="mode == 'create' || mode=='edit'">
-                        <label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
+                    <li>
+                        <label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Extra data</label>
                         <span class="right-col" [ngSwitch]="mode">
-                            <input #input hidden type="file" (change)="attachNewFile($event)"/>
-                            <button (click)="setFile()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
-                            <ul>
-                                <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
-                                </li>
-                            </ul>
+							<ng-template [ngSwitchCase]="'view'">
+                                <ul>
+                                    <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button type="button" class="dl-button" (click)="downloadFile(file)"><i class="fas fa-download"></i></button>
+                                    </li>
+                                </ul>
+							</ng-template>
+							<ng-template ngSwitchDefault>
+                                <input #input hidden type="file" (change)="attachNewFile($event)"/>
+                                <button (click)="setFile()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
+                                <ul>
+                                    <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
+                                    </li>
+                                </ul>
+                            </ng-template>
 						</span>
                     </li>
                     <li *ngIf="mode != 'create' && examination.copies?.length > 0">

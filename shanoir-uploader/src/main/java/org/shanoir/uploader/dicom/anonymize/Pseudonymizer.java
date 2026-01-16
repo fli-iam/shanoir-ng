@@ -5,8 +5,8 @@ import java.io.File;
 import org.apache.commons.lang.SystemUtils;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
+import org.shanoir.ng.utils.StreamGobbler;
 import org.shanoir.uploader.exception.PseudonymusException;
-import org.shanoir.uploader.utils.StreamGobbler;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +57,9 @@ public class Pseudonymizer {
 
 	public Pseudonymizer(final String pseudonymusKey, final String pseudonymusFolderPath) throws PseudonymusException {
 		logger.info("Pseudonymizer: initialization started.");
+		if (pseudonymusKey == null) {
+			throw new PseudonymusException("Pseudonymus key is null.");
+		}
 		this.pseudonymusKey = pseudonymusKey;
 		final File pseudonymusFolder = new File(pseudonymusFolderPath);
 		if (!pseudonymusFolder.exists()) {

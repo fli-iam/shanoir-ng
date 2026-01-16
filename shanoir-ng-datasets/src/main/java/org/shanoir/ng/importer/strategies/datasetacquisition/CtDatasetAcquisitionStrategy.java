@@ -25,13 +25,13 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtProtocol;
+import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.CtProtocolStrategy;
-import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,8 +70,9 @@ public class CtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
-		datasetAcquisition.setAcquisitionStartTime(LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate)), 
-													DateTimeUtils.stringToLocalTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime))));
+		LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionDate), 
+				dicomAttributes.getFirstDatasetAttributes().getString(Tag.AcquisitionTime));
+		datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
 		CtProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
 		datasetAcquisition.setCtProtocol(protocol);
 	

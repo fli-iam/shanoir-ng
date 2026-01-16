@@ -1,0 +1,224 @@
+name: ShanoirUploader Build & Release
+
+concurrency:
+  group: shanoir-uploader-release
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+ 
+jobs:
+  setup-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version_part: ${{ steps.get_tag.outputs.version_part }}
+      release_tag: ${{ steps.get_tag.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Get latest NG tag and generate SHUP release tag
+        id: get_tag
+        run: |
+          latest_tag=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases \ | jq -r '[.[] | select(.tag_name | test("^NG_v"))] | sort_by(.published_at) | last.tag_name')
+          echo "Latest_tag: $latest_tag"
+          if [[ "$latest_tag" =~ NG_v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            patch="${BASH_REMATCH[3]}"
+            version_part="${major}.${minor}.${patch}"
+            new_tag="SHUP_v${version_part}"
+            echo "version_part=$version_part" >> "$GITHUB_OUTPUT"
+            echo "new_tag=$new_tag" >> "$GITHUB_OUTPUT"
+          else
+            echo "No NG_v tag found"
+            exit 1
+          fi
+
+
+  build-linux:
+    needs: setup-version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set ShUp version from incremented tag
+        run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
+
+      - name: Build
+        run: cd shanoir-ng-parent && mvn clean package -DskipTests
+
+      - name: Create custom runtime with jlink
+        run: |
+          jlink \
+            --module-path $JAVA_HOME/jmods \
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets \
+            --output shanoir-uploader/target/custom-runtime \
+            --compress zip-6 \
+            --strip-debug \
+            --no-header-files \
+            --no-man-pages
+
+      - name: Package .deb
+        run: |
+          cd shanoir-uploader
+          mkdir target/packages
+          jpackage \
+            --type deb \
+            --input target \
+            --dest target/packages \
+            --vendor "Inria" \
+            --copyright "© 2025 Inria" \
+            --name ShanoirUploader \
+            --app-version ${{ needs.setup-version.outputs.version_part }} \
+            --main-jar shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-jar-with-dependencies.jar \
+            --main-class org.shanoir.uploader.ShanoirUploader \
+            --runtime-image target/custom-runtime \
+            --java-options "-Xmx2g -Dapp.version=v${{ needs.setup-version.outputs.version_part }}" \
+            --icon src/main/resources/images/icon.png
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shup-deb
+          path: shanoir-uploader/target/packages/*.deb
+
+      - name: Upload ZIP Package
+        uses: actions/upload-artifact@v4
+        with:
+          name: shup-zip
+          path: shanoir-uploader/target/shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-*.zip
+
+  build-windows:
+    needs: setup-version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set ShUp version from incremented tag
+        run: cd shanoir-uploader && mvn versions:set "-DnewVersion=${{ needs.setup-version.outputs.version_part }}"
+
+      - name: Build
+        run: cd shanoir-ng-parent && mvn clean package -DskipTests
+
+      - name: Create custom runtime with jlink
+        run: |
+          jlink `
+            --module-path $Env:JAVA_HOME\jmods `
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets `
+            --output shanoir-uploader/target/custom-runtime `
+            --compress zip-6 `
+            --strip-debug `
+            --no-header-files `
+            --no-man-pages
+
+      - name: Package .exe
+        run: |
+          cd shanoir-uploader
+          mkdir target/packages
+          jpackage `
+            --type exe `
+            --input target `
+            --dest target/packages `
+            --vendor "Inria" `
+            --copyright "© 2025 Inria" `
+            --name ShanoirUploader `
+            --app-version ${{ needs.setup-version.outputs.version_part }} `
+            --win-upgrade-uuid 123e4567-e89b-12d3-a456-426614174000 `
+            --main-jar shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-jar-with-dependencies.jar `
+            --main-class org.shanoir.uploader.ShanoirUploader `
+            --runtime-image target/custom-runtime `
+            --java-options "-Xmx2g -Dapp.version=v${{ needs.setup-version.outputs.version_part }}" `
+            --icon src/main/resources/images/icon.ico `
+            --win-menu `
+            --win-shortcut `
+            --win-dir-chooser `
+            --win-per-user-install
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shup-exe
+          path: shanoir-uploader/target/packages/*.exe
+
+  build-macos:
+    needs: setup-version
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set ShUp version from incremented tag
+        run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
+
+      - name: Build
+        run: cd shanoir-ng-parent && mvn clean package -DskipTests
+
+      - name: Create custom runtime with jlink
+        run: |
+          jlink \
+            --module-path $JAVA_HOME/jmods \
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets \
+            --output shanoir-uploader/target/custom-runtime \
+            --compress zip-6 \
+            --strip-debug \
+            --no-header-files \
+            --no-man-pages
+
+      - name: Package .dmg
+        run: |
+          cd shanoir-uploader
+          mkdir target/packages
+          jpackage \
+            --type dmg \
+            --input target \
+            --dest target/packages \
+            --vendor "Inria" \
+            --copyright "© 2025 Inria" \
+            --name ShanoirUploader \
+            --app-version ${{ needs.setup-version.outputs.version_part }} \
+            --main-jar shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-jar-with-dependencies.jar \
+            --main-class org.shanoir.uploader.ShanoirUploader \
+            --runtime-image target/custom-runtime \
+            --java-options "-Xmx2g -Dapp.version=v${{ needs.setup-version.outputs.version_part }}" \
+            --icon src/main/resources/images/icon.icns \
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shup-dmg
+          path: shanoir-uploader/target/packages/*.dmg
+
+  release:
+    needs: [build-linux, build-windows, build-macos, setup-version]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.setup-version.outputs.release_tag }}
+          name: ${{ needs.setup-version.outputs.release_tag }}
+          files: |
+            artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

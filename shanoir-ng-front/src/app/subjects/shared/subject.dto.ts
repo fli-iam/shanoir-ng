@@ -20,8 +20,10 @@ import { Tag } from '../../tags/tag.model';
 import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { SubjectStudyDTO } from './subject-study.dto';
 import { Subject } from './subject.model';
-import { Sex } from './subject.types';
+import {Sex, SubjectType} from './subject.types';
 import {formatDate} from "@angular/common";
+import {QualityTag} from "../../study-cards/shared/quality-card.model";
+import {SimpleStudy, Study} from "../../studies/shared/study.model";
 
 
 @Injectable()
@@ -77,6 +79,14 @@ export class SubjectDTOService {
         } else {
             entity.subjectStudyList = [];
         }
+        entity.studyIdentifier = dto.studyIdentifier;
+        entity.isAlreadyAnonymized = dto.isAlreadyAnonymized;
+        entity.subjectType = dto.subjectType;
+        entity.physicallyInvolved = dto.physicallyInvolved;
+        entity.tags = dto.tags;
+        entity.qualityTag = dto.qualityTag;
+        entity.study = new Study()
+        entity.study.id = dto.studyId;
         return entity;
     }
 
@@ -103,13 +113,21 @@ export class SubjectDTO {
     selected: boolean = false;
     subjectStudyList: SubjectStudyDTO[] = [];
     preclinical: boolean;
+    studyIdentifier: string;
+    isAlreadyAnonymized: boolean = false;
+    subjectType: SubjectType;
+    physicallyInvolved: boolean;
+    tags: Tag[];
+    qualityTag: QualityTag;
+    study: SimpleStudy;
+    studyId: number;
 
     constructor(subject: Subject) {
         this.id = subject.id;
         if (subject.examinations) this.examinations = Id.toIdList(subject.examinations);
         this.name = subject.name;
         this.identifier = subject.identifier;
-        if (subject.birthDate) this.birthDate = formatDate(subject.birthDate, 'yyyy-MM-dd', 'en');
+        if (subject.birthDate && !isNaN(subject.birthDate.getTime())) this.birthDate = formatDate(subject.birthDate, 'yyyy-MM-dd', 'en');
         this.languageHemisphericDominance = subject.languageHemisphericDominance;
         this.manualHemisphericDominance = subject.manualHemisphericDominance;
         this.imagedObjectCategory = subject.imagedObjectCategory;
@@ -121,5 +139,12 @@ export class SubjectDTO {
             dto.subject = null;
             return dto;
         }) : null;
+        this.studyIdentifier = subject.studyIdentifier;
+        this.isAlreadyAnonymized = subject.isAlreadyAnonymized;
+        this.subjectType = subject.subjectType;
+        this.physicallyInvolved = subject.physicallyInvolved;
+        this.tags = subject.tags;
+        this.qualityTag = subject.qualityTag;
+        this.study = new SimpleStudy(subject.study);
     }
 }

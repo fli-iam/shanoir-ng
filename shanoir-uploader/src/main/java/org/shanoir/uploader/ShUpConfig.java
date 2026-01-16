@@ -18,9 +18,7 @@ public class ShUpConfig {
 	/**
 	 * Constants
 	 */
-	public static final String SHANOIR_UPLOADER_VERSION = "v9.0.0";
-	
-	public static final String RELEASE_DATE = "2025-03-04, for Neurinfo";
+	public static final String SHANOIR_UPLOADER_VERSION;
 	
 	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	
@@ -34,7 +32,7 @@ public class ShUpConfig {
 
 	public static final String MODE_PSEUDONYMUS = "mode.pseudonymus";
 	
-	public static final String MODE_PSEUDONYMUS_KEY_FILE = "key";
+	public static final String MODE_PSEUDONYMUS_KEY = "PSEUDONYMUS";
 	
 	public static final String MODE_SUBJECT_COMMON_NAME = "mode.subject.common.name";
 	
@@ -57,6 +55,8 @@ public class ShUpConfig {
 	public static final String KEYCLOAK_JSON = "keycloak.json";
 	
 	public static final String SU = ".su";
+
+	public static final String DEV = "dev";
 	
 	public static final String USER_HOME = "user.home";
 
@@ -69,12 +69,26 @@ public class ShUpConfig {
 	public static final int UPLOAD_SERVICE_INTERVAL = 5;
 
 	public static final String RANDOM_SEED = "random.seed";
+
+	public static final String RELEASE_DATE = "release.date";
 	
 	public static final String PROFILE = "profile";
 	
 	public static final String USERNAME = "username";
 
 	public static final String PASSWORD = "password";
+
+	public static final String CHECK_ON_SERVER = "check.on.server";
+
+	public static final String DICOMDIR = "DICOMDIR";
+
+	public static final String IMPORT_JOB_JSON = "import-job.json";
+
+	public static final String UPLOAD_JOB_XML = "upload-job.xml";
+
+	public static final String NOMINATIVE_DATA_JOB_XML = "nominative-data-job.xml";
+
+	public static final String ANONYMIZATION_PROFILE = "anonymization.profile";
 
 	/**
 	 * Static variables
@@ -117,16 +131,32 @@ public class ShUpConfig {
 		return Boolean.parseBoolean(profileProperties.getProperty(MODE_PSEUDONYMUS));
 	}
 	
-	public static boolean isModeSubjectCommonNameAutoIncrement() {
+	public static boolean isModeSubjectNameAutoIncrement() {
 		return MODE_SUBJECT_COMMON_NAME_AUTO_INCREMENT.equals(profileProperties.getProperty(MODE_SUBJECT_COMMON_NAME));
 	}
 
-	public static boolean isModeSubjectCommonNameManual() {
+	public static boolean isModeSubjectNameManual() {
 		return MODE_SUBJECT_COMMON_NAME_MANUAL.equals(profileProperties.getProperty(MODE_SUBJECT_COMMON_NAME));
 	}
 
 	public static boolean isModeSubjectStudyIdentifier() {
 		return Boolean.parseBoolean(profileProperties.getProperty(MODE_SUBJECT_STUDY_IDENTIFIER));
 	}
+
+	/**
+	 * Static initialization block to set the ShanoirUploader version.
+	 * Used to manage the version only in pom.xml.
+	 */
+	static {
+        String version = DEV;
+        Package pkg = ShUpConfig.class.getPackage();
+        if (pkg != null) {
+            String currentVersion = pkg.getImplementationVersion();
+            if (currentVersion != null) {
+                version = "v" + currentVersion;
+            }
+        }
+        SHANOIR_UPLOADER_VERSION = version;
+    }
 
 }

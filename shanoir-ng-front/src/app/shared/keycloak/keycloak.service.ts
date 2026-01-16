@@ -14,6 +14,7 @@
 import { Injectable } from '@angular/core';
 
 import * as AppUtils from '../../utils/app.utils';
+import Keycloak from "keycloak-js";
 
 
 // The keycloak adapter supports two authentication methods : "login-required"
@@ -32,8 +33,6 @@ import * as AppUtils from '../../utils/app.utils';
 //   authentication is performed twice and the SPA is loaded twice).
 const USE_LOGIN_REQUIRED = (<any>window).SHANOIR_KEYCLOAK_ADAPTER_MODE == "login-required";
 
-declare var Keycloak: any;
-
 @Injectable()
 export class KeycloakService {
     static auth: any = {};
@@ -42,12 +41,7 @@ export class KeycloakService {
     private gettingToken: boolean = false;
     private tokenPromise: Promise<string>;
 
-    static init(): Promise<any> {
-
-        if (window.location.href.endsWith('/account-request')) {
-            return Promise.resolve();
-        }
-
+    static init(optionalAuth: boolean = false): Promise<any> {
         const keycloakAuth: any = new Keycloak({
             url: AppUtils.KEYCLOAK_BASE_URL,
             realm: 'shanoir-ng',
@@ -63,7 +57,7 @@ export class KeycloakService {
                         // login form.
                         // But 'check-sso' only sets/clears the token, we have
                         // to do the redirection explicitely
-                        window.location.replace(keycloakAuth.createLoginUrl());
+                        keycloakAuth.createLoginUrl().then(url => window.location.replace(url));
                 }
         }
 
@@ -84,8 +78,14 @@ export class KeycloakService {
                         keycloakAuth.onAuthLogout = maybe_redirect_to_login_page;
                         resolve(null);
                     } else {
-                        maybe_redirect_to_login_page();
-                        reject();
+                        if (optionalAuth) {
+                            // some pages can be accessible in a either authenticated or unauthenticated context
+                            KeycloakService.auth.loggedIn = false;
+                            resolve(null);
+                        } else {
+                            maybe_redirect_to_login_page();
+                            reject();
+                        }
                     }
                 })
                 .catch(() => {
@@ -102,7 +102,7 @@ export class KeycloakService {
         if (!this.gettingToken) {
             this.gettingToken = true;
             this.tokenPromise = new Promise<string>((resolve, reject) => {
-                if (KeycloakService.auth.authz.token) {
+                if (KeycloakService.auth?.authz?.token) {
                     KeycloakService.auth.authz.updateToken(5).then(() => {
                         this.gettingToken = false;
                         resolve(<string>KeycloakService.auth.authz.token);

@@ -42,9 +42,15 @@ public class Subject {
 	
 	private Sex sex;
 
-	private List<SubjectStudy> subjectStudyList;
+	private IdName study;
 
-	private SubjectStudy subjectStudy;
+	private String studyIdentifier;
+
+	private SubjectType subjectType;
+
+	private boolean physicallyInvolved;
+
+	private List<Tag> tags;
 	
 	private PseudonymusHashValues pseudonymusHashValues;
 
@@ -155,21 +161,6 @@ public class Subject {
 		this.imagedObjectCategory = imagedObjectCategory;
 	}
 
-	/**
-	 * @return the subjectStudyList
-	 */
-	public List<SubjectStudy> getSubjectStudyList() {
-		return subjectStudyList;
-	}
-
-	/**
-	 * @param subjectStudyList
-	 *            the subjectStudyList to set
-	 */
-	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
-		this.subjectStudyList = subjectStudyList;
-	}
-
 	public boolean isPreclinical() {
 		return preclinical;
 	}
@@ -196,18 +187,47 @@ public class Subject {
 
 	@Override
 	public String toString() {
-		return "Subject [id=" + id + ", name=" + name + ", identifier=" + identifier + ", birthDate=" + birthDate
-				+ ", languageHemisphericDominance=" + languageHemisphericDominance + ", manualHemisphericDominance="
-				+ manualHemisphericDominance + ", imagedObjectCategory=" + imagedObjectCategory + ", sex=" + sex
-				+ ", preclinical=" + preclinical + "]";
+		return this.getName();
 	}
 
-	public SubjectStudy getSubjectStudy() {
-		return subjectStudy;
+	public IdName getStudy() {
+		return study;
 	}
 
-	public void setSubjectStudy(SubjectStudy subjectStudy) {
-		this.subjectStudy = subjectStudy;
+	public void setStudy(IdName study) {
+		this.study = study;
+	}
+
+	public String getStudyIdentifier() {
+		return studyIdentifier;
+	}
+
+	public void setStudyIdentifier(String studyIdentifier) {
+		this.studyIdentifier = studyIdentifier;
+	}
+
+	public SubjectType getSubjectType() {
+		return subjectType;
+	}
+
+	public void setSubjectType(SubjectType subjectType) {
+		this.subjectType = subjectType;
+	}
+
+	public boolean isPhysicallyInvolved() {
+		return physicallyInvolved;
+	}
+
+	public void setPhysicallyInvolved(boolean physicallyInvolved) {
+		this.physicallyInvolved = physicallyInvolved;
+	}
+
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
 	}
 
 }

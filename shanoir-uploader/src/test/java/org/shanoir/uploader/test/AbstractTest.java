@@ -1,24 +1,27 @@
 package org.shanoir.uploader.test;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.File;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
+import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.ShanoirUploader;
+import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
+import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.Manufacturer;
 import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.utils.Util;
+import org.shanoir.uploader.utils.PropertiesUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is the base class for all ShUp test classes, that do
@@ -43,14 +46,21 @@ public abstract class AbstractTest {
 	private static final String USER_PASSWORD = "user.password";
 
 	protected static ShanoirUploaderServiceClient shUpClient;
+
+	protected static Pseudonymizer pseudonymizer;
+
+	protected static IdentifierCalculator identifierCalculator;
 	
 	@BeforeAll
 	public static void setup() {
-		initProperties(TEST_PROPERTIES, testProperties);
-		initProperties(ShUpConfig.PROFILE_DIR + testProperties.getProperty(PROFILE) + "/" + ShUpConfig.PROFILE_PROPERTIES,
-				ShUpConfig.profileProperties);
-		initProperties(ShUpConfig.ENDPOINT_PROPERTIES, ShUpConfig.endpointProperties);
+		ShanoirUploader.initShanoirUploaderFolders();
+		PropertiesUtil.initPropertiesFromResourcePath(testProperties, TEST_PROPERTIES);
+		PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.profileProperties, ShUpConfig.PROFILE_DIR + testProperties.getProperty(PROFILE) + "/" + ShUpConfig.PROFILE_PROPERTIES);
+		PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.endpointProperties, ShUpConfig.ENDPOINT_PROPERTIES);
+		identifierCalculator = new IdentifierCalculator();
 		shUpClient = new ShanoirUploaderServiceClient();
+		shUpClient.configure();
+		ShUpOnloadConfig.setShanoirUploaderServiceClient(shUpClient);
 		String user = testProperties.getProperty(USER_NAME);
 		String password = testProperties.getProperty(USER_PASSWORD);
 		String token;
@@ -62,21 +72,19 @@ public abstract class AbstractTest {
 				logger.error("ERROR: login not successful.");
 	            Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
 			}
+			if (ShUpConfig.isModePseudonymus()) {
+				File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
+				String pseudonymusKeyValue = shUpClient.findValueByKey(ShUpConfig.MODE_PSEUDONYMUS_KEY);
+				try {
+					pseudonymizer = new Pseudonymizer(pseudonymusKeyValue, pseudonymusFolder.getAbsolutePath());
+				} catch (PseudonymusException e) {
+					logger.error(e.getMessage(), e);
+					System.exit(0);
+				}	
+			}
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
             Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
-		}
-	}
-
-	private static void initProperties(final String fileName, final Properties properties) {
-		try {
-			InputStream iS = Util.class.getResourceAsStream("/" + fileName);
-			if (iS != null) {
-				properties.load(iS);
-				iS.close();
-			}
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
 		}
 	}
 	

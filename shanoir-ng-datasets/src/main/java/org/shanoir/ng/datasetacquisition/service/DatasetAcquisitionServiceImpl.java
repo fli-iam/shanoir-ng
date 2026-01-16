@@ -49,12 +49,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
+
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
 
 
     @Autowired
     private DatasetAcquisitionRepository repository;
+
+    @Autowired
+    private ExaminationRepository examRepository;
 
     @Autowired
     private SecurityService securityService;
@@ -97,7 +103,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     public List<DatasetAcquisition> findByExamination(Long examinationId) {
-        return repository.findByExaminationId(examinationId);
+        Optional<Examination> exam = examRepository.findByIdWithEagerAcquisitions(examinationId);
+        if (exam.isPresent()) {
+            return exam.get().getDatasetAcquisitions();
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private DatasetAcquisition updateValues(DatasetAcquisition from, DatasetAcquisition to) {
@@ -242,18 +253,20 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     @Transactional
     public void deleteById(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-        final DatasetAcquisition entity = repository.findById(id).orElse(null);
-        if (entity == null) {
+        final DatasetAcquisition acquisition = repository.findById(id).orElse(null);
+        if (acquisition == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
-        delete(entity, event);
+        delete(acquisition, event);
 
-        String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(entity.getExamination());
-        String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(entity);
-        dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
+        String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(acquisition.getExamination());
+        String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(acquisition);
+
+        if (acquisition.getSource() == null)
+            dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
 
         repository.deleteById(id);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, acquisition.getExamination().getStudyId()));
     }
 
     /**

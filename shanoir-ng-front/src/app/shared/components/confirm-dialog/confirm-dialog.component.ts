@@ -27,7 +27,7 @@ export class ConfirmDialogComponent {
     mode: 'confirm' | 'choose' | 'info' | 'error';
     private _message: string;
     link: string;
-    buttons: {yes: string, no?: string, cancel: string};
+    buttons: {yes: string, no?: string, cancel?: string};
     private closePromise: SuperPromise<any> = new SuperPromise();
 
     public get message(): string {
@@ -38,7 +38,7 @@ export class ConfirmDialogComponent {
         this._message = value?.split(' ').map(w => w.startsWith('https://') ? '<a target="_blank" href="' + w + '">' + w + '</a>' : w).join(' ');
     }
 
-    public openConfirm(title: string, message: string, buttons?: {yes: string, cancel: string}): Promise<boolean> {
+    public openConfirm(title: string, message?: string, buttons?: {yes: string, cancel: string}): Promise<boolean> {
         this.title = title;
         this.message = message;
         this.buttons = buttons;
@@ -46,7 +46,7 @@ export class ConfirmDialogComponent {
         return this.closePromise;
     }
 
-    public openChoose(title: string, message: string, buttons?: {yes: string, no: string, cancel: string}): Promise<'yes' | 'no' | false> {
+    public openChoose(title: string, message?: string, buttons?: {yes: string, no: string, cancel?: string}): Promise<'yes' | 'no' | false> {
         this.title = title;
         this.message = message;
         this.buttons = buttons;
@@ -54,14 +54,15 @@ export class ConfirmDialogComponent {
         return this.closePromise;
     }
 
-    public openInfo(title: string, message: string): Promise<boolean> {
+    public openInfo(title: string, message?: string, button?: string): Promise<boolean> {
         this.title = title;
         this.message = message;
+        this.buttons = {yes: button, no: null, cancel: null};
         this.mode = 'info';
         return this.closePromise;
     }
 
-    public openError(title: string, message: string, link?: string): Promise<boolean> {
+    public openError(title: string, message?: string, link?: string): Promise<boolean> {
         this.title = title;
         this.message = message;
         this.link = link;

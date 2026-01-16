@@ -71,8 +71,9 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
                     this.input.studyRights.includes(StudyUserRight.CAN_ADMINISTRATE),
                     this.input.studyRights.includes(StudyUserRight.CAN_DOWNLOAD)
                 );
-                this.loadDatasets();
             }
+            this.node.registerOpenPromise(this.contentLoaded);
+            this.nodeInit.emit(this.node);
         }
     }
 
@@ -84,10 +85,16 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
     
     loadDatasets() {
         if (this.node.datasets == UNLOADED) {
+            this.loading = true;
             this.datasetService.getByAcquisitionId(this.node.id).then(datasets => {
                 this.node.datasets = datasets.map(ds => DatasetNode.fromDataset(ds, false, this.node, this.node.canDelete, this.node.canDownload)).sort();
                 this.setDatasetIds(this.node.datasets);
+            }).finally(() => {
+                this.loading = false;
+                this.contentLoaded.resolve();
             });
+        } else {
+            this.contentLoaded.resolve();
         }
     }
 

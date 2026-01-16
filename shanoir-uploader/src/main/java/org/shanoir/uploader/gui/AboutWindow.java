@@ -13,6 +13,8 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -21,15 +23,17 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.shanoir.uploader.ShUpConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.shanoir.uploader.ShUpConfig;
 
 public class AboutWindow extends JFrame {
 
 	private static final Logger logger = LoggerFactory.getLogger(AboutWindow.class);
 
-	String supportMail = "imagerie@ofsep.org";
+	String supportMail = ShUpConfig.profileProperties.getProperty("shanoir.support.mail", "developers_shanoir@inria.fr");
+
+	String releasesUrl = ShUpConfig.endpointProperties.getProperty("github.releases");
 
 	public AboutWindow(final ResourceBundle resourceBundle) {
 		// Create the frame.
@@ -46,13 +50,13 @@ public class AboutWindow extends JFrame {
 		final JPanel aboutPanel = new JPanel();
 		aboutPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
-		masterPanel.add(aboutPanel, BorderLayout.NORTH);
+		masterPanel.add(aboutPanel, BorderLayout.CENTER);
 
 		GridBagLayout gBLPanel = new GridBagLayout();
 		gBLPanel.columnWidths = new int[] { 0, 0, 0 };
-		gBLPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+		gBLPanel.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gBLPanel.columnWeights = new double[] { 1.0, 1.0, Double.MIN_VALUE };
-		gBLPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gBLPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		aboutPanel.setLayout(gBLPanel);
 
 		JLabel icon = new JLabel();
@@ -65,8 +69,33 @@ public class AboutWindow extends JFrame {
 				+ resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.name") + "</B></body></html>");
 		addItem(aboutPanel, nameLabel, 0, 2, 1, GridBagConstraints.CENTER);
 
-		JLabel versionLabel = new JLabel(ShUpConfig.SHANOIR_UPLOADER_VERSION + " Released: 2023-03");
-		addItem(aboutPanel, versionLabel, 0, 4, 1, GridBagConstraints.CENTER);
+		// Setting a default value for release date (-in dev mode for exemple- it might not be set)
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		String defaultDate = LocalDate.now().format(formatter)
+;
+		if (ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE) == null
+				|| ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE).isEmpty()) {
+			ShUpConfig.basicProperties.setProperty(ShUpConfig.RELEASE_DATE, defaultDate);
+		}
+
+		JLabel versionLabel = new JLabel(ShUpConfig.SHANOIR_UPLOADER_VERSION + " Released: "
+				+ ShUpConfig.basicProperties.getProperty(ShUpConfig.RELEASE_DATE).substring(0, 10));
+		addItem(aboutPanel, versionLabel, 0, 3, 1, GridBagConstraints.CENTER);
+
+		JLabel releasesLabel = new JLabel("<html><div style='white-space: nowrap;'><a href=''>"
+				+ resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.releases") + "</a></div></html>");
+		addItem(aboutPanel, releasesLabel, 0, 4, 1, GridBagConstraints.CENTER);
+
+		releasesLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    try {
+                        Desktop.getDesktop().browse(new URI(releasesUrl));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
 
 		JLabel copyrightLabel = new JLabel(
 				resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.copyrightShUp"));
@@ -76,8 +105,7 @@ public class AboutWindow extends JFrame {
 				resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.copyrightPseudonymus"));
 		addItem(aboutPanel, copyrightPseudonymusLabel, 0, 6, 1, GridBagConstraints.CENTER);
 
-		final JLabel SupportLabel = new JLabel(
-				resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.supportMail"));
+		final JLabel SupportLabel = new JLabel("<html><a href='mailto:" + supportMail + "'>" + supportMail + "</a></html>");
 		addItem(aboutPanel, SupportLabel, 0, 7, 1, GridBagConstraints.CENTER);
 
 		SupportLabel.addMouseListener(new MouseAdapter() {
@@ -85,7 +113,7 @@ public class AboutWindow extends JFrame {
 			public void mouseClicked(MouseEvent event) {
 				try {
 					Desktop.getDesktop().mail(new URI(
-							"mailto:" + resourceBundle.getString("shanoir.uploader.helpMenu.aboutShUp.supportMail")));
+							"mailto:" + supportMail));
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (URISyntaxException e) {
@@ -112,8 +140,8 @@ public class AboutWindow extends JFrame {
 		// center the frame
 		// frame.setLocationRelativeTo( null );
 		Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
-		int windowWidth = 300;
-		int windowHeight = 369;
+		int windowWidth = 415;
+		int windowHeight = 400;
 		// set position and size
 		frame.setBounds(center.x - windowWidth / 2, center.y - windowHeight / 2, windowWidth, windowHeight);
 

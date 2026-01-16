@@ -50,7 +50,7 @@ public class MrProtocolStrategy {
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 
-	public MrProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) {
+	public MrProtocol generateProtocolForSerie(AcquisitionAttributes<String> acquisitionAttributes, Serie serie) throws IOException {
 
 		Attributes attributes = acquisitionAttributes.getFirstDatasetAttributes();
 		// dcm4che3 does not support MultiframeExtraction for MRS
@@ -123,16 +123,9 @@ public class MrProtocolStrategy {
 		LOG.debug("extractMetadata : sliceThickness=" + sliceThickness);
 		mrProtocol.setSliceThickness(sliceThickness);
 
-		/** (0054, 0081) Number of Slices */
-		Integer numberOfSlices = attributes.getInt(Tag.NumberOfSlices, -1);
-		numberOfSlices = (numberOfSlices != -1) ? numberOfSlices : null;
-		LOG.debug("extractMetadata : numberOfSlices=" + numberOfSlices);
-		if (numberOfSlices == null) {
-			try {
-				numberOfSlices = DicomProcessing.countUniqueInstances(serie, false);
-				LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
-			} catch (IOException e) {}
-		}
+		/** Number of Slices */
+		Integer numberOfSlices = DicomProcessing.countUniqueInstances(serie, false);
+		LOG.debug("count nb of slices within the serie : numberOfSlices=" + numberOfSlices);
 		mrProtocol.setNumberOfSlices(numberOfSlices);
 
 		// Spacing between slices

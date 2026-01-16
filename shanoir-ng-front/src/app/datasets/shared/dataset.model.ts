@@ -40,6 +40,19 @@ export abstract class Dataset extends Entity {
     tags: Tag[];
     copies: number[];
     source: number;
+    private _hasProcessing: boolean;
+
+    get hasProcessings(): boolean {
+        return this.processings?.length > 0;
+    }
+
+    set hasProcessing(hasProcessing: boolean) {
+        this._hasProcessing = hasProcessing;
+    }
+
+    get hasProcessing(): boolean {
+        return this._hasProcessing != undefined ? this._hasProcessing : !!this.datasetProcessing;
+    }
 }
 
 export class DatasetMetadata {

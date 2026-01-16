@@ -76,6 +76,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
 	private static final String YES = "YES";
 
+	private static final String SERIES_NUMBER_0 = "0";
+
 	@Autowired
 	private ShanoirEventService eventService;
 
@@ -107,7 +109,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 						if (!serie.isIgnored()) {
 							// use a second try here, in case error is on serie, to get at least the serie name for error tracing
 							try {
-								getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
+								getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, patient, study, serie, isImportFromPACS);
 							} catch (Exception e) {
 								handleError(event, nbSeries, cpt, serie, e);						
 							}
@@ -121,7 +123,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				 * we can not correctly sort in ShanoirUploader without going into the files itself, what we do not
 				 * do, therefore we have the ImagesCreatorAndDicomFileAnalyzerService, that is called on the server.
 				 */
-				series.sort(new SeriesNumberOrDescriptionSorter());
+				series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
 			}
 		}
 	}
@@ -142,13 +144,13 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param serie
 	 * @throws FileNotFoundException
 	 */
-	public void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Serie serie, Patient patient, boolean isImportFromPACS)
+	public void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Patient patient, Study study, Serie serie, boolean isImportFromPACS)
 			throws FileNotFoundException {
 		List<Instance> instances = serie.getInstances();
 		if (instances != null && !instances.isEmpty()) {
 			Instance firstInstance = instances.get(0);
 			File firstInstanceFile = getFileFromInstance(firstInstance, serie, folderFileAbsolutePath, isImportFromPACS);
-			processDicomFileForFirstInstance(firstInstanceFile, serie, patient);
+			processDicomFileForFirstInstance(firstInstanceFile, patient, study, serie);
 		}
 	}
 
@@ -195,30 +197,20 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	public File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath, boolean isImportFromPACS)
 			throws FileNotFoundException {
-		StringBuilder instanceFilePath = new StringBuilder();
+		String instanceFilePath;
 		if (isImportFromPACS) {
-			instanceFilePath.append(folderFileAbsolutePath)
+			StringBuilder instanceFilePathBuilder = new StringBuilder();
+			instanceFilePathBuilder.append(folderFileAbsolutePath)
 				.append(File.separator)
 				.append(serie.getSeriesInstanceUID())
 				.append(File.separator)
 				.append(instance.getSopInstanceUID())
-				.append(SUFFIX_DCM);
+					.append(SUFFIX_DCM);
+			instanceFilePath = instanceFilePathBuilder.toString();
 		} else {
-			String[] instancePathArray = instance.getReferencedFileID();
-			if (instancePathArray != null) {
-				instanceFilePath.append(folderFileAbsolutePath).append(File.separator);
-				for (int count = 0; count < instancePathArray.length; count++) {
-					instanceFilePath.append(instancePathArray[count]);
-					if (count != instancePathArray.length - 1) {
-						instanceFilePath.append(File.separator);
-					}
-				}
-			} else {
-				throw new FileNotFoundException(
-						"instancePathArray in DicomDir: missing file: " + instancePathArray);
-			}
+			instanceFilePath = DicomUtils.referencedFileIDToPath(folderFileAbsolutePath, instance.getReferencedFileID());
 		}
-		File instanceFile = new File(instanceFilePath.toString());
+		File instanceFile = new File(instanceFilePath);
 		if (instanceFile.exists()) {
 			return instanceFile;
 		} else {
@@ -258,7 +250,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				} else {
 					relativeFilePath = dicomFile.getAbsolutePath();
 				}
-				
 				image.setPath(relativeFilePath);
 				addImageSeparateDatasetsInfo(image, attributes);
 				images.add(image);
@@ -278,11 +269,12 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param serie
 	 * @param patient
 	 */
-	private void processDicomFileForFirstInstance(File dicomFile, Serie serie, Patient patient) {
+	private void processDicomFileForFirstInstance(File dicomFile, Patient patient, Study study, Serie serie) {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
 			LOG.debug("Process first DICOM file of serie {} path {}", serie.getSeriesInstanceUID() + " " + serie.getSeriesDescription(), dicomFile.getAbsolutePath());
 			Attributes attributes = dIS.readDatasetUntilPixelData();
 			checkPatientData(patient, attributes);
+			checkStudyData(study, attributes);
 			checkSerieData(serie, attributes);
 			addSeriesEquipment(serie, attributes);
 			addSeriesCenter(serie, attributes);
@@ -301,9 +293,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
 		final String sopClassUID = attributes.getString(Tag.SOPClassUID);
 		if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-			|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
-			|| UID.EnhancedCTImageStorage.equals(sopClassUID)
-			|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
+				|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
+				|| UID.EnhancedCTImageStorage.equals(sopClassUID)
+				|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
 		}
@@ -360,7 +352,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			String deviceSerialNumber = getOrSetToUnknown(attributes, Tag.DeviceSerialNumber, UNKNOWN);
 			String stationName = getOrSetToUnknown(attributes, Tag.StationName, UNKNOWN);
 			String magneticFieldStrength = getOrSetToUnknown(attributes, Tag.MagneticFieldStrength, UNKNOWN);
-			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber, stationName, magneticFieldStrength));
+			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, serie.getModality(), deviceSerialNumber, stationName, magneticFieldStrength));
 		}
 	}
 	
@@ -371,11 +363,12 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
 	/**
 	 * Adds the equipment information.
+	 * Used by ShanoirUploader in case of a DICOM Pushed study
 	 * 
 	 * @param serie
 	 * @param datasetAttributes
 	 */
-	private void addSeriesCenter(Serie serie, Attributes attributes) {
+	public void addSeriesCenter(Serie serie, Attributes attributes) {
 		if (serie.getInstitution() == null) {
 			InstitutionDicom institution = new InstitutionDicom();
 			String institutionName = getOrSetToUnknown(attributes, Tag.InstitutionName, UNKNOWN);
@@ -383,6 +376,23 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			institution.setInstitutionName(institutionName);
 			institution.setInstitutionAddress(institutionAddress);
 			serie.setInstitution(institution);
+		}
+	}
+
+	/**
+	 * Get DICOM study information from .dcm file.
+	 * 
+	 * @param study
+	 * @param attributes
+	 */
+	private void checkStudyData(Study study, Attributes attributes) {
+		if (study != null && attributes != null) {
+			// always use StudyDescription from .dcm file, e.g. in Q/R encoding errors
+			// can happen, so we trust the local .dcm file the most to avoid further issues
+			String studyDescriptionDicomFile = attributes.getString(Tag.StudyDescription);
+			if (StringUtils.isNotEmpty(studyDescriptionDicomFile)) {
+				study.setStudyDescription(studyDescriptionDicomFile);
+			}
 		}
 	}
 
@@ -401,19 +411,18 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				serie.setSopClassUID(sopClassUIDDicomFile);
 			}
 		}
-		if (StringUtils.isEmpty(serie.getSeriesNumber())) {
+		if (StringUtils.isEmpty(serie.getSeriesNumber()) || SERIES_NUMBER_0.equals(serie.getSeriesNumber())) {
 			// has not been sent by PACS (case for Telemis), get it from .dcm file:
 			String seriesNumberDicomFile = attributes.getString(Tag.SeriesNumber);
 			if (StringUtils.isNotEmpty(seriesNumberDicomFile)) {
 				serie.setSeriesNumber(seriesNumberDicomFile);
 			}
 		}
-		if (StringUtils.isEmpty(serie.getSeriesDescription())) {
-			// has not been found in dicomdir or before in other file, so we get it from .dcm file:
-			String seriesDescriptionDicomFile = attributes.getString(Tag.SeriesDescription);
-			if (StringUtils.isNotEmpty(seriesDescriptionDicomFile)) {
-				serie.setSeriesDescription(seriesDescriptionDicomFile);
-			}
+		// always use seriesDescription from .dcm file, e.g. in Q/R encoding errors
+		// can happen, so we trust the local .dcm file the most to avoid further issues
+		String seriesDescriptionDicomFile = attributes.getString(Tag.SeriesDescription);
+		if (StringUtils.isNotEmpty(seriesDescriptionDicomFile)) {
+			serie.setSeriesDescription(seriesDescriptionDicomFile);
 		}
 		DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
 		DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie, attributes);
@@ -429,6 +438,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		}
 		// keep this check at this place: enhanced Dicom needs to be checked first
 		DicomSerieAndInstanceAnalyzer.checkSerieIsMultiFrame(serie, attributes);
+		if (StringUtils.isEmpty(serie.getModality())) {
+			serie.setModality(attributes.getString(Tag.Modality));
+		}
 	}
 
 	/**

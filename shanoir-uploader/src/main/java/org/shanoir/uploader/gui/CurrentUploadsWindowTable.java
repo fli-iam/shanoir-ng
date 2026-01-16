@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -13,10 +14,14 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
+import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.UploadState;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataModel;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
-import org.shanoir.uploader.upload.UploadState;
 
 @SuppressWarnings("deprecation")
 public class CurrentUploadsWindowTable implements Observer {
@@ -30,13 +35,18 @@ public class CurrentUploadsWindowTable implements Observer {
 	public int deleteColumn = 8;
 	public int patientNameColumn = 2;
 	public int uploadStateColumn = 6;
-	public String readyUploadState = "READY";
-	public String startUploadState = "START";
-	public String startAutoImportUploadState = "START_AUTOIMPORT";
-	public String finishedUploadState = "FINISHED";
-	public String errorUploadState = "ERROR";
+	public String readyUploadState = UploadState.READY.toString();
+	public String startUploadState = UploadState.START.toString();
+	public String startAutoImportUploadState = UploadState.START_AUTOIMPORT.toString();
+	public String finishedUploadState = UploadState.FINISHED.toString();
+	public String errorUploadState = UploadState.ERROR.toString();
+	public String checkOKUploadState = UploadState.CHECK_OK.toString();
+	public String checkKOUploadState = UploadState.CHECK_KO.toString();
 	public int selectedRow;
 	public int rowsNb;
+
+	// Formatter to display the dates in the table
+	DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ShUpConfig.formatter.toPattern());
 
 	private CurrentUploadsWindowTable(MainWindow frame) {
 		this.frame = frame;
@@ -53,14 +63,20 @@ public class CurrentUploadsWindowTable implements Observer {
 		};
 		this.columnNames = columnNames;
 		// Create the non editable table to display the current uploads
-		this.table = new JTable(new DefaultTableModel(columnNames, 0) {
+		DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+    		@Override
+    		public boolean isCellEditable(int row, int column) {
+        		return false;
+    		}
+		};
+		this.table = new JTable(model);
 
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-		});
-		
+		// Activate sorting for comparable content
+		TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);
+		sorter.setSortable(importColumn, false);
+		sorter.setSortable(deleteColumn, false);
+		table.setRowSorter(sorter);
+
 		initTable();
 		frame.scrollPaneUpload.getViewport().add(table);
 	}
@@ -105,57 +121,63 @@ public class CurrentUploadsWindowTable implements Observer {
 		table.getColumnModel().getColumn(deleteColumn).setCellRenderer(new Background_Renderer());
     }
 
-	public void fillTable(Map<String, NominativeDataUploadJob> initialUploads) {
+	public void fillTable(Map<String, ImportJob> initialUploads) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
-		for (Map.Entry<String, NominativeDataUploadJob> entry : initialUploads.entrySet()) {
+		for (Map.Entry<String, ImportJob> entry : initialUploads.entrySet()) {
 			if (entry.getValue() != null) {
 				String key = entry.getKey();
-				NominativeDataUploadJob nominativeDataUploadJob = (NominativeDataUploadJob) entry.getValue();
-				addRow(model, key, nominativeDataUploadJob);
+				ImportJob nominativeDataImportJob = (ImportJob) entry.getValue();
+				addRow(model, key, nominativeDataImportJob);
 			}
 		}
-		addLastRow(model);
 	}
 
-	private void addLastRow(DefaultTableModel model) {
-		model.addRow(new Object[] { "", "", "", "", "", "", "", "",
-				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll") });
-	}
-
-	private void addRow(DefaultTableModel model, String key, NominativeDataUploadJob nominativeDataUploadJob) {
+	private void addRow(DefaultTableModel model, String key, ImportJob nominativeDataImportJob) {
+		Serie firstSelectedSerie = nominativeDataImportJob.getFirstSelectedSerie();
 		String actionImport = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import");
 		String actionDelete = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete");
-		Object[] row = switch (nominativeDataUploadJob.getUploadState()) {
+		Object[] row = switch (nominativeDataImportJob.getUploadState()) {
 			case READY, ERROR -> new Object[] {
 				key,
-				nominativeDataUploadJob.getPatientPseudonymusHash(),
-				nominativeDataUploadJob.getPatientName(),
-				nominativeDataUploadJob.getIPP(),
-				nominativeDataUploadJob.getStudyDate(),
-				nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadState().toString(),
+				nominativeDataImportJob.getSubject().getIdentifier(),
+				nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(), // Was firstname and lastname from nominativeDataUploadJob, check if firstname still present
+				nominativeDataImportJob.getPatient().getPatientID(),
+				nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
+				firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")", // was e.g Philips (serial number)
+				nominativeDataImportJob.getUploadState().toString(),
 				actionImport,
 				actionDelete
 			};
-			case FINISHED_UPLOAD -> new Object[] {
+			case FINISHED -> new Object[] {
 				key,
-				nominativeDataUploadJob.getPatientPseudonymusHash(),
-				nominativeDataUploadJob.getPatientName(),
-				nominativeDataUploadJob.getIPP(),
-				nominativeDataUploadJob.getStudyDate(),
-				nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadPercentage(),
+				nominativeDataImportJob.getSubject().getIdentifier(),
+				nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
+				nominativeDataImportJob.getPatient().getPatientID(),
+				nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
+				firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
+				nominativeDataImportJob.getUploadPercentage().toString(),
+				"",
+				""
+			};
+			case CHECK_OK, CHECK_KO -> new Object[] {
+				key,
+				nominativeDataImportJob.getSubject().getIdentifier(),
+				nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
+				nominativeDataImportJob.getPatient().getPatientID(),
+				nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
+				firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
+				nominativeDataImportJob.getUploadPercentage().toString(),
 				"",
 				actionDelete
 			};
 			default -> new Object[] {
 				key,
-				nominativeDataUploadJob.getPatientPseudonymusHash(),
-				nominativeDataUploadJob.getPatientName(),
-				nominativeDataUploadJob.getIPP(),
-				nominativeDataUploadJob.getStudyDate(),
-				nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadPercentage(),
+				nominativeDataImportJob.getSubject().getIdentifier(),
+				nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
+				nominativeDataImportJob.getPatient().getPatientID(),
+				nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
+				firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
+				nominativeDataImportJob.getUploadPercentage().toString(),
 				"",
 				""
 			};
@@ -163,18 +185,15 @@ public class CurrentUploadsWindowTable implements Observer {
 		model.addRow(row);
 	}
 
-	public void addLineToTable(String absolutePath, NominativeDataUploadJob nominativeDataUploadJob) {
+	public void addLineToTable(String absolutePath, ImportJob nominativeDataImportJob) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
-		int nbRow = model.getRowCount();
-		model.removeRow(nbRow - 1);
-		addRow(model, absolutePath, nominativeDataUploadJob);
-		addLastRow(model);
+		addRow(model, absolutePath, nominativeDataImportJob);
 	}
 
 	public void updatePercent(String path, String percentage) {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		int nbRow = model.getRowCount();
-		for (int i = 0; i < nbRow - 1; i++) {
+		for (int i = 0; i < nbRow; i++) {
 			if (model.getValueAt(i, 0).equals(path)) {
 				model.setValueAt(percentage, i, uploadStateColumn);
 			}
@@ -224,15 +243,17 @@ public class CurrentUploadsWindowTable implements Observer {
 		int nbStartUpload = 0;
 		int nbErrorUpload = 0;
 		int totalUploadPercent = 0;
-		for (Map.Entry<String, NominativeDataUploadJob> entry : currentNominativeDataModel.getCurrentUploads()
+		for (Map.Entry<String, ImportJob> entry : currentNominativeDataModel.getCurrentUploads()
 				.entrySet()) {
 			if (entry.getValue() != null) {
 				if (entry.getValue().getUploadPercentage() == null
 					|| entry.getValue().getUploadPercentage().isEmpty()
-					|| "READY".compareTo(entry.getValue().getUploadPercentage()) == 0) {
+					|| UploadState.READY.toString().compareTo(entry.getValue().getUploadPercentage()) == 0) {
 					// Do Nothing
 				} else {
-					if (entry.getValue().getUploadPercentage().equals(finishedUploadState)) {
+					if (entry.getValue().getUploadPercentage().equals(finishedUploadState)
+					|| entry.getValue().getUploadPercentage().equals(checkOKUploadState)
+					|| entry.getValue().getUploadPercentage().equals(checkKOUploadState)) {
 						totalUploadPercent += 100;
 						nbFinishUpload++;
 					} else if (entry.getValue().getUploadPercentage().equals(errorUploadState)) {

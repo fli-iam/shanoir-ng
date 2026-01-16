@@ -14,20 +14,16 @@
 
 package org.shanoir.ng.manufacturermodel.repository;
 
-import org.shanoir.ng.manufacturermodel.model.Manufacturer;
-import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
-import org.springframework.data.repository.CrudRepository;
-
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Implementation of custom repository for centers.
- * 
- * @author msimon
- *
- */
+import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
+import org.springframework.data.repository.CrudRepository;
+
 public interface ManufacturerModelRepository extends CrudRepository<ManufacturerModel, Long>, ManufacturerModelRepositoryCustom {
 
     Optional<List<ManufacturerModel>> findByManufacturerId(Long id);
+
+    Optional<ManufacturerModel> findFirstByNameContainingIgnoreCaseOrderByIdAsc(String name);
+
 }

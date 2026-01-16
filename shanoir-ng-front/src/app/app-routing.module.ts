@@ -96,6 +96,8 @@ import { AccessRequestListComponent } from './users/access-request/access-reques
 import { QualityCardListComponent } from './study-cards/quality-card-list/quality-card-list.component';
 import { QualityCardComponent } from './study-cards/quality-card/quality-card.component';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
+import { DUAAssistantComponent } from './dua/dua-assistant.component';
+import { TestComponent } from './utils/dev/test.component';
 
 let routes: Routes = [
     {
@@ -827,6 +829,24 @@ let routes: Routes = [
     {
         path: 'access-request/list',
         component: AccessRequestListComponent
+    },
+    {
+        path: 'dua/create/:studyId',
+        component: DUAAssistantComponent,
+        data: { mode: 'create' }
+    },
+    {
+        path: 'dua/edit/:id',
+        component: DUAAssistantComponent,
+        data: { mode: 'edit' }
+    },
+    {
+        path: 'dua/view/:id',
+        component: DUAAssistantComponent,
+        data: { mode: 'view' }
+    },{
+        path: 'dev',
+        component: TestComponent
     }
 ];
 

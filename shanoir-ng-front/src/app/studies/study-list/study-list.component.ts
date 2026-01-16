@@ -41,6 +41,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     accessRequestValidated = false;
     hasDUA: boolean;
     isSuConfirmed: boolean;
+    private studyIdsForCurrentUser: number[];
 
     constructor(
         private studyService: StudyService,
@@ -48,13 +49,14 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         private userService: UserService) {
 
         super('study');
+        this.studyService.getStudiesByRight(StudyUserRight.CAN_ADMINISTRATE).then( studies => this.studyIdsForCurrentUser = studies);
     }
 
     getService(): EntityService<Study> {
         return this.studyService;
     }
 
-    getEntities(): Promise<Study[]> {
+    getEntities(eager: boolean = false): Promise<Study[]> {
         let earlyResult: Promise<Study[]> = Promise.all([
             this.studyService.getAll().then(studies => this.fetchStorageVolumesByChunk(studies)),
             this.studyService.getPublicStudiesData()
@@ -82,7 +84,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 }));
             return studies;
         })
-        Promise.all([
+        let allPromise: Promise<Study[]> = Promise.all([
             earlyResult,
             this.userService.getAccessRequests(),
         ]).then(([studies, accessRequests]) => {
@@ -93,8 +95,13 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     }
                 }
             }
+            return studies;
         });
-        return earlyResult;
+        if (eager) {
+            return allPromise;
+        } else {
+            return earlyResult;
+        }
     }
 
     private fetchStorageVolumesByChunk(studies) {
@@ -208,10 +215,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     canEdit(study: Study): boolean {
-        return this.keycloakService.isUserAdmin() || (
-            study.studyUserList &&
-            study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
-        );
+        return this.keycloakService.isUserAdmin() || this.studyIdsForCurrentUser.includes(study.id);
     }
 
     private fetchStudyUsers(study: any): Promise<StudyUser[]> {
@@ -233,12 +237,12 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             this.fetchHasDUA(study),
             this.fetchStudyUsers(study),
         ]).then(([hasDUA, studyUsers]) => {
-            for (let su of studyUsers) {
+            studyUsers?.forEach(su => {
                 if (su.userId == this.keycloakService.getUserId()) {
                     this.accessRequestValidated = true;
                     this.isSuConfirmed = su.confirmed;
                 }
-            }
+            });
             if (study.visibleByDefault && study.locked && !this.keycloakService.isUserAdmin()) {
                 if (study.accessRequestedByCurrentUser) {
                     this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.');

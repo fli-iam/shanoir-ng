@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -15,10 +15,8 @@
 package org.shanoir.ng.studycard.model;
 
 import java.util.HashSet;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import jakarta.persistence.*;
+import java.util.List;
+import java.util.Set;
 
 import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
@@ -33,8 +31,16 @@ import org.shanoir.ng.studycard.model.rule.DatasetAcquisitionRule;
 import org.shanoir.ng.studycard.model.rule.DatasetRule;
 import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
 
 /**
  * Study card.
@@ -71,11 +77,11 @@ public class StudyCard extends HalEntity implements Card {
 
     /** The study for which is defined the study card. */
     private Long studyId;
-    
+
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name="study_card_id")
     private List<StudyCardRule<?>> rules;
-    
+
     private Long lastEditTimestamp;
 
     /**
@@ -141,7 +147,7 @@ public class StudyCard extends HalEntity implements Card {
     public void setLastEditTimestamp(Long lastEditTimestamp) {
         this.lastEditTimestamp = lastEditTimestamp;
     }
-    
+
     /**
     * Application during import, when dicoms are present in tmp directory.
     * @param acquisition
@@ -167,7 +173,7 @@ public class StudyCard extends HalEntity implements Card {
                         } else {
                             throw new IllegalStateException("the parametrized type of AcquisitionAttributes is not implemented, use String or Long");
                         }
-                        ((DatasetRule) rule).apply(dataset, attributes);                       
+                        ((DatasetRule) rule).apply(dataset, attributes);
                     }
                 } else {
                     throw new IllegalStateException("unknown type of rule");
@@ -181,10 +187,12 @@ public class StudyCard extends HalEntity implements Card {
 
     public Set<Integer> getDicomTagsInUse() {
         Set<Integer> tagsInUse = new HashSet<>();
-        for (StudyCardRule rule : getRules()) {
-            tagsInUse.addAll(rule.getConditionsDICOMtags());
+        if (getRules() != null) {
+            for (StudyCardRule rule : getRules()) {
+                tagsInUse.addAll(rule.getConditionsDICOMtags());
+            }
         }
         return tagsInUse;
     }
-   
+
 }

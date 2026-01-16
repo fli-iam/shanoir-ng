@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -15,11 +15,11 @@
 package org.shanoir.ng.shared.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
@@ -46,7 +46,7 @@ public class StudyServiceImpl implements StudyService {
 	public void updateStudy(Study updated, Study current) {
 
 		if (current.getId() == null)
-			throw new IllegalStateException("The entity should have an id.");
+			throw new IllegalStateException("The entity must have an ID.");
 
 		// TAGS
 		if (current.getTags() != null) {
@@ -65,7 +65,7 @@ public class StudyServiceImpl implements StudyService {
 		if (current.getStudyTags() != null) {
 			current.getStudyTags().clear();
 		} else {
-			current.setTags(new ArrayList<>());
+			current.setStudyTags(new HashSet<>());
 		}
 		if (updated.getStudyTags() != null) {
 			current.getStudyTags().addAll(updated.getStudyTags());
@@ -74,33 +74,6 @@ public class StudyServiceImpl implements StudyService {
 			tag.setStudy(current);
 		}
 
-		Study studyDb = this.repository.save(current);
-
-		// SUBJECT_STUDY
-		if (current.getSubjectStudyList() != null) {
-			current.getSubjectStudyList().clear();
-		} else {
-			current.setSubjectStudyList(new ArrayList<>());
-		}
-		if (updated.getSubjectStudyList() != null) {
-			current.getSubjectStudyList().addAll(updated.getSubjectStudyList());
-		}
-
-		for (SubjectStudy sustu : current.getSubjectStudyList()) {
-			sustu.setStudy(current);
-			for (Tag tag : sustu.getTags()) {
-				if (tag.getId() == null) {
-					Tag dbTag = studyDb.getTags().stream().filter(upTag ->
-							upTag.getColor().equals(tag.getColor()) && upTag.getName().equals(tag.getName())
-					).findFirst().orElse(null);
-					if (dbTag != null) {
-						tag.setId(dbTag.getId());
-					} else {
-						throw new IllegalStateException("Cannot link a new tag to a subject-study, this tag does not exist in the study");
-					}
-				}
-			}
-		}
 		this.repository.save(current);
 	}
 
@@ -122,4 +95,5 @@ public class StudyServiceImpl implements StudyService {
 
 		return errors;
 	}
+
 }

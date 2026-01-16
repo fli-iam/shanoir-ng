@@ -1,5 +1,6 @@
 package org.shanoir.uploader.service.rest;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -20,8 +21,11 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.io.DicomInputStream;
 import org.json.JSONObject;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.uploader.ShUpConfig;
@@ -42,6 +46,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
 
 /**
  * 
@@ -77,6 +85,8 @@ public class ShanoirUploaderServiceClient {
 	
 	private static final String SERVICE_ACQUISITION_EQUIPMENTS_BY_SERIAL_NUMBER = "service.acquisition.equipments.by.serial.number";
 
+	private static final String SERVICE_ACQUISITION_EQUIPMENTS_BY_EQUIPMENT_DICOM = "service.acquisition.equipments.find.or.create.by.equipment.dicom";
+
 	private static final String SERVICE_MANUFACTURER_MODELS = "service.manufacturer.models";
 	
 	private static final String SERVICE_MANUFACTURERS = "service.manufacturers";
@@ -90,6 +100,8 @@ public class ShanoirUploaderServiceClient {
 	private static final String SERVICE_DATASETS_DICOM_WEB_STUDIES = "service.datasets.dicom.web.studies";
 	
 	private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
+
+	private static final String SERVICE_KEYS_FIND_VALUE = "service.keys.find.value";
 	
 	private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";
 	
@@ -126,12 +138,16 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLAcquisitionEquipments;
 	
 	private String serviceURLAcquisitionEquipmentsBySerialNumber;
+
+	private String serviceURLAcquisitionEquipmentsFindOrCreateByEquipmentDicom;
 	
 	private String serviceURLManufacturerModels;
 	
 	private String serviceURLManufacturers;
 	
 	private String serviceURLSubjectsCreate;
+
+	private String serviceURLKeysFindValue;
 
 	private String serviceURLSubjectsFindByIdentifier;
 
@@ -186,6 +202,8 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS);
 		this.serviceURLAcquisitionEquipmentsBySerialNumber = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS_BY_SERIAL_NUMBER);
+		this.serviceURLAcquisitionEquipmentsFindOrCreateByEquipmentDicom = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS_BY_EQUIPMENT_DICOM);
 		this.serviceURLManufacturerModels = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_MANUFACTURER_MODELS);
 		this.serviceURLManufacturers = this.serverURL
@@ -199,6 +217,8 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_DICOM_WEB_STUDIES);
 		this.serviceURLSubjectsCreate = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_CREATE);
+		this.serviceURLKeysFindValue = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_KEYS_FIND_VALUE);
 		this.serviceURLExaminationsCreate = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
 		this.serviceURLImporterCreateTempDir = this.serverURL
@@ -418,7 +438,7 @@ public class ShanoirUploaderServiceClient {
 					logger.info("findExaminationsBySubjectId: " + examinations.size() + " examinations found for subject: " + subjectId);
 					return examinations;
 				} else {
-					logger.warn("Could not get exam(s) for subject with id " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");					
+					logger.info("Exam(s) not found for subject with Id: " + subjectId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");					
 				}
 			}
 		}
@@ -517,6 +537,32 @@ public class ShanoirUploaderServiceClient {
 				logger.error("Could not find acquisition equipments by serial number (status code: " + code + ", message: "
 						+ apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 			}
+		}
+		return null;
+	}
+
+	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateByEquipmentDicom(final EquipmentDicom equipmentDicom, Long centerId) {
+		try {
+			long startTime = System.currentTimeMillis();
+			String json = Util.objectWriter.writeValueAsString(equipmentDicom);
+			try (CloseableHttpResponse response = httpService.post(this.serviceURLAcquisitionEquipmentsFindOrCreateByEquipmentDicom + centerId, json, false)) {
+				long stopTime = System.currentTimeMillis();
+				long elapsedTime = stopTime - startTime;
+				logger.info("findAcquisitionEquipmentsOrCreateByEquipmentDicom: " + elapsedTime + "ms");
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					List<AcquisitionEquipment> acquisitionEquipments = Util.getMappedList(response,
+							AcquisitionEquipment.class);
+					return acquisitionEquipments;
+				} else {
+					logger.error("Could not find acquisition equipment(s) or create by equipment dicom (status code: " + code + ", message: "
+							+ apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		} catch(JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
 		}
 		return null;
 	}
@@ -818,34 +864,18 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 	
-	/**
-	 * This method updates a subject on the server and therefore updates
-	 * the rel_subject_study list too.
-	 * 
-	 * @param subject
-	 * @return
-	 */
-	public Subject createSubjectStudy(
-			final Subject subject) {
-		try {
-			String json = Util.objectWriter.writeValueAsString(subject);
-			try (CloseableHttpResponse response = httpService.put(this.serviceURLSubjectsCreate + "/" + subject.getId(), json)) {
-				int code = response.getCode();
-				if (code == HttpStatus.SC_NO_CONTENT) {
-					return subject;
-				} else {
-					logger.error("Error in createSubjectStudy: with subject " + subject.getName()
-					+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
-				}
+	public String findValueByKey(String key) throws Exception {
+		try (CloseableHttpResponse response = httpService.get(this.serviceURLKeysFindValue + key)) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				return EntityUtils.toString(response.getEntity());
+			} else {
+				logger.error("Could not get value from server (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				return null;
 			}
-		} catch (JsonProcessingException e) {
-			logger.error(e.getMessage(), e);
-		} catch (Exception ioE) {
-			logger.error(ioE.getMessage(), ioE);			
 		}
-		return null;
 	}
-	
+
 	/**
 	 * This method creates an examination on the server.
 	 * 
@@ -923,6 +953,44 @@ public class ShanoirUploaderServiceClient {
 				throw new Exception("Error in postDicomSR");
 			}
 		}		
+	}
+
+	public Attributes getDicomInstance(String examinationUID, String seriesInstanceUID, String sopInstanceUID) throws Exception {
+		long startTime = System.currentTimeMillis();
+		URIBuilder b = new URIBuilder(this.serviceURLDatasetsDicomWebStudies
+			+ "/" + examinationUID
+			+ "/series/" +  seriesInstanceUID
+			+ "/instances/" + sopInstanceUID);
+		URL url = b.build().toURL();
+		try (CloseableHttpResponse response = httpService.getDicom(url.toString())) {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			logger.debug("getDicomInstance: " + elapsedTime + "ms");
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				HttpEntity entity = response.getEntity();
+				if (entity != null) {
+					String contentType = entity.getContentType();
+	                byte[] rawData = EntityUtils.toByteArray(entity);
+					ByteArrayDataSource ds = new ByteArrayDataSource(rawData, contentType);
+					MimeMultipart multipart = new MimeMultipart(ds);
+					if (multipart.getCount() > 0) {
+						MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(0); // assuming single-part for now
+						try (DicomInputStream din = new DicomInputStream(part.getInputStream())) {
+							return din.readDataset();
+						}
+					} else {
+						throw new RuntimeException("No parts found in multipart DICOM response.");
+					}
+				}
+			} else {
+				logger.error("Error in getDicomInstance: status code: "
+					+ code + ", message: "
+					+ apiResponseMessages.getOrDefault(code, "unknown status code"));
+				throw new Exception("Error in getDicomFile");
+			}
+		}
+		return null;	
 	}
 
 }

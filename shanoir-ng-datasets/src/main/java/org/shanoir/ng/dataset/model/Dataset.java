@@ -19,11 +19,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.shanoir.ng.dataset.modality.*;
+import org.shanoir.ng.dataset.modality.BidsDataset;
+import org.shanoir.ng.dataset.modality.CalibrationDataset;
+import org.shanoir.ng.dataset.modality.CtDataset;
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.GenericDataset;
+import org.shanoir.ng.dataset.modality.MeasurementDataset;
+import org.shanoir.ng.dataset.modality.MegDataset;
+import org.shanoir.ng.dataset.modality.MeshDataset;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
+import org.shanoir.ng.dataset.modality.PetDataset;
+import org.shanoir.ng.dataset.modality.RegistrationDataset;
+import org.shanoir.ng.dataset.modality.SegmentationDataset;
+import org.shanoir.ng.dataset.modality.SpectDataset;
+import org.shanoir.ng.dataset.modality.StatisticalDataset;
+import org.shanoir.ng.dataset.modality.TemplateDataset;
+import org.shanoir.ng.dataset.modality.XaDataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.tag.model.StudyTag;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -95,7 +112,7 @@ public abstract class Dataset extends AbstractEntity {
 
 	/** Dataset Processing. */
 	@JsonIgnore
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "dataset_processing_id")
 	private DatasetProcessing datasetProcessing;
 
@@ -107,7 +124,7 @@ public abstract class Dataset extends AbstractEntity {
 
 	/** Processings for which this dataset is an input. */
 	@JsonIgnore
-	@ManyToMany(mappedBy="inputDatasets")
+	@ManyToMany(mappedBy = "inputDatasets", fetch = FetchType.LAZY)
 	private List<DatasetProcessing> processings;
 
 	/** Origin metadata. */
@@ -155,6 +172,10 @@ public abstract class Dataset extends AbstractEntity {
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
 	private List<Dataset> copies;
+
+	@JsonIgnore
+	@ManyToMany(mappedBy = "relatedDatasets", fetch = FetchType.LAZY) // no cascade
+    private List<Study> relatedStudies;
 
 	@JsonIgnore
 	@Transient
@@ -502,5 +523,13 @@ public abstract class Dataset extends AbstractEntity {
 	public void setCopies(List<Dataset> copies) {
 		this.copies = copies;
 	}
+
+    public List<Study> getRelatedStudies() {
+        return relatedStudies;
+    }
+
+    public void setRelatedStudies(List<Study> relatedStudies) {
+        this.relatedStudies = relatedStudies;
+    }
 
 }
