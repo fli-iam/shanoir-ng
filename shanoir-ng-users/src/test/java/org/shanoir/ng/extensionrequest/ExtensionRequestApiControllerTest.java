@@ -33,6 +33,7 @@ import org.shanoir.ng.user.utils.KeycloakClient;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -49,7 +50,14 @@ import tools.jackson.databind.json.JsonMapper;
  * @author fli
  *
  */
-@WebMvcTest(controllers = {ExtensionRequestApiController.class, UserUniqueConstraintManager.class, UserRepository.class})
+@WebMvcTest(controllers = {
+        ExtensionRequestApiController.class,
+        UserUniqueConstraintManager.class,
+        UserRepository.class},
+        excludeAutoConfiguration = {
+            OAuth2ResourceServerAutoConfiguration.class
+        }
+)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class ExtensionRequestApiControllerTest {

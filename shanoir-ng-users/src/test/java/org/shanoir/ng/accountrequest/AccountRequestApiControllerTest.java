@@ -62,8 +62,8 @@ import tools.jackson.databind.json.JsonMapper;
             OAuth2ResourceServerAutoConfiguration.class
         }
 )
-@ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 public class AccountRequestApiControllerTest {
 
     private static final String REQUEST_PATH = "/accountrequest";

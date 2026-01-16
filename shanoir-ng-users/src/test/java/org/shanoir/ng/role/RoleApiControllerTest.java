@@ -25,6 +25,7 @@ import org.shanoir.ng.role.controller.RoleApiController;
 import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.role.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -39,7 +40,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * @author msimon
  *
  */
-@WebMvcTest(controllers = RoleApiController.class)
+@WebMvcTest(controllers = RoleApiController.class,
+        excludeAutoConfiguration = {
+            OAuth2ResourceServerAutoConfiguration.class
+        }
+)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class RoleApiControllerTest {

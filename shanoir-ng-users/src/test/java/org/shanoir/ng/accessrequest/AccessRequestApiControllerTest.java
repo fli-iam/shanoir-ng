@@ -49,6 +49,7 @@ import org.shanoir.ng.user.service.VIPUserService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -61,10 +62,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
-
-@WebMvcTest(AccessRequestApiController.class)
-@ActiveProfiles("test")
+@WebMvcTest(
+        controllers = AccessRequestApiController.class,
+        excludeAutoConfiguration = {
+            OAuth2ResourceServerAutoConfiguration.class
+        }
+)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 public class AccessRequestApiControllerTest {
 
     private static final String REQUEST_PATH = "/accessrequest";
