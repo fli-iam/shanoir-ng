@@ -28,7 +28,6 @@ import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.ValueSerializer;
 import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.databind.ser.ValueSerializerModifier;
 
 @Configuration(proxyBeanMethods = false)
@@ -46,10 +45,10 @@ public class JacksonConfiguration {
         return builder.build();
     }
 
-    @Bean
-    SimpleModule pageModule() {
-        return new SimpleModule().setSerializerModifier(new MyClassSerializerModifier());
-    }
+    // @Bean
+    // SimpleModule pageModule() {
+    //     return new SimpleModule().setSerializerModifier(new MyClassSerializerModifier());
+    // }
 
     public class MyClassSerializerModifier extends ValueSerializerModifier {
 
