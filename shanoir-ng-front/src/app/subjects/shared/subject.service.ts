@@ -14,6 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -22,6 +23,7 @@ import * as AppUtils from '../../utils/app.utils';
 
 import { Subject } from './subject.model';
 import { SubjectDTO, SubjectDTOService } from './subject.dto';
+
 
 @Injectable()
 export class SubjectService extends EntityService<Subject> {
@@ -65,6 +67,12 @@ export class SubjectService extends EntityService<Subject> {
     findSubjectByIdentifier(identifier: string): Promise<Subject> {
         return this.http.get<SubjectDTO>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier)
             .toPromise().then(dto => this.mapEntity(dto));
+    }
+
+    isSubjectNameExistForStudy(name: string, studyId: number): Promise<boolean> {
+        return firstValueFrom( 
+            this.http.get<boolean>(AppUtils.BACKEND_API_SUBJECT_URL + '/nameExists/' + name + '/inStudy/' + studyId)
+        );  
     }
 
     protected mapEntity = (dto: SubjectDTO, result?: Subject): Promise<Subject> => {
