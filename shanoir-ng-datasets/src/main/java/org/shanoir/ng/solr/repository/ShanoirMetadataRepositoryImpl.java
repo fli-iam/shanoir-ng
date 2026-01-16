@@ -396,10 +396,8 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
     @Override
     public ShanoirMetadata findOneSolrDoc(Long datasetId) {
         List<ShanoirMetadata> processed = findSolrProcessed(" AND d.id = " + datasetId + " AND d.dataset_processing_id IS NOT NULL");
-        if (!processed.isEmpty()) {
-            if (processed.size() > 1) {
-                LOG.error("Multiple processed metadata rows for dataset [{}]", datasetId);
-            }
+        if (!processed.isEmpty() && processed.size() > 1) {
+            LOG.error("Multiple processed metadata rows for dataset [{}]", datasetId);
             return processed.get(0);
         }
 
