@@ -16,9 +16,8 @@ package org.shanoir.ng.shared.exception;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import tools.jackson.databind.ObjectMapper;
-
-import tools.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * REST service exception.

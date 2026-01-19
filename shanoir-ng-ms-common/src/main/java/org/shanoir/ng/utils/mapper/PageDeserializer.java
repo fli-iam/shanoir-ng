@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.utils.mapper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,16 +22,16 @@ import org.shanoir.ng.shared.paging.Page;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
-import tools.jackson.core.JsonParser;
-import tools.jackson.core.JsonTokenId;
-import tools.jackson.databind.BeanProperty;
-import tools.jackson.databind.DeserializationContext;
-import tools.jackson.databind.JavaType;
-import tools.jackson.databind.ValueDeserializer;
-import tools.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonTokenId;
+import com.fasterxml.jackson.databind.BeanProperty;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
+import com.fasterxml.jackson.databind.type.CollectionType;
 
-public class PageDeserializer extends ValueDeserializer<Page<?>> {
-
+public class PageDeserializer extends JsonDeserializer<Page<?>> implements ContextualDeserializer {
     private static final String CONTENT = "content";
     private static final String NUMBER = "number";
     private static final String SIZE = "size";
@@ -38,7 +39,7 @@ public class PageDeserializer extends ValueDeserializer<Page<?>> {
     private JavaType valueType;
 
     @Override
-    public Page<?> deserialize(JsonParser p, DeserializationContext ctxt) {
+    public Page<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         final CollectionType valuesListType = ctxt.getTypeFactory().constructCollectionType(List.class, valueType);
 
         List<?> list = new ArrayList<>();
@@ -47,8 +48,8 @@ public class PageDeserializer extends ValueDeserializer<Page<?>> {
         long total = 0;
         if (p.isExpectedStartObjectToken()) {
             p.nextToken();
-            if (p.hasTokenId(JsonTokenId.ID_PROPERTY_NAME)) {
-                String propName = p.getString();
+            if (p.hasTokenId(JsonTokenId.ID_FIELD_NAME)) {
+                String propName = p.getCurrentName();
                 do {
                     p.nextToken();
                     switch (propName) {
@@ -68,7 +69,7 @@ public class PageDeserializer extends ValueDeserializer<Page<?>> {
                             p.skipChildren();
                             break;
                     }
-                } while (((propName = p.nextName())) != null);
+                } while (((propName = p.nextFieldName())) != null);
             } else {
                 ctxt.handleUnexpectedToken(handledType(), p);
             }
@@ -76,23 +77,23 @@ public class PageDeserializer extends ValueDeserializer<Page<?>> {
             ctxt.handleUnexpectedToken(handledType(), p);
         }
 
-        //Note that Sort field of Page is ignored here.
-        //Feel free to add more switch cases above to deserialize it as well.
+        // Note that Sort field of Page is ignored here.
+        // Feel free to add more switch cases above to deserialize it as well.
         return new PageImpl<>(list, PageRequest.of(pageNumber, pageSize), total);
     }
 
     /**
      * This is the main point here.
-     * The PageDeserializer is created for each specific deserialization with concrete generic parameter type of Page.
+     * The PageDeserializer is created for each specific deserialization with
+     * concrete generic parameter type of Page.
      */
     @Override
-    public ValueDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
-        //This is the Page actually
+    public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
+        // This is the Page actually
         final JavaType wrapperType = ctxt.getContextualType();
         final PageDeserializer deserializer = new PageDeserializer();
-        //This is the parameter of Page
+        // This is the parameter of Page
         deserializer.valueType = wrapperType.containedType(0);
         return deserializer;
     }
-
 }

@@ -14,11 +14,12 @@
 
 package org.shanoir.ng.shared.dateTime;
 
+import java.io.IOException;
 import java.time.LocalDate;
 
-import tools.jackson.core.JsonGenerator;
-import tools.jackson.databind.SerializationContext;
-import tools.jackson.databind.ValueSerializer;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 
 /**
  * LocalDateSerializer: custom serializer, written for the deployment
@@ -32,10 +33,10 @@ import tools.jackson.databind.ValueSerializer;
  * @author mkain
  *
  */
-public class LocalDateSerializer extends ValueSerializer<LocalDate> {
+public class LocalDateSerializer extends JsonSerializer<LocalDate> {
 
     @Override
-    public void serialize(LocalDate date, JsonGenerator generator, SerializationContext provider) {
+    public void serialize(LocalDate date, JsonGenerator generator, SerializerProvider provider) throws IOException {
         generator.writeStartArray();
         generator.writeNumber(date.getYear());
         generator.writeNumber(date.getMonthValue());

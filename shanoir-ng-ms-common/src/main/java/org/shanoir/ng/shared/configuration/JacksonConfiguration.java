@@ -14,69 +14,75 @@
 
 package org.shanoir.ng.shared.configuration;
 
-import org.springframework.context.annotation.Bean;
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Page;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationConfig;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import tools.jackson.core.JsonGenerator;
-import tools.jackson.databind.BeanDescription;
-import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.SerializationConfig;
-import tools.jackson.databind.SerializationContext;
-import tools.jackson.databind.SerializationFeature;
-import tools.jackson.databind.ValueSerializer;
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.ser.ValueSerializerModifier;
-
-@Configuration(proxyBeanMethods = false)
+@Configuration
 public class JacksonConfiguration {
 
-    @Bean
-    JsonMapper jsonMapper() {
-        var builder = JsonMapper.builder();
-        builder.changeDefaultPropertyInclusion(include -> include.withValueInclusion(JsonInclude.Include.NON_NULL))
-                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-                        DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
-                .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-                .findAndAddModules();
-        return builder.build();
+    /**
+     * Allows to configure the Jackson object mapper.
+     *
+     * @param objectMapper
+     *                     an instance of {@link ObjectMapper}.
+     */
+    @Autowired
+    public void configureJacksonObjectMapper(final ObjectMapper objectMapper) {
+        objectMapper
+                .registerModule(preparePageModule())
+                .registerModule(new JavaTimeModule())
+                .registerModule(new Jdk8Module())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    // @Bean
-    // SimpleModule pageModule() {
-    //     return new SimpleModule().setSerializerModifier(new MyClassSerializerModifier());
-    // }
-
-    public class MyClassSerializerModifier extends ValueSerializerModifier {
-
-        @Override
-        public ValueSerializer<?> modifySerializer(SerializationConfig config, BeanDescription.Supplier beanDesc,
-                ValueSerializer<?> serializer) {
-            if (beanDesc.getBeanClass() == Page.class) {
-                return new MyClassSerializer((ValueSerializer<Object>) serializer);
-            }
-            return serializer;
-        }
-
+    /**
+     * Allows to configure a {@link JsonSerializer} for pagination.
+     *
+     * @return an instance of {@link Module}.
+     */
+    private Module preparePageModule() {
+        return new SimpleModule().setSerializerModifier(new MyClassSerializerModifier());
     }
 
-    public class MyClassSerializer extends ValueSerializer<Page> {
+    public class MyClassSerializer extends JsonSerializer<Page> {
+        private final JsonSerializer<Object> defaultSerializer;
 
-        private final ValueSerializer<Object> defaultSerializer;
-
-        public MyClassSerializer(ValueSerializer<Object> defaultSerializer) {
+        public MyClassSerializer(JsonSerializer<Object> defaultSerializer) {
             this.defaultSerializer = defaultSerializer;
         }
 
         @Override
         public void serialize(@SuppressWarnings("rawtypes") final Page page, final JsonGenerator jsonGenerator,
-                final SerializationContext serializers) {
+                final SerializerProvider serializers) throws IOException {
             defaultSerializer.serialize(page, jsonGenerator, serializers);
         }
+    }
 
+    public class MyClassSerializerModifier extends BeanSerializerModifier {
+        @Override
+        public JsonSerializer<?> modifySerializer(SerializationConfig config, BeanDescription beanDesc,
+                JsonSerializer<?> serializer) {
+            if (beanDesc.getBeanClass() == Page.class) {
+                return new MyClassSerializer((JsonSerializer<Object>) serializer);
+            }
+            return serializer;
+        }
     }
 
 }

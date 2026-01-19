@@ -16,7 +16,7 @@ package org.shanoir.ng.shared.paging;
 
 import org.springframework.data.domain.Pageable;
 
-import tools.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(as = FacetPageableImpl.class)
 public interface FacetPageable extends Pageable {
