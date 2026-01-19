@@ -113,14 +113,6 @@ public class ExecutionServiceImpl implements ExecutionService {
         return datasetService.findByIdIn(datasetsIds);
     }
 
-    public void checkRightsForExecution(List<Dataset> datasets) throws EntityNotFoundException, RestServiceException {
-        if (!datasetSecurityService.hasRightOnEveryDataset(datasets.stream().map(Dataset::getId).toList(), "CAN_ADMINISTRATE")) {
-            throw new RestServiceException(
-                    new ErrorModel(HttpStatus.UNAUTHORIZED.value(),
-                            "You don't have the right to run pipelines on studies you don't administrate."));
-        }
-    }
-
     public Mono<VipExecutionDTO> getExecution(String identifier) {
         String url = vipExecutionUri + "/" + identifier;
         return webClient.get()
@@ -208,9 +200,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         dto.setName(candidate.getName());
         dto.setPipelineIdentifier(candidate.getPipelineIdentifier());
         dto.setStudyIdentifier(candidate.getStudyIdentifier().toString());
-
+        dto.setSorting(candidate.getSorting());
         dto.setResultsLocation(getResultsLocationUri(executionMonitoring.getResultsLocation(), candidate));
-
         dto.setInputValues(getInputValues(executionMonitoring, candidate));
 
         return createExecution(dto)

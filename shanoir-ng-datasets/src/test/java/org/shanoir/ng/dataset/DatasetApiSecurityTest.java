@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -282,12 +283,13 @@ public class DatasetApiSecurityTest {
         //massiveDownloadByDatasetIds(List<Long>, String, HttpServletResponse)
         given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
         su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_DOWNLOAD));
-        assertAccessAuthorized(api::massiveDownloadByDatasetIds, Utils.toList(1L), "file", 1L, null);
-        assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 3L), "file", 1L, null);
-        assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(3L), "file", 1L, null);
-        assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 2L), "file", 1L, null);
-        assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(2L), "file", 1L, null);
-        assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(4L), "file", 1L, null);
+        HttpServletResponse mockResponse = Mockito.mock(HttpServletResponse.class);
+        assertAccessAuthorized(() -> api.massiveDownloadByDatasetIds(Utils.toList(1L), "file", 1L, null, mockResponse));
+        assertAccessDenied(() -> api.massiveDownloadByDatasetIds(Utils.toList(1L, 3L), "file", 1L, null, mockResponse));
+        assertAccessDenied(() -> api.massiveDownloadByDatasetIds(Utils.toList(3L), "file", 1L, null, mockResponse));
+        assertAccessDenied(() -> api.massiveDownloadByDatasetIds(Utils.toList(1L, 2L), "file", 1L, null, mockResponse));
+        assertAccessDenied(() -> api.massiveDownloadByDatasetIds(Utils.toList(2L), "file", 1L, null, mockResponse));
+        assertAccessDenied(() -> api.massiveDownloadByDatasetIds(Utils.toList(4L), "file", 1L, null, mockResponse));
 
         //massiveDownloadByStudyId(Long, String, HttpServletResponse)
         assertAccessAuthorized(api::massiveDownloadByStudyId, 1L, "file", null);
@@ -475,8 +477,8 @@ public class DatasetApiSecurityTest {
         given(datasetRepository.findByDatasetAcquisitionExaminationId(4L)).willReturn(Arrays.asList(new Dataset[]{dataset4}));
 
         try {
-            DatasetLight datasetLight1 = new DatasetLight(1L, "ds1", MrDataset.class, 1L, "study1", 1L, "subject1", LocalDate.now(), false);
-            DatasetLight datasetLight3 = new DatasetLight(3L, "ds3", MrDataset.class, 1L, "study1", 1L, "subject1", LocalDate.now(), false);
+            DatasetLight datasetLight1 = new DatasetLight(1L, "ds1", MrDataset.class, 1L, "study1", 1L, "subject1", LocalDate.now(), false, 1L);
+            DatasetLight datasetLight3 = new DatasetLight(3L, "ds3", MrDataset.class, 1L, "study1", 1L, "subject1", LocalDate.now(), false, 1L);
             given(datasetRepository.findAllLightByStudyId(1L)).willReturn(Arrays.asList(new DatasetLight[]{datasetLight1, datasetLight3}));
         } catch (NoSuchMethodException | InstantiationException | IllegalArgumentException | IllegalAccessException | InvocationTargetException ex) {
             fail("exception raised : ", ex);

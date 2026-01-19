@@ -13,7 +13,11 @@
  */
 package org.shanoir.ng.dataset.service;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
@@ -36,6 +41,8 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.download.DatasetDownloadError;
+import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
@@ -48,11 +55,15 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.study.rights.UserRights;
+import org.shanoir.ng.studycard.dto.DicomTag;
+import org.shanoir.ng.studycard.service.StudyCardService;
+import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
@@ -119,6 +130,16 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
+
+    @Autowired
+    private WADODownloaderService downloader;
+
+    @Autowired
+    private StudyCardService studyCardService;
+
+    @Autowired
+    @Lazy
+    private SubjectRepository subjectRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -524,5 +545,91 @@ public class DatasetServiceImpl implements DatasetService {
             downloadDataList.add(downloadData);
         }
         return downloadDataList;
+    }
+
+    public File extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws Exception {
+        LOG.info("Metdata file download started.");
+        File metadataFile = createMetadataFile(metadataKeys);
+        fillMetadataFile(metadataFile, datasetIds, metadataKeys);
+        return metadataFile;
+    }
+
+    protected void fillMetadataFile(File metadataFile, List<Long> datasetIds, List<String> metadataKeys) throws Exception {
+        LOG.info("Filling metadata file.");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(metadataFile, true))) {
+            ObjectMapper mapper = new ObjectMapper();
+
+            for (Long datasetId : datasetIds) {
+                String metadataLine = shapeMetadataLinesForOneDicom(metadataKeys, datasetId, mapper);
+                writer.newLine();
+                writer.write(metadataLine);
+            }
+        } catch (Exception e) {
+            LOG.error("An error occured while writing a metadata line");
+            throw e;
+        }
+    }
+
+    protected String shapeMetadataLinesForOneDicom(List<String> metadataKeys, Long datasetId, ObjectMapper mapper) {
+        String metadataLine = datasetId.toString();
+        final Dataset dataset = findById(datasetId);
+        metadataLine += ";" + (Objects.nonNull(dataset.getDatasetAcquisition()) ? dataset.getDatasetAcquisition().getId().toString() : "");
+        JsonNode metadatas = null;
+        try {
+            String metadataStr = getMetadataFromDicom(dataset);
+            metadatas = mapper.readTree(metadataStr).get(0);
+        } catch (Exception ignored) {
+        }
+
+        for (String metadataKey : metadataKeys) {
+            metadataLine += ";";
+            if (Objects.nonNull(metadatas) && metadatas.has(metadataKey) && metadatas.get(metadataKey).has("Value")) {
+                metadataLine += metadatas.get(metadataKey).get("Value").get(0).asText();
+            }
+        }
+        return metadataLine;
+    }
+
+    protected String getMetadataFromDicom(Dataset dataset) throws Exception {
+        DatasetDownloadError result = new DatasetDownloadError();
+        List<URL> pathURLs = new ArrayList<>();
+        DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, result);
+
+        if (pathURLs.isEmpty()) {
+            LOG.error("No metadata found for dataset " + dataset.getId());
+            throw new Exception("No metadata found for dataset " + dataset.getId());
+        } else {
+            try {
+                return downloader.downloadDicomMetadataForURL(pathURLs.get(0));
+            } catch (Exception e) {
+                LOG.error("Loading metadata for dataset " + dataset.getId() + " failed");
+                throw e;
+            }
+        }
+    }
+
+    protected File createMetadataFile(List<String> metadataKeys) throws Exception {
+        File metadataFile = new File("/tmp/metadataExtraction.csv");
+        try {
+            if (!metadataFile.createNewFile()) {
+                metadataFile.delete();
+                metadataFile.createNewFile();
+            }
+
+            List<DicomTag> dicomTags = studyCardService.findDicomTags();
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(metadataFile))) {
+                String headers = "Dataset_Id;Acquisition_Id;" + metadataKeys.stream().map(key -> dicomTags.stream().filter(tag -> Objects.equals(Long.parseLong(key, 16), (long) tag.getCode())).findAny().map(tag -> tag.getLabel() + " " + key).orElse("Unknown " + key)).collect(Collectors.joining(";"));
+                writer.write(headers);
+                LOG.info("Headers for metadata file : " + headers);
+            } catch (IOException e) {
+                throw new Exception("An error occured while creating metadata extraction file", e);
+            }
+        } catch (Exception e) {
+            LOG.error("An error occured while creating metadata extraction file");
+            throw e;
+        }
+        LOG.info("Metadata file created");
+        return metadataFile;
     }
 }
