@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -120,8 +121,15 @@ public class RabbitMQSubjectService {
     @RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_NAME_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
-    public boolean existsSubjectName(String name) {
-        return this.subjectService.existsSubjectWithName(name);
+    public boolean existsSubjectName(String subjectNameInStudyString) {
+        IdName subjectNameInStudy;
+        try {
+            subjectNameInStudy = mapper.readValue(subjectNameInStudyString, IdName.class);
+            return this.subjectService.existsSubjectWithNameInStudy(subjectNameInStudy.getName(), subjectNameInStudy.getId());
+        } catch (JsonProcessingException e) {
+            LOG.error("Error while checking subject name existence", e);
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
     }
 
     @RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE, containerFactory = "multipleConsumersFactory")
