@@ -184,7 +184,7 @@ public interface SubjectService {
     @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
     List<Subject> findByPreclinical(boolean preclinical);
 
-    boolean existsSubjectWithName(String name);
+    boolean existsSubjectWithNameInStudy(String name, Long studyId);
 
     public void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew);
 

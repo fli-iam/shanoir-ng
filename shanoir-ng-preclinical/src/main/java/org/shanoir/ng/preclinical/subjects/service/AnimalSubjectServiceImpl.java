@@ -23,6 +23,7 @@ import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapy;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -139,7 +140,14 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 
     @Override
     public boolean isSubjectNameAlreadyUsedInStudy(String name, Long studyId) {
-        return (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_NAME_QUEUE, name);
+        String request;
+        try {
+            request = mapper.writeValueAsString(new IdName(studyId, name));
+        } catch (JsonProcessingException e) {
+            // very unlikely to happen
+            throw new RuntimeException("Error while serializing subject name check request", e);
+        }
+        return (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_NAME_QUEUE, request);
     }
 
     @Override
