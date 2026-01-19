@@ -18,11 +18,11 @@
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 
-	<packaging>jar</packaging>
-
 	<artifactId>shanoir-ng-study-rights</artifactId>
 	<name>shanoir-ng-study-rights</name>
-	<description>Shanoir study rights management</description>
+    <packaging>jar</packaging>
+
+    <description>Study rights management</description>
 
 	<dependencies>
 		<dependency>

@@ -9,144 +9,155 @@
 	along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.shanoir-ng</groupId>
-		<artifactId>shanoir-ng-back</artifactId>
-		<version>3.4.0</version>
-		<relativePath>../shanoir-ng-back</relativePath>
-	</parent>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.0</version>
+        <relativePath />
+    </parent>
 
-	<artifactId>shanoir-ng-import</artifactId>
-	<packaging>jar</packaging>
+    <groupId>org.shanoir-ng</groupId>
+    <artifactId>shanoir-ng-import</artifactId>
+    <packaging>jar</packaging>
 
-	<name>shanoir-ng-import</name>
-	<description>Import microservice</description>
+    <name>shanoir-ng-import</name>
+    <description>Import microservice</description>
 
-	<dependencies>
-		<!-- Shanoir dependencies -->
-		<dependency>
-			<groupId>org.shanoir-ng</groupId>
-			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>3.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.shanoir-ng</groupId>
-			<artifactId>shanoir-ng-study-rights</artifactId>
-			<version>3.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.shanoir.anonymization</groupId>
-			<artifactId>anonymization</artifactId>
-			<version>3.4.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.shanoir-ng</groupId>
-			<artifactId>shanoir-ng-exchange</artifactId>
-			<version>3.4.0</version>
-		</dependency>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version>
+        <dcm4che.version>5.31.1</dcm4che.version>
+        <checkstyle.header.file>${project.basedir}/../shanoir-ng-back/java-header</checkstyle.header.file>
+        <checkstyle.config.file>${project.basedir}/../shanoir-ng-back/checkstyle.xml</checkstyle.config.file>
+        <checkstyle.suppressions.file>${project.basedir}/../shanoir-ng-back/suppressions.xml</checkstyle.suppressions.file>
+    </properties>
 
-		<dependency>
-			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-kotlin</artifactId>
-		</dependency>
+    <dependencies>
+        <!-- Shanoir dependencies -->
+        <dependency>
+            <groupId>org.shanoir-ng</groupId>
+            <artifactId>shanoir-ng-ms-common</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.shanoir-ng</groupId>
+            <artifactId>shanoir-ng-study-rights</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.shanoir.anonymization</groupId>
+            <artifactId>anonymization</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.shanoir-ng</groupId>
+            <artifactId>shanoir-ng-exchange</artifactId>
+            <version>3.4.0</version>
+        </dependency>
 
-		<!-- DICOM Weasis Tools, based on dcm4che3 -->
-		<dependency>
-			<groupId>org.weasis</groupId>
-			<artifactId>weasis-dicom-tools</artifactId>
-			<version>${dcm4che.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+        </dependency>
 
-		<!-- mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpmime</artifactId>
-			<version>4.5.14</version>
-		</dependency>
+        <!-- DICOM Weasis Tools, based on dcm4che3 -->
+        <dependency>
+            <groupId>org.weasis</groupId>
+            <artifactId>weasis-dicom-tools</artifactId>
+            <version>${dcm4che.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-		<dependency>
+        <!-- mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>4.5.14</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-csv</artifactId>
         </dependency>
-	</dependencies>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<classpathDependencyExcludes>
-						<classpathDependencyExclude>org.slf4j:slf4j-log4j12</classpathDependencyExclude>
-					</classpathDependencyExcludes>
-				</configuration>
-			</plugin>
-			<!-- Package shanoir-ng-import.jar as Spring Boot executable: Avoid error:
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <classpathDependencyExcludes>
+                        <classpathDependencyExclude>org.slf4j:slf4j-log4j12</classpathDependencyExclude>
+                    </classpathDependencyExcludes>
+                </configuration>
+            </plugin>
+            <!-- Package shanoir-ng-import.jar as Spring Boot executable: Avoid error:
 				no main manifest attribute, in /shanoir-ng-import.jar -->
-			<!-- Used here for ShanoirUploader: create an additional single jar to be used by ShUp -->
-	        <plugin>
-	            <groupId>org.springframework.boot</groupId>
-	            <artifactId>spring-boot-maven-plugin</artifactId>
-	            <configuration>
-	                <classifier>exec</classifier>
-	            </configuration>
-	        </plugin>
-			<!-- Copy shanoir-ng-import.jar for docker-compose up running -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<configuration>
-							<target>
-								<copy file="target/${project.build.finalName}-exec.jar"
-									tofile="${basedir}/../docker-compose/import/${project.artifactId}.jar" />
-							</target>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+            <!-- Used here for ShanoirUploader: create an additional single jar to be used by ShUp -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <classifier>exec</classifier>
+                </configuration>
+            </plugin>
+            <!-- Copy shanoir-ng-import.jar for docker-compose up running -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <copy file="target/${project.build.finalName}-exec.jar"
+                                    tofile="${basedir}/../docker-compose/import/${project.artifactId}.jar" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
-	<repositories>
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>mvn-repo-master</id>
-			<url>https://raw.github.com/nroduit/mvn-repo/master/</url>
-		</repository>
-	</repositories>
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>mvn-repo-master</id>
+            <url>https://raw.github.com/nroduit/mvn-repo/master/</url>
+        </repository>
+    </repositories>
 
-	<profiles>
-		<profile>
-			<id>dev</id>
-			<properties>
-				<spring-active-profile>dev</spring-active-profile>
-			</properties>
-		</profile>
-		<profile>
-			<id>qualif</id>
-			<properties>
-				<spring.active.profile>qualif</spring.active.profile>
-				<maven.test.skip>true</maven.test.skip>
-			</properties>
-		</profile>
-	</profiles>
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <spring-active-profile>dev</spring-active-profile>
+            </properties>
+        </profile>
+        <profile>
+            <id>qualif</id>
+            <properties>
+                <spring.active.profile>qualif</spring.active.profile>
+                <maven.test.skip>true</maven.test.skip>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

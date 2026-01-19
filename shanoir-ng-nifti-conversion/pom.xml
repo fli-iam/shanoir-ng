@@ -18,12 +18,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.shanoir-ng</groupId>
-        <artifactId>shanoir-ng-back</artifactId>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.4.0</version>
-        <relativePath>../shanoir-ng-back</relativePath>
+        <relativePath />
     </parent>
 
+    <groupId>org.shanoir-ng</groupId>
     <artifactId>nifti-conversion</artifactId>
     <packaging>jar</packaging>
 
@@ -84,4 +85,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </plugin>
         </plugins>
     </build>
+
 </project>
