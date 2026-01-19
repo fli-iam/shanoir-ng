@@ -31,17 +31,14 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @Service
-@Profile("!test")
 public class RabbitMqStudyUserService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMqStudyUserService.class);
@@ -53,19 +50,15 @@ public class RabbitMqStudyUserService {
     private StudyUserRightsRepository studyUserRightsRepository;
 
     @Autowired
-    private JsonMapper mapper;
-
-    @Bean
-    SimpleModule addSimpleModule() {
-        SimpleModule module = new SimpleModule();
-        module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
-        return module;
-    }
+    private ObjectMapper mapper;
 
     public void receiveStudyUsers(String commandArrStr) throws AmqpRejectAndDontRequeueException {
         StudyUserCommand[] commands;
         try {
             LOG.debug("Received study-user commands : {}", commandArrStr);
+            SimpleModule module = new SimpleModule();
+            module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
+            mapper.registerModule(module);
             commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
             service.processCommands(Arrays.asList(commands));
         } catch (Exception e) {
@@ -77,25 +70,24 @@ public class RabbitMqStudyUserService {
     @RabbitHandler
     @Transactional
     public List<Long> getStudiesICanAdmin(Long userId) {
-        List<StudyUser> sus = Utils.toList(this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+        List<StudyUser> sus = Utils.toList(
+                this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
         if (CollectionUtils.isEmpty(sus)) {
             return null;
         }
-        return sus.stream().map(StudyUser::getStudyId
-        ).collect(Collectors.toList());
+        return sus.stream().map(StudyUser::getStudyId).collect(Collectors.toList());
     }
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_ADMINS_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
     public List<Long> getStudyAdmins(Long studyId) {
-        List<StudyUser> admins = Utils.toList(this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+        List<StudyUser> admins = Utils.toList(
+                this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
         if (CollectionUtils.isEmpty(admins)) {
             return null;
         }
-        return admins.stream().map(studyUser ->
-            studyUser.getUserId()
-        ).collect(Collectors.toList());
+        return admins.stream().map(studyUser -> studyUser.getUserId()).collect(Collectors.toList());
     }
 
 }
