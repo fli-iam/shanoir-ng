@@ -104,7 +104,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </dependency>
         <dependency>
             <groupId>org.shanoir-ng</groupId>
-            <artifactId>shanoir-ng-study-rights</artifactId>
+            <artifactId>shanoir-ng-study-rights-jackson3</artifactId>
             <version>4.0.1</version>
         </dependency>
 
