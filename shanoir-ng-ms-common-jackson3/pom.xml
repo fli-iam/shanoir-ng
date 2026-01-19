@@ -20,29 +20,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.shanoir-ng</groupId>
-    <artifactId>shanoir-ng-ms-common</artifactId>
-    <name>shanoir-ng-ms-common</name>
-    <version>3.4.0</version>
+    <artifactId>shanoir-ng-ms-common-jackson3</artifactId>
+    <name>shanoir-ng-ms-common-jackson3</name>
+    <version>4.0.1</version>
     <packaging>jar</packaging>
 
     <description>Common project for microservices</description>
-    <dependencies>
-        <!-- Spring Boot -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-            <version>3.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-            <version>3.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <version>3.4.0</version>
-        </dependency>
-    </dependencies>
 
 </project>

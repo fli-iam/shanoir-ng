@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>shanoir-ng-study-rights-jackson3</artifactId>
-    <name>shanoir-ng-study-rights</name>
+    <name>shanoir-ng-study-rights-jackson3</name>
     <packaging>jar</packaging>
 
     <description>Study rights management</description>
@@ -27,7 +27,7 @@
     <dependencies>
         <dependency>
             <groupId>org.shanoir-ng</groupId>
-            <artifactId>shanoir-ng-ms-common</artifactId>
+            <artifactId>shanoir-ng-ms-common-jackson3</artifactId>
             <version>4.0.1</version>
         </dependency>
     </dependencies>

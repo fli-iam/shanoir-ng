@@ -30,6 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <modules>
         <module>../shanoir-ng-anonymization</module>
         <module>../shanoir-ng-ms-common</module>
+        <module>../shanoir-ng-ms-common-jackson3</module>
         <module>../shanoir-ng-study-rights</module>
         <module>../shanoir-ng-study-rights-jackson3</module>
         <module>../shanoir-ng-users</module>
