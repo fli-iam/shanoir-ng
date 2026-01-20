@@ -18,7 +18,6 @@ import org.shanoir.ng.shared.paging.PageSerializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -51,7 +50,7 @@ public class ShanoirDatasetApplication {
     @Bean
     public Module jacksonPageWithJsonViewModule() {
         SimpleModule module = new SimpleModule("jackson-page-with-jsonview", Version.unknownVersion());
-        module.addSerializer(PageImpl.class, new PageSerializer());
+        module.addSerializer(org.shanoir.ng.shared.paging.PageImpl.class, new PageSerializer());
         return module;
     }
 
