@@ -388,16 +388,19 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
     @Override
     public List<ShanoirMetadata> findAllAsSolrDoc() {
         List<ShanoirMetadata> result = new ArrayList<>();
-        result.addAll(findSolrProcessed(" AND d.dataset_processing_id IS NOT NULL"));
+        result.addAll(findSolrProcessed(""));
         result.addAll(findSolrAcquisitions(" AND d.dataset_processing_id IS NULL"));
         return result;
     }
 
     @Override
     public ShanoirMetadata findOneSolrDoc(Long datasetId) {
-        List<ShanoirMetadata> processed = findSolrProcessed(" AND d.id = " + datasetId + " AND d.dataset_processing_id IS NOT NULL");
-        if (!processed.isEmpty() && processed.size() > 1) {
-            LOG.error("Multiple processed metadata rows for dataset [{}]", datasetId);
+        List<ShanoirMetadata> processed = findSolrProcessed(" AND d.id = " + datasetId);
+        if (!processed.isEmpty()) {
+            if (processed.size() > 1) {
+                LOG.error("Multiple processed metadata rows for dataset [{}]", datasetId);
+                return null;
+            }
             return processed.get(0);
         }
 
@@ -423,7 +426,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
                 .collect(Collectors.joining(","));
 
         List<ShanoirMetadata> result = new ArrayList<>();
-        result.addAll(findSolrProcessed(" AND d.id IN (" + ids + ")" + " AND d.dataset_processing_id IS NOT NULL"));
+        result.addAll(findSolrProcessed(" AND d.id IN (" + ids + ")"));
         result.addAll(findSolrAcquisitions(" AND d.id IN (" + ids + ")" + " AND d.dataset_processing_id IS NULL"));
 
         return result;
