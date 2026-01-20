@@ -17,6 +17,7 @@ package org.shanoir.ng.processing.controler;
 import java.io.IOException;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
@@ -172,4 +173,15 @@ public interface DatasetProcessingApi {
             @Parameter(description = "outputs to extract") @Valid
             @RequestParam(value = "resultOnly", defaultValue = "false") boolean resultOnly, HttpServletResponse response) throws RestServiceException;
 
+    @Operation(summary = "complexMassiveDownload", description = "Returns a zip file of the inputs/outputs according to the json params file in the HTTP request body. Datas are in the http response body, it must be written in a zip file.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no dataset found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @PostMapping(value = "/complexMassiveDownload")
+    ResponseEntity<String> complexMassiveDownload(
+            @Parameter(description = "parameters for download", required = true)
+            @Valid @RequestBody JsonNode request);
 }

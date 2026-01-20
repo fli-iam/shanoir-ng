@@ -53,6 +53,26 @@ public class StudyRightsService {
                 && founded.isConfirmed();
     }
 
+    /**
+     * Check that the connected user has any right for the given study.
+     *
+     * @param studyId the study id
+     * @param rightStr the right
+     * @return true or false
+     */
+    public boolean hasAnyRightOnStudy(Long studyId) {
+        Long userId = KeycloakUtil.getTokenUserId();
+        if (userId == null) {
+            throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
+        }
+        StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
+        return
+                founded != null
+                && founded.getStudyUserRights() != null
+                && !founded.getStudyUserRights().isEmpty()
+                && founded.isConfirmed();
+    }
+
     public boolean hasRightOnCenter(Long studyId, Long centerId) {
         Long userId = KeycloakUtil.getTokenUserId();
         if (userId == null) {

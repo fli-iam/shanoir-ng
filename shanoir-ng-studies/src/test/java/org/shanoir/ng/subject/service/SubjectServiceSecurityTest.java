@@ -89,7 +89,6 @@ public class SubjectServiceSecurityTest {
 
         assertAccessDenied(service::findById, ENTITY_ID);
         assertAccessDenied(service::findByIdentifierInStudiesWithRights, "identifier", studiesMock);
-        assertAccessDenied(service::findByIdWithSubjectStudies, ENTITY_ID);
         assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
 
         assertAccessDenied(service::create, mockNew, true);
@@ -160,7 +159,6 @@ public class SubjectServiceSecurityTest {
         assertAccessAuthorized(service::findAllSubjectsOfStudyId, 1L);
         assertAccessAuthorized(service::findById, ENTITY_ID);
         assertAccessAuthorized(service::findByIdentifierInStudiesWithRights, "identifier", studiesMock);
-        assertAccessAuthorized(service::findByIdWithSubjectStudies, ENTITY_ID);
         assertAccessAuthorized(service::findSubjectFromCenterCode, "centerCode");
         assertAccessAuthorized(service::create, mockNew, true);
         assertAccessAuthorized(service::update, mockExisting);
@@ -176,7 +174,6 @@ public class SubjectServiceSecurityTest {
         given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockNoRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockNoRights);
         assertAccessDenied(service::findById, 1L);
-        assertAccessDenied(service::findByIdWithSubjectStudies, 1L);
         assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
 
         Subject subjectMockWrongRights = buildSubjectMock(1L);
@@ -186,7 +183,6 @@ public class SubjectServiceSecurityTest {
         given(repository.findSubjectWithSubjectStudyById(1L)).willReturn(subjectMockWrongRights);
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockWrongRights);
         assertAccessDenied(service::findById, 1L);
-        assertAccessDenied(service::findByIdWithSubjectStudies, 1L);
         assertAccessDenied(service::findSubjectFromCenterCode, "centerCode");
 
         Subject subjectMockRightRights = buildSubjectMock(1L);
@@ -197,7 +193,6 @@ public class SubjectServiceSecurityTest {
         given(repository.findSubjectFromCenterCode("centerCode%")).willReturn(subjectMockRightRights);
         given(studyRepository.findById(100L)).willReturn(Optional.of(subjectMockRightRights.getStudy()));
         assertAccessAuthorized(service::findById, 1L);
-        assertAccessAuthorized(service::findByIdWithSubjectStudies, 1L);
         assertAccessAuthorized(service::findSubjectFromCenterCode, "centerCode");
     }
 

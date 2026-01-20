@@ -58,6 +58,7 @@ import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -229,6 +230,7 @@ public class DicomImporterService {
         if (!DicomUtils.checkSerieIsIgnored(attributes)) { // do nothing for files of ignored series
             Long subjectId = manageSubject(attributes, study);
             Long centerId = manageCenter(attributes, study.getId());
+
             Examination examination = manageExamination(attributes, study, subjectId, centerId);
             DatasetAcquisition acquisition = manageAcquisitionAndEquipment(attributes, examination, centerId, serie);
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition, serie);
@@ -310,8 +312,8 @@ public class DicomImporterService {
             if (dataset.getOriginMetadata().getImageOrientationPatient() != null) {
                 String iop = dataset.getOriginMetadata().getImageOrientationPatient();
                 if (iop != null && !iop.isBlank()) {
-                    iop = iop.trim().replaceAll("[\\\\\\s]+", ",");
-                    String[] parts = iop.split("\\s*,\\s*");
+                    iop = iop.trim().replaceAll("[\\\s]+", ",");
+                    String[] parts = iop.split("\s*,\s*");
                     imageOrientationPatient = new double[parts.length];
                     for (int i = 0; i < parts.length; i++) {
                         imageOrientationPatient[i] = Double.parseDouble(parts[i]);
@@ -514,7 +516,7 @@ public class DicomImporterService {
     }
 
 
-    private Examination manageExamination(Attributes attributes, Study study, Long subjectId, Long centerId) {
+    private Examination manageExamination(Attributes attributes, Study study, Long subjectId, Long centerId) throws EntityNotFoundException {
         Examination examination = null;
         org.shanoir.ng.importer.dto.Study studyDICOM = new org.shanoir.ng.importer.dto.Study(attributes);
         List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, study.getId());

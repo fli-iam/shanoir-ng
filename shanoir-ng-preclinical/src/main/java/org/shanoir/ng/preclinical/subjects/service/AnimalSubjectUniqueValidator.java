@@ -19,6 +19,4 @@ import org.shanoir.ng.shared.validation.UniqueConstraintManagerImpl;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AnimalSubjectUniqueValidator extends UniqueConstraintManagerImpl<AnimalSubject> {
-
-}
+public class AnimalSubjectUniqueValidator extends UniqueConstraintManagerImpl<AnimalSubject> { }

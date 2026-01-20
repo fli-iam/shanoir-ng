@@ -279,7 +279,9 @@ public interface DatasetApi {
             @RequestParam(value = "format", required = false, defaultValue = "dcm") String format,
             @Parameter(description = "If nifti, decide converter to use") @Valid
             @RequestParam(value = "converterId", required = false) Long converterId,
-            HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException;
+            @Parameter(description = "Sorting") @Valid
+            @RequestParam(value = "sorting", required = false) String sortingForProcessingOutputs,
+            HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException;
 
     @Operation(summary = "massiveDownloadDatasetsByStudyId", description = "If exists, returns a zip file of the datasets corresponding to the given study ID")
     @ApiResponses(value = {

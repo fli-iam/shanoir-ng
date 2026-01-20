@@ -47,7 +47,11 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
         private pathologyService: PathologyService)
         {
 
-            super(route, 'preclinical-pathology-model');
+            super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'preclinical-pathology-model';
             this.manageSaveEntity();
         }
 

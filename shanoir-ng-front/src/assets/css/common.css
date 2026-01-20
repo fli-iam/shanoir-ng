@@ -106,6 +106,8 @@ form { color: var(--dark-grey); position: relative; }
   form textarea { resize: vertical; }
   form button:not(.normal) { margin-top: 10px; margin-bottom: 10px; }
   form input:not([type]), form input[type='text'], form input[type='password'], form input[type='email'], form textarea, form select, form select-box { width: 220px; }
+  form input.small { width: 75px; }
+  form .units { margin-left: 20px; }
   form fieldset { border: 0; padding: 0; margin: 30px 0; display: block; min-width: 504px; }
   form fieldset.disabled { color: var(--grey); }
   form fieldset ~ fieldset { margin-right: 20px; }
@@ -152,27 +154,12 @@ form { color: var(--dark-grey); position: relative; }
     my-date-picker button.btnpicker span,
     my-date-picker button.btnclear span { font-size: 12px !important; }
   my-date-picker .icon-calendar { line-height: 17px !important; }
-  my-date-picker .mydp { border: 0 !important; font-family: "Open Sans",Arial,sans-serif !important;}
-  my-date-picker .mydp .caltable,
-  my-date-picker .mydp .header { font-size: 12px !important; padding: 0 !important; }
-  my-date-picker .mydp .daycell { height: 23px !important; }
-  my-date-picker .mydp .selector { width: auto !important; position: absolute; }
-  my-date-picker .mydp td + td { border-left: none; }
-  my-date-picker .mydp .daycell,
-  my-date-picker .mydp .weekdaytitle { padding: 5px 3px !important; }
-  my-date-picker .mydp .headerlabelbtn { font-size: 12px !important; color: var(--dark-grey) !important; min-width: 40px !important;}
-  my-date-picker .mydp .icon-left,
-  my-date-picker .mydp .icon-right { font-size: 12px !important; }
-  my-date-picker .mydp .headertodaybtn { font-size: 12px !important; min-width: 0 !important; }
-  my-date-picker .mydp .selbtngroup { top: 3px !important; right: 2px !important; height: 15px !important; }
-  my-date-picker .mydp .selectorarrow::before { border-color: rgba(204, 204, 204, 0) rgba(204, 204, 204, 0) #f1f1f1 !important; border-width: 12px !important; margin-left: -12px !important; }
-  my-date-picker .mydp .caltable,
-  my-date-picker .mydp .daycell,
-  my-date-picker .mydp .weekdaytitle { color: var(--color-a) !important; }
-  my-date-picker .mydp .sunday { color: var(--color-b) !important; }
 
 .left-icon i { margin-right: 7px; }
 .right-icon i { margin-left: 7px; }
+
+form .right-col button.download { padding: 0 5px 0 6px; margin-left: 3px; }
+form .right-col button.delete { padding: 0 5px 0 6px; margin-left: 3px; vertical-align: -1px; }
 
 .content-component { text-align: left; display: inline-block; }
 .max-content { display: inline-block; }

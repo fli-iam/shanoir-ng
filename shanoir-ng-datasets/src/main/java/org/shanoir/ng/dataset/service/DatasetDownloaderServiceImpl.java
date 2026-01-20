@@ -107,26 +107,41 @@ public class DatasetDownloaderServiceImpl {
     }
 
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId) throws RestServiceException {
+        massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, null);
+    }
+
+    public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting) throws RestServiceException {
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
-        Map<Long, String> datasetDownloadName = getDatasetDownloadName(datasets);
+        Map<Long, String> datasetDownloadPath;
 
         // Prepare the HTTP response for a zip download
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "attachment;filename=" + getFileName(datasets));
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
-            for (Dataset dataset : datasets) {
-                // Prepare folder structure
-                String subjectName = getSubjectName(dataset).replace(File.separator, "_");
-                String studyName = studyRepository.findById(dataset.getStudyId())
-                        .map(Study::getName)
-                        .orElse("Unknown_study");
+            Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
 
-                // Determine dataset file path if multiple datasets are downloaded
-                String datasetFilePath = datasets.size() != 1
-                        ? getDatasetFilepath(dataset, studyName, subjectName, withShanoirId)
-                        : null;
+            for (Dataset dataset : datasets) {
+                String datasetFilePath = "";
+                String subjectName = getSubjectName(dataset).replace(File.separator, "_");
+
+                if (Objects.isNull(sorting)) {
+                    // Prepare folder structure
+                    String studyName = studyRepository.findById(dataset.getStudyId())
+                            .map(Study::getName)
+                            .orElse("Unknown_study");
+
+                    // Determine dataset file path if multiple datasets are downloaded
+                    datasetFilePath = datasets.size() != 1
+                            ? getDatasetFilepath(dataset, studyName, subjectName, withShanoirId)
+                            : null;
+                } else {
+
+                    datasetDownloadPath = getDatasetDownloadPath(datasets, sorting);
+                    datasetFilePath = datasetDownloadPath.get(dataset.getId());
+                }
+
 
                 // Download the dataset into the zip
                 manageDatasetDownload(
@@ -139,7 +154,7 @@ public class DatasetDownloaderServiceImpl {
                         withManifest,
                         filesByAcquisitionId,
                         converterId,
-                        datasetDownloadName.get(dataset.getId())
+                        datasetDownloadNameListPerPath
                 );
             }
 
@@ -181,26 +196,38 @@ public class DatasetDownloaderServiceImpl {
         }
     }
 
-    protected Map<Long, String> getDatasetDownloadName(List<Dataset> datasets) {
-        HashMap<Long, String> datasetDownloadName = new HashMap<>();
-        int count = 0;
+    protected Map<Long, String> getDatasetDownloadPath(List<Dataset> datasets, String sorting) {
+        HashMap<Long, String> datasetDownloadPath = new HashMap<>();
+
         for (Dataset dataset : datasets) {
-            String datasetName = dataset.getName();
-            if (datasetDownloadName.containsValue(datasetName)) {
-                if (datasetName.contains(".")) {
-                    datasetDownloadName.put(dataset.getId(), datasetName.replaceFirst("\\.", "_" + count + "."));
-                } else {
-                    datasetDownloadName.put(dataset.getId(), datasetName + "_" + count);
-                }
-                count++;
-            } else {
-                datasetDownloadName.put(dataset.getId(), dataset.getName());
+            String path = "";
+            Dataset relevantDataset = dataset;
+
+            if (Objects.nonNull(dataset.getDatasetProcessing())) {
+                relevantDataset = dataset.getFirstRealInput();
             }
+
+            if (sorting.contains("study")) {
+                path += "/Study_" + relevantDataset.getDatasetAcquisition().getExamination().getStudy().getName() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getStudy().getId();
+            }
+
+            if (sorting.contains("subject")) {
+                path += "/Subject_" + relevantDataset.getDatasetAcquisition().getExamination().getSubject().getName() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getSubject().getId();
+            }
+
+            if (sorting.contains("exam")) {
+                path += "/Exam_" + relevantDataset.getDatasetAcquisition().getExamination().getComment() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getId();
+            }
+
+            if (sorting.contains("acquisition")) {
+                path += "/Acq_id_" + relevantDataset.getDatasetAcquisition().getId();
+            }
+            datasetDownloadPath.put(dataset.getId(), path);
         }
-        return datasetDownloadName;
+        return datasetDownloadPath;
     }
 
-    protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String outputFormat, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, String datasetDownloadName) throws IOException, RestServiceException {
+    protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String outputFormat, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, Map<String, List<String>> datasetDownloadNameListPerPath) throws IOException, RestServiceException {
         if (!dataset.isDownloadable()) {
             downloadResults.put(dataset.getId(), new DatasetDownloadError("Dataset not downloadable", DatasetDownloadError.ERROR));
             return;
@@ -223,14 +250,14 @@ public class DatasetDownloaderServiceImpl {
             try {
                 Long converterToUse = (converterId != null) ? converterId : DEFAULT_NIFTI_CONVERTER_ID;
                 tempDir = convertToNifti(dataset, pathURLs, converterToUse, downloadResult, subjectName);
-                DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadName);
+                DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
             } finally {
                 LOG.info("Deleting temporary conversion folder [{}]", tempDir.getAbsolutePath());
                 FileUtils.deleteQuietly(tempDir);
             }
         } else { // Download the other types
             DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, format, downloadResult);
-            DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadName);
+            DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
         }
         if (downloadResult.getStatus() == null)
             downloadResults.remove(dataset.getId());

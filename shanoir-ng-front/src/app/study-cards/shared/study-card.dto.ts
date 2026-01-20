@@ -40,7 +40,7 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    public toEntity(dto: StudyCardDTO, result?: StudyCard): Promise<StudyCard> {        
+    public toEntity(dto: StudyCardDTO, result?: StudyCard): Promise<StudyCard> {
         if (!result) result = new StudyCard();
         StudyCardDTOService.mapSyncFields(dto, result);
         return Promise.all([
