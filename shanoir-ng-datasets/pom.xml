@@ -34,6 +34,7 @@
         <solrj.version>9.4.1</solrj.version>
         <spring.data.solr.version>4.3.15</spring.data.solr.version>
         <opencsv.version>5.7.1</opencsv.version>
+        <dcm4che.version>5.31.1</dcm4che.version>
     </properties>
 
     <dependencies>
@@ -64,7 +65,7 @@
             <!-- do not put scope test here: compile errors: org.json package will be missing -->
         </dependency>
 
-        <!-- Shanoir dependencies -->
+        <!-- Shanoir -->
         <dependency>
             <groupId>org.shanoir-ng</groupId>
             <artifactId>shanoir-ng-ms-common</artifactId>
@@ -81,13 +82,25 @@
             <version>3.4.0</version>
         </dependency>
 
+        <!-- DCM4CHEE -->
+        <dependency>
+            <groupId>org.dcm4che</groupId>
+            <artifactId>dcm4che-json</artifactId>
+            <version>${dcm4che.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dcm4che</groupId>
+            <artifactId>dcm4che-emf</artifactId>
+            <version>${dcm4che.version}</version>
+        </dependency>
+
         <!-- gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
 
-        <!-- Apache dependencies -->
+        <!-- Apache -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
@@ -205,5 +218,16 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>dcm4che</id>
+            <name>dcm4che</name>
+            <url>https://www.dcm4che.org/maven2/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>
