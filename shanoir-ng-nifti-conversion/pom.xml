@@ -65,6 +65,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <artifactId>shanoir-ng-ms-common</artifactId>
             <version>3.4.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.5</version>
+        </dependency>
     </dependencies>
 
     <build>
