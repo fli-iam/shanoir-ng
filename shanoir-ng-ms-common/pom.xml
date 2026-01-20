@@ -79,6 +79,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <artifactId>spring-data-keyvalue</artifactId>
             <version>${spring.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.security</groupId>
