@@ -20,15 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Keycloak Service account utility class
@@ -38,21 +36,21 @@ import org.springframework.web.client.RestClientException;
 @Component
 public class KeycloakServiceAccountUtils {
 
+    /**
+     * Logger
+     */
     private static final Logger LOG = LoggerFactory.getLogger(KeycloakServiceAccountUtils.class);
-
     private static final String GRANT_TYPE = "client_credentials";
 
     @Value("${service-account.token.uri:'https://shanoir-ng-nginx/auth'}")
     private String serverUrl;
-
     @Value("${service-account.client.id:'service-account'}")
     private String clientId;
-
     @Value("${service-account.client.credential-secret:'SECRET'}")
     private String clientSecret;
 
     @Autowired
-    private RestClient restClient;
+    private RestTemplate restTemplate;
 
     /**
      * Get an access token using service account
@@ -60,20 +58,20 @@ public class KeycloakServiceAccountUtils {
      * @return AccessTokenResponse
      */
     public AccessTokenResponse getServiceAccountAccessToken() throws SecurityException {
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("client_id", this.clientId);
         map.add("client_secret", this.clientSecret);
-        map.add("grant_type", GRANT_TYPE);
+        map.add("grant_type", this.GRANT_TYPE);
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
+
         try {
-            ResponseEntity<AccessTokenResponse> response = this.restClient
-                    .post()
-                    .uri(this.serverUrl)
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .body(map)
-                    .retrieve()
-                    .toEntity(AccessTokenResponse.class);
+            ResponseEntity<AccessTokenResponse> response = this.restTemplate.exchange(this.serverUrl, HttpMethod.POST,
+                    entity, AccessTokenResponse.class);
             return response.getBody();
         } catch (HttpStatusCodeException e) {
             // in case of error with a response payload.
@@ -85,5 +83,4 @@ public class KeycloakServiceAccountUtils {
             throw new SecurityException("No response payload for service account token request", e);
         }
     }
-
 }
