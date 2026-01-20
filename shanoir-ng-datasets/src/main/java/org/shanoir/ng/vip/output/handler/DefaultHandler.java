@@ -254,7 +254,7 @@ public class DefaultHandler extends OutputHandler {
         } catch (Exception e) {
             LOG.debug("Could not read DICOM attributes from file [{}]: {}", file.getAbsolutePath(), e.getMessage());
         }
-        return DatasetType.GENERIC.name();
+        return DatasetType.Names.GENERIC;
     }
 
     private Attributes readDicomAttributes(File file) {
@@ -272,17 +272,17 @@ public class DefaultHandler extends OutputHandler {
     private String mapDicomToDatasetType(Attributes attributes) {
         String sopClassUID = attributes.getString(Tag.SOPClassUID);
 
-        if (sopClassUID == null || sopClassUID.isEmpty()) return DatasetType.GENERIC.name();
-        if (isMr(sopClassUID)) return DatasetType.MR.name();
-        if (isCt(sopClassUID)) return DatasetType.CT.name();
-        if (isXa(sopClassUID)) return DatasetType.XA.name();
-        if (isPet(sopClassUID)) return DatasetType.PET.name();
-        if (isSpect(sopClassUID)) return DatasetType.SPECT.name();
-        if (isSegmentation(sopClassUID)) return DatasetType.SEGMENTATION.name();
-        if (isRegistration(sopClassUID)) return DatasetType.REGISTRATION.name();
-        if (isSr(sopClassUID)) return DatasetType.SR.name();
+        if (sopClassUID == null || sopClassUID.isEmpty()) return DatasetType.Names.GENERIC;
+        if (isMr(sopClassUID)) return DatasetType.Names.MR;
+        if (isCt(sopClassUID)) return DatasetType.Names.CT;
+        if (isXa(sopClassUID)) return DatasetType.Names.XA;
+        if (isPet(sopClassUID)) return DatasetType.Names.PET;
+        if (isSpect(sopClassUID)) return DatasetType.Names.SPECT;
+        if (isSegmentation(sopClassUID)) return DatasetType.Names.SEGMENTATION;
+        if (isRegistration(sopClassUID)) return DatasetType.Names.REGISTRATION;
+        if (isSr(sopClassUID)) return DatasetType.Names.SR;
 
-        return DatasetType.GENERIC.name();
+        return DatasetType.Names.GENERIC;
 
     }
 
