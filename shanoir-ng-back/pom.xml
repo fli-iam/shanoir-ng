@@ -28,18 +28,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <description>Shanoir microservices backend project</description>
 
     <modules>
-        <module>../shanoir-ng-anonymization</module>
-        <module>../shanoir-ng-ms-common</module>
-        <module>../shanoir-ng-ms-common-jackson3</module>
-        <module>../shanoir-ng-study-rights</module>
-        <module>../shanoir-ng-study-rights-jackson3</module>
-        <module>../shanoir-ng-users</module>
-        <module>../shanoir-ng-studies</module>
-        <module>../shanoir-ng-datasets</module>
-        <module>../shanoir-ng-import</module>
-        <module>../shanoir-ng-preclinical</module>
-        <module>../shanoir-ng-exchange</module>
-        <module>../shanoir-ng-nifti-conversion</module>
     </modules>
 
     <properties>

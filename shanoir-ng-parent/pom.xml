@@ -27,8 +27,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<description>Parent project for Shanoir</description>
 
 	<modules>
-		<module>../shanoir-ng-keycloak-auth</module>
-		<module>../shanoir-ng-back</module>
+        <module>../shanoir-ng-anonymization</module>
+        <module>../shanoir-ng-ms-common</module>
+        <module>../shanoir-ng-ms-common-jackson3</module>
+        <module>../shanoir-ng-study-rights</module>
+        <module>../shanoir-ng-study-rights-jackson3</module>
+        <module>../shanoir-ng-exchange</module>
+        <module>../shanoir-ng-keycloak-auth</module>
+        <!-- Microservices -->
+        <module>../shanoir-ng-users</module>
+        <module>../shanoir-ng-studies</module>
+        <module>../shanoir-ng-datasets</module>
+        <module>../shanoir-ng-import</module>
+        <module>../shanoir-ng-preclinical</module>
+        <module>../shanoir-ng-nifti-conversion</module>
+        <!-- Clients -->
 		<module>../shanoir-ng-front</module>
 		<module>../shanoir-uploader</module>
 	</modules>
@@ -80,7 +93,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<goal>report</goal>
 						</goals>
 					</execution>
-					<!-- <execution> <id>post-unit-test</id> <phase>test</phase> <goals>
+                    <!-- <execution> <id>post-unit-test</id> <phase>test</phase> <goals>
 						<goal>report</goal> </goals> </execution> -->
 				</executions>
 			</plugin>
