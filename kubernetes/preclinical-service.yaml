@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: /usr/local/bin/kompose convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: preclinical
+  name: preclinical
+spec:
+  ports:
+    - name: "9905"
+      port: 9905
+      targetPort: 9905
+    - name: "9915"
+      port: 9915
+      targetPort: 9915
+  selector:
+    io.kompose.service: preclinical

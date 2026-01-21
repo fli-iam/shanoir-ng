@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: /usr/local/bin/kompose convert
+    kompose.version: 1.35.0 (9532ceef3)
+  labels:
+    io.kompose.service: dcm4chee-arc
+  name: dcm4chee-arc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: dcm4chee-arc
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: /usr/local/bin/kompose convert
+        kompose.version: 1.35.0 (9532ceef3)
+      labels:
+        io.kompose.service: dcm4chee-arc
+    spec:
+      containers:
+        - env:
+            - name: HTTP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  key: HTTP_PORT
+                  name: variables-env
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  key: POSTGRES_DB
+                  name: variables-env
+            - name: POSTGRES_HOST
+              value: dcm4chee-database
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  key: POSTGRES_PASSWORD
+                  name: variables-env
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  key: POSTGRES_USER
+                  name: variables-env
+            - name: STORAGE_DIR
+              valueFrom:
+                configMapKeyRef:
+                  key: STORAGE_DIR
+                  name: variables-env
+            - name: WILDFLY_CHOWN
+              value: /storage
+            - name: WILDFLY_WAIT_FOR
+              value: ldap:389 dcm4chee-database:5432
+          image: dcm4che/dcm4chee-arc-psql:5.27.0
+          name: dcm4chee-arc
+          ports:
+            - containerPort: 8081
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+            - containerPort: 9990
+              protocol: TCP
+            - containerPort: 11112
+              protocol: TCP
+            - containerPort: 2575
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /opt/wildfly/standalone
+              name: dcm4chee-arc-wildfly-data
+            - mountPath: /storage
+              name: dcm4chee-arc-storage-data
+      restartPolicy: Always
+      volumes:
+        - name: dcm4chee-arc-wildfly-data
+          persistentVolumeClaim:
+            claimName: dcm4chee-arc-wildfly-data
+        - name: dcm4chee-arc-storage-data
+          persistentVolumeClaim:
+            claimName: dcm4chee-arc-storage-data
