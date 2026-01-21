@@ -44,7 +44,7 @@ export abstract class StudyCardDTOServiceAbstract {
                 if (ruleDTO.assignments) {
                     rule.assignments = [];
                     for (const assigmentDTO of ruleDTO.assignments) {
-                        const assigment: StudyCardAssignment = new StudyCardAssignment('Dataset');
+                        const assigment: StudyCardAssignment = new StudyCardAssignment(assigmentDTO.scope);
                         assigment.field = assigmentDTO.field;
                         if (this.isCoil(assigment.field) && !Number.isNaN(Number(assigmentDTO.value))) {
                             assigment.value = new Coil();
@@ -59,7 +59,7 @@ export abstract class StudyCardDTOServiceAbstract {
                     rule.conditions = [];
                     for (const conditionDTO of ruleDTO.conditions) {
                         const condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
-                        if (conditionDTO.dicomTag) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null, null, null);
+                        if (conditionDTO.dicomTag != undefined) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null, null, null);
                         condition.shanoirField = conditionDTO.shanoirField;
                         if (this.isCoil(condition.shanoirField) && !Number.isNaN(Number(conditionDTO.values?.[0]))) {
                             condition.values = [];
