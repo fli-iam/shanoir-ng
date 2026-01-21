@@ -24,7 +24,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<dcm4che.version>5.31.1</dcm4che.version>
 		<poi.version>5.4.0</poi.version>
-		<checkstyle.header.file>../shanoir-ng-back/java-header</checkstyle.header.file>
+        <checkstyle.header.file>${project.basedir}/../shanoir-ng-back/java-header</checkstyle.header.file>
+        <checkstyle.config.file>${project.basedir}/../shanoir-ng-back/checkstyle.xml</checkstyle.config.file>
+        <checkstyle.suppressions.file>${project.basedir}/../shanoir-ng-back/suppressions.xml</checkstyle.suppressions.file>
 	</properties>
 
 	<dependencies>
@@ -34,13 +36,13 @@
 			<version>4.13.1</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- Commons -->
+        <!-- Commons -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.17.0</version>
 		</dependency>
-		<!-- DCM4CHE -->
+        <!-- DCM4CHE -->
 		<dependency>
 			<groupId>org.dcm4che</groupId>
 			<artifactId>dcm4che-core</artifactId>
@@ -68,7 +70,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
+        <!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
@@ -94,6 +96,26 @@
 
 	<build>
 		<plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <configLocation>${checkstyle.config.file}</configLocation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <suppressionsLocation>${checkstyle.suppressions.file}</suppressionsLocation>
+                    <excludes>**/target/**/*</excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>checkstyle-verify</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
