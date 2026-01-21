@@ -93,7 +93,7 @@ public class UploadFromTableActionListener implements ActionListener {
             }
         } catch (InvalidFormatException | IOException | IllegalStateException e) {
             LOG.error("Error while parsing the input file: ", e);
-            this.importFromTableWindow.displayError(resourceBundle.getString("shanoir.uploader.import.table.error.csv"));
+            this.importFromTableWindow.displayError(resourceBundle.getString("shanoir.uploader.import.table.error.file"));
             return;
         }
         LOG.info(importJobs.entrySet().size() + " import jobs (== DICOM studies/examinations) read from table.");
