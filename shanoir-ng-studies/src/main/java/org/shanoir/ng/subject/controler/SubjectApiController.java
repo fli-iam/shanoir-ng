@@ -212,6 +212,15 @@ public class SubjectApiController implements SubjectApi {
         return new ResponseEntity<>(subjectMapper.subjectToSubjectDTO(subject), HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<Boolean> isSubjectNameExistForStudy(
+            @Parameter(description = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+
+        final boolean exists = subjectService.isSubjectNameExistForStudy(studyId, subjectName);
+        return new ResponseEntity<>(exists, HttpStatus.OK);
+    }
+
     private void validate(Subject subject, BindingResult result) throws RestServiceException {
         final FieldErrorMap errors = new FieldErrorMap().add(new FieldErrorMap(result))
                 .add(uniqueConstraintManager.validate(subject));
@@ -231,5 +240,6 @@ public class SubjectApiController implements SubjectApi {
         }
         return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
     }
+
 
 }
