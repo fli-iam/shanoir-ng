@@ -1,0 +1,7 @@
+{
+  "servers": [
+    {
+      "url": "https://shanoir-ng-nginx/auth/realms/shanoir-ng"
+    }
+  ]
+}
