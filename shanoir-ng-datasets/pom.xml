@@ -85,6 +85,11 @@
             <version>3.4.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.2.0</version>
+        </dependency>
         <!-- DCM4CHEE -->
         <dependency>
             <groupId>org.dcm4che</groupId>

@@ -75,6 +75,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <version>3.4.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.2.0</version>
+        </dependency>
         <!-- SpringFox Swagger UI -->
         <dependency>
             <groupId>org.springdoc</groupId>
