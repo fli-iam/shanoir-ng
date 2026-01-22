@@ -174,4 +174,15 @@ public interface SubjectApi {
     ResponseEntity<SubjectDTO> findSubjectByIdentifier(
             @Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier);
 
+    @Operation(summary = "", description = "If exists, returns the subject corresponding to the given name in the given study")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subject"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/nameExists/{subjectName}/inStudy/{studyId}", produces = {"application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasAnyRightOnStudy(#studyId))")
+    ResponseEntity<Boolean> isSubjectNameExistForStudy(
+            @Parameter(description = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+
 }

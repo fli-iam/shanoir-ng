@@ -484,8 +484,13 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public boolean existsSubjectWithName(String name) {
-        return this.subjectRepository.existsByName(name);
+    public boolean existsSubjectWithNameInStudy(String name, Long studyId) {
+        return this.subjectRepository.findByStudyIdAndName(studyId, name) != null;
+    }
+
+    @Override
+    public boolean isSubjectNameExistForStudy(Long studyId, String subjectName) {
+        return this.subjectRepository.existsBySubjectStudyListStudyIdAndName(studyId, subjectName);
     }
 
     /**
