@@ -50,9 +50,9 @@ services:
       - SHANOIR_SMTP_STARTTLS_ENABLE
       - SHANOIR_SMTP_STARTTLS_REQUIRED
       - SHANOIR_SMTP_FROM
-    image: "ghcr.io/fli-iam/shanoir-ng/keycloak:NG_v2.5.1"
+    image: "ghcr.io/fli-iam/shanoir-ng/keycloak:26.2.1"
     volumes:
-      - "keycloak-logs:/opt/keycloak/data/log"
+      - keycloak-logs:/opt/keycloak/data/log
     networks:
       - shanoir_ng_network
     ports:
