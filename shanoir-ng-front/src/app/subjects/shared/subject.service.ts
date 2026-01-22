@@ -14,6 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -22,6 +23,7 @@ import * as AppUtils from '../../utils/app.utils';
 
 import { Subject } from './subject.model';
 import { SubjectDTO, SubjectDTOService } from './subject.dto';
+
 
 @Injectable()
 export class SubjectService extends EntityService<Subject> {
@@ -67,6 +69,12 @@ export class SubjectService extends EntityService<Subject> {
             .toPromise().then(dto => this.mapEntity(dto));
     }
 
+    isSubjectNameExistForStudy(name: string, studyId: number): Promise<boolean> {
+        return firstValueFrom( 
+            this.http.get<boolean>(AppUtils.BACKEND_API_SUBJECT_URL + '/nameExists/' + name + '/inStudy/' + studyId)
+        );  
+    }
+
     protected mapEntity = (dto: SubjectDTO, result?: Subject): Promise<Subject> => {
         if (result == undefined) result = this.getEntityInstance();
         return this.subjectDTOService.toEntity(dto, result);
@@ -79,8 +87,6 @@ export class SubjectService extends EntityService<Subject> {
 
     public stringify(entity: Subject) {
         const dto = new SubjectDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

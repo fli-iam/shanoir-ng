@@ -25,13 +25,18 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.core.model.AbstractEntityInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -275,6 +280,34 @@ public final class Utils {
     public static String getOrSetToDefault(Attributes attributes, int tag, String defaultValue) {
         String value = attributes.getString(tag);
         return (value == null || value.isEmpty()) ? defaultValue : value;
+    }
+
+    public static <T extends AbstractEntityInterface> void syncList(
+            List<T> managedList,
+            List<T> incomingList,
+            BiConsumer<T, T> mapper
+    ) {
+        Map<Long, T> managedById = managedList.stream()
+                .filter(e -> e.getId() != null)
+                .collect(Collectors.toMap(AbstractEntityInterface::getId, Function.identity()));
+
+        // remove deleted
+        managedList.removeIf(
+                m -> m.getId() != null
+                && incomingList.stream().noneMatch(i -> m.getId().equals(i.getId()))
+        );
+
+        // add new and update existing
+        for (T incoming : incomingList) {
+            if (incoming.getId() == null) {
+                managedList.add(incoming);
+            } else {
+                T managed = managedById.get(incoming.getId());
+                if (managed != null) {
+                    mapper.accept(managed, incoming); // copy fields
+                }
+            }
+        }
     }
 
 }

@@ -13,7 +13,7 @@
  */
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 
@@ -31,7 +31,7 @@ import { DatasetUtils } from './dataset.utils';
 import { DatasetType } from './dataset-type.model';
 
 export type Format = 'nii' | 'dcm';
-export type DatasetLight = {id: number, name: string, type: DatasetType, subject: IdName, hasProcessings: boolean, study: IdName, creationDate: Date};
+export type DatasetLight = {id: number, name: string, type: DatasetType, subject: IdName, hasProcessings: boolean, study: IdName, creationDate: Date; centerId: number};
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
@@ -117,15 +117,14 @@ export class DatasetService extends EntityService<Dataset> {
             .toPromise();
     }
 
-    countDatasetsByStudyId(studyId: number): Promise<number> {
-        return this.http.get<number>(AppUtils.BACKEND_API_DATASET_URL + '/study/nb-datasets/' + studyId)
-        .toPromise();
-    }
-
-    public downloadDatasets(ids: number[], format: string, converter ? : number, state?: TaskState): Observable<TaskState> {
+    public downloadDatasets(ids: number[], format: string, sorting?: string, converter ? : number, state?: TaskState): Observable<TaskState> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
+        if (sorting) {
+            formData.set('sortingForProcessingOutputs', sorting)
+
+        }
         if (converter) {
             formData.set("converterId", "" + converter);
         }
@@ -167,8 +166,12 @@ export class DatasetService extends EntityService<Dataset> {
         ).toPromise();
     }
 
-    private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFileFromResponse(response);
+    getDownloadData(acquisitionIds: number[], examinationIds: number[]): Promise<{id: number, canDownload: boolean}[]> {
+        const formData = {examinationIds: examinationIds, acquisitionIds: acquisitionIds};
+        return firstValueFrom(this.http.post<{id: number, canDownload: boolean}[]>(
+            AppUtils.BACKEND_API_DATASET_URL + '/getDownloadData',
+            formData
+        ));
     }
 
     protected mapEntity = (dto: DatasetDTO, quickResult?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> => {
@@ -190,8 +193,6 @@ export class DatasetService extends EntityService<Dataset> {
         } else {
             dto = new DatasetDTO(entity);
         }
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

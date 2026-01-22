@@ -47,6 +47,10 @@ public class UserRights {
         }
     }
 
+    public boolean hasStudyRights(Long studyId, StudyUserRight right) {
+        return hasStudyRights(studyId, right.name());
+    }
+
     /**
      * Has the user specific center restrictions for this study
      */

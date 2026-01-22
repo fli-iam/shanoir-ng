@@ -50,6 +50,10 @@ public interface SubjectService {
     @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
     List<Subject> findAll();
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
+    Iterable<Subject> findAllById(List<Long> subjectIds);
+
     /**
      * Get all the subjects.
      *
@@ -92,6 +96,9 @@ public interface SubjectService {
     @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
     Subject findById(Long id);
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    Subject findByStudyIdAndName(Long id, String name);
+
     /**
      * Find subject by its identifier and a list of studies (based on the rights).
      *
@@ -106,16 +113,6 @@ public interface SubjectService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     Subject findByIdentifierInStudiesWithRights(String identifier, List<Study> studies);
-
-    /**
-     * Find a subject by its subject-study relationship id.
-     *
-     * @param id id
-     * @return a subject or null
-     */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(returnObject, 'CAN_SEE_ALL')")
-    Subject findByIdWithSubjectStudies(Long subjectStudyId);
 
     /**
      * Find a subject from a center code
@@ -187,8 +184,9 @@ public interface SubjectService {
     @PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
     List<Subject> findByPreclinical(boolean preclinical);
 
-    boolean existsSubjectWithName(String name);
+    boolean existsSubjectWithNameInStudy(String name, Long studyId);
 
     public void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew);
 
+    boolean isSubjectNameExistForStudy(Long studyId, String subjectName);
 }

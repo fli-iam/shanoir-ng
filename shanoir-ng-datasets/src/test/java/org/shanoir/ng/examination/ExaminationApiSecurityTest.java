@@ -246,8 +246,8 @@ public class ExaminationApiSecurityTest {
         assertThat(api.findExaminations(PageRequest.of(0, 10), "", "").getBody()).hasSize(1);
 
         // findPreclinicalExaminations(Boolean, Pageable)
-        assertAccessAuthorized(api::findPreclinicalExaminations, true, PageRequest.of(0, 10));
-        assertAccessAuthorized(api::findPreclinicalExaminations, false, PageRequest.of(0, 10));
+        assertAccessAuthorized(api::findPreclinicalExaminations, true, PageRequest.of(0, 10), "", "");
+        assertAccessAuthorized(api::findPreclinicalExaminations, false, PageRequest.of(0, 10), "", "");
 
         // findExaminationsBySubjectIdStudyId(Long, Long)
         assertAccessAuthorized((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 1L, 1L);

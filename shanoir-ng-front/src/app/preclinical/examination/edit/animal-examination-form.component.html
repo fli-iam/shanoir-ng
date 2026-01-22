@@ -19,9 +19,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				[state]="footerState"
 				(save)="save()"
 				(edit)="goToEdit()"
+                (delete) = "delete()"
 				(back)="goBack()"
-				(dismiss)="goToView()"
-			></form-footer>
+				(dismiss)="goToView()">
+                <button *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState.isActive() || noDatasets">Download<i class="fas fa-download"></i></button>
+                <button *ngIf="mode == 'view'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openViewer()">View DICOM<i class="fa fa-eye"></i></button>
+                <button *ngIf="mode == 'view'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openSegmentationViewer()">View for segmentation<i class="fa fa-eye"></i></button>
+            </form-footer>
 			<span [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
 					<h2 class="header command-zone"i18n="View examination|Title@@examinationDetailViewTitle">Details on examination</h2>
@@ -154,13 +158,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{examination.subjectWeight}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" id="subjectWeight" formControlName="subjectWeight"/>
+							<input class="small" type="text" id="subjectWeight" formControlName="subjectWeight"/>
 						</ng-template>
 
-                        <span class="right-col" *ngIf="mode != 'view'">
-                                <input id="{{unit.KG}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" value="{{unit.KG}}" />{{getUnit(unit.KG.toString())}}
+                        <span *ngIf="mode != 'view'" class="units">
+							<input id="{{unit.KG}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" value="{{unit.KG}}" />{{getUnit(unit.KG.toString())}}
                             <input id="{{unit.G}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" value="{{unit.G}}" />{{getUnit(unit.G.toString())}}
-                            </span>
+						</span>
 
 					</span>
 				</li>
@@ -179,21 +183,35 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</ng-template> -->
 					</span>
 				</li>
-                    <li *ngIf="mode == 'create' || mode=='edit'">
-                        <label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
-                        <span class="right-col" [ngSwitch]="mode">
-                            <input #input hidden type="file" (change)="attachNewFile($event)"/>
-                            <button (click)="setFile()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
-                            <ul>
-                                <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
-                                </li>
-                            </ul>
-                        </span>
-                    </li>
+				@if (mode == 'create' || mode=='edit') {
+					<li>
+						<label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Attach new files</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<input #input hidden type="file" (change)="attachNewFile($event)"/>
+							<button (click)="setFile()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
+							<ul>
+								<li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)" class="delete"><i class="fa-regular fa-trash-can"></i></button>
+								</li>
+							</ul>
+						</span>
+					</li>
+				} @else {
+					<li>
+						<label>Attached files</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ul>
+								<li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="downloadFile(file)" class="download"><i class="fas fa-download"></i></button>
+								</li>
+							</ul>
+						</span>
+					</li>
+				}
+
 			</ol>
 		</fieldset>
 
 		<examination-anesthetic-form
+		    class="embedded-form"
 			[id]="examination.id"
 			[mode]="mode"
 			(examAnestheticChange)="onExamAnestheticChange($event)"
@@ -212,6 +230,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 		<physiological-data-upload-form
+			class="embedded-form"
 			(physioDataReady)="onUploadPhysiologicalData($event)"
 			[mode]="mode"
 			[canModify]="true"
@@ -220,19 +239,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</physiological-data-upload-form>
 
 		<bloodgas-data-upload-form
+			class="embedded-form"
 			(bloodGasDataReady)="onUploadBloodGasData($event)"
 			[mode]="mode"
 			[canModify]="true"
 			[examinationId]="examination.id"
 			[embedded]="true">
 		</bloodgas-data-upload-form>
-
-		<fieldset *ngIf="examination && mode=='view'">
-			<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
-			<examination-node
-					[input]="breadcrumbsService.currentStep.data.examinationNode ? breadcrumbsService.currentStep.data.examinationNode : {examination: examination, parentNode: null}"
-					(nodeInit)="onExaminationNodeInit($event)"></examination-node>
-		</fieldset>
 	</div>
 </form>
 </div>

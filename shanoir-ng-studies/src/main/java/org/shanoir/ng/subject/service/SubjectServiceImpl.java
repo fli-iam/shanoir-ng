@@ -129,6 +129,16 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
+    public Iterable<Subject> findAllById(List<Long> subjectIds) {
+        return subjectRepository.findAllById(subjectIds);
+    }
+
+    @Override
+    public Subject findByStudyIdAndName(Long id, String name) {
+        return subjectRepository.findByStudyIdAndName(id, name);
+    }
+
+    @Override
     public List<IdName> findAllNames() {
         Iterable<Subject> subjects;
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -172,11 +182,6 @@ public class SubjectServiceImpl implements SubjectService {
         Subject subject = subjectRepository.findById(id).orElse(null);
         Hibernate.initialize(subject.getTags());
         return subject;
-    }
-
-    @Override
-    public Subject findByIdWithSubjectStudies(final Long id) {
-        return subjectRepository.findSubjectWithSubjectStudyById(id);
     }
 
     @Override
@@ -471,8 +476,13 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public boolean existsSubjectWithName(String name) {
-        return this.subjectRepository.existsByName(name);
+    public boolean existsSubjectWithNameInStudy(String name, Long studyId) {
+        return this.subjectRepository.findByStudyIdAndName(studyId, name) != null;
+    }
+
+    @Override
+    public boolean isSubjectNameExistForStudy(Long studyId, String subjectName) {
+        return this.subjectRepository.existsBySubjectStudyListStudyIdAndName(studyId, subjectName);
     }
 
     /**

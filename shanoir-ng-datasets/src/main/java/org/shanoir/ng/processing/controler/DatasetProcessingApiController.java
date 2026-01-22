@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.processing.controler;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -27,7 +28,7 @@ import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
-import org.shanoir.ng.processing.service.ProcessingDownloaderServiceImpl;
+import org.shanoir.ng.processing.service.ProcessingDownloaderService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -64,7 +65,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     private DatasetProcessingService datasetProcessingService;
 
     @Autowired
-    private ProcessingDownloaderServiceImpl processingDownloaderService;
+    private ProcessingDownloaderService processingDownloaderService;
 
     @Autowired
     private ExaminationService examinationService;
@@ -198,7 +199,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
                         new ErrorModel(HttpStatus.FORBIDDEN.value(), processingId + " is not a valid processing id."));
             }
         }
-        processingDownloaderService.massiveDownload(processingList, resultOnly, null, response, false, null);
+        processingDownloaderService.massiveDownload(processingList, resultOnly, "dcm", response, false, null);
     }
 
     @Override
@@ -229,5 +230,17 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             }
         }
         processingDownloaderService.massiveDownloadByExaminations(examinationList, processingComment, resultOnly, "dcm", response, false, null);
+    }
+
+    public ResponseEntity<String> complexMassiveDownload(JsonNode jsonRequest) {
+        try {
+            LOG.info("Preparing complex download for processed data.");
+            processingDownloaderService.complexMassiveDownload(jsonRequest);
+            LOG.info("Preparation for complex download done.");
+            return ResponseEntity.ok("Preparation for complex download done. Please log in to the shanoir web instance and check the job, download tasks should be accessible.");
+        } catch (Exception e) {
+            LOG.error("Error while preparing complex processed data download.", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while preparing complex processed data download: " + e.getMessage());
+        }
     }
 }

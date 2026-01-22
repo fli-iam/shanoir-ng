@@ -21,10 +21,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -38,6 +35,8 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.DatasetDownloadError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.UriUtils;
@@ -50,11 +49,14 @@ import jakarta.mail.MessagingException;
 
 public final class DatasetFileUtils {
 
-    private DatasetFileUtils() { }
+    private DatasetFileUtils() {
+    }
 
     private static final String UNDERSCORE = "_";
 
     public static final String INPUT = "input.json";
+
+    protected static final Logger LOG = LoggerFactory.getLogger(DatasetFileUtils.class);
 
     public static File getUserImportDir(String importDir) {
         final Long userId = KeycloakUtil.getTokenUserId();
@@ -100,55 +102,66 @@ public final class DatasetFileUtils {
      * @param urls
      * @param subjectName         the subjectName
      * @param datasetFilePath
-     * @param datasetDownloadName
+     * @param datasetDownloadNameListPerPath
      * @return
      * @throws IOException
      * @throws MessagingException
      */
-    public static List<String> copyNiftiFilesForURLs(final List<URL> urls, final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName, String datasetFilePath, String datasetDownloadName) throws IOException {
+    public static List<String> copyFilesForDownload(final List<URL> urls, final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName, String datasetFilePath, Map<String, List<String>> datasetDownloadNameListPerPath)
+            throws IOException {
+
+        List<String> filesInZip = new ArrayList<>();
         int index = 0;
-        List<String> files = new ArrayList<>();
-        for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-            URL url =  iterator.next();
+
+        for (URL url : urls) {
             File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
             String srcPath = srcFile.getAbsolutePath();
 
-            String fileName = getFileName(keepName, srcFile, subjectName, dataset, index, datasetDownloadName);
+            // Generate the target file name
+            String fileName = getFileName(keepName, srcFile, subjectName, dataset, index);
+            fileName = fileName.replace(File.separator, UNDERSCORE); // avoid nested folders
 
-            if (fileName.contains(File.separator)) {
-                fileName = fileName.replaceAll(File.separator, UNDERSCORE);
+            if (!datasetDownloadNameListPerPath.containsKey(datasetFilePath)) {
+                datasetDownloadNameListPerPath.put(datasetFilePath, new ArrayList<>(List.of(fileName)));
+            } else {
+                List<String> nameListForFilePath = datasetDownloadNameListPerPath.get(datasetFilePath);
+                String finalFileName = fileName;
+                if (nameListForFilePath.contains(finalFileName)) {
+                    fileName = fileName.replaceFirst("\\.", "_" + nameListForFilePath.stream().filter(name -> Objects.equals(name, finalFileName)).count() + ".");
+                }
+                nameListForFilePath.add(finalFileName);
             }
-            // add folder logic if necessary
-            if (datasetFilePath != null) {
+
+            // Add folder path if specified
+            if (datasetFilePath != null)
                 fileName = datasetFilePath + File.separator + fileName;
-            }
-            boolean compressed = srcPath.endsWith(".nii");
 
-            // Gzip file if necessary in order to always return a .nii.gz file
-            if (compressed) {
-                srcPath = srcPath + ".gz";
-                fileName = fileName + ".gz";
-                compressGzipFile(srcFile.getAbsolutePath(), srcPath);
-            }
+            // If it's an uncompressed NIfTI file, compress it.
+            boolean compress = srcPath.endsWith(".nii");
+            String zipPath = compress ? srcPath + ".gz" : srcPath;
+            String zipFileName = compress ? fileName + ".gz" : fileName;
 
-            files.add(fileName);
+            // Compress file if needed
+            if (compress)
+                compressGzipFile(srcPath, zipPath);
 
-            FileSystemResource fileSystemResource = new FileSystemResource(srcPath);
-            ZipEntry zipEntry = new ZipEntry(fileName);
-            zipEntry.setSize(fileSystemResource.contentLength());
+            // Add to ZIP
+            FileSystemResource resource = new FileSystemResource(zipPath);
+            ZipEntry zipEntry = new ZipEntry(zipFileName);
+            zipEntry.setSize(resource.contentLength());
             zipEntry.setTime(System.currentTimeMillis());
             zipOutputStream.putNextEntry(zipEntry);
-            StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
+            StreamUtils.copy(resource.getInputStream(), zipOutputStream);
             zipOutputStream.closeEntry();
 
-            if (compressed) {
-                // If we gzipped the file, delete the newly created file directly after
-                FileUtils.deleteQuietly(new File(srcPath));
-            }
+            // Cleanup temporary compressed file
+            if (compress)
+                FileUtils.deleteQuietly(new File(zipPath));
 
+            filesInZip.add(zipFileName);
             index++;
         }
-        return files;
+        return filesInZip;
     }
 
     public static void writeManifestForExport(final ZipOutputStream zipOutputStream, Map<Long, List<String>> filesByAcquisitionId) throws IOException {
@@ -172,12 +185,14 @@ public final class DatasetFileUtils {
         zipOutputStream.closeEntry();
     }
 
-    public static String getFileName(boolean keepName, File srcFile, String subjectName, Dataset dataset, int index, String datasetDownloadName) {
-        if (dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
-            return datasetDownloadName;
-        }
+    public static String getFileName(boolean keepName, File srcFile, String subjectName, Dataset dataset, int index) {
         if (keepName) {
-            return srcFile.getName();
+            String fileName = srcFile.getName();
+            String prefix = fileName.split("\\.", 2)[0];
+            if (prefix.matches("\\d+") || prefix.matches("\\d+_info")) {
+                fileName = dataset.getName() + "_" + fileName;
+            }
+            return fileName;
         }
 
         // Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
@@ -196,20 +211,21 @@ public final class DatasetFileUtils {
             }
         }
         name.append(dataset.getDatasetAcquisition().getRank()).append(UNDERSCORE)
-        .append(index)
-        .append(".");
+                .append(index)
+                .append(".");
         if (srcFile.getName().endsWith(".nii.gz")) {
             name.append("nii.gz");
         } else {
             name.append(FilenameUtils.getExtension(srcFile.getName()));
         }
+
         return name.toString();
     }
 
     public static void compressGzipFile(String source, String gzipDestination) throws IOException {
         try (FileInputStream fis = new FileInputStream(source);
-                FileOutputStream fos = new FileOutputStream(gzipDestination);
-                GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {
+                 FileOutputStream fos = new FileOutputStream(gzipDestination);
+                 GZIPOutputStream gzipOS = new GZIPOutputStream(fos)) {
             byte[] buffer = new byte[1024];
             int len;
             while ((len = fis.read(buffer)) > 0) {

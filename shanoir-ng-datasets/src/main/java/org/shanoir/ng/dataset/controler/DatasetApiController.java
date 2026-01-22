@@ -16,7 +16,6 @@ package org.shanoir.ng.dataset.controler;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -24,16 +23,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.DatasetDownloadData;
+import org.shanoir.ng.dataset.dto.DatasetDownloadDataInput;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -72,6 +70,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -90,7 +90,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-
 
 @Controller
 public class DatasetApiController implements DatasetApi {
@@ -386,7 +385,10 @@ public class DatasetApiController implements DatasetApi {
             @RequestParam(value = "format", required = false, defaultValue = DCM) String format,
             @Parameter(description = "If nifti, decide converter to use") @Valid
             @RequestParam(value = "converterId", required = false) Long converterId,
-            HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
+            @Parameter(description = "Sorting for directories tree") @Valid
+            @RequestParam(value = "sortingForProcessingOutputs", required = false) String sortingForProcessingOutputs,
+            HttpServletResponse response) throws RestServiceException {
+
         // STEP 0: Check data integrity
         if (datasetIds == null || datasetIds.isEmpty()) {
             throw new RestServiceException(
@@ -394,7 +396,7 @@ public class DatasetApiController implements DatasetApi {
         }
         int size = datasetIds.size();
 
-        if (size > DATASET_LIMIT) {
+        if (size > DATASET_LIMIT && Objects.isNull(sortingForProcessingOutputs)) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.FORBIDDEN.value(), "This selection includes " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
         }
@@ -402,7 +404,7 @@ public class DatasetApiController implements DatasetApi {
         // STEP 1: Retrieve all datasets all in one with only the one we can see
         List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
-        datasetDownloaderService.massiveDownload(format, datasets, response, false, converterId);
+        datasetDownloaderService.massiveDownload(format, datasets, response, false, converterId, false, sortingForProcessingOutputs);
     }
 
     @Override
@@ -474,6 +476,14 @@ public class DatasetApiController implements DatasetApi {
         }
 
         datasetDownloaderService.massiveDownload(format, datasets, response, true, null);
+    }
+
+    @Override
+    public ResponseEntity<List<DatasetDownloadData>> getDownloadData(
+            @Parameter(description = "Input arguments", required = true) @Valid @RequestBody DatasetDownloadDataInput input) {
+
+        List<DatasetDownloadData> downloadDataList = datasetService.getDownloadDataByAcquisitionAndExaminationIds(input.getAcquisitionIds(), input.getExaminationIds());
+        return new ResponseEntity<>(downloadDataList, HttpStatus.OK);
     }
 
 
@@ -572,9 +582,7 @@ public class DatasetApiController implements DatasetApi {
                 null);
 
         eventService.publishEvent(event);
-
         createStatisticsService.createStats(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp, event, params);
-
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -627,5 +635,36 @@ public class DatasetApiController implements DatasetApi {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public ResponseEntity<Resource> extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws RestServiceException {
+        File file = null;
+        try {
+            file = datasetService.extractDicomMetadata(datasetIds, metadataKeys);
+        } catch (Exception e) {
+            ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while creating metadata csv file.", e.getMessage());
+            throw new RestServiceException(e, error);
+        }
+
+        if (file == null || !file.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Resource resource = new FileSystemResource(file);
+
+        try {
+            String contentType = Files.probeContentType(file.toPath());
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+            LOG.info("Metadata file download ended.");
+            return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                    .body(resource);
+        } catch (IOException e) {
+            ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while shaping HTTP response.", e.getMessage());
+            throw new RestServiceException(e, error);
+        }
+
     }
 }

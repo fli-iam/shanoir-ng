@@ -14,11 +14,11 @@
 
 package org.shanoir.ng.preclinical.extra_data.bloodgas_data;
 
-import jakarta.persistence.Entity;
-
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import jakarta.persistence.Entity;
 /**
  * Blood gas Data
  */
@@ -26,6 +26,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({ "_links", "examinationId", "filename" })
 public class BloodGasData extends ExaminationExtraData {
 
+    public static final String BLOODGASDATA_TYPE = "Blood gas data";
 
+    @Override
+    public String getExtraDataType() {
+        return BLOODGASDATA_TYPE;
+    }
 }
-

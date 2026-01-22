@@ -68,8 +68,12 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             private vipClientService: ExecutionService
             ) {
 
-        super(route, 'dataset-processing');
+        super(route);
         this.createColumnDefs();
+    }
+
+    protected getRoutingName(): string {
+        return 'dataset-processing';
     }
 
     get subject(): Subject { return this._subject; }
@@ -347,7 +351,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     public formatDate(millis: number) : string {
-        return millis ? formatDate(new Date(millis), 'dd/MM/YYYY HH:mm:ss', 'en-US') : "";
+        return millis ? formatDate(new Date(millis), 'dd/MM/yyyy HH:mm:ss', 'en-US') : "";
     }
 
     public getDuration(){

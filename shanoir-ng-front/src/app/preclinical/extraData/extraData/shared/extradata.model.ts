@@ -16,10 +16,10 @@ import { Field } from "../../../../shared/reflect/field.decorator";
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
 
 
-export class ExtraData extends Entity{
+export class ExtraData extends Entity {
     @Field() id: number;
     @Field() examinationId: number;
     @Field() filename: string;
-    @Field() extradatatype:string;
+    @Field() extraDataType: string;
 }
 

@@ -14,11 +14,13 @@
 
 package org.shanoir.ng.dataset.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -124,7 +126,6 @@ public interface DatasetService {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetPage(returnObject, 'CAN_SEE_ALL')")
     Page<Dataset> findPage(final Pageable pageable);
 
-
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
     List<Dataset> findByStudyId(Long studyId);
@@ -165,4 +166,9 @@ public interface DatasetService {
     DatasetAcquisition getAcquisition(Dataset dataset);
 
     void deleteNiftis(Long studyId);
+
+    List<DatasetDownloadData> getDownloadDataByAcquisitionAndExaminationIds(List<Long> acquisitionIds, List<Long> examinationIds);
+
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
+    File extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws Exception;
 }

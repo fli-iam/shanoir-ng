@@ -149,7 +149,18 @@
                       <#if message.type = 'error'><span class="${properties.kcFeedbackErrorIcon!}"></span></#if>
                       <#if message.type = 'info'><span class="${properties.kcFeedbackInfoIcon!}"></span></#if>
                   </div>
-                      <span class="${properties.kcAlertTitleClass!}">${kcSanitize(message.summary)?no_esc}</span>
+                  <span class="${properties.kcAlertTitleClass!}">
+                      ${kcSanitize(message.summary)?no_esc}
+
+                      <#if message.summary?? && message.summary == msg("updatePasswordMessage")>
+                          <span class="kc-login-tooltip" tabindex="0">
+                              <span class="kc-tooltip-icon" aria-hidden="true"></span>
+                              <span class="kc-tooltip-text">
+                                  ${msg("passwordPolicies")}
+                              </span>
+                          </span>
+                      </#if>
+                  </span>
               </div>
           </#if>
 

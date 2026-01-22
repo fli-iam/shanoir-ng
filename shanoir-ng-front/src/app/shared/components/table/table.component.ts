@@ -12,18 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
-import { fromEvent, Subscription } from 'rxjs';
 import { Router } from "@angular/router";
+import { fromEvent, Subscription } from 'rxjs';
 import shajs from 'sha.js';
 
+import { Task, TaskStatus } from '../../../async-tasks/task.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import * as AppUtils from '../../../utils/app.utils';
 import { isDarkColor } from "../../../utils/app.utils";
 import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 import { GlobalService } from '../../services/global.service';
+import { SessionService } from '../../services/session.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
-import {TaskService} from "../../../async-tasks/task.service";
 
 import { ColumnDefinition } from './column.definition.type';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
@@ -86,7 +88,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             private globalClickService: GlobalService,
             protected router: Router,
             private dialogService: ConfirmDialogService,
-            private taskService: TaskService) {
+            private notificationService: NotificationsService,
+            private sessionService: SessionService) {
         this.maxResultsField = this.maxResults;
     }
 
@@ -646,23 +649,35 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             this.dialogService.error('Too Many Rows', 'You are trying to export ' + this.page.totalElements
                 + ' rows, the current max is at ' + MAX_ROWS + ', sorry.');
         } else {
+            let task: Task;
             let csvStr: string = '';
-            csvStr += this.columnDefs.map(col => col.headerName).join(','); // headers
+            const exportedColumns: ColumnDefinition[] = this.columnDefs.filter(col => !col.hidden && !['button', 'progress'].includes(col.type));
+            csvStr += exportedColumns.map(col => col.headerName).join(','); // headers
             let completion: Promise<void> = Promise.resolve();
+            const startTs: number = performance.now();
             for (let i = 0; i < this.page.totalPages; i++) { // here we could use a fixed page size
                 const pageable: Pageable = this.getPageable();
                 pageable.pageNumber = i + 1;
-                const getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, true, true)
                 completion = completion.then(() => { // load pages sequentially
+                    const getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, false, true)
+                    if (!task 
+                            && (performance.now() - startTs > 5000) 
+                            && (i / this.page.totalPages < 0.8)) {
+                        task = this.startNofification(i / this.page.totalPages);
+                    } else if (task) {
+                        task.progress = i / this.page.totalPages;
+                        task.lastUpdate = new Date();
+                        this.notificationService.pushLocalTask(task);
+                    }
                     if (getPage instanceof Promise) {
                         return getPage.then(page => {
                             for (const entry of page.content) {
-                                csvStr += '\n' + this.columnDefs.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
+                                csvStr += '\n' + exportedColumns.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
                             }
                         });
                     } else if (getPage instanceof Page) {
                         for (const entry of getPage.content) {
-                            csvStr += '\n' + this.columnDefs.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
+                            csvStr += '\n' + exportedColumns.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
                         }
                         return Promise.resolve();
                     }
@@ -673,8 +688,34 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                     type: 'text/csv'
                 });
                 AppUtils.browserDownloadFile(csvBlob, 'tableExport_' + new Date().toLocaleString('fr-FR'));
+                if (task) {
+                    task.progress = 1;
+                    task.status = TaskStatus.DONE;
+                    task.lastUpdate = new Date();
+                    this.notificationService.pushLocalTask(task);
+                }
+            }).catch(() => {
+                if (task) {
+                    task.status = TaskStatus.ERROR;
+                    task.lastUpdate = new Date();
+                    this.notificationService.pushLocalTask(task);
+                }
             });
         }
+    }
+
+    private startNofification(progress: number): Task {
+        const task: Task = new Task();
+        task.id = Date.now();
+        task.creationDate = new Date();
+        task.lastUpdate = task.creationDate;
+        task.message = "Exporting table";
+        task.progress = progress;
+        task.status = TaskStatus.IN_PROGRESS;
+        task.eventType = 'exportTable.event';
+        task.sessionId = this.sessionService.sessionId;
+        this.notificationService.pushLocalTask(task);
+        return task;
     }
 
     /** Deal with the dates */

@@ -17,7 +17,6 @@ import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { Examination } from '../../examinations/shared/examination.model';
 import { AnimalSubject } from '../../preclinical/animalSubject/shared/animalSubject.model';
 import { AnimalSubjectService } from '../../preclinical/animalSubject/shared/animalSubject.service';
-import { PreclinicalSubject } from '../../preclinical/animalSubject/shared/preclinicalSubject.model';
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
@@ -116,22 +115,19 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        const newPreclinicalSubject = new PreclinicalSubject();
         const newAnimalSubject = new AnimalSubject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
-        newSubject.name = this.patient.patientName;
+        newSubject.name = this.subjectNamePrefix ? this.subjectNamePrefix + '-' + this.patient.patientName : this.patient.patientName;
         newSubject.preclinical = true;
         newSubject.study = this.study;
         newSubject.physicallyInvolved = false;
-        newPreclinicalSubject.animalSubject = newAnimalSubject;
-        newPreclinicalSubject.subject = newSubject;
-        this.breadcrumbsService.addNextStepPrefilled('entity', newPreclinicalSubject);
+        newAnimalSubject.subject = newSubject;
+        this.breadcrumbsService.addNextStepPrefilled('entity', newAnimalSubject);
         this.breadcrumbsService.addNextStepPrefilled('firstName', this.computeNameFromDicomTag(this.patient.patientName)[1]);
         this.breadcrumbsService.addNextStepPrefilled('lastName', this.computeNameFromDicomTag(this.patient.patientName)[2]);
         this.breadcrumbsService.addNextStepPrefilled('patientName', this.patient.patientName);
-        this.breadcrumbsService.addNextStepPrefilled('forceStudy', this.study);
+        this.breadcrumbsService.addNextStepPrefilled('entity.study', this.study, true);
         this.breadcrumbsService.addNextStepPrefilled('subjectNamePrefix', this.subjectNamePrefix);
-        this.breadcrumbsService.addNextStepPrefilled('birthDate', newSubject.birthDate);
         this.breadcrumbsService.addNextStepPrefilled('isAlreadyAnonymized', newSubject.isAlreadyAnonymized);
     }
 
