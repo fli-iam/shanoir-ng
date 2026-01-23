@@ -47,7 +47,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 FROM base-debian-with-adoptium AS jdk
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update -qq && apt-get install -qqy temurin-21-jdk maven bzip2 git
+    apt-get update -qq && apt-get install -qqy temurin-25-jdk maven bzip2 git
 
 FROM base-debian-with-adoptium AS base-microservice
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
