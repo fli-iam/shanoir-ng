@@ -106,7 +106,7 @@ export class SubjectTherapyComponent extends EntityComponent<SubjectTherapy> {
     loadTherapies() {
         this.therapyService.getAll().then(therapies => this.therapies = therapies);
     }
-    
+
     loadUnits() {
         this.referenceService.getReferencesByCategory(PreclinicalUtils.PRECLINICAL_CAT_UNIT).then(units => this.units = units);
     }
@@ -116,7 +116,6 @@ export class SubjectTherapyComponent extends EntityComponent<SubjectTherapy> {
     }
 
     protected goToAddTherapy() {
-        this.navigateToAttributeCreateStep('/therapy/create', 'therapy');
+        this.navigateToAttributeCreateStep('/preclinical-therapy/create', 'therapy');
     }
-
 }

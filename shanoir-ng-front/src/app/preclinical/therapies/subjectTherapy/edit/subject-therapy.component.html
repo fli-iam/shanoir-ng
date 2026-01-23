@@ -24,10 +24,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				@switch (mode) {
 					@case ('view') {
 						<h2 class="header command-zone">Details on subject pathology</h2>
-					} 
+					}
 					@case ('edit') {
 						<h2 class="header command-zone">Edit subject pathology</h2>
-					} 
+					}
 					@case ('create') {
 						<h2 class="header command-zone">Create a pathology record for a subject</h2>
 					}
@@ -43,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{subjectTherapy?.therapy?.name}}
 								}
 								@default {
-									<select-box formControlName="therapy" [optionArr]="therapies" (newOption)="isUserAdmin() ? goToAddTherapy() : null"></select-box>
+									<select-box formControlName="therapy" [optionArr]="therapies" (newClick)="hasEditRight() ? goToAddTherapy() : null"></select-box>
 									<label *ngIf="hasError('therapy', ['required'])" [@slideDown]="hasError('therapy', ['required'])" class="form-validation-alert">Therapy is required!</label>
 								}
 							}
