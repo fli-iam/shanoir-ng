@@ -52,7 +52,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 FROM base-debian-with-adoptium AS base-microservice
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq \
-    && apt-get install -qqy temurin-21-jre ca-certificates-java \
+    && apt-get install -qqy temurin-25-jre ca-certificates-java \
     && update-ca-certificates
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
@@ -252,7 +252,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 COPY --link users/shanoir-ng-users.jar shanoir-ng-users.jar
 COPY --link users/entrypoint /usr/bin/
-
 
 ENV	\
 	kc.admin.client.client.id="admin-cli"	\
