@@ -29,7 +29,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>25</java.version>
+        <java.version>21</java.version>
         <mapstruct.version>1.5.3.Final</mapstruct.version>
         <checkstyle.header.file>${project.basedir}/../shanoir-ng-back/java-header</checkstyle.header.file>
         <checkstyle.config.file>${project.basedir}/../shanoir-ng-back/checkstyle.xml</checkstyle.config.file>
