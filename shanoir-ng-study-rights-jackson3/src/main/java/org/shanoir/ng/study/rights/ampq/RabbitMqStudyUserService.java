@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
-import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.utils.Utils;
@@ -31,13 +30,10 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-
-import tools.jackson.databind.module.SimpleModule;
 
 import tools.jackson.databind.json.JsonMapper;
 
@@ -55,13 +51,6 @@ public class RabbitMqStudyUserService {
 
     @Autowired
     private JsonMapper mapper;
-
-    @Bean
-    SimpleModule addSimpleModule() {
-        SimpleModule module = new SimpleModule();
-        module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
-        return module;
-    }
 
     public void receiveStudyUsers(String commandArrStr) throws AmqpRejectAndDontRequeueException {
         StudyUserCommand[] commands;

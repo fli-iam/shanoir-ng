@@ -12,8 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.shared.configuration;
+package org.shanoir.ng.configuration;
 
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Page;
@@ -28,6 +30,7 @@ import tools.jackson.databind.SerializationContext;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.ValueSerializer;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.databind.ser.ValueSerializerModifier;
 
 @Configuration(proxyBeanMethods = false)
@@ -35,20 +38,21 @@ public class JacksonConfiguration {
 
     @Bean
     JsonMapper jsonMapper() {
+        SimpleModule studyUserModule = new SimpleModule();
+        studyUserModule.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
+        SimpleModule pageModule = new SimpleModule();
+        pageModule.setSerializerModifier(new MyClassSerializerModifier());
         var builder = JsonMapper.builder();
         builder.changeDefaultPropertyInclusion(include -> include.withValueInclusion(JsonInclude.Include.NON_NULL))
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
                         DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
                 .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+                .addModule(studyUserModule)
+                .addModule(pageModule)
                 .findAndAddModules();
         return builder.build();
     }
-
-    // @Bean
-    // SimpleModule pageModule() {
-    //     return new SimpleModule().setSerializerModifier(new MyClassSerializerModifier());
-    // }
 
     public class MyClassSerializerModifier extends ValueSerializerModifier {
 
