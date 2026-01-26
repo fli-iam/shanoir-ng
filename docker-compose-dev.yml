@@ -385,6 +385,21 @@ services:
       - "rabbitmq"
       - "nifti-conversion"
 
+  bids-validator:
+    build: ./bids-validator
+    environment:
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+      - IN_QUEUE=bids.validate
+      - OUT_QUEUE=bids.validated
+      - DATA_ROOT=/var/datasets-data/bids-data
+    volumes:
+      - datasets-data:/var/datasets-data:ro
+    depends_on:
+      - rabbitmq
+    networks:
+      - shanoir_ng_network
+    restart: unless-stopped
+
 volumes:
   keycloak-database-data:
   rabbitmq-data:

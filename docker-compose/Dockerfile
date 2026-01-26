@@ -392,3 +392,15 @@ COPY --link solr/entrypoint /usr/bin/
 
 ENTRYPOINT ["/usr/bin/entrypoint"]
 CMD ["solr-precreate", "shanoir", "/etc/shanoir-core-template"]
+
+
+
+################ BIDS validator #####################################################
+
+FROM node:20-alpine
+
+RUN npm i -g bids-validator@latest
+WORKDIR /app
+RUN npm i amqplib
+COPY bids-validator/worker.js /app/worker.js
+CMD ["node", "worker.js"]
