@@ -11,10 +11,22 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<p>Caution: Shanoir offers a web-based configuration possibility to auto-generate a BIDS-compliant tree,
+<p class="info-frame">
+    <i class="fas fa-exclamation-triangle"></i>
+    <b>Caution :</b> 
+    Shanoir offers a web-based configuration possibility to auto-generate a BIDS-compliant tree,
     based on the meta-data available, see BIDS data type. Very often a special, study-specific mapping configuration
     is necessary to generate a fully-compliant BIDS tree (see undefined folders). This configuration needs to be done
-    by a study expert on using the study cards, that are applied during the import or afterwards to complete this mapping.</p>
+    by a study expert on using the study cards, that are applied during the import or afterwards to complete this mapping.
+    <br/><br/>
+    The BIDS Validator button below allows to check the compliance of the generated BIDS tree. It uses the official BIDS Validator
+    (<a href="https://bids-standard.github.io/bids-validator/" target="_blank" rel="noopener noreferrer">https://bids-standard.github.io/bids-validator/</a>)
+    in a safe way, as no data is sent to any external server.
+</p>
+<div>
+    <button>Call BIDS Validator</button>
+</div>
+
 <ng-template #recursiveList let-datas let-id="id">
     <node *ngFor="let item of datas; let i = index" 
         [label]="getFileName(item.path)" 
