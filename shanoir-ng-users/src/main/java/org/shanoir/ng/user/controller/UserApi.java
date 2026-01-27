@@ -145,7 +145,8 @@ public interface UserApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#userId)) and @controllerSecurityService.idMatches(#userId, #user)")
     ResponseEntity<Void> updateUser(
             @Parameter(name = "id of the user", required = true) @PathVariable("userId") Long userId,
-            @Parameter(name = "user to update", required = true) @RequestBody User user, BindingResult result)
+            @Parameter(name = "user to update", required = true) @RequestBody User user,
+            BindingResult result)
             throws RestServiceException;
 
 }

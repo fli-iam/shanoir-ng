@@ -46,11 +46,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
@@ -86,7 +82,7 @@ public class AccessRequestApiController implements AccessRequestApi {
     private static final Logger LOG = LoggerFactory.getLogger(AccessRequestApiController.class);
 
     public ResponseEntity<AccessRequest> saveNewAccessRequest(
-            @Parameter(name = "access request to create", required = true) @RequestBody AccessRequest request,
+            AccessRequest request,
             BindingResult result) throws RestServiceException {
         // Create a new access request
         User user = userService.findById(KeycloakUtil.getTokenUserId());
@@ -169,8 +165,8 @@ public class AccessRequestApiController implements AccessRequestApi {
     }
 
     public ResponseEntity<Void> resolveNewAccessRequest(
-            @Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
-            @Parameter(name = "Accept or refuse the request", required = true) @RequestBody boolean validation,
+            Long accessRequestId,
+            boolean validation,
             BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JacksonException, AmqpException {
         AccessRequest resolvedRequest = accessRequestService.findById(accessRequestId).orElse(null);
         if (resolvedRequest == null) {
@@ -211,25 +207,18 @@ public class AccessRequestApiController implements AccessRequestApi {
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
-    public ResponseEntity<AccessRequest> getByid(@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException {
+    public ResponseEntity<AccessRequest> getByid(Long accessRequestId) throws RestServiceException {
         AccessRequest acceReq = this.accessRequestService.findById(accessRequestId).get();
         return new ResponseEntity<AccessRequest>(acceReq, HttpStatus.OK);
     }
 
-    public     ResponseEntity<AccessRequest> inviteUserToStudy(
-            @Parameter(name = "Study the user is invited in", required = true)
-                @RequestParam(value = "studyId", required = true) Long studyId,
-            @Parameter(name = "Study name the user is invited in", required = true)
-                @RequestParam(value = "studyName", required = true) String studyName,
-            @Parameter(name = "Issuer of the invitation", required = true)
-                @RequestParam(value = "issuer", required = false) String issuer,
-            @Parameter(name = "The future function of the user in the study he is invited in", required = true)
-                @RequestParam(value = "function", required = false) String function,
-            @Parameter(name = "The email or login of the invited user.")
-                @RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JacksonException, AmqpException {
-
+    public ResponseEntity<AccessRequest> inviteUserToStudy(
+            Long studyId,
+            String studyName,
+            String issuer,
+            String function,
+            String emailOrLogin) throws RestServiceException, JacksonException, AmqpException {
         boolean isEmail = emailOrLogin.contains("@");
-
         User user;
 
         if (isEmail) {
@@ -274,14 +263,12 @@ public class AccessRequestApiController implements AccessRequestApi {
             } else {
                 return new ResponseEntity<AccessRequest>(HttpStatus.BAD_REQUEST);
             }
-
         }
-
     }
 
     public ResponseEntity<List<AccessRequest>> findAllByStudyId(
-            @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException {
-
+            Long studyId) throws RestServiceException {
         return new ResponseEntity<List<AccessRequest>>(this.accessRequestService.findByStudyIdAndStatus(Collections.singletonList(studyId), AccessRequest.ON_DEMAND), HttpStatus.OK);
     }
+
 }
