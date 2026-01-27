@@ -115,6 +115,8 @@ public class BidsApiController implements BidsApi {
         File validationResultFile = new File(filePath + File.separator + "validation_result.json");
         try (FileWriter writer = new FileWriter(validationResultFile)) {
             writer.write(validationResultJson);
+        } catch (IOException e) {
+            LOG.error("Error while writing BIDS validation result file", e);
         }
 
         // Get file, zip it and download it
