@@ -14,11 +14,14 @@
 
 package org.shanoir.ng.exporter.controller;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.bids.BidsDeserializer;
 import org.shanoir.ng.bids.controller.BidsApiController;
 import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.bids.service.BidsValidationPublisher;
 import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -30,8 +33,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test for BidsApiController class
@@ -67,6 +68,9 @@ public class BidsApiControllerTest {
 
     @MockBean
     private DicomImporterService dicomImporterService;
+
+    @MockBean
+    private BidsValidationPublisher bidsValidationPublisher;
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
