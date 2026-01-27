@@ -56,7 +56,7 @@ export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
 #   outside, disabling strict checking allows us to reach the admin console
 #   at http://localhost:8080/auth/admin/
 export KC_HOSTNAME_STRICT=false
-export KC_HOSTNAME_STRICT_BACKCHANNEL=false
+export KC_HOSTNAME_BACKCHANNEL_DYNAMIC=true
 
 
 export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"${DB_PORT:-3306}"/"${DB_DATABASE:-keycloak}"
