@@ -35,6 +35,7 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
         if (!req.url.endsWith('/accountrequest')
                 && !req.url.endsWith('/extensionrequest')
                 && !req.url.endsWith('/data')
+                && !req.url.endsWith('/datasets/overallStatistics')
                 && !(req.url.endsWith('/count') && ['GET'].includes(req.method))
                 && !(req.url.includes('/studies/dua') && !req.url.includes('/studies/studies/dua') && ['GET', 'PUT'].includes(req.method))) {
             authReq = this.setAuthHeader(authReq);
