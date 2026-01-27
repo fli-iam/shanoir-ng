@@ -11,28 +11,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 package org.shanoir.ng.role.repository;
 
+import java.util.List;
+
 import org.shanoir.ng.role.model.Role;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Magic repository for roles
+ * Repository for roles.
  *
  * @author jlouis
  */
 @Repository
-public interface RoleRepository extends CrudRepository<Role, Long>, RoleRepositoryCustom {
+public interface RoleRepository extends CrudRepository<Role, Long> {
 
     /**
      * Find role by its name.
      *
-     * @param name
-     *            name.
-     * @return a role or null/
+     * @param name role name
+     * @return a role or null
      */
     Role findByName(String name);
+
+    /**
+     * Get list of all role names.
+     *
+     * @return list of role names
+     */
+    @Query("SELECT r.name FROM Role r")
+    List<String> getAllNames();
 
 }
