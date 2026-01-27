@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -43,6 +44,7 @@ import org.springframework.validation.BindingResult;
  */
 @SpringBootTest
 @ActiveProfiles("test")
+@DisabledInAotMode
 public class AccountRequestApiSecurityTest {
 
     private BindingResult mockBindingResult;

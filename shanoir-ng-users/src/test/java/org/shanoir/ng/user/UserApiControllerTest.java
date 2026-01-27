@@ -55,6 +55,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -76,6 +77,7 @@ import tools.jackson.databind.json.JsonMapper;
         })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
+@DisabledInAotMode
 public class UserApiControllerTest {
 
     private static final String REQUEST_PATH = "/users";

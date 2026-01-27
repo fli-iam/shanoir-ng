@@ -36,6 +36,7 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.icegreen.greenmail.util.GreenMail;
@@ -52,6 +53,7 @@ import jakarta.mail.internet.MimeMessage;
  */
 @SpringBootTest
 @ActiveProfiles("test")
+@DisabledInAotMode
 public class EmailServiceTest {
 
     private static final String NEW_PASSWORD = "testPwd";

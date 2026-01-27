@@ -43,6 +43,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
@@ -53,6 +54,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
  */
 @SpringBootTest
 @ActiveProfiles("test")
+@DisabledInAotMode
 public class UserServiceSecurityTest {
 
     private static final long USER_ID = 1L;

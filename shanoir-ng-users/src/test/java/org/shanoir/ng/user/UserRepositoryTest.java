@@ -32,6 +32,7 @@ import org.shanoir.ng.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
 
 /**
  * Tests for repository 'user'.
@@ -41,6 +42,7 @@ import org.springframework.test.context.ActiveProfiles;
  */
 @DataJpaTest
 @ActiveProfiles("test")
+@DisabledInAotMode
 public class UserRepositoryTest {
 
     private static final String USER_TEST_1_EMAIL = "admin@shanoir.fr";

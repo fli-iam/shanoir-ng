@@ -54,6 +54,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -70,6 +71,7 @@ import tools.jackson.databind.ObjectMapper;
 )
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
+@DisabledInAotMode
 public class AccessRequestApiControllerTest {
 
     private static final String REQUEST_PATH = "/accessrequest";
