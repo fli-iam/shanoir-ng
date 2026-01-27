@@ -107,6 +107,7 @@ export class KeycloakService {
                         this.gettingToken = false;
                         resolve(KeycloakService.auth.authz.token as string);
                     }).catch(() => {
+                        console.error('Failed to refresh token');
                         reject();
                     });
                 }

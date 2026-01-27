@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 
@@ -233,6 +233,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             observe: 'events',
             responseType: 'blob'
         });
+    }
+
+    validateStudyForBIDS(studyId: number, path: string): Promise<any> {
+        if (!studyId) throw Error('study id is required');
+        const params = new HttpParams().set("filePath", path);
+        return this.http.get<any>(AppUtils.BACKEND_API_BIDS_URL + '/validateBidsStudy/' + studyId, { params: params })
+            .toPromise();
     }
 
     protected static getIgnoreList(): string[] {

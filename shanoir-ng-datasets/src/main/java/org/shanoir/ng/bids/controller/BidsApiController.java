@@ -34,12 +34,14 @@ import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.bids.model.BidsFolder;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.bids.service.BidsValidationPublisher;
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -180,6 +182,25 @@ public class BidsApiController implements BidsApi {
         }
 
         return new ResponseEntity<>(studyBidsElement, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<String> validateBidsByStudyId(
+            @Parameter(description = "Id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath) throws RestServiceException, IOException {
+
+        if (!filePath.startsWith("/var/datasets-data/bids-data/stud-" + studyId)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            // Request BIDS validation
+            String validationResultJson = bidsValidationPublisher.requestValidationSync(filePath);
+            return new ResponseEntity<>(validationResultJson, HttpStatus.OK);
+        } catch (AmqpException e) {
+            ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while validating BIDS dataset", e.getMessage());
+            throw new RestServiceException(e, error);
+        }
     }
 
     /**
