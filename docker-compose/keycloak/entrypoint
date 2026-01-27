@@ -36,9 +36,6 @@ sed "	s/SHANOIR_ADMIN_NAME/$SHANOIR_ADMIN_NAME/g
 		s/VIP_CLIENT_SECRET/$VIP_CLIENT_SECRET/g
 "		/opt/keycloak/shanoir-ng-realm.json > /tmp/import/shanoir-ng-realm.json
 
-sed -i -E "s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl 
-sed -i -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl 
-
 #
 # keycloak options
 # see: https://www.keycloak.org/server/all-config
