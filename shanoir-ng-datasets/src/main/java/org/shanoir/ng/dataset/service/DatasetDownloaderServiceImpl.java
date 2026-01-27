@@ -121,6 +121,7 @@ public class DatasetDownloaderServiceImpl {
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
             Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
+            datasetDownloadPath = getDatasetDownloadPath(datasets, sorting);
 
             for (Dataset dataset : datasets) {
                 String datasetFilePath = "";
@@ -137,8 +138,6 @@ public class DatasetDownloaderServiceImpl {
                             ? getDatasetFilepath(dataset, studyName, subjectName, withShanoirId)
                             : null;
                 } else {
-
-                    datasetDownloadPath = getDatasetDownloadPath(datasets, sorting);
                     datasetFilePath = datasetDownloadPath.get(dataset.getId());
                 }
 
@@ -200,6 +199,7 @@ public class DatasetDownloaderServiceImpl {
         HashMap<Long, String> datasetDownloadPath = new HashMap<>();
 
         for (Dataset dataset : datasets) {
+            LOG.info("Dataset id : " + dataset.getId());
             String path = "";
             Dataset relevantDataset = dataset;
 
