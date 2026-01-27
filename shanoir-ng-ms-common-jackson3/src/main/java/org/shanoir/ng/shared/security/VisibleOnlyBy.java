@@ -12,31 +12,25 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.role.repository;
+package org.shanoir.ng.shared.security;
 
-import java.util.List;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-
-import org.springframework.stereotype.Repository;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Implementation of custom repository for roles.
+ * Validator interface for edition by role.
  *
  * @author msimon
  *
  */
-@Repository
-public class RoleRepositoryImpl implements RoleRepositoryCustom {
+@Target(ElementType.FIELD)
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
+public @interface VisibleOnlyBy {
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<String> getAllNames() {
-        return entityManager.createQuery("SELECT r.name FROM Role r").getResultList();
-    }
+    String[] roles();
 
 }

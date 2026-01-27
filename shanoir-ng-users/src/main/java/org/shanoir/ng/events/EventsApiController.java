@@ -28,6 +28,7 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class EventsApiController implements EventsApi {
+
     @Autowired
     private ShanoirEventsService shanoirEventsService;
 
@@ -37,15 +38,13 @@ public class EventsApiController implements EventsApi {
         LOG.error("findEventsByStudyId : studyId=" + studyId + " / searchStr = " + searchStr + " / searchField = " + searchField);
         try {
             Page<ShanoirEvent> events = shanoirEventsService.findByStudyId(pageable, studyId, searchStr, searchField);
-
             if (events == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>(events, HttpStatus.OK);
-
         } catch (Exception e) {
             throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()));
         }
-
     }
+
 }

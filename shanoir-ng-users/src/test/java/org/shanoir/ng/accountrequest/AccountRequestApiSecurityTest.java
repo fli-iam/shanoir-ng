@@ -25,11 +25,14 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
@@ -41,15 +44,22 @@ import org.springframework.validation.BindingResult;
  */
 @SpringBootTest
 @ActiveProfiles("test")
+@DisabledInAotMode
 public class AccountRequestApiSecurityTest {
 
     private BindingResult mockBindingResult;
 
-    @MockBean
-    private UserRepository userRepository;
-
     @Autowired
     private AccountRequestApi accountRequestApi;
+
+    @MockitoBean
+    private UserRepository userRepository;
+
+    @MockitoBean
+    private RabbitTemplate rabbitTemplate;
+
+    @MockitoBean
+    private ConnectionFactory connectionFactory;
 
     private User mockAccountReqUser;
 

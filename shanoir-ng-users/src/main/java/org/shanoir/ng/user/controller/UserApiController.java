@@ -17,8 +17,6 @@ package org.shanoir.ng.user.controller;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.validation.Valid;
-
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
@@ -39,8 +37,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Controller
 public class UserApiController extends AbstractUserRequestApiController implements UserApi {
@@ -52,20 +48,18 @@ public class UserApiController extends AbstractUserRequestApiController implemen
     private AccessRequestService accessRequestService;
 
     @Override
-    public ResponseEntity<Void> deleteUser(@PathVariable("userId") final Long userId) throws ForbiddenException {
+    public ResponseEntity<Void> deleteUser(final Long userId) throws ForbiddenException {
         try {
             getUserService().deleteById(userId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @Override
-    public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
-            @RequestBody final User user, final BindingResult result) throws RestServiceException {
-
+    public ResponseEntity<Void> confirmAccountRequest(final Long userId,
+            User user, final BindingResult result) throws RestServiceException {
         try {
             validate(user, result);
             getUserService().confirmAccountRequest(user);
@@ -78,13 +72,11 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         }
     }
 
-
     @Override
-    public ResponseEntity<Void> denyAccountRequest(@PathVariable("userId") final Long userId) throws RestServiceException {
+    public ResponseEntity<Void> denyAccountRequest(final Long userId) throws RestServiceException {
         try {
             getUserService().denyAccountRequest(userId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (AccountNotOnDemandException e) {
@@ -92,9 +84,8 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         }
     }
 
-
     @Override
-    public ResponseEntity<User> findUserById(@PathVariable("userId") final Long userId) {
+    public ResponseEntity<User> findUserById(final Long userId) {
         final User user = getUserService().findById(userId);
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -111,7 +102,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-
     @Override
     public ResponseEntity<List<User>> findAccountRequests() {
         final List<User> users = getUserService().findAccountRequests();
@@ -121,9 +111,8 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-
     @Override
-    public ResponseEntity<User> saveNewUser(@RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {
+    public ResponseEntity<User> saveNewUser(final User user, final BindingResult result) throws RestServiceException {
         /* Generate a username. */
         if (user.getUsername() == null && user.getFirstName() != null && user.getLastName() != null) {
             generateUsername(user);
@@ -168,7 +157,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
     }
 
     @Override
-    public ResponseEntity<List<IdName>> searchUsers(@RequestBody final IdList userIds) {
+    public ResponseEntity<List<IdName>> searchUsers(final IdList userIds) {
         final List<IdName> users = getUserService().findByIds(userIds.getIdList());
         if (users.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -177,16 +166,13 @@ public class UserApiController extends AbstractUserRequestApiController implemen
     }
 
     @Override
-    public ResponseEntity<Void> updateUser(@PathVariable("userId") final Long userId,
-            @RequestBody @Valid final User user, final BindingResult result) throws RestServiceException {
-
+    public ResponseEntity<Void> updateUser(final Long userId, final User user,
+            final BindingResult result) throws RestServiceException {
         try {
             validate(user, result);
-
             /* Update user in db. */
             getUserService().update(user);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-
         } catch (final EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

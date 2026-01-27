@@ -21,11 +21,12 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Service to send every event created.
+ *
  * @author fli
  *
  */
@@ -58,7 +59,7 @@ public class ShanoirEventService {
         try {
             String str = mapper.writeValueAsString(event);
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.EVENTS_EXCHANGE, event.getEventType(), str);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOG.error("Error while sending event: event {}, user: {}, reference: {}", event.getEventType(), event.getUserId(), event.getObjectId());
             LOG.error("Thrown exception: {}", e);
         }
@@ -82,4 +83,5 @@ public class ShanoirEventService {
         event.setStatus(status);
         this.publishEvent(event, message, progress);
     }
+
 }

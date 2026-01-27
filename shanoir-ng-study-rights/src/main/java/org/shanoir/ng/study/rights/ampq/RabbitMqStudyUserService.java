@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.study.rights.ampq;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
@@ -33,9 +35,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 @Service
 public class RabbitMqStudyUserService {
@@ -55,11 +56,9 @@ public class RabbitMqStudyUserService {
         StudyUserCommand[] commands;
         try {
             LOG.debug("Received study-user commands : {}", commandArrStr);
-
             SimpleModule module = new SimpleModule();
             module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
             mapper.registerModule(module);
-
             commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
             service.processCommands(Arrays.asList(commands));
         } catch (Exception e) {
@@ -71,24 +70,24 @@ public class RabbitMqStudyUserService {
     @RabbitHandler
     @Transactional
     public List<Long> getStudiesICanAdmin(Long userId) {
-        List<StudyUser> sus = Utils.toList(this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+        List<StudyUser> sus = Utils.toList(
+                this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
         if (CollectionUtils.isEmpty(sus)) {
             return null;
         }
-        return sus.stream().map(StudyUser::getStudyId
-        ).collect(Collectors.toList());
+        return sus.stream().map(StudyUser::getStudyId).collect(Collectors.toList());
     }
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_ADMINS_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
     public List<Long> getStudyAdmins(Long studyId) {
-        List<StudyUser> admins = Utils.toList(this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+        List<StudyUser> admins = Utils.toList(
+                this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
         if (CollectionUtils.isEmpty(admins)) {
             return null;
         }
-        return admins.stream().map(studyUser ->
-            studyUser.getUserId()
-        ).collect(Collectors.toList());
+        return admins.stream().map(studyUser -> studyUser.getUserId()).collect(Collectors.toList());
     }
+
 }

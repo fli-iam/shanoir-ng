@@ -50,5 +50,4 @@ public interface ShanoirEventRepository extends CrudRepository<ShanoirEvent, Lon
 
     ShanoirEvent findByIdAndUserId(Long taskId, long userId);
 
-
 }

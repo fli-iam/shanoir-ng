@@ -14,8 +14,19 @@
 
 package org.shanoir.ng.accessrequest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +41,6 @@ import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
@@ -39,26 +49,29 @@ import org.shanoir.ng.user.service.VIPUserService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.security.oauth2.server.resource.autoconfigure.servlet.OAuth2ResourceServerAutoConfiguration;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.aot.DisabledInAotMode;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.*;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-@WebMvcTest(AccessRequestApiController.class)
-@ActiveProfiles("test")
+@WebMvcTest(
+        controllers = AccessRequestApiController.class,
+        excludeAutoConfiguration = {
+            OAuth2ResourceServerAutoConfiguration.class
+        }
+)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
+@DisabledInAotMode
 public class AccessRequestApiControllerTest {
 
     private static final String REQUEST_PATH = "/accessrequest";
@@ -66,31 +79,31 @@ public class AccessRequestApiControllerTest {
     @Autowired
     private MockMvc mvc;
 
-    @MockBean
+    @MockitoBean
     private ShanoirEventService eventService;
 
-    @MockBean
+    @MockitoBean
     private UserRepository userRepository;
 
-    @MockBean
+    @MockitoBean
     private AccessRequestService accessRequestService;
 
-    @MockBean
+    @MockitoBean
     private EmailService emailService;
 
-    @MockBean
+    @MockitoBean
     private UserService userService;
 
-    @MockBean
+    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
-    @MockBean
+    @MockitoBean
     private VIPUserService vipUserService;
 
     @Autowired
     private ObjectMapper mapper;
 
-    @MockBean
+    @MockitoBean
     private StudyUserRightsRepository studyUserRightsRepository;
 
     private User user = new User();
@@ -103,7 +116,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void saveNewAccessRequestWithStudyNameTest() throws JsonProcessingException, Exception {
+    public void saveNewAccessRequestWithStudyNameTest() throws JacksonException, Exception {
         AccessRequest request = createAccessRequest();
 
         // Access request is saved
@@ -111,7 +124,7 @@ public class AccessRequestApiControllerTest {
         Mockito.when(accessRequestService.createAllowed(Mockito.any(AccessRequest.class))).thenReturn(request);
 
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(request)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
         // Do not call to get the name
@@ -126,7 +139,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void saveNewAccessRequestWithNoStudyNameTest() throws JsonProcessingException, Exception {
+    public void saveNewAccessRequestWithNoStudyNameTest() throws JacksonException, Exception {
         AccessRequest request = createAccessRequest();
         // Only change: the study name is null, we have to load it.
         request.setStudyName(null);
@@ -143,7 +156,7 @@ public class AccessRequestApiControllerTest {
         Mockito.when(accessRequestService.createAllowed(requestCaptor.capture())).thenReturn(request);
 
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(request)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
         // Check study name was updated
@@ -226,7 +239,7 @@ public class AccessRequestApiControllerTest {
         Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.of(request));
 
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(true)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(true)))
                 .andExpect(status().isOk());
 
         Mockito.verify(accessRequestService).update(request);
@@ -246,7 +259,7 @@ public class AccessRequestApiControllerTest {
         Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.of(request));
 
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(true)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(true)))
                 .andExpect(status().isOk());
 
         Mockito.verify(accessRequestService).update(request);
@@ -257,7 +270,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void resolveNewAccessRequestRefuse() throws JsonProcessingException, Exception {
+    public void resolveNewAccessRequestRefuse() throws JacksonException, Exception {
         AccessRequest request = createAccessRequest();
         user.setAccountRequestDemand(Boolean.TRUE);
         request.setUser(user);
@@ -265,7 +278,7 @@ public class AccessRequestApiControllerTest {
         Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.of(request));
 
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(false)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(false)))
                 .andExpect(status().isOk());
 
         Mockito.verify(accessRequestService).update(request);
@@ -276,7 +289,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void resolveNewAccessRequestRefuseNoDemand() throws JsonProcessingException, Exception {
+    public void resolveNewAccessRequestRefuseNoDemand() throws JacksonException, Exception {
         AccessRequest request = createAccessRequest();
         // No demand
         user.setAccountRequestDemand(Boolean.FALSE);
@@ -285,7 +298,7 @@ public class AccessRequestApiControllerTest {
         Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.of(request));
 
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(false)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(false)))
                 .andExpect(status().isOk());
 
         Mockito.verify(accessRequestService).update(request);
@@ -296,12 +309,12 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void resolveNewAccessRequestNoRequestTest() throws JsonProcessingException, Exception {
+    public void resolveNewAccessRequestNoRequestTest() throws JacksonException, Exception {
         // no ogoing request
         Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.empty());
 
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(true)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(true)))
                 .andExpect(status().isNoContent());
 
         Mockito.verifyNoInteractions(this.userService);
@@ -367,7 +380,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void inviteNotExistingUserMailTest() throws JsonProcessingException, Exception {
+    public void inviteNotExistingUserMailTest() throws JacksonException, Exception {
         // We invite an user that does not exists
         Mockito.when(this.userService.findByEmail("mail@mail")).thenReturn(Optional.empty());
         //Mockito.when(this.userService.findByUsername("mail")).thenReturn(Optional.empty());
@@ -395,7 +408,7 @@ public class AccessRequestApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 1)
-    public void inviteNotExistingUserLoginTest() throws JsonProcessingException, Exception {
+    public void inviteNotExistingUserLoginTest() throws JacksonException, Exception {
         // We invite an user that does not exists using its login
         //Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.empty());
         Mockito.when(this.userService.findByUsernameForInvitation("login")).thenReturn(Optional.empty());
@@ -421,7 +434,7 @@ public class AccessRequestApiControllerTest {
         Mockito.when(this.accessRequestService.findById(1L)).thenReturn(Optional.of(request));
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()).andExpect(content().string(JacksonUtils.serialize(request)));
+                .andExpect(status().isOk()).andExpect(content().string(mapper.writeValueAsString(request)));
     }
 
     private AccessRequest createAccessRequest() {

@@ -12,23 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.role.repository;
+package org.shanoir.ng.shared.security;
 
-import java.util.List;
+import org.shanoir.ng.shared.core.model.AbstractEntityInterface;
+import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.springframework.stereotype.Service;
 
-/**
- * Custom repository for roles.
- *
- * @author msimon
- *
- */
-public interface RoleRepositoryCustom {
+@Service
+public interface FieldEditionSecurityManager<T extends AbstractEntityInterface> {
 
-    /**
-     * Get list of roles name.
-     *
-     * @return list of names.
-     */
-    List<String> getAllNames();
+    public FieldErrorMap validate(final T entity);
 
 }
