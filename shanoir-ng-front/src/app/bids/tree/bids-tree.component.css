@@ -1,7 +1,15 @@
 .content { display: inline-block; vertical-align: top; margin-top: 20px; }
-.root-node { display: inline-block; }
+.root-node { display: inline-block; margin-top: 10px; }
 
 table { border-spacing: 0; }
 td { padding: 0 20px; }
 td.first { padding-left: 0; }
 td.last { padding-right: 0; }
+
+.json-report { margin-top: 30px; }
+.report-viewer { 
+    display: block;
+    border-radius: 2px;
+    padding: 10px 15px;
+    background-color: var(--color-b-light);
+}

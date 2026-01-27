@@ -23,9 +23,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     (<a href="https://bids-standard.github.io/bids-validator/" target="_blank" rel="noopener noreferrer">https://bids-standard.github.io/bids-validator/</a>)
     in a safe way, as no data is sent to any external server.
 </p>
-<div>
-    <button>Call BIDS Validator</button>
-</div>
 
 <ng-template #recursiveList let-datas let-id="id">
     <node *ngFor="let item of datas; let i = index" 
@@ -62,3 +59,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </tr>
     </table>
 </div>
+
+@if (!report) {
+    <div>
+        <button (click)="callBidsValidator()">Call BIDS Validator</button>
+    </div>
+} @else {
+    <div class="json-report">
+        <h4>BIDS Validator Report</h4>
+        <ngx-json-viewer class="report-viewer" [json]="report"></ngx-json-viewer>
+    </div>
+}
+

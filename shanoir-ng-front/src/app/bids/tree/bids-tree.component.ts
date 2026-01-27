@@ -15,14 +15,16 @@ import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Component, ElementRef, Input, OnDestroy, OnInit} from '@angular/core';
 import { Subscription } from 'rxjs';
 
+import { StudyService } from 'src/app/studies/shared/study.service';
+import { DatasetService } from 'src/app/datasets/shared/dataset.service';
+
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { BidsElement } from '../model/bidsElement.model'
 import * as AppUtils from '../../utils/app.utils';
 import { GlobalService } from '../../shared/services/global.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
-import {DatasetService} from "../../datasets/shared/dataset.service";
 
 @Component({
     selector: 'bids-tree',
@@ -44,13 +46,15 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     private globalClickSubscription: Subscription;
     public load: string;
     private hasDownloadRight: boolean;
+    protected report: any; // JSON
 
     constructor(private globalService: GlobalService,
                 private elementRef: ElementRef,
                 private datasetService: DatasetService,
                 protected http: HttpClient,
                 private keycloakService: KeycloakService,
-                private studyRightsService: StudyRightsService) {
+                private studyRightsService: StudyRightsService,
+                private studyService: StudyService) {
         this.globalClickSubscription = globalService.onGlobalClick.subscribe(clickEvent => {
             if (!this.elementRef.nativeElement.contains(clickEvent.target)) {
                 this.selectedIndex = null;
@@ -69,14 +73,17 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
         this.globalClickSubscription.unsubscribe();
     }
 
-    getBidsStructure() {
+    getBidsStructure(): Promise<void> {
        if (!this.load) {
-        this.load="loading"
-            this.datasetService.getBidsStructure(this.studyId).then(element => {
+            this.load="loading";
+            return this.datasetService.getBidsStructure(this.studyId).then(element => {
                 this.sort(element);
                 this.list = [element];
+            }).finally(() => {
                 this.load = "loaded";
             });
+        } else {
+            return Promise.resolve();
         }
     }
 
@@ -175,5 +182,12 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
         return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
     }
 
-
+    callBidsValidator(): void {
+        this.getBidsStructure().then(() => {
+            // currently the list object always contains one element which is the root folder
+            this.studyService.validateStudyForBIDS(this.studyId, this.list[0]?.path).then(report => {
+                this.report = report;
+            });
+        });
+    }
 }
