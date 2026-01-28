@@ -66,6 +66,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li class="tags" *ngIf="isStudyAdmin" [class.active]="activeTab == 'history'" [routerLink]="'.'" [fragment]="'history'" replaceUrl="true" (click)="loadHistory()">
                     <span class="history">History</span>
                 </li>
+				@if (accessRequests?.length > 0) {
+					<li class="ar-tab highlighted" *ngIf="isStudyAdmin" [class.active]="activeTab == 'access-requests'" [routerLink]="'.'" [fragment]="'access-requests'" replaceUrl="true">
+						<span class="access-requests left-icon">
+							<i class="fas fa-warning"></i>
+							Access requests ({{accessRequests?.length}})
+						</span>
+					</li>
+				}
 			</ul>
 
 			<fieldset [class.hidden-tab]="activeTab != 'general'" tab="general">
@@ -377,7 +385,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[mode]="mode">
 				</studyuser-list>
 			</fieldset>
-			<fieldset *ngIf="keycloakService.isUserAdmin() && accessRequests?.length > 0" class="access-requests">
+			<fieldset [class.hidden-tab]="activeTab != 'access-requests'" *ngIf="keycloakService.isUserAdmin() && accessRequests?.length > 0" class="access-requests">
 				<legend>Pending access requests for this study</legend>
 				<ul>
 					<li *ngFor="let a of accessRequests">

@@ -43,20 +43,6 @@ a:hover, a:active { color: inherit; }
 .user-commands a:link, .user-commands a:visited { color: inherit; text-decoration: none; }
 .user-commands a:hover, .user-commands a:active { text-decoration: none; }
 
-
-.counter { margin: 0 6px;
-    background-color: var(--color-c);
-    border-radius: 21px;
-    width: 15px;
-    height: 15px;
-    display: inline-block;
-    text-align: center;
-    font-size: 10px;
-    vertical-align: middle;
-    padding: 0;
-    line-height: 15px;
-}
-
 .admin-tag { color: orange; }
     .admin-tag i { margin-right: 4px; }
 .admin-tag-sep { color: var(--color-b-light2); }

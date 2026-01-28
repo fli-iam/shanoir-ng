@@ -122,9 +122,10 @@ form { color: var(--dark-grey); position: relative; }
     form fieldset li input,
     form fieldset li select,
     form fieldset li button:not(.normal) { height: 21px; }
-    form li.info { margin: 4px 0 13px; background-color: var(--color-b-light); padding: 10px 15px; overflow: hidden; width: 440px; border-radius: 2px; }
-      form li.info i { margin-right: 6px; color: var(--color-b); font-size: 16px; }
-      form li.info b { font-weight: bold; color: var(--color-a); }
+    form li.info, .info-frame { margin: 4px 0 13px; background-color: var(--color-b-light); padding: 10px 15px; overflow: hidden; border-radius: 2px; }
+    form li.info { width: 440px; } 
+      form li.info i, .info-frame i { margin-right: 6px; color: var(--color-b); font-size: 16px; }
+      form li.info b, .info-frame b { font-weight: bold; color: var(--color-a); }
   form em { font-weight: bold; font-style: normal; color: var(--color-error); }
   form .header { padding-top: 10px; padding-bottom: 10px; }
   form div.header { font-size: 16px; }
@@ -195,3 +196,17 @@ node node { margin-left: 18px; }
 .modal-host { background-color: var(--color-overlay); display: table; position: fixed; top: 0; bottom: 0; left: 0; right: 0; height: 100%; width: 100%; z-index: 10000; }
 .modal-host .modal-cell  { display: table-cell; vertical-align: middle; text-align: center; max-height: 100vh; overflow: auto; }
 .modal-host .modal-window  { display: inline-block; background-color: var(--very-light-grey); width: fit-content; border-radius: 2px; }
+
+.counter { margin: 0 6px;
+    background-color: var(--color-c);
+    border-radius: 21px;
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    text-align: center;
+    font-size: 10px;
+    vertical-align: middle;
+    padding: 0;
+    line-height: 15px;
+    color: var(--very-light-grey);
+}

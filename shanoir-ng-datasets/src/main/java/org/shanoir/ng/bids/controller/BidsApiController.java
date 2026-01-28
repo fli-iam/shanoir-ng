@@ -16,6 +16,7 @@ package org.shanoir.ng.bids.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -32,12 +33,15 @@ import org.shanoir.ng.bids.BidsDeserializer;
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.bids.model.BidsFolder;
 import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.bids.service.BidsValidationPublisher;
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +71,9 @@ public class BidsApiController implements BidsApi {
 
     @Autowired
     private StudyRepository studyRepo;
+
+    @Autowired
+    private BidsValidationPublisher bidsValidationPublisher;
 
     private final HttpServletRequest request;
 
@@ -100,6 +107,16 @@ public class BidsApiController implements BidsApi {
         if (!filePath.startsWith("/var/datasets-data/bids-data/stud-" + studyId)) {
             response.sendError(HttpStatus.UNAUTHORIZED.value());
             return;
+        }
+
+        // Request BIDS validation
+        String validationResultJson = bidsValidationPublisher.requestValidationSync(filePath);
+        // write a file and add validation result to the directory
+        File validationResultFile = new File(filePath + File.separator + "validation_result.json");
+        try (FileWriter writer = new FileWriter(validationResultFile)) {
+            writer.write(validationResultJson);
+        } catch (IOException e) {
+            LOG.error("Error while writing BIDS validation result file", e);
         }
 
         // Get file, zip it and download it
@@ -167,6 +184,25 @@ public class BidsApiController implements BidsApi {
         }
 
         return new ResponseEntity<>(studyBidsElement, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<String> validateBidsByStudyId(
+            @Parameter(description = "Id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath) throws RestServiceException, IOException {
+
+        if (!filePath.startsWith("/var/datasets-data/bids-data/stud-" + studyId)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            // Request BIDS validation
+            String validationResultJson = bidsValidationPublisher.requestValidationSync(filePath);
+            return new ResponseEntity<>(validationResultJson, HttpStatus.OK);
+        } catch (AmqpException e) {
+            ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while validating BIDS dataset", e.getMessage());
+            throw new RestServiceException(e, error);
+        }
     }
 
     /**
