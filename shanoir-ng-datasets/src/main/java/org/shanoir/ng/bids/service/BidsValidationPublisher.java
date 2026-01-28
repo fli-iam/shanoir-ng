@@ -53,7 +53,7 @@ public class BidsValidationPublisher {
         });
         String resultJson;
         try {
-            resultJson = future.get(60, TimeUnit.SECONDS);
+            resultJson = future.get(30, TimeUnit.MINUTES);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new AmqpException("Error waiting for BIDS validation result", e);
         }
