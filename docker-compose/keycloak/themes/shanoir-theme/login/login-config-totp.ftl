@@ -41,7 +41,7 @@
                 <li>
                     <p>${msg("loginTotpStep2")}</p>
                     <img id="kc-totp-secret-qr-code" src="data:image/png;base64, ${totp.totpSecretQrCode}" alt="Figure: Barcode"><br/>
-                    <p><a href="${totp.manualUrl}" id="mode-manual">${msg("loginTotpUnableToScan")}</a></p>
+                    <p><a href="${totp.manualUrl}" id="mode-manual" style="color: #E3E0E8;">${msg("loginTotpUnableToScan")}</a></p>
                 </li>
             </#if>
             <li>
@@ -52,41 +52,34 @@
 
         <form action="${url.loginAction}" class="${properties.kcFormClass!}" id="kc-totp-settings-form" method="post">
             <div class="${properties.kcFormGroupClass!}">
-                <div class="${properties.kcInputWrapperClass!}">
-                    <label for="totp" class="control-label" style="color: #E3E0E8;">${msg("authenticatorCode")}</label> <span class="required">*</span>
-                </div>
+                <#if messagesPerField.existsError('totp')>
+                    <span id="input-error" class="alert ${properties.kcInputErrorMessageClass!}" aria-live="polite">
+                        ${kcSanitize(messagesPerField.get('totp'))?no_esc}
+                    </span>
+                </#if>
                 <div class="${properties.kcInputWrapperClass!}">
                     <input type="text" id="totp" name="totp" autocomplete="off" class="${properties.kcInputClass!}"
                            aria-invalid="<#if messagesPerField.existsError('totp')>true</#if>"
+                           placeholder="${msg("authenticatorCode")}"
                            dir="ltr"
                     />
-
-                    <#if messagesPerField.existsError('totp')>
-                        <span id="input-error-otp-code" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
-                            ${kcSanitize(messagesPerField.get('totp'))?no_esc}
-                        </span>
-                    </#if>
-
                 </div>
                 <input type="hidden" id="totpSecret" name="totpSecret" value="${totp.totpSecret}" />
                 <#if mode??><input type="hidden" id="mode" name="mode" value="${mode}"/></#if>
             </div>
 
             <div class="${properties.kcFormGroupClass!}">
-                <div class="${properties.kcInputWrapperClass!}">
-                    <label for="userLabel" class="control-label" style="color: #E3E0E8;">${msg("loginTotpDeviceName")}</label> <#if totp.otpCredentials?size gte 1><span class="required">*</span></#if>
-                </div>
-
+                <#if messagesPerField.existsError('userLabel')>
+                    <span id="input-error" class="alert ${properties.kcInputErrorMessageClass!}" aria-live="polite">
+                        ${kcSanitize(messagesPerField.get('userLabel'))?no_esc}
+                    </span>
+                </#if>
                 <div class="${properties.kcInputWrapperClass!}">
                     <input type="text" class="${properties.kcInputClass!}" id="userLabel" name="userLabel" autocomplete="off"
-                           aria-invalid="<#if messagesPerField.existsError('userLabel')>true</#if>" dir="ltr"
+                           aria-invalid="<#if messagesPerField.existsError('userLabel')>true</#if>"
+                           placeholder="${msg("loginTotpDeviceName")}"
+                           dir="ltr"
                     />
-
-                    <#if messagesPerField.existsError('userLabel')>
-                        <span id="input-error-otp-label" class="${properties.kcInputErrorMessageClass!}" aria-live="polite">
-                            ${kcSanitize(messagesPerField.get('userLabel'))?no_esc}
-                        </span>
-                    </#if>
                 </div>
             </div>
 
@@ -94,21 +87,15 @@
                 <@passwordCommons.logoutOtherSessions/>
             </div>
 
-            <#if isAppInitiatedAction??>
-                <input type="submit"
-                       class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonLargeClass!}"
-                       id="saveTOTPBtn" value="${msg("doSubmit")}"
-                />
-                <button type="submit"
-                        class="${properties.kcButtonClass!} ${properties.kcButtonDefaultClass!} ${properties.kcButtonLargeClass!} ${properties.kcButtonLargeClass!}"
-                        id="cancelTOTPBtn" name="cancel-aia" value="true" />${msg("doCancel")}
-                </button>
-            <#else>
-                <input type="submit"
-                       class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}"
-                       id="saveTOTPBtn" value="${msg("doSubmit")}"
-                />
-            </#if>
+            <div class="${properties.kcFormGroupClass!} ${properties.kcFormSettingClass!} ">
+                <div id="kc-form-buttons" class="${properties.kcFormButtonsClass!}">
+                    <input type="hidden" id="id-hidden-input" name="credentialId" <#if auth.selectedCredential?has_content>value="${auth.selectedCredential}"</#if>/>
+                    <a href="${properties.requestWelcome!}">
+						<button type="button">${msg("doCancel")}</button>
+					</a>
+                    <button class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}" type="submit">${msg("doSubmit")}</button>
+                </div>
+            </div>
         </form>
     </#if>
 </@layout.registrationLayout>
