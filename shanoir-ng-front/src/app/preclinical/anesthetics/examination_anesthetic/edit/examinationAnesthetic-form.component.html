@@ -21,7 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(edit)="goToEdit()"
 				(back)="goBack()">
 			</form-footer>
-		</div> 
+		</div>
 		<span *ngIf="isStandalone"  [ngSwitch]="mode">
 			<ng-template [ngSwitchCase]="'view'">
 				<h2 class="header command-zone"i18n="View examAnesthetic|Title@@examinationDetailViewTitle">Details on examination anesthetic</h2>
@@ -33,7 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<h2 class="header command-zone"i18n="Create examAnesthetic|Title@@examinationDetailCreateTitle">Create examination anesthetic</h2>
 			</ng-template>
 		</span>
-		
+
 
 		<fieldset>
 			<legend *ngIf="!isStandalone">Examination anesthetic</legend>
@@ -41,13 +41,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li >
 					<label i18n="Edit examAnesthetic|Anesthetic label" >Anesthetic</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
+						<ng-template [ngSwitchCase]="'view'">
 								{{examinationAnesthetic?.anesthetic?.name}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="anesthetic"  formControlName="anesthetic">
-								<option *ngFor="let anesthetic of anesthetics" [ngValue]="anesthetic">{{anesthetic.name}}</option>
-							</select>
+							<select-box id="anesthetic" formControlName="anesthetic" [optionArr]="anesthetics"></select-box>
 							<button i18n="Edit examAnesthetic|Add a new anesthetic" (click)="goToAddAnesthetic()">
 								<i class="fas fa-plus-square"></i>
 								new anesthetic
@@ -58,7 +56,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li >
 					<label i18n="Edit examAnesthetic|InjectionInterval label">Injection interval</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
+						<ng-template [ngSwitchCase]="'view'">
 								{{examinationAnesthetic?.injectionInterval | camel}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
@@ -71,7 +69,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li >
 					<label i18n="Edit examAnesthetic|InjectionSite label">Injection site</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
+						<ng-template [ngSwitchCase]="'view'">
 								{{examinationAnesthetic?.injectionSite | camel}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
@@ -82,7 +80,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
 				</li>
 				<li>
-					<label i18n="Edit examAnesthetic|InjectionType label">Injection type</label> 
+					<label i18n="Edit examAnesthetic|InjectionType label">Injection type</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
 								{{examinationAnesthetic?.injectionType | camel}}
@@ -97,18 +95,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li>
 					<label i18n="Edit examAnesthetic|Dose label">Dose</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
+						<ng-template [ngSwitchCase]="'view'">
 								{{examinationAnesthetic?.dose}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							<input type="text" id="dose" formControlName="dose"/>
 						</ng-template>
-					</span> 
+					</span>
 				</li>
 				<li>
 					<label i18n="Edit examAnesthetic|DoseUnit label">Dose Unit</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
+						<ng-template [ngSwitchCase]="'view'">
 								{{examinationAnesthetic?.doseUnit?.value}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
@@ -116,9 +114,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
 							</select>
 						</ng-template>
-					</span> 							
+					</span>
 				</li>
 			</ol>
 		</fieldset>
-	</form>   
+	</form>
 </div>

@@ -16,13 +16,14 @@ package org.shanoir.ng.preclinical.subjects.service;
 
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathology;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
+import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapy;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -31,6 +32,9 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * AnimalSubjects service implementation.
@@ -56,8 +60,8 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
     private ObjectMapper mapper;
 
     @Override
-    public void deleteBySubjectId(final Long id) {
-        subjectsRepository.deleteBySubjectId(id);
+    public void deleteById(final Long id) {
+        subjectsRepository.deleteById(id);
     }
 
     @Override
@@ -66,8 +70,8 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
     }
 
     @Override
-    public AnimalSubject getBySubjectId(final Long id) {
-        return subjectsRepository.getBySubjectId(id);
+    public AnimalSubject getById(final Long id) {
+        return subjectsRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -102,7 +106,31 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
         subjectDb.setSpecie(subject.getSpecie());
         subjectDb.setStabulation(subject.getStabulation());
         subjectDb.setStrain(subject.getStrain());
+        updateSubjectPathologiesValues(subjectDb.getSubjectPathologies(), subject.getSubjectPathologies());
+        updateSubjectTherapiesValues(subjectDb.getSubjectTherapies(), subject.getSubjectTherapies());
         return subjectDb;
+    }
+
+    private void updateSubjectPathologiesValues(List<SubjectPathology> existingSubjectPathologies, final List<SubjectPathology> newSubjectPathologies) {
+        Utils.syncList(existingSubjectPathologies, newSubjectPathologies, (target, src) -> {
+            target.setLocation(src.getLocation());
+            target.setPathology(src.getPathology());
+            target.setPathologyModel(src.getPathologyModel());
+            target.setStartDate(src.getStartDate());
+            target.setEndDate(src.getEndDate());
+        });
+    }
+
+    private void updateSubjectTherapiesValues(List<SubjectTherapy> existingSubjectTherapies, final List<SubjectTherapy> newSubjectTherapies) {
+        Utils.syncList(existingSubjectTherapies, newSubjectTherapies, (target, src) -> {
+            if (src.getTherapy() != null) target.setTherapy(src.getTherapy());
+            target.setDose(src.getDose());
+            target.setStartDate(src.getStartDate());
+            target.setEndDate(src.getEndDate());
+            target.setDoseUnit(src.getDoseUnit());
+            target.setFrequency(src.getFrequency());
+            target.setMolecule(src.getMolecule());
+        });
     }
 
     @Override
@@ -111,30 +139,36 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
     }
 
     @Override
-    public Long getIdBySubjectId(long subjectId) {
-        AnimalSubject sub = subjectsRepository.getBySubjectId(subjectId);
-
-        return sub != null ? sub.getId() : null;
-    }
-
-    @Override
     public boolean isSubjectNameAlreadyUsedInStudy(String name, Long studyId) {
-        return (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_NAME_QUEUE, name);
+        String request;
+        try {
+            request = mapper.writeValueAsString(new IdName(studyId, name));
+        } catch (JsonProcessingException e) {
+            // very unlikely to happen
+            throw new RuntimeException("Error while serializing subject name check request", e);
+        }
+        return (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_NAME_QUEUE, request);
     }
 
     @Override
     public Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException {
-        Long subjectId;
-        subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, mapper.writeValueAsString(dto));
+        Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, mapper.writeValueAsString(dto));
         if (subjectId == null) {
             throw new ShanoirException("Created subject id is null.");
         }
+
+        dto.setId(subjectId);
+        boolean updateSuccess = (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE, mapper.writeValueAsString(dto));
+        if (!updateSuccess) {
+            throw new ShanoirException("Subject creation in datasets MS failed.");
+        }
+
         return subjectId;
     }
 
     @Override
-    public List<AnimalSubject> findBySubjectIds(List<Long> subjectIds) {
-        return subjectsRepository.findBySubjectIdIn(subjectIds);
+    public List<AnimalSubject> findByIds(List<Long> ids) {
+        return Utils.toList(subjectsRepository.findAllById(ids));
     }
 
 }

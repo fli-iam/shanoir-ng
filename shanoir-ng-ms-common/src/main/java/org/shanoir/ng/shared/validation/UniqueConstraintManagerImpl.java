@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.core.model.AbstractEntityInterface;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
  * @param <T>
  */
 @Service
-public abstract class UniqueConstraintManagerImpl<T extends AbstractEntity> implements UniqueConstraintManager<T> {
+public abstract class UniqueConstraintManagerImpl<T extends AbstractEntityInterface> implements UniqueConstraintManager<T> {
 
     @Autowired
     private FindByRepository<T> repository;

@@ -185,11 +185,6 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public Subject findByIdWithSubjectStudies(final Long id) {
-        return subjectRepository.findSubjectWithSubjectStudyById(id);
-    }
-
-    @Override
     @Transactional
     public Subject create(Subject subject, boolean withAMQP) throws ShanoirException {
         subject = mapSubjectStudyListToSubject(subject);
@@ -481,8 +476,13 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public boolean existsSubjectWithName(String name) {
-        return this.subjectRepository.existsByName(name);
+    public boolean existsSubjectWithNameInStudy(String name, Long studyId) {
+        return this.subjectRepository.findByStudyIdAndName(studyId, name) != null;
+    }
+
+    @Override
+    public boolean isSubjectNameExistForStudy(Long studyId, String subjectName) {
+        return this.subjectRepository.existsBySubjectStudyListStudyIdAndName(studyId, subjectName);
     }
 
     /**

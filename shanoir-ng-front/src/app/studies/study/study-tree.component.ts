@@ -15,6 +15,8 @@ import { Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angu
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
+import { DatasetCopyDialogService } from 'src/app/shared/components/dataset-copy-dialog/dataset-copy-dialog.service';
+
 import { TaskState } from '../../async-tasks/task.model';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { MassDownloadService } from '../../shared/mass-download/mass-download.service';
@@ -53,7 +55,9 @@ export class StudyTreeComponent implements OnDestroy {
             private router: Router,
             private downloadService: MassDownloadService,
             private dialogService: ConfirmDialogService,
-            private datasetService: DatasetService) {
+            private datasetService: DatasetService,
+            private datasetCopyDialogService: DatasetCopyDialogService,
+            private confirmDialogService: ConfirmDialogService) {
 
         treeService.studyNodeOpenPromise.then(() => this.loaded = true);
 
@@ -110,7 +114,7 @@ export class StudyTreeComponent implements OnDestroy {
     }
 
     downloadSelected() {
-        this.getSelectedDatasetIdsIncludingExamAndAcq().then(allSelectedIds => {
+        this.getSelectedDatasetIdsIncludingExamAndAcq('download').then(allSelectedIds => {
             this.downloadService.downloadByIds(Array.from(allSelectedIds), this.downloadState);
         }).catch(e => {
             if (e instanceof RightsError) {
@@ -119,9 +123,21 @@ export class StudyTreeComponent implements OnDestroy {
         });
     }
 
-    getSelectedDatasetIdsIncludingExamAndAcq(): Promise<Set<number>> /* throws RightsError */ {        
+    copySelected() {
+        this.getSelectedDatasetIdsIncludingExamAndAcq().then(allSelectedIds => {
+            this.datasetCopyDialogService.openWithIds(allSelectedIds);
+        }).catch(e => {
+            if (e instanceof RightsError) {
+                this.dialogService.error('error', 'Sorry, you don\'t have the right to copy all the datasets you have selected.'
+                    + ' You must have ADMIN right on all the studies of the selected datasets to proceed with the copy.'
+                );
+            }
+        });
+    }
+
+    getSelectedDatasetIdsIncludingExamAndAcq(mustHaveRight?: 'download'): Promise<Set<number>> /* throws RightsError */ {        
         // Check directly selected datasets for download rights
-        if (this.selectedDatasetNodes.find(dsNode => !dsNode.canDownload)) {
+        if (mustHaveRight === 'download' && this.selectedDatasetNodes.find(dsNode => !dsNode.canDownload)) {
             return Promise.reject(new RightsError());
         }
         else if (this.selectedAcquisitionNodes?.length > 0 || this.selectedExaminationNodes?.length > 0) {

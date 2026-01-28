@@ -31,7 +31,7 @@ import { DatasetUtils } from './dataset.utils';
 import { DatasetType } from './dataset-type.model';
 
 export type Format = 'nii' | 'dcm';
-export type DatasetLight = {id: number, name: string, type: DatasetType, subject: IdName, hasProcessings: boolean, study: IdName, creationDate: Date};
+export type DatasetLight = {id: number, name: string, type: DatasetType, subject: IdName, hasProcessings: boolean, study: IdName, creationDate: Date; centerId: number};
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
@@ -117,15 +117,14 @@ export class DatasetService extends EntityService<Dataset> {
             .toPromise();
     }
 
-    countDatasetsByStudyId(studyId: number): Promise<number> {
-        return this.http.get<number>(AppUtils.BACKEND_API_DATASET_URL + '/study/nb-datasets/' + studyId)
-        .toPromise();
-    }
-
-    public downloadDatasets(ids: number[], format: string, converter ? : number, state?: TaskState): Observable<TaskState> {
+    public downloadDatasets(ids: number[], format: string, sorting?: string, converter ? : number, state?: TaskState): Observable<TaskState> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
+        if (sorting) {
+            formData.set('sortingForProcessingOutputs', sorting)
+
+        }
         if (converter) {
             formData.set("converterId", "" + converter);
         }
