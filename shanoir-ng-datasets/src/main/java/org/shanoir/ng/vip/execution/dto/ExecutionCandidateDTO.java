@@ -38,6 +38,7 @@ public class ExecutionCandidateDTO {
     @NotNull(message = "Client must be provided")
     private String client;
     private Long converterId;
+    private String sorting;
 
     public String getName() {
         return name;
@@ -112,12 +113,19 @@ public class ExecutionCandidateDTO {
         this.inputParameters = inputParameters;
     }
 
-
     public Long getConverterId() {
         return converterId;
     }
 
     public void setConverterId(Long converterId) {
         this.converterId = converterId;
+    }
+
+    public String getSorting() {
+        return sorting;
+    }
+
+    public void setSorting(String sorting) {
+        this.sorting = sorting;
     }
 }

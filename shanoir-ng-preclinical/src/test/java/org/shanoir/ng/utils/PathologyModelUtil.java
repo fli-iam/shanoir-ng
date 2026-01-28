@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.utils;
 
+import java.util.ArrayList;
+
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModel;
 import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathology;
@@ -79,6 +81,8 @@ public final class PathologyModelUtil {
         spatho.setPathology(createPathology());
         spatho.setPathologyModel(createPathologyModel());
         spatho.setAnimalSubject(AnimalSubjectModelUtil.createAnimalSubject());
+        spatho.getAnimalSubject().setSubjectPathologies(new ArrayList<>());
+        //spatho.getAnimalSubject().getSubjectPathologies().add(spatho);
         spatho.setId(1L);
         return spatho;
     }

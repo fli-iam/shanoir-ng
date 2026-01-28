@@ -18,10 +18,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -57,6 +59,9 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 
     @Autowired
     private DatasetService datasetService;
+
+    @Autowired
+    private DatasetSecurityService datasetSecurityService;
 
     @Autowired
     private SolrService solrService;
@@ -115,10 +120,24 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
         final Optional<DatasetProcessing> entity = repository.findById(id);
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
 
+        // Load datasetProcessing output datasets
+        List<Dataset> datasets = entity.get().getOutputDatasets();
+        List<Long> datasetIds = datasets.stream().map(Dataset::getId).collect(Collectors.toList());
+
+        // Check for rights
+        boolean hasRights = datasetSecurityService.hasRightOnEveryDataset(datasetIds, "CAN_ADMINISTRATE");
+
+        if (!hasRights)
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNAUTHORIZED.value(),
+                            "You don't have the right to delete datasets on studies you don't administrate."
+                    ));
+
         // delete associated ressources
         processingResourceRepository.deleteByProcessingId(id);
 
-        for (Dataset ds : entity.get().getOutputDatasets()) {
+        for (Dataset ds : datasets) {
             datasetService.deleteById(ds.getId());
             solrService.deleteFromIndex(ds.getId());
         }
