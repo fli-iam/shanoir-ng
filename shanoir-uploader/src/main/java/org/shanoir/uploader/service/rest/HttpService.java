@@ -292,13 +292,13 @@ public class HttpService {
         if (sslContextDev != null) {
             sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
                     .setSslContext(sslContextDev)
-                    .setTlsVersions(TLS.V_1_2)
+                    .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
                     .build();
             LOG.info("DEV SSLSocketFactory used.");
         } else {
             sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
                     .setHostnameVerifier(new CustomHostnameVerifier())
-                    .setTlsVersions(TLS.V_1_2)
+                    .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
                     .build();
             LOG.info("Standard SSLSocketFactory used with CustomHostnameVerifier.");
         }
