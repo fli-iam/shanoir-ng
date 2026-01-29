@@ -16,6 +16,10 @@ package org.shanoir.ng.vip.output.handler;
 
 import jakarta.ws.rs.NotFoundException;
 import org.apache.commons.io.IOUtils;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.data.UID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -211,7 +215,9 @@ public class DefaultHandler extends OutputHandler {
                 }
             }
 
-            processedDataset.setDatasetType(DatasetType.GENERIC.name());
+            // Determine dataset type: DICOM → infer from modality/SOP class, otherwise GENERIC
+            String datasetType = determineDatasetType(file);
+            processedDataset.setDatasetType(datasetType);
             processedDatasetImporterService.createProcessedDataset(processedDataset);
 
             LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), file.getAbsolutePath());
@@ -234,4 +240,116 @@ public class DefaultHandler extends OutputHandler {
         return processing;
     }
 
+    /**
+     * Determines the dataset type based on file content.
+     * If DICOM: extracts modality/SOP class and maps to appropriate type
+     * If not DICOM: returns GENERIC
+     */
+    private String determineDatasetType(File file) {
+        try {
+            Attributes attributes = readDicomAttributes(file);
+            if (attributes != null) {
+                return mapDicomToDatasetType(attributes);
+            }
+        } catch (Exception e) {
+            LOG.debug("Could not read DICOM attributes from file [{}]: {}", file.getAbsolutePath(), e.getMessage());
+        }
+        return DatasetType.Names.GENERIC;
+    }
+
+    private Attributes readDicomAttributes(File file) {
+        if (file.exists()) {
+            try (DicomInputStream dIS = new DicomInputStream(file)) {
+                return dIS.readDataset();
+            } catch (IOException e) {
+                // Not a DICOM file or error reading
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private String mapDicomToDatasetType(Attributes attributes) {
+        String sopClassUID = attributes.getString(Tag.SOPClassUID);
+
+        if (sopClassUID == null || sopClassUID.isEmpty()) return DatasetType.Names.GENERIC;
+        if (isMr(sopClassUID)) return DatasetType.Names.MR;
+        if (isCt(sopClassUID)) return DatasetType.Names.CT;
+        if (isXa(sopClassUID)) return DatasetType.Names.XA;
+        if (isPet(sopClassUID)) return DatasetType.Names.PET;
+        if (isSpect(sopClassUID)) return DatasetType.Names.SPECT;
+        if (isSegmentation(sopClassUID)) return DatasetType.Names.SEGMENTATION;
+        if (isRegistration(sopClassUID)) return DatasetType.Names.REGISTRATION;
+        if (isSr(sopClassUID)) return DatasetType.Names.SR;
+
+        return DatasetType.Names.GENERIC;
+
+    }
+
+    private boolean isMr(String uid) {
+        return Set.of(
+            UID.MRImageStorage,
+            UID.EnhancedMRImageStorage,
+            UID.MRSpectroscopyStorage,
+            UID.EnhancedMRColorImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isCt(String uid) {
+        return Set.of(
+            UID.CTImageStorage,
+            UID.EnhancedCTImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isXa(String uid) {
+        return Set.of(
+            UID.XRayAngiographicImageStorage,
+            UID.EnhancedXAImageStorage,
+            UID.XRayRadiofluoroscopicImageStorage,
+            UID.EnhancedXRFImageStorage,
+            UID.XRay3DAngiographicImageStorage,
+            UID.XRay3DCraniofacialImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isPet(String uid) {
+        return Set.of(
+            UID.PositronEmissionTomographyImageStorage,
+            UID.EnhancedPETImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isSpect(String uid) {
+        return Set.of(
+            UID.NuclearMedicineImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isSegmentation(String uid) {
+        return Set.of(
+            UID.SegmentationStorage,
+            UID.SurfaceSegmentationStorage
+        ).contains(uid);
+    }
+
+    private boolean isRegistration(String uid) {
+        return Set.of(
+            UID.SpatialRegistrationStorage,
+            UID.DeformableSpatialRegistrationStorage
+        ).contains(uid);
+    }
+
+    private boolean isSr(String uid) {
+        return Set.of(
+            UID.BasicTextSRStorage,
+            UID.EnhancedSRStorage,
+            UID.ComprehensiveSRStorage,
+            UID.MammographyCADSRStorage,
+            UID.ChestCADSRStorage,
+            UID.XRayRadiationDoseSRStorage,
+            UID.ColonCADSRStorage,
+            UID.ImplantationPlanSRStorage
+        ).contains(uid);
+    }
 }

@@ -60,9 +60,9 @@ public final class DatasetUtils {
         Dataset dataset = null;
 
         switch (type) {
-            case DatasetType.Names.GENERIC:
+            case DatasetType.Names.CALIBRATION:
                 dataset = new CalibrationDataset();
-                originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+                originMetadata.setDatasetModalityType(DatasetModalityType.CALIBRATION_DATASET);
                 break;
             case DatasetType.Names.CT:
                 dataset = new CtDataset();
@@ -74,11 +74,11 @@ public final class DatasetUtils {
                 break;
             case DatasetType.Names.MEG:
                 dataset = new MegDataset();
-                originMetadata.setDatasetModalityType(DatasetModalityType.EEG_DATASET);
+                originMetadata.setDatasetModalityType(DatasetModalityType.MEG_DATASET);
                 break;
             case DatasetType.Names.MESH:
                 dataset = new MeshDataset();
-                originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+                originMetadata.setDatasetModalityType(DatasetModalityType.MESH_DATASET);
                 break;
             case DatasetType.Names.MR:
                 dataset = new MrDataset();
@@ -86,7 +86,7 @@ public final class DatasetUtils {
                 break;
             case DatasetType.Names.PARAMETER_QUANTIFICATION:
                 dataset = new ParameterQuantificationDataset();
-                originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+                originMetadata.setDatasetModalityType(DatasetModalityType.PARAMETER_QUANTIFICATION_DATASET);
                 break;
             case DatasetType.Names.PET:
                 dataset = new PetDataset();
@@ -94,11 +94,15 @@ public final class DatasetUtils {
                 break;
             case DatasetType.Names.REGISTRATION:
                 dataset = new RegistrationDataset();
-                originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+                originMetadata.setDatasetModalityType(DatasetModalityType.REG_DATASET);
                 break;
             case DatasetType.Names.SEGMENTATION:
                 dataset = new SegmentationDataset();
-                originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+                originMetadata.setDatasetModalityType(DatasetModalityType.SEG_DATASET);
+                break;
+            case DatasetType.Names.SR:
+                dataset = new SrDataset();
+                originMetadata.setDatasetModalityType(DatasetModalityType.SR_DATASET);
                 break;
             case DatasetType.Names.SPECT:
                 dataset = new SpectDataset();
@@ -106,11 +110,11 @@ public final class DatasetUtils {
                 break;
             case DatasetType.Names.STATISTICAL:
                 dataset = new StatisticalDataset();
-                originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+                originMetadata.setDatasetModalityType(DatasetModalityType.STATISTICAL_DATASET);
                 break;
             case DatasetType.Names.TEMPLATE:
                 dataset = new TemplateDataset();
-                originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+                originMetadata.setDatasetModalityType(DatasetModalityType.TEMPLATE_DATASET);
                 break;
             case DatasetType.Names.BIDS:
                 dataset = new BidsDataset();
@@ -119,6 +123,10 @@ public final class DatasetUtils {
             case DatasetType.Names.XA:
                 dataset = new XaDataset();
                 originMetadata.setDatasetModalityType(DatasetModalityType.XA_DATASET);
+                break;
+            case DatasetType.Names.MEASUREMENT:
+                dataset = new MeasurementDataset();
+                originMetadata.setDatasetModalityType(DatasetModalityType.MEASUREMENT_DATASET);
                 break;
             default:
                 dataset = new GenericDataset();
