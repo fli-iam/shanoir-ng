@@ -14,24 +14,23 @@
 
 package org.shanoir.ng.download;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import io.micrometer.common.util.StringUtils;
+import jakarta.activation.DataHandler;
+import jakarta.mail.internet.MimeBodyPart;
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.UID;
+import org.dcm4che3.data.VR;
+import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.io.DicomOutputStream;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -158,11 +157,11 @@ public class WADODownloaderService {
                 String name = buildFileName(subjectName, dataset, datasetFilePath, sopInstanceUID);
                 // Download and zip
                 try {
-                    String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name);
+                    String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name, subjectName);
                     if (zipedFile != null) {
                         files.add(zipedFile);
                     }
-                } catch (ZipPacsFileException e) {
+                } catch (Exception e) {
                     LOG.error("Could not download dataset [{}] as dicom", dataset.getId(), e);
                     downloadResult.update("Could not download dataset [" + dataset.getId() + "] as dicom : " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
                 }
@@ -202,11 +201,11 @@ public class WADODownloaderService {
      * @throws ZipPacsFileException
      * @throws IOException when couldn't write into the stream
      */
-    private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name) throws ZipPacsFileException {
+    private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name, String subjectName) throws Exception {
         byte[] responseBody = null;
         try {
-            responseBody = downloadFileFromPACS(url);
-            this.extractDICOMZipFromMHTMLFile(responseBody, name, zipOutputStream, url.contains(WADO_REQUEST_TYPE_WADO_RS));
+            responseBody = downloadFileFromPACS(url, subjectName);
+            this.extractDICOMZipFromMHTMLFile(responseBody,  name, zipOutputStream, url.contains(WADO_REQUEST_TYPE_WADO_RS));
             return name + DCM;
         } catch (IOException | MessagingException e) {
             LOG.error("Error in downloading/writing file [{}] from pacs to zip", name, e);
@@ -240,7 +239,7 @@ public class WADODownloaderService {
                 int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
                 if (indexInstanceUID > 0) {
                     sopInstanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
-                    byte[] responseBody = downloadFileFromPACS(url);
+                    byte[] responseBody = downloadFileFromPACS(url, "");
                     extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder);
                 } else {
                     // handle and check secondly for WADO-URI URLs by "objectUID="
@@ -259,7 +258,7 @@ public class WADODownloaderService {
 
                         File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
 
-                        byte[] responseBody = downloadFileFromPACS(url);
+                        byte[] responseBody = downloadFileFromPACS(url, "");
                         try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
                             Files.copy(bIS, extractedDicomFile.toPath());
                             files.add(extractedDicomFile);
@@ -345,18 +344,89 @@ public class WADODownloaderService {
      * @return
      * @throws IOException
      */
-    private byte[] downloadFileFromPACS(final String url) throws IOException, HttpClientErrorException {
+    private byte[] downloadFileFromPACS(final String url, String subjectName) throws MessagingException, IOException {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, entity, byte[].class, "1");
-        if (response.getStatusCode() == HttpStatus.OK) {
+        ResponseEntity<byte[]> response = restTemplate.exchange(url,
+                HttpMethod.GET, entity, byte[].class, "1");
+
+        String contentType = response.getHeaders().getContentType().toString();
+        byte[] body = response.getBody();
+
+        if (contentType.startsWith("multipart/") && !StringUtils.isEmpty(subjectName)) {
+            return extractAndReplaceDICOMPatientFields(body, contentType, subjectName);
+        } else if (response.getStatusCode() == HttpStatus.OK) {
             return response.getBody();
         } else {
             throw new IOException("Download did not work: wrong status code received.");
         }
     }
+
+    private byte[] extractAndReplaceDICOMPatientFields(byte[] body, String contentType, String subjectName) throws MessagingException, IOException {
+        MimeMultipart multipart = new MimeMultipart(new ByteArrayDataSource(body, contentType));
+        List<MimeBodyPart> rebuiltParts = new ArrayList<>();
+
+        for (int i = 0; i < multipart.getCount(); i++) {
+            MimeBodyPart part = (MimeBodyPart) multipart.getBodyPart(i);
+
+            if (part.getContentType().toLowerCase().contains("application/dicom")) {
+                byte[] dicomBytes;
+                try (InputStream is = part.getInputStream()) {
+                    dicomBytes = is.readAllBytes();
+                }
+
+                Attributes dataset;
+                try (DicomInputStream dis = new DicomInputStream(new ByteArrayInputStream(dicomBytes))) {
+                    dis.setIncludeBulkData(DicomInputStream.IncludeBulkData.YES);
+                    dataset = dis.readDataset();
+                    dataset.setString(Tag.PatientName, VR.LO, subjectName);
+                    dataset.setString(Tag.PatientID, VR.LO, subjectName);
+                } catch (IOException e) {
+                    throw new IOException("Error while trying to read the dataset tags.");
+                }
+
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                try (DicomOutputStream dos = new DicomOutputStream(baos, UID.ExplicitVRLittleEndian)) {
+                    dos.writeDataset(dataset.createFileMetaInformation(UID.ExplicitVRLittleEndian), dataset);
+                }
+                byte[] modifiedDicom = baos.toByteArray();
+
+                MimeBodyPart modifiedPart = new MimeBodyPart();
+                modifiedPart.setDataHandler(new DataHandler(new ByteArrayDataSource(modifiedDicom, "application/dicom")));
+                modifiedPart.setHeader("Content-Type", part.getContentType());
+
+                rebuiltParts.add(modifiedPart);
+
+            } else {
+                rebuiltParts.add(part);
+            }
+        }
+
+        String boundary = extractBoundary(contentType);
+
+        MimeMultipart rebuilt = new MimeMultipart("related; boundary=" + boundary);
+        for (MimeBodyPart p : rebuiltParts) {
+            rebuilt.addBodyPart(p);
+        }
+
+        ByteArrayOutputStream finalOut = new ByteArrayOutputStream();
+        rebuilt.writeTo(finalOut);
+
+        return finalOut.toByteArray();
+    }
+
+    private String extractBoundary(String contentType) {
+        for (String part : contentType.split(";")) {
+            part = part.trim();
+            if (part.startsWith("boundary=")) {
+                return part.substring("boundary=".length()).replace("\"", "");
+            }
+        }
+        throw new IllegalArgumentException("No boundary found in Content-Type");
+    }
+
 
     private String downloadMetadataFromPACS(final String url) throws IOException {
         HttpHeaders headers = new HttpHeaders();
