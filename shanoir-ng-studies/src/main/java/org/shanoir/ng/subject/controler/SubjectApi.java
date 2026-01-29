@@ -108,7 +108,7 @@ public interface SubjectApi {
     ResponseEntity<List<IdName>> findSubjectsNames(@RequestParam(value = "subjectIds", required = true) List<Long> subjectIds);
 
     @Operation(summary = "", description = "If exists, returns the subject corresponding to the given id")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found bubject"),
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subject"),
             @ApiResponse(responseCode = "204", description = "no subject found"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),

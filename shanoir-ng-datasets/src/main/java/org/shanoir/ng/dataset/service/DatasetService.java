@@ -24,6 +24,7 @@ import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -166,6 +167,8 @@ public interface DatasetService {
     DatasetAcquisition getAcquisition(Dataset dataset);
 
     void deleteNiftis(Long studyId);
+
+    OverallStatistics getOverallStatistics();
 
     List<DatasetDownloadData> getDownloadDataByAcquisitionAndExaminationIds(List<Long> acquisitionIds, List<Long> examinationIds);
 

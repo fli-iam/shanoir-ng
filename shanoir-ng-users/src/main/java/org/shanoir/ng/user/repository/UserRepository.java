@@ -102,4 +102,12 @@ public interface UserRepository extends CrudRepository<User, Long> {
      */
     List<User> findByAccountRequestDemandTrueOrExtensionRequestDemandTrue();
 
+    /**
+     * Count all the users that have an active account
+     *
+     * @return the number of active users
+     */
+    @Query("select count(u) from User u where expirationDate > CURDATE() or expirationDate is null")
+    Long countActiveUsers();
+
 }

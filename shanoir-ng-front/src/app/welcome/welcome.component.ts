@@ -16,6 +16,8 @@ import { ImagesUrlUtil } from "../shared/utils/images-url.util";
 import { StudyType } from "../studies/shared/study-type.enum";
 import { StudyLight } from "../studies/shared/study.dto";
 import { StudyService } from "../studies/shared/study.service";
+import { UserService } from "../users/shared/user.service";
+import { DatasetService } from "../datasets/shared/dataset.service";
 import * as AppUtils from "../utils/app.utils";
 import { isDarkColor } from "../utils/app.utils";
 
@@ -31,20 +33,29 @@ export class WelcomeComponent implements OnInit {
 	public githubLogoUrl: string = ImagesUrlUtil.GITHUB_WHITE_LOGO_PATH;
 	public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
 	public email: string = "mailto:developers_shanoir-request@inria.fr";
-	public studies: StudyLight[] = [];
+	public publicStudies: StudyLight[] = [];
+  public usersCount: number = 0;
+  public eventsCount: number = 0;
+  public studiesCount: number = 0;
+  public datasetAcquisitionsCount: number = 0;
+  public subjectsCount: number = 0;
+  public storageSize: number = 0;
 	public StudyType = StudyType;
 	public show: number = 10;
+  public welcomeIntroduction: string = AppUtils.FRONTEND_WELCOME_INTRODUCTION;
 	@ViewChild('showMore', { static: false }) showMore: ElementRef<HTMLElement>;
 
 	constructor(
 		private studyService: StudyService,
+        private userService: UserService,
+        private datasetService: DatasetService,
         private _renderer2: Renderer2,
         private confirmDialogService: ConfirmDialogService,
         @Inject(DOCUMENT) private _document: Document
 	) { }
 
 	ngOnInit(): void {
-        this.fetchStudies();
+        this.fetchOverallStats();
     }
 
     addSchemaToDOM(): void {
@@ -54,7 +65,7 @@ export class WelcomeComponent implements OnInit {
         let datasetStr: string = "";
         const shanoirUrl: string = window.location.protocol + "//" + window.location.hostname;
 
-        this.studies?.forEach( study => {
+        this.publicStudies?.forEach( study => {
 
             // keywords handling
             let keywords: string = "";
@@ -71,7 +82,7 @@ export class WelcomeComponent implements OnInit {
             if (study != null) {
                 datasetStr += `
                     {
-                        "@context": "https://schema.org",
+                        "@id": "` + study.name + `",
                         "@type": "Dataset",
                         "dct:conformsTo": "https://bioschemas.org/profiles/Dataset/0.3-RELEASE-2019_06_14",
                         "url": "` + shanoirUrl + `/shanoir-ng/study/details/` + study.id + `",
@@ -84,7 +95,7 @@ export class WelcomeComponent implements OnInit {
                         ]
                     }`
             }
-            if (study != this.studies[this.studies.length - 1]) {
+            if (study != this.publicStudies[this.publicStudies.length - 1]) {
                 datasetStr += ",";
             }
         })
@@ -92,65 +103,337 @@ export class WelcomeComponent implements OnInit {
         // schema.org DataCatalog + Datasets
         script.text = `
         {
-            "@context": "http://schema.org",
-            "@id": "` + shanoirUrl + `",
-            "@type": "DataCatalog",
-            "dct:conformsTo": "https://bioschemas.org/profiles/DataCatalog/0.3-RELEASE-2019_07_01",
-            "description": "Shanoir-NG (SHAring NeurOImaging Resources, Next Generation) is a web platform (open-source) for clinical and preclinical research, designed to import, share, archive, search and visualize all kind of medical imaging data (BIDS, MR, CT, PT, EEG, Bruker). Its origin goes back to neuroimaging, but its usage is now open for all kind of organs. It provides a user-friendly, secure web access and offers an intuitive workflow to facilitate the collecting and retrieving of imaging data from multiple sources and a wizzard to make the completion of metadata easy. Shanoir-NG comes along with many features such as pseudonymization of data for all imports, automatic NIfTI conversion and support for multi-centres clinical studies.",
-            "keywords": [
-                "Medical Imaging",
-                "Neuroimaging",
-                "Neuroinformatics",
-                "MRI",
-                "Research"
-            ],
-            "license": "https://www.gnu.org/licenses/gpl-3.0.en.html",
-            "name": "Shanoir",
-            "provider": [
+            "@context": {
+              "schema": "https://schema.org/",
+              "dcat": "http://www.w3.org/ns/dcat#",
+              "dct": "http://purl.org/dc/terms/",
+              "dqv": "http://www.w3.org/ns/dqv#",
+              "prov": "http://www.w3.org/ns/prov#",
+              "skos": "http://www.w3.org/2004/02/skos/core#",
+              "xsd": "http://www.w3.org/2001/XMLSchema#",
+              "ex": "http://example.org/"
+            },
+            "@graph": [
+              {
+                "@id": "` + shanoirUrl + `",
+                "@type": ["schema:DataCatalog", "dcat:Catalog"],
+                "dct:conformsTo": "https://bioschemas.org/profiles/DataCatalog/0.3-RELEASE-2019_07_01",
+                "schema:name": "Shanoir - Sharing in vivo imaging resources",
+                "schema:description": "Shanoir-NG (SHAring NeurOImaging Resources, Next Generation) is a web platform (open-source) for clinical and preclinical research, designed to import, share, archive, search and visualize all kind of medical imaging data (BIDS, MR, CT, PT, EEG, Bruker). Its origin goes back to neuroimaging, but its usage is now open for all kind of organs. It provides a user-friendly, secure web access and offers an intuitive workflow to facilitate the collecting and retrieving of imaging data from multiple sources and a wizzard to make the completion of metadata easy. Shanoir-NG comes along with many features such as pseudonymization of data for all imports, automatic NIfTI conversion and support for multi-centres clinical studies.",
+                "schema:url": "` + shanoirUrl + `",
+                "schema:keywords": [
+                  "Medical Imaging",
+                  "Neuroimaging",
+                  "Neuroinformatics",
+                  "MRI",
+                  "Research",
+                  "DICOM",
+                  "BIDS",
+                  "Data Sharing"
+                ],
+                "schema:license": "https://www.gnu.org/licenses/gpl-3.0.en.html",
+                "dct:language": { "@id": "http://id.loc.gov/vocabulary/iso639-1/en" },
+                "dcterms:title": [
+                  { "@value": "Shanoir - Sharing in vivo imaging resources", "@language": "en" },
+                  { "@value": "Shanoir - Base de données de recherche en imagerie in vivo", "@language": "fr" }
+                ],
+                "rdfs:label": [
+                  { "@value": "Shanoir - Sharing in vivo imaging resources", "@language": "en" },
+                  { "@value": "Shanoir - Base de données de recherche en imagerie in vivo", "@language": "fr" }
+                ],
+                "schema:provider": [
+                  {"@id": "https://www.francelifeimaging.fr"},
+                  {"@id": "https://inria.fr"}
+                ],
+                "dct:creator": [
+                  {"@id": "https://www.francelifeimaging.fr"}
+                ],
+                "dct:publisher": [
+                  {"@id": "https://inria.fr"}
+                ],
+                "schema:dataset": [`
+                  + datasetStr + `
+                ],
+                "dcat:dataset": [`
+                  + datasetStr + `
+                ],
                 {
-                    "@context": "http://schema.org",
-                    "@type": "Organization",
-                    "dct:conformsTo": "https://bioschemas.org/profiles/Organization/0.2-DRAFT-2019_07_19",
-                    "description": "France Life Imaging (FLI) is a harmonized imaging network for biomedical research giving access to innovative or even unique imaging equipment systems and to a methodological expertise in all imaging fields to researchers, from public research organisations and industries.",
-                    "legalName": "FRANCE LIFE IMAGING",
-                    "sameAs": "https://www.francelifeimaging.fr",
-                    "topic": "Réseau français pour l'imagerie médicale",
-                    "name": "France Life Imaging",
-                    "url": "https://www.francelifeimaging.fr"
+                  "@id": "https://www.francelifeimaging.fr",
+                  "@type": "Organization",
+                  "dct:conformsTo": "https://bioschemas.org/profiles/Organization/0.2-DRAFT-2019_07_19",
+                  "schema:description": "France Life Imaging (FLI) is a harmonized imaging network for biomedical research giving access to innovative or even unique imaging equipment systems and to a methodological expertise in all imaging fields to researchers, from public research organisations and industries.",
+                  "schema:legalName": "FRANCE LIFE IMAGING",
+                  "schema:sameAs": "https://www.francelifeimaging.fr",
+                  "schema:topic": "Réseau français pour l'imagerie médicale",
+                  "schema:name": "France Life Imaging",
+                  "schema:url": "https://www.francelifeimaging.fr"
                 },
                 {
-                    "@context": "http://schema.org",
-                    "@type": "Organization",
-                    "dct:conformsTo": "https://bioschemas.org/profiles/Organization/0.2-DRAFT-2019_07_19",
-                    "description": "Inria - National Institute for Research in Digital Science and Technology",
-                    "legalName": "INSTITUT NATIONAL DE RECHERCHE EN INFORMATIQUE ET EN AUTOMATIQUE (INRIA)",
-                    "sameAs": "https://www.wikidata.org/wiki/Q1146208",
-                    "topic": "Recherche en informatique",
-                    "name": "Inria",
-                    "url": "https://inria.fr"
+                  "@id": "https://inria.fr",
+                  "@type": "Organization",
+                  "dct:conformsTo": "https://bioschemas.org/profiles/Organization/0.2-DRAFT-2019_07_19",
+                  "schema:description": "Inria - National Institute for Research in Digital Science and Technology",
+                  "schema:legalName": "INSTITUT NATIONAL DE RECHERCHE EN INFORMATIQUE ET EN AUTOMATIQUE (INRIA)",
+                  "schema:sameAs": "https://www.wikidata.org/wiki/Q1146208",
+                  "schema:topic": "Recherche en informatique",
+                  "schema:name": "Inria",
+                  "schema:url": "https://inria.fr"
+                },
+                {
+                  "@id": "` + shanoirUrl + `/shanoir-ng/users/users/count` + `",
+                  "@type": "dqv:QualityMeasurement",
+                  "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
+                  "dqv:isMeasurementOf": { "@id": "Users" },
+                  "dqv:inMetric": { "@id": "Users Count" },
+                  "dqv:value": { "@value": "` + this.usersCount + `", "@type": "xsd:integer" }
+                },
+                {
+                  "@id": "` + shanoirUrl + `/shanoir-ng/users/events/count` + `",
+                  "@type": "dqv:QualityMeasurement",
+                  "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
+                  "dqv:isMeasurementOf": { "@id": "Events" },
+                  "dqv:inMetric": { "@id": "Events Count" },
+                  "dqv:value": { "@value": "` + this.eventsCount + `", "@type": "xsd:integer" }
+                },
+                {
+                  "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics` + `",
+                  "@type": "dqv:QualityMeasurement",
+                  "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
+                  "dqv:isMeasurementOf": { "@id": "Datasets" },
+                  "dqv:inMetric": { "@id": "Datasets Count" },
+                  "dqv:value": { "@value": "` + this.studiesCount + `", "@type": "xsd:integer" }
+                },
+                {
+                  "@id": "` + shanoirUrl + `/shanoir-ng/studies/studies/public/data` + `",
+                  "@type": "dqv:QualityMeasurement",
+                  "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
+                  "dqv:isMeasurementOf": { "@id": "Public Datasets" },
+                  "dqv:inMetric": { "@id": "Public Datasets Count" },
+                  "dqv:value": { "@value": "` + this.publicStudies.length + `", "@type": "xsd:integer" }
+                },
+                {
+                  "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics` + `",
+                  "@type": "dqv:QualityMeasurement",
+                  "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
+                  "dqv:isMeasurementOf": { "@id": "Subjects" },
+                  "dqv:inMetric": { "@id": "Subjects Count" },
+                  "dqv:value": { "@value": "` + this.subjectsCount + `", "@type": "xsd:integer" }
+                },
+                {
+                  "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics` + `",
+                  "@type": "dqv:QualityMeasurement",
+                  "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
+                  "dqv:isMeasurementOf": { "@id": "Images" },
+                  "dqv:inMetric": { "@id": "Images Count" },
+                  "dqv:value": { "@value": "` + this.datasetAcquisitionsCount + `", "@type": "xsd:integer" }
+                },
+                {
+                  "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics` + `",
+                  "@type": "schema:QuantitativeValue",
+                  "skos:prefLabel": "Total data storage volume",
+                  "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
+                  "dqv:isMeasurementOf": { "@id": "Storage Volume" },
+                  "schema:value": {
+                  "@value": "` + this.storageSize + `",
+                  "@type": "xsd:decimal"
+                  },
+                  "schema:unitCode": "E34", 
+                  "schema:unitText": "Gigabyte"
+                  },
+                {
+                  "@id": "Users",
+                  "@type": "dqv:Dimension",
+                  "skos:prefLabel": "Number of users",
+                  "skos:definition": "Total number of users registered on the platform."
+                },
+                {
+                  "@id": "Events",
+                  "@type": "dqv:Dimension",
+                  "skos:prefLabel": "Number of events",
+                  "skos:definition": "Total number of events generated by users on the platform."
+                },
+                {
+                  "@id": "Datasets",
+                  "@type": "dqv:Dimension",
+                  "skos:prefLabel": "Number of datasets",
+                  "skos:definition": "Total number of datasets hosted on the platform."
+                },
+                {
+                  "@id": "Public Datasets",
+                  "@type": "dqv:Dimension",
+                  "skos:prefLabel": "Number of public datasets",
+                  "skos:definition": "Total number of public datasets hosted on the platform."
+                },
+                {
+                  "@id": "Subjects",
+                  "@type": "dqv:Dimension",
+                  "skos:prefLabel": "Number of subjects",
+                  "skos:definition": "Total number of subjects belonging to datasets on the platform."
+                },
+                {
+                  "@id": "Images",
+                  "@type": "dqv:Dimension",
+                  "skos:prefLabel": "Number of images",
+                  "skos:definition": "Total number of DICOM series belonging to subjects on the platform."
+                },
+                {
+                  "@id": "Storage Volume",
+                  "@type": "dqv:Dimension",
+                  "skos:prefLabel": "Data storage volume",
+                  "skos:definition": "Total data storage volume used to store all datasets on the platform."
+                },
+                {
+                  "@id": "Users Count",
+                  "@type": "dqv:Metric",
+                  "dqv:inDimension": { "@id": "Users" },
+                  "skos:prefLabel": "Count of all users",
+                  "skos:definition": "Count all active users accounts present in Shanoir database."
+                },
+                {
+                  "@id": "Events Count",
+                  "@type": "dqv:Metric",
+                  "dqv:inDimension": { "@id": "Events" },
+                  "skos:prefLabel": "Count of all events",
+                  "skos:definition": "Count all events generated by users on the platform during the last 30 days."
+                },
+                {
+                  "@id": "Datasets Count",
+                  "@type": "dqv:Metric",
+                  "dqv:inDimension": { "@id": "Datasets" },
+                  "skos:prefLabel": "Count of all datasets",
+                  "skos:definition": "Count all datasets hosted on the platform under the Shanoir term Studies."
+                },
+                {
+                  "@id": "Public Datasets Count",
+                  "@type": "dqv:Metric",
+                  "dqv:inDimension": { "@id": "Public Datasets" },
+                  "skos:prefLabel": "Count of all public datasets",
+                  "skos:definition": "Count all the publicly accessible datasets among all the datasets hosted on the platform under the Shanoir term Studies."
+                },
+                {
+                  "@id": "Subjects Count",
+                  "@type": "dqv:Metric",
+                  "dqv:inDimension": { "@id": "Subjects" },
+                  "skos:prefLabel": "Count of all subjects",
+                  "skos:definition": "Count all subjects belonging to datasets and hosted on the platform under the Shanoir term Subjects."
+                },
+                {
+                  "@id": "Images Count",
+                  "@type": "dqv:Metric",
+                  "dqv:inDimension": { "@id": "Images" },
+                  "skos:prefLabel": "Count of all images",
+                  "skos:definition": "Count all DICOM series belonging to subjects and hosted on the platform under the Shanoir term Dataset Acquisition."
+                },
+                {
+                  "@id": "Storage Volume",
+                  "@type": "dqv:Metric",
+                  "dqv:inDimension": { "@id": "Storage Volume" },
+                  "skos:prefLabel": "Total data storage volume",
+                  "skos:definition": "Total data storage volume used to store all datasets on the platform."
                 }
-            ],
-            "dataset": [`
-                + datasetStr + `
-            ],
-
-            "url": "` + shanoirUrl + `"
+            ]
         }`;
 
         this._renderer2.appendChild(this._document.head, script);
 	}
 
-	private fetchStudies() {
+    private fetchUsersCount() {
+        //count all users
+        this.userService.countAllUsers().then(count => {
+            this.usersCount = count;
+        });
+    }
+
+    private fetchEventsCount() {
+        // count all users events during last month
+        this.userService.countLastMonthEvents().then(count => {
+            this.eventsCount = count;
+        });
+    }
+
+    private fetchOverallStats() {
+        // get the latest overall statistics
+        this.datasetService.getOverallStatistics().then(stats => {
+            this.studiesCount = stats.studiesCount;
+            this.subjectsCount = stats.subjectsCount;
+            this.datasetAcquisitionsCount = stats.datasetAcquisitionsCount;
+            this.storageSize = stats.storageSize;
+            this.fetchPublicStudies();
+            this.fetchUsersCount();
+            this.fetchEventsCount();
+            this.addSchemaToDOM();
+        });
+
+    }
+
+	private fetchPublicStudies() {
+        // get public studies
 		this.studyService.getPublicStudiesData().then(studies => {
 			// sort by nbExaminations
-			this.studies = studies?.sort((a, b) => {
+			this.publicStudies = studies?.sort((a, b) => {
 				// To order by dates :
 				// return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
 				return (b.nbExaminations) - (a.nbExaminations);
 			})
-            this.addSchemaToDOM();
 		});
 	}
+
+  get studiesSentence(): string {
+    if (this.studiesCount == null || this.studiesCount === 0) {
+      return '<strong>no collection</strong>';
+    }
+    if (this.studiesCount === 1) {
+      return '<strong>1 collection</strong>';
+    }
+    return `<strong>${this.studiesCount} collections</strong>`;
+  }
+
+  get subjectsSentence(): string {
+    if (this.subjectsCount == null || this.subjectsCount === 0) {
+      return '<strong>no subject</strong>';
+    }
+    if (this.subjectsCount === 1) {
+      return '<strong>1 subject</strong>';
+    }
+    return `<strong>${this.subjectsCount} subjects</strong>`;
+  }
+
+  get datasetAcquisitionsSentence(): string {
+    if (this.datasetAcquisitionsCount == null || this.datasetAcquisitionsCount === 0) {
+      return '<strong>no image</strong>';
+    }
+    if (this.datasetAcquisitionsCount === 1) {
+      return '<strong>1 image</strong>';
+    }
+    return `<strong>${this.datasetAcquisitionsCount} images</strong>`;
+  }
+
+  get publicStudiesSentence(): string {
+    if (this.publicStudies == null || this.publicStudies.length === 0) {
+      return '<strong>none public</strong>';
+    }
+    return `including <strong>${this.publicStudies.length} public</strong>`;
+  }
+
+  get usersSentence(): string {
+    if (this.usersCount == null || this.usersCount === 0) {
+      return 'is <strong>no active user</strong>';
+    }
+    if (this.usersCount === 1) {
+      return 'is <strong>1 active user</strong>';
+    }
+    return `are <strong>${this.usersCount} active users</strong>`;
+  }
+
+  get eventsSentence(): string {
+    if (this.eventsCount == null || this.eventsCount === 0) {
+      return '<strong>no query</strong> was';
+    }
+    if (this.eventsCount === 1) {
+      return '<strong>1 query</strong> was';
+    }
+    return `<strong>${this.eventsCount} queries</strong> were`;
+  }
 
 	increaseShow() {
 		this.show += 10;
@@ -188,6 +471,6 @@ export class WelcomeComponent implements OnInit {
 	@HostListener('window:scroll', ['$event']) onWindowScroll(e) {
 		const scroll = e.target['scrollingElement'].scrollTop + window.innerHeight;
 		const end = this.showMore?.nativeElement?.offsetTop;
-		if (scroll > end && this.studies.length > this.show) this.increaseShow();
+		if (scroll > end && this.publicStudies.length > this.show) this.increaseShow();
 	}
 }

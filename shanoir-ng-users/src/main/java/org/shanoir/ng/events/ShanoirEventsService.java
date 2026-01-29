@@ -39,6 +39,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
  * Service managing ShanoirEvents
+ *
  * @author fli
  *
  */
@@ -61,11 +62,12 @@ public class ShanoirEventsService {
     public void addEvent(ShanoirEvent event) {
         // Call repository
         repository.save(event);
-        // This is sad but with the @CreationTimestamp the date is not returned by the save method
+        // This is sad but with the @CreationTimestamp the date is not returned by the
+        // save method
         ShanoirEvent saved = repository.findById(event.getId()).orElse(null);
         // Push notification to UI
         if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())
-                  || ShanoirEventType.EXECUTION_MONITORING_EVENT.equals(event.getEventType())
+                || ShanoirEventType.EXECUTION_MONITORING_EVENT.equals(event.getEventType())
                 || ShanoirEventType.SOLR_INDEX_ALL_EVENT.equals(event.getEventType())
                 || ShanoirEventType.COPY_DATASET_EVENT.equals(event.getEventType())
                 || ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())
@@ -90,7 +92,8 @@ public class ShanoirEventsService {
         for (String type : eventType) {
             list.add(type);
         }
-        List<ShanoirEvent> dbEvents = Utils.toList(repository.findByUserIdAndEventTypeInAndLastUpdateYoungerThan7Days(userId, list));
+        List<ShanoirEvent> dbEvents = Utils
+                .toList(repository.findByUserIdAndEventTypeInAndLastUpdateYoungerThan7Days(userId, list));
         List<ShanoirEventLight> events = new ArrayList<>();
         cleanEvents(dbEvents);
         for (ShanoirEvent event : dbEvents) {
@@ -107,13 +110,15 @@ public class ShanoirEventsService {
         // set inactive tasks since > 5 min with a running status
         List<ShanoirEvent> updatedEvents = events.stream().filter(event -> {
             return (event.getStatus() == 2 || event.getStatus() == 5)
-                && now - event.getLastUpdate().getTime() > INACTIVE_TIMEOUT;
+                    && now - event.getLastUpdate().getTime() > INACTIVE_TIMEOUT;
         }).map(event -> {
             event.setStatus(-1);
-            event.setMessage("Inactivity timeout, task was set to error status because inactive for more than 5 minutes.");
+            event.setMessage(
+                    "Inactivity timeout, task was set to error status because inactive for more than 5 minutes.");
             return event;
         }).collect(Collectors.toList());
-        if (!updatedEvents.isEmpty()) repository.saveAll(updatedEvents);
+        if (!updatedEvents.isEmpty())
+            repository.saveAll(updatedEvents);
     }
 
     /**
@@ -128,6 +133,7 @@ public class ShanoirEventsService {
 
     /**
      * Sends an event using an emiter
+     *
      * @param notification the event to send
      */
     public void sendSseEventsToUI(ShanoirEvent notification) {
@@ -175,8 +181,21 @@ public class ShanoirEventsService {
         return repository.findByIdAndUserId(taskId, userId);
     }
 
-    public Page<ShanoirEvent> findByStudyId(final Pageable pageable, Long studyId, String searchStr, String searchField) {
-        Page<ShanoirEvent> events = repositoryCustom.findByStudyIdOrderByCreationDateDescAndSearch(pageable, studyId, searchStr, searchField);
+    public Page<ShanoirEvent> findByStudyId(final Pageable pageable, Long studyId, String searchStr,
+            String searchField) {
+        Page<ShanoirEvent> events = repositoryCustom.findByStudyIdOrderByCreationDateDescAndSearch(pageable, studyId,
+                searchStr, searchField);
         return events;
+    }
+
+    /**
+     * Count events passed during the last given days
+     *
+     * @param days number of days
+     * @return number of events
+     */
+    public Long countPassedEvents(Integer days) {
+        return repository
+                .countByLastUpdateAfter(new Date(System.currentTimeMillis() - days * DateUtils.MILLIS_PER_DAY));
     }
 }

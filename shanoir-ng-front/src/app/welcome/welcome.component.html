@@ -30,11 +30,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</div>
 	</div>
     <div class="stats">
-        {{ studies?.length }} shared studies
+        {{ welcomeIntroduction }}<br>
+        It has <span [innerHTML]="studiesSentence"></span> (<span [innerHTML]="publicStudiesSentence"></span>) containing <span [innerHTML]="datasetAcquisitionsSentence"></span> of <span [innerHTML]="subjectsSentence"></span>, for a total of <strong>{{ storageSize }} GB</strong>.<br>
+        There <span [innerHTML]="usersSentence"></span> and <span [innerHTML]="eventsSentence"></span> run during the last month.
     </div>
     <div class="study-tab-parent">
-        <div *ngIf="studies?.length > 0" class="study-tab">
-            <div class="studyItem" *ngFor="let study of studies | slice:0:show; let index = index;">
+        <div *ngIf="publicStudies?.length > 0" class="study-tab">
+            <div class="studyItem" *ngFor="let study of publicStudies | slice:0:show; let index = index;">
                 <div class="title link" (click)="accessRequest(study)">
                     <span class="studyTitle"><b>{{study.name}}</b></span>
                     <span *ngIf="study.description" class="studyDescription">
@@ -73,12 +75,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="tag" [style.border-color]="tag.color" *ngFor="let tag of study.studyTags"> {{ tag.name }}</span>
                     </div>
                 </div>
-                <hr *ngIf="index < (studies.length - 1)" />
+                <hr *ngIf="index < (publicStudies.length - 1)" />
                 <div class="accessRequest">
                     <a class="buttonItem" type="button" (click)="accessRequest(study)">Request an access</a>
                 </div>
             </div>
-            <div *ngIf="studies.length > show" class="showMoreButton" #showMore><i class="fa fa-cog fa-spin"></i></div>
+            <div *ngIf="publicStudies.length > show" class="showMoreButton" #showMore><i class="fa fa-cog fa-spin"></i></div>
         </div>
     </div>
 </div>

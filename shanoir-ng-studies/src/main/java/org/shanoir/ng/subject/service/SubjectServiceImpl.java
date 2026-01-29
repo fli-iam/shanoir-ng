@@ -145,7 +145,8 @@ public class SubjectServiceImpl implements SubjectService {
             subjects = subjectRepository.findAll();
         } else {
             Long userId = KeycloakUtil.getTokenUserId();
-            List<Long> studyIds = studyUserRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+            List<Long> studyIds = studyUserRepository.findDistinctStudyIdByUserId(userId,
+                    StudyUserRight.CAN_SEE_ALL.getId());
             subjects = subjectRepository.findBySubjectStudyListStudyIdIn(studyIds);
         }
         return getIdNamesFromSubjects(subjects);
@@ -158,7 +159,8 @@ public class SubjectServiceImpl implements SubjectService {
             subjects = subjectRepository.findAllById(subjectIds);
         } else {
             Long userId = KeycloakUtil.getTokenUserId();
-            List<Long> studyIds = studyUserRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+            List<Long> studyIds = studyUserRepository.findDistinctStudyIdByUserId(userId,
+                    StudyUserRight.CAN_SEE_ALL.getId());
             subjects = subjectRepository.findBySubjectStudyListStudyIdInAndIdIn(studyIds, subjectIds);
         }
         return getIdNamesFromSubjects(subjects);
@@ -239,7 +241,8 @@ public class SubjectServiceImpl implements SubjectService {
      */
     private Subject mapSubjectStudyListToSubject(Subject subject) throws ShanoirException {
         List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
-        // Old versions of ShUp will still send subject study objects, and no studyId in subject
+        // Old versions of ShUp will still send subject study objects, and no studyId in
+        // subject
         if (subjectStudyList != null && !subjectStudyList.isEmpty()) {
             if (subjectStudyList.size() > 1) {
                 throw new ShanoirException("A subject is only in one study.", HttpStatus.FORBIDDEN.value());
@@ -247,7 +250,8 @@ public class SubjectServiceImpl implements SubjectService {
             SubjectStudy subjectStudy = subjectStudyList.get(0);
             subject = mapSubjectStudyAttributesToSubject(subject, subjectStudy);
             subjectStudy.setSubject(subject);
-        // New code from Angular will be without subject study, but tree requires it still
+            // New code from Angular will be without subject study, but tree requires it
+            // still
         } else {
             SubjectStudy subjectStudy = new SubjectStudy();
             subjectStudy.setStudy(subject.getStudy());
@@ -327,7 +331,8 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     private Subject updateSubjectValues(final Subject subjectOld, final Subject subjectNew) throws ShanoirException {
-        // We can not update subject name, birth date, identifier and pseudonymus hash values
+        // We can not update subject name, birth date, identifier and pseudonymus hash
+        // values
         subjectOld.setSex(subjectNew.getSex());
         subjectOld.setManualHemisphericDominance(subjectNew.getManualHemisphericDominance());
         subjectOld.setLanguageHemisphericDominance(subjectNew.getLanguageHemisphericDominance());
@@ -367,8 +372,8 @@ public class SubjectServiceImpl implements SubjectService {
         Set<Long> newTagIds = sSNew.getSubjectStudyTags() == null
                 ? Collections.emptySet()
                 : sSNew.getSubjectStudyTags().stream()
-                    .map(sst -> sst.getTag().getId())
-                    .collect(Collectors.toSet());
+                        .map(sst -> sst.getTag().getId())
+                        .collect(Collectors.toSet());
         subjectStudyTagsOld.removeIf(oldTag -> !newTagIds.contains(oldTag.getTag().getId()));
         if (sSNew.getSubjectStudyTags() != null) {
             for (SubjectStudyTag sst : sSNew.getSubjectStudyTags()) {
@@ -389,17 +394,18 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public boolean updateSubjectInMicroservices(SubjectDTO subjectDTO) throws MicroServiceCommunicationException {
         try {
-            rabbitTemplate.
-                    convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,
+            rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(subjectDTO));
             return true;
         } catch (AmqpException | JsonProcessingException e) {
-            throw new MicroServiceCommunicationException("Error while communicating with MS Datasets to update subject.");
+            throw new MicroServiceCommunicationException(
+                    "Error while communicating with MS Datasets to update subject.");
         }
     }
 
     /**
-     * If preclinical is null, doesn't use it. Else it filters the subjects depending of the given value true/false.
+     * If preclinical is null, doesn't use it. Else it filters the subjects
+     * depending of the given value true/false.
      */
     @Override
     public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, final Boolean preclinical) {
@@ -415,7 +421,8 @@ public class SubjectServiceImpl implements SubjectService {
         if (subjectStudyList != null) {
             subjectStudyList.stream().forEach(ss -> {
                 // after testing this seems to be useless :
-                // ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(studyId, ss.getSubject().getId()));
+                // ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(studyId,
+                // ss.getSubject().getId()));
                 if (studyWithTags != null) {
                     ss.getStudy().setTags(studyWithTags.getTags());
                 }
@@ -463,7 +470,8 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public Page<Subject> getClinicalFilteredPageByStudies(Pageable page, String name, List<Study> studies) {
         Iterable<Long> studyIds = studies.stream().map(AbstractEntity::getId).collect(Collectors.toList());
-        return subjectRepository.findDistinctByPreclinicalIsFalseAndNameContainingAndSubjectStudyListStudyIdIn(name, page, studyIds);
+        return subjectRepository.findDistinctByPreclinicalIsFalseAndNameContainingAndSubjectStudyListStudyIdIn(name,
+                page, studyIds);
     }
 
     @Override
@@ -486,7 +494,8 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     /**
-     * Use this method to avoid two bags violation exception and load subjectStudyTags.
+     * Use this method to avoid two bags violation exception and load
+     * subjectStudyTags.
      *
      * @param subject
      */
@@ -496,7 +505,8 @@ public class SubjectServiceImpl implements SubjectService {
             if (subjectStudyList != null) {
                 subjectStudyList.stream().forEach(ss -> {
                     ss.getSubjectStudyTags().clear();
-                    ss.getSubjectStudyTags().addAll(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
+                    ss.getSubjectStudyTags().addAll(subjectStudyRepository
+                            .findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
                     Study studyWithTags = studyRepository.findStudyWithTagsById(ss.getStudy().getId());
                     if (studyWithTags != null) {
                         ss.getStudy().setTags(studyWithTags.getTags());

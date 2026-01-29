@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.subject.controler;
 
-
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -79,7 +78,8 @@ public class SubjectApiController implements SubjectApi {
         try {
             // Delete all associated BIDS folders
             subjectService.deleteById(subjectId);
-            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, subjectId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, subjectId.toString(),
+                    KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, subjectId.toString());
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
@@ -149,7 +149,8 @@ public class SubjectApiController implements SubjectApi {
         } else {
             createdSubject = subjectService.createAutoIncrement(subject, centerId, true);
         }
-        eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_SUBJECT_EVENT,
+                createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
         final SubjectDTO subjectDTO = subjectMapper.subjectToSubjectDTO(createdSubject);
         return new ResponseEntity<SubjectDTO>(subjectDTO, HttpStatus.OK);
     }
@@ -163,7 +164,8 @@ public class SubjectApiController implements SubjectApi {
         validate(subject, result);
         try {
             subjectService.update(subject);
-            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_SUBJECT_EVENT, subject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_SUBJECT_EVENT,
+                    subject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -181,7 +183,8 @@ public class SubjectApiController implements SubjectApi {
         if ("null".equals(preclinical)) {
             simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyId(studyId);
         } else {
-            simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyAndPreclinical(studyId, Boolean.parseBoolean(preclinical));
+            simpleSubjectDTOList = subjectService.findAllSubjectsOfStudyAndPreclinical(studyId,
+                    Boolean.parseBoolean(preclinical));
         }
         if (simpleSubjectDTOList.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -189,8 +192,12 @@ public class SubjectApiController implements SubjectApi {
         simpleSubjectDTOList.sort(new Comparator<SimpleSubjectDTO>() {
             @Override
             public int compare(SimpleSubjectDTO o1, SimpleSubjectDTO o2) {
-                String aname = o1.getSubjectStudy().getSubjectStudyIdentifier() != null ? o1.getSubjectStudy().getSubjectStudyIdentifier() : o1.getName();
-                String bname = o2.getSubjectStudy().getSubjectStudyIdentifier() != null ? o2.getSubjectStudy().getSubjectStudyIdentifier() : o2.getName();
+                String aname = o1.getSubjectStudy().getSubjectStudyIdentifier() != null
+                        ? o1.getSubjectStudy().getSubjectStudyIdentifier()
+                        : o1.getName();
+                String bname = o2.getSubjectStudy().getSubjectStudyIdentifier() != null
+                        ? o2.getSubjectStudy().getSubjectStudyIdentifier()
+                        : o2.getName();
                 return aname.compareToIgnoreCase(bname);
             }
         });
@@ -204,7 +211,8 @@ public class SubjectApiController implements SubjectApi {
             @Parameter(description = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
         // Get all allowed studies
         List<Study> studies = studyService.findAll();
-        // As only studies are used to find a subject, in which the user has rights, no need for further rights checks
+        // As only studies are used to find a subject, in which the user has rights, no
+        // need for further rights checks
         final Subject subject = subjectService.findByIdentifierInStudiesWithRights(subjectIdentifier, studies);
         if (subject == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

@@ -317,7 +317,6 @@ public interface StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException, ShanoirException;
 
-
     @Operation(summary = "", description = "Add DUA to a study")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "dua uploaded"),
@@ -391,7 +390,6 @@ public interface StudyApi {
     ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
 
-
     @Operation(summary = "", description = "If exists, returns a list of Study corresponding to the given right for current user")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "List of study"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -402,6 +400,5 @@ public interface StudyApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
     ResponseEntity<List<Long>> getStudiesByRightForCurrentUser(
             @Parameter(description = "right requested", required = true) @PathVariable("right") StudyUserRight right) throws RestServiceException;
-
 
 }
