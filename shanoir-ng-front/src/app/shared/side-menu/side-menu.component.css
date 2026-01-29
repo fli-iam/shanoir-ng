@@ -53,8 +53,7 @@ a:hover, a:active { color: inherit; }
     text-align: center;
     font-size: 10px;
     vertical-align: middle;
-    padding: 0;
-    line-height: 15px;
+    padding: 1px 1px 0 0px;
 }
 
 .admin-tag { color: orange; }
