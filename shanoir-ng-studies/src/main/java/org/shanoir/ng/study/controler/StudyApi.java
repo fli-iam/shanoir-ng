@@ -167,7 +167,6 @@ public interface StudyApi {
             @Parameter(description = "subject id of datasets", required = true)
             @RequestParam(value = "subjectIds", required = true) List<String> subjectIdStudyId);
 
-
     @Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Sizes of the study files in bytes by format"),
@@ -191,7 +190,6 @@ public interface StudyApi {
     ResponseEntity<Map<Long, StudyStorageVolumeDTO>> getDetailedStorageVolumeByStudy(
             @Parameter(description = "study ids") @RequestParam List<Long> studyIds
     ) throws RestServiceException;
-
 
     @Operation(summary = "", description = "Updates a study")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study updated"),
@@ -317,7 +315,6 @@ public interface StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException, ShanoirException;
 
-
     @Operation(summary = "", description = "Add DUA to a study")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "dua uploaded"),
@@ -391,7 +388,6 @@ public interface StudyApi {
     ResponseEntity<List<StudyStatisticsDTO>> getStudyStatistics(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws RestServiceException, IOException;
 
-
     @Operation(summary = "", description = "If exists, returns a list of Study corresponding to the given right for current user")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "List of study"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -402,6 +398,5 @@ public interface StudyApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
     ResponseEntity<List<Long>> getStudiesByRightForCurrentUser(
             @Parameter(description = "right requested", required = true) @PathVariable("right") StudyUserRight right) throws RestServiceException;
-
 
 }
