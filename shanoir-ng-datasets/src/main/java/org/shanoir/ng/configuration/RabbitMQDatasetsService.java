@@ -189,7 +189,7 @@ public class RabbitMQDatasetsService {
         Subject subject = objectMapper.readValue(subjectStr, Subject.class);
         subject = subjectRepository.save(subject);
         LOG.info("Subject replicated in MS Datasets with ID: {} and Name: {}",
-            subject.getId(), subject.getName()
+                subject.getId(), subject.getName()
         );
         // Update BIDS
         Set<Long> studyIds = new HashSet<>();
