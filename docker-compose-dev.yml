@@ -386,7 +386,10 @@ services:
       - "nifti-conversion"
 
   bids-validator:
-    build: ./bids-validator
+    container_name: "${SHANOIR_PREFIX}bids-validator"
+    build:
+      context: docker-compose
+      target: bids-validator
     environment:
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
       - IN_QUEUE=bids.validate
