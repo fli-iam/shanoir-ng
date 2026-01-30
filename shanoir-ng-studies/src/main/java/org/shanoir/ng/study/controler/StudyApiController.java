@@ -218,6 +218,7 @@ public class StudyApiController implements StudyApi {
         Study createdStudy;
         try {
             addCurrentUserAsStudyUserIfEmptyStudyUsers(study);
+            study.setIsActive(true);
             createdStudy = studyService.create(study);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_STUDY_EVENT,
                     createdStudy.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));

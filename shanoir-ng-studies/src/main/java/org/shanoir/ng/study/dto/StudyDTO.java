@@ -98,6 +98,8 @@ public class StudyDTO {
 
     private StudyStorageVolumeDTO storageVolume;
 
+    private boolean isActive;
+
     /**
      * Default constructor.
      */
@@ -503,4 +505,11 @@ public class StudyDTO {
                 + ", storageVolume=" + storageVolume + "]";
     }
 
+    public boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+    }
 }

@@ -158,6 +158,8 @@ export class StudyDTOService {
             entity.detailedSizes = this.studyStorageVolumeDTOToDetailedSizes(dto.storageVolume)
         }
 
+        entity.isActive = dto.isActive;
+
         return entity;
     }
 
@@ -273,6 +275,7 @@ export class StudyDTO {
     description: string;
     license: string;
     storageVolume: StudyStorageVolumeDTO;
+    isActive: boolean;
 
     constructor(study: Study) {
         this.id = study.id ? study.id : null;
@@ -311,8 +314,8 @@ export class StudyDTO {
         this.studyTags = study.studyTags;
         this.description = study.description;
         this.license = study.license;
+        this.isActive = study.isActive;
     }
-
 }
 
 export class CenterStudyDTO {
@@ -339,6 +342,7 @@ export class StudyLight {
   license: string;
   studyTags: Tag[];
   profile: Profile;
+  isActive: boolean;
 }
 
 

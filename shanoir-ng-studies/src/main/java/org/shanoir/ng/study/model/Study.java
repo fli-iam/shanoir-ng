@@ -186,6 +186,10 @@ public class Study extends HalEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudyTag> studyTags;
 
+    @NotNull
+    @Column(name = "is_active", columnDefinition = "TINYINT(1) DEFAULT 0")
+    private Boolean isActive = false;
+
     /**
      * Init HATEOAS links
      */
@@ -557,5 +561,13 @@ public class Study extends HalEntity {
 
     public void setStudyTags(List<StudyTag> studyTags) {
         this.studyTags = studyTags;
+    }
+
+    public boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
     }
 }

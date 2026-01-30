@@ -146,6 +146,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
+                        <label i18n="Study detail|Approval status label@@studyDetailApprovalStatus">Approval Status</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <span *ngIf="study.isActive" i18n="Study detail|Active@@studyDetailActive">Active</span>
+                                <span *ngIf="!study.isActive" i18n="Study detail|Draft@@studyDetailDraft">Draft</span>
+                            </ng-template>
+                        </span>
+                    </li>
+					<li>
 						<label>Pseudonymization profile</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-container *ngIf="mode == 'view' || mode == 'edit'">

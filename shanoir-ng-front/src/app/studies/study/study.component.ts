@@ -157,6 +157,10 @@ export class StudyComponent extends EntityComponent<Study> {
         return this.idPromise.then(() => this.studyService.get(this.id, null));
     }
 
+    isAdmin(): boolean {
+         return this.keycloakService.isUserAdmin();
+    }
+
     initView(): Promise<void> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin()

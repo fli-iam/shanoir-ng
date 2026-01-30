@@ -143,7 +143,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "", produces = { "application/json" }, consumes = {
             "application/json" }, method = RequestMethod.POST)
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<StudyDTO> saveNewStudy(
             @Parameter(description = "study to create", required = true) @RequestBody Study study, BindingResult result)
             throws RestServiceException;
