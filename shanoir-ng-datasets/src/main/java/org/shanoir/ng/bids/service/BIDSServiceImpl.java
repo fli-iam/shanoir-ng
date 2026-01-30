@@ -61,6 +61,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.DatasetFileUtils;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -140,6 +141,9 @@ public class BIDSServiceImpl implements BIDSService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    private BidsTreeSemaphore bidsTreeSemaphore;
+
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 
     private DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -181,38 +185,46 @@ public class BIDSServiceImpl implements BIDSService {
      * @param studyName the study name
      * @return data from the study formatted as BIDS in a .zip file.
      * @throws IOException
+     * @throws BidsTreeLockedException
      */
     @Override
-    public File exportAsBids(final Long studyId, String studyName) throws IOException {
+    public File exportAsBids(final Long studyId, String studyName) throws IOException, BidsTreeLockedException {
         // Get folder
         File workFolder = getBidsFolderpath(studyId, studyName);
-        if (workFolder.exists()) {
-            // If the file already exists, just return it
-            return workFolder;
+        Long userId = KeycloakUtil.getTokenUserId();
+        bidsTreeSemaphore.lockOrThrow(studyId, userId);
+        try { // ensure unlock in finally
+            if (workFolder.exists()) {
+                // If the file already exists, just return it
+                return workFolder;
+            } else {
+                // Otherwise, create it from scratch
+                File baseDir = createBaseBidsFolder(workFolder, studyName);
+
+                // Iterate over subjects got from call to SubjectApiController.findSubjectsByStudyId() and get list of subjects
+                List<Subject> subjs = getSubjectsForStudy(studyId);
+                if (org.apache.commons.collections4.CollectionUtils.isEmpty(subjs)) {
+                    return baseDir;
+                }
+
+                // Sort by ID
+                subjs.sort(Comparator.comparing(Subject::getId));
+
+                // Create participants.tsv
+                rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
+
+                int index = 1;
+                for (Subject subj : subjs) {
+                    exportAsBids(subj, studyName, studyId, baseDir, index);
+                    index++;
+                }
+
+                return baseDir;
+            }
+
+        } finally {
+            bidsTreeSemaphore.unlock(studyId, userId);
         }
-
-        // Otherwise, create it from scratch
-        File baseDir = createBaseBidsFolder(workFolder, studyName);
-
-        // Iterate over subjects got from call to SubjectApiController.findSubjectsByStudyId() and get list of subjects
-        List<Subject> subjs = getSubjectsForStudy(studyId);
-        if (org.apache.commons.collections4.CollectionUtils.isEmpty(subjs)) {
-            return baseDir;
-        }
-
-        // Sort by ID
-        subjs.sort(Comparator.comparing(Subject::getId));
-
-        // Create participants.tsv
-        rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
-
-        int index = 1;
-        for (Subject subj : subjs) {
-            exportAsBids(subj, studyName, studyId, baseDir, index);
-            index++;
-        }
-
-        return baseDir;
     }
 
     /**
