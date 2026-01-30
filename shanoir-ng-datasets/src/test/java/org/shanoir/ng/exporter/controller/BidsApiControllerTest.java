@@ -21,10 +21,11 @@ import org.mockito.Mockito;
 import org.shanoir.ng.bids.BidsDeserializer;
 import org.shanoir.ng.bids.controller.BidsApiController;
 import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.bids.service.BidsTreeSemaphore;
 import org.shanoir.ng.bids.service.BidsValidationPublisher;
 import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
-import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -58,7 +59,7 @@ public class BidsApiControllerTest {
     private BidsDeserializer bidsDeserializer;
 
     @MockBean
-    private StudyRepository studyRepo;
+    private StudyService studyService;
 
     @Autowired
     private MockMvc mvc;
@@ -71,6 +72,9 @@ public class BidsApiControllerTest {
 
     @MockBean
     private BidsValidationPublisher bidsValidationPublisher;
+
+    @MockBean
+    private BidsTreeSemaphore bidsTreeSemaphore;
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
