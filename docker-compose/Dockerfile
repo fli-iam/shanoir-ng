@@ -403,11 +403,32 @@ CMD ["solr-precreate", "shanoir", "/etc/shanoir-core-template"]
 
 
 ################ BIDS validator #####################################################
+# ---- stage: cache validator deps
+FROM denoland/deno:debian AS deno_cache
 
-FROM node:20-alpine
+# Force Deno to store its cache here
+ENV DENO_DIR=/deno
 
-RUN npm i -g bids-validator@latest
+ARG BIDS_VALIDATOR_VERSION=2.2.10
+
+# Pre-fetch into Deno cache
+RUN deno cache jsr:@bids/validator@${BIDS_VALIDATOR_VERSION}
+
+
+# ---- stage: runtime
+FROM node:20-bullseye-slim
+
+# Copy deno binary
+COPY --from=deno_cache /usr/bin/deno /usr/local/bin/deno
+
+# Copy the populated DENO_DIR
+COPY --from=deno_cache /deno /deno
+ENV DENO_DIR=/deno
+
 WORKDIR /app
-RUN npm i amqplib
-COPY bids-validator/worker.js /app/worker.js
+RUN npm i amqplib@0.10.9
+COPY bids/validator/worker.js /app/worker.js
+
+ENV BIDS_VALIDATOR_VERSION=2.2.10
+
 CMD ["node", "worker.js"]
