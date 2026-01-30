@@ -404,7 +404,8 @@ services:
       - "preclinical"
 
   bids-validator:
-    build: ./bids-validator
+    container_name: "${SHANOIR_PREFIX}bids-validator"
+    image: "ghcr.io/fli-iam/shanoir-ng/bids-validator:NG_v2.5.1"
     environment:
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
       - IN_QUEUE=bids.validate

@@ -416,7 +416,7 @@ RUN deno cache jsr:@bids/validator@${BIDS_VALIDATOR_VERSION}
 
 
 # ---- stage: runtime
-FROM node:20-bullseye-slim
+FROM node:20-bullseye-slim AS bids-validator
 
 # Copy deno binary
 COPY --from=deno_cache /usr/bin/deno /usr/local/bin/deno
@@ -427,7 +427,7 @@ ENV DENO_DIR=/deno
 
 WORKDIR /app
 RUN npm i amqplib@0.10.9
-COPY bids/validator/worker.js /app/worker.js
+COPY bids-validator/worker.js /app/worker.js
 
 ENV BIDS_VALIDATOR_VERSION=2.2.10
 
