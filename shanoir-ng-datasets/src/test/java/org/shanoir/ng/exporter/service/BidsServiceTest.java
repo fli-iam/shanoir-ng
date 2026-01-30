@@ -32,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.shanoir.ng.bids.service.BIDSServiceImpl;
 import org.shanoir.ng.bids.service.BidsTreeLockedException;
+import org.shanoir.ng.bids.service.BidsTreeSemaphore;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -82,6 +83,9 @@ public class BidsServiceTest {
 
     @Mock
     private RabbitTemplate rabbitTemplate;
+
+    @Mock
+    private BidsTreeSemaphore bidsTreeSemaphore;
 
     private String studyName = "STUDY";
 
