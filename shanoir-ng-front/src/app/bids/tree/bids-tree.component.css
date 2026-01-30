@@ -13,3 +13,10 @@ td.last { padding-right: 0; }
     padding: 10px 15px;
     background-color: var(--color-b-light);
 }
+h4 { display: inline-block; }
+.dl-button {
+    padding: 5px 5px;
+    margin-left: 10px;
+    color: var(--color-b);
+    cursor: pointer;
+}
