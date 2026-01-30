@@ -28,9 +28,10 @@ const DATA_ROOT = process.env.DATA_ROOT || "/data";
 
 function runValidator(path) {
     return new Promise((resolve) => {
+        const v = process.env.BIDS_VALIDATOR_VERSION || "2.2.10";
         execFile(
-            "bids-validator",
-            ["--json", path],
+            "deno",
+            ["run", "--cached-only", "-ERWN", `jsr:@bids/validator@${v}`, "--json", path],
             { maxBuffer: 50 * 1024 * 1024 },
             (err, stdout, stderr) => {
                 const exitCode = err && typeof err.code === "number" ? err.code : 0;
