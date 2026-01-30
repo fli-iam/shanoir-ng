@@ -180,7 +180,7 @@ public class BidsApiController implements BidsApi {
             boolean unlocked = bidsTreeSemaphore.awaitUnlock(studyId, KeycloakUtil.getTokenUserId(), 30, java.util.concurrent.TimeUnit.SECONDS);
             if (!unlocked) { // still locked after timeout
                 throw new RestServiceException(
-                    new ErrorModel(HttpStatus.CONFLICT.value(), "The BIDS tree is locked and the timeout has been reached", null));
+                        new ErrorModel(HttpStatus.CONFLICT.value(), "The BIDS tree is locked and the timeout has been reached", null));
             } else { // now unlocked
                 try {
                     // try to get the BIDS structure
@@ -189,7 +189,7 @@ public class BidsApiController implements BidsApi {
                 } catch (BidsTreeLockedException e) {
                     // if, by any bad luck, it has been locked between those lines by the same user requesting a refresh, throw exception
                     throw new RestServiceException(
-                        new ErrorModel(HttpStatus.CONFLICT.value(), "The BIDS tree is currently reconstructing, try again later", null));
+                            new ErrorModel(HttpStatus.CONFLICT.value(), "The BIDS tree is currently reconstructing, try again later", null));
                 }
             }
         } else {
