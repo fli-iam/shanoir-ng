@@ -182,12 +182,24 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
         return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
     }
 
-    callBidsValidator(): void {
+    protected callBidsValidator(): void {
         this.getBidsStructure().then(() => {
             // currently the list object always contains one element which is the root folder
             this.studyService.validateStudyForBIDS(this.studyId, this.list[0]?.path).then(report => {
                 this.report = report;
             });
         });
+    }
+
+    protected downloadBidsValidatorReport(): void {
+        if (!this.report) return;
+        const blob = new Blob([JSON.stringify(this.report, null, 4)], {
+            type: 'application/json'
+        });
+        AppUtils.browserDownloadFile(blob, 'bids_validator_' 
+            + AppUtils.sanitizeFilename(this.studyName) + '_'
+            + new Date().toLocaleString('fr-FR')
+            + '.json'
+        );
     }
 }
