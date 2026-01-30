@@ -186,11 +186,14 @@ public class RabbitMQDatasetsService {
      */
     @Transactional
     private void manageSubjectUpdate(final String subjectStr) throws JsonProcessingException, JsonMappingException {
-        Subject received = objectMapper.readValue(subjectStr, Subject.class);
-        received = subjectRepository.save(received);
+        Subject subject = objectMapper.readValue(subjectStr, Subject.class);
+        subject = subjectRepository.save(subject);
+        LOG.info("Subject replicated in MS Datasets with ID: {} and Name: {}",
+            subject.getId(), subject.getName()
+        );
         // Update BIDS
         Set<Long> studyIds = new HashSet<>();
-        for (Examination exam : examinationRepository.findBySubjectId(received.getId())) {
+        for (Examination exam : examinationRepository.findBySubjectId(subject.getId())) {
             studyIds.add(exam.getStudyId());
         }
         for (Study stud : studyRepository.findAllById(studyIds)) {
@@ -198,7 +201,7 @@ public class RabbitMQDatasetsService {
         }
         // Update solr references
         List<Long> subjectIdList = new ArrayList<Long>();
-        subjectIdList.add(received.getId());
+        subjectIdList.add(subject.getId());
         try {
             solrService.updateSubjectsAsync(subjectIdList);
         } catch (Exception e) {
