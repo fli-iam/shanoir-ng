@@ -14,10 +14,6 @@
 
 package org.shanoir.ng.exporter.service;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.BDDMockito.given;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,12 +22,16 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.shanoir.ng.bids.service.BIDSServiceImpl;
+import org.shanoir.ng.bids.service.BidsTreeLockedException;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -149,7 +149,12 @@ public class BidsServiceTest {
         given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
 
         // WHEN we export the data
-        service.exportAsBids(exam.getStudyId(), studyName);
+        try {
+            service.exportAsBids(exam.getStudyId(), studyName);
+        } catch (BidsTreeLockedException e) {
+            // Should not happen
+            throw new RuntimeException(e);
+        }
 
         // THEN the bids folder is generated with study - subject - exam - data
         File studyFile = new File(tempFolderPath + "stud-" + exam.getStudyId() + "" + studyName);
