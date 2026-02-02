@@ -54,6 +54,9 @@ import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
@@ -144,6 +147,9 @@ public class BIDSServiceImpl implements BIDSService {
     @Autowired
     private BidsTreeSemaphore bidsTreeSemaphore;
 
+    @Autowired
+    private ShanoirEventService eventService;
+
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 
     private DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -193,11 +199,24 @@ public class BIDSServiceImpl implements BIDSService {
         File workFolder = getBidsFolderpath(studyId, studyName);
         Long userId = KeycloakUtil.getTokenUserId();
         bidsTreeSemaphore.lockOrThrow(studyId, userId);
+        ShanoirEvent event = null;
         try { // ensure unlock in finally
             if (workFolder.exists()) {
                 // If the file already exists, just return it
                 return workFolder;
             } else {
+                event = new ShanoirEvent(
+                        ShanoirEventType.BIDS_EXPORT,
+                        null,
+                        KeycloakUtil.getTokenUserId(),
+                        "Export BIDS for study " + studyName,
+                        ShanoirEvent.IN_PROGRESS,
+                        0f,
+                        null);
+                event.setReport("This operation is automatically triggered at least once per study as preparation for operations "
+                        + "like building the BIDS tree or running the validator. You can safely ignore this message.");
+                eventService.publishEvent(event);
+
                 // Otherwise, create it from scratch
                 File baseDir = createBaseBidsFolder(workFolder, studyName);
 
@@ -211,17 +230,33 @@ public class BIDSServiceImpl implements BIDSService {
                 subjs.sort(Comparator.comparing(Subject::getId));
 
                 // Create participants.tsv
+                event.setMessage("Getting participants.tsv for study " + studyName);
+                eventService.publishEvent(event);
                 rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
 
                 int index = 1;
                 for (Subject subj : subjs) {
+                    event.setMessage("Exporting subject " + subj.getName() + " as BIDS for study " + studyName);
+                    event.setProgress((float) (index - 1) / subjs.size());
+                    eventService.publishEvent(event);
                     exportAsBids(subj, studyName, studyId, baseDir, index);
                     index++;
                 }
+                event.setMessage("Export BIDS for study " + studyName + " completed");
+                event.setProgress(1f);
+                event.setStatus(ShanoirEvent.SUCCESS);
+                eventService.publishEvent(event);
 
                 return baseDir;
             }
-
+        } catch (Exception e) {
+            if (event != null) {
+                event.setMessage("Export BIDS for study " + studyName + " failed: " + e.getMessage());
+                event.setProgress(1f);
+                event.setStatus(ShanoirEvent.ERROR);
+                eventService.publishEvent(event);
+            }
+            throw e;
         } finally {
             bidsTreeSemaphore.unlock(studyId, userId);
         }

@@ -376,7 +376,6 @@ services:
       - rabbitmq
     networks:
       - shanoir_ng_network
-    restart: unless-stopped
 
 volumes:
   keycloak-database-data:

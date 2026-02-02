@@ -31,7 +31,7 @@ function runValidator(path) {
         const v = process.env.BIDS_VALIDATOR_VERSION || "2.2.10";
         execFile(
             "deno",
-            ["run", "--cached-only", "-ERWN", `jsr:@bids/validator@${v}`, "--json", path],
+            ["run", "--cached-only", "--no-color", "-ERWN", `jsr:@bids/validator@${v}`, "--json", path],
             { maxBuffer: 50 * 1024 * 1024 },
             (err, stdout, stderr) => {
                 const exitCode = err && typeof err.code === "number" ? err.code : 0;
@@ -105,10 +105,15 @@ async function connectWithRetry() {
 
             // 2) Validation
             try {
+                const start = Date.now();
+                console.log("Start running BIDS Validator...");
                 const { exitCode, report, stderr } = await runValidator(path);
+                const duration = Date.now() - start;
                 const ok = exitCode === 0;
 
                 const out = { input, path, ok, exitCode, report, stderr };
+
+                console.log(`BIDS Validator took ${duration} ms, stderr: ${stderr}`);
                 ch.sendToQueue(OUT_QUEUE, Buffer.from(JSON.stringify(out)), {
                     persistent: true,
                     contentType: "application/json",
@@ -118,6 +123,7 @@ async function connectWithRetry() {
                 ch.ack(msg);
             } catch (err) {
                 const out = { input, path, ok: false, error: `Validator crash: ${err.message || String(err)}` };
+                console.error(`BIDS Validator error after ${duration}ms: ${err.message || String(err)}`);
                 ch.sendToQueue(OUT_QUEUE, Buffer.from(JSON.stringify(out)), {
                     persistent: true,
                     contentType: "application/json",
