@@ -150,9 +150,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-					<li>
-                        <label i18n="Study detail|State label@@studyDetailApprovalStatus">State</label>
-                        <span class="right-col" [ngSwitch]="mode">
+					<li [ngSwitch]="mode">
+                        <label i18n="Study detail|Draft state label@@studyDetailApprovalStatus">State</label>
+                        <span class="right-col">
                             <ng-template [ngSwitchCase]="'view'">
                                 <span>{{ study.isDraft ? 'Draft' : 'Active' }}</span>
                             </ng-template>
