@@ -154,9 +154,9 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/toggleState/{studyId}", produces = { "application/json" }, method = RequestMethod.PUT)
+    @RequestMapping(value = "/toggleDraftState/{studyId}", produces = { "application/json" }, method = RequestMethod.PUT)
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<StudyDTO> toggleStateById(
+    ResponseEntity<StudyDTO> toggleDraftStateById(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException;
 

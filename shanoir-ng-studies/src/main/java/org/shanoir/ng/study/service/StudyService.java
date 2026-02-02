@@ -104,7 +104,7 @@ public interface StudyService {
      * @throws ShanoirStudiesException
      */
     @PreAuthorize("hasRole('ADMIN')")
-    public Study toggleState(Long studyId) throws ShanoirException;
+    public Study toggleDraftState(Long studyId) throws ShanoirException;
 
 
     /**

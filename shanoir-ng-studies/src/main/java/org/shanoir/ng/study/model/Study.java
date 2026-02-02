@@ -187,8 +187,8 @@ public class Study extends HalEntity {
     private List<StudyTag> studyTags;
 
     @NotNull
-    @Column(name = "is_active", columnDefinition = "TINYINT(1) DEFAULT 0")
-    private Boolean isActive = false;
+    @Column(name = "is_draft", columnDefinition = "TINYINT(1) DEFAULT 0")
+    private Boolean isDraft = false;
 
     /**
      * Init HATEOAS links
@@ -563,11 +563,11 @@ public class Study extends HalEntity {
         this.studyTags = studyTags;
     }
 
-    public boolean getIsActive() {
-        return isActive;
+    public boolean getIsDraft() {
+        return isDraft;
     }
 
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
+    public void setIsDraft(boolean isDraft) {
+        this.isDraft = isDraft;
     }
 }

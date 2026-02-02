@@ -56,7 +56,7 @@ export class Study extends Entity {
     @Field() studyTags: Tag[];
     @Field() description: string;
     @Field() license: string;
-    @Field() isActive: boolean = false;
+    @Field() isDraft: boolean = false;
     accessRequestedByCurrentUser: boolean = false;
     locked: boolean = false; // current user has no access
 

@@ -159,8 +159,8 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             },
             { headerName: "Name", field: "name" },
             {
-                headerName: "State", field: "isActive", width: '70px', cellRenderer: function (params: any) {
-                    return params.data.isActive ? 'Active' : 'Draft';
+                headerName: "State", field: "isDraft", width: '70px', cellRenderer: function (params: any) {
+                    return params.data.isDraft ? 'Draft' : 'Active';
                 }
             },
             {

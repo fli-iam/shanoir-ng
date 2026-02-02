@@ -259,12 +259,12 @@ public class StudyServiceImpl implements StudyService {
         return studyDb;
     }
 
-    public Study toggleState(Long studyId) throws ShanoirException {
+    public Study toggleDraftState(Long studyId) throws ShanoirException {
         Study study = studyRepository.findById(studyId).orElse(null);
         if (study == null) {
             throw new EntityNotFoundException(Study.class, studyId);
         }
-        study.setIsActive(!study.getIsActive());
+        study.setIsDraft(!study.getIsDraft());
         studyRepository.save(study);
         return study;
     }

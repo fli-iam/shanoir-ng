@@ -485,8 +485,8 @@ export class StudyComponent extends EntityComponent<Study> {
         this.downloadService.downloadAllByStudyId(this.study?.id, this.study.totalSize, this.downloadState);
     }
 
-    toggleState() {
-        return this.studyService.toggleStateById(this.study?.id)
+    toggleDraftState() {
+        return this.studyService.toggleDraftStateById(this.study?.id)
             .then(() => window.location.reload())
             .catch(err => {
                 this.consoleService.log('error', 'Error changing study draft state', err);

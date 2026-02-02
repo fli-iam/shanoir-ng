@@ -98,7 +98,7 @@ public class StudyDTO {
 
     private StudyStorageVolumeDTO storageVolume;
 
-    private boolean isActive;
+    private boolean isDraft;
 
     /**
      * Default constructor.
@@ -505,11 +505,11 @@ public class StudyDTO {
                 + ", storageVolume=" + storageVolume + "]";
     }
 
-    public boolean getIsActive() {
-        return isActive;
+    public boolean getIsDraft() {
+        return isDraft;
     }
 
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
+    public void setIsDraft(boolean isDraft) {
+        this.isDraft = isDraft;
     }
 }

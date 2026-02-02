@@ -23,8 +23,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(dismiss)="goToView()"
 					(back)="goBack()">
 				<button *ngIf="mode == 'view' && hasDownloadRight && downloadService.advancedDownloadCompat" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
-			    <button *ngIf="keycloakService.isUserAdmin()" class="right-icon dl-button" type="button" (click)="toggleState()">
-                    {{ !study.isActive ? 'Approve' : 'Convert to draft' }}<i [ngClass]="study.isActive ? ['fas','fa-file'] : ['fas','fa-check']"></i></button>
+			    <button *ngIf="keycloakService.isUserAdmin()" class="right-icon dl-button" type="button" (click)="toggleDraftState()">
+                    {{ study.isDraft ? 'Approve' : 'Convert to draft' }}<i [ngClass]="study.isDraft ? ['fas','fa-check'] : ['fas','fa-file']"></i></button>
             </form-footer>
 
 			<span [ngSwitch]="mode">
@@ -151,8 +151,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Study detail|State label@@studyDetailApprovalStatus">State</label>
                         <span class="right-col" [ngSwitch]="mode">
                             <ng-template [ngSwitchCase]="'view'">
-                                <span *ngIf="study.isActive" i18n="Study detail|Active@@studyDetailActive">Active</span>
-                                <span *ngIf="!study.isActive" i18n="Study detail|Draft@@studyDetailDraft">Draft</span>
+                                <span>{{ study.isDraft ? 'Draft' : 'Active' }}</span>
                             </ng-template>
                         </span>
                     </li>
