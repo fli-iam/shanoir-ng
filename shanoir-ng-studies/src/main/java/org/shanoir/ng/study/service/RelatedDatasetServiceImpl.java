@@ -93,31 +93,45 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             subjectIds.add(Long.valueOf(s.substring(0, s.indexOf("/"))));
         }
         Study targetStudy = studyService.findById(studyId);
+        List<Subject> createdSubjects = new ArrayList<>();
         for (Long subjectId : subjectIds) {
             Subject sourceSubject = subjectService.findById(subjectId);
             if (sourceSubject == null) {
                 throw new SecurityException(
-                    "Copy dataset(s): source subject with ID " + subjectId + " not found.");
+                        "Copy dataset(s): source subject with ID " + subjectId + " not found.");
             }
             Subject targetSubject = subjectService.findByStudyIdAndName(targetStudy.getId(), sourceSubject.getName());
             if (targetSubject == null) {
-                Subject clonedSubject = new Subject(sourceSubject, targetStudy);
-                if (sourceSubject.getTags() != null && !sourceSubject.getTags().isEmpty()) {
-                    Set<Tag> clonedTags = new HashSet<>();
-                    List<Long> tagIds = sourceSubject.getTags().stream()
-                            .map(Tag::getId)
-                            .collect(Collectors.toList());
-                    Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
-                    managedTagsIt.forEach(clonedTags::add);
-                    clonedSubject.setTags((clonedTags));
-                }
-                // true: synchronize subjects with MS Datasets
-                clonedSubject = subjectService.create(clonedSubject, true);
+                Subject created = createNewSubjectInTargetStudy(targetStudy, sourceSubject, null, false);
+                createdSubjects.add(created);
             }
+        }
+        if (!createdSubjects.isEmpty()) {
+            subjectService.updateSubjectBatchInMicroservices(createdSubjects);
         }
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         LOG.info("Finished createSubjectsInTargetStudy: " + elapsedTime + "ms");
+    }
+
+    private Subject createNewSubjectInTargetStudy(Study targetStudy, Subject sourceSubject, String newSubjectName,
+            boolean withAMQP)
+            throws ShanoirException {
+        Subject clonedSubject = new Subject(sourceSubject, targetStudy);
+        if (newSubjectName != null && !newSubjectName.trim().isEmpty()) {
+            clonedSubject.setName(newSubjectName);
+        }
+        if (sourceSubject.getTags() != null && !sourceSubject.getTags().isEmpty()) {
+            Set<Tag> clonedTags = new HashSet<>();
+            List<Long> tagIds = sourceSubject.getTags().stream()
+                    .map(Tag::getId)
+                    .collect(Collectors.toList());
+            Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
+            managedTagsIt.forEach(clonedTags::add);
+            clonedSubject.setTags((clonedTags));
+        }
+        clonedSubject = subjectService.create(clonedSubject, withAMQP);
+        return clonedSubject;
     }
 
     @Override
