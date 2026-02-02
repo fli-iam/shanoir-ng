@@ -162,11 +162,10 @@ public interface StudyApi {
             @RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
             @Parameter(description = "Study id to copy in", required = true)
             @RequestParam(value = "studyId", required = true) String studyId,
-            @Parameter(description = "center id of datasets", required = true)
+            @Parameter(description = "Center ids of datasets", required = true)
             @RequestParam(value = "centerIds", required = true) List<Long> centerIds,
-            @Parameter(description = "subject id of datasets", required = true)
-            @RequestParam(value = "subjectIds", required = true) List<String> subjectIdStudyId);
-
+            @Parameter(description = "Subject ids/study ids of datasets", required = true)
+            @RequestParam(value = "subjectIdStudyIds", required = true) List<String> subjectIdStudyIds);
 
     @Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
     @ApiResponses(value = {
@@ -191,7 +190,6 @@ public interface StudyApi {
     ResponseEntity<Map<Long, StudyStorageVolumeDTO>> getDetailedStorageVolumeByStudy(
             @Parameter(description = "study ids") @RequestParam List<Long> studyIds
     ) throws RestServiceException;
-
 
     @Operation(summary = "", description = "Updates a study")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study updated"),
