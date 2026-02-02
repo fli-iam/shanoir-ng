@@ -96,6 +96,16 @@ public interface StudyService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')  and @studySecurityService.studyUsersStudyNull(#study)")
     Study create(Study study) throws MicroServiceCommunicationException;
 
+    /**
+     * approve a draft study (or convert it back to draft)
+     *
+     * @param studyId
+     * @return created Study
+     * @throws ShanoirStudiesException
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    public Study toggleState(Long studyId) throws ShanoirException;
+
 
     /**
      * Update a study

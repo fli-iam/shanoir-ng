@@ -230,6 +230,24 @@ public class StudyApiController implements StudyApi {
         return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
     }
 
+    @Override
+    @Transactional
+    public ResponseEntity<StudyDTO> toggleStateById(@PathVariable("studyId") final Long studyId)
+            throws RestServiceException {
+        Study study;
+        try {
+            study = studyService.toggleState(studyId);
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_STUDY_EVENT, studyId.toString(),
+                    KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ShanoirException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), e));
+        }
+
+        return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
+    }
+
     private void addCurrentUserAsStudyUserIfEmptyStudyUsers(final Study study) {
         if (study.getStudyUserList() == null) {
             List<StudyUser> studyUserList = new ArrayList<StudyUser>();

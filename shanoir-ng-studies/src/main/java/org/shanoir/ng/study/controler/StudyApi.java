@@ -148,6 +148,18 @@ public interface StudyApi {
             @Parameter(description = "study to create", required = true) @RequestBody Study study, BindingResult result)
             throws RestServiceException;
 
+    @Operation(summary = "", description = "If exists, changes the study's state (active or draft)")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "approved study"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/toggleState/{studyId}", produces = { "application/json" }, method = RequestMethod.PUT)
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<StudyDTO> toggleStateById(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+            throws RestServiceException;
+
     @Operation(summary = "", description = "Copy a list of dataset to a study")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "copy worked"),
