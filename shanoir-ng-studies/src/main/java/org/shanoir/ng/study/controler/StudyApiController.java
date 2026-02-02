@@ -218,7 +218,9 @@ public class StudyApiController implements StudyApi {
         Study createdStudy;
         try {
             addCurrentUserAsStudyUserIfEmptyStudyUsers(study);
-            study.setIsActive(true);
+            // ROLE_ADMIN creates active studies, ROLE_EXPERT creates draft studies
+            boolean isAdmin = KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN");
+            study.setIsActive(isAdmin);  // true for ADMIN, false for EXPERT
             createdStudy = studyService.create(study);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_STUDY_EVENT,
                     createdStudy.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
