@@ -42,6 +42,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
@@ -86,6 +87,9 @@ public class BidsServiceTest {
 
     @Mock
     private BidsTreeSemaphore bidsTreeSemaphore;
+
+    @Mock
+    private ShanoirEventService eventService;
 
     private String studyName = "STUDY";
 
