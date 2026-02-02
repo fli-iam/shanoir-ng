@@ -12,8 +12,8 @@
 
 create table overall_statistics (
     stats_date DATE PRIMARY KEY,
-    studies_count INT NOT NULL,
-    subjects_count INT NOT NULL,
-    dataset_acquisitions_count INT NOT NULL,
+    studies_count BIGINT NOT NULL,
+    subjects_count BIGINT NOT NULL,
+    dataset_acquisitions_count BIGINT NOT NULL,
     storage_size BIGINT DEFAULT NULL
 );

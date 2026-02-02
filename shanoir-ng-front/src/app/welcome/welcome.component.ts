@@ -378,63 +378,6 @@ export class WelcomeComponent implements OnInit {
 		});
 	}
 
-  get studiesSentence(): string {
-    if (this.studiesCount == null || this.studiesCount === 0) {
-      return '<strong>no collection</strong>';
-    }
-    if (this.studiesCount === 1) {
-      return '<strong>1 collection</strong>';
-    }
-    return `<strong>${this.studiesCount} collections</strong>`;
-  }
-
-  get subjectsSentence(): string {
-    if (this.subjectsCount == null || this.subjectsCount === 0) {
-      return '<strong>no subject</strong>';
-    }
-    if (this.subjectsCount === 1) {
-      return '<strong>1 subject</strong>';
-    }
-    return `<strong>${this.subjectsCount} subjects</strong>`;
-  }
-
-  get datasetAcquisitionsSentence(): string {
-    if (this.datasetAcquisitionsCount == null || this.datasetAcquisitionsCount === 0) {
-      return '<strong>no image</strong>';
-    }
-    if (this.datasetAcquisitionsCount === 1) {
-      return '<strong>1 image</strong>';
-    }
-    return `<strong>${this.datasetAcquisitionsCount} images</strong>`;
-  }
-
-  get publicStudiesSentence(): string {
-    if (this.publicStudies == null || this.publicStudies.length === 0) {
-      return '<strong>none public</strong>';
-    }
-    return `including <strong>${this.publicStudies.length} public</strong>`;
-  }
-
-  get usersSentence(): string {
-    if (this.usersCount == null || this.usersCount === 0) {
-      return 'is <strong>no active user</strong>';
-    }
-    if (this.usersCount === 1) {
-      return 'is <strong>1 active user</strong>';
-    }
-    return `are <strong>${this.usersCount} active users</strong>`;
-  }
-
-  get eventsSentence(): string {
-    if (this.eventsCount == null || this.eventsCount === 0) {
-      return '<strong>no query</strong> was';
-    }
-    if (this.eventsCount === 1) {
-      return '<strong>1 query</strong> was';
-    }
-    return `<strong>${this.eventsCount} queries</strong> were`;
-  }
-
 	increaseShow() {
 		this.show += 10;
 	}

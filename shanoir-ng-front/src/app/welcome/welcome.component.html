@@ -31,8 +31,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	</div>
     <div class="stats">
         {{ welcomeIntroduction }}<br>
-        It has <span [innerHTML]="studiesSentence"></span> (<span [innerHTML]="publicStudiesSentence"></span>) containing <span [innerHTML]="datasetAcquisitionsSentence"></span> of <span [innerHTML]="subjectsSentence"></span>, for a total of <strong>{{ storageSize }} GB</strong>.<br>
-        There <span [innerHTML]="usersSentence"></span> and <span [innerHTML]="eventsSentence"></span> run during the last month.
+        It has <strong>{{ studiesCount || 'no' }} collection@if (studiesCount > 1) {s}</strong> 
+        (@if (publicStudies.length > 0) {including <strong>{{ publicStudies.length }}</strong>} @else {<strong>none</strong>} <strong> public</strong>)
+        containing <strong>{{ datasetAcquisitionsCount || 'no' }} image@if (datasetAcquisitionsCount > 1) {s}</strong> 
+        of <strong>{{ subjectsCount || 'no' }} subject@if (subjectsCount > 1) {s}</strong>, 
+        for a total of <strong>{{ storageSize }} GB</strong>.<br>
+        There @if (usersCount < 2) {is} @else {are} <strong> {{ usersCount || 'no' }} active user@if (usersCount > 1) {s}</strong> 
+        and @if (eventsCount === 0 || !eventsCount) {
+        <strong>no query</strong> was run during the last month.
+        } @else {
+        <strong>{{ eventsCount }} {{ eventsCount === 1 ? 'query ' : 'queries ' }}</strong> @if (eventsCount === 1) {was} @else {were} run during the last month.
+        }
     </div>
     <div class="study-tab-parent">
         <div *ngIf="publicStudies?.length > 0" class="study-tab">
