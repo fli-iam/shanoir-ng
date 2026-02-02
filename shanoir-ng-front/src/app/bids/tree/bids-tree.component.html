@@ -67,7 +67,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 } @else {
     <div class="json-report">
         <h4>BIDS Validator Report</h4>
-        <span (click)="downloadBidsValidatorReport()" class="dl-button">
+        <span (click)="downloadBidsValidatorReport()" class="dl-button" title="Download BIDS Validator Report as JSON">
             <i class="fas fa-download"></i>
         </span>
         <ngx-json-viewer class="report-viewer" [json]="report"></ngx-json-viewer>
