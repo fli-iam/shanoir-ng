@@ -31,7 +31,7 @@ function runValidator(path) {
         const v = process.env.BIDS_VALIDATOR_VERSION || "2.2.10";
         execFile(
             "deno",
-            ["run", "--cached-only", "--no-color", "-ERWN", `jsr:@bids/validator@${v}`, "--json", path],
+            ["run", "--cached-only", "-ERWN", `jsr:@bids/validator@${v}`, "--", "--json", "--no-color", path],
             { maxBuffer: 50 * 1024 * 1024 },
             (err, stdout, stderr) => {
                 const exitCode = err && typeof err.code === "number" ? err.code : 0;
