@@ -21,26 +21,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class BidsTreeSemaphore {
 
-    private final Map<BidsTreeLockKey, Semaphore> semaphoreMap = new ConcurrentHashMap<>();
+    private final Map<Long, Semaphore> semaphoreMap = new ConcurrentHashMap<>();
 
-    public void lockOrThrow(Long studyId, Long userId) throws BidsTreeLockedException {
-        BidsTreeLockKey key = new BidsTreeLockKey(userId.toString(), studyId.toString());
-        Semaphore semaphore = semaphoreMap.computeIfAbsent(key, k -> new Semaphore(1));
+    public void lockOrThrow(Long studyId) throws BidsTreeLockedException {
+        Semaphore semaphore = semaphoreMap.computeIfAbsent(studyId, k -> new Semaphore(1));
         boolean acquired = semaphore.tryAcquire();
         if (!acquired) {
             throw new BidsTreeLockedException();
         }
     }
 
-    public void unlock(Long studyId, Long userId) {
-        BidsTreeLockKey key = new BidsTreeLockKey(userId.toString(), studyId.toString());
-        Semaphore semaphore = semaphoreMap.computeIfAbsent(key, k -> new Semaphore(1));
+    public void unlock(Long studyId) {
+        Semaphore semaphore = semaphoreMap.computeIfAbsent(studyId, k -> new Semaphore(1));
         semaphore.release();
     }
 
-    public boolean isLocked(Long studyId, Long userId) {
-        BidsTreeLockKey key = new BidsTreeLockKey(userId.toString(), studyId.toString());
-        Semaphore semaphore = semaphoreMap.computeIfAbsent(key, k -> new Semaphore(1));
+    public boolean isLocked(Long studyId) {
+        Semaphore semaphore = semaphoreMap.computeIfAbsent(studyId, k -> new Semaphore(1));
         return semaphore.availablePermits() == 0;
     }
 
@@ -51,12 +48,13 @@ public class BidsTreeSemaphore {
      * @param unit    Timeout unit.
      * @return true if unlocked within the timeout, false otherwise.
      */
-    public boolean awaitUnlock(Long studyId, Long userId, long timeout, java.util.concurrent.TimeUnit unit) {
-        BidsTreeLockKey key = new BidsTreeLockKey(userId.toString(), studyId.toString());
-        Semaphore semaphore = semaphoreMap.computeIfAbsent(key, k -> new Semaphore(1));
+    public boolean awaitUnlock(Long studyId, long timeout, java.util.concurrent.TimeUnit unit) {
+        Semaphore semaphore = semaphoreMap.computeIfAbsent(studyId, k -> new Semaphore(1));
         try {
             boolean acquired = semaphore.tryAcquire(timeout, unit);
-            if (!acquired) return false;
+            if (!acquired) {
+                return false;
+            }
             semaphore.release();
             return true;
         } catch (InterruptedException e) {
