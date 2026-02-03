@@ -25,7 +25,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -197,8 +204,7 @@ public class BIDSServiceImpl implements BIDSService {
     public File exportAsBids(final Long studyId, String studyName) throws IOException, BidsTreeLockedException {
         // Get folder
         File workFolder = getBidsFolderpath(studyId, studyName);
-        Long userId = KeycloakUtil.getTokenUserId();
-        bidsTreeSemaphore.lockOrThrow(studyId, userId);
+        bidsTreeSemaphore.lockOrThrow(studyId);
         ShanoirEvent event = null;
         try { // ensure unlock in finally
             if (workFolder.exists()) {
@@ -213,8 +219,8 @@ public class BIDSServiceImpl implements BIDSService {
                         ShanoirEvent.IN_PROGRESS,
                         0f,
                         null);
-                event.setReport("This operation is automatically triggered at least once per study as preparation for operations "
-                        + "like building the BIDS tree or running the validator. You can safely ignore this message.");
+                event.setReport("This operation is automatically triggered at least once per study as a preparation for operations "
+                        + "like building the BIDS tree or running the validator.");
                 eventService.publishEvent(event);
 
                 // Otherwise, create it from scratch
@@ -258,7 +264,7 @@ public class BIDSServiceImpl implements BIDSService {
             }
             throw e;
         } finally {
-            bidsTreeSemaphore.unlock(studyId, userId);
+            bidsTreeSemaphore.unlock(studyId);
         }
     }
 

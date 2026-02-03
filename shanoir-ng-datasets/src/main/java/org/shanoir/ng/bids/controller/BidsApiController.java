@@ -177,7 +177,7 @@ public class BidsApiController implements BidsApi {
         BidsElement studyBidsElement;
         Study study = studyService.findById(studyId);
         if (study != null) {
-            boolean unlocked = bidsTreeSemaphore.awaitUnlock(studyId, KeycloakUtil.getTokenUserId(), 30, java.util.concurrent.TimeUnit.SECONDS);
+            boolean unlocked = bidsTreeSemaphore.awaitUnlock(studyId, 30, java.util.concurrent.TimeUnit.SECONDS);
             if (!unlocked) { // still locked after timeout
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.CONFLICT.value(), "The BIDS tree is locked and the timeout has been reached", null));

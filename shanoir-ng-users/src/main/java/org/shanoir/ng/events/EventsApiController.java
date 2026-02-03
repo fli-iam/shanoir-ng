@@ -34,7 +34,7 @@ public class EventsApiController implements EventsApi {
     private static final Logger LOG = LoggerFactory.getLogger(EventsApiController.class);
     @Override
     public ResponseEntity<Page<ShanoirEvent>> findEventsByStudyId(final Pageable pageable, Long studyId, String searchStr, String searchField) throws RestServiceException {
-        LOG.error("findEventsByStudyId : studyId=" + studyId + " / searchStr = " + searchStr + " / searchField = " + searchField);
+        LOG.debug("findEventsByStudyId : studyId=" + studyId + " / searchStr = " + searchStr + " / searchField = " + searchField);
         try {
             Page<ShanoirEvent> events = shanoirEventsService.findByStudyId(pageable, studyId, searchStr, searchField);
 
