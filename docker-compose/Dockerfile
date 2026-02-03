@@ -392,3 +392,14 @@ COPY --link solr/entrypoint /usr/bin/
 
 ENTRYPOINT ["/usr/bin/entrypoint"]
 CMD ["solr-precreate", "shanoir", "/etc/shanoir-core-template"]
+
+
+################ VIP ###############################################################
+
+FROM viplatform/vip-portal as vip
+
+COPY --link vip/vip-oidc.json /vip/.vip/vip-oidc.json
+COPY --link vip/vip.conf /vip/.vip/vip.conf
+
+RUN mv /vip/storage/workflows/SharedData/groups/g1 /vip/storage/workflows/SharedData/groups/local
+RUN mkdir /vip/storage/workflows/SharedData/groups/local/boutiques && mkdir /vip/storage/workflows/SharedData/groups/local/inputs
