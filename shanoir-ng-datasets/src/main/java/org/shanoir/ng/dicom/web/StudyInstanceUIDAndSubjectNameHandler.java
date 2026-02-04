@@ -42,26 +42,33 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The StudyInstanceUIDHandler component manages the translation between
- * examinationIds (Long) in the Shanoir database and the need for StudyInstanceUIDs
- * in the DICOM world, when querying the backup PACS of Shanoir.
- * The StudyInstanceUID is part of the DICOM WADO link in the table dataset_file,
- * that actually points to the DICOMs. The StudyInstanceUID is either extracted from
- * a WADO-URI link or from a WADO-RS link in the path colum of dataset_file.
- * Furthermore the StudyInstanceUIDHandler replaces the StudyInstanceUIDs + retrieveURLs
- * send from the backup PACS in the DICOMWeb Json, to match the examinationId.
+ * The StudyInstanceUIDAndSubjectNameHandler component manages the translation
+ * between examinationIds (Long) in the Shanoir database and the need for
+ * StudyInstanceUIDs in the DICOM world, when querying the backup PACS of
+ * Shanoir. Furthermore in case of copied datasets (derived) it manages the
+ * MR-004 aspect, that subjects might have a new name and caches the subject
+ * name if so.
  *
- * StudyInstanceUIDHandler contains a internal cache, that is cleaned at 6:00h every
- * morning, to accelerate the resolution between examinationUID and StudyInstanceUID;
+ * The StudyInstanceUID is part of the DICOM WADO link in the table dataset_file,
+ * that actually points to the DICOMs. The StudyInstanceUID is either extracted
+ * from a WADO-URI link or from a WADO-RS link in the path colum of dataset_file.
+ *
+ * Furthermore the StudyInstanceUIDAndSubjectNameHandler replaces the
+ * StudyInstanceUIDs + retrieveURLs send from the backup PACS in the DICOMWeb Json,
+ * to match the examinationId.
+ *
+ * StudyInstanceUIDAndSubjectNameHandler contains internal caches, that are
+ * cleaned at 6:00h every morning, to accelerate the resolution between
+ * examinationUID and StudyInstanceUID and examinationUID and a new subject name (if);
  * what avoids database look ups for every request.
  *
  * @author mkain
  *
  */
 @Component
-public class StudyInstanceUIDHandler {
+public class StudyInstanceUIDAndSubjectNameHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(StudyInstanceUIDHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StudyInstanceUIDAndSubjectNameHandler.class);
 
     private static final String WADO_URI_STUDY_UID_SERIES_UID = "studyUID=(.*?)\\&seriesUID";
 
@@ -88,16 +95,22 @@ public class StudyInstanceUIDHandler {
 
     private ConcurrentHashMap<String, String> examinationUIDToStudyInstanceUIDCache;
 
+    private ConcurrentHashMap<String, String> examinationUIDToSubjectNameCache;
+
     @PostConstruct
     public void init() {
         examinationUIDToStudyInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
         LOG.info("DICOMWeb cache created: examinationUIDToStudyInstanceUIDCache");
+        examinationUIDToSubjectNameCache = new ConcurrentHashMap<String, String>(1000);
+        LOG.info("DICOMWeb cache created: examinationUIDToSubjectNameCache");
     }
 
     @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
-    public void clearExaminationIdToStudyInstanceUIDCache() {
+    public void clearCaches() {
         examinationUIDToStudyInstanceUIDCache.clear();
         LOG.info("DICOMWeb cache cleared: examinationUIDToStudyInstanceUIDCache");
+        examinationUIDToSubjectNameCache.clear();
+        LOG.info("DICOMWeb cache cleared: examinationUIDToSubjectNameCache");
     }
 
     /**
@@ -164,13 +177,40 @@ public class StudyInstanceUIDHandler {
                 if (studyInstanceUID != null) {
                     String existing = examinationUIDToStudyInstanceUIDCache.putIfAbsent(examinationUID, studyInstanceUID);
                     if (existing == null) {
-                        LOG.info("DICOMWeb cache adding: {}, {}", examinationUID, studyInstanceUID);
-                        LOG.info("DICOMWeb cache, size: {}", examinationUIDToStudyInstanceUIDCache.size());
+                        LOG.info("DICOMWeb StudyInstanceUID cache adding: {}, {}", examinationUID, studyInstanceUID);
+                        LOG.info("DICOMWeb StudyInstanceUID cache, size: {}", examinationUIDToStudyInstanceUIDCache.size());
                     }
                 }
             }
         }
         return studyInstanceUID;
+    }
+
+    public String findSubjectNameFromCacheOrDatabase(String examinationUID) {
+        String subjectName = examinationUIDToSubjectNameCache.get(examinationUID);
+        if (subjectName == null) {
+            Long examinationId = extractExaminationId(examinationUID);
+            Examination examination = examinationService.findById(examinationId);
+            if (examination != null) {
+                if(examination.getSource() != null) { // only for copied
+                    subjectName = examination.getSubject().getName();
+                    addToCache(examinationUID, subjectName);
+                } else { // for source/original data: set to empty string
+                    subjectName = "";
+                    addToCache(examinationUID, subjectName);
+                }
+            }
+        }
+        return subjectName;
+    }
+
+    private void addToCache(String examinationUID, String subjectName) {
+        String existing = examinationUIDToSubjectNameCache.putIfAbsent(examinationUID,
+                subjectName);
+        if (existing == null) {
+            LOG.info("DICOMWeb subject name cache adding: {}, {}", examinationUID, subjectName);
+            LOG.info("DICOMWeb subject name cache, size: {}", examinationUIDToSubjectNameCache.size());
+        }
     }
 
     /**
