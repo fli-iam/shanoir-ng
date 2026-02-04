@@ -40,6 +40,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import jakarta.annotation.PostConstruct;
 
@@ -127,7 +128,8 @@ public class StudyInstanceUIDAndSubjectNameHandler {
      * @param examinationUID
      * @param studyLevel
      */
-    public void replaceStudyInstanceUIDAndPatientInfo(JsonNode root, String examinationUID, boolean studyLevel, String subjectName) {
+    public void replaceStudyInstanceUIDAndPatientInfo(JsonNode root, String examinationUID, boolean studyLevel,
+            String subjectName) {
         if (root.isObject()) {
             // find attribute: StudyInstanceUID
             JsonNode studyInstanceUIDNode = root.get(DICOM_TAG_STUDY_INSTANCE_UID);
@@ -137,12 +139,12 @@ public class StudyInstanceUIDAndSubjectNameHandler {
             // find attribute: PatientName
             JsonNode patientNameNode = root.get(DICOM_TAG_PATIENT_NAME);
             if (patientNameNode != null && subjectName != null && !subjectName.trim().isEmpty()) {
-                modifyValue(patientNameNode, subjectName);
+                modifyPatientName(patientNameNode, subjectName);
             }
             // find attribute: PatientID
             JsonNode patientIDNode = root.get(DICOM_TAG_PATIENT_ID);
             if (patientIDNode != null && subjectName != null && !subjectName.trim().isEmpty()) {
-                modifyValue(patientIDNode, subjectName);
+                modifyPatientID(patientIDNode, subjectName);
             }
             // find attribute: RetrieveURL
             JsonNode retrieveURLNode = root.get(DICOM_TAG_RETRIEVE_URL);
@@ -156,7 +158,8 @@ public class StudyInstanceUIDAndSubjectNameHandler {
                         retrieveURLArray.remove(i);
                         retrieveURLArray.insert(i, retrieveURL);
                     } else { // serie level
-                        retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_SERIE_LEVEL, STUDIES + examinationUID + SERIES);
+                        retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_SERIE_LEVEL,
+                                STUDIES + examinationUID + SERIES);
                         retrieveURLArray.remove(i);
                         retrieveURLArray.insert(i, retrieveURL);
                     }
@@ -175,7 +178,35 @@ public class StudyInstanceUIDAndSubjectNameHandler {
         ArrayNode array = (ArrayNode) node.path(VALUE);
         for (int i = 0; i < array.size(); i++) {
             array.remove(i);
-            array.insert(i,  value);
+            array.insert(i, value);
+        }
+    }
+
+    /**
+     * PatientName in DICOM JSON has VR "PN" (Person Name).
+     * Structure: {"Value": [{"Alphabetic": "LastName^FirstName"}]}
+     *
+     * @param node
+     * @param patientName
+     */
+    private void modifyPatientName(JsonNode node, String patientName) {
+        ArrayNode valueArray = (ArrayNode) node.path(VALUE);
+        if (valueArray.size() > 0) {
+            ObjectNode personNameObject = (ObjectNode) valueArray.get(0);
+            personNameObject.put("Alphabetic", patientName);
+        } else {
+            ObjectNode personNameObject = valueArray.addObject();
+            personNameObject.put("Alphabetic", patientName);
+        }
+    }
+
+    private void modifyPatientID(JsonNode node, String patientID) {
+        ArrayNode array = (ArrayNode) node.path(VALUE);
+        if (array.size() > 0) {
+            array.remove(0);
+            array.insert(0, patientID);
+        } else {
+            array.add(patientID);
         }
     }
 
