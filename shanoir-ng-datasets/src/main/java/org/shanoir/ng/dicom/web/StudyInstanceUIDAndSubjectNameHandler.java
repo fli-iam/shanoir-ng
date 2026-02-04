@@ -192,7 +192,7 @@ public class StudyInstanceUIDAndSubjectNameHandler {
             Long examinationId = extractExaminationId(examinationUID);
             Examination examination = examinationService.findById(examinationId);
             if (examination != null) {
-                if(examination.getSource() != null) { // only for copied
+                if (examination.getSource() != null) { // only for copied
                     subjectName = examination.getSubject().getName();
                     addToCache(examinationUID, subjectName);
                 } else { // for source/original data: set to empty string
