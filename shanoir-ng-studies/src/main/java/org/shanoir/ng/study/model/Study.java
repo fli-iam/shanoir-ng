@@ -187,8 +187,8 @@ public class Study extends HalEntity {
     private List<StudyTag> studyTags;
 
     @NotNull
-    @Column(name = "is_draft", columnDefinition = "TINYINT(1) DEFAULT 0")
-    private Boolean isDraft = false;
+    @Column(name = "is_draft", columnDefinition = "TINYINT(1) DEFAULT 1")
+    private boolean isDraft;
 
     /**
      * Init HATEOAS links
