@@ -14,9 +14,11 @@
 
 package org.shanoir.ng.dicom.web;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import jakarta.annotation.PostConstruct;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -36,10 +38,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * The StudyInstanceUIDAndSubjectNameHandler component manages the translation
@@ -77,6 +79,10 @@ public class StudyInstanceUIDAndSubjectNameHandler {
     private static final String DICOM_TAG_STUDY_INSTANCE_UID = "0020000D";
 
     private static final String DICOM_TAG_RETRIEVE_URL = "00081190";
+
+    private static final String DICOM_TAG_PATIENT_NAME = "00100010";
+
+    private static final String DICOM_TAG_PATIENT_ID = "00100020";
 
     private static final String VALUE = "Value";
 
@@ -121,16 +127,22 @@ public class StudyInstanceUIDAndSubjectNameHandler {
      * @param examinationUID
      * @param studyLevel
      */
-    public void replaceStudyInstanceUIDsWithExaminationUIDs(JsonNode root, String examinationUID, boolean studyLevel) {
+    public void replaceStudyInstanceUIDAndPatientInfo(JsonNode root, String examinationUID, boolean studyLevel, String subjectName) {
         if (root.isObject()) {
             // find attribute: StudyInstanceUID
             JsonNode studyInstanceUIDNode = root.get(DICOM_TAG_STUDY_INSTANCE_UID);
             if (studyInstanceUIDNode != null) {
-                ArrayNode studyInstanceUIDArray = (ArrayNode) studyInstanceUIDNode.path(VALUE);
-                for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
-                    studyInstanceUIDArray.remove(i);
-                    studyInstanceUIDArray.insert(i,  examinationUID);
-                }
+                modifyValue(studyInstanceUIDNode, examinationUID);
+            }
+            // find attribute: PatientName
+            JsonNode patientNameNode = root.get(DICOM_TAG_PATIENT_NAME);
+            if (patientNameNode != null && subjectName != null && !subjectName.trim().isEmpty()) {
+                modifyValue(patientNameNode, subjectName);
+            }
+            // find attribute: PatientID
+            JsonNode patientIDNode = root.get(DICOM_TAG_PATIENT_ID);
+            if (patientIDNode != null && subjectName != null && !subjectName.trim().isEmpty()) {
+                modifyValue(patientIDNode, subjectName);
             }
             // find attribute: RetrieveURL
             JsonNode retrieveURLNode = root.get(DICOM_TAG_RETRIEVE_URL);
@@ -154,15 +166,25 @@ public class StudyInstanceUIDAndSubjectNameHandler {
             ArrayNode arrayNode = (ArrayNode) root;
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode arrayElement = arrayNode.get(i);
-                replaceStudyInstanceUIDsWithExaminationUIDs(arrayElement, examinationUID, studyLevel);
+                replaceStudyInstanceUIDAndPatientInfo(arrayElement, examinationUID, studyLevel, subjectName);
             }
         }
     }
 
+    private void modifyValue(JsonNode node, String value) {
+        ArrayNode array = (ArrayNode) node.path(VALUE);
+        for (int i = 0; i < array.size(); i++) {
+            array.remove(i);
+            array.insert(i,  value);
+        }
+    }
+
     /**
-     * This method returns the corresponding StudyInstanceUID, that is generated during the import in Shanoir
-     * with the pseudonymization module and present in the PACS, either from a local cache to accelerate the
-     * request response time or from the database, in table dataset_file.
+     * This method returns the corresponding StudyInstanceUID,
+     * that is generated during the import in Shanoir
+     * with the pseudonymization module and present in the PACS,
+     * either from a local cache to accelerate the request response
+     * time or from the database, in table dataset_file.
      *
      * @param examinationUID
      * @return

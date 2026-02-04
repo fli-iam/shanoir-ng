@@ -140,6 +140,8 @@ public class DICOMWebApiController implements DICOMWebApi {
             Examination examination = iterator.next();
             String examinationUID = StudyInstanceUIDAndSubjectNameHandler.PREFIX + examination.getId();
             String studyInstanceUID = studyInstanceUIDAndSubjectNameHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
+            String subjectName = studyInstanceUIDAndSubjectNameHandler
+                    .findSubjectNameFromCacheOrDatabase(examinationUID);
             if (studyInstanceUID == null) {
                 // continue: e.g. empty examination without dataset acquisition
                 continue;
@@ -151,7 +153,7 @@ public class DICOMWebApiController implements DICOMWebApi {
                 continue;
             }
             JsonNode root = mapper.readTree(studyJson);
-            studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, true);
+            studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUIDAndPatientInfo(root, examinationUID, true, subjectName);
             studyJson = mapper.writeValueAsString(root);
             studyJson = studyJson.substring(1, studyJson.length() - 1);
             studies.append(studyJson);
@@ -175,6 +177,8 @@ public class DICOMWebApiController implements DICOMWebApi {
         String includefield = "";
         String seriesInstanceUID = "";
         String studyInstanceUID = studyInstanceUIDAndSubjectNameHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
+        String subjectName = studyInstanceUIDAndSubjectNameHandler
+                .findSubjectNameFromCacheOrDatabase(examinationUID);
         if (allParams.containsKey("includefield")) {
             includefield = allParams.get(INCLUDEFIELD);
         }
@@ -187,7 +191,7 @@ public class DICOMWebApiController implements DICOMWebApi {
             if (response != null) {
                 JsonNode root = mapper.readTree(response);
                 root = sortSeriesBySeriesNumber(root);
-                studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, false);
+                studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUIDAndPatientInfo(root, examinationUID, false, subjectName);
                 return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -217,10 +221,12 @@ public class DICOMWebApiController implements DICOMWebApi {
     public ResponseEntity<String> findSerieMetadataOfStudy(String examinationUID, String serieId)
             throws RestServiceException, JsonMappingException, JsonProcessingException {
         String studyInstanceUID = studyInstanceUIDAndSubjectNameHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
+        String subjectName = studyInstanceUIDAndSubjectNameHandler
+                .findSubjectNameFromCacheOrDatabase(examinationUID);
         if (studyInstanceUID != null && serieId != null) {
             String response = dicomWebService.findSerieMetadataOfStudy(studyInstanceUID, serieId);
             JsonNode root = mapper.readTree(response);
-            studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUIDsWithExaminationUIDs(root, examinationUID, false);
+            studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUIDAndPatientInfo(root, examinationUID, false, subjectName);
             return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
