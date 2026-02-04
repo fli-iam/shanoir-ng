@@ -486,11 +486,14 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     toggleDraftState() {
-        return this.studyService.toggleDraftStateById(this.study?.id)
-            .then(() => window.location.reload())
-            .catch(err => {
-                this.consoleService.log('error', 'Error changing study draft state', err);
-            });
+        return this.studyService.toggleDraftStateById(this.study?.id).then((study) => {
+            this.entity.isDraft = study.isDraft;
+            this.consoleService.log('info', `Study ${this.entity.name} is now ${this.entity.isDraft ? 'Draft' : 'Active'}`);
+        }).catch(err => {
+            this.entity.isDraft = !this.entity.isDraft;
+            this.consoleService.log('error', 'Error changing study draft state', err);
+            throw err;
+        });
     }
 
     public attachNewFile(event: any) {
