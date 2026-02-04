@@ -145,7 +145,14 @@ public class SubjectApiController implements SubjectApi {
             if (subject.getName() != null) {
                 subject.setName(subject.getName().trim());
             }
-            createdSubject = subjectService.create(subject, true);
+
+            try {
+                createdSubject = subjectService.create(subject, true);
+            } catch (ShanoirException e) {
+                throw new RestServiceException(
+                        new ErrorModel(HttpStatus.FORBIDDEN.value(),
+                            "Unexpected error creating subject: " + e.getMessage(), e));
+            }
         } else {
             createdSubject = subjectService.createAutoIncrement(subject, centerId, true);
         }

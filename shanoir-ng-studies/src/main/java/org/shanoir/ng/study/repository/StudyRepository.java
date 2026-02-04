@@ -91,4 +91,7 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 
     @Query("SELECT su.study.id FROM StudyUser su WHERE su.userId = :userId AND :right MEMBER OF su.studyUserRights")
     List<Long> findByUserIdAndStudyUserRight(Long userId, Integer right);
+
+    @Query("SELECT s.isDraft FROM Study s WHERE s.id = :studyId")
+    Boolean findIsDraftById(@Param("studyId") Long id);
 }

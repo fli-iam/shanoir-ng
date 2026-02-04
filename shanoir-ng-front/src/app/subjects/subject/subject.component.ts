@@ -272,7 +272,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.subject = { ...this.subject, study: { id: this.subject.study.id } as Study };
         return super.save()
             .then(() => { if (savedDate) this.subject.birthDate = savedDate; return this.subject; })
-            .catch(reason => { if (savedDate) this.subject.birthDate = savedDate; throw reason; })
+            .catch(reason => {
+                if (savedDate) this.subject.birthDate = savedDate;
+                this.consoleService.log('error', reason.error.message);
+                throw reason;
+            })
     }
 
     loadAllStudies(): void {

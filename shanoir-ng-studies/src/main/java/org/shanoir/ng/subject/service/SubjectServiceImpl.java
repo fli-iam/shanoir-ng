@@ -187,7 +187,12 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     @Transactional
     public Subject create(Subject subject, boolean withAMQP) throws ShanoirException {
-        subject = mapSubjectStudyListToSubject(subject);
+        try {
+            subject = mapSubjectStudyListToSubject(subject);
+        } catch (ShanoirException e) {
+            throw e;
+        }
+
         Subject subjectDb = subjectRepository.save(subject);
         if (withAMQP) {
             try {
@@ -238,6 +243,11 @@ public class SubjectServiceImpl implements SubjectService {
      * @throws ShanoirException
      */
     private Subject mapSubjectStudyListToSubject(Subject subject) throws ShanoirException {
+        Boolean isDraft = studyRepository.findIsDraftById(subject.getStudy().getId());
+        if (isDraft) {
+            throw new ShanoirException("You cannot relate entities with draft studies", HttpStatus.FORBIDDEN.value());
+        }
+
         List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
         // Old versions of ShUp will still send subject study objects, and no studyId in subject
         if (subjectStudyList != null && !subjectStudyList.isEmpty()) {
