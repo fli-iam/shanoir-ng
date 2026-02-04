@@ -237,10 +237,9 @@ public class DICOMWebApiController implements DICOMWebApi {
     public ResponseEntity findFrameOfStudyOfSerieOfInstance(String examinationUID, String serieInstanceUID,
                                                             String sopInstanceUID, String frame) throws RestServiceException {
         String studyInstanceUID = studyInstanceUIDAndSubjectNameHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
-        String subjectName = studyInstanceUIDAndSubjectNameHandler.findSubjectNameFromCacheOrDatabase(examinationUID);
         if (!StringUtils.isEmpty(studyInstanceUID) && !StringUtils.isEmpty(serieInstanceUID)
                 && !StringUtils.isEmpty(sopInstanceUID) && !StringUtils.isEmpty(frame)) {
-            return dicomWebService.findFrameOfStudyOfSerieOfInstance(studyInstanceUID, serieInstanceUID, sopInstanceUID, frame, subjectName);
+            return dicomWebService.findFrameOfStudyOfSerieOfInstance(studyInstanceUID, serieInstanceUID, sopInstanceUID, frame);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

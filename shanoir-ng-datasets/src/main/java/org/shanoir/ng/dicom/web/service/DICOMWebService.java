@@ -214,6 +214,8 @@ public class DICOMWebService {
      * The raw pixel data are searched in dcm4chee arc light behind Shanoir
      * and send as byte array to OHIF.
      *
+     * MK: nothing to replace here for MR-004 as JPEG.
+     *
      * @param studyInstanceUID
      * @param serieInstanceUID
      * @param sopInstanceUID
@@ -221,7 +223,7 @@ public class DICOMWebService {
      * @return
      */
     public ResponseEntity findFrameOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
-            String sopInstanceUID, String frame, String subjectName) {
+            String sopInstanceUID, String frame) {
         try {
             String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/"
                     + sopInstanceUID + "/frames/" + frame;
@@ -230,9 +232,6 @@ public class DICOMWebService {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
                     byte[] dicomBytes = EntityUtils.toByteArray(entity);
-                    if (subjectName != null && !subjectName.trim().isEmpty()) {
-                        dicomBytes = modifyDicomPatientInfo(dicomBytes, subjectName);
-                    }
                     ByteArrayResource byteArrayResource = new ByteArrayResource(dicomBytes);
                     HttpHeaders responseHeaders = new HttpHeaders();
                     if (!entity.isChunked() && entity.getContentLength() >= 0) {
