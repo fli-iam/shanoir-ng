@@ -426,13 +426,10 @@ COPY --from=deno_cache /deno /deno
 ENV DENO_DIR=/deno
 
 WORKDIR /app
-
-RUN printf '{ "nodeModulesDir": "auto" }\n' > /app/deno.json
-ENV DENO_CONFIG=/app/deno.json
-
 RUN npm i amqplib@0.10.9
 COPY bids-validator/worker.js /app/worker.js
 
 ENV BIDS_VALIDATOR_VERSION=2.2.10
+ENV NO_COLOR=1
 
 CMD ["node", "worker.js"]

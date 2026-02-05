@@ -213,12 +213,12 @@ public class BIDSServiceImpl implements BIDSService {
             } else {
                 event = new ShanoirEvent(
                         ShanoirEventType.BIDS_EXPORT,
-                        null,
+                        studyId.toString(),
                         KeycloakUtil.getTokenUserId(),
                         "Export BIDS for study " + studyName,
                         ShanoirEvent.IN_PROGRESS,
                         0f,
-                        null);
+                        studyId);
                 event.setReport("This operation is automatically triggered at least once per study as a preparation for operations "
                         + "like building the BIDS tree or running the validator.");
                 eventService.publishEvent(event);
