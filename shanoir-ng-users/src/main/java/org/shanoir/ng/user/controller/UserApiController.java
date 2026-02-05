@@ -17,8 +17,6 @@ package org.shanoir.ng.user.controller;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.validation.Valid;
-
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
@@ -41,6 +39,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import jakarta.validation.Valid;
 
 @Controller
 public class UserApiController extends AbstractUserRequestApiController implements UserApi {
@@ -111,6 +111,10 @@ public class UserApiController extends AbstractUserRequestApiController implemen
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<Long> countActiveUsers() {
+        return new ResponseEntity<>(getUserService().countActiveUsers(), HttpStatus.OK);
+    }
 
     @Override
     public ResponseEntity<List<User>> findAccountRequests() {

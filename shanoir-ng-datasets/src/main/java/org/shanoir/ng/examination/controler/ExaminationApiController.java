@@ -348,5 +348,4 @@ public class ExaminationApiController implements ExaminationApi {
         String newUID = generator.getNewUID();
         examination.setStudyInstanceUID(newUID);
     }
-
 }
