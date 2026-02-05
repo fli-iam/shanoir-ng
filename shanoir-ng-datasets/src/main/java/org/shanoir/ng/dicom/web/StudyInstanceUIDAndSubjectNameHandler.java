@@ -136,16 +136,6 @@ public class StudyInstanceUIDAndSubjectNameHandler {
             if (studyInstanceUIDNode != null) {
                 modifyValue(studyInstanceUIDNode, examinationUID);
             }
-            // find attribute: PatientName
-            JsonNode patientNameNode = root.get(DICOM_TAG_PATIENT_NAME);
-            if (patientNameNode != null && subjectName != null && !subjectName.trim().isEmpty()) {
-                modifyPatientName(patientNameNode, subjectName);
-            }
-            // find attribute: PatientID
-            JsonNode patientIDNode = root.get(DICOM_TAG_PATIENT_ID);
-            if (patientIDNode != null && subjectName != null && !subjectName.trim().isEmpty()) {
-                modifyPatientID(patientIDNode, subjectName);
-            }
             // find attribute: RetrieveURL
             JsonNode retrieveURLNode = root.get(DICOM_TAG_RETRIEVE_URL);
             if (retrieveURLNode != null) {
@@ -165,12 +155,38 @@ public class StudyInstanceUIDAndSubjectNameHandler {
                     }
                 }
             }
+            replacePatientInfoValues(root, subjectName);
         } else if (root.isArray()) {
             ArrayNode arrayNode = (ArrayNode) root;
             for (int i = 0; i < arrayNode.size(); i++) {
                 JsonNode arrayElement = arrayNode.get(i);
                 replaceStudyInstanceUIDAndPatientInfo(arrayElement, examinationUID, studyLevel, subjectName);
             }
+        }
+    }
+
+    public void replacePatientInfo(JsonNode root, String subjectName) {
+        if (root.isObject()) {
+            replacePatientInfoValues(root, subjectName);
+        } else if (root.isArray()) {
+            ArrayNode arrayNode = (ArrayNode) root;
+            for (int i = 0; i < arrayNode.size(); i++) {
+                JsonNode arrayElement = arrayNode.get(i);
+                replacePatientInfo(arrayElement, subjectName);
+            }
+        }
+    }
+
+    private void replacePatientInfoValues(JsonNode root, String subjectName) {
+        // find attribute: PatientName
+        JsonNode patientNameNode = root.get(DICOM_TAG_PATIENT_NAME);
+        if (patientNameNode != null && subjectName != null && !subjectName.trim().isEmpty()) {
+            modifyPatientName(patientNameNode, subjectName);
+        }
+        // find attribute: PatientID
+        JsonNode patientIDNode = root.get(DICOM_TAG_PATIENT_ID);
+        if (patientIDNode != null && subjectName != null && !subjectName.trim().isEmpty()) {
+            modifyPatientID(patientIDNode, subjectName);
         }
     }
 

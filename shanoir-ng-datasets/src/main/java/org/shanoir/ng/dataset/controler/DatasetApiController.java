@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -48,7 +49,7 @@ import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.download.DatasetDownloadError;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -64,6 +65,8 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -88,6 +91,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -132,6 +136,9 @@ public class DatasetApiController implements DatasetApi {
     private ExaminationService examinationService;
 
     @Autowired
+    private SubjectService subjectService;
+
+    @Autowired
     private ImporterService importerService;
 
     @Autowired
@@ -152,6 +159,9 @@ public class DatasetApiController implements DatasetApi {
     @Qualifier("datasetDownloaderServiceImpl")
     @Autowired
     private DatasetDownloaderServiceImpl datasetDownloaderService;
+
+    @Autowired
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDAndSubjectNameHandler;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -361,16 +371,25 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public ResponseEntity<String> getDicomMetadataByDatasetId(
-            Long datasetId) throws IOException, MessagingException {
+    public ResponseEntity<String> getDicomMetadataByDatasetId(Long datasetId)
+            throws IOException, MessagingException {
         final Dataset dataset = datasetService.findById(datasetId);
-        DatasetDownloadError result = new DatasetDownloadError();
-        List<URL> pathURLs = new ArrayList<>();
-        DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, result);
-        if (pathURLs.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        Optional<URL> firstWADOURL = DatasetFileUtils.getFirstDatasetFilePathURL(
+                dataset,
+                DatasetExpressionFormat.DICOM);
+        if (firstWADOURL.isPresent()) {
+            String dicomJson = downloader.downloadDicomMetadataForURL(firstWADOURL.orElseThrow());
+            if (dataset.getSource() != null) {
+                Optional<Subject> subjectOpt = subjectService.findById(dataset.getSubjectId());
+                String subjectName = subjectOpt.get().getName();
+                JsonNode root = objectMapper.readTree(dicomJson);
+                studyInstanceUIDAndSubjectNameHandler.replacePatientInfo(root, subjectName);
+                dicomJson = objectMapper.writeValueAsString(root);
+                LOG.error(dicomJson);
+            }
+            return ResponseEntity.ok(dicomJson);
         } else {
-            return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);
+            return ResponseEntity.noContent().build();
         }
     }
 
@@ -485,7 +504,6 @@ public class DatasetApiController implements DatasetApi {
     @Override
     public ResponseEntity<List<DatasetDownloadData>> getDownloadData(
             @Parameter(description = "Input arguments", required = true) @Valid @RequestBody DatasetDownloadDataInput input) {
-
         List<DatasetDownloadData> downloadDataList = datasetService.getDownloadDataByAcquisitionAndExaminationIds(input.getAcquisitionIds(), input.getExaminationIds());
         return new ResponseEntity<>(downloadDataList, HttpStatus.OK);
     }
@@ -589,8 +607,6 @@ public class DatasetApiController implements DatasetApi {
         createStatisticsService.createStats(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp, event, params);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
 
     @Override
     public ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(String eventId) throws IOException {
