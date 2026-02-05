@@ -45,6 +45,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -654,6 +655,27 @@ public class DatasetApiController implements DatasetApi {
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Scheduled method to compute overall statistics daily at 6 AM to display up to date stats on welcome page.
+     */
+    @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
+    public void computeOverallStatistics() {
+        try {
+            createStatisticsService.computeOverallStatistics();
+        } catch (Exception e) {
+            LOG.error("Error while computing overall statistics.", e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<OverallStatistics> getOverallStatistics() throws IOException {
+        OverallStatistics statistics = datasetService.getOverallStatistics();
+        if (statistics == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(statistics, HttpStatus.OK);
     }
 
     public ResponseEntity<Resource> extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws RestServiceException {

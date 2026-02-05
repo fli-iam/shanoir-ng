@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.utils.DatasetFileUtils;
@@ -47,6 +48,9 @@ public class CreateStatisticsService {
 
     @Autowired
     private ShanoirEventService eventService;
+
+    @Autowired
+    private DatasetRepository datasetRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -204,5 +208,22 @@ public class CreateStatisticsService {
             }
             zos.closeEntry();
         }
+    }
+
+    /**
+     * Compute overall statistics by calling the corresponding stored procedure.
+     * Used to insert daily stats into the overall_statistics table.
+     *
+     * @throws Exception
+     */
+    public void computeOverallStatistics() throws Exception {
+        // Call the stored procedure to compute Studies, subjects and dataset_acquisition counts
+        datasetRepository.computeOverallStatistics();
+
+        //calculate total storage volume by summing volumes by format for each study
+        Long totalStorageVolume = datasetRepository.findDatasetsExpressionSizesSum();
+
+        //update overall_statistics table with total storage volume for current date
+        datasetRepository.addTotalStorageVolume(totalStorageVolume);
     }
 }
