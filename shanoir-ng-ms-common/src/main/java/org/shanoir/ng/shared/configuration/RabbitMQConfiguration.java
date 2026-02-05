@@ -195,11 +195,15 @@ public class RabbitMQConfiguration {
     /** Study name updated => notify dataset MS to change database. */
     public static final String STUDY_NAME_UPDATE_QUEUE = "study-name-update-queue";
 
+    /** Study name updated => notify dataset MS to change database. */
+    public static final String STUDY_DRAFT_STATE_QUEUE = "study-draft-state-queue";
+
     /** Queue to create a study_user when subscribing to a study */
     public static final String STUDY_SUBSCRIPTION_QUEUE = "study-subscription-queue";
 
     /** Create tags on subject-study via quality control using study cards: ms datasets -> ms studies */
     public static final String STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG = "studies-subject-study-study-card-tag";
+
     /** Queue used to get participants.tsv of a study. */
     public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
 
@@ -480,6 +484,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyNameUpdateQueue() {
         return new Queue(STUDY_NAME_UPDATE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyDraftStateQueue() {
+        return new Queue(STUDY_DRAFT_STATE_QUEUE, true);
     }
 
     @Bean

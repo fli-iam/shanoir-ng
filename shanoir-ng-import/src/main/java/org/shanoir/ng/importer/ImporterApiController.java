@@ -44,6 +44,7 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.AmqpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -236,6 +237,33 @@ public class ImporterApiController implements ImporterApi {
     public ResponseEntity<Void> startImportJob(
             @Parameter(name = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
                     throws RestServiceException {
+
+        try {
+            String response = (String) rabbitTemplate.convertSendAndReceive(
+                    RabbitMQConfiguration.STUDY_DRAFT_STATE_QUEUE,
+                    String.valueOf(importJob.getStudyId())
+            );
+
+            if (response == null || "NOT_FOUND".equals(response)) {
+                throw new RestServiceException(
+                        new ErrorModel(HttpStatus.NOT_FOUND.value(), "Cannot find study.", null));
+            }
+
+            if ("ERROR".equals(response)) {
+                throw new RestServiceException(
+                        new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error checking study state.", null));
+            }
+
+            if (Boolean.parseBoolean(response)) {
+                LOG.error("Cannot import data into a draft study.");
+                return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+            }
+        } catch (AmqpException e) {
+            LOG.error("Failed to communicate with Study MS", e);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Study service unavailable.", null));
+        }
+
         File userImportDir = ImportUtils.getUserImportDir(importDir);
         final Long userId = KeycloakUtil.getTokenUserId();
         importJob.setUserId(userId);
