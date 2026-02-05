@@ -96,12 +96,12 @@ public class DICOMWebApiController implements DICOMWebApi {
         String includeField = allParams.get(INCLUDEFIELD);
         // 1. Search for studies==examinations with patient name
         // (DICOM patientID does not make sense in case of Shanoir)
-        String patientIDTagParam = allParams.get(PATIENT_ID);
+        String patientIDParam = allParams.get(PATIENT_ID);
         String patientNameParam = allParams.get(PATIENT_NAME);
-        if (patientIDTagParam != null || patientNameParam != null) {
+        if (patientIDParam != null || patientNameParam != null) {
             String subjectName;
-            if (patientIDTagParam != null) {
-                subjectName = patientIDTagParam;
+            if (patientIDParam != null) {
+                subjectName = patientIDParam;
             } else {
                 subjectName = patientNameParam;
             }
