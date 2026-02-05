@@ -157,10 +157,13 @@ services:
     ports:
      - "9902:9902"
      - "9912:9912"
+     - "9927:9927"
     depends_on:
       - "database"
       - "rabbitmq"
       - "users"
+    command: >
+      -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9927 -jar /shanoir-ng-studies.jar
   #
   # Import microservice
   #
@@ -183,6 +186,7 @@ services:
     ports:
      - "9903:9903"
      - "9913:9913"
+     - "9928:9928"
      # uncomment below for local testing of import-from-pacs, enable:
      # pacs-to-ms-import: c-move from dcm4chee arc light to ms import
      # do not add by default, as it blocks local ShUp from using 44105
@@ -191,6 +195,8 @@ services:
       - "database"
       - "rabbitmq"
       - "users"
+    command: >
+      -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9928 -jar /shanoir-ng-import.jar
   #
   # Datasets microservice
   #
@@ -219,11 +225,14 @@ services:
     ports:
      - "9904:9904"
      - "9914:9914"
+     - "9924:9924"
     depends_on:
       - "database"
       - "rabbitmq"
       - "users"
       - "solr"
+    command: >
+      -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9924 -jar /shanoir-ng-datasets.jar
 
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"

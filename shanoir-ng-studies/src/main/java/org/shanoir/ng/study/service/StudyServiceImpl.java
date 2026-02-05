@@ -26,6 +26,7 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.email.EmailStudyCreated;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -254,6 +255,18 @@ public class StudyServiceImpl implements StudyService {
 
             // Use newly created study "studyDb" to decide, to send email to which user
             sendStudyUserReport(studyDb, studyDb.getStudyUserList());
+
+            // Notify users service to send emails to study admins about new study
+            try {
+                EmailStudyCreated email = new EmailStudyCreated();
+                email.setUserId(KeycloakUtil.getTokenUserId());
+                email.setStudyId(studyDb.getId().toString());
+                email.setStudyName(studyDb.getName());
+                rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_CREATED_MAIL_QUEUE,
+                        objectMapper.writeValueAsString(email));
+            } catch (Exception e) {
+                LOG.error("Could not send study created email event.", e);
+            }
         }
 
         return studyDb;
@@ -884,14 +897,14 @@ public class StudyServiceImpl implements StudyService {
         }
 
         this.studyRepository.findAllById(studyIds).forEach(study -> {
-            if (!detailedStorageVolumes.containsKey(study.getId())) {
-                return;
-            }
-            Long filesSize = this.getStudyFilesSize(study);
-            StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
-            dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
-            dto.setTotal(filesSize + dto.getTotal());
-        }
+                    if (!detailedStorageVolumes.containsKey(study.getId())) {
+                        return;
+                    }
+                    Long filesSize = this.getStudyFilesSize(study);
+                    StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
+                    dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
+                    dto.setTotal(filesSize + dto.getTotal());
+                }
         );
 
         return detailedStorageVolumes;

@@ -123,6 +123,8 @@ public interface EmailService {
      */
     void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email);
 
+    void notifyStudyCreated(EmailStudyUsersAdded email);
+
     /**
      *  This method notifies a study manager that an import failed for a given study
      * @param generatedMail: The object containing all the mail informations

@@ -135,6 +135,37 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+    public void notifyStudyCreated(EmailStudyUsersAdded email) {
+        // Find user that created the study (may be absent)
+        User user = userRepository.findById(email.getUserId()).orElse(null);
+
+        // Retrieve study admins for this study
+        List<User> studyAdmins = findStudyAdmin(Long.valueOf(email.getStudyId()));
+
+        if (!CollectionUtils.isEmpty(studyAdmins)) {
+            for (User studyAdmin : studyAdmins) {
+                MimeMessagePreparator messagePreparator = mimeMessage -> {
+                    final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+                    messageHelper.setFrom(administratorEmail);
+                    messageHelper.setCc(user != null ? user.getEmail() : administratorEmail);
+                    messageHelper.setTo(studyAdmin.getEmail());
+                    messageHelper.setSubject("[Shanoir] New study created: " + email.getStudyName());
+                    final Map<String, Object> variables = new HashMap<>();
+                    variables.put(FIRSTNAME, studyAdmin.getFirstName());
+                    variables.put(LASTNAME, studyAdmin.getLastName());
+                    variables.put(EMAIL, user != null ? user.getEmail() : administratorEmail);
+                    variables.put(STUDY_NAME, email.getStudyName());
+                    variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
+                    final String content = build("notifyStudyAdminStudyCreated", variables);
+                    messageHelper.setText(content, true);
+                };
+                LOG.info("Sending study-created mail to {} for study {}", studyAdmin.getUsername(), email.getStudyId());
+                mailSender.send(messagePreparator);
+            }
+        }
+    }
+
+    @Override
     public void notifyAdminAccountExtensionRequest(User user) {
         // Get admins emails
         final List<String> adminEmails = userRepository.findAdminEmails();

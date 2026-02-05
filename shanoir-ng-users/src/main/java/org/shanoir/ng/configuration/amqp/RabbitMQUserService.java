@@ -133,6 +133,19 @@ public class RabbitMQUserService {
         }
     }
 
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_CREATED_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    public void receiveStudyCreated(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            EmailStudyUsersAdded mail = mapper.readValue(generatedMailAsString, EmailStudyUsersAdded.class);
+            this.emailService.notifyStudyCreated(mail);
+        } catch (Exception e) {
+            LOG.error("Something went wrong deserializing the study created event.", e);
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
+        }
+    }
+
     /**
      * Receives an study user report as a json object, thus send a mail to study manager to notice him
      * @param commandArrStr the task as a json string.

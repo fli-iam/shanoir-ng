@@ -210,6 +210,9 @@ public class RabbitMQConfiguration {
     /** Send a mail from studies microservice to ms users */
     public static final String STUDY_USER_MAIL_QUEUE = "study-user-mail-queue";
 
+    /** Send a mail from studies microservice when a study is created */
+    public static final String STUDY_CREATED_MAIL_QUEUE = "study-created-mail-queue";
+
     /** Queue to notify when a user / study is updated / deleted. */
     public static final String STUDY_USER_QUEUE = "study-user";
 
