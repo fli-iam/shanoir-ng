@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.file.Files;
@@ -32,6 +33,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.VR;
+import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.io.DicomOutputStream;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -239,7 +244,11 @@ public class WADODownloaderService {
                 if (indexInstanceUID > 0) {
                     sopInstanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
                     byte[] responseBody = downloadFileFromPACS(url);
-                    extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder);
+                    if (dataset.getSource() != null) {
+                        extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder, subjectName);
+                    } else {
+                        extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder, null);
+                    }
                 } else {
                     // handle and check secondly for WADO-URI URLs by "objectUID="
                     // instanceUID == objectUID
@@ -384,7 +393,7 @@ public class WADODownloaderService {
      * @throws IOException
      * @throws MessagingException
      */
-    private void extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder)
+    private void extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder, String subjectName)
             throws IOException, MessagingException {
         try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
             ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
@@ -401,7 +410,23 @@ public class WADODownloaderService {
                 } else {
                     extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + i + DCM);
                 }
-                Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
+                if (subjectName != null && !subjectName.trim().isEmpty()) {
+                    modifyAndSaveDicomFile(bodyPart.getInputStream(), extractedDicomFile, subjectName);
+                } else {
+                    Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
+                }
+            }
+        }
+    }
+
+    private void modifyAndSaveDicomFile(InputStream inputStream, File outputFile, String subjectName)
+            throws IOException {
+        try (DicomInputStream dis = new DicomInputStream(inputStream)) {
+            Attributes attributes = dis.readDataset();
+            attributes.setString(Tag.PatientName, VR.PN, subjectName);
+            attributes.setString(Tag.PatientID, VR.LO, subjectName);
+            try (DicomOutputStream dos = new DicomOutputStream(outputFile)) {
+                dos.writeDataset(dis.getFileMetaInformation(), attributes);
             }
         }
     }
