@@ -480,13 +480,7 @@ public class WADODownloaderService {
                     throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
                 }
                 ZipEntry entry = new ZipEntry(name + DCM);
-                zipOutputStream.putNextEntry(entry);
-                if (subjectName != null && !subjectName.trim().isEmpty()) {
-                    modifyAndWriteDicomToStream(bodyPart.getInputStream(), zipOutputStream, subjectName);
-                } else {
-                    bodyPart.getInputStream().transferTo(zipOutputStream);
-                }
-                zipOutputStream.closeEntry();
+                addEntry(zipOutputStream, subjectName, bodyPart, entry);
                 return;
             }
             // Multipart with multiple parts
@@ -495,17 +489,21 @@ public class WADODownloaderService {
                 if (isNotOnlyDicom(bodyPart)) {
                     throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
                 }
-
                 ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
-                zipOutputStream.putNextEntry(entry);
-                if (subjectName != null && !subjectName.trim().isEmpty()) {
-                    modifyAndWriteDicomToStream(bodyPart.getInputStream(), zipOutputStream, subjectName);
-                } else {
-                    bodyPart.getInputStream().transferTo(zipOutputStream);
-                }
-                zipOutputStream.closeEntry();
+                addEntry(zipOutputStream, subjectName, bodyPart, entry);
             }
         }
+    }
+
+    private void addEntry(ZipOutputStream zipOutputStream, String subjectName, BodyPart bodyPart, ZipEntry entry)
+            throws IOException, MessagingException {
+        zipOutputStream.putNextEntry(entry);
+        if (subjectName != null && !subjectName.trim().isEmpty()) {
+            modifyAndWriteDicomToStream(bodyPart.getInputStream(), zipOutputStream, subjectName);
+        } else {
+            bodyPart.getInputStream().transferTo(zipOutputStream);
+        }
+        zipOutputStream.closeEntry();
     }
 
     private void modifyAndWriteDicomToStream(InputStream inputStream, OutputStream outputStream, String subjectName)
@@ -514,9 +512,10 @@ public class WADODownloaderService {
             Attributes attributes = dis.readDataset();
             attributes.setString(Tag.PatientName, VR.PN, subjectName);
             attributes.setString(Tag.PatientID, VR.LO, subjectName);
-            try (DicomOutputStream dos = new DicomOutputStream(outputStream, "1.2.840.10008.1.2.1")) {
-                dos.writeDataset(dis.getFileMetaInformation(), attributes);
-            }
+            @SuppressWarnings("resource")
+            DicomOutputStream dos = new DicomOutputStream(outputStream, "1.2.840.10008.1.2.1");
+            dos.writeDataset(dis.getFileMetaInformation(), attributes);
+            dos.flush();
         }
     }
 
