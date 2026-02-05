@@ -157,13 +157,10 @@ services:
     ports:
      - "9902:9902"
      - "9912:9912"
-     - "9927:9927"
     depends_on:
       - "database"
       - "rabbitmq"
       - "users"
-    command: >
-      -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9927 -jar /shanoir-ng-studies.jar
   #
   # Import microservice
   #
