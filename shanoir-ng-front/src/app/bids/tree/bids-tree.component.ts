@@ -12,19 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
-import { Component, ElementRef, Input, OnDestroy, OnInit} from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { StudyService } from 'src/app/studies/shared/study.service';
 import { DatasetService } from 'src/app/datasets/shared/dataset.service';
+import { StudyService } from 'src/app/studies/shared/study.service';
+import { Task, TaskStatus } from 'src/app/async-tasks/task.model';
+import { NotificationsService } from 'src/app/shared/notifications/notifications.service';
 
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { BidsElement } from '../model/bidsElement.model'
-import * as AppUtils from '../../utils/app.utils';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { GlobalService } from '../../shared/services/global.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import * as AppUtils from '../../utils/app.utils';
+import { BidsElement } from '../model/bidsElement.model';
 
 @Component({
     selector: 'bids-tree',
@@ -47,6 +49,9 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     public load: string;
     private hasDownloadRight: boolean;
     protected report: any; // JSON
+    protected truncatedReport: any; // JSON
+    private subscriptions: Subscription[] = [];
+    protected task: Task;
 
     constructor(private globalService: GlobalService,
                 private elementRef: ElementRef,
@@ -54,13 +59,26 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
                 protected http: HttpClient,
                 private keycloakService: KeycloakService,
                 private studyRightsService: StudyRightsService,
-                private studyService: StudyService) {
-        this.globalClickSubscription = globalService.onGlobalClick.subscribe(clickEvent => {
+                private studyService: StudyService,
+                private notificationsService: NotificationsService) {
+
+        this.subscriptions.push(globalService.onGlobalClick.subscribe(clickEvent => {
             if (!this.elementRef.nativeElement.contains(clickEvent.target)) {
                 this.selectedIndex = null;
                 this.removeContent();
             }
-        })
+        }));
+        this.subscriptions.push(
+            this.notificationsService.getNotifications().subscribe(tasks => {
+                this.task = tasks.find(t => 
+                        t.id === this.task?.id ||
+                        (
+                            t.eventType === 'bidsExport.event'
+                            && t.objectId === this.studyId
+                            && [TaskStatus.IN_PROGRESS, TaskStatus.QUEUED, TaskStatus.IN_PROGRESS_BUT_WARNING].includes(t.status))
+                        );               
+            })
+        );
     }
 
     ngOnInit(): void {
@@ -70,7 +88,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     }
 
     ngOnDestroy(): void {
-        this.globalClickSubscription.unsubscribe();
+        this.subscriptions.forEach(subscription => subscription.unsubscribe());
     }
 
     getBidsStructure(): Promise<void> {
@@ -186,9 +204,40 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
         this.getBidsStructure().then(() => {
             // currently the list object always contains one element which is the root folder
             this.studyService.validateStudyForBIDS(this.studyId, this.list[0]?.path).then(report => {
-                this.report = report;
+                this.report = report.report;
+                this.truncateReportForDisplay();
             });
         });
+    }
+
+    private truncateReportForDisplay(): void {
+        const MAX_NB_ISSUES_DISPLAY = 30;
+        if (!this.report) {
+            this.truncatedReport = null;
+            return;
+        }
+        // Create a deep copy of the report to truncate for display
+        this.truncatedReport = JSON.parse(JSON.stringify(this.report));
+
+        // Truncate the "issues" arrays
+        const truncateIssues = (obj: any) => {
+            if (obj && typeof obj === 'object') {
+                for (const key in obj) {
+                    if (key === 'issues' && Array.isArray(obj[key])) {
+                        const length = obj[key].length;
+                        if (length > MAX_NB_ISSUES_DISPLAY) {
+                            obj[key] = obj[key].slice(0, MAX_NB_ISSUES_DISPLAY);
+                            obj[key].push({ message: `... and ${length - MAX_NB_ISSUES_DISPLAY} more issues not displayed. 
+                                You can download the full report for more details.` });
+                        }
+                    } else {
+                        truncateIssues(obj[key]);
+                    }
+                }
+            }
+        };
+
+        truncateIssues(this.truncatedReport);
     }
 
     protected downloadBidsValidatorReport(): void {

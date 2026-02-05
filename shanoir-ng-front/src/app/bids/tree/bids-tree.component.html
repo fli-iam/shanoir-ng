@@ -39,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </node>
 </ng-template>
 
-<node label="BIDS" awesome="far fa-folder" class="root-node" (firstOpen)="getBidsStructure()" [dataLoading]="load=='loading'" [hasChildren]="list ? (list.length > 0 ? true : false) : 'unknown' "
+<node label="BIDS" awesome="far fa-folder" class="root-node" (firstOpen)="getBidsStructure()" [dataLoading]="load=='loading' || (task && task.progress < 1)" [hasChildren]="list ? (list.length > 0 ? true : false) : 'unknown' "
         [buttonPicto]="'fas fa-refresh'"
         (buttonClick)="refresh()">
     <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list, id: 'ID' }"></ng-container>
@@ -62,7 +62,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 @if (!report) {
     <div>
-        <button (click)="callBidsValidator()">Call BIDS Validator</button>
+        <button class="right-icon" (click)="callBidsValidator()" [disabled]="task && task.progress < 1">
+            Call BIDS Validator
+        </button>
     </div>
 } @else {
     <div class="json-report">
@@ -70,7 +72,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <span (click)="downloadBidsValidatorReport()" class="dl-button" title="Download BIDS Validator Report as JSON">
             <i class="fas fa-download"></i>
         </span>
-        <ngx-json-viewer class="report-viewer" [json]="report"></ngx-json-viewer>
+        <ngx-json-viewer class="report-viewer" [json]="truncatedReport"></ngx-json-viewer>
+    </div>
+}
+
+@if (task && task.progress < 1) {
+    <div class="json-report">
+        <p class="info-frame">
+            <progress-bar [progress]="task?.progress" [width]="200" [warning]="task.status == 5 || task.status == 3"></progress-bar>
+            <br/>
+            <i class="fas fa-info-circle"></i>
+            BIDS export is in progress and can take some time depending of the size of your study.
+            Once the export is finished, you will be able to use the generated BIDS tree and call the BIDS Validator.
+            Unless you manually trigger a refresh, the export will not be required again, even if you navigate away from the BIDS tree and come back later. 
+        </p>
     </div>
 }
 
