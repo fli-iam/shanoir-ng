@@ -30,6 +30,7 @@ import org.shanoir.ng.importer.eeg.edf.EDFAnnotation;
 import org.shanoir.ng.importer.eeg.edf.EDFParser;
 import org.shanoir.ng.importer.eeg.edf.EDFParserResult;
 import org.shanoir.ng.importer.model.*;
+import org.shanoir.ng.importer.service.StudyService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -138,6 +139,9 @@ public class ImporterApiController implements ImporterApi {
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
+    private StudyService studyService;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -238,30 +242,9 @@ public class ImporterApiController implements ImporterApi {
             @Parameter(name = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
                     throws RestServiceException {
 
-        try {
-            String response = (String) rabbitTemplate.convertSendAndReceive(
-                    RabbitMQConfiguration.STUDY_DRAFT_STATE_QUEUE,
-                    String.valueOf(importJob.getStudyId())
-            );
-
-            if (response == null || "NOT_FOUND".equals(response)) {
-                throw new RestServiceException(
-                        new ErrorModel(HttpStatus.NOT_FOUND.value(), "Cannot find study.", null));
-            }
-
-            if ("ERROR".equals(response)) {
-                throw new RestServiceException(
-                        new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error checking study state.", null));
-            }
-
-            if (Boolean.parseBoolean(response)) {
-                LOG.error("Cannot import data into a draft study.");
-                return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-            }
-        } catch (AmqpException e) {
-            LOG.error("Failed to communicate with Study MS", e);
-            throw new RestServiceException(
-                    new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Study service unavailable.", null));
+        if (studyService.isDraft(importJob.getStudyId())) {
+            LOG.error("Cannot import data into a draft study.");
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         File userImportDir = ImportUtils.getUserImportDir(importDir);
@@ -634,7 +617,13 @@ public class ImporterApiController implements ImporterApi {
      */
     @Override
     public ResponseEntity<Void> startImportEEGJob(
-            @Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob) {
+            @Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob)
+            throws RestServiceException {
+        if (studyService.isDraft(importJob.getStudyId())) {
+            LOG.error("Cannot import data into a draft study.");
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
         // Comment: Anonymisation is not necessary for pure brainvision EEGs data
         try {
             importJob.setUsername(KeycloakUtil.getTokenUserName());
