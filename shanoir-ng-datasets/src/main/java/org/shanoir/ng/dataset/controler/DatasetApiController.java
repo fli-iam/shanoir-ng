@@ -385,7 +385,6 @@ public class DatasetApiController implements DatasetApi {
                 JsonNode root = objectMapper.readTree(dicomJson);
                 studyInstanceUIDAndSubjectNameHandler.replacePatientInfo(root, subjectName);
                 dicomJson = objectMapper.writeValueAsString(root);
-                LOG.error(dicomJson);
             }
             return ResponseEntity.ok(dicomJson);
         } else {
