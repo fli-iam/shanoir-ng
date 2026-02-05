@@ -145,11 +145,10 @@ public class WADODownloaderService {
      *
      */
     public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, DatasetDownloadError downloadResult) {
-        int i = 0;
         List<String> files = new ArrayList<>();
         Set<String> zippedUrls = new HashSet<>();
         long duplicates = 0;
-        for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
+        for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
             String url = iterator.next().toString();
             if (!zippedUrls.contains(url)) {
                 zippedUrls.add(url);
@@ -206,7 +205,7 @@ public class WADODownloaderService {
         byte[] responseBody = null;
         try {
             responseBody = downloadFileFromPACS(url);
-            this.extractDICOMZipFromMHTMLFile(responseBody, name, zipOutputStream, url.contains(WADO_REQUEST_TYPE_WADO_RS));
+            extractDICOMZipFromMHTMLFile(responseBody, name, zipOutputStream, url.contains(WADO_REQUEST_TYPE_WADO_RS));
             return name + DCM;
         } catch (IOException | MessagingException e) {
             LOG.error("Error in downloading/writing file [{}] from pacs to zip", name, e);
@@ -349,7 +348,6 @@ public class WADODownloaderService {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
         HttpEntity<String> entity = new HttpEntity<>(headers);
-
         ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, entity, byte[].class, "1");
         if (response.getStatusCode() == HttpStatus.OK) {
             return response.getBody();
