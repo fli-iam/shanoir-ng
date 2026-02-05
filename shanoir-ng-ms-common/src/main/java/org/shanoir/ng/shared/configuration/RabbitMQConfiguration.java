@@ -510,6 +510,11 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
+    public static Queue studyCreatedMailQueue() {
+        return new Queue(STUDY_CREATED_MAIL_QUEUE, true);
+    }
+
+    @Bean
     public static Queue studyUserQueue() {
         return new Queue(STUDY_USER_QUEUE, true);
     }
