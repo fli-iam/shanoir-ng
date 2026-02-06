@@ -245,12 +245,18 @@ public class SubjectServiceImpl implements SubjectService {
      * @throws ShanoirException
      */
     private Subject mapSubjectStudyListToSubject(Subject subject) throws ShanoirException {
-        Boolean isDraft = studyRepository.findIsDraftById(subject.getStudy().getId());
-        if (isDraft) {
-            throw new ShanoirException("You cannot relate entities with draft studies", HttpStatus.FORBIDDEN.value());
+        List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+
+        if (subject.getStudy() != null && subject.getStudy().getId() != null) {
+            Long studyId = subject.getStudy().getId();
+            Boolean isDraft = studyRepository.findIsDraftById(studyId);
+            if (Boolean.TRUE.equals(isDraft)) {
+                throw new ShanoirException(
+                    "Cannot create subjects in draft studies. Study must be approved first.",
+                    HttpStatus.FORBIDDEN.value());
+            }
         }
 
-        List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
         // Old versions of ShUp will still send subject study objects, and no studyId in
         // subject
         if (subjectStudyList != null && !subjectStudyList.isEmpty()) {

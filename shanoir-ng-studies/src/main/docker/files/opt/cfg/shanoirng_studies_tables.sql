@@ -1,12 +1,12 @@
 -- Shanoir NG - Import, manage and share neuroimaging data
 -- Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 -- Contact us on https://project.inria.fr/shanoir/
--- 
+--
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
 -- the Free Software Foundation, either version 3 of the License, or
 -- (at your option) any later version.
--- 
+--
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -50,6 +50,7 @@ CREATE TABLE `study` (
   `study_type` int(11) NOT NULL,
   `visible_by_default` bit(1) NOT NULL,
   `with_examination` bit(1) NOT NULL,
+  `is_draft` bit(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UK_q5qxcb7ermaxmp5f2wx2rj28n` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -98,7 +99,7 @@ CREATE TABLE `pseudonymus_hash_values` (
   `last_name_hash3` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-	
+
 CREATE TABLE `subject` (
   `id` bigint(20) NOT NULL,
   `birth_date` datetime DEFAULT NULL,

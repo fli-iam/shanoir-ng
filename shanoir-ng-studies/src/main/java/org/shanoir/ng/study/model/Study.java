@@ -187,7 +187,7 @@ public class Study extends HalEntity {
     private List<StudyTag> studyTags;
 
     @NotNull
-    @Column(name = "is_draft", columnDefinition = "TINYINT(1) DEFAULT 1")
+    @Column(name = "is_draft")
     private boolean isDraft;
 
     /**
