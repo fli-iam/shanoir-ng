@@ -10,4 +10,5 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-ALTER TABLE study ADD COLUMN `is_draft` TINYINT(1) DEFAULT 1;
+ALTER TABLE study ADD COLUMN is_draft TINYINT(1) DEFAULT 1;
+UPDATE study SET is_draft = 0;
