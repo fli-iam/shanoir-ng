@@ -140,29 +140,23 @@ public class EmailServiceImpl implements EmailService {
         User user = userRepository.findById(email.getUserId()).orElse(null);
 
         // Retrieve study admins for this study
-        List<User> studyAdmins = findStudyAdmin(Long.valueOf(email.getStudyId()));
+        final List<String> adminEmails = userRepository.findAdminEmails();
 
-        if (!CollectionUtils.isEmpty(studyAdmins)) {
-            for (User studyAdmin : studyAdmins) {
-                MimeMessagePreparator messagePreparator = mimeMessage -> {
-                    final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-                    messageHelper.setFrom(administratorEmail);
-                    messageHelper.setCc(user != null ? user.getEmail() : administratorEmail);
-                    messageHelper.setTo(studyAdmin.getEmail());
-                    messageHelper.setSubject("[Shanoir] New study created: " + email.getStudyName());
-                    final Map<String, Object> variables = new HashMap<>();
-                    variables.put(FIRSTNAME, studyAdmin.getFirstName());
-                    variables.put(LASTNAME, studyAdmin.getLastName());
-                    variables.put(EMAIL, user != null ? user.getEmail() : administratorEmail);
-                    variables.put(STUDY_NAME, email.getStudyName());
-                    variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
-                    final String content = build("notifyStudyAdminStudyCreated", variables);
-                    messageHelper.setText(content, true);
-                };
-                LOG.info("Sending study-created mail to {} for study {}", studyAdmin.getUsername(), email.getStudyId());
-                mailSender.send(messagePreparator);
-            }
-        }
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(administratorEmail);
+            messageHelper.setTo(adminEmails.toArray(new String[0]));
+            messageHelper.setSubject("[Shanoir] New study created: " + email.getStudyName());
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, user.getFirstName());
+            variables.put(LASTNAME, user.getLastName());
+            variables.put(EMAIL, user.getEmail());
+            variables.put(STUDY_NAME, email.getStudyName());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
+            final String content = build("notifyAdminStudyCreated", variables);
+            messageHelper.setText(content, true);
+        };
+        mailSender.send(messagePreparator);
     }
 
     @Override
