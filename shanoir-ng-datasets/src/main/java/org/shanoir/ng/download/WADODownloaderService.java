@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,16 +50,13 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.json.Json;
@@ -67,6 +65,7 @@ import jakarta.mail.BodyPart;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.util.ByteArrayDataSource;
+import reactor.core.publisher.Mono;
 
 /**
  * This class is used to download files on using WADO URLs:
@@ -125,14 +124,20 @@ public class WADODownloaderService {
     private static final String CONTENT_TYPE = "&contentType";
 
     @Autowired
-    private RestTemplate restTemplate;
+    private WebClient.Builder webClientBuilder;
 
     @Autowired
     private WADOURLHandler wadoURLHandler;
 
+    private WebClient webClient;
+
     @PostConstruct
-    public void initRestTemplate() {
-        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+    public void initWebClient() {
+        this.webClient = webClientBuilder
+                .codecs(configurer -> configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(16 * 1024 * 1024)) // 16MB buffer for large DICOM files
+                .build();
     }
 
     /**
@@ -352,36 +357,58 @@ public class WADODownloaderService {
     }
 
     /**
-     * This method contacts the PACS with a WADO-RS url and does the actual download.
+     * This method contacts the PACS with a WADO-RS url and does the actual
+     * download. Uses async WebClient internally but maintains synchronous
+     * method signature.
      *
      * @param url
      * @return
      * @throws IOException
      */
     private byte[] downloadFileFromPACS(final String url) throws IOException, HttpClientErrorException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, entity, byte[].class, "1");
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return response.getBody();
-        } else {
-            throw new IOException("Download did not work: wrong status code received.");
+        try {
+            return downloadFileFromPACSAsync(url)
+                    .block(); // Block at the end to convert Mono to sync result
+        } catch (WebClientResponseException e) {
+            throw new HttpClientErrorException(e.getStatusCode(),
+                    "Download failed: " + e.getMessage());
+        } catch (Exception e) {
+            throw new IOException("Download failed: " + e.getMessage(), e);
         }
     }
 
     private String downloadMetadataFromPACS(final String url) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        LOG.debug("Download metadata from pacs, url : " + url);
-        ResponseEntity<String> response = restTemplate.exchange(url,
-                HttpMethod.GET, entity, String.class, "1");
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return response.getBody();
-        } else {
-            throw new IOException("Download did not work: wrong status code received.");
+        try {
+            return downloadMetadataFromPACSAsync(url)
+                    .block(); // Block at the end to convert Mono to sync result
+        } catch (WebClientResponseException e) {
+            throw new IOException("Download failed: " + e.getStatusCode() + " - " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new IOException("Download failed: " + e.getMessage(), e);
         }
+    }
+
+    // Internal async methods for potential reuse
+    private Mono<byte[]> downloadFileFromPACSAsync(final String url) {
+        return webClient.get()
+                .uri(url)
+                .header(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";")
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        response -> Mono.error(new IOException("Download did not work: wrong status code received.")))
+                .bodyToMono(byte[].class)
+                .timeout(Duration.ofMinutes(5));
+    }
+
+    private Mono<String> downloadMetadataFromPACSAsync(final String url) {
+        return webClient.get()
+                .uri(url)
+                .header(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        response -> Mono.error(new IOException("Download did not work: wrong status code received.")))
+                .bodyToMono(String.class)
+                .timeout(Duration.ofSeconds(30));
     }
 
     /**
