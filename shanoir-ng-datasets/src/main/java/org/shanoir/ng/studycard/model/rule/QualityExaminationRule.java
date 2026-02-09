@@ -21,6 +21,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -103,38 +105,39 @@ public class QualityExaminationRule extends AbstractEntity {
     }
 
     public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
-        // In case a rule was added without condition (= set as Always in gui)
-        if (this.getConditions() == null || this.getConditions().isEmpty()) {
-            QualityCardResultEntry resultEntry = initResult(examination);
-            resultEntry.setTagSet(getQualityTag());
-            resultEntry.setMessage("Tag " + getQualityTag().name() + " was set by the quality card rule without any condition.");
-            result.add(resultEntry);
-            result.addUpdatedSubject(
-                    setTagToSubject(examination.getSubjectId()));
-        } else {
-            ConditionResult conditionResult = conditionsfulfilled(examinationDicomAttributes, examination, result, downloader);
-            if (conditionResult.isFulfilled()) {
-                result.addUpdatedSubject(
-                        setTagToSubject(examination.getSubjectId()));
-            }
-            // if conditions not fulfilled for a VALID tag
-            // or if conditions fulfilled for a ERROR or WARNING tag
-            // then add an entry to the report
-            if ((conditionResult.isFulfilled() && !getQualityTag().equals(QualityTag.VALID))
-                    || (!conditionResult.isFulfilled() && getQualityTag().equals(QualityTag.VALID))) {
-                QualityCardResultEntry resultEntry = initResult(examination);
-                resultEntry.setFailedValid(QualityTag.VALID.equals(getQualityTag()) && !conditionResult.isFulfilled());
+        for (DatasetAcquisition da : examination.getDatasetAcquisitions()) {
+            // In case a rule was added without condition (= set as Always in gui)
+            if (this.getConditions() == null || this.getConditions().isEmpty()) {
+                QualityCardResultEntry resultEntry = initResult(da);
                 resultEntry.setTagSet(getQualityTag());
-                if (conditionResult.isFulfilled()) {
-                    resultEntry.setMessage("Tag " + getQualityTag().name() + " was set because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
-                } else {
-                    resultEntry.setMessage("Tag " + getQualityTag().name() + " could not be set because those conditions failed : " + StringUtils.join(conditionResult.getUnfulfilledConditionsMsgList(), ", "));
-                }
+                resultEntry.setMessage("Tag " + getQualityTag().name() + " was set by the quality card rule without any condition.");
                 result.add(resultEntry);
+                result.addUpdatedDatasetAcquisition(
+                    setTagToDatasetAcquisition(da.getId()));
+            } else {
+                ConditionResult conditionResult = conditionsfulfilled(examinationDicomAttributes, examination, result, downloader);
+                if (conditionResult.isFulfilled()) {
+                    result.addUpdatedDatasetAcquisition(
+                        setTagToDatasetAcquisition(da.getId()));
+                }
+                // if conditions not fulfilled for a VALID tag
+                // or if conditions fulfilled for a ERROR or WARNING tag
+                // then add an entry to the report
+                if ((conditionResult.isFulfilled() && !getQualityTag().equals(QualityTag.VALID))
+                        || (!conditionResult.isFulfilled() && getQualityTag().equals(QualityTag.VALID))) {
+                    QualityCardResultEntry resultEntry = initResult(da);
+                    resultEntry.setFailedValid(QualityTag.VALID.equals(getQualityTag()) && !conditionResult.isFulfilled());
+                    resultEntry.setTagSet(getQualityTag());
+                    if (conditionResult.isFulfilled()) {
+                        resultEntry.setMessage("Tag " + getQualityTag().name() + " was set because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
+                    } else {
+                        resultEntry.setMessage("Tag " + getQualityTag().name() + " could not be set because those conditions failed : " + StringUtils.join(conditionResult.getUnfulfilledConditionsMsgList(), ", "));
+                    }
+                    result.add(resultEntry);
+                }
             }
         }
     }
-
 
     /**
      *
@@ -147,6 +150,18 @@ public class QualityExaminationRule extends AbstractEntity {
         subjectCopy.setId(subjectId);
         subjectCopy.setQualityTag(getQualityTag());
         return subjectCopy;
+    }
+
+    /**
+     *
+     * @param datasetAcquisitionId
+     * @return an updated dataset acquisition
+     */
+    private DatasetAcquisition setTagToDatasetAcquisition(Long datasetAcquisitionId) {
+        DatasetAcquisition datasetAcquisitionCopy = new GenericDatasetAcquisition();
+        datasetAcquisitionCopy.setId(datasetAcquisitionId);
+        datasetAcquisitionCopy.setQualityTag(getQualityTag());
+        return datasetAcquisitionCopy;
     }
 
     /**
@@ -203,11 +218,11 @@ public class QualityExaminationRule extends AbstractEntity {
         return condResult;
     }
 
-    private QualityCardResultEntry initResult(ExaminationData examination) {
+    private QualityCardResultEntry initResult(DatasetAcquisition datasetAcquisition) {
         QualityCardResultEntry result = new QualityCardResultEntry();
-        result.setSubjectName(examination.getSubjectName());
-        result.setExaminationDate(examination.getExaminationDate());
-        result.setExaminationComment(examination.getExaminationComment());
+        result.setDatasetAcquisitionId(datasetAcquisition.getId());
+        // result.setExaminationDate(examination.getExaminationDate());
+        // result.setExaminationComment(examination.getExaminationComment());
         return result;
     }
 

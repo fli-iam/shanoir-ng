@@ -60,7 +60,7 @@ public class QualityService {
         }
         Study firstStudy = importJob.getFirstStudy();
         if (firstStudy == null) {
-            throw new ShanoirException("The given import job does not provide any serie. Examination : " + importJob.getExaminationId());
+            throw new ShanoirException("The given import job does not provide any DICOM study. Examination id : " + importJob.getExaminationId());
         }
         ExaminationAttributes<String> dicomAttributes = DicomProcessing.getDicomExaminationAttributes(firstStudy);
         QualityCardResult qualityResult = new QualityCardResult();

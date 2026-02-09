@@ -245,18 +245,18 @@ public class ImportFinishActionListener implements ActionListener {
                 ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder, UploadState.ERROR.toString());
                 logger.error("The upload for the patient {} failed due to quality control errors.", importJob.getSubject().getName());
             } else {
-                // If quality control condition is VALID we do not set a quality card result entry but we update the subjectStudy qualityTag
-                if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedSubjects().isEmpty()) {
+                // If quality control condition is VALID we do not set a quality card result entry but we update the datasetAcquisition qualityTag
+                if (!qualityControlResult.isEmpty() || !qualityControlResult.getUpdatedDatasetAcquisitions().isEmpty()) {
                     // If quality control has one warning or failed valid condition fulfilled we inform the user and allow import to continue
                     if (qualityControlResult.hasWarning() || qualityControlResult.hasFailedValid()) {
                         JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult),
                             ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.WARNING_MESSAGE);
                     }
-                    // If Failed Valid No updated subject studies exist in the qualityControlResult
-                    // For Now if Failed Valid then the quality tag of the subject on server side is not updated with an empty value
+                    // If Failed Valid No updated dataset acquisitions exist in the qualityControlResult
+                    // For Now if Failed Valid then the quality tag of the dataset acquisition on server side is not updated with an empty value
                     if (!qualityControlResult.hasFailedValid()) {
-                        //Set qualityTag to the importJob in order to update subjectStudy qualityTag on server side
-                        importJob.setQualityTag(qualityControlResult.getUpdatedSubjects().get(0).getQualityTag());
+                        //Set qualityTag to the importJob in order to update dataset acquisition qualityTag on server side
+                        importJob.setQualityTag(qualityControlResult.getUpdatedDatasetAcquisitions().get(0).getQualityTag());
                     }
                 }
             }
