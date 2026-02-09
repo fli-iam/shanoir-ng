@@ -108,7 +108,7 @@ public interface SubjectService {
      * or triple rights checks.
      *
      * @param identifier - hash to search a subject
-     * @param studies - list of studies to search with identifier
+     * @param studies    - list of studies to search with identifier
      * @return the subject or null
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -116,6 +116,7 @@ public interface SubjectService {
 
     /**
      * Find a subject from a center code
+     *
      * @param centerCode
      * @return a subject or null
      */
@@ -154,7 +155,6 @@ public interface SubjectService {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnSubjectForOneStudy(#subject, 'CAN_IMPORT'))")
     Subject update(@Param("subject") Subject subject) throws ShanoirException;
 
-
     /**
      * Delete a subject.
      *
@@ -166,6 +166,7 @@ public interface SubjectService {
 
     /**
      * Update subject name and values for other microservices.
+     *
      * @param subjectToSubjectDTO the subject DTO to update
      * @throws MicroServiceCommunicationException
      */
@@ -173,8 +174,9 @@ public interface SubjectService {
 
     /**
      * Returns a filtered page by clinical subject name.
-     * @param page pageable
-     * @param name the subject name filter
+     *
+     * @param page    pageable
+     * @param name    the subject name filter
      * @param studies the list of allowed studies
      * @return the list of clinical subject as page
      */

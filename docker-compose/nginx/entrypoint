@@ -49,8 +49,13 @@ then
 else
 	cp "/etc/nginx/https.conf" /etc/nginx/server.conf
 fi
-cp "/etc/nginx/viewer/app-config.js" /etc/nginx/viewer/html/
 
+# Copy our linked app-config.js into /html and remove the .gz variant
+# (so that nginx always serves the new one)
+cp "/etc/nginx/viewer/app-config.js" /etc/nginx/viewer/html/
+rm -f /etc/nginx/viewer/html/app-config.js.gz
+
+# Replace all placeholder variables in all the files below
 sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
 	s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g
 	s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g

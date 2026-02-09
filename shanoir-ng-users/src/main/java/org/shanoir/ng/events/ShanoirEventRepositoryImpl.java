@@ -27,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 @Component
 public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom {
@@ -128,6 +129,13 @@ public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom 
         }
 
         return Pair.of(query.getResultList(), total);
+    }
+
+    public Long countByLastUpdateAfter(Date expiryDate) {
+        String queryStr = "select count(e) from ShanoirEvent as e where e.lastUpdate > ?1";
+        Query query = entityManager.createQuery(queryStr);
+        query.setParameter(1, expiryDate);
+        return (Long) query.getSingleResult();
     }
 
 }
