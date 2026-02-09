@@ -51,7 +51,9 @@ import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,6 +120,9 @@ public class RabbitMQDatasetsService {
 
     @Autowired
     private StudyCardRepository studyCardRepository;
+
+    @Autowired
+    private QualityCardRepository qualityCardRepository;
 
     @Autowired
     private BIDSService bidsService;
@@ -326,6 +331,10 @@ public class RabbitMQDatasetsService {
             // also delete associated study cards
             for (StudyCard sc : studyCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
                 studyCardRepository.delete(sc);
+            }
+            // also delete associated quality cards
+            for (QualityCard qc : qualityCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
+                qualityCardRepository.delete(qc);
             }
 
             // Delete study from datasets database
