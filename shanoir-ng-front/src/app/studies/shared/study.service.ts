@@ -44,6 +44,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     API_URL = AppUtils.BACKEND_API_STUDY_URL;
     private _duasToSign: number = 0;
+    private _draftStudies: number = 0;
     subscriptions: Subscription[] = [];
     fileUploads: Map<number, Promise<void>> = new Map(); // current uploads
     private studyVolumesCache: Map<number, StudyStorageVolumeDTO> = new Map();
@@ -324,8 +325,26 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise();
     }
 
+    get draftStudies(): number {
+        return this._draftStudies;
+    }
+
+    getStudiesByDraftState(): Promise<Study[]> {
+        return this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL)
+            .toPromise()
+            .then(studies => {
+                const draftStudies = studies.filter(s => s.isDraft === true)
+                this._draftStudies = draftStudies ? draftStudies.length : 0;
+                return draftStudies;
+            });
+    }
+
     toggleDraftStateById(id: number) {
         return this.http.put<any>(AppUtils.BACKEND_API_STUDY_URL + '/toggleDraftState/' + id, null)
             .toPromise();
+    }
+
+    decreaseDraftStudies() {
+        this._draftStudies --;
     }
 }
