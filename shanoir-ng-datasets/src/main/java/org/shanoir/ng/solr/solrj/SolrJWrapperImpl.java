@@ -56,6 +56,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.shanoir.ng.shared.exception.TooManyResultsException;
+
 /**
  * @author yyao
  *
@@ -396,20 +398,8 @@ public class SolrJWrapperImpl implements SolrJWrapper {
         /* add user's filtering */
         addUserFiltering(query, shanoirQuery);
 
-        boolean hasRestrictions = false;
-        if (!CollectionUtils.isEmpty(studyIds)) {
-            for (Entry<Long, List<String>> element : studyIds.entrySet()) {
-                if (!CollectionUtils.isEmpty(element.getValue())) {
-                    hasRestrictions = true;
-                }
-            }
-            if (hasRestrictions) {
-                addFilterQueryForCenterStudy(query, studyIds);
-            } else {
-                /* add study filtering */
-                addFilterQueryFromLongs(query, STUDY_ID_FACET, studyIds.keySet());
-            }
-        }
+        /* add rights restrictions */
+        addRightsRescrictions(query, studyIds);
 
         /* add sorting */
         if (pageable.getSort() != null) {
@@ -436,6 +426,63 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
         /* build the page object */
         return buildShanoirSolrPage(response, pageable, cleanedFacetPage);
+    }
+
+    @Override
+    public Set<Long> findAllDatasetIdsForQuery(ShanoirSolrQuery shanoirQuery, Map<Long, List<String>> studyIds) throws RestServiceException, TooManyResultsException {
+        final int maxResults = 10000000;
+        final SolrQuery query = new SolrQuery("*:*");
+
+        /* add user's filtering */
+        addUserFiltering(query, shanoirQuery);
+
+        /* add rights restrictions */
+        if (studyIds != null) {
+            addRightsRescrictions(query, studyIds);
+        }
+
+        /* add sorting */
+        query.addSort(DATASET_ID_FACET, ORDER.asc);
+
+        /* add max rows */
+        query.setRows(maxResults);
+
+        /* results with only dataset IDs */
+        query.addField(DATASET_ID_FACET);
+
+        /* query */
+        QueryResponse response = querySolrServer(query);
+        if (response.getResults().getNumFound() >= maxResults) {
+            throw new TooManyResultsException("Number of results for query is at the limit of " + maxResults
+                    + ", query gave : " + response.getResults().getNumFound() + " results");
+        }
+
+        /* convert to Set */
+        Set<Long> datasetIds = new HashSet<>(response.getResults().size());
+        for (SolrDocument doc : response.getResults()) {
+            Object v = doc.getFieldValue("datasetId");
+            if (v != null) {
+                datasetIds.add(((Number) v).longValue());
+            }
+        }
+        return datasetIds;
+    }
+
+    private void addRightsRescrictions(SolrQuery query, Map<Long, List<String>> studyIds) {
+        boolean hasRestrictions = false;
+        if (!CollectionUtils.isEmpty(studyIds)) {
+            for (Entry<Long, List<String>> element : studyIds.entrySet()) {
+                if (!CollectionUtils.isEmpty(element.getValue())) {
+                    hasRestrictions = true;
+                }
+            }
+            if (hasRestrictions) {
+                addFilterQueryForCenterStudy(query, studyIds);
+            } else {
+                /* add study filtering */
+                addFilterQueryFromLongs(query, STUDY_ID_FACET, studyIds.keySet());
+            }
+        }
     }
 
     private Map<String, FacetPageable> cleanFacetPage(QueryResponse response, ShanoirSolrQuery shanoirQuery) {

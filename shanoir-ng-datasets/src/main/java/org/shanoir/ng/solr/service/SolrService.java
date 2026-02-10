@@ -19,17 +19,19 @@
  */
 package org.shanoir.ng.solr.service;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.TooManyResultsException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.security.access.prepost.PreAuthorize;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * @author yyao
@@ -119,4 +121,8 @@ public interface SolrService {
      */
     void updateStudyAsync(Long studyId) throws SolrServerException, IOException;
 
+    /**
+     * Find all dataset IDs for a query, with a limit on the number of results to avoid memory issues.
+     */
+    Set<Long> findAllDatasetIdsForQuery(ShanoirSolrQuery shanoirQuery) throws RestServiceException, TooManyResultsException;
 }
