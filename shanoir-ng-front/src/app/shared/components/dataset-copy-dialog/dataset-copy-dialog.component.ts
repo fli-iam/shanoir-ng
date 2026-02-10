@@ -45,6 +45,7 @@ export class DatasetCopyDialogComponent {
     protected inputDatasets: InputDataset[] = [];
     protected ownRef: any;
     protected selectedStudy: IdName;
+    protected subjectName: string = '';
     protected statusMessage: string;
     protected hasRight: boolean = false;
     protected isDatasetInStudy: boolean = false;
@@ -118,6 +119,9 @@ export class DatasetCopyDialogComponent {
                 const formData: FormData = new FormData();
                 formData.set('datasetIds', Array.from(this.inputDatasets.map(d => d.datasetId)).join(","));
                 formData.set('studyId', this.selectedStudy.id.toString());
+                if (this.subjectName && this.subjectName.trim() !== '') {
+                    formData.set('subjectName', this.subjectName.trim());
+                }
                 formData.set('centerIds', Array.from(this.centerIds).join(","));
                 formData.set('subjectIdStudyIds', Array.from(this.subjectIdStudyIds).join(","));
                 return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json' })

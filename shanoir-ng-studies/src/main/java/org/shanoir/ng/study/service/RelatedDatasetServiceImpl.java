@@ -85,7 +85,8 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
     @Transactional
     @Override
-    public void createSubjectsInTargetStudy(List<String> subjectIdStudyIds, Long studyId) throws ShanoirException {
+    public void createSubjectsInTargetStudy(List<String> subjectIdStudyIds, Long studyId,
+            String subjectName) throws ShanoirException {
         LOG.info("Starting createSubjectsInTargetStudy");
         long startTime = System.currentTimeMillis();
         List<Long> subjectIds = new ArrayList<>();
@@ -102,8 +103,13 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             }
             Subject targetSubject = subjectService.findByStudyIdAndName(targetStudy.getId(), sourceSubject.getName());
             if (targetSubject == null) {
-                Subject created = createNewSubjectInTargetStudy(targetStudy, sourceSubject, null, false);
-                createdSubjects.add(created);
+                Subject createdSubject = null;
+                if (createdSubjects.isEmpty()) {
+                    createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, subjectName, false);
+                } else {
+                    createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, null, false);
+                }
+                createdSubjects.add(createdSubject);
             }
         }
         if (!createdSubjects.isEmpty()) {

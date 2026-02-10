@@ -33,6 +33,6 @@ public interface RelatedDatasetService {
     String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds) throws SecurityException;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    void createSubjectsInTargetStudy(List<String> subjectIdStudyIds, Long studyId) throws ShanoirException;
+    void createSubjectsInTargetStudy(List<String> subjectIdStudyIds, Long studyId, String subjectName) throws ShanoirException;
 
 }

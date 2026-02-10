@@ -192,6 +192,7 @@ public class SubjectServiceImpl implements SubjectService {
     public Subject create(Subject subject, boolean withAMQP) throws ShanoirException {
         subject = mapSubjectStudyListToSubject(subject);
         Subject subjectDb = subjectRepository.save(subject);
+        LOG.info("New subject created with ID: {} and Name: {}", subjectDb.getId(), subjectDb.getName());
         if (withAMQP) {
             try {
                 updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));

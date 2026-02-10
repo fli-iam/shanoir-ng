@@ -246,12 +246,13 @@ public class StudyApiController implements StudyApi {
     public ResponseEntity<String> copyDatasetsToStudy(
             List<Long> datasetIds,
             String studyIdAsStr,
+            String subjectName,
             List<Long> centerIds,
             List<String> subjectIdStudyIds) {
         String res;
         try {
             Long studyId = Long.valueOf(studyIdAsStr);
-            relatedDatasetService.createSubjectsInTargetStudy(subjectIdStudyIds, studyId);
+            relatedDatasetService.createSubjectsInTargetStudy(subjectIdStudyIds, studyId, subjectName);
             res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
         } catch (SecurityException e) {
             LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);

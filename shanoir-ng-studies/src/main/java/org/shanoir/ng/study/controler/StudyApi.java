@@ -162,6 +162,8 @@ public interface StudyApi {
             @RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
             @Parameter(description = "Study id to copy in", required = true)
             @RequestParam(value = "studyId", required = true) String studyId,
+            @Parameter(description = "New subject name", required = false)
+            @RequestParam(value = "subjectName", required = false) String subjectName,
             @Parameter(description = "Center ids of datasets", required = true)
             @RequestParam(value = "centerIds", required = true) List<Long> centerIds,
             @Parameter(description = "Subject ids/study ids of datasets", required = true)
