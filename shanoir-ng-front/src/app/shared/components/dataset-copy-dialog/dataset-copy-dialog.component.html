@@ -40,6 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </select-box>
                 </span>
             </p>
+            @if (subjectIds.length === 1) {
             <p>
                 <span class="label">Subject name (optional):</span>
                 <span class="content">
@@ -47,6 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         class="subject-name-input" />
                 </span>
             </p>
+            }
             @if (statusMessage) {
                 <div class="error">
                     {{ statusMessage }}

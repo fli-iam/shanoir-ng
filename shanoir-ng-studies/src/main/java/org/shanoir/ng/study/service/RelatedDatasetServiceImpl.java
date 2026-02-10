@@ -86,13 +86,13 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
     @Transactional
     @Override
-    public void createSubjectsInTargetStudy(List<String> subjectIdStudyIds, Long studyId,
+    public void createSubjectsInTargetStudy(List<String> subjectIdsStr, Long studyId,
             Map<Long, Long> subjectMapping, String subjectName) throws ShanoirException {
         LOG.info("Starting createSubjectsInTargetStudy");
         long startTime = System.currentTimeMillis();
         List<Long> subjectIds = new ArrayList<>();
-        for (String s : subjectIdStudyIds) {
-            subjectIds.add(Long.valueOf(s.substring(0, s.indexOf("/"))));
+        for (String s : subjectIdsStr) {
+            subjectIds.add(Long.valueOf(s));
         }
         Study targetStudy = studyService.findById(studyId);
         List<Subject> createdSubjects = new ArrayList<>();
