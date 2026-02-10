@@ -149,9 +149,7 @@ public class SubjectApiController implements SubjectApi {
             try {
                 createdSubject = subjectService.create(subject, true);
             } catch (ShanoirException e) {
-                throw new RestServiceException(
-                        new ErrorModel(HttpStatus.FORBIDDEN.value(),
-                            "Unexpected error creating subject: " + e.getMessage(), e));
+                throw new RestServiceException(new ErrorModel(HttpStatus.FORBIDDEN.value(), e.getMessage(), null));
             }
         } else {
             createdSubject = subjectService.createAutoIncrement(subject, centerId, true);

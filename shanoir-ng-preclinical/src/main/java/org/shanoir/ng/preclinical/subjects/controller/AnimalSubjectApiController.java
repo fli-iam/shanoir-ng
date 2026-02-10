@@ -56,6 +56,8 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
     private static final String BAD_ARGUMENTS = "Bad arguments";
 
+    private static final String DRAFT_STUDY = "The study you are trying to upload is draft. It must be approved before uploading any data to it.";
+
     /**
      * Logger
      */
@@ -115,7 +117,8 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
         } catch (JsonProcessingException | ShanoirException ex) {
             String msg = "Failed to create subject. Animal subject can't be created.";
             LOG.error(msg, ex);
-            throw new ShanoirException(msg, ex);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.FORBIDDEN.value(), ex.getMessage(), null));
         }
         dto.setId(id);
         return dto;

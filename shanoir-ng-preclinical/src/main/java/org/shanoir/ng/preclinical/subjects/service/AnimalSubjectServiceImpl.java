@@ -29,6 +29,7 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.AmqpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -151,8 +152,14 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
     }
 
     @Override
-    public Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException {
-        Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, mapper.writeValueAsString(dto));
+    public Long createSubject(SubjectDto dto) throws ShanoirException, JsonProcessingException {
+        Long subjectId;
+        try {
+            subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, mapper.writeValueAsString(dto));
+        } catch (JsonProcessingException | AmqpException e) {
+            throw new ShanoirException("Error creating subject", e);
+        }
+
         if (subjectId == null) {
             throw new ShanoirException("Created subject id is null.");
         }
