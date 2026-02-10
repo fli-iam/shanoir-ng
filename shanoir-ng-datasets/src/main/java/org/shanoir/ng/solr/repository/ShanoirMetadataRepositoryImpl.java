@@ -19,17 +19,22 @@
  */
 package org.shanoir.ng.solr.repository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 /**
  * @author yyao
@@ -70,7 +75,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN examination e ON e.id = da.examination_id"
             + " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
             + " LEFT JOIN study st ON st.id = e.study_id"
-            + " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
+            + " LEFT JOIN subject su ON su.id = e.subject_id AND su.study_id = e.study_id"
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , dataset_metadata dm, mr_dataset md"
             + " LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id"
@@ -100,7 +105,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN examination e ON e.id = da.examination_id"
             + " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
             + " LEFT JOIN study st ON st.id = e.study_id"
-            + " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
+            + " LEFT JOIN subject su ON su.id = e.subject_id AND su.study_id = e.study_id"
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , pet_dataset pd, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND pd.id = d.id";
@@ -131,7 +136,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN examination e ON e.id = da.examination_id"
             + " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
             + " LEFT JOIN study st ON st.id = e.study_id"
-            + " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
+            + " LEFT JOIN subject su ON su.id = e.subject_id AND su.study_id = e.study_id"
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , ct_dataset cd, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
@@ -163,7 +168,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN examination e ON e.id = da.examination_id"
             + " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
             + " LEFT JOIN study st ON st.id = e.study_id"
-            + " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
+            + " LEFT JOIN subject su ON su.id = e.subject_id AND su.study_id = e.study_id"
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , generic_dataset cd, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
@@ -194,7 +199,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN examination e ON e.id = da.examination_id"
             + " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
             + " LEFT JOIN study st ON st.id = e.study_id"
-            + " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
+            + " LEFT JOIN subject su ON su.id = e.subject_id AND su.study_id = e.study_id"
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , eeg_dataset ed, dataset_metadata dm"
             + " WHERE d.origin_metadata_id = dm.id AND ed.id = d.id";
@@ -226,7 +231,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN examination e ON e.id = da.examination_id"
             + " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
             + " LEFT JOIN study st ON st.id = e.study_id"
-            + " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
+            + " LEFT JOIN subject su ON su.id = e.subject_id AND su.study_id = e.study_id"
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , bids_dataset ed, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND ed.id = d.id";
@@ -289,7 +294,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN examination e ON e.id = da.examination_id"
             + " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
             + " LEFT JOIN study st ON st.id = e.study_id"
-            + " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
+            + " LEFT JOIN subject su ON su.id = e.subject_id AND su.study_id = e.study_id"
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , measurement_dataset md, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND md.id = d.id";
@@ -322,7 +327,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN examination e ON e.id = da.examination_id"
             + " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
             + " LEFT JOIN study st ON st.id = e.study_id"
-            + " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
+            + " LEFT JOIN subject su ON su.id = e.subject_id AND su.study_id = e.study_id"
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , segmentation_dataset sd, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND sd.id = d.id";
@@ -354,7 +359,7 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             + " LEFT JOIN examination e ON e.id = da.examination_id"
             + " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
             + " LEFT JOIN study st ON st.id = e.study_id"
-            + " LEFT JOIN subject su ON su.id = d.subject_id AND su.study_id = e.study_id"
+            + " LEFT JOIN subject su ON su.id = e.subject_id AND su.study_id = e.study_id"
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , xa_dataset cd, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
