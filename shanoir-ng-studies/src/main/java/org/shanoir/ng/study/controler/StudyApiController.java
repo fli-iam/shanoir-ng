@@ -249,12 +249,12 @@ public class StudyApiController implements StudyApi {
             String studyIdAsStr,
             String subjectName,
             List<Long> centerIds,
-            List<String> subjectIdStudyIds) {
+            List<String> subjectIds) {
         String res;
         try {
             Long studyId = Long.valueOf(studyIdAsStr);
             Map<Long, Long> subjectMapping = new HashMap<>();
-            relatedDatasetService.createSubjectsInTargetStudy(subjectIdStudyIds, studyId, subjectMapping, subjectName);
+            relatedDatasetService.createSubjectsInTargetStudy(subjectIds, studyId, subjectMapping, subjectName);
             res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds, subjectMapping);
         } catch (SecurityException e) {
             LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
