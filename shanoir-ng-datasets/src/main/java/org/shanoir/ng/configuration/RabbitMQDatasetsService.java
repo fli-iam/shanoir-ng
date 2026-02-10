@@ -466,7 +466,7 @@ public class RabbitMQDatasetsService {
                     countAlreadyExist++;
 
                 } else {
-                    Object[] result = datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap, userId);
+                    Object[] result = datasetCopyService.moveDataset(datasetParent, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
                     Long newDsId = (Long) result[0];
                     countProcessed += (int) result[1];
                     countSuccess += (int) result[2];

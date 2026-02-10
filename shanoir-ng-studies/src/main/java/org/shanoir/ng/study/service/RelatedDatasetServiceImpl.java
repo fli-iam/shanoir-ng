@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -86,7 +87,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
     @Transactional
     @Override
     public void createSubjectsInTargetStudy(List<String> subjectIdStudyIds, Long studyId,
-            String subjectName) throws ShanoirException {
+            Map<Long, Long> subjectMapping, String subjectName) throws ShanoirException {
         LOG.info("Starting createSubjectsInTargetStudy");
         long startTime = System.currentTimeMillis();
         List<Long> subjectIds = new ArrayList<>();
@@ -109,6 +110,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                 } else {
                     createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, null, false);
                 }
+                subjectMapping.put(subjectId, createdSubject.getId());
                 createdSubjects.add(createdSubject);
             }
         }
@@ -141,7 +143,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
     }
 
     @Override
-    public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds) throws SecurityException {
+    public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds, Map<Long, Long> subjectMapping) throws SecurityException {
         String result = "";
         Long userId = KeycloakUtil.getTokenUserId();
         Study study = studyService.findById(studyId);
@@ -153,7 +155,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             if (rights.contains(StudyUserRight.CAN_ADMINISTRATE) || rights.contains(StudyUserRight.CAN_IMPORT)) {
                 addCentersToStudy(study, centerIds);
                 try {
-                    copyDatasetsToStudy(datasetIds, studyId, userId);
+                    copyDatasetsToStudy(datasetIds, studyId, userId, subjectMapping);
                 } catch (MicroServiceCommunicationException e) {
                     throw new RuntimeException(e);
                 }
@@ -187,7 +189,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         studyRepository.save(study);
     }
 
-    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Long userId) throws MicroServiceCommunicationException {
+    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Long userId, Map<Long, Long> subjectMapping) throws MicroServiceCommunicationException {
         // datasetIds order is : selected datasets in solr from top of the table to bottom
         // reverse that order so that the first dataset to be treated is the last selected in solr
         Collections.sort(datasetIds);
@@ -195,6 +197,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         dto.setStudyId(studyId);
         dto.setDatasetIds(datasetIds);
         dto.setUserId(userId);
+        dto.setSubjectMapping(subjectMapping);
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, objectMapper.writeValueAsString(dto));
         } catch (AmqpException | JsonProcessingException e) {

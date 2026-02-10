@@ -67,13 +67,14 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     private static final Logger LOG = LoggerFactory.getLogger(DatasetCopyServiceImpl.class);
 
     @Override
-    public Object[] moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws JsonProcessingException {
+    public Object[] moveDataset(Dataset ds, Long studyId, Map<Long, Long> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws JsonProcessingException {
         try {
             int countProcessed = 0;
             int countSuccess = 0;
             Long oldDsId = ds.getId();
-            Subject subjectSource = subjectRepository.findById(ds.getSubjectId()).orElseThrow();
-            Subject subjectTarget = subjectRepository.findByNameAndStudy_Id(subjectSource.getName(), studyId);
+            Subject sourceSubject = subjectRepository.findById(ds.getSubjectId()).orElseThrow();
+            Long targetSubjectId = subjectMap.get(sourceSubject.getId());
+            Subject targetSubject = subjectRepository.findById(targetSubjectId).orElseThrow();
             LOG.info("[CopyDatasets] moveDataset : " + oldDsId + " to study : " + studyId);
 
             // Creation of new dataset according to its type
@@ -88,7 +89,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 ds.getCopies().add(newDs);
                 newDs.setSource(ds);
                 newDs.setCopies(new ArrayList<>());
-                newDs.setSubjectId(subjectTarget.getId());
+                newDs.setSubjectId(targetSubject.getId());
 
                 // Handling of DatasetAcquisition and Examination
                 DatasetAcquisition newDsAcq = null;

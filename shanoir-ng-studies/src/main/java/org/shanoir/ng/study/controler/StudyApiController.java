@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -252,8 +253,9 @@ public class StudyApiController implements StudyApi {
         String res;
         try {
             Long studyId = Long.valueOf(studyIdAsStr);
-            relatedDatasetService.createSubjectsInTargetStudy(subjectIdStudyIds, studyId, subjectName);
-            res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
+            Map<Long, Long> subjectMapping = new HashMap<>();
+            relatedDatasetService.createSubjectsInTargetStudy(subjectIdStudyIds, studyId, subjectMapping, subjectName);
+            res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds, subjectMapping);
         } catch (SecurityException e) {
             LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
