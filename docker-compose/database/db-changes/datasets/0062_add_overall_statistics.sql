@@ -15,5 +15,5 @@ create table overall_statistics (
     studies_count BIGINT NOT NULL,
     subjects_count BIGINT NOT NULL,
     dataset_acquisitions_count BIGINT NOT NULL,
-    storage_size BIGINT DEFAULT NULL
+    storage_size FLOAT DEFAULT NULL
 );
