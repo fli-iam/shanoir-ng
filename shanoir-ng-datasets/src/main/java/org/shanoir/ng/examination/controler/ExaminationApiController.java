@@ -43,6 +43,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,6 +92,9 @@ public class ExaminationApiController implements ExaminationApi {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private StudyService studyService;
 
     private final HttpServletRequest request;
 
@@ -179,6 +183,12 @@ public class ExaminationApiController implements ExaminationApi {
             final BindingResult result) throws RestServiceException {
         validate(result);
         Examination examination = examinationMapper.examinationDTOToExamination(examinationDTO);
+
+        if (studyService.isDraft(examination.getStudyId())) {
+            LOG.error("Cannot import data into a draft study.");
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         generateStudyInstanceUID(examination);
         try {
             final Examination createdExamination = examinationService.save(examination);

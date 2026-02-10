@@ -29,6 +29,7 @@ import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.processing.service.ProcessingDownloaderService;
+import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -69,6 +70,9 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
     @Autowired
     private ExaminationService examinationService;
+
+    @Autowired
+    private StudyService studyService;
 
     public DatasetProcessingApiController() {
 
@@ -138,6 +142,11 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     public ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(
             @Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
             final BindingResult result) throws RestServiceException {
+
+        if (studyService.isDraft(datasetProcessing.getStudyId())) {
+            LOG.error("Cannot import data into a draft study.");
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
 
         /* set authenticated username */
         datasetProcessing.setUsername(KeycloakUtil.getTokenUserName());

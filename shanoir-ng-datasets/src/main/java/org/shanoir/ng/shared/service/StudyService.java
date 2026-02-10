@@ -15,6 +15,7 @@
 package org.shanoir.ng.shared.service;
 
 import org.shanoir.ng.shared.exception.AccessDeniedException;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Study;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -41,4 +42,6 @@ public interface StudyService {
     void updateStudy(Study updated, Study current);
 
     List<String> validate(Study updated, Study current);
+
+    boolean isDraft(Long studyId) throws RestServiceException;
 }

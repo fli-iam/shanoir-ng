@@ -19,24 +19,37 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.StudyCenter;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @Component
 public class StudyServiceImpl implements StudyService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(StudyService.class);
 
     @Autowired
     private StudyRepository repository;
 
     @Autowired
     private DatasetRepository dsRepository;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     public Study findById(final Long id) {
@@ -110,4 +123,28 @@ public class StudyServiceImpl implements StudyService {
         return errors;
     }
 
+    public boolean isDraft(Long studyId) throws RestServiceException {
+        try {
+            String response = (String) rabbitTemplate.convertSendAndReceive(
+                    RabbitMQConfiguration.STUDY_DRAFT_STATE_QUEUE,
+                    String.valueOf(studyId)
+            );
+
+            if (response == null || "NOT_FOUND".equals(response)) {
+                throw new RestServiceException(
+                        new ErrorModel(HttpStatus.NOT_FOUND.value(), "Cannot find study.", null));
+            }
+
+            if ("ERROR".equals(response)) {
+                throw new RestServiceException(
+                        new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error checking study state.", null));
+            }
+
+            return Boolean.parseBoolean(response);
+        } catch (AmqpException e) {
+            LOG.error("Failed to communicate with Study MS", e);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Study service unavailable.", null));
+        }
+    }
 }
