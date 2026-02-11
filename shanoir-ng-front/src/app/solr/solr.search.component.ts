@@ -404,6 +404,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     private addAllToSelection() {
         this.solrService.getAllIds(this.solrRequest).then(ids => {
             ids.forEach(id => this.selectedDatasetIds.add(id));
+            this.onSelectionChange(this.selectedDatasetIds);
         });
     }
 
@@ -594,8 +595,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         }
     }
 
-    onSelectionChange (selection: Set<any>) {
-
+    onSelectionChange(selection: Set<any>) {
         let downloadable = true;
         selection.forEach((datasetid) => {
             const selected: any = this.table?.page?.content?.find((element: any) => element.id == datasetid);
@@ -612,7 +612,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         });
         this.canDownload = downloadable;
 
-        this.selectedDatasetIds = selection;
+        this.selectedDatasetIds = new Set(selection);
         this.prepareForCopy();
     }
 
