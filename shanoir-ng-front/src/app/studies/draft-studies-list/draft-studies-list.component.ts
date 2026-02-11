@@ -11,14 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild } from '@angular/core';
-
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Component } from '@angular/core';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
-import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
-import { TableComponent } from '../../shared/components/table/table.component';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 
