@@ -39,10 +39,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <ul class="menu-list">
     <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
-    <li *ngIf="(duasToSign() + studiesToApprove() + accessRequestsToValidate) > 0" (click)="state.notifOpened = !state.notifOpened; saveState();"><i class="far fa-flag"></i>
-        Notifications<span class="counter">{{duasToSign() + studiesToApprove() + accessRequestsToValidate}}</span><span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    <li *ngIf="(duasToSign() + (isUserAdmin() ? studiesToApprove() : 0) + accessRequestsToValidate) > 0" (click)="state.notifOpened = !state.notifOpened; saveState();"><i class="far fa-flag"></i>
+        Notifications<span class="counter">{{duasToSign() + (isUserAdmin() ? studiesToApprove() : 0) + accessRequestsToValidate}}</span><span class="chevron"><i class="fas fa-chevron-down"></i></span>
     </li>
-    <div *ngIf="state.notifOpened && studiesToApprove() > 0" class="sub-menu" [@slideDown]="state.notifOpened">
+    <div *ngIf="state.notifOpened && studiesToApprove() > 0 && isUserAdmin()" class="sub-menu" [@slideDown]="state.notifOpened">
         <li routerLink="/draft" routerLinkActive="active"><i class="fas fa-file"></i>Draft Studies<span class="counter">{{studiesToApprove()}}</span></li>
     </div>
     <div *ngIf="state.notifOpened && duasToSign() > 0" class="sub-menu" [@slideDown]="state.notifOpened">
