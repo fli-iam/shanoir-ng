@@ -27,6 +27,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.property.model.DatasetProperty;
@@ -44,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -134,15 +136,18 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
     @Override
     public boolean canProcess(ExecutionMonitoring processing) throws ResultHandlerException {
-        if (processing.getPipelineIdentifier() == null || processing.getPipelineIdentifier().isEmpty()) {
-            throw new ResultHandlerException("Pipeline identifier is not set for processing [" + processing.getName() + "]", null);
-        }
-        return processing.getPipelineIdentifier().startsWith("ofsep_sequences_identification")  || processing.getPipelineIdentifier().startsWith("SIMS");
+        return canProcess(processing.getPipelineIdentifier(), false);
     }
 
-    @Override
-    public void manageTarGzResult(List<File> resultFiles, File parentFolder, ExecutionMonitoring monitoring, String resourceId) {
+    public boolean canProcess(String pipelineIdentifier, boolean postProcessing) throws ResultHandlerException {
+        if (Objects.isNull(pipelineIdentifier)) {
+            throw new ResultHandlerException("Pipeline identifier can not be null", null);
+        }
+        return (pipelineIdentifier.startsWith("SIMS") || pipelineIdentifier.startsWith("ofsep_sequences_identification")) && postProcessing == pipelineIdentifier.endsWith("post_processing");
+    }
 
+    @Transactional
+    public void manageTarGzResult(List<File> resultFiles, File parentFolder, ExecutionMonitoring monitoring, String resourceId) {
         for (File file : resultFiles) {
             if (!file.getName().equals(PIPELINE_OUTPUT)) {
                 continue;
@@ -321,7 +326,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
                     List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, monitoring);
                     addDatasetTags(ds, properties);
-                    properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, monitoring));
+                    properties.addAll(getDatasetPropertiesFromDicom(attributes, ds,  monitoring));
                     datasetPropertyService.createAll(properties);
                 } else {
                     LOG.info("Dataset {} ignored, no update", ds.getId());
