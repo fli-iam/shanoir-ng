@@ -38,8 +38,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 
-import jakarta.validation.Valid;
-
 @Controller
 public class UserApiController extends AbstractUserRequestApiController implements UserApi {
 
