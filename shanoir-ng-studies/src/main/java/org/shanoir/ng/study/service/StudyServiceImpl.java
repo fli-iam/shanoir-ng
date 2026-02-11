@@ -263,7 +263,7 @@ public class StudyServiceImpl implements StudyService {
                 email.setUserId(KeycloakUtil.getTokenUserId());
                 email.setStudyId(studyDb.getId().toString());
                 email.setStudyName(studyDb.getName());
-                rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_CREATED_MAIL_QUEUE,
+                rabbitTemplate.convertAndSend(RabbitMQConfiguration.DRAFT_STUDY_CREATED_MAIL_QUEUE,
                         objectMapper.writeValueAsString(email));
             } catch (Exception e) {
                 LOG.error("Could not send study created email event.", e);

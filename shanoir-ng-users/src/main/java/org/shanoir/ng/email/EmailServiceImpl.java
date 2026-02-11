@@ -135,13 +135,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void notifyStudyCreated(EmailStudyUsersAdded email) {
-        // Find user that created the study (may be absent)
+    public void notifyDraftStudyCreated(EmailStudyUsersAdded email) {
         User user = userRepository.findById(email.getUserId()).orElse(null);
-
-        // Retrieve study admins for this study
         final List<String> adminEmails = userRepository.findAdminEmails();
-
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom(administratorEmail);
@@ -153,9 +149,11 @@ public class EmailServiceImpl implements EmailService {
             variables.put(EMAIL, user.getEmail());
             variables.put(STUDY_NAME, email.getStudyName());
             variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
-            final String content = build("notifyAdminStudyCreated", variables);
+            final String content = build("notifyAdminDraftStudyCreated", variables);
+            LOG.info(content);
             messageHelper.setText(content, true);
         };
+        LOG.info("Sending study-users-added mail to {} for study {}", adminEmails.toArray(new String[0]), email.getStudyId());
         mailSender.send(messagePreparator);
     }
 
