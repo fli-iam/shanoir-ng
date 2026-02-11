@@ -98,4 +98,5 @@ public class AccessRequest extends AbstractEntity {
     public void setStudyName(String studyName) {
         this.studyName = studyName;
     }
+
 }
