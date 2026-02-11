@@ -57,3 +57,7 @@ shanoir-ng-tests/tests/lib/
 shanoir-ng-tests/tests/pip-selfcheck.json
 .idea/
 *.iml
+
+# VIP Local
+/docker-compose/vip/
+/docker-compose/Dockerfile.vip

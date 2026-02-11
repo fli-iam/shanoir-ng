@@ -13,7 +13,7 @@
                             <label for="kc-otp-credential-${otpCredential?index}" class="${properties.kcLoginOTPListClass!}" tabindex="${otpCredential?index}">
                                 <span class="${properties.kcLoginOTPListItemHeaderClass!}">
                                     <span class="${properties.kcLoginOTPListItemIconBodyClass!}">
-                                      <i class="${properties.kcLoginOTPListItemIconClass!}" aria-hidden="true"></i>
+                                        <i class="${properties.kcLoginOTPListItemIconClass!}" aria-hidden="true"></i>
                                     </span>
                                     <span class="${properties.kcLoginOTPListItemTitleClass!}">${otpCredential.userLabel}</span>
                                 </span>
@@ -24,34 +24,26 @@
             </#if>
 
             <div class="${properties.kcFormGroupClass!}">
-                <div class="${properties.kcLabelWrapperClass!}">
-                    <label for="otp" class="${properties.kcLabelClass!}">${msg("loginOtpOneTime")}</label>
-                </div>
-
-            <div class="${properties.kcInputWrapperClass!}">
-                <input id="otp" name="otp" autocomplete="one-time-code" type="text" class="${properties.kcInputClass!}"
-                       autofocus aria-invalid="<#if messagesPerField.existsError('totp')>true</#if>"
-                       dir="ltr" />
-
                 <#if messagesPerField.existsError('totp')>
-                    <span id="input-error-otp-code" class="${properties.kcInputErrorMessageClass!}"
-                          aria-live="polite">
+                    <span id="input-error" class="alert ${properties.kcInputErrorMessageClass!}" aria-live="polite">
                         ${kcSanitize(messagesPerField.get('totp'))?no_esc}
                     </span>
                 </#if>
-            </div>
-        </div>
-
-            <div class="${properties.kcFormGroupClass!}">
-                <div id="kc-form-options" class="${properties.kcFormOptionsClass!}">
-                    <div class="${properties.kcFormOptionsWrapperClass!}">
-                    </div>
+                <div class="${properties.kcInputWrapperClass!}">
+                    <input id="otp" name="otp" autocomplete="one-time-code" type="text" class="${properties.kcInputClass!}"
+                            placeholder="${msg("loginOtpOneTime")}"
+                            autofocus aria-invalid="<#if messagesPerField.existsError('totp')>true</#if>"
+                            dir="ltr" />
                 </div>
+            </div>
 
+            <div class="${properties.kcFormGroupClass!} ${properties.kcFormSettingClass!} ">
                 <div id="kc-form-buttons" class="${properties.kcFormButtonsClass!}">
-                    <input
-                        class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}"
-                        name="login" id="kc-login" type="submit" value="${msg("doLogIn")}" />
+                    <input type="hidden" id="id-hidden-input" name="credentialId" <#if auth.selectedCredential?has_content>value="${auth.selectedCredential}"</#if>/>
+                    <a href="${properties.requestWelcome!}">
+						<button type="button">${msg("doCancel")}</button>
+					</a>
+                    <button class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}" type="submit">${msg("doSubmit")}</button>
                 </div>
             </div>
         </form>

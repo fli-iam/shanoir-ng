@@ -28,8 +28,12 @@ export class HandleErrorService implements ErrorHandler {
     public handleError(error: any) {
         try {
             if (error instanceof HttpErrorResponse) {
+                if (error.status !== 404) {
+                    console.error(error);
+                }
                 this.handleHttpError(error);
             } else {
+                console.error(error);
                 this.handleDefaultError(error);
             }
         } catch (error) {

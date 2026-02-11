@@ -38,6 +38,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 
+import jakarta.validation.Valid;
+
 @Controller
 public class UserApiController extends AbstractUserRequestApiController implements UserApi {
 
@@ -100,6 +102,11 @@ public class UserApiController extends AbstractUserRequestApiController implemen
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Long> countActiveUsers() {
+        return new ResponseEntity<>(getUserService().countActiveUsers(), HttpStatus.OK);
     }
 
     @Override

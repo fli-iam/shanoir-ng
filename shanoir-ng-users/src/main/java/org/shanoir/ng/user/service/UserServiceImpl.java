@@ -195,6 +195,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Long countActiveUsers() {
+        return userRepository.countActiveUsers();
+    }
+
+    @Override
     public List<User> findAccountRequests() {
         return Utils.toList(userRepository.findByAccountRequestDemandTrueOrExtensionRequestDemandTrue());
     }
