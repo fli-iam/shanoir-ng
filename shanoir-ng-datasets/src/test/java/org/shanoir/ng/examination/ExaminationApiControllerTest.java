@@ -30,6 +30,7 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
+import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -141,6 +142,9 @@ public class ExaminationApiControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockBean
+    private StudyService studyServiceMock;
+
     @BeforeEach
     public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {
         doNothing().when(examinationServiceMock).deleteById(1L, null);
@@ -230,6 +234,7 @@ public class ExaminationApiControllerTest {
         given(examinationMapperMock.examinationDTOToExamination(Mockito.any())).willReturn(exam);
         given(examinationServiceMock.findById(1L)).willReturn(exam);
         given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
+        given(studyServiceMock.isDraft(exam.getStudyId())).willReturn(false);
 
         mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination())))
