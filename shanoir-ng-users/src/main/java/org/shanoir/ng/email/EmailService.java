@@ -20,6 +20,7 @@ import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
+import org.shanoir.ng.shared.email.EmailStudyCreated;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
 
@@ -123,7 +124,9 @@ public interface EmailService {
      */
     void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email);
 
-    void notifyDraftStudyCreated(EmailStudyUsersAdded email);
+    void notifyAdminDraftStudyCreated(EmailStudyCreated email);
+
+    void notifyStudyMembersStudyDraftState(EmailStudyCreated email);
 
     /**
      *  This method notifies a study manager that an import failed for a given study

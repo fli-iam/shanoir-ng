@@ -24,6 +24,7 @@ import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.email.EmailStudyCreated;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
@@ -138,8 +139,21 @@ public class RabbitMQUserService {
     public void receiveStudyCreated(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
-            EmailStudyUsersAdded mail = mapper.readValue(generatedMailAsString, EmailStudyUsersAdded.class);
-            this.emailService.notifyDraftStudyCreated(mail);
+            EmailStudyCreated mail = mapper.readValue(generatedMailAsString, EmailStudyCreated.class);
+            this.emailService.notifyAdminDraftStudyCreated(mail);
+        } catch (Exception e) {
+            LOG.error("Something went wrong deserializing the study created event.", e);
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
+        }
+    }
+
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_DRAFT_STATE_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    public void receiveStudyDraftState(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            EmailStudyCreated mail = mapper.readValue(generatedMailAsString, EmailStudyCreated.class);
+            this.emailService.notifyStudyMembersStudyDraftState(mail);
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the study created event.", e);
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);

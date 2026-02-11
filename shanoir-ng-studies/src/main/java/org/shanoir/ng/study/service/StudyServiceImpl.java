@@ -256,17 +256,9 @@ public class StudyServiceImpl implements StudyService {
 
             // Use newly created study "studyDb" to decide, to send email to which user
             sendStudyUserReport(studyDb, studyDb.getStudyUserList());
-
-            // Notify users service to send emails to study admins about new study
-            try {
-                EmailStudyCreated email = new EmailStudyCreated();
-                email.setUserId(KeycloakUtil.getTokenUserId());
-                email.setStudyId(studyDb.getId().toString());
-                email.setStudyName(studyDb.getName());
-                rabbitTemplate.convertAndSend(RabbitMQConfiguration.DRAFT_STUDY_CREATED_MAIL_QUEUE,
-                        objectMapper.writeValueAsString(email));
-            } catch (Exception e) {
-                LOG.error("Could not send study created email event.", e);
+            if (studyDb.getIsDraft()) {
+                // Notify users service to send emails to study admins about new study
+                sendSystemAdminReport(studyDb);
             }
         }
 
@@ -280,6 +272,7 @@ public class StudyServiceImpl implements StudyService {
         }
         study.setIsDraft(!study.getIsDraft());
         studyRepository.save(study);
+        sendStudyMembersDraftReport(study);
         return study;
     }
 
@@ -773,6 +766,35 @@ public class StudyServiceImpl implements StudyService {
             } catch (AmqpException | JsonProcessingException e) {
                 LOG.error("Could not send email for study user report. ", e);
             }
+        }
+    }
+
+    private void sendSystemAdminReport(Study study) {
+        EmailStudyCreated email = new EmailStudyCreated();
+        email.setUserId(KeycloakUtil.getTokenUserId());
+        email.setStudyId(study.getId().toString());
+        email.setStudyName(study.getName());
+        try {
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.DRAFT_STUDY_CREATED_MAIL_QUEUE,
+                    objectMapper.writeValueAsString(email));
+        } catch (Exception e) {
+            LOG.error("Could not send study created email event.", e);
+        }
+    }
+
+    private void sendStudyMembersDraftReport(Study study) {
+        EmailStudyCreated email = new EmailStudyCreated();
+        email.setUserId(KeycloakUtil.getTokenUserId());
+        email.setStudyId(study.getId().toString());
+        email.setStudyName(study.getName());
+        List<Long> studyUserIds = study.getStudyUserList().stream().map(StudyUser::getUserId).collect(Collectors.toList());
+        email.setStudyUsers(studyUserIds);
+        email.setIsDraft(study.getIsDraft());
+        try {
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_DRAFT_STATE_MAIL_QUEUE,
+                    objectMapper.writeValueAsString(email));
+        } catch (Exception e) {
+            LOG.error("Could not send study draft state changed email event.", e);
         }
     }
 

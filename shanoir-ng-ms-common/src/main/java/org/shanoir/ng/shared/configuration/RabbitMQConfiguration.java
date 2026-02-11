@@ -217,6 +217,9 @@ public class RabbitMQConfiguration {
     /** Send a mail from studies microservice when a study is created */
     public static final String DRAFT_STUDY_CREATED_MAIL_QUEUE = "draft-study-created-mail-queue";
 
+    /** Send a mail from studies microservice when a study is created */
+    public static final String STUDY_DRAFT_STATE_MAIL_QUEUE = "study-draft-state-mail-queue";
+
     /** Queue to notify when a user / study is updated / deleted. */
     public static final String STUDY_USER_QUEUE = "study-user";
 
@@ -516,6 +519,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyCreatedMailQueue() {
         return new Queue(DRAFT_STUDY_CREATED_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyDraftStateMailQueue() {
+        return new Queue(STUDY_DRAFT_STATE_MAIL_QUEUE, true);
     }
 
     @Bean

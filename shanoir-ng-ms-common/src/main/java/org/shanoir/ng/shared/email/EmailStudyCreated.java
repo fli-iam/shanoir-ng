@@ -14,8 +14,28 @@
 
 package org.shanoir.ng.shared.email;
 
+import java.util.List;
+
 public class EmailStudyCreated extends EmailBase {
 
-    // no extra fields for now; reuse studyId, studyName, userId from EmailBase
+    private boolean isDraft;
+
+    private List<Long> studyUsers;
+
+    public boolean getIsDraft() {
+        return isDraft;
+    }
+
+    public void setIsDraft(boolean isDraft) {
+        this.isDraft = isDraft;
+    }
+
+    public List<Long> getStudyUsers() {
+        return studyUsers;
+    }
+
+    public void setStudyUsers(List<Long> studyUsers) {
+        this.studyUsers = studyUsers;
+    }
 
 }

@@ -31,6 +31,7 @@ import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.email.EmailStudyCreated;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
@@ -93,6 +94,8 @@ public class EmailServiceImpl implements EmailService {
 
     private static final String LINK = "link";
 
+    private static final String IS_DRAFT = "isDraft";
+
     private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
 
     @Autowired
@@ -135,26 +138,53 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void notifyDraftStudyCreated(EmailStudyUsersAdded email) {
+    public void notifyAdminDraftStudyCreated(EmailStudyCreated email) {
         User user = userRepository.findById(email.getUserId()).orElse(null);
         final List<String> adminEmails = userRepository.findAdminEmails();
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom(administratorEmail);
             messageHelper.setTo(adminEmails.toArray(new String[0]));
-            messageHelper.setSubject("[Shanoir] New study created: " + email.getStudyName());
+            messageHelper.setSubject("New draft study created");
             final Map<String, Object> variables = new HashMap<>();
             variables.put(FIRSTNAME, user.getFirstName());
             variables.put(LASTNAME, user.getLastName());
             variables.put(EMAIL, user.getEmail());
             variables.put(STUDY_NAME, email.getStudyName());
-            variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/details/" + email.getStudyId());
             final String content = build("notifyAdminDraftStudyCreated", variables);
             LOG.info(content);
             messageHelper.setText(content, true);
         };
-        LOG.info("Sending study-users-added mail to {} for study {}", adminEmails.toArray(new String[0]), email.getStudyId());
+        LOG.info("Sending study-draft-created mail to {} for study {}", adminEmails.toArray(new String[0]), email.getStudyId());
         mailSender.send(messagePreparator);
+    }
+
+    @Override
+    public void notifyStudyMembersStudyDraftState(EmailStudyCreated email) {
+        final List<User> studyMembers = (List<User>) userRepository.findByIdIn(email.getStudyUsers());
+        if (!CollectionUtils.isEmpty(studyMembers)) {
+            for (User studyMember : studyMembers) {
+                MimeMessagePreparator messagePreparator = mimeMessage -> {
+                    final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+                    messageHelper.setFrom(administratorEmail);
+                    messageHelper.setTo(studyMember.getEmail());
+                    messageHelper.setSubject("Study draft state");
+                    final Map<String, Object> variables = new HashMap<>();
+                    variables.put(FIRSTNAME, studyMember.getFirstName());
+                    variables.put(LASTNAME, studyMember.getLastName());
+                    variables.put(IS_DRAFT, String.valueOf(email.getIsDraft()));
+                    variables.put(STUDY_NAME, email.getStudyName());
+                    variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/details/" + email.getStudyId());
+                    final String content = build("notifyStudyMembersStudyDraftState", variables);
+                    LOG.info(content);
+                    messageHelper.setText(content, true);
+                };
+                // Send the message
+                LOG.info("Sending study-draft-state mail to {} for study {}", studyMember.getUsername(), email.getStudyId());
+                mailSender.send(messagePreparator);
+            }
+        }
     }
 
     @Override
