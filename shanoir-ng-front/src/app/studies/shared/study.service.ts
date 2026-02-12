@@ -330,4 +330,5 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         return this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL + '/studyUser/right/' + right)
             .toPromise();
     }
+
 }

@@ -90,6 +90,7 @@ public class RabbitMQConfiguration {
     /** Center name updated => notify MS Datasets to change database. */
     public static final String CENTER_UPDATE_QUEUE = "center-update-queue";
 
+    /** Copy datasets from one study to another. */
     public static final String COPY_DATASETS_TO_STUDY_QUEUE = "copy-datasets-to-study-queue";
 
     /** Create DS acquisition => Index datasets in solr. */
@@ -119,6 +120,7 @@ public class RabbitMQConfiguration {
     /** Queue to get an equipment id from a code. */
     public static final String EQUIPMENT_FROM_CODE_QUEUE = "equipment-from-code-queue";
 
+    /** Monitor execution of long tasks. */
     public static final String EXECUTION_MONITORING_TASK = "execution-monitoring-task";
 
     /** Queue to create exam for import bids. */
@@ -179,8 +181,10 @@ public class RabbitMQConfiguration {
     /** Get the type of dataset from a given study. */
     public static final String STUDY_DATASET_TYPE = "study-dataset-type";
 
+    /** Calculate storage volume for datasets linked to a study. */
     public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
 
+    /** Calculate total storage volume for datasets linked to a study. */
     public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";
 
     /** Queue used to get the list of studies I can Admin. */

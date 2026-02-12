@@ -48,4 +48,16 @@ public class EventsApiController implements EventsApi {
         }
 
     }
+
+    @Override
+    public ResponseEntity<Long> countPassedEvents(Integer days) throws RestServiceException {
+        LOG.info("countPassedEvents : days=" + days);
+        try {
+            Long count = shanoirEventsService.countPassedEvents(days);
+            return new ResponseEntity<>(count, HttpStatus.OK);
+        } catch (Exception e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()));
+        }
+    }
+
 }

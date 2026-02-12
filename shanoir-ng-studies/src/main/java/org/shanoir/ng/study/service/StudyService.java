@@ -50,7 +50,6 @@ public interface StudyService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#id, 'CAN_ADMINISTRATE')")
     void deleteById(Long id) throws EntityNotFoundException;
 
-
     /**
      * Find study by its id. Check if current user can see study.
      *
@@ -62,7 +61,6 @@ public interface StudyService {
     @PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL') or @studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_ADMINISTRATE')")
     Study findById(Long id);
 
-
     /**
      * Get all the studies
      *
@@ -72,11 +70,9 @@ public interface StudyService {
     @PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
     List<Study> findAll();
 
-
     @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
     @PostFilter("@studySecurityService.filterStudyIdNameDTOsHasRight(filterObject, 'CAN_SEE_ALL')")
     List<IdName> findAllNames();
-
 
     /**
      * Get all the challenges
@@ -96,7 +92,6 @@ public interface StudyService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')  and @studySecurityService.studyUsersStudyNull(#study)")
     Study create(Study study) throws MicroServiceCommunicationException;
 
-
     /**
      * Update a study
      *
@@ -111,6 +106,7 @@ public interface StudyService {
 
     /**
      * Adds one studyUser to a study.
+     *
      * @param studyUser
      * @param study
      */
@@ -118,6 +114,7 @@ public interface StudyService {
 
     /**
      * Remove a studyUser from a study
+     *
      * @param studyId
      * @param userId
      */
@@ -125,17 +122,18 @@ public interface StudyService {
 
     /**
      * Links an examination to a study
+     *
      * @param examinationId an examination ID
-     * @param studyId the lionked study ID
+     * @param studyId       the lionked study ID
      * @param centerId
      */
     void addExaminationToStudy(Long examinationId, Long studyId, Long centerId, Long subjectId);
 
-
     /**
      * Deletes an examination from a study
+     *
      * @param examinationId the examination ID to delete
-     * @param studyId the linked study ID
+     * @param studyId       the linked study ID
      */
     void deleteExamination(Long examinationId, Long studyId);
 
@@ -143,23 +141,23 @@ public interface StudyService {
      * Gets the protocol or data user agreement file path
      *
      * @param studyId
-     *            id of the study
+     *                 id of the study
      * @param fileName
-     *            name of the file
+     *                 name of the file
      * @return the file path of the file
      */
     String getStudyFilePath(Long studyId, String fileName);
 
     /**
-     * Returns all public available studies;
+     * Returns all publicly available studies;
      */
     List<Study> findPublicStudies();
 
     StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId);
 
-    Map<Long, StudyStorageVolumeDTO> getDetailedStorageVolumeByStudy(List<Long> studyId);
+    Map<Long, StudyStorageVolumeDTO> getDetailedStorageVolumeByStudy(List<Long> studyIds);
 
-        /**
+    /**
      * Get statistics for data analysts and study promoters
      *
      * @return imaging statistics
@@ -170,4 +168,5 @@ public interface StudyService {
     public List<Tag> getTagsFromStudy(Long studyId);
 
     List<Long> queryStudiesByRight(StudyUserRight right);
+
 }

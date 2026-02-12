@@ -145,7 +145,6 @@ public class Subject extends HalEntity {
         this.pseudonymusHashValues = other.pseudonymusHashValues;
     }
 
-
     /**
      * Init HATEOAS links
      */

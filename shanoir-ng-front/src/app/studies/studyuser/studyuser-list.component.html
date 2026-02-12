@@ -59,13 +59,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li>
 							<label>Receive Import Mail</label>
 							<span class="right-col">
-								<checkbox [mode]="mode == 'view' ? mode : 'edit'" [(ngModel)]="pannelStudyUser.receiveNewImportReport"></checkbox>
+								<checkbox [mode]="mode == 'view' ? mode : 'edit'" [(ngModel)]="pannelStudyUser.receiveNewImportReport" (userChange)="onStudyUserEdit()"></checkbox>
 							</span>
 						</li>
 						<li>
 							<label>Receive Member Mail</label>
 							<span class="right-col">
-								<checkbox [mode]="mode == 'view' ? mode : 'edit'" [(ngModel)]="pannelStudyUser.receiveStudyUserReport"></checkbox>
+								<checkbox [mode]="mode == 'view' ? mode : 'edit'" [(ngModel)]="pannelStudyUser.receiveStudyUserReport" (userChange)="onStudyUserEdit()"></checkbox>
 							</span>
 						</li>
 					</ul>
