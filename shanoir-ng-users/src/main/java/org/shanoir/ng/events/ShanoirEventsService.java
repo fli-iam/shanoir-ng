@@ -24,7 +24,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
 import org.shanoir.ng.tasks.UserSseEmitter;
-import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -51,9 +50,6 @@ public class ShanoirEventsService {
 
     @Autowired
     private ShanoirEventRepositoryCustom repositoryCustom;
-
-    @Autowired
-    private UserRepository userRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventsService.class);
 
@@ -93,7 +89,8 @@ public class ShanoirEventsService {
             list.add(type);
         }
         List<ShanoirEvent> dbEvents = Utils
-                .toList(repository.findByUserIdAndEventTypeInAndLastUpdateYoungerThan7Days(userId, list));
+                .toList(repository.findByUserIdAndEventTypeInAndLastUpdateGreaterThan(userId, list,
+                        DateUtils.addDays(new Date(), -1 * ShanoirEventRepository.TIMEOUT_DAYS)));
         List<ShanoirEventLight> events = new ArrayList<>();
         cleanEvents(dbEvents);
         for (ShanoirEvent event : dbEvents) {
@@ -195,7 +192,7 @@ public class ShanoirEventsService {
      * @return number of events
      */
     public Long countPassedEvents(Integer days) {
-        return repository
+        return repositoryCustom
                 .countByLastUpdateAfter(new Date(System.currentTimeMillis() - days * DateUtils.MILLIS_PER_DAY));
     }
 }

@@ -30,10 +30,9 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.List;
 @Component
-public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom {
+public class ShanoirEventRepositoryCustomImpl implements ShanoirEventRepositoryCustom {
 
-
-    private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventRepositoryImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventRepositoryCustomImpl.class);
 
     @PersistenceContext
     private EntityManager entityManager;
