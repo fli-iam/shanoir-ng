@@ -48,12 +48,12 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
         {
 
             super(route);
+            this.manageSaveEntity();
     }
 
     protected getRoutingName(): string {
         return 'preclinical-pathology-model';
-            this.manageSaveEntity();
-        }
+    }
 
     get model(): PathologyModel { return this.entity; }
     set model(model: PathologyModel) { this.entity = model; }
