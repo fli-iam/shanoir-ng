@@ -38,7 +38,7 @@ public interface ShanoirEventRepository extends CrudRepository<ShanoirEvent, Lon
 
     List<ShanoirEvent> findByObjectIdAndEventType(String objectId, String eventType);
 
-    ShanoirEvent findByIdAndUserId(Long taskId, long userId);
+    ShanoirEvent findByIdAndUserId(Long taskId, Long userId);
 
 }
 
