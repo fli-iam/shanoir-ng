@@ -120,7 +120,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-container>
 							<ng-container *ngIf="mode == 'create'">
 								<datepicker formControlName="startDate"></datepicker>
-								<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date vali error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
+								<label *ngIf="hasError('startDate', ['required'])" class="form-validation-alert" i18n="Study detail|Date required error@@studyDetailStartDateRequiredError">Start date is required!</label>
+								<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 							</ng-container>
 						</span>
 					</li>
@@ -132,6 +133,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<datepicker formControlName="endDate"></datepicker>
+								<label *ngIf="hasError('endDate', ['required'])" class="form-validation-alert" i18n="Study detail|Date required error@@studyDetailEndDateRequiredError">End date is required!</label>
 								<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 								<label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
 							</ng-template>
@@ -167,7 +169,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<ng-container *ngIf="mode == 'create'">
 								<select-box formControlName="profile" [options]="profileOptions">
 								</select-box>
-								<label *ngIf="hasError('profile', ['required'])" class="form-validation-alert" i18n="Study detail|Profile required error@@studyDetailStatusRequiredError">Profile is required!</label>
+								<label *ngIf="hasError('profile', ['required'])" class="form-validation-alert" i18n="Study detail|Profile required error@@studyDetailProfileRequiredError">Profile is required!</label>
 							</ng-container>
 						</span>
                     </li>

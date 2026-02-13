@@ -253,8 +253,8 @@ export class StudyComponent extends EntityComponent<Study> {
     buildForm(): UntypedFormGroup {
         const formGroup = this.formBuilder.group({
             'name': [this.study.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
-            'startDate': [this.study.startDate, [DatepickerComponent.validator]],
-            'endDate': [this.study.endDate, [DatepickerComponent.validator, this.dateOrdervalidator]],
+            'startDate': [this.study.startDate, [Validators.required, DatepickerComponent.validator]],
+            'endDate': [this.study.endDate, [Validators.required, DatepickerComponent.validator, this.dateOrdervalidator]],
             'studyStatus': [this.study.studyStatus, [Validators.required]],
             'profile': [this.study.profile, [Validators.required]],
             'withExamination': [this.study.withExamination],
@@ -264,7 +264,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'license': [this.study.license],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
-            'studyCenterList': [{value: this.study.studyCenterList}, [this.validateCenter]],
+            'studyCenterList': [{value: this.study.studyCenterList}, [Validators.required, this.validateCenter]],
             'subjects': [this.study.subjects],
             'tags': [this.study.tags],
             'studyTags': [this.study.studyTags],
