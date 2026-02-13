@@ -99,7 +99,6 @@ services:
      - "3307:3306"
     networks:
       - shanoir_ng_network
-
   #
   # Create temporary certificate
   #  
@@ -115,7 +114,6 @@ services:
       - SHANOIR_CERTIFICATE_PEM_KEY
     volumes:
       - "certificate-share-data:/etc/ssl/certs/java"
-
   #
   # Users microservice
   #
@@ -151,7 +149,6 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_started
-
   #
   # Studies microservice
   #
