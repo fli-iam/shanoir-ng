@@ -100,13 +100,27 @@ services:
     networks:
       - shanoir_ng_network
   #
+  # Create certificate for dev
+  #  
+  cert-init:
+    build:
+      context: docker-compose
+      target: cert-init
+    environment:
+      - SHANOIR_URL_HOST
+      - SHANOIR_CERTIFICATE
+      - SHANOIR_CERTIFICATE_PEM_CRT
+      - SHANOIR_CERTIFICATE_PEM_KEY
+    volumes:
+      - "certificate-share-data:/etc/ssl/certs/java"
+      - "shanoir-bindings:/bindings/ca-certificates"
+
+  #
   # Users microservice
   #
   users:
     container_name: "${SHANOIR_PREFIX}users"
-    build:
-      context: docker-compose
-      target: users
+    image: "docker.io/library/shanoir-ng-users:4.0.2"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -121,17 +135,26 @@ services:
       - VIP_SERVICE_EMAIL
       - SHANOIR_SMTP_HOST
       - SHANOIR_SMTP_PORT
+      - SERVICE_BINDING_ROOT=/bindings
+      - kc.admin.client.client.id=admin-cli
+      - kc.admin.client.realm=master
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
-      - certificate-share-data:/etc/ssl/certs/java
+      - "certificate-share-data:/etc/ssl/certs/java"
+      - "shanoir-bindings:/bindings"
     networks:
       - shanoir_ng_network
     ports:
-     - "9901:9901"
-     - "9911:9911"
+      - "9901:9901"
+      - "9911:9911"
     depends_on:
-      - "database"
-      - "rabbitmq"
+      cert-init:
+        condition: service_completed_successfully
+      database:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+
   #
   # Studies microservice
   #
@@ -399,6 +422,7 @@ volumes:
   dcm4chee-arc-storage-data:
   solr-data:
   certificate-share-data:
+  shanoir-bindings:
   tmp:
   logs:
   keycloak-logs:

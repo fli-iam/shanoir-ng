@@ -1,0 +1,40 @@
+#!/bin/bash
+set -e
+. /bin/entrypoint_common
+
+optional SHANOIR_PREFIX
+optional SHANOIR_CERTIFICATE
+require  SHANOIR_URL_HOST
+require  SHANOIR_CERTIFICATE_PEM_CRT
+require  SHANOIR_CERTIFICATE_PEM_KEY
+
+keystore="/etc/ssl/certs/java/cacerts"
+crt="/etc/ssl/certs/java/$SHANOIR_CERTIFICATE_PEM_CRT"
+key="/etc/ssl/certs/java/$SHANOIR_CERTIFICATE_PEM_KEY"
+
+if [ "$SHANOIR_CERTIFICATE" = auto ] && \
+   [ "$SHANOIR_CERTIFICATE_PEM_CRT" != none ] && \
+   [ "$SHANOIR_CERTIFICATE_PEM_KEY" != none ]
+then
+    if [ ! -f "$crt" ] || [ "$(openssl x509 -in "$crt" -subject | grep ^subject=)" \
+                         != "subject=CN = $SHANOIR_URL_HOST" ]
+    then
+        echo "generating a self-signed certificate with CN=$SHANOIR_URL_HOST..."
+        openssl genrsa 2048 > /tmp/key
+        openssl req -new -key /tmp/key -out /tmp/csr -batch -subj "/CN=$SHANOIR_URL_HOST"
+        openssl x509 -req -days 730 -in /tmp/csr -signkey /tmp/key -out /tmp/crt
+        rm -f /tmp/store
+        keytool -importcert -file /tmp/crt -alias shanoir-ng-nginx -keystore /tmp/store \
+            -storepass changeit -noprompt -trustcacerts
+        mv /tmp/store "$keystore"
+        mv /tmp/key   "$key"
+        mv /tmp/crt   "$crt"
+    fi
+fi
+
+# write the Paketo runtime binding type file and copy cert for SERVICE_BINDING_ROOT
+mkdir -p /bindings/ca-certificates
+echo "ca-certificates" > /bindings/ca-certificates/type
+[ -f "$crt" ] && cp "$crt" /bindings/ca-certificates/shanoir.crt
+
+abort_if_error
