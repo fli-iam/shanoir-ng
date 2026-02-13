@@ -99,10 +99,12 @@ services:
      - "3307:3306"
     networks:
       - shanoir_ng_network
+
   #
-  # Create certificate for dev
+  # Create temporary certificate
   #  
   cert-init:
+    container_name: "${SHANOIR_PREFIX}cert-init"
     build:
       context: docker-compose
       target: cert-init
@@ -113,7 +115,6 @@ services:
       - SHANOIR_CERTIFICATE_PEM_KEY
     volumes:
       - "certificate-share-data:/etc/ssl/certs/java"
-      - "shanoir-bindings:/bindings/ca-certificates"
 
   #
   # Users microservice
@@ -135,13 +136,9 @@ services:
       - VIP_SERVICE_EMAIL
       - SHANOIR_SMTP_HOST
       - SHANOIR_SMTP_PORT
-      - SERVICE_BINDING_ROOT=/bindings
-      - kc.admin.client.client.id=admin-cli
-      - kc.admin.client.realm=master
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - "certificate-share-data:/etc/ssl/certs/java"
-      - "shanoir-bindings:/bindings"
     networks:
       - shanoir_ng_network
     ports:
@@ -423,7 +420,6 @@ volumes:
   dcm4chee-arc-storage-data:
   solr-data:
   certificate-share-data:
-  shanoir-bindings:
   tmp:
   logs:
   keycloak-logs:

@@ -2,7 +2,6 @@
 set -e
 . /bin/entrypoint_common
 
-optional SHANOIR_PREFIX
 optional SHANOIR_CERTIFICATE
 require  SHANOIR_URL_HOST
 require  SHANOIR_CERTIFICATE_PEM_CRT
@@ -31,10 +30,5 @@ then
         mv /tmp/crt   "$crt"
     fi
 fi
-
-# write the Paketo runtime binding type file and copy cert for SERVICE_BINDING_ROOT
-mkdir -p /bindings/ca-certificates
-echo "ca-certificates" > /bindings/ca-certificates/type
-[ -f "$crt" ] && cp "$crt" /bindings/ca-certificates/shanoir.crt
 
 abort_if_error
