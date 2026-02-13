@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <head></head>
 <body>
     <p>Dear <span th:text="${firstname}"></span> <span th:text="${lastname}"></span>,</p>
-    <p><span th:text="${isDraft == 'true'} ? 'A study was set to draft on' : 'A draft study has been approved on'"></span> <a th:href="${serverAddress}">Shanoir</a></p>
+    <p>A draft study has been approved on Shanoir</p>
     <p><b>Study name:</b> <span th:text="${studyName}"></span></p>
     <p>You can access and manage the study here: <a th:href="${serverAddress}">Manage Study</a></p>
     <p>Regards</p>

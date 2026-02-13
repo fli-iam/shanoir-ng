@@ -126,7 +126,7 @@ public interface EmailService {
 
     void notifyAdminDraftStudyCreated(EmailStudyCreated email);
 
-    void notifyStudyMembersStudyDraftState(EmailStudyCreated email);
+    void notifyStudyMembersStudyApproval(EmailStudyCreated email);
 
     /**
      *  This method notifies a study manager that an import failed for a given study

@@ -33,15 +33,16 @@ export class DraftStudiesListComponent {
         private studyService: StudyService,
         private breadcrumbsService: BreadcrumbsService) {
 
-        studyService.getStudiesByDraftState().then(draftStudies => this.draftStudies = draftStudies);
+        studyService.getDraftStudies().then(draftStudies => this.draftStudies = draftStudies);
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = 'Draft Studies';
         });
     }
 
-    decide(index: number) {
-        this.studyService.toggleDraftStateById(this.draftStudies[index].id);
+    async decide(index: number) {
+        const approved = await this.studyService.approveStudyById(this.draftStudies[index].id);
+        if (!approved) return;
         this.draftStudies.splice(index, 1);
         this.studyService.decreaseDraftStudies();
     }

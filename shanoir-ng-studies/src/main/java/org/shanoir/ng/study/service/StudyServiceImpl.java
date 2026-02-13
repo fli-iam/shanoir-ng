@@ -265,14 +265,14 @@ public class StudyServiceImpl implements StudyService {
         return studyDb;
     }
 
-    public Study toggleDraftState(Long studyId) throws ShanoirException {
+    public Study approveDraftStudy(Long studyId) throws ShanoirException {
         Study study = studyRepository.findById(studyId).orElse(null);
         if (study == null) {
             throw new EntityNotFoundException(Study.class, studyId);
         }
-        study.setIsDraft(!study.getIsDraft());
+        study.setIsDraft(false);
         studyRepository.save(study);
-        sendStudyMembersDraftReport(study);
+        sendStudyMembersApprovalnReport(study);
         return study;
     }
 
@@ -782,7 +782,7 @@ public class StudyServiceImpl implements StudyService {
         }
     }
 
-    private void sendStudyMembersDraftReport(Study study) {
+    private void sendStudyMembersApprovalnReport(Study study) {
         EmailStudyCreated email = new EmailStudyCreated();
         email.setUserId(KeycloakUtil.getTokenUserId());
         email.setStudyId(study.getId().toString());
@@ -791,7 +791,7 @@ public class StudyServiceImpl implements StudyService {
         email.setStudyUsers(studyUserIds);
         email.setIsDraft(study.getIsDraft());
         try {
-            rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_DRAFT_STATE_MAIL_QUEUE,
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.APPROVE_STUDY_MAIL_QUEUE,
                     objectMapper.writeValueAsString(email));
         } catch (Exception e) {
             LOG.error("Could not send study draft state changed email event.", e);

@@ -231,11 +231,11 @@ public class StudyApiController implements StudyApi {
 
     @Override
     @Transactional
-    public ResponseEntity<StudyDTO> toggleDraftStateById(@PathVariable("studyId") final Long studyId)
+    public ResponseEntity<StudyDTO> approveDraftStudy(@PathVariable("studyId") final Long studyId)
             throws RestServiceException {
         Study study;
         try {
-            study = studyService.toggleDraftState(studyId);
+            study = studyService.approveDraftStudy(studyId);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_STUDY_EVENT, studyId.toString(),
                     KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
         } catch (EntityNotFoundException e) {

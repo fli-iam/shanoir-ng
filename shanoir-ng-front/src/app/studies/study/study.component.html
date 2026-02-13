@@ -25,7 +25,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<button *ngIf="mode == 'view' && hasDownloadRight && downloadService.advancedDownloadCompat" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
 			    <span [ngSwitch]="mode">
                     <ng-template [ngSwitchCase]="'view'">
-                        <button *ngIf="keycloakService.isUserAdmin()" class="right-icon dl-button" type="button" (click)="toggleDraftState()">{{ study.isDraft ? 'Approve' : 'Convert to draft' }}<i [ngClass]="study.isDraft ? ['fas','fa-check'] : ['fas','fa-file']"></i></button>
+                        <button *ngIf="keycloakService.isUserAdmin() && study.isDraft" class="right-icon dl-button" type="button" (click)="approveStudy()">Approve<i class="fas fa-check"></i></button>
                     </ng-template>
                 </span>
             </form-footer>

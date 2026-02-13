@@ -161,7 +161,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void notifyStudyMembersStudyDraftState(EmailStudyCreated email) {
+    public void notifyStudyMembersStudyApproval(EmailStudyCreated email) {
         final List<User> studyMembers = (List<User>) userRepository.findByIdIn(email.getStudyUsers());
         if (!CollectionUtils.isEmpty(studyMembers)) {
             for (User studyMember : studyMembers) {
@@ -176,7 +176,7 @@ public class EmailServiceImpl implements EmailService {
                     variables.put(IS_DRAFT, String.valueOf(email.getIsDraft()));
                     variables.put(STUDY_NAME, email.getStudyName());
                     variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/details/" + email.getStudyId());
-                    final String content = build("notifyStudyMembersStudyDraftState", variables);
+                    final String content = build("notifyStudyMembersStudyApproval", variables);
                     LOG.info(content);
                     messageHelper.setText(content, true);
                 };

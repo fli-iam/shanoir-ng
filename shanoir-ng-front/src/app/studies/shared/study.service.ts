@@ -329,7 +329,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         return this._draftStudies;
     }
 
-    getStudiesByDraftState(): Promise<Study[]> {
+    getDraftStudies(): Promise<Study[]> {
         return this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL)
             .toPromise()
             .then(studies => {
@@ -339,9 +339,27 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             });
     }
 
-    toggleDraftStateById(id: number) {
-        return this.http.put<any>(AppUtils.BACKEND_API_STUDY_URL + '/toggleDraftState/' + id, null)
+    async approveStudyById(id: number): Promise<boolean> {
+        const confirmed = await this.confirmDialogService.confirm(
+            'Approve Study',
+            'Are you sure you want to approve this study?\n\n'
+            + 'Once approved, the study will be available to its members according to their permissions.\n\n'
+            + 'This means:\n'
+            + '• Dataset importation will be enabled\n'
+            + '• Members will be able to create and manage related entities (e.g., subjects, examinations, datasets) based on their assigned rights.'
+        );
+
+        if (!confirmed) {
+            return false;
+        }
+
+        await this.http
+            .put<any>(AppUtils.BACKEND_API_STUDY_URL + '/approveDraftStudy/' + id, null)
             .toPromise();
+
+        this.getDraftStudies();
+
+        return true;
     }
 
     decreaseDraftStudies() {

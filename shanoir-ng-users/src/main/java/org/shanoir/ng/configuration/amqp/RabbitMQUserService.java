@@ -147,13 +147,13 @@ public class RabbitMQUserService {
         }
     }
 
-    @RabbitListener(queues = RabbitMQConfiguration.STUDY_DRAFT_STATE_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitListener(queues = RabbitMQConfiguration.APPROVE_STUDY_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    public void receiveStudyDraftState(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
+    public void receiveStudyApproval(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
             EmailStudyCreated mail = mapper.readValue(generatedMailAsString, EmailStudyCreated.class);
-            this.emailService.notifyStudyMembersStudyDraftState(mail);
+            this.emailService.notifyStudyMembersStudyApproval(mail);
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the study created event.", e);
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);

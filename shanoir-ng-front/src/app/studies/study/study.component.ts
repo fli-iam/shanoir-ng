@@ -485,38 +485,15 @@ export class StudyComponent extends EntityComponent<Study> {
         this.downloadService.downloadAllByStudyId(this.study?.id, this.study.totalSize, this.downloadState);
     }
 
-    toggleDraftState() {
-        const doToggle = () => {
-            return this.studyService.toggleDraftStateById(this.study?.id).then((study) => {
-                this.entity.isDraft = study.isDraft;
-                this.consoleService.log('info', `Study ${this.entity.name} is now ${this.entity.isDraft ? 'Draft' : 'Active'}`);
-            }).catch(err => {
-                this.entity.isDraft = !this.entity.isDraft;
-                this.consoleService.log('error', 'Error changing study draft state', err);
-                throw err;
-            });
-        };
-
-        // If we are converting to draft (was active -> will become draft), ask for confirmation
-        if (!this.study?.isDraft) {
-            return this.confirmDialogService
-                .confirm(
-                    'Convert to draft',
-                    'Are you sure you want to convert this study to draft? This will make it unavailable to regular users.'
-                    + '\n\nWarning: this action will deactivate the study and:'
-                    + '\n• No data downloads will be allowed'
-                    + '\n• The study will be hidden from non-admin users'
-                    + '\n• All related operations will be restricted until the study is reactivated'
-                    + '\n\nOnly administrators can reactivate the study.'
-                ).then(confirmed => {
-                    if (confirmed) {
-                        return doToggle();
-                    }
-                    return Promise.resolve();
-                });
-        }
-
-        return doToggle();
+    approveStudy() {
+        this.studyService.approveStudyById(this.study?.id).then((approved) => {
+            if (!approved) return;
+            this.entity.isDraft = false;
+            this.consoleService.log('info', `Study ${this.entity.name} has been approved successfully.`);
+        }).catch(err => {
+            this.consoleService.log('error', 'Error while approving the study', err);
+            throw err;
+        });
     }
 
     public attachNewFile(event: any) {
@@ -606,6 +583,7 @@ export class StudyComponent extends EntityComponent<Study> {
             } else if (newStudy) {
                 DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);
             }
+            this.studyService.getDraftStudies();
             return study;
         });
     }
