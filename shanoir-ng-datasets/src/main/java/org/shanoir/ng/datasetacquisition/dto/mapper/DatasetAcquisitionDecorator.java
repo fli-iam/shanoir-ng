@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
@@ -76,14 +77,16 @@ public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionM
     }
 
     private void setType(DatasetAcquisitionDTO datasetAcquisitionDTO, DatasetAcquisition datasetAcquisition) {
-        if (datasetAcquisition.getType().equals("Mr")) {
-            datasetAcquisitionDTO.setProtocol(((MrDatasetAcquisition) datasetAcquisition).getMrProtocol());
-        } else if (datasetAcquisition.getType().equals("Pet")) {
-            datasetAcquisitionDTO.setProtocol(((PetDatasetAcquisition) datasetAcquisition).getPetProtocol());
-        } else if (datasetAcquisition.getType().equals("Ct")) {
-            datasetAcquisitionDTO.setProtocol(((CtDatasetAcquisition) datasetAcquisition).getCtProtocol());
-        } else if (datasetAcquisition.getType().equals("Xa")) {
-            datasetAcquisitionDTO.setProtocol(((XaDatasetAcquisition) datasetAcquisition).getXaProtocol());
+        DatasetAcquisition instanceUnProxied = (DatasetAcquisition) Hibernate.unproxy(datasetAcquisition);
+        if (instanceUnProxied instanceof MrDatasetAcquisition mr) {
+            datasetAcquisitionDTO.setProtocol(mr.getMrProtocol());
+        } else if (instanceUnProxied instanceof PetDatasetAcquisition pet) {
+            datasetAcquisitionDTO.setProtocol(pet.getPetProtocol());
+        } else if (instanceUnProxied instanceof CtDatasetAcquisition ct) {
+            datasetAcquisitionDTO.setProtocol(ct.getCtProtocol());
+        } else if (instanceUnProxied instanceof XaDatasetAcquisition xa) {
+            datasetAcquisitionDTO.setProtocol(xa.getXaProtocol());
         }
     }
+
 }
