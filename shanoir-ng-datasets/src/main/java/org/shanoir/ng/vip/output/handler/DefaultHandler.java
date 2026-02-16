@@ -82,12 +82,14 @@ public class DefaultHandler extends OutputHandler {
     @Autowired
     private ProcessedDatasetImporterService processedDatasetImporterService;
 
-    @Override
-    public boolean canProcess(ExecutionMonitoring processing) {
-        return true;
+    public boolean canProcess(ExecutionMonitoring processing, boolean postProcessing) {
+        return !postProcessing;
     }
 
-    @Override
+    public boolean canProcess(String pipelineIdentifier, boolean postProcessing) {
+        return !postProcessing;
+    }
+
     public void manageTarGzResult(List<File> resultFiles, File parent, ExecutionMonitoring monitoring) throws ResultHandlerException {
         try {
             List<File> outputFiles = new ArrayList<>();

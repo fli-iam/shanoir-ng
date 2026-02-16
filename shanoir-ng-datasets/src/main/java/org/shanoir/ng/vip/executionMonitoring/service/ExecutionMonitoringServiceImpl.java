@@ -32,7 +32,7 @@ import org.shanoir.ng.vip.executionMonitoring.security.ExecutionMonitoringSecuri
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
-import org.shanoir.ng.vip.output.service.OutputService;
+import org.shanoir.ng.vip.output.service.OutputServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +79,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     private ExecutionServiceImpl executionService;
 
     @Autowired
-    private OutputService outputService;
+    private OutputServiceImpl outputService;
 
     public ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) throws RestServiceException {
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
