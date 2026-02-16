@@ -53,6 +53,8 @@ jobs:
           modules=(
             "org.shanoir-ng:shanoir-ng-ms-common"
             "org.shanoir-ng:shanoir-ng-study-rights"
+            "org.shanoir-ng:shanoir-ng-ms-common-jackson3"
+            "org.shanoir-ng:shanoir-ng-study-rights-jackson3"
             "org.shanoir-ng:shanoir-ng-users"
             "org.shanoir.anonymization:anonymization"
             "org.shanoir-ng:shanoir-ng-studies"
