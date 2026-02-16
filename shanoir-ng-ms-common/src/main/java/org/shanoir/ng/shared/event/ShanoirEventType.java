@@ -98,6 +98,9 @@ public final class ShanoirEventType {
     /** Download statistics. */
     public static final String DOWNLOAD_STATISTICS_EVENT = "downloadStatistics.event";
 
+    /** Download statistics. */
+    public static final String MASSIVE_OUTPUTS_DOWNLOAD = "massiveOutputsDownload.event";
+
     /** User subscribed to a challenge. */
     public static final String CHALLENGE_SUBSCRIPTION_EVENT = "challengeSubscription.event";
 

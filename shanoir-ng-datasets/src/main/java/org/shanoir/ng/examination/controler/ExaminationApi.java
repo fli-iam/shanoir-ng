@@ -93,7 +93,9 @@ public interface ExaminationApi {
     @GetMapping(value = "/preclinical/{isPreclinical}", produces = { "application/json" })
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
-            @Parameter(description = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable);
+            @Parameter(description = "preclinical", required = true)
+            @PathVariable("isPreclinical") Boolean isPreclinical,
+            Pageable pageable, String searchStr, String searchField);
 
     @Operation(summary = "", description = "Returns the list of examinations by subject id and study id")
     @ApiResponses(value = {

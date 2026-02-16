@@ -123,7 +123,6 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
     @Autowired
     private StudyRightsService commService;
-    private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     @Override
     public void run(final ApplicationArguments args) throws Exception {
@@ -256,7 +255,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
      * @return true or false
      */
     public boolean hasRightOnStudy(Long studyId, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (studyId == null) {

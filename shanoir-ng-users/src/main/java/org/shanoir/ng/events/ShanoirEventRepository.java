@@ -50,5 +50,13 @@ public interface ShanoirEventRepository extends CrudRepository<ShanoirEvent, Lon
 
     ShanoirEvent findByIdAndUserId(Long taskId, long userId);
 
+    /**
+     * Count events younger than a date.
+     *
+     * @param expiryDate the expiration date.
+     * @return the number of events younger than the date.
+     */
+    public Long countByLastUpdateAfter(Date expiryDate);
+
 
 }

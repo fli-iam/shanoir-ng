@@ -14,36 +14,47 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="overlay">
     <div class="main">
-        <div class="header">
-            <i class="fas fa-question-circle"></i>
-            {{ title }}
-        </div>
+        <h2 class="header">
+            Copy datasets to another study
+        </h2>
         <div class="body">
-            <p>{{ message }}</p>
-            <p>Number of datasets selected for copy : {{ datasetsIds.length }}</p>
-        </div>
-        <div class="titles">
-            <p class="studies">Study selection:</p>
-        </div>
-        <div class="container">
-            <div class="list">
-                <div *ngFor="let study of studies" (click)="pickStudy(study)">
-                    <div class="studyRow">
-                        <div [ngClass]="{'study-default': selectedStudy != study, 'study-change': selectedStudy == study}">{{ study.name }}</div>
-                    </div>
+            <p class="info">
+                <i class="fas fa-info-circle"></i>
+                You need admin rights on dataset's study AND destination study. 
+                Also, note that the dataset's center will be added to destination study.
+            </p>
+            
+            <p>
+                <span class="label">Number of datasets selected for copy :</span>
+                <span class="content">{{ inputDatasets.length }}</span>
+            </p>
+            
+            <p>
+                <span class="label">Target study :</span>
+                <span class="content">
+                    <select-box class="studies-select-box"
+                            [optionArr]="studies"
+                            [(ngModel)]="selectedStudy"
+                            (ngModelChange)="pickStudy($event)"
+                            placeholder="Select a study to copy datasets to">
+                    </select-box>
+                </span>
+            </p>
+            @if (statusMessage) {
+                <div class="error">
+                    {{ statusMessage }}
                 </div>
-            </div>
-        </div>
-        <div class="status">
-            Status:
-            <div class="status-message">
-                {{ statusMessage }}
-            </div>
+            }
         </div>
         <div class="footer-position">
             <div class="footer">
-                <button type="button" (click)="copy()" [disabled]="!canCopy">Copy</button>
-                <button type="button" (click)="close()">Close</button>
+                <button type="button" (click)="copy()" [disabled]="!canCopy || !selectedStudy" class="left-icon alt">
+                    <i class="fa-solid fa-copy"></i>
+                    Copy
+                </button>
+                <button type="button" (click)="close()">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>

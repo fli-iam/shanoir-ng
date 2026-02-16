@@ -49,7 +49,7 @@ public final class PasswordUtils {
     private static final String ALL_CHARS = LOWERCASE_ALPHA + UPPERCASE_ALPHA + NUMERIC + SPECIAL_CHARS;
 
     /** Password minimum length */
-    private static final int PASSWORD_MIN_LENGTH = 8;
+    private static final int PASSWORD_MIN_LENGTH = 12;
 
     /** The algorithm. */
     private static final String ALGORITHM = "SHA";

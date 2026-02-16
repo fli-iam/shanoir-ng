@@ -96,21 +96,29 @@ public abstract class Dataset extends AbstractEntity {
      */
     private static final long serialVersionUID = -6712556010816448026L;
 
-    /** Creation date of the dataset. */
+    /**
+     * Creation date of the dataset.
+     */
     @LocalDateAnnotations
     private LocalDate creationDate;
 
-    /** Dataset Acquisition. */
+    /**
+     * Dataset Acquisition.
+     */
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "dataset_acquisition_id")
     private DatasetAcquisition datasetAcquisition;
 
-    /** Dataset expression list. */
+    /**
+     * Dataset expression list.
+     */
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "dataset", cascade = CascadeType.ALL)
     private List<DatasetExpression> datasetExpressions;
 
-    /** Dataset Processing. */
+    /**
+     * Dataset Processing.
+     */
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dataset_processing_id")
@@ -122,12 +130,16 @@ public abstract class Dataset extends AbstractEntity {
      */
     private Long groupOfSubjectsId;
 
-    /** Processings for which this dataset is an input. */
+    /**
+     * Processings for which this dataset is an input.
+     */
     @JsonIgnore
     @ManyToMany(mappedBy = "inputDatasets", fetch = FetchType.LAZY)
     private List<DatasetProcessing> processings;
 
-    /** Origin metadata. */
+    /**
+     * Origin metadata.
+     */
     @OneToOne(cascade = CascadeType.ALL)
     private DatasetMetadata originMetadata;
 
@@ -146,19 +158,29 @@ public abstract class Dataset extends AbstractEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "referencedDatasetForSuperimposition", cascade = CascadeType.ALL)
     private List<Dataset> referencedDatasetForSuperimpositionChildrenList;
 
-    /** The study for which this dataset has been imported. Don't use it, use getStudyId() instead. */
+    /**
+     * The study for which this dataset has been imported. Don't use it, use getStudyId() instead.
+     */
     private Long importedStudyId;
 
-    /** Study. */
+    /**
+     * Study.
+     */
     private Long studyId;
 
-    /** Subject. */
+    /**
+     * Subject.
+     */
     private Long subjectId;
 
-    /** Can we download the subject */
+    /**
+     * Can we download the subject
+     */
     private boolean downloadable = true;
 
-    /** Metadata updated by study card. */
+    /**
+     * Metadata updated by study card.
+     */
     @OneToOne(cascade = CascadeType.ALL)
     private DatasetMetadata updatedMetadata;
 
@@ -224,8 +246,7 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     /**
-     * @param creationDate
-     *            the creationDate to set
+     * @param creationDate the creationDate to set
      */
     public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
@@ -239,8 +260,7 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     /**
-     * @param datasetAcquisition
-     *            the datasetAcquisition to set
+     * @param datasetAcquisition the datasetAcquisition to set
      */
     public void setDatasetAcquisition(DatasetAcquisition datasetAcquisition) {
         this.datasetAcquisition = datasetAcquisition;
@@ -257,8 +277,7 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     /**
-     * @param datasetExpressions
-     *            the datasetExpressions to set
+     * @param datasetExpressions the datasetExpressions to set
      */
     public void setDatasetExpressions(List<DatasetExpression> datasetExpressions) {
         this.datasetExpressions = datasetExpressions;
@@ -272,8 +291,7 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     /**
-     * @param datasetProcessing
-     *            the datasetProcessing to set
+     * @param datasetProcessing the datasetProcessing to set
      */
     public void setDatasetProcessing(DatasetProcessing datasetProcessing) {
         this.datasetProcessing = datasetProcessing;
@@ -287,8 +305,7 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     /**
-     * @param groupOfSubjectsId
-     *            the groupOfSubjectsId to set
+     * @param groupOfSubjectsId the groupOfSubjectsId to set
      */
     public void setGroupOfSubjectsId(Long groupOfSubjectsId) {
         this.groupOfSubjectsId = groupOfSubjectsId;
@@ -334,7 +351,8 @@ public abstract class Dataset extends AbstractEntity {
         }
     }
 
-    @JsonIgnore @Transient
+    @JsonIgnore
+    @Transient
     public DatasetModalityType getModalityType() {
         if (updatedMetadata != null && updatedMetadata.getDatasetModalityType() != null) {
             return updatedMetadata.getDatasetModalityType();
@@ -354,8 +372,7 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     /**
-     * @param originMetadata
-     *            the originMetadata to set
+     * @param originMetadata the originMetadata to set
      */
     public void setOriginMetadata(DatasetMetadata originMetadata) {
         this.originMetadata = originMetadata;
@@ -369,8 +386,7 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     /**
-     * @param referencedDatasetForSuperimposition
-     *            the referencedDatasetForSuperimposition to set
+     * @param referencedDatasetForSuperimposition the referencedDatasetForSuperimposition to set
      */
     public void setReferencedDatasetForSuperimposition(Dataset referencedDatasetForSuperimposition) {
         this.referencedDatasetForSuperimposition = referencedDatasetForSuperimposition;
@@ -384,8 +400,7 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     /**
-     * @param referencedDatasetForSuperimpositionChildrenList
-     *            the referencedDatasetForSuperimpositionChildrenList to set
+     * @param referencedDatasetForSuperimpositionChildrenList the referencedDatasetForSuperimpositionChildrenList to set
      */
     public void setReferencedDatasetForSuperimpositionChildrenList(
             List<Dataset> referencedDatasetForSuperimpositionChildrenList) {
@@ -420,7 +435,8 @@ public abstract class Dataset extends AbstractEntity {
     /**
      * @return The first original (non-derived) Dataset in the chain.
      */
-    @JsonIgnore @Transient
+    @JsonIgnore
+    @Transient
     public Dataset getFirstRealInput() {
         if (this.datasetProcessing != null) {
             return this.datasetProcessing.getInputDatasets().get(0).getFirstRealInput();
@@ -437,8 +453,7 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     /**
-     * @param subjectId
-     *            the subjectId to set
+     * @param subjectId the subjectId to set
      */
     public void setSubjectId(Long subjectId) {
         this.subjectId = subjectId;
@@ -459,8 +474,7 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     /**
-     * @param updatedMetadata
-     *            the updatedMetadata to set
+     * @param updatedMetadata the updatedMetadata to set
      */
     public void setUpdatedMetadata(DatasetMetadata updatedMetadata) {
         this.updatedMetadata = updatedMetadata;
@@ -476,6 +490,7 @@ public abstract class Dataset extends AbstractEntity {
 
     /**
      * You probably want to use getStudyId() instead.
+     *
      * @return
      */
     @Deprecated
@@ -485,6 +500,7 @@ public abstract class Dataset extends AbstractEntity {
 
     /**
      * If you want to move the dataset to another study, change its examination.
+     *
      * @param importedStudyId
      */
     @Deprecated
@@ -543,5 +559,4 @@ public abstract class Dataset extends AbstractEntity {
     public void setRelatedStudies(List<Study> relatedStudies) {
         this.relatedStudies = relatedStudies;
     }
-
 }

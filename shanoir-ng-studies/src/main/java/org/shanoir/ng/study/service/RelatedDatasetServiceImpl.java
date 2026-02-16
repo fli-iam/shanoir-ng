@@ -26,6 +26,7 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
@@ -79,30 +80,31 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
     private static final Logger LOG = LoggerFactory.getLogger(RelatedDatasetServiceImpl.class);
 
     @Transactional
     @Override
-    public void createSubjectsInTargetStudy(List<String> subjectIdStudyId, Long studyId) throws ShanoirException {
+    public void createSubjectsInTargetStudy(List<String> subjectIdStudyIds, Long studyId) throws ShanoirException {
+        LOG.info("Starting createSubjectsInTargetStudy");
+        long startTime = System.currentTimeMillis();
         List<Long> subjectIds = new ArrayList<>();
-        List<Long> studySourceId = new ArrayList<>();
-        for (String s : subjectIdStudyId) {
+        for (String s : subjectIdStudyIds) {
             subjectIds.add(Long.valueOf(s.substring(0, s.indexOf("/"))));
-            studySourceId.add(Long.valueOf(s.substring(s.indexOf("/") + 1, s.length())));
         }
-        Study studyTarget = studyService.findById(Long.valueOf(studyId));
-        Boolean toAdd = true;
-        Iterable<Subject> subjects = subjectService.findAllById(subjectIds);
-        for (Subject subject : subjects) {
-            Subject subjectTarget = subjectService.findByStudyIdAndName(studyTarget.getId(), subject.getName());
-            if (subjectTarget != null) {
-                toAdd = false;
+        Study targetStudy = studyService.findById(studyId);
+        for (Long subjectId : subjectIds) {
+            Subject sourceSubject = subjectService.findById(subjectId);
+            if (sourceSubject == null) {
+                throw new SecurityException(
+                    "Copy dataset(s): source subject with ID " + subjectId + " not found.");
             }
-            if (toAdd) {
-                Subject clonedSubject = new Subject(subject, studyTarget);
-                if (subject.getTags() != null && !subject.getTags().isEmpty()) {
+            Subject targetSubject = subjectService.findByStudyIdAndName(targetStudy.getId(), sourceSubject.getName());
+            if (targetSubject == null) {
+                Subject clonedSubject = new Subject(sourceSubject, targetStudy);
+                if (sourceSubject.getTags() != null && !sourceSubject.getTags().isEmpty()) {
                     Set<Tag> clonedTags = new HashSet<>();
-                    List<Long> tagIds = subject.getTags().stream()
+                    List<Long> tagIds = sourceSubject.getTags().stream()
                             .map(Tag::getId)
                             .collect(Collectors.toList());
                     Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
@@ -113,17 +115,19 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                 clonedSubject = subjectService.create(clonedSubject, true);
             }
         }
+        long stopTime = System.currentTimeMillis();
+        long elapsedTime = stopTime - startTime;
+        LOG.info("Finished createSubjectsInTargetStudy: " + elapsedTime + "ms");
     }
 
     @Override
-    public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds) {
+    public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds) throws SecurityException {
         String result = "";
         Long userId = KeycloakUtil.getTokenUserId();
         Study study = studyService.findById(studyId);
         StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
-        if (studyUser == null) {
-            LOG.error("You must be part of both studies to copy datasets.");
-            return "You must be part of both studies to copy datasets.";
+        if (!KeycloakUtil.isAdmin() && studyUser == null) {
+            throw new SecurityException("User not member of study " + study.getName() + ".");
         } else {
             List<StudyUserRight> rights = studyUser.getStudyUserRights();
             if (rights.contains(StudyUserRight.CAN_ADMINISTRATE) || rights.contains(StudyUserRight.CAN_IMPORT)) {
@@ -134,8 +138,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                     throw new RuntimeException(e);
                 }
             } else {
-                LOG.error("Missing IMPORT or ADMIN rights on destination study " + study.getName());
-                return "Missing IMPORT or ADMIN rights on destination study " + study.getName();
+                throw new SecurityException("Missing IMPORT or ADMIN rights on destination study " + study.getName());
             }
             return result;
         }

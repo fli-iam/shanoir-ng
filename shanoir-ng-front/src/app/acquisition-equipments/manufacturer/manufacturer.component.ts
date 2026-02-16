@@ -35,7 +35,11 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
             private route: ActivatedRoute,
             private manufService: ManufacturerService) {
 
-        super(route, 'manufacturer');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'manufacturer';
     }
 
     get manuf(): Manufacturer { return this.entity; }

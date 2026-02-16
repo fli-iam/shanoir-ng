@@ -85,7 +85,7 @@ export class StudyCardCondition {
     dicomTag: DicomTag;
     operation: Operation;
     values: (string | Coil)[] = [];
-    cardinality: number;
+    cardinality: number = -1; // -1 means condition on every dataset / acquisition
 
     constructor(public scope: ConditionScope) {}
 

@@ -85,7 +85,7 @@ public class ExaminationExtraDataServiceImpl implements ExtraDataService<Examina
     private ExaminationExtraData updateExtraDataValues(final ExaminationExtraData extraDataDb,
             final ExaminationExtraData extraData) {
         extraDataDb.setExaminationId(extraData.getExaminationId());
-        extraDataDb.setExtradatatype(extraData.getExtradatatype());
+        extraDataDb.setExtraDataType(extraData.getExtraDataType());
         extraDataDb.setFilename(extraData.getFilename());
         extraDataDb.setFilepath(extraData.getFilepath());
         return extraDataDb;

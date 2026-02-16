@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.shared.core.model;
 
-import java.io.Serializable;
-
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,7 +26,7 @@ import jakarta.persistence.MappedSuperclass;
  *
  */
 @MappedSuperclass
-public abstract class AbstractEntity implements Serializable {
+public abstract class AbstractEntity implements AbstractEntityInterface {
 
     /**
      * UID

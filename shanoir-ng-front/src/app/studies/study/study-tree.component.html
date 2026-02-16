@@ -37,6 +37,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			title="download selection">
 		<i class="fas fa-download"></i>
 	</button>
+	<button class="copy-button" 
+			type="button" 
+			(click)="copySelected()" 
+			[disabled]="selectionEmpty" 
+			title="copy selection">
+		<i class="fas fa-copy"></i>
+	</button>
     <button class="dl-button" 
 			type="button" 
 			(click)="goToProcessing()" 

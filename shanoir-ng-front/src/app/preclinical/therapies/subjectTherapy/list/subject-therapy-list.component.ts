@@ -12,9 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, forwardRef, Input } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Router } from '@angular/router';
 
 import { Mode } from 'src/app/shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
@@ -37,9 +36,10 @@ import { SubjectTherapy } from '../shared/subjectTherapy.model';
     ],
     standalone: false
 })
-export class SubjectTherapyListComponent implements ControlValueAccessor {
+export class SubjectTherapyListComponent implements ControlValueAccessor, OnChanges {
 
     @Input() mode: Mode;
+    @Output() openCreationForm: EventEmitter<void> = new EventEmitter<void>(); // To avoid Angular warning
     protected paging: BrowserPaging<SubjectTherapy>;
     protected columnDefs: ColumnDefinition[];
     protected customActionDefs: any[];
@@ -52,12 +52,16 @@ export class SubjectTherapyListComponent implements ControlValueAccessor {
     protected refreshTable: SuperPromise<(number?) => void> = new SuperPromise<(number?) => void>();
 
     constructor(
-        private keycloakService: KeycloakService,
-        private router: Router) {
+        private keycloakService: KeycloakService) {
 
         this.columnDefs = this.getColumnDefs();
         this.paging = new BrowserPaging<SubjectTherapy>([], this.columnDefs);
-        this.completeCustomActions();
+    }
+
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['mode']) {
+            this.completeCustomActions();
+        }
     }
 
     writeValue(obj: any): void {
@@ -85,24 +89,30 @@ export class SubjectTherapyListComponent implements ControlValueAccessor {
             { headerName: "Type", field: "therapy.therapyType" },
             { headerName: "Dose", field: "dose" },
             { headerName: "Molecule", field: "molecule" },
-            { headerName: "Dose Unit", field: "doseUnit" },
+            { headerName: "Dose Unit", field: "doseUnit", cellRenderer: (params) => params.data?.doseUnit?.value },
             { headerName: "Start Date", field: "startDate", type: "date" },
             { headerName: "End Date", field: "endDate", type: "date" },
         ];
-        if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-            columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeItem(item) });
-        }
+        setTimeout(() => {
+            if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
+                columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeItem(item) });
+            }
+        });
         return columnDefs;
     }
 
     private completeCustomActions(): void {
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
             this.customActionDefs = [{
-                title: "New", awesome: "fa-solid fa-plus", action: () => this.router.navigate(['/preclinical-subject-therapy/create'])
+                title: "New", awesome: "fa-solid fa-plus", action: () => this.openCreateSubjectTherapy()
             }];
         } else {
             this.customActionDefs = [];
         }
+    }
+
+    protected openCreateSubjectTherapy() {
+        this.openCreationForm.emit();
     }
 
     protected removeItem(item: SubjectTherapy) {

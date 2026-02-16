@@ -32,15 +32,15 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
     standalone: false
 })
 export class ExaminationListComponent extends EntityListComponent<Examination>{
-
     @ViewChild('table', { static: false }) table: TableComponent;
+
     private studiesICanAdmin: number[];
     private studyIdsForCurrentUser: number[];
 
     constructor(
-            private examinationService: ExaminationService,
-            private studyService: StudyService) {
-
+        private examinationService: ExaminationService,
+        private studyService: StudyService
+    ) {
         super('examination');
         this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
         this.studyService.getStudiesByRight(StudyUserRight.CAN_IMPORT).then( studies => this.studyIdsForCurrentUser = studies);

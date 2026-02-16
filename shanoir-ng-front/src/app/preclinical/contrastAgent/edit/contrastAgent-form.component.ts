@@ -56,7 +56,11 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
         private contrastAgentsService: ContrastAgentService,
         private referenceService: ReferenceService) {
 
-        super(route, 'preclinical-contrast-agent');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'preclinical-contrast-agent';
     }
 
     get agent(): ContrastAgent { return this.entity; }

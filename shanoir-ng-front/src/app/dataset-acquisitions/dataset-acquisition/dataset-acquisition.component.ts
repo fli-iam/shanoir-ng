@@ -57,7 +57,11 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             private studyRightsService: StudyRightsService,
             public acqEqPipe: AcquisitionEquipmentPipe,
             private downloadService: MassDownloadService) {
-        super(route, 'dataset-acquisition');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'dataset-acquisition';
     }
 
     getService(): EntityService<DatasetAcquisition> {

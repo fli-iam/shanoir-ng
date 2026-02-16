@@ -45,7 +45,11 @@ export class CoilComponent extends EntityComponent<Coil> {
             private coilService: CoilService,
             private centerService: CenterService,
             public manufModelPipe: ManufacturerModelPipe) {
-        super(route, 'coil');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'coil';
     }
 
     get coil(): Coil { return this.entity; }

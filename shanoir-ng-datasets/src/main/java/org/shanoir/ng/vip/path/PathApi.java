@@ -52,6 +52,7 @@ public interface PathApi {
     ) @Valid @RequestParam(value = "action", defaultValue = "content") String action,
             @Valid @RequestParam(value = "format", required = false, defaultValue = "dcm") final String format,
             @Valid @RequestParam(value  = "converterId", required  = false) Long converterId,
+            @Valid @RequestParam(value  = "sorting", required  = false) String sorting,
             HttpServletResponse response) throws IOException, RestServiceException, EntityNotFoundException;
 
 

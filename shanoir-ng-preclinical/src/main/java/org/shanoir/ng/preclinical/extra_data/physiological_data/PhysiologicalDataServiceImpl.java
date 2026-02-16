@@ -87,9 +87,11 @@ public class PhysiologicalDataServiceImpl implements ExtraDataService<Physiologi
     private PhysiologicalData updatePhysiologicalDataValues(final PhysiologicalData physioDataDb,
             final PhysiologicalData physioData) {
         physioDataDb.setExaminationId(physioData.getExaminationId());
-        physioDataDb.setExtradatatype(physioData.getExtradatatype());
-        physioDataDb.setFilename(physioData.getFilename());
-        physioDataDb.setFilepath(physioData.getFilepath());
+        physioDataDb.setExtraDataType(physioData.getExtraDataType());
+        if (!physioDataDb.getFilename().equals(physioData.getFilename())) {
+            physioDataDb.setFilename(physioData.getFilename());
+            physioDataDb.setFilepath(physioData.getFilepath());
+        }
         physioDataDb.setHasHeartRate(physioData.getHasHeartRate());
         physioDataDb.setHasRespiratoryRate(physioData.getHasRespiratoryRate());
         physioDataDb.setHasSao2(physioData.getHasSao2());

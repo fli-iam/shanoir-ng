@@ -23,7 +23,7 @@ import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
-import { DownloadInputIds, DownloadSetup } from '../mass-download.service';
+import { DownloadInputIds, DownloadSetup, MassDownloadService } from '../mass-download.service';
 
 @Component({
     selector: 'download-setup',
@@ -67,6 +67,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
             private formBuilder: UntypedFormBuilder,
             globalService: GlobalService,
             deviceInformationService: AngularDeviceInformationService,
+            private massDownloadService: MassDownloadService,
             private datasetService: DatasetService) {
         
         this.subscriptions.push(
@@ -114,7 +115,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     private buildForm(): UntypedFormGroup {
         const formGroup = this.formBuilder.group({
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
-            'converter': [{value: this.converter}],
+            'converter': [{value: this.converter}, [this.massDownloadService.requiredIfTypeIsNii()]],
             'nbQueues': [4, [Validators.required, Validators.min(1), Validators.max(1024)]],
             'unzip': [false],
             'subjectFolders': [true],

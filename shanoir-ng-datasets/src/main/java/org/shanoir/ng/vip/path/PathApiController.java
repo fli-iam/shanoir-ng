@@ -45,7 +45,7 @@ public class PathApiController implements PathApi {
     private ProcessingResourceRepository processingResourceRepository;
 
     @Override
-    public ResponseEntity<?> getPath(String completePath, String action, final String format, Long converterId, HttpServletResponse response)
+    public ResponseEntity<?> getPath(String completePath, String action, final String format, Long converterId, String sorting, HttpServletResponse response)
             throws IOException, RestServiceException, EntityNotFoundException {
         LOG.debug("completePath: {}, action: {}, format: {}, converterId: {}, response: {}", completePath, action, format, converterId, response);
         // TODO implement those actions
@@ -64,7 +64,7 @@ public class PathApiController implements PathApi {
                         return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
                     }
 
-                    datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true);
+                    datasetDownloaderService.massiveDownload(format, datasets, response, true, converterId, true, sorting);
                     return new ResponseEntity<Void>(HttpStatus.OK);
                 default:
                     ErrorModel errorModel = new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Action " + action + " not supported");

@@ -200,9 +200,8 @@ public class ExecutionServiceImpl implements ExecutionService {
         dto.setName(candidate.getName());
         dto.setPipelineIdentifier(candidate.getPipelineIdentifier());
         dto.setStudyIdentifier(candidate.getStudyIdentifier().toString());
-
+        dto.setSorting(candidate.getSorting());
         dto.setResultsLocation(getResultsLocationUri(executionMonitoring.getResultsLocation(), candidate));
-
         dto.setInputValues(getInputValues(executionMonitoring, candidate));
 
         return createExecution(dto)
