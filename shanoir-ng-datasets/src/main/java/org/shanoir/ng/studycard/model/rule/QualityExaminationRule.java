@@ -36,8 +36,6 @@ import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnAcq;
 import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnDatasets;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.condition.StudyCardDICOMConditionOnDatasets;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -96,12 +94,7 @@ public class QualityExaminationRule extends AbstractEntity {
 
     public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
         ExaminationData examData = new ExaminationData(examination);
-        if (examData.getSubjectId() == null) {
-            Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
-            log.warn("No subject in exam " + examination.getId());
-        } else {
-            apply(examData, examinationDicomAttributes, result, downloader);
-        }
+        apply(examData, examinationDicomAttributes, result, downloader);
     }
 
     public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
