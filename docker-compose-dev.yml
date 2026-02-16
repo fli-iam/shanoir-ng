@@ -119,7 +119,9 @@ services:
   #
   users:
     container_name: "${SHANOIR_PREFIX}users"
-    image: "docker.io/library/shanoir-ng-users:4.0.2"
+    build:
+      context: docker-compose
+      target: users
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
