@@ -14,14 +14,14 @@
     <groupId>org.shanoir-ng</groupId>
     <artifactId>shanoir-ng-study-rights-jackson3</artifactId>
     <name>shanoir-ng-study-rights-jackson3</name>
-    <version>4.0.1</version>
+    <version>4.0.2</version>
     <packaging>jar</packaging>
 
     <description>Study rights management</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <checkstyle.header.file>${project.basedir}/../shanoir-ng-back/java-header</checkstyle.header.file>
         <checkstyle.config.file>${project.basedir}/../shanoir-ng-back/checkstyle.xml</checkstyle.config.file>
         <checkstyle.suppressions.file>${project.basedir}/../shanoir-ng-back/suppressions.xml</checkstyle.suppressions.file>
@@ -31,7 +31,7 @@
         <dependency>
             <groupId>org.shanoir-ng</groupId>
             <artifactId>shanoir-ng-ms-common-jackson3</artifactId>
-            <version>4.0.1</version>
+            <version>4.0.2</version>
         </dependency>
     </dependencies>
 
