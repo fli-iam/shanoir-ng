@@ -72,6 +72,7 @@ public class CardsProcessingService {
      * @param studyCard
      * @param acquisitions
      * @throws PacsException
+     * @throws EntityNotFoundException 
      */
     public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) throws PacsException, EntityNotFoundException {
         boolean changeInAtLeastOneAcquisition = false;
