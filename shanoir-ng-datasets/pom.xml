@@ -159,6 +159,11 @@
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.18.5</version>
+        </dependency>
 
         <!-- Testing -->
         <dependency>
