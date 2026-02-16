@@ -279,6 +279,7 @@ import { PipelinesComponent } from './vip/pipelines/pipelines.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { SubjectPathologiesListComponent } from './preclinical/pathologies/subjectPathology/list/subject-pathology-list.component';
 import { DatasetCopyDialogService } from './shared/components/dataset-copy-dialog/dataset-copy-dialog.service';
+import { CopyFromCsvComponent } from './studies/study/copy-csv.component';
 
 @NgModule({
     declarations: [
@@ -462,7 +463,8 @@ import { DatasetCopyDialogService } from './shared/components/dataset-copy-dialo
         DoubleAwesomeComponent,
         MetadataNodeComponent,
         SizePipe,
-        DUAAssistantComponent
+        DUAAssistantComponent,
+        CopyFromCsvComponent
     ],
     bootstrap: [AppComponent],
     imports: [
