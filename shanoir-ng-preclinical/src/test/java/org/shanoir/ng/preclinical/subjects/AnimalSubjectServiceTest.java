@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.preclinical.subjects;
 
-import static org.mockito.BDDMockito.given;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +21,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -48,7 +47,6 @@ import org.springframework.test.context.ActiveProfiles;
 public class AnimalSubjectServiceTest {
 
     private static final Long ID = 1L;
-    private static final Long SUBJECT_ID = 2L;
     private static final String UPDATED_SUBJECT_DATA = "subject73";
     private static final Long REF_ID = 1L;
 
@@ -70,16 +68,15 @@ public class AnimalSubjectServiceTest {
         given(subjectsRepository.findByReference(ReferenceModelUtil.createReferenceSpecie()))
                 .willReturn(Arrays.asList(AnimalSubjectModelUtil.createAnimalSubject()));
         given(subjectsRepository.findById(ID)).willReturn(Optional.of(AnimalSubjectModelUtil.createAnimalSubject()));
-        given(subjectsRepository.getBySubjectId(SUBJECT_ID)).willReturn(AnimalSubjectModelUtil.createAnimalSubject());
         given(subjectsRepository.save(Mockito.any(AnimalSubject.class)))
                 .willReturn(AnimalSubjectModelUtil.createAnimalSubject());
     }
 
     @Test
-    public void deleteBySubjectIdTest() throws ShanoirException {
-        subjectsService.deleteBySubjectId(SUBJECT_ID);
+    public void deleteByIdTest() throws ShanoirException {
+        subjectsService.deleteById(ID);
 
-        Mockito.verify(subjectsRepository, Mockito.times(1)).deleteBySubjectId(Mockito.anyLong());
+        Mockito.verify(subjectsRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
     }
 
     @Test
@@ -92,11 +89,11 @@ public class AnimalSubjectServiceTest {
     }
 
     @Test
-    public void getBySubjectIdTest() {
-        final AnimalSubject subject = subjectsService.getBySubjectId(SUBJECT_ID);
+    public void getByIdTest() {
+        final AnimalSubject subject = subjectsService.getById(ID);
         Assertions.assertNotNull(subject);
-        Assertions.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(subject.getSubjectId()));
-        Mockito.verify(subjectsRepository, Mockito.times(1)).getBySubjectId(Mockito.anyLong());
+        Assertions.assertTrue(AnimalSubjectModelUtil.ID.equals(subject.getId()));
+        Mockito.verify(subjectsRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
 
     @Test
@@ -136,7 +133,6 @@ public class AnimalSubjectServiceTest {
     private AnimalSubject createAnimalSubject() {
         final AnimalSubject animalSubject = new AnimalSubject();
         animalSubject.setId(ID);
-        animalSubject.setSubjectId(SUBJECT_ID);
         return animalSubject;
     }
 

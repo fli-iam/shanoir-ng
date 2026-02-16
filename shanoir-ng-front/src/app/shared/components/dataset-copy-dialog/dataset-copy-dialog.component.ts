@@ -51,7 +51,7 @@ export class DatasetCopyDialogComponent {
     protected canCopy: boolean = true;
     protected centerIds: number[] = [];
     protected subjectIds: number[] = [];
-    protected subjectIdStudyId: string[] = [];
+    protected subjectIdStudyIds: string[] = [];
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
 
     constructor(private http: HttpClient,
@@ -89,8 +89,8 @@ export class DatasetCopyDialogComponent {
                 this.statusMessage = "Some of the selected datasets (id = " + ids.join(", ") + ") have no subject, can't proceed with the copy.";
                 this.canCopy = false;
             }
-            if (!this.subjectIdStudyId.includes(line.subjectId + "/" + line.studyId)) {
-                this.subjectIdStudyId.push(line.subjectId + "/" + line.studyId);
+            if (!this.subjectIdStudyIds.includes(line.subjectId + "/" + line.studyId)) {
+                this.subjectIdStudyIds.push(line.subjectId + "/" + line.studyId);
             }
         }
     }
@@ -119,7 +119,7 @@ export class DatasetCopyDialogComponent {
                 formData.set('datasetIds', Array.from(this.inputDatasets.map(d => d.datasetId)).join(","));
                 formData.set('studyId', this.selectedStudy.id.toString());
                 formData.set('centerIds', Array.from(this.centerIds).join(","));
-                formData.set('subjectIdStudyId', Array.from(this.subjectIdStudyId).join(","));
+                formData.set('subjectIdStudyIds', Array.from(this.subjectIdStudyIds).join(","));
                 return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json' })
                     .toPromise()
                     .then(() => {
@@ -162,7 +162,6 @@ export class DatasetCopyDialogComponent {
     }
 
     close() {
-        console.log("Closing dialog");
         this.ownRef.destroy();
     }
 }

@@ -16,11 +16,12 @@ package org.shanoir.ng.preclinical.subjects.service;
 
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.shared.exception.ShanoirException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * Refs service.
@@ -37,7 +38,7 @@ public interface AnimalSubjectService {
      *            animalSubject id.
      * @throws ShanoirException
      */
-    void deleteBySubjectId(Long id) throws ShanoirException;
+    void deleteById(Long id) throws ShanoirException;
 
     /**
      * Get all the AnimalSubject.
@@ -53,7 +54,7 @@ public interface AnimalSubjectService {
      *            AnimalSubject id.
      * @return a AnimalSubject or null.
      */
-    AnimalSubject getBySubjectId(Long id);
+    AnimalSubject getById(Long id);
 
     /**
      * Save a AnimalSubject.
@@ -77,12 +78,10 @@ public interface AnimalSubjectService {
 
     List<AnimalSubject> findByReference(Reference reference);
 
-    Long getIdBySubjectId(long subjectId);
-
     boolean isSubjectNameAlreadyUsedInStudy(String name, Long studyId);
 
     Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException;
 
-    List<AnimalSubject> findBySubjectIds(List<Long> subjectIds);
+    List<AnimalSubject> findByIds(List<Long> ids);
 
 }

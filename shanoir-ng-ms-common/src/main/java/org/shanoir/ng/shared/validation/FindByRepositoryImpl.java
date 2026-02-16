@@ -16,12 +16,12 @@ package org.shanoir.ng.shared.validation;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.core.model.AbstractEntityInterface;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
-import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
  * Custom repository for entities.
@@ -31,7 +31,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
  */
 @Component
 @ConditionalOnProperty(prefix = "shanoir", name = "database", havingValue = "other", matchIfMissing = true)
-public class FindByRepositoryImpl<T extends AbstractEntity> implements FindByRepository<T> {
+public class FindByRepositoryImpl<T extends AbstractEntityInterface> implements FindByRepository<T> {
 
     @PersistenceContext
     private EntityManager em;

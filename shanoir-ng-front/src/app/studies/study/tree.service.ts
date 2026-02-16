@@ -29,19 +29,19 @@ import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService } from 'src/app/datasets/shared/dataset.service';
 import { Examination } from 'src/app/examinations/shared/examination.model';
 import { ExaminationService } from 'src/app/examinations/shared/examination.service';
-import { PreclinicalSubject } from "src/app/preclinical/animalSubject/shared/preclinicalSubject.model";
 import { Entity } from "src/app/shared/components/entity/entity.abstract";
 import { KeycloakService } from "src/app/shared/keycloak/keycloak.service";
 import { QualityCard } from 'src/app/study-cards/shared/quality-card.model';
 import { StudyCard } from 'src/app/study-cards/shared/study-card.model';
 import { Subject } from "src/app/subjects/shared/subject.model";
 import { User } from 'src/app/users/shared/user.model';
+import { AnimalSubject } from "src/app/preclinical/animalSubject/shared/animalSubject.model";
 
+import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode, CoilNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, MembersNode, MetadataNode, AnimalSubjectNode, ProcessingNode, QualityCardNode, RightNode, ShanoirNode, StudyCardNode, StudyNode, SubjectNode, SubjectsNode, UNLOADED } from '../../tree/tree.model';
 import { SuperPromise } from '../../utils/super-promise';
-import { Study } from "../shared/study.model";
-import { AcquisitionEquipmentNode, CenterNode, CentersNode, ClinicalSubjectNode, CoilNode, DatasetAcquisitionNode, DatasetNode, ExaminationNode, MemberNode, MembersNode, MetadataNode, PreclinicalSubjectNode, ProcessingNode, QualityCardNode, RightNode, ShanoirNode, StudyCardNode, StudyNode, SubjectNode, SubjectsNode, UNLOADED } from '../../tree/tree.model';
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
+import { Study } from "../shared/study.model";
 import { StudyService } from '../shared/study.service';
 
 export type DatasetForChain =  {id: number, outProcessing?: ProcessingForChain, acqId?: number, examId?: number, subjectId?: number, studyId?: number};
@@ -605,7 +605,7 @@ export class TreeService {
         );
         const subjects: SubjectNode[] = study.subjects.map(subject => {
             if(subject.preclinical){
-                return PreclinicalSubjectNode.fromSubject(
+                return AnimalSubjectNode.fromSubject(
                     subject,
                     studyNode,
                     this.canAdminStudy,
@@ -703,8 +703,8 @@ export class Selection {
         return new Selection(subject.id, 'subject', [subject.study.id], subject);
     }
 
-    static fromPreclinicalSubject(preclinicalSubject: PreclinicalSubject): Selection {
-        return new Selection(preclinicalSubject.subject.id, 'subject', [preclinicalSubject.subject.study.id], preclinicalSubject.subject);
+    static fromAnimalSubject(animalSubject: AnimalSubject): Selection {
+        return new Selection(animalSubject.subject.id, 'subject', [animalSubject.subject.study.id], animalSubject.subject);
     }
 
     static fromExamination(examination: Examination): Selection {

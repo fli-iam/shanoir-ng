@@ -34,6 +34,7 @@ public class VipExecutionDTO {
     private Long startDate;
     private Long endDate;
     private String resultsLocation;
+    private String sorting;
 
     public VipExecutionDTO() { }
 
@@ -138,4 +139,11 @@ public class VipExecutionDTO {
         this.resultsLocation = resultsLocation;
     }
 
+    public String getSorting() {
+        return sorting;
+    }
+
+    public void setSorting(String sorting) {
+        this.sorting = sorting;
+    }
 }

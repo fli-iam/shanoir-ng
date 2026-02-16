@@ -68,8 +68,12 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             private vipClientService: ExecutionService
             ) {
 
-        super(route, 'dataset-processing');
+        super(route);
         this.createColumnDefs();
+    }
+
+    protected getRoutingName(): string {
+        return 'dataset-processing';
     }
 
     get subject(): Subject { return this._subject; }

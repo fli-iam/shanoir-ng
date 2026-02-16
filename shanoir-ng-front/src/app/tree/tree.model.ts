@@ -254,12 +254,12 @@ export class ClinicalSubjectNode extends SubjectNode {
     protected readonly routeBase = '/subject/details/';
 }
 
-export class PreclinicalSubjectNode extends SubjectNode {
+export class AnimalSubjectNode extends SubjectNode {
     public title = "preclinical-subject";
     public awesome = "fas fa-hippo";
 
-    public static fromSubject(subject: Subject, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): PreclinicalSubjectNode {
-        return new PreclinicalSubjectNode(
+    public static fromSubject(subject: Subject, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): AnimalSubjectNode {
+        return new AnimalSubjectNode(
             parent,
             subject.id,
             subject.name,

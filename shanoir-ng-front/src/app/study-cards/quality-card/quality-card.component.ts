@@ -90,7 +90,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
             keycloakService: KeycloakService,
             coilService: CoilService,
             private confirmService: ConfirmDialogService) {
-        super(route, 'quality-card');
+        super(route);
 
         coilService.getAll().then(coils => this.allCoils = coils);
 
@@ -99,7 +99,11 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
                 this.forceStudyId = +params['studyId'];
             }
         ));
-     }
+    }
+
+    protected getRoutingName(): string {
+        return 'quality-card';
+    }
 
     getService(): EntityService<QualityCard> {
         return this.qualityCardService;

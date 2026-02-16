@@ -16,7 +16,6 @@ package org.shanoir.ng.dataset.controler;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -24,10 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -44,6 +40,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -389,7 +386,10 @@ public class DatasetApiController implements DatasetApi {
             @RequestParam(value = "format", required = false, defaultValue = DCM) String format,
             @Parameter(description = "If nifti, decide converter to use") @Valid
             @RequestParam(value = "converterId", required = false) Long converterId,
-            HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
+            @Parameter(description = "Sorting for directories tree") @Valid
+            @RequestParam(value = "sortingForProcessingOutputs", required = false) String sortingForProcessingOutputs,
+            HttpServletResponse response) throws RestServiceException {
+
         // STEP 0: Check data integrity
         if (datasetIds == null || datasetIds.isEmpty()) {
             throw new RestServiceException(
@@ -397,7 +397,7 @@ public class DatasetApiController implements DatasetApi {
         }
         int size = datasetIds.size();
 
-        if (size > DATASET_LIMIT) {
+        if (size > DATASET_LIMIT && Objects.isNull(sortingForProcessingOutputs)) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.FORBIDDEN.value(), "This selection includes " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
         }
@@ -405,7 +405,7 @@ public class DatasetApiController implements DatasetApi {
         // STEP 1: Retrieve all datasets all in one with only the one we can see
         List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
-        datasetDownloaderService.massiveDownload(format, datasets, response, false, converterId);
+        datasetDownloaderService.massiveDownload(format, datasets, response, false, converterId, false, sortingForProcessingOutputs);
     }
 
     @Override
@@ -636,6 +636,27 @@ public class DatasetApiController implements DatasetApi {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Scheduled method to compute overall statistics daily at 6 AM to display up to date stats on welcome page.
+     */
+    @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
+    public void computeOverallStatistics() {
+        try {
+            createStatisticsService.computeOverallStatistics();
+        } catch (Exception e) {
+            LOG.error("Error while computing overall statistics.", e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<OverallStatistics> getOverallStatistics() throws IOException {
+        OverallStatistics statistics = datasetService.getOverallStatistics();
+        if (statistics == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(statistics, HttpStatus.OK);
     }
 
     public ResponseEntity<Resource> extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws RestServiceException {

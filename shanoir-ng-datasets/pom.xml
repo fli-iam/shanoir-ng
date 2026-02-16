@@ -96,8 +96,12 @@
 			<artifactId>spring-boot-starter-webflux</artifactId>
 			<version>3.4.0</version>
 		</dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>

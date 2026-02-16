@@ -44,7 +44,11 @@ export class CenterComponent extends EntityComponent<Center> {
             private route: ActivatedRoute,
             private centerService: CenterService) {
 
-        super(route, 'center');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'center';
     }
 
     getService(): EntityService<Center> {
