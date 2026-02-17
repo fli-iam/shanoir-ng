@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;
@@ -54,7 +54,7 @@ public class MrProtocolStrategyTest {
     private MrProtocolStrategy mrProtocolStrategy;
 
     @MockBean
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @BeforeEach
     public void setup() {

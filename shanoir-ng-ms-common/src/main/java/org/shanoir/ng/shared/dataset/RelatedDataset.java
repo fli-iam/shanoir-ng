@@ -15,10 +15,13 @@
 package org.shanoir.ng.shared.dataset;
 
 import java.util.List;
+import java.util.Map;
 
 public class RelatedDataset {
 
     private Long studyId;
+
+    private Map<Long, Long> subjectMapping;
 
     private List<Long> datasetIds;
 
@@ -33,6 +36,14 @@ public class RelatedDataset {
 
     public void setStudyId(Long studyId) {
         this.studyId = studyId;
+    }
+
+    public Map<Long, Long> getSubjectMapping() {
+        return subjectMapping;
+    }
+
+    public void setSubjectMapping(Map<Long, Long> subjectMapping) {
+        this.subjectMapping = subjectMapping;
     }
 
     public List<Long> getDatasetIds() {
@@ -50,4 +61,5 @@ public class RelatedDataset {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
+
 }
