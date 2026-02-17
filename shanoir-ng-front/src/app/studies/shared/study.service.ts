@@ -345,6 +345,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             'Are you sure you want to approve this study?\n\n'
             + 'Once approved, the study will be available to its members according to their permissions.\n\n'
             + 'This means:\n'
+            + '• Editing the start date will be disabled\n'
             + '• Dataset importation will be enabled\n'
             + '• Members will be able to create and manage related entities (e.g., subjects, examinations, datasets) based on their assigned rights.'
         );

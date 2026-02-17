@@ -42,6 +42,7 @@ import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyExtraDetails;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
@@ -316,6 +317,27 @@ public class StudyServiceImpl implements StudyService {
         studyDb.setVisibleByDefault(study.isVisibleByDefault());
         studyDb.setStudyCardPolicy(study.getStudyCardPolicy());
         studyDb.setWithExamination(study.isWithExamination());
+
+        if (study.getExtraDetails() != null) {
+            StudyExtraDetails incoming = study.getExtraDetails();
+            StudyExtraDetails existing = studyDb.getExtraDetails();
+
+            if (existing == null) {
+                // First time setting extra details — link it properly
+                studyDb.setExtraDetails(incoming);
+            } else {
+                // Update fields on the existing managed entity to avoid a duplicate insert
+                existing.setExpectedNbOfSubjects(incoming.getExpectedNbOfSubjects());
+                existing.setExpectedNbOfCenters(incoming.getExpectedNbOfCenters());
+                existing.setAverageExaminationSize(incoming.getAverageExaminationSize());
+                existing.setEstimatedTotalVolume(incoming.getEstimatedTotalVolume());
+                existing.setInclusionRate(incoming.getInclusionRate());
+                existing.setInclusionRateUnit(incoming.getInclusionRateUnit());
+                existing.setSponsor(incoming.getSponsor());
+                existing.setPrincipalInvestigator(incoming.getPrincipalInvestigator());
+                existing.setScientificAdvisor(incoming.getScientificAdvisor());
+            }
+        }
 
         if (study.getStudyCenterList() != null) {
             for (StudyCenter studyCenter : studyDb.getStudyCenterList()) {

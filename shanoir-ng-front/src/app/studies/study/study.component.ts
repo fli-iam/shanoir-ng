@@ -90,6 +90,13 @@ export class StudyComponent extends EntityComponent<Study> {
         new Option<string>('IN_PROGRESS', 'In Progress'),
         new Option<string>('FINISHED', 'Finished')
     ];
+    inclusionRateOptions: Option<string>[] = [
+        new Option<string>(null, ''),
+        new Option<string>('PER_DAY', 'Per day'),
+        new Option<string>('PER_WEEK', 'Per week'),
+        new Option<string>('PER_MONTH', 'Per month'),
+        new Option<string>('PER_YEAR', 'Per year')
+    ];
 
     valueDescOrder = (a: KeyValue<string, number>, b: KeyValue<string, number>): number => {
         return b.value - a.value;
@@ -199,19 +206,14 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initEdit(): Promise<void> {
-
         if (this.study.profile == null) {
             const profile = new Profile();
             profile.profileName = "Profile Neurinfo";
             this.study.profile = profile;
         }
-
         this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
-
         this.getAllSubjects();
-
         this.protocolFiles = [];
-
         this.fetchUsers().then(users => {
             Study.completeMembers(this.study, users);
         });
@@ -271,7 +273,16 @@ export class StudyComponent extends EntityComponent<Study> {
             'challenge': [this.study.challenge],
             'protocolFile': [],
             'dataUserAgreement': [],
-            'studyUserList': [this.study.studyUserList]
+            'studyUserList': [this.study.studyUserList],
+            'expectedNbOfSubjects': [this.study.expectedNbOfSubjects, [Validators.required, Validators.min(1)]],
+            'averageExaminationSize': [this.study.averageExaminationSize, [Validators.min(1)]],
+            'estimatedTotalVolume': [this.study.estimatedTotalVolume, [Validators.min(1)]],
+            'expectedNbOfCenters': [this.study.expectedNbOfCenters, [Validators.required, Validators.min(1)]],
+            'inclusionRate': [this.study.inclusionRate, [Validators.min(1)]],
+            'inclusionRateUnit': [this.study.inclusionRateUnit],
+            'sponsor': [this.study.sponsor, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+            'principalInvestigator': [this.study.principalInvestigator, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+            'scientificAdvisor': [this.study.scientificAdvisor, [Validators.minLength(2), Validators.maxLength(200)]]
         });
 
         return formGroup;
@@ -429,7 +440,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.study.studyUserList.unshift(studyUser);
     }
 
-    studyStatusStr(studyStatus: string) {
+    enumStrToStr(studyStatus: string) {
       return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 

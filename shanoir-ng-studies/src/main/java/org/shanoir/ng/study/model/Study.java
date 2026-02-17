@@ -38,6 +38,7 @@ import org.shanoir.ng.timepoint.Timepoint;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.CascadeType;
@@ -54,6 +55,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.SqlResultSetMapping;
@@ -73,7 +75,8 @@ import jakarta.validation.constraints.NotNull;
         @NamedAttributeNode("studyTags"),
         @NamedAttributeNode("protocolFilePaths"), @NamedAttributeNode("dataUserAgreementPaths"),
         @NamedAttributeNode("timepoints"), @NamedAttributeNode("tags"), @NamedAttributeNode("profile"),
-        @NamedAttributeNode("examinations") })
+        @NamedAttributeNode("examinations"),
+        @NamedAttributeNode("extraDetails") })
 @JsonPropertyOrder({ "_links", "id", "name" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 @SqlResultSetMapping(name = "studyNameResult", classes = { @ConstructorResult(targetClass = IdName.class, columns = {
@@ -189,6 +192,10 @@ public class Study extends HalEntity {
     @NotNull
     @Column(name = "is_draft")
     private boolean isDraft;
+
+    @JsonManagedReference
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+    private StudyExtraDetails extraDetails;
 
     /**
      * Init HATEOAS links
@@ -569,5 +576,19 @@ public class Study extends HalEntity {
 
     public void setIsDraft(boolean isDraft) {
         this.isDraft = isDraft;
+    }
+
+    /**
+     * @return the extraDetails
+     */
+    public StudyExtraDetails getExtraDetails() {
+        return extraDetails;
+    }
+
+    /**
+     * @param extraDetails the extraDetails to set
+     */
+    public void setExtraDetails(StudyExtraDetails extraDetails) {
+        this.extraDetails = extraDetails;
     }
 }

@@ -225,7 +225,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         this.onTouchedCallback();
     }
 
-    studyStatusStr(studyStatus: string) {
+    enumStrToStr(studyStatus: string) {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 
