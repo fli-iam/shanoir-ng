@@ -70,6 +70,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -84,6 +85,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.context.event.EventListener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -636,6 +638,14 @@ public class DatasetApiController implements DatasetApi {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Compute overall statistics on application startup.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void computeOverallStatisticsOnStartup() {
+        computeOverallStatistics();
     }
 
     /**
