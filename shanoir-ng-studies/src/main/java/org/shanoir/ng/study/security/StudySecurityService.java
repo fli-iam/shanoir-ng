@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.CopyData;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementRepository;
@@ -258,8 +259,8 @@ public class StudySecurityService {
     /**
      * Check that the connected user has the given right for every subject
      *
-     * @param subjectId
-     *            the subject id
+     * @param subjectDTOs
+     *            the subjects
      * @param rightStr
      *            the right
      * @return true or false
@@ -271,27 +272,24 @@ public class StudySecurityService {
         for (SimpleSubjectDTO dto : subjectDTOs) {
             subjectIds.add(dto.getId());
         }
+        return hasRightOnSubjects(subjectIds, rightStr);
+    }
+
+    /**
+     * Check that the connected user has the given right for every subject
+     * @param subjectIds
+     * @param rightStr
+     * @return
+     * @throws EntityNotFoundException
+     */
+    public boolean hasRightOnSubjects(List<Long> subjectIds, String rightStr) throws EntityNotFoundException {
         List<Subject> subjects = Utils.toList(subjectRepository.findAllById(subjectIds));
         if (subjects == null || subjects.isEmpty()) {
             return true;
         }
         for (Subject subject : subjects) {
-            boolean hasRight = false;
             StudyUserRight right = StudyUserRight.valueOf(rightStr);
-            if (subject.getStudy() != null) {
-                if (hasPrivilege(subject.getStudy(), right)) {
-                    hasRight = true;
-                }
-            // @todo: remove later usage of subject study list
-            } else if (subject.getSubjectStudyList() == null) {
-                return false;
-            }
-            for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-                if (hasPrivilege(subjectStudy.getStudy(), right)) {
-                    hasRight = true;
-                }
-            }
-            if (!hasRight) return false;
+            return subject.getStudy() != null && hasPrivilege(subject.getStudy(), right);
         }
         return true;
     }
@@ -650,6 +648,24 @@ public class StudySecurityService {
         }
         // Filter only allowed centers.
         centers.removeIf(center -> !su.getCenterIds().contains(center.getId()));
+        return true;
+    }
+
+    /**
+     * Check that the connected user has the given right for the copy operation.
+     *
+     * @param copyData the data to copy
+     * @return true or false
+     */
+    public boolean hasRightOnCopy(CopyData copyData) throws EntityNotFoundException {
+        if (copyData == null || copyData.getTargetStudyId() == null) {
+            return false;
+        } else if (!hasRightOnStudy(copyData.getTargetStudyId(), StudyUserRight.CAN_ADMINISTRATE.name())) {
+            return false;
+        } else if (!hasRightOnSubjects(copyData.getSubjectIds(), StudyUserRight.CAN_DOWNLOAD.name())) {
+            return false;
+        }
+        // Can not check datasets as they are not stored in this microservice
         return true;
     }
 

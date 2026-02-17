@@ -11,7 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, HostListener, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, Input, ViewChild } from '@angular/core';
+
+import { CopyDataService } from '../shared/copy-data.service';
 
 @Component({
     selector: 'copy-from-csv',
@@ -27,6 +29,7 @@ export class CopyFromCsvComponent {
     
     @Input() studyId: any;
     @ViewChild('input') inputEl: ElementRef;
+    private copyDataService: CopyDataService = inject(CopyDataService);
 
     @HostListener('click') onClick() {
         this.inputEl?.nativeElement.click();
@@ -36,7 +39,7 @@ export class CopyFromCsvComponent {
         (event.target as HTMLInputElement).files[0].text().then(csv => {
             const rawData: string[][] = this.parseCsv(csv);
             const copyData = this.convertToCopyData(rawData);
-            console.log(copyData);
+            this.copyDataService.copyData(copyData);
         });
     }
 
@@ -54,17 +57,14 @@ export class CopyFromCsvComponent {
         const newSubjectNameIndex = rawData[0].indexOf("subjectName");
         const centerIdIndex = rawData[0].indexOf("centerId");
         const copyData: CopyData = {
-            datasets: [],
+            datasetIds: [],
             subjects: [],
             centerIds: []
         };
         for (let i = 1; i < rawData.length; i++) {
             const line = rawData[i];
             if (datasetIdIndex >= 0) {
-                copyData.datasets.push({
-                    id: +line[datasetIdIndex],
-                    subjectId: +line[subjectIdIndex]
-                });
+                copyData.datasetIds.push(+line[datasetIdIndex]);
             }
             if (newSubjectNameIndex >= 0) {
                 if (copyData.subjects.find(s => s.id === +line[subjectIdIndex]) == null) {
@@ -81,21 +81,18 @@ export class CopyFromCsvComponent {
                 }
             }
         }
+        copyData.targetStudyId = this.studyId;
         return copyData;
     }
 
 }
 
 export interface CopyData {
-    datasets: {
-        id: number;
-        subjectId: number;
-    }[];
-    // su
+    datasetIds: number[];
     subjects: {
         id: number;
         newName: string;
     }[];
-    // centers to copy in the target study
     centerIds: number[];
+    targetStudyId?: number;
 }

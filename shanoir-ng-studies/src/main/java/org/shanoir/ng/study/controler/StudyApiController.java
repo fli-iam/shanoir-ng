@@ -39,6 +39,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.CopyData;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
@@ -107,6 +108,7 @@ public class StudyApiController implements StudyApi {
 
     @Autowired
     private RelatedDatasetService relatedDatasetService;
+
 
     private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
 
@@ -242,26 +244,41 @@ public class StudyApiController implements StudyApi {
         }
     }
 
+    // @Override
+    // public ResponseEntity<String> copyDatasetsToStudy(
+    //         List<Long> datasetIds,
+    //         String studyIdAsStr,
+    //         List<Long> centerIds,
+    //         List<String> subjectIdStudyIds) {
+    //     String res;
+    //     try {
+    //         Long studyId = Long.valueOf(studyIdAsStr);
+    //         relatedDatasetService.createSubjectsInTargetStudy(subjectIdStudyIds, studyId);
+    //         res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
+    //     } catch (SecurityException e) {
+    //         LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
+    //         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    //     } catch (ShanoirException e) {
+    //         LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
+    //         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    //     }
+    //     return new ResponseEntity<>(res, HttpStatus.OK);
+    // }
+
     @Override
-    public ResponseEntity<String> copyDatasetsToStudy(
-            List<Long> datasetIds,
-            String studyIdAsStr,
-            List<Long> centerIds,
-            List<String> subjectIdStudyIds) {
-        String res;
+    public ResponseEntity<Void> copyDatasetsToStudy(
+            @Parameter(description = "Data to copy", required = true) CopyData copyData) throws RestServiceException {
+
         try {
-            Long studyId = Long.valueOf(studyIdAsStr);
-            relatedDatasetService.createSubjectsInTargetStudy(subjectIdStudyIds, studyId);
-            res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
-        } catch (SecurityException e) {
-            LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            relatedDatasetService.copyData(copyData);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (ShanoirException e) {
-            LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "Error while copying study datasets.", e));
         }
-        return new ResponseEntity<>(res, HttpStatus.OK);
     }
+
 
     @Override
     public ResponseEntity<StudyStorageVolumeDTO> getDetailedStorageVolume(@PathVariable("studyId") final Long studyId)

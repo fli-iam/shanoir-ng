@@ -16,10 +16,11 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 
 import { StudyService } from 'src/app/studies/shared/study.service';
+import { CopyDataService } from 'src/app/studies/shared/copy-data.service';
+import { CopyData } from 'src/app/studies/study/copy-csv.component';
 
 import { StudyRightsService } from "../../../studies/shared/study-rights.service";
 import { StudyUserRight } from "../../../studies/shared/study-user-right.enum";
-import * as AppUtils from "../../../utils/app.utils";
 import { ServiceLocator } from "../../../utils/locator.service";
 import { ConsoleService } from "../../console/console.service";
 import { KeycloakService } from "../../keycloak/keycloak.service";
@@ -57,7 +58,8 @@ export class DatasetCopyDialogComponent {
     constructor(private http: HttpClient,
         private studyRightsService: StudyRightsService,
         private studyService: StudyService,
-        private keycloakService: KeycloakService) {
+        private keycloakService: KeycloakService,
+        private copyDataService: CopyDataService) {
     }
 
     public setUp(inputDatasets: InputDataset[], modalRef: any) {
@@ -115,14 +117,18 @@ export class DatasetCopyDialogComponent {
             } else if (this.isDatasetInStudy) {
                 this.statusMessage = 'Selected dataset(s) already belong to selected study.';
             } else {
-                const formData: FormData = new FormData();
-                formData.set('datasetIds', Array.from(this.inputDatasets.map(d => d.datasetId)).join(","));
-                formData.set('studyId', this.selectedStudy.id.toString());
-                formData.set('centerIds', Array.from(this.centerIds).join(","));
-                formData.set('subjectIdStudyIds', Array.from(this.subjectIdStudyIds).join(","));
-                return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json' })
-                    .toPromise()
-                    .then(() => {
+                const copyData: CopyData = {
+                    datasetIds: Array.from(this.inputDatasets.map(d => d.datasetId)),
+                    targetStudyId: this.selectedStudy.id,
+                    centerIds: Array.from(this.centerIds),
+                    subjects: Array.from(this.subjectIds.map(s => {
+                        return {
+                            id: s,
+                            newName: null
+                        }
+                    }))
+                };
+                return this.copyDataService.copyData(copyData).then(() => {
                         this.close();
                         this.consoleService.log('info', 'The copy of ' + this.inputDatasets.length + ' datasets towards study ' + this.selectedStudy.name + ' has started.');
                     }).catch(reason => {

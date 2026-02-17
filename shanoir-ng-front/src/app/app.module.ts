@@ -280,6 +280,7 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { SubjectPathologiesListComponent } from './preclinical/pathologies/subjectPathology/list/subject-pathology-list.component';
 import { DatasetCopyDialogService } from './shared/components/dataset-copy-dialog/dataset-copy-dialog.service';
 import { CopyFromCsvComponent } from './studies/study/copy-csv.component';
+import { CopyDataService } from './studies/shared/copy-data.service';
 
 @NgModule({
     declarations: [
@@ -568,6 +569,7 @@ import { CopyFromCsvComponent } from './studies/study/copy-csv.component';
         TreeService,
         DuaService,
         DatasetCopyDialogService,
+        CopyDataService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
     ]

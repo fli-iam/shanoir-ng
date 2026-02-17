@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.study.service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -25,10 +24,15 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
+import org.shanoir.ng.shared.dataset.SubjectIdMapping;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.CopyData;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
@@ -81,25 +85,42 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private ShanoirEventService eventService;
+
     private static final Logger LOG = LoggerFactory.getLogger(RelatedDatasetServiceImpl.class);
 
-    @Transactional
+
     @Override
-    public void createSubjectsInTargetStudy(List<String> subjectIdStudyIds, Long studyId) throws ShanoirException {
+    public void copyData(CopyData copyData) throws ShanoirException, SecurityException {
+        ShanoirEvent event = new ShanoirEvent(
+                ShanoirEventType.COPY_DATASET_EVENT,
+                String.valueOf(copyData.getTargetStudyId()),
+                KeycloakUtil.getTokenUserId(),
+                "Copy datasets, starting...",
+                ShanoirEvent.IN_PROGRESS
+        );
+        eventService.publishEvent(event);
+        SubjectIdMapping subjectMappings = createSubjectsInTargetStudy(copyData.getSubjects(), copyData.getTargetStudyId(), event);
+        addCentersInTargetStudy(copyData.getCenterIds(), copyData.getTargetStudyId(), event);
+        copyDatasetsToStudy(copyData.getDatasetIds(), copyData.getTargetStudyId(), subjectMappings, event);
+    }
+
+
+    @Transactional
+    private SubjectIdMapping createSubjectsInTargetStudy(List<CopyData.SubjectCopy> subjects, Long studyId, ShanoirEvent event) throws ShanoirException {
         LOG.info("Starting createSubjectsInTargetStudy");
+        eventService.publishEvent(event, "Creating subjects in target study", 0f);
         long startTime = System.currentTimeMillis();
-        List<Long> subjectIds = new ArrayList<>();
-        for (String s : subjectIdStudyIds) {
-            subjectIds.add(Long.valueOf(s.substring(0, s.indexOf("/"))));
-        }
         Study targetStudy = studyService.findById(studyId);
-        for (Long subjectId : subjectIds) {
-            Subject sourceSubject = subjectService.findById(subjectId);
+        SubjectIdMapping subjectIdMapping = new SubjectIdMapping();
+        for (CopyData.SubjectCopy subjectCopy : subjects) {
+            Subject sourceSubject = subjectService.findById(subjectCopy.getId());
             if (sourceSubject == null) {
-                throw new SecurityException(
-                    "Copy dataset(s): source subject with ID " + subjectId + " not found.");
+                throw new ShanoirException(
+                    "Copy dataset(s): source subject with ID " + subjectCopy.getId() + " not found.");
             }
-            Subject targetSubject = subjectService.findByStudyIdAndName(targetStudy.getId(), sourceSubject.getName());
+            Subject targetSubject = subjectService.findByStudyIdAndName(targetStudy.getId(), subjectCopy.getNewName());
             if (targetSubject == null) {
                 Subject clonedSubject = new Subject(sourceSubject, targetStudy);
                 if (sourceSubject.getTags() != null && !sourceSubject.getTags().isEmpty()) {
@@ -112,17 +133,22 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                     clonedSubject.setTags((clonedTags));
                 }
                 // true: synchronize subjects with MS Datasets
-                clonedSubject = subjectService.create(clonedSubject, true);
+                clonedSubject.setName(subjectCopy.getNewName());
+                subjectService.create(clonedSubject, true);
+                subjectIdMapping.map(sourceSubject.getId(), clonedSubject.getId());
+            } else {
+                subjectIdMapping.map(sourceSubject.getId(), targetSubject.getId());
             }
         }
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         LOG.info("Finished createSubjectsInTargetStudy: " + elapsedTime + "ms");
+        return subjectIdMapping;
     }
 
-    @Override
-    public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds) throws SecurityException {
-        String result = "";
+    @Transactional
+    private void addCentersInTargetStudy(List<Long> centerIds, Long studyId, ShanoirEvent event) throws ShanoirException {
+        eventService.publishEvent(event, "Adding centers in target study...", 0f);
         Long userId = KeycloakUtil.getTokenUserId();
         Study study = studyService.findById(studyId);
         StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
@@ -132,15 +158,18 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             List<StudyUserRight> rights = studyUser.getStudyUserRights();
             if (rights.contains(StudyUserRight.CAN_ADMINISTRATE) || rights.contains(StudyUserRight.CAN_IMPORT)) {
                 addCentersToStudy(study, centerIds);
-                try {
-                    copyDatasetsToStudy(datasetIds, studyId, userId);
-                } catch (MicroServiceCommunicationException e) {
-                    throw new RuntimeException(e);
-                }
             } else {
                 throw new SecurityException("Missing IMPORT or ADMIN rights on destination study " + study.getName());
             }
-            return result;
+        }
+    }
+
+    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, SubjectIdMapping subjectMapping, ShanoirEvent event) throws ShanoirException {
+        eventService.publishEvent(event, "Copying datasets to target study...", 0f);
+        try {
+            copyDatasetsToStudy(datasetIds, studyId, subjectMapping, KeycloakUtil.getTokenUserId(), event.getId());
+        } catch (MicroServiceCommunicationException e) {
+            throw new ShanoirException("Error while copying datasets to target study.", e);
         }
     }
 
@@ -167,7 +196,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         studyRepository.save(study);
     }
 
-    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Long userId) throws MicroServiceCommunicationException {
+    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, SubjectIdMapping subjectMapping, Long userId, Long eventId) throws MicroServiceCommunicationException {
         // datasetIds order is : selected datasets in solr from top of the table to bottom
         // reverse that order so that the first dataset to be treated is the last selected in solr
         Collections.sort(datasetIds);
@@ -175,6 +204,8 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         dto.setStudyId(studyId);
         dto.setDatasetIds(datasetIds);
         dto.setUserId(userId);
+        dto.setEventId(eventId);
+        dto.setSubjectMapping(subjectMapping);
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, objectMapper.writeValueAsString(dto));
         } catch (AmqpException | JsonProcessingException e) {

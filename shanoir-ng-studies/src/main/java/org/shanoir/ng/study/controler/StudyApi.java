@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.CopyData;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
@@ -156,16 +157,9 @@ public interface StudyApi {
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/copyDatasets", produces = { "application/json" }, method = RequestMethod.POST)
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-    ResponseEntity<String> copyDatasetsToStudy(
-            @Parameter(description = "Dataset ids to copy", required = true)
-            @RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
-            @Parameter(description = "Study id to copy in", required = true)
-            @RequestParam(value = "studyId", required = true) String studyId,
-            @Parameter(description = "Center ids of datasets", required = true)
-            @RequestParam(value = "centerIds", required = true) List<Long> centerIds,
-            @Parameter(description = "Subject ids/study ids of datasets", required = true)
-            @RequestParam(value = "subjectIdStudyIds", required = true) List<String> subjectIdStudyIds);
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @studySecurityService.hasRightOnCopy(#copyData))")
+    ResponseEntity<Void> copyDatasetsToStudy(
+            @Parameter(description = "Data to copy", required = true) @RequestBody CopyData copyData) throws RestServiceException;
 
     @Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
     @ApiResponses(value = {

@@ -24,6 +24,10 @@ public class RelatedDataset {
 
     private Long userId;
 
+    private SubjectIdMapping subjectMapping;
+
+    private Long eventId;
+
     public RelatedDataset() {
     }
 
@@ -49,5 +53,21 @@ public class RelatedDataset {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public Long getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(Long eventId) {
+        this.eventId = eventId;
+    }
+
+    public SubjectIdMapping getSubjectMapping() {
+        return subjectMapping;
+    }
+
+    public void setSubjectMapping(SubjectIdMapping subjectMapping) {
+        this.subjectMapping = subjectMapping;
     }
 }

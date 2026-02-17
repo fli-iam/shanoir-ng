@@ -484,10 +484,6 @@ export class StudyComponent extends EntityComponent<Study> {
         this.downloadService.downloadAllByStudyId(this.study?.id, this.study.totalSize, this.downloadState);
     }
 
-    copyDatasetsTo() {
-        
-    }
-
     public attachNewFile(event: any) {
         const fileToAdd = event.target.files[0];
         this.protocolFiles.push(fileToAdd);
