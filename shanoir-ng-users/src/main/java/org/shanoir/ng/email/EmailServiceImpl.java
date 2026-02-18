@@ -150,8 +150,31 @@ public class EmailServiceImpl implements EmailService {
             variables.put(FIRSTNAME, user.getFirstName());
             variables.put(LASTNAME, user.getLastName());
             variables.put(EMAIL, user.getEmail());
-            variables.put(STUDY_NAME, email.getStudyName());
             variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/details/" + email.getStudyId());
+
+            // Study core fields
+            variables.put(STUDY_NAME, email.getStudyName());
+            variables.put("description", email.getDescription());
+            variables.put("license", email.getLicense());
+            variables.put("startDate", email.getStartDate());
+            variables.put("endDate", email.getEndDate());
+            variables.put("studyStatus", email.getStudyStatus());
+            variables.put("profile", email.getProfile());
+            variables.put("studyCardPolicy", email.getStudyCardPolicy());
+            variables.put("clinical", email.isClinical());
+            variables.put("challenge", email.isChallenge());
+
+            // Extra details
+            variables.put("expectedNbOfSubjects", email.getExpectedNbOfSubjects());
+            variables.put("averageExaminationSize", email.getAverageExaminationSize());
+            variables.put("estimatedTotalVolume", email.getEstimatedTotalVolume());
+            variables.put("expectedNbOfCenters", email.getExpectedNbOfCenters());
+            variables.put("inclusionRate", email.getInclusionRate());
+            variables.put("inclusionRateUnit", email.getInclusionRateUnit());
+            variables.put("sponsor", email.getSponsor());
+            variables.put("principalInvestigator", email.getPrincipalInvestigator());
+            variables.put("scientificAdvisor", email.getScientificAdvisor());
+
             final String content = build("notifyAdminDraftStudyCreated", variables);
             LOG.info(content);
             messageHelper.setText(content, true);
@@ -173,7 +196,6 @@ public class EmailServiceImpl implements EmailService {
                     final Map<String, Object> variables = new HashMap<>();
                     variables.put(FIRSTNAME, studyMember.getFirstName());
                     variables.put(LASTNAME, studyMember.getLastName());
-                    variables.put(IS_DRAFT, String.valueOf(email.getIsDraft()));
                     variables.put(STUDY_NAME, email.getStudyName());
                     variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/details/" + email.getStudyId());
                     final String content = build("notifyStudyMembersStudyApproval", variables);

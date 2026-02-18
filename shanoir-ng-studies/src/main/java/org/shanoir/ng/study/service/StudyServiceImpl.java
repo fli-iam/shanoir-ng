@@ -792,10 +792,38 @@ public class StudyServiceImpl implements StudyService {
     }
 
     private void sendSystemAdminReport(Study study) {
+        // From EmailBase
         EmailStudy email = new EmailStudy();
         email.setUserId(KeycloakUtil.getTokenUserId());
         email.setStudyId(study.getId().toString());
         email.setStudyName(study.getName());
+
+        // Core Study fields
+        email.setName(study.getName());
+        email.setDescription(study.getDescription());
+        email.setLicense(study.getLicense());
+        email.setStartDate(study.getStartDate());
+        email.setEndDate(study.getEndDate());
+        email.setStudyStatus(study.getStudyStatus() != null ? study.getStudyStatus().name() : null);
+        email.setProfile(study.getProfile() != null ? study.getProfile().getName() : null);
+        email.setStudyCardPolicy(study.getStudyCardPolicy() != null ? study.getStudyCardPolicy().name() : null);
+        email.setClinical(study.isClinical());
+        email.setChallenge(study.isChallenge());
+
+        // StudyExtraDetails
+        StudyExtraDetails details = study.getExtraDetails();
+        if (details != null) {
+            email.setExpectedNbOfSubjects(details.getExpectedNbOfSubjects());
+            email.setAverageExaminationSize(details.getAverageExaminationSize());
+            email.setEstimatedTotalVolume(details.getEstimatedTotalVolume());
+            email.setExpectedNbOfCenters(details.getExpectedNbOfCenters());
+            email.setInclusionRate(details.getInclusionRate());
+            email.setInclusionRateUnit(details.getInclusionRateUnit() != null ? details.getInclusionRateUnit().name() : null);
+            email.setSponsor(details.getSponsor());
+            email.setPrincipalInvestigator(details.getPrincipalInvestigator());
+            email.setScientificAdvisor(details.getScientificAdvisor());
+        }
+
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.DRAFT_STUDY_CREATED_MAIL_QUEUE,
                     objectMapper.writeValueAsString(email));
@@ -811,7 +839,6 @@ public class StudyServiceImpl implements StudyService {
         email.setStudyName(study.getName());
         List<Long> studyUserIds = study.getStudyUserList().stream().map(StudyUser::getUserId).collect(Collectors.toList());
         email.setStudyUsers(studyUserIds);
-        email.setIsDraft(study.getIsDraft());
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.APPROVE_STUDY_MAIL_QUEUE,
                     objectMapper.writeValueAsString(email));
