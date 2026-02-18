@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.vip.path;
+package org.shanoir.ng.vip.processingResource.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -33,9 +33,9 @@ import java.io.IOException;
 import java.util.List;
 
 @Controller
-public class PathApiController implements PathApi {
+public class ProcessingResourceApiController implements ProcessingResourceApi {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PathApiController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProcessingResourceApiController.class);
 
     @Qualifier("datasetDownloaderServiceImpl")
     @Autowired

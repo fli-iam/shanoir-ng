@@ -61,4 +61,12 @@ public interface ExecutionMonitoringService {
      * @param event
      */
     void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) throws EntityNotFoundException, SecurityException;
+
+    /**
+     * Get a vipIdentifier from an execution monitoring id
+     *
+     * @param id
+     * @return String monitoring id
+     */
+    String getVipIdentifierFromMonitoringId(Long id);
 }
