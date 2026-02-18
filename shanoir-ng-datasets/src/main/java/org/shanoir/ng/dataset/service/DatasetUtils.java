@@ -131,13 +131,13 @@ public final class DatasetUtils {
 
     public static Dataset copyDatasetFromDataset(Dataset d) {
         DatasetType type = d.getType();
-
         return switch (type) {
             case CALIBRATION -> new CalibrationDataset(d);
             case CT -> new CtDataset(d);
             case EEG -> new EegDataset(d);
             case MEG -> new MegDataset(d);
             case MESH -> new MeshDataset(d);
+            case MR -> new MrDataset(d);
             case PARAMETER_QUANTIFICATION -> new ParameterQuantificationDataset(d);
             case PET -> new PetDataset(d);
             case REGISTRATION -> new RegistrationDataset(d);
@@ -150,4 +150,5 @@ public final class DatasetUtils {
             default -> new GenericDataset(d);
         };
     }
+
 }
