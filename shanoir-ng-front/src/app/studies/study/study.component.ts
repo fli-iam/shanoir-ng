@@ -285,8 +285,20 @@ export class StudyComponent extends EntityComponent<Study> {
             'scientificAdvisor': [this.study.scientificAdvisor, [Validators.minLength(2), Validators.maxLength(200)]]
         });
 
+        formGroup.setValidators(this.inclusionRatePairValidator.bind(this));
+
         return formGroup;
     }
+
+    private inclusionRatePairValidator(group: UntypedFormGroup) {
+        const rate = group.get('inclusionRate')?.value;
+        const unit = group.get('inclusionRateUnit')?.value;
+
+        if ((rate && !unit) || (!rate && unit)) return { inclusionRatePair: true };
+
+        return null;
+    }
+
     private setLabeledSizes(study: Study): Promise<void> {
         const waitUploads: Promise<void> = this.studyService.fileUploads.has(study.id)
             ? this.studyService.fileUploads.get(study.id)
