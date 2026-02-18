@@ -15,6 +15,7 @@
 package org.shanoir.ng.dicom.web.service;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +36,11 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.VR;
+import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.io.DicomOutputStream;
 import org.shanoir.ng.dicom.WADOURLHandler;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
@@ -208,6 +214,8 @@ public class DICOMWebService {
      * The raw pixel data are searched in dcm4chee arc light behind Shanoir
      * and send as byte array to OHIF.
      *
+     * MK: nothing to replace here for MR-004 as JPEG.
+     *
      * @param studyInstanceUID
      * @param serieInstanceUID
      * @param sopInstanceUID
@@ -215,7 +223,7 @@ public class DICOMWebService {
      * @return
      */
     public ResponseEntity findFrameOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
-                                                            String sopInstanceUID, String frame) {
+            String sopInstanceUID, String frame) {
         try {
             String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/"
                     + sopInstanceUID + "/frames/" + frame;
@@ -223,10 +231,11 @@ public class DICOMWebService {
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
-                    ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
+                    byte[] dicomBytes = EntityUtils.toByteArray(entity);
+                    ByteArrayResource byteArrayResource = new ByteArrayResource(dicomBytes);
                     HttpHeaders responseHeaders = new HttpHeaders();
                     if (!entity.isChunked() && entity.getContentLength() >= 0) {
-                        responseHeaders.setContentLength(entity.getContentLength());
+                        responseHeaders.setContentLength(dicomBytes.length);
                     }
                     return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
                 } else {
@@ -239,6 +248,22 @@ public class DICOMWebService {
         return null;
     }
 
+    private byte[] modifyDicomPatientInfo(byte[] dicomBytes, String subjectName) throws Exception {
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(dicomBytes);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            DicomInputStream dis = new DicomInputStream(bais);
+            Attributes attributes = dis.readDataset();
+            // Replace Patient Name (0010,0010) and Patient ID (0010,0020)
+            attributes.setString(Tag.PatientName, VR.PN, subjectName);
+            attributes.setString(Tag.PatientID, VR.LO, subjectName);
+            DicomOutputStream dos = new DicomOutputStream(baos, dis.getTransferSyntax());
+            dos.writeDataset(attributes.createFileMetaInformation(dis.getTransferSyntax()), attributes);
+            dos.close();
+            dis.close();
+            return baos.toByteArray();
+        }
+    }
+
     /**
      * This method is used by OHIF viewer, double-click on DICOM SEG.
      * ShanoirUploader is calling it to get a DICOM instance,
@@ -249,7 +274,7 @@ public class DICOMWebService {
      * @param sopInstanceUID
      * @return
      */
-    public ResponseEntity findInstance(String studyInstanceUID, String serieInstanceUID, String sopInstanceUID) {
+    public ResponseEntity findInstance(String studyInstanceUID, String serieInstanceUID, String sopInstanceUID, String subjectName) {
         try {
             String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/"
                     + sopInstanceUID;
@@ -257,6 +282,10 @@ public class DICOMWebService {
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
+                    byte[] dicomBytes = EntityUtils.toByteArray(entity);
+                    if (subjectName != null && !subjectName.trim().isEmpty()) {
+                        dicomBytes = modifyDicomPatientInfo(dicomBytes, subjectName);
+                    }
                     ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
                     HttpHeaders responseHeaders = new HttpHeaders();
                     if (!entity.isChunked() && entity.getContentLength() >= 0) {

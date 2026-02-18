@@ -113,7 +113,7 @@ logging:
   file:
     name: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
   level:
-    org.shanoir: WARN
+    org.shanoir: INFO
     org.springframework.web: ERROR
     org.hibernate: ERROR
 

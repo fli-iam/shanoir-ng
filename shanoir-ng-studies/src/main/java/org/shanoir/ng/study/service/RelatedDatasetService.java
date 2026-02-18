@@ -15,6 +15,7 @@
 package org.shanoir.ng.study.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -30,9 +31,9 @@ import org.springframework.stereotype.Service;
 public interface RelatedDatasetService {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds) throws SecurityException;
+    String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds, Map<Long, Long> subjectMapping) throws SecurityException;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    void createSubjectsInTargetStudy(List<String> subjectIdStudyIds, Long studyId) throws ShanoirException;
+    void createSubjectsInTargetStudy(List<String> subjectIdStudyIds, Long studyId, Map<Long, Long> subjectMapping, String subjectName) throws ShanoirException;
 
 }
