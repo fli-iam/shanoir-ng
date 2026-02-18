@@ -118,9 +118,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<fieldset class="rules">
 				<legend>
 					Rules
+					<tool-tip [large]="true">
+						<span class="bold"></span>This rule set will be applied to each DICOM serie/dataset acquisition of a given examination, and will set a VALID/WARNING/ERROR quality tag for each acquisition.</span>
+						<ul>
+							<li>
+								The "Check at import" checkbox of the Study menu can set this quality card to automatically check the quality of acquisitions at import if needed.<br>
+								<i class="fa-solid fa-triangle-exclamation"></i>
+								Be aware that in this case a rule with an <span class="tag"><i class="fa-solid fa-times-circle"></i>Error</span> tag
+								will block any DICOM serie/dataset acquisition import <b>that would match</b> this rule.
+							</li>
+							<li>
+								This quality card can also be applied afterwards from a Study menu to generate a quality report and set quality tags on already imported acquisitions of a given study.
+							</li>
+						</ul>
+					</tool-tip>
 				</legend>
 				<div class="info left-icon">
-					This rule set will be applied to each given examination
+					
 				</div>
 				<study-card-rules class="rules" [formGroup]="form"
 					cardType="qualitycard"
