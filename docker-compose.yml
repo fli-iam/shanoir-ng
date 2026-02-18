@@ -131,7 +131,7 @@ services:
       - SHANOIR_SMTP_PORT
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
-      - certificate-share-data:/etc/ssl/certs/java
+      - "certificate-share-data:/etc/ssl/certs/java:ro"
     networks:
       - shanoir_ng_network
     ports:
@@ -277,7 +277,8 @@ services:
       users:
         condition: service_started
   #
-  # Nifti conversion microservice
+  # NIfTI conversion microservice
+  # Only contacted by RabbitMQ, no REST-API
   #
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
@@ -294,8 +295,6 @@ services:
     networks:
       - shanoir_ng_network
     depends_on:
-      cert-init:
-        condition: service_completed_successfully
       import:
         condition: service_started
       datasets:
