@@ -28,7 +28,6 @@ import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
@@ -43,6 +42,8 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
 
     public enum ExecStatus { VALID, SENT }
+
+    private final Object lock = new Object();
 
     public void updateTrackingFile(ExecutionMonitoring executionMonitoring, ExecStatus execStatus) {
         try {
@@ -60,31 +61,32 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
     }
 
     public void completeTracking(ExecutionMonitoring executionMonitoring, DatasetProcessing newProcessing) {
-        try {
-            File trackingFile = new File(getTrackingFilePath(executionMonitoring));
-            List<String> lastLines = getLastLines(trackingFile);
+        synchronized (lock) {
+            try {
+                File trackingFile = new File(getTrackingFilePath(executionMonitoring));
+                List<String> lastLines = getLastLines(trackingFile);
 
-            boolean retrievedLine = false;
-            for (String line : lastLines) {
-                List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(",")));
+                boolean retrievedLine = false;
+                for (String line : lastLines) {
+                    List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(",")));
 
-                if (Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
-                    lineParts.set(1, newProcessing.getId().toString());
-                    lineParts.add(executionMonitoring.getStatus().toString());
-                    lineParts.add(newProcessing.getOutputDatasets().stream().map(Dataset::getName).collect(Collectors.joining(" / ")));
+                    if (Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
+                        lineParts.set(1, newProcessing.getId().toString());
+                        lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("error.yaml", file.getName())) ? "true" : "false");
+                        lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("results.yaml", file.getName())) ? "true" : "false");
 
-                    lastLines.set(lastLines.indexOf(line), String.join(",", lineParts));
-                    retrievedLine = true;
-                    break;
+                        lastLines.set(lastLines.indexOf(line), String.join(",", lineParts));
+                        retrievedLine = true;
+                        break;
+                    }
                 }
+                if (!retrievedLine) {
+                    throw new ShanoirException("Execution monitoring tracking line is lost, can not complete line.");
+                }
+                writeLastLines(lastLines, trackingFile);
+            } catch (IOException | ShanoirException e) {
+                LOG.error("An error occured while trying to write in VIP tracking file", e);
             }
-            if (!retrievedLine) {
-                throw new ShanoirException("Execution monitoring tracking line is lost, can not complete line.");
-            }
-
-            writeLastLines(lastLines, trackingFile);
-        } catch (IOException | ShanoirException e) {
-            LOG.error("An error occured while trying to write in VIP tracking file", e);
         }
     }
 
@@ -114,23 +116,25 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      * Update the execution monitoring line (at VIP sending moment)
      */
     private void updateTrackingLine(ExecutionMonitoring executionMonitoring, File trackingFile) throws IOException, ShanoirException {
-        List<String> lastLines = getLastLines(trackingFile);
+        synchronized (lock) {
+            List<String> lastLines = getLastLines(trackingFile);
 
-        boolean retrievedLine = false;
-        for (String line : lastLines) {
-            List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(",")));
+            boolean retrievedLine = false;
+            for (String line : lastLines) {
+                List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(",")));
 
-            if (Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
-                lineParts.add("true,,");
-                lastLines.set(lastLines.indexOf(line), String.join(",", lineParts));
-                retrievedLine = true;
-                break;
+                if (Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
+                    lineParts.add("true,,");
+                    lastLines.set(lastLines.indexOf(line), String.join(",", lineParts));
+                    retrievedLine = true;
+                    break;
+                }
             }
+            if (!retrievedLine) {
+                throw new ShanoirException("Execution monitoring tracking line is lost, can not update line.");
+            }
+            writeLastLines(lastLines, trackingFile);
         }
-        if (!retrievedLine) {
-            throw new ShanoirException("Execution monitoring tracking line is lost, can not update line.");
-        }
-        writeLastLines(lastLines, trackingFile);
     }
 
     /**
@@ -163,7 +167,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
     /**
      * Rewrite the lines at the end of the files according to MAX_LAST_LINES_TO_CHECK
      */
-    private synchronized void writeLastLines(List<String> lastLines, File trackingFile) {
+    private void writeLastLines(List<String> lastLines, File trackingFile) {
         List<String> lines = null;
         try {
             //BufferedWriter clear file, so we need to read it before opening buffer

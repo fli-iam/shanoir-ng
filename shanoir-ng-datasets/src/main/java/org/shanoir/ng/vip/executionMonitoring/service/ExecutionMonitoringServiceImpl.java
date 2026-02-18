@@ -196,6 +196,10 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         isRunning = false;
     }
 
+    public String getVipIdentifierFromMonitoringId(Long id) {
+        return repository.findById(id).get().getIdentifier();
+    }
+
     /**
      * Update values of an existing execution monitoring. No saving.
      */
