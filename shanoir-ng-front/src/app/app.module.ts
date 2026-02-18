@@ -280,6 +280,14 @@ import { PipelinesComponent } from './vip/pipelines/pipelines.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { SubjectPathologiesListComponent } from './preclinical/pathologies/subjectPathology/list/subject-pathology-list.component';
 import { DatasetCopyDialogService } from './shared/components/dataset-copy-dialog/dataset-copy-dialog.service';
+import {ExecutionTemplateListComponent} from "./vip/execution-template/execution-template-list.component";
+import {ExecutionTemplateFilterComponent} from "./vip/execution-template/filter/execution-template-filter.component";
+import {
+    ExecutionTemplateFilterListComponent
+} from "./vip/execution-template/filter/execution-template-filter-list.component";
+import {ExecutionTemplateComponent} from "./vip/execution-template/execution-template.component";
+import {ExecutionTemplateService} from "./vip/execution-template/execution-template.service";
+import {ExecutionTemplateFilterService} from "./vip/execution-template/filter/execution-template-filter.service";
 import { CopyFromCsvComponent } from './studies/study/copy-csv.component';
 import { CopyDataService } from './studies/shared/copy-data.service';
 
@@ -467,6 +475,11 @@ import { CopyDataService } from './studies/shared/copy-data.service';
         MetadataNodeComponent,
         SizePipe,
         DUAAssistantComponent,
+        ExecutionTemplateListComponent,
+        ExecutionTemplateComponent,
+        ExecutionTemplateFilterListComponent,
+        ExecutionTemplateFilterComponent
+        DUAAssistantComponent,
         CopyFromCsvComponent
     ],
     bootstrap: [AppComponent],
@@ -482,6 +495,10 @@ import { CopyDataService } from './studies/shared/copy-data.service';
         RouterModule,
         ClipboardModule,
         LocalDateFormatPipe
+    ],
+    exports: [
+        TableComponent,
+        FormFooterComponent
     ],
     providers: [
         AcquisitionEquipmentService,
@@ -569,6 +586,8 @@ import { CopyDataService } from './studies/shared/copy-data.service';
         SessionService,
         ShanoirEventService,
         TreeService,
+        ExecutionTemplateService,
+        ExecutionTemplateFilterService,
         DuaService,
         DatasetCopyDialogService,
         CopyDataService,
