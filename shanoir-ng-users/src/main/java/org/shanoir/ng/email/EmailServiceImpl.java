@@ -31,7 +31,7 @@ import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
-import org.shanoir.ng.shared.email.EmailStudyCreated;
+import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
@@ -138,7 +138,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void notifyAdminDraftStudyCreated(EmailStudyCreated email) {
+    public void notifyAdminDraftStudyCreated(EmailStudy email) {
         User user = userRepository.findById(email.getUserId()).orElse(null);
         final List<String> adminEmails = userRepository.findAdminEmails();
         MimeMessagePreparator messagePreparator = mimeMessage -> {
@@ -161,7 +161,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void notifyStudyMembersStudyApproval(EmailStudyCreated email) {
+    public void notifyStudyMembersStudyApproval(EmailStudy email) {
         final List<User> studyMembers = (List<User>) userRepository.findByIdIn(email.getStudyUsers());
         if (!CollectionUtils.isEmpty(studyMembers)) {
             for (User studyMember : studyMembers) {

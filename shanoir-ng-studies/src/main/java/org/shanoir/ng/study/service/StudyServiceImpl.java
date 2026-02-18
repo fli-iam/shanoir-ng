@@ -26,7 +26,7 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.email.EmailStudyCreated;
+import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -792,7 +792,7 @@ public class StudyServiceImpl implements StudyService {
     }
 
     private void sendSystemAdminReport(Study study) {
-        EmailStudyCreated email = new EmailStudyCreated();
+        EmailStudy email = new EmailStudy();
         email.setUserId(KeycloakUtil.getTokenUserId());
         email.setStudyId(study.getId().toString());
         email.setStudyName(study.getName());
@@ -805,7 +805,7 @@ public class StudyServiceImpl implements StudyService {
     }
 
     private void sendStudyMembersApprovalnReport(Study study) {
-        EmailStudyCreated email = new EmailStudyCreated();
+        EmailStudy email = new EmailStudy();
         email.setUserId(KeycloakUtil.getTokenUserId());
         email.setStudyId(study.getId().toString());
         email.setStudyName(study.getName());

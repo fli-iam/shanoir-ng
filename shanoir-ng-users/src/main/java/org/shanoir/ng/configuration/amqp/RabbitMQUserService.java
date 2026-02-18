@@ -24,7 +24,7 @@ import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
-import org.shanoir.ng.shared.email.EmailStudyCreated;
+import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
@@ -139,7 +139,7 @@ public class RabbitMQUserService {
     public void receiveStudyCreated(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
-            EmailStudyCreated mail = mapper.readValue(generatedMailAsString, EmailStudyCreated.class);
+            EmailStudy mail = mapper.readValue(generatedMailAsString, EmailStudy.class);
             this.emailService.notifyAdminDraftStudyCreated(mail);
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the study created event.", e);
@@ -152,7 +152,7 @@ public class RabbitMQUserService {
     public void receiveStudyApproval(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
-            EmailStudyCreated mail = mapper.readValue(generatedMailAsString, EmailStudyCreated.class);
+            EmailStudy mail = mapper.readValue(generatedMailAsString, EmailStudy.class);
             this.emailService.notifyStudyMembersStudyApproval(mail);
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the study created event.", e);
