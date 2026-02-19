@@ -545,6 +545,11 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
+    public static Queue subjectsWithoutDatasetsQueue() {
+        return new Queue(SUBJECTS_QUEUE_WITHOUT_DATASETS, true);
+    }
+
+    @Bean
     public TopicExchange topicExchange() {
         return new TopicExchange(EVENTS_EXCHANGE);
     }
