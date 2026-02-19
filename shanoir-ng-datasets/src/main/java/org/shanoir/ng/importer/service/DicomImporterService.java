@@ -311,11 +311,11 @@ public class DicomImporterService {
             if (dataset.getOriginMetadata().getImageOrientationPatient() != null) {
                 String iop = dataset.getOriginMetadata().getImageOrientationPatient();
                 if (iop != null && !iop.isBlank()) {
-                    iop = iop.trim().replaceAll("[\\\s]+", ",");
-                    String[] parts = iop.split("\s*,\s*");
+                    iop = iop.trim();
+                    String[] parts = iop.split("[\\\\,\\s]+");
                     imageOrientationPatient = new double[parts.length];
                     for (int i = 0; i < parts.length; i++) {
-                        imageOrientationPatient[i] = Double.parseDouble(parts[i]);
+                        imageOrientationPatient[i] = Double.parseDouble(parts[i].trim());
                     }
                 }
             }
