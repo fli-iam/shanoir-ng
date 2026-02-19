@@ -21,14 +21,12 @@ import java.util.Map;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
-import org.shanoir.ng.shared.dataset.SubjectIdMapping;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -68,25 +66,24 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     private static final Logger LOG = LoggerFactory.getLogger(DatasetCopyServiceImpl.class);
 
     @Override
-    public Object[] moveDataset(Dataset ds, Long studyId, SubjectIdMapping subjectMapping, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws JsonProcessingException {
+    public Object[] moveDataset(Dataset ds, Long studyId, Map<Long, Long> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws JsonProcessingException {
         try {
             int countProcessed = 0;
             int countSuccess = 0;
             Long oldDsId = ds.getId();
+            Subject sourceSubject = subjectRepository.findById(ds.getSubjectId()).orElseThrow();
+            Long targetSubjectId = subjectMap.get(sourceSubject.getId());
+            Subject targetSubject = subjectRepository.findById(targetSubjectId).orElseThrow();
             LOG.info("[CopyDatasets] moveDataset : " + oldDsId + " to study : " + studyId);
 
             // Creation of new dataset according to its type
-            DatasetType dsType = ds.getType();
             Dataset newDs = null;
             if (ds.getDatasetAcquisition() != null &&  ds.getDatasetAcquisition().getId() != null) {
-                if (DatasetType.MR.equals(dsType)) {
-                    newDs = new MrDataset(ds);
-                } else {
-                    newDs = DatasetUtils.copyDatasetFromDataset(ds);
-                }
+                newDs = DatasetUtils.copyDatasetFromDataset(ds);
                 ds.getCopies().add(newDs);
                 newDs.setSource(ds);
                 newDs.setCopies(new ArrayList<>());
+                newDs.setSubjectId(targetSubject.getId());
 
                 // Handling of DatasetAcquisition and Examination
                 DatasetAcquisition newDsAcq = null;
@@ -99,7 +96,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                         newDsAcq = datasetAcquisitionRepository.findBySourceIdAndExaminationStudy_Id(oldAcqId, studyId);
                     }
                     if (newDsAcq == null) {
-                        newDsAcq = moveAcquisition(ds.getDatasetAcquisition(), newDs, studyId, examMap, subjectMapping, userId);
+                        newDsAcq = moveAcquisition(ds.getDatasetAcquisition(), newDs, studyId, targetSubject, examMap, userId);
                     }
                 }
                 // Create the DatasetExpression for the new Dataset
@@ -127,7 +124,8 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         }
     }
 
-    public DatasetAcquisition moveAcquisition(DatasetAcquisition oldAcq, Dataset newDs, Long studyId, Map<Long, Examination> examMap, SubjectIdMapping subjectMapping, Long userId) {
+    public DatasetAcquisition moveAcquisition(DatasetAcquisition oldAcq, Dataset newDs, Long studyId,
+            Subject targetSubject, Map<Long, Examination> examMap, Long userId) {
         Examination newExam = null;
         // Get existing examination...
         if (oldAcq.getExamination() != null &&  oldAcq.getExamination().getId() != null) {
@@ -137,7 +135,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 newExam = examinationRepository.findBySourceIdAndStudy_Id(oldAcq.getExamination().getId(), studyId);
             }
             if (newExam == null) {
-                newExam = moveExamination(oldAcq, studyId, userId, subjectMapping);
+                newExam = moveExamination(oldAcq, studyId, targetSubject, userId);
             }
         }
         // Create new DatasetAcquisition according to its type
@@ -159,19 +157,11 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         return newDsAcq;
     }
 
-    public Examination moveExamination(DatasetAcquisition acq, Long studyId, Long userId, SubjectIdMapping subjectMapping) {
+    public Examination moveExamination(DatasetAcquisition acq, Long studyId, Subject targetSubject, Long userId) {
         Examination oldExam = acq.getExamination();
         Long oldSubjectId = oldExam.getSubject().getId();
-        Long subjectId;
-        System.out.println("############################################## subjectMapping : " + subjectMapping);
-        if (subjectMapping.containsSource(oldSubjectId)) {
-            subjectId = subjectMapping.getTargetId(oldSubjectId);
-        } else {
-            throw new IllegalArgumentException("No mapping provided for subject with id " + oldSubjectId);
-        }
         Study newStudy = studyService.findById(studyId);
-        Subject subjectTarget = subjectRepository.findById(subjectId).orElse(null);
-        Examination newExamination = new Examination(oldExam, newStudy, subjectTarget);
+        Examination newExamination = new Examination(oldExam, newStudy, targetSubject);
         oldExam.getCopies().add(newExamination);
         newExamination.setSource(oldExam);
         newExamination.setCopies(new ArrayList<>());

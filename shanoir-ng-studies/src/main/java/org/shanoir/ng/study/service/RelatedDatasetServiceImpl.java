@@ -14,9 +14,12 @@
 
 package org.shanoir.ng.study.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,12 +27,10 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
-import org.shanoir.ng.shared.dataset.SubjectIdMapping;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.CopyData;
@@ -92,7 +93,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
 
     @Override
-    public void copyData(CopyData copyData) throws ShanoirException, SecurityException {
+    public void copyData(CopyData copyData) throws ShanoirException {
         ShanoirEvent event = new ShanoirEvent(
                 ShanoirEventType.COPY_DATASET_EVENT,
                 String.valueOf(copyData.getTargetStudyId()),
@@ -101,50 +102,62 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                 ShanoirEvent.IN_PROGRESS
         );
         eventService.publishEvent(event);
-        SubjectIdMapping subjectMappings = createSubjectsInTargetStudy(copyData.getSubjects(), copyData.getTargetStudyId(), event);
+        Map<Long, Long> subjectMapping = createSubjectsInTargetStudy(copyData.getSubjects(), copyData.getTargetStudyId(), event);
         addCentersInTargetStudy(copyData.getCenterIds(), copyData.getTargetStudyId(), event);
-        copyDatasetsToStudy(copyData.getDatasetIds(), copyData.getTargetStudyId(), subjectMappings, event);
+        copyDatasetsToStudy(copyData.getDatasetIds(), copyData.getTargetStudyId(), subjectMapping, event);
     }
 
 
     @Transactional
-    private SubjectIdMapping createSubjectsInTargetStudy(List<CopyData.SubjectCopy> subjects, Long studyId, ShanoirEvent event) throws ShanoirException {
+    private Map<Long, Long> createSubjectsInTargetStudy(List<CopyData.SubjectCopy> subjects, Long studyId, ShanoirEvent event) throws ShanoirException {
         LOG.info("Starting createSubjectsInTargetStudy");
         eventService.publishEvent(event, "Creating subjects in target study", 0f);
         long startTime = System.currentTimeMillis();
         Study targetStudy = studyService.findById(studyId);
-        SubjectIdMapping subjectIdMapping = new SubjectIdMapping();
+        Map<Long, Long> subjectMapping = new HashMap<>();
+        List<Subject> createdSubjects = new ArrayList<>();
         for (CopyData.SubjectCopy subjectCopy : subjects) {
             Subject sourceSubject = subjectService.findById(subjectCopy.getId());
             if (sourceSubject == null) {
-                throw new ShanoirException(
+                throw new IllegalArgumentException(
                     "Copy dataset(s): source subject with ID " + subjectCopy.getId() + " not found.");
             }
             Subject targetSubject = subjectService.findByStudyIdAndName(targetStudy.getId(), subjectCopy.getNewName());
             if (targetSubject == null) {
-                Subject clonedSubject = new Subject(sourceSubject, targetStudy);
-                if (sourceSubject.getTags() != null && !sourceSubject.getTags().isEmpty()) {
-                    Set<Tag> clonedTags = new HashSet<>();
-                    List<Long> tagIds = sourceSubject.getTags().stream()
-                            .map(Tag::getId)
-                            .collect(Collectors.toList());
-                    Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
-                    managedTagsIt.forEach(clonedTags::add);
-                    clonedSubject.setTags((clonedTags));
-                }
-                // true: synchronize subjects with MS Datasets
-                clonedSubject.setName(subjectCopy.getNewName());
-                subjectService.create(clonedSubject, true);
-                subjectIdMapping.map(sourceSubject.getId(), clonedSubject.getId());
-            } else {
-                subjectIdMapping.map(sourceSubject.getId(), targetSubject.getId());
+                Subject createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, subjectCopy.getNewName(), false);
+                subjectMapping.put(sourceSubject.getId(), createdSubject.getId());
+                createdSubjects.add(createdSubject);
             }
+        }
+        if (!createdSubjects.isEmpty()) {
+            subjectService.updateSubjectBatchInMicroservices(createdSubjects);
         }
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         LOG.info("Finished createSubjectsInTargetStudy: " + elapsedTime + "ms");
-        return subjectIdMapping;
+        return subjectMapping;
     }
+
+    //new
+    private Subject createNewSubjectInTargetStudy(Study targetStudy, Subject sourceSubject, String newSubjectName,
+            boolean withAMQP) throws ShanoirException {
+        Subject clonedSubject = new Subject(sourceSubject, targetStudy);
+        if (newSubjectName != null && !newSubjectName.trim().isEmpty()) {
+            clonedSubject.setName(newSubjectName);
+        }
+        if (sourceSubject.getTags() != null && !sourceSubject.getTags().isEmpty()) {
+            Set<Tag> clonedTags = new HashSet<>();
+            List<Long> tagIds = sourceSubject.getTags().stream()
+                    .map(Tag::getId)
+                    .collect(Collectors.toList());
+            Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
+            managedTagsIt.forEach(clonedTags::add);
+            clonedSubject.setTags((clonedTags));
+        }
+        clonedSubject = subjectService.create(clonedSubject, withAMQP);
+        return clonedSubject;
+    }
+
 
     @Transactional
     private void addCentersInTargetStudy(List<Long> centerIds, Long studyId, ShanoirEvent event) throws ShanoirException {
@@ -164,10 +177,9 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         }
     }
 
-    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, SubjectIdMapping subjectMapping, ShanoirEvent event) throws ShanoirException {
-        eventService.publishEvent(event, "Copying datasets to target study...", 0f);
+    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Map<Long, Long> subjectMapping, ShanoirEvent event) throws ShanoirException {
         try {
-            copyDatasetsToStudy(datasetIds, studyId, subjectMapping, KeycloakUtil.getTokenUserId(), event.getId());
+            copyDatasetsToStudy(datasetIds, studyId, KeycloakUtil.getTokenUserId(), subjectMapping, event.getId());
         } catch (MicroServiceCommunicationException e) {
             throw new ShanoirException("Error while copying datasets to target study.", e);
         }
@@ -196,7 +208,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         studyRepository.save(study);
     }
 
-    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, SubjectIdMapping subjectMapping, Long userId, Long eventId) throws MicroServiceCommunicationException {
+    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Long userId, Map<Long, Long> subjectMapping, Long eventId) throws MicroServiceCommunicationException {
         // datasetIds order is : selected datasets in solr from top of the table to bottom
         // reverse that order so that the first dataset to be treated is the last selected in solr
         Collections.sort(datasetIds);

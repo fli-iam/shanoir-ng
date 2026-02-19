@@ -46,13 +46,13 @@ export class DatasetCopyDialogComponent {
     protected inputDatasets: InputDataset[] = [];
     protected ownRef: any;
     protected selectedStudy: IdName;
+    protected subjectName: string = '';
     protected statusMessage: string;
     protected hasRight: boolean = false;
     protected isDatasetInStudy: boolean = false;
     protected canCopy: boolean = true;
     protected centerIds: number[] = [];
     protected subjectIds: number[] = [];
-    protected subjectIdStudyIds: string[] = [];
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
 
     constructor(private http: HttpClient,
@@ -84,15 +84,14 @@ export class DatasetCopyDialogComponent {
             if (!this.centerIds.includes(line.centerId)) {
                 this.centerIds.push(line.centerId);
             }
-            if (!this.subjectIds.includes(line.subjectId) && line.subjectId != null) {
-                this.subjectIds.push(line.subjectId);
-            } else if (line.subjectId == null) {
+            if (line.subjectId != null) {
+                if (!this.subjectIds.includes(line.subjectId)) {
+                    this.subjectIds.push(line.subjectId);
+                }
+            } else {
                 ids.push(line.datasetId);
                 this.statusMessage = "Some of the selected datasets (id = " + ids.join(", ") + ") have no subject, can't proceed with the copy.";
                 this.canCopy = false;
-            }
-            if (!this.subjectIdStudyIds.includes(line.subjectId + "/" + line.studyId)) {
-                this.subjectIdStudyIds.push(line.subjectId + "/" + line.studyId);
             }
         }
     }
@@ -170,4 +169,5 @@ export class DatasetCopyDialogComponent {
     close() {
         this.ownRef.destroy();
     }
+
 }

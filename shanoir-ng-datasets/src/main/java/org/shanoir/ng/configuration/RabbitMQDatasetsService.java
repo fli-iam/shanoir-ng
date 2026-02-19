@@ -43,6 +43,7 @@ import org.shanoir.ng.shared.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectBatchDTO;
 import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -206,6 +207,43 @@ public class RabbitMQDatasetsService {
             solrService.updateSubjectsAsync(subjectIdList);
         } catch (Exception e) {
             LOG.error("Solr update failed for subjects {}", subjectIdList, e);
+        }
+    }
+
+    @RabbitListener(queues = RabbitMQConfiguration.SUBJECT_BATCH_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public boolean receiveSubjectBatchUpdate(final String subjectBatchStr) {
+        try {
+            manageSubjectBatchUpdate(subjectBatchStr);
+            return true;
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
+        }
+    }
+
+    @Transactional
+    private void manageSubjectBatchUpdate(final String subjectBatchStr) throws JsonProcessingException {
+        SubjectBatchDTO batchDTO = objectMapper.readValue(subjectBatchStr, SubjectBatchDTO.class);
+        Set<Long> allStudyIds = new HashSet<>();
+        List<Long> allSubjectIds = new ArrayList<>();
+        for (Subject subject : batchDTO.getSubjects()) {
+            subject = subjectRepository.save(subject);
+            allSubjectIds.add(subject.getId());
+            LOG.info("Subject replicated in MS Datasets with ID: {} and Name: {}",
+                    subject.getId(), subject.getName());
+            for (Examination exam : examinationRepository.findBySubjectId(subject.getId())) {
+                allStudyIds.add(exam.getStudyId());
+            }
+        }
+        // Update BIDS for all affected studies
+        for (Study stud : studyRepository.findAllById(allStudyIds)) {
+            bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+        }
+        // Update Solr references in batch
+        try {
+            solrService.updateSubjectsAsync(allSubjectIds);
+        } catch (Exception e) {
+            LOG.error("Solr update failed for subjects {}", allSubjectIds, e);
         }
     }
 
