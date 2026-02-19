@@ -213,10 +213,10 @@ public class DicomImporterService {
     public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes, String modality)
             throws Exception {
         String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
-        Sequence deIdentificationActionSequence = attributes.getSequence(Tag.DeidentificationActionSequence);
+        Sequence deIdentificationMethodCodeSequence = attributes.getSequence(Tag.DeidentificationMethodCodeSequence);
         if (!StringUtils.isNotBlank(deIdentificationMethod)
-                && (deIdentificationActionSequence == null
-                || deIdentificationActionSequence.isEmpty())) {
+                || (deIdentificationMethodCodeSequence == null
+                || deIdentificationMethodCodeSequence.isEmpty())) {
             LOG.error("Only de-identified DICOM is allowed.");
             return false;
         }
