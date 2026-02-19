@@ -29,7 +29,6 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.AmqpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -152,24 +151,12 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
     }
 
     @Override
-    public Long createSubject(SubjectDto dto) throws ShanoirException, JsonProcessingException {
-        Long subjectId;
-        try {
-            subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, mapper.writeValueAsString(dto));
-        } catch (JsonProcessingException | AmqpException e) {
-            throw new ShanoirException("Error creating subject", e);
-        }
-
+    public Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException {
+        Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, mapper.writeValueAsString(dto));
         if (subjectId == null) {
             throw new ShanoirException("Created subject id is null.");
         }
-
         dto.setId(subjectId);
-        boolean updateSuccess = (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE, mapper.writeValueAsString(dto));
-        if (!updateSuccess) {
-            throw new ShanoirException("Subject creation in datasets MS failed.");
-        }
-
         return subjectId;
     }
 

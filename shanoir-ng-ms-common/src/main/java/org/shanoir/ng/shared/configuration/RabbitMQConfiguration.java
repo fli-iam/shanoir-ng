@@ -237,8 +237,9 @@ public class RabbitMQConfiguration {
     /** Subject name updated => notify dataset MS to change database. */
     public static final String SUBJECT_UPDATE_QUEUE = "subject-update-queue";
 
-    /** BIDS purpose => Get a list of subjects to create bids participants file. */
-    public static final String SUBJECTS_QUEUE = "subjects-queue";
+    public static final String SUBJECTS_QUEUE_WITH_DATASETS = "subjects-queue-with-datasets";
+
+    public static final String SUBJECTS_QUEUE_WITHOUT_DATASETS = "subjects-queue-without-datasets";
 
     /** Preclinical subject creation => Check if a subject with this name already exists **/
     public static final String SUBJECTS_NAME_QUEUE = "subjects-name-queue";
@@ -565,7 +566,12 @@ public class RabbitMQConfiguration {
 
     @Bean
     public static Queue subjectsQueue() {
-        return new Queue(SUBJECTS_QUEUE, true);
+        return new Queue(SUBJECTS_QUEUE_WITH_DATASETS, true);
+    }
+
+    @Bean
+    public static Queue subjectsWithoutDatasetsQueue() {
+        return new Queue(SUBJECTS_QUEUE_WITHOUT_DATASETS, true);
     }
 
     @Bean
