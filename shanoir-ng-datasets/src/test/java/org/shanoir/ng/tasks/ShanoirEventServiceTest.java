@@ -17,7 +17,7 @@ package org.shanoir.ng.tasks;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -48,7 +48,7 @@ public class ShanoirEventServiceTest {
     private RabbitTemplate rabbitTemplate;
 
     @MockBean
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Test
     public void testAddTask() {

@@ -30,7 +30,7 @@ import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -106,7 +106,7 @@ public class StudyCardApiSecurityTest {
     private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
     @MockBean
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @BeforeEach
     public void setup() {
