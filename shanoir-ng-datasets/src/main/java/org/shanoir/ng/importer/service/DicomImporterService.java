@@ -215,7 +215,7 @@ public class DicomImporterService {
         String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
         Sequence deIdentificationMethodCodeSequence = attributes.getSequence(Tag.DeidentificationMethodCodeSequence);
         if (!StringUtils.isNotBlank(deIdentificationMethod)
-                || (deIdentificationMethodCodeSequence == null
+                && (deIdentificationMethodCodeSequence == null
                 || deIdentificationMethodCodeSequence.isEmpty())) {
             LOG.error("Only de-identified DICOM is allowed.");
             return false;
@@ -230,7 +230,6 @@ public class DicomImporterService {
         if (!DicomUtils.checkSerieIsIgnored(attributes)) { // do nothing for files of ignored series
             Long subjectId = manageSubject(attributes, study);
             Long centerId = manageCenter(attributes, study.getId());
-
             Examination examination = manageExamination(attributes, study, subjectId, centerId);
             DatasetAcquisition acquisition = manageAcquisitionAndEquipment(attributes, examination, centerId, serie);
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition, serie);
