@@ -17,8 +17,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <head></head>
 <body>
     <p><span>Dear administrator,</span></p>
-    <p>A new draft study has been created on <a th:href="${serverAddress}">Shanoir</a>.</p>
-    <p><b>Created by:</b> <span th:text="${firstname}"></span> <span th:text="${lastname}"></span> (<span th:text="${email}"></span>)</p>
+    <p>A study has been <b th:text="${action}"></b> on <a th:href="${serverAddress}">Shanoir</a>
+        <b>by:</b> <span th:text="${firstname}"></span> <span th:text="${lastname}"></span> (<span th:text="${email}"></span>)
+    </p>
     <hr/>
     <h3>Study Information</h3>
     <p><b>Name:</b> <span th:text="${studyName}"></span></p>

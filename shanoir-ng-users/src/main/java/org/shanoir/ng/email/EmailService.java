@@ -124,7 +124,7 @@ public interface EmailService {
      */
     void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email);
 
-    void notifyAdminDraftStudyCreated(EmailStudy email);
+    void notifyAdminStudyEvent(EmailStudy email);
 
     void notifyStudyMembersStudyApproval(EmailStudy email);
 

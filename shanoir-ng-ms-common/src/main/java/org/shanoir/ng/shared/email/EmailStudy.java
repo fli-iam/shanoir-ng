@@ -37,6 +37,7 @@ public class EmailStudy extends EmailBase {
     private String principalInvestigator;
     private String scientificAdvisor;
     private List<Long> studyUsers;
+    private Boolean isNew;
 
     public String getDescription() {
         return description;
@@ -188,5 +189,13 @@ public class EmailStudy extends EmailBase {
 
     public void setStudyUsers(List<Long> studyUsers) {
         this.studyUsers = studyUsers;
+    }
+
+    public Boolean getIsNew() {
+        return isNew;
+    }
+
+    public void setIsNew(Boolean isNew) {
+        this.isNew = isNew;
     }
 }

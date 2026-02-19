@@ -138,48 +138,20 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void notifyAdminDraftStudyCreated(EmailStudy email) {
+    public void notifyAdminStudyEvent(EmailStudy email) {
         User user = userRepository.findById(email.getUserId()).orElse(null);
         final List<String> adminEmails = userRepository.findAdminEmails();
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom(administratorEmail);
             messageHelper.setTo(adminEmails.toArray(new String[0]));
-            messageHelper.setSubject("New draft study created");
-            final Map<String, Object> variables = new HashMap<>();
-            variables.put(FIRSTNAME, user.getFirstName());
-            variables.put(LASTNAME, user.getLastName());
-            variables.put(EMAIL, user.getEmail());
-            variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/details/" + email.getStudyId());
-
-            // Study core fields
-            variables.put(STUDY_NAME, email.getStudyName());
-            variables.put("description", email.getDescription());
-            variables.put("license", email.getLicense());
-            variables.put("startDate", email.getStartDate());
-            variables.put("endDate", email.getEndDate());
-            variables.put("studyStatus", email.getStudyStatus());
-            variables.put("profile", email.getProfile());
-            variables.put("studyCardPolicy", email.getStudyCardPolicy());
-            variables.put("clinical", email.isClinical());
-            variables.put("challenge", email.isChallenge());
-
-            // Extra details
-            variables.put("expectedNbOfSubjects", email.getExpectedNbOfSubjects());
-            variables.put("averageExaminationSize", email.getAverageExaminationSize());
-            variables.put("estimatedTotalVolume", email.getEstimatedTotalVolume());
-            variables.put("expectedNbOfCenters", email.getExpectedNbOfCenters());
-            variables.put("inclusionRate", email.getInclusionRate());
-            variables.put("inclusionRateUnit", email.getInclusionRateUnit());
-            variables.put("sponsor", email.getSponsor());
-            variables.put("principalInvestigator", email.getPrincipalInvestigator());
-            variables.put("scientificAdvisor", email.getScientificAdvisor());
-
-            final String content = build("notifyAdminDraftStudyCreated", variables);
+            messageHelper.setSubject(email.getIsNew() ? "New draft study created" : "Draft study got edited");
+            final Map<String, Object> variables = buildDraftStudyEmailVariables(user, email, shanoirServerAddress);
+            final String content = build("notifyAdminDraftStudy", variables);
             LOG.info(content);
             messageHelper.setText(content, true);
         };
-        LOG.info("Sending study-draft-created mail to {} for study {}", adminEmails.toArray(new String[0]), email.getStudyId());
+        LOG.info("Sending study-draft mail to {} for study {}", adminEmails.toArray(new String[0]), email.getStudyId());
         mailSender.send(messagePreparator);
     }
 
@@ -203,7 +175,7 @@ public class EmailServiceImpl implements EmailService {
                     messageHelper.setText(content, true);
                 };
                 // Send the message
-                LOG.info("Sending study-draft-state mail to {} for study {}", studyMember.getUsername(), email.getStudyId());
+                LOG.info("Sending approve-study mail to {} for study {}", studyMember.getUsername(), email.getStudyId());
                 mailSender.send(messagePreparator);
             }
         }
@@ -758,4 +730,39 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    private Map<String, Object> buildDraftStudyEmailVariables(User user, EmailStudy email, String shanoirServerAddress) {
+        Map<String, Object> variables = new HashMap<>();
+
+        // User info
+        variables.put(FIRSTNAME, user.getFirstName());
+        variables.put(LASTNAME, user.getLastName());
+        variables.put(EMAIL, user.getEmail());
+        variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/details/" + email.getStudyId());
+
+        // Study core fields
+        variables.put(STUDY_NAME, email.getStudyName());
+        variables.put("description", email.getDescription());
+        variables.put("license", email.getLicense());
+        variables.put("startDate", email.getStartDate());
+        variables.put("endDate", email.getEndDate());
+        variables.put("studyStatus", email.getStudyStatus());
+        variables.put("profile", email.getProfile());
+        variables.put("studyCardPolicy", email.getStudyCardPolicy());
+        variables.put("clinical", email.isClinical());
+        variables.put("challenge", email.isChallenge());
+        variables.put("isNew", email.getIsNew());
+
+        // Extra details
+        variables.put("expectedNbOfSubjects", email.getExpectedNbOfSubjects());
+        variables.put("averageExaminationSize", email.getAverageExaminationSize());
+        variables.put("estimatedTotalVolume", email.getEstimatedTotalVolume());
+        variables.put("expectedNbOfCenters", email.getExpectedNbOfCenters());
+        variables.put("inclusionRate", email.getInclusionRate());
+        variables.put("inclusionRateUnit", email.getInclusionRateUnit());
+        variables.put("sponsor", email.getSponsor());
+        variables.put("principalInvestigator", email.getPrincipalInvestigator());
+        variables.put("scientificAdvisor", email.getScientificAdvisor());
+
+        return variables;
+    }
 }
