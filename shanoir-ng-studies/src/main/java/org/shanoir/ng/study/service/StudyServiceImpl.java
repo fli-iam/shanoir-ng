@@ -820,7 +820,7 @@ public class StudyServiceImpl implements StudyService {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.APPROVE_STUDY_MAIL_QUEUE,
                     objectMapper.writeValueAsString(email));
         } catch (Exception e) {
-            LOG.error("Could not send study draft state changed email event.", e);
+            LOG.error("Could not send study approval email event.", e);
         }
     }
 
