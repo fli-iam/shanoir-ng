@@ -551,15 +551,16 @@ public class DicomImporterService {
             subjectDTO.setName(subjectName);
             subjectDTO.setStudy(new IdName(study.getId(), study.getName()));
             Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(
-                    RabbitMQConfiguration.SUBJECTS_QUEUE,
+                    RabbitMQConfiguration.SUBJECTS_QUEUE_WITHOUT_DATASETS,
                     objectMapper.writeValueAsString(subjectDTO));
             if (subjectId == null) {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
             }
             LOG.info("Subject created in MS Studies with ID: {}, Name: {}", subjectId, subjectName);
-            // We create subject here ourselves to avoid 1) transactional issues
-            // and 2) to much RabbitMQ communication
+            // We create subject here ourselves to avoid
+            // 1) transactional issues, that came up during tests
+            // and 2) to avoid too much RabbitMQ communication
             subject = new Subject();
             subject.setId(subjectId); // use same as MS Studies
             subject.setName(subjectName);
