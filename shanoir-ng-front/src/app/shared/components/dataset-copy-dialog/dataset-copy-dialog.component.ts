@@ -16,8 +16,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 
 import { StudyService } from 'src/app/studies/shared/study.service';
-import { CopyDataService } from 'src/app/studies/shared/copy-data.service';
-import { CopyData } from 'src/app/studies/study/copy-csv.component';
+import { CopyData, CopyDataService } from 'src/app/studies/shared/copy-data.service';
 
 import { StudyRightsService } from "../../../studies/shared/study-rights.service";
 import { StudyUserRight } from "../../../studies/shared/study-user-right.enum";
@@ -54,7 +53,7 @@ export class DatasetCopyDialogComponent {
     protected centerIds: number[] = [];
     protected subjectIds: number[] = [];
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
-    protected readonly BATCH_SIZE: number = 1000;
+    protected readonly BATCH_SIZE: number = 2;
 
     constructor(private http: HttpClient,
         private studyRightsService: StudyRightsService,
@@ -117,7 +116,7 @@ export class DatasetCopyDialogComponent {
             } else if (this.isDatasetInStudy) {
                 this.statusMessage = 'Selected dataset(s) already belong to selected study.';
             } else {
-                return this.doCopy().then(() => {
+                return this.copyDataService.copy(this.buildCopyData()).then(() => {
                     this.close();
                 }).catch(reason => {
                     this.canCopy = true;
@@ -129,41 +128,15 @@ export class DatasetCopyDialogComponent {
         });
     }
 
-    private doCopy(): Promise<void> {
-        const nbPages: number = Math.ceil(this.inputDatasets.length / this.BATCH_SIZE);
-        const copyData: CopyData[] = [];
-        for (let page = 1; page <= nbPages; page++) {
-            copyData.push(this.buildCopyData(page, this.BATCH_SIZE));
-        }
-        let promise: Promise<void> = Promise.resolve();
-        if (copyData.length > 1) {
-            this.consoleService.log('info', 'The copy of ' + this.inputDatasets.length + ' datasets towards study ' 
-                + this.selectedStudy.name + ' has started in batch mode, it may take a while. '
-                + copyData.length + ' batch(es) will be processed sequentially.');
-        } else {
-            this.consoleService.log('info', 'The copy of ' + this.inputDatasets.length + ' datasets towards study ' 
-                + this.selectedStudy.name + ' has started.');
-        }
-        copyData.forEach(cd => {
-            promise = promise.then(() => {
-                return this.copyDataService.copyData(cd);
-            });
-        });
-        return promise;
-    }
-
-    private buildCopyData(page: number, pageSize: number): CopyData {
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-        const datasetSlice = this.inputDatasets.slice(start, end);
-        const centerIdSet = new Set(datasetSlice.map(d => d.centerId));
-        const subjectIdSet = new Set(datasetSlice.map(d => d.subjectId));
+    private buildCopyData(): CopyData {
         return {
-            datasetIds: datasetSlice.map(d => d.datasetId),
+            datasets: this.inputDatasets.map(d => ({
+                datasetId: d.datasetId,
+                centerId: d.centerId,
+                subjectId: d.subjectId
+            })),
             targetStudyId: this.selectedStudy.id,
-            centerIds: this.centerIds.filter(c => centerIdSet.has(c)),
             subjects: this.subjectIds
-                .filter(s => subjectIdSet.has(s))
                 .map(s => ({
                     id: s,
                     newName: null

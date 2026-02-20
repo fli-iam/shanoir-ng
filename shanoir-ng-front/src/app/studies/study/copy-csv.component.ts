@@ -13,7 +13,7 @@
  */
 import { Component, ElementRef, HostListener, inject, Input, ViewChild } from '@angular/core';
 
-import { CopyDataService } from '../shared/copy-data.service';
+import { CopyData, CopyDataService } from '../shared/copy-data.service';
 
 @Component({
     selector: 'copy-from-csv',
@@ -39,7 +39,7 @@ export class CopyFromCsvComponent {
         (event.target as HTMLInputElement).files[0].text().then(csv => {
             const rawData: string[][] = this.parseCsv(csv);
             const copyData = this.convertToCopyData(rawData);
-            this.copyDataService.copyData(copyData);
+            this.copyDataService.copy(copyData);
         });
     }
 
@@ -57,14 +57,17 @@ export class CopyFromCsvComponent {
         const newSubjectNameIndex = rawData[0].indexOf("subjectName");
         const centerIdIndex = rawData[0].indexOf("centerId");
         const copyData: CopyData = {
-            datasetIds: [],
+            datasets: [],
             subjects: [],
-            centerIds: []
         };
         for (let i = 1; i < rawData.length; i++) {
             const line = rawData[i];
             if (datasetIdIndex >= 0) {
-                copyData.datasetIds.push(+line[datasetIdIndex]);
+                copyData.datasets.push({
+                    datasetId: +line[datasetIdIndex],
+                    centerId: +line[centerIdIndex],
+                    subjectId: +line[subjectIdIndex]
+                });
             }
             if (newSubjectNameIndex >= 0) {
                 if (copyData.subjects.find(s => s.id === +line[subjectIdIndex]) == null) {
@@ -74,25 +77,9 @@ export class CopyFromCsvComponent {
                     });
                 }
             }
-            if (centerIdIndex >= 0) {
-                const centerId = +line[centerIdIndex];
-                if (!copyData.centerIds.includes(centerId)) {
-                    copyData.centerIds.push(centerId);
-                }
-            }
         }
         copyData.targetStudyId = this.studyId;
         return copyData;
     }
 
-}
-
-export interface CopyData {
-    datasetIds: number[];
-    subjects: {
-        id: number;
-        newName: string;
-    }[];
-    centerIds: number[];
-    targetStudyId?: number;
 }
