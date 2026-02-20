@@ -63,7 +63,7 @@ public class StudyRightsService {
         if (userId == null) {
             throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
         }
-        StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
+        StudyUser founded = cache.findByUserIdAndStudyIdCached(userId, studyId);
         return
                 founded != null
                 && founded.getStudyUserRights() != null
