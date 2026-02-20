@@ -27,9 +27,9 @@ VALUES
 	(1, 'DemoStudy');
 	
 INSERT INTO subject
-	(id, name)
+	(id, name, study_id)
 VALUES
-	(1, 'subject1');
+	(1, 'subject1', 1);
 
 INSERT INTO center
     (id, name)
