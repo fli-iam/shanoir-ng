@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
@@ -29,6 +28,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class RabbitMQPreclinicalService {
@@ -62,7 +63,7 @@ public class RabbitMQPreclinicalService {
         try {
             Long subjectId = Long.valueOf(subjectIdAsStr);
 
-            AnimalSubject animalSubject = animalSubjectService.getBySubjectId(subjectId);
+            AnimalSubject animalSubject = animalSubjectService.getById(subjectId);
 
             if (animalSubject == null) {
                 return;
@@ -71,7 +72,7 @@ public class RabbitMQPreclinicalService {
 
             subjectPathologyService.deleteByAnimalSubject(animalSubject);
             subjectTherapyService.deleteByAnimalSubject(animalSubject);
-            animalSubjectService.deleteBySubjectId(subjectId);
+            animalSubjectService.deleteById(subjectId);
 
             LOG.info("Animal subject [{}] has been deleted following deletion of subject [{}]", id, subjectId);
 

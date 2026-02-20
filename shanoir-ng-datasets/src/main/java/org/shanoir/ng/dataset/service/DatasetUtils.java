@@ -136,6 +136,7 @@ public final class DatasetUtils {
             case EEG -> new EegDataset(d);
             case MEG -> new MegDataset(d);
             case MESH -> new MeshDataset(d);
+            case MR -> new MrDataset(d);
             case PARAMETER_QUANTIFICATION -> new ParameterQuantificationDataset(d);
             case PET -> new PetDataset(d);
             case REGISTRATION -> new RegistrationDataset(d);

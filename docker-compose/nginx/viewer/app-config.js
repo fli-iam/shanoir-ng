@@ -13,11 +13,11 @@
  */
 
 window.config = { 
-	routerBasename: '/', 
+	routerBasename: null,
 	extensions: [], 
 	modes: [],
 	experimentalStudyBrowserSort: true,
-	showStudyList: true,
+	showStudyList: false,
 	dataSources: [ 
 		{ 
 			namespace: '@ohif/extension-default.dataSourcesModule.dicomweb', 
@@ -35,7 +35,7 @@ window.config = {
 				enableStudyLazyLoad: true, 
 				supportsFuzzyMatching: true, 
 				supportsWildcard: true, 
-				omitQuotationForMultipartRequest: false, 
+				omitQuotationForMultipartRequest: false 
 			}, 
 		}, 
 	], 

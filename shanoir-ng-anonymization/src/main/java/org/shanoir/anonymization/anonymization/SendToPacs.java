@@ -18,6 +18,8 @@ import java.io.IOException;
 
 import org.dcm4che3.net.ApplicationEntity;
 import org.dcm4che3.tool.storescu.StoreSCU;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TEMPORARY CLASS.
@@ -28,6 +30,8 @@ import org.dcm4che3.tool.storescu.StoreSCU;
  */
 public class SendToPacs {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SendToPacs.class);
+
     public void processSendToPacs(final String folderPath) {
         ApplicationEntity  ae = new ApplicationEntity();
         try {
@@ -35,7 +39,7 @@ public class SendToPacs {
             String[] args = {"-c", "DCM4CHEE@localhost:11112", folderPath };
             sc.main(args);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
     }
 

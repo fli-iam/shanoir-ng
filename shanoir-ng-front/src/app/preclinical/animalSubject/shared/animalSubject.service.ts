@@ -19,12 +19,11 @@ import { Subject } from '../../../subjects/shared/subject.model';
 import * as AppUtils from '../../../utils/app.utils';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 
-import { AnimalSubject } from './animalSubject.model';
-import { PreclinicalSubject, PreclinicalSubjectDTO } from './preclinicalSubject.model';
+import { AnimalSubject, AnimalSubjectDTO } from './animalSubject.model';
 
 
 @Injectable()
-export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
+export class AnimalSubjectService extends EntityService<AnimalSubject>{
 
     API_URL = PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL;
 
@@ -32,11 +31,11 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
         super(http)
     }
 
-    getEntityInstance() { return new PreclinicalSubject(); }
+    getEntityInstance() { return new AnimalSubject(); }
 
     getAnimalSubjects(ids: IterableIterator<any>): Promise<AnimalSubject[]>{
         const formData: FormData = new FormData();
-        formData.set('subjectIds', Array.from(ids).join(","));
+        formData.set('ids', Array.from(ids).join(","));
         return this.http.post<AnimalSubject[]>(PreclinicalUtils.PRECLINICAL_API_SUBJECT_FIND_URL, formData)
             .toPromise();
     }
@@ -47,14 +46,9 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
     }
 
     updateAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
-      const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/`+animalSubject.id;
-      return this.http
-        .put<AnimalSubject>(url, JSON.stringify(animalSubject))
-        .toPromise();
-    }
-
-    createPreclinicalSubject(preclinicalSubject: PreclinicalSubject): Promise<PreclinicalSubject> {
-        return this.http.post<PreclinicalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, this.stringify(preclinicalSubject))
+        const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/`+animalSubject.id;
+        return this.http
+            .put<AnimalSubject>(url, this.stringify(animalSubject))
             .toPromise();
     }
 
@@ -63,8 +57,8 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
         .toPromise()    ;
     }
 
-    public stringify(entity: PreclinicalSubject) {
-        const dto = new PreclinicalSubjectDTO(entity);
+    public stringify(entity: AnimalSubject) {
+        const dto = new AnimalSubjectDTO(entity);
         return JSON.stringify(dto, this.customReplacer);
     }
 }

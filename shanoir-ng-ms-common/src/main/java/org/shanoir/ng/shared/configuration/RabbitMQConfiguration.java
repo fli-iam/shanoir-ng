@@ -90,6 +90,7 @@ public class RabbitMQConfiguration {
     /** Center name updated => notify MS Datasets to change database. */
     public static final String CENTER_UPDATE_QUEUE = "center-update-queue";
 
+    /** Copy datasets from one study to another. */
     public static final String COPY_DATASETS_TO_STUDY_QUEUE = "copy-datasets-to-study-queue";
 
     /** Create DS acquisition => Index datasets in solr. */
@@ -119,6 +120,7 @@ public class RabbitMQConfiguration {
     /** Queue to get an equipment id from a code. */
     public static final String EQUIPMENT_FROM_CODE_QUEUE = "equipment-from-code-queue";
 
+    /** Monitor execution of long tasks. */
     public static final String EXECUTION_MONITORING_TASK = "execution-monitoring-task";
 
     /** Queue to create exam for import bids. */
@@ -179,8 +181,10 @@ public class RabbitMQConfiguration {
     /** Get the type of dataset from a given study. */
     public static final String STUDY_DATASET_TYPE = "study-dataset-type";
 
+    /** Calculate storage volume for datasets linked to a study. */
     public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
 
+    /** Calculate total storage volume for datasets linked to a study. */
     public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";
 
     /** Queue used to get the list of studies I can Admin. */
@@ -218,11 +222,14 @@ public class RabbitMQConfiguration {
     /** Update / create a study user to users MS. */
     public static final String STUDY_USER_QUEUE_USERS = "study-user-queue-users";
 
+    public static final String SUBJECT_BATCH_UPDATE_QUEUE = "subject_batch_update_queue";
+
     /** Subject name updated => notify dataset MS to change database. */
     public static final String SUBJECT_UPDATE_QUEUE = "subject-update-queue";
 
-    /** BIDS purpose => Get a list of subjects to create bids participants file. */
-    public static final String SUBJECTS_QUEUE = "subjects-queue";
+    public static final String SUBJECTS_QUEUE_WITH_DATASETS = "subjects-queue-with-datasets";
+
+    public static final String SUBJECTS_QUEUE_WITHOUT_DATASETS = "subjects-queue-without-datasets";
 
     /** Preclinical subject creation => Check if a subject with this name already exists **/
     public static final String SUBJECTS_NAME_QUEUE = "subjects-name-queue";
@@ -518,6 +525,11 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
+    public Queue subjectBatchUpdateQueue() {
+        return new Queue(SUBJECT_BATCH_UPDATE_QUEUE, true);
+    }
+
+    @Bean
     public static Queue subjectUpdateQueue() {
         return new Queue(SUBJECT_UPDATE_QUEUE, true);
     }
@@ -529,7 +541,12 @@ public class RabbitMQConfiguration {
 
     @Bean
     public static Queue subjectsQueue() {
-        return new Queue(SUBJECTS_QUEUE, true);
+        return new Queue(SUBJECTS_QUEUE_WITH_DATASETS, true);
+    }
+
+    @Bean
+    public static Queue subjectsWithoutDatasetsQueue() {
+        return new Queue(SUBJECTS_QUEUE_WITHOUT_DATASETS, true);
     }
 
     @Bean

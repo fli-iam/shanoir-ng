@@ -17,7 +17,7 @@ package org.shanoir.ng.examination;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.controler.ExaminationApi;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
@@ -89,7 +89,7 @@ public class ExaminationApiSecurityTest {
     private StudyUserRightsRepository studyUserRightsRepository;
 
     @MockBean
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @BeforeEach
     public void setup() {
@@ -246,8 +246,8 @@ public class ExaminationApiSecurityTest {
         assertThat(api.findExaminations(PageRequest.of(0, 10), "", "").getBody()).hasSize(1);
 
         // findPreclinicalExaminations(Boolean, Pageable)
-        assertAccessAuthorized(api::findPreclinicalExaminations, true, PageRequest.of(0, 10));
-        assertAccessAuthorized(api::findPreclinicalExaminations, false, PageRequest.of(0, 10));
+        assertAccessAuthorized(api::findPreclinicalExaminations, true, PageRequest.of(0, 10), "", "");
+        assertAccessAuthorized(api::findPreclinicalExaminations, false, PageRequest.of(0, 10), "", "");
 
         // findExaminationsBySubjectIdStudyId(Long, Long)
         assertAccessAuthorized((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 1L, 1L);

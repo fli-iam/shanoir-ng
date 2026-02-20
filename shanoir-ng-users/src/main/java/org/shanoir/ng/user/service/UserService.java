@@ -223,4 +223,11 @@ public interface UserService {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#id))")
     User findById(Long id);
 
+    /**
+     * Count all the users that have an active account
+     *
+     * @return the number of active users
+     */
+    Long countActiveUsers();
+
 }

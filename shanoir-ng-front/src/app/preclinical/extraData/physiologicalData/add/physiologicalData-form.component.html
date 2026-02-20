@@ -14,78 +14,78 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div #formContainer class="PhysiologicalDataFormComponent content-component">
 	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
-		<div *ngIf="isStandalone" class="footer command-zone">
+		<div *ngIf="!embedded" class="footer command-zone">
 			<form-footer
 				[state]="footerState"
 				(save)="save()"
 				(edit)="goToEdit()"
 				(back)="goBack()">
 			</form-footer>
-		</div>  
+		</div>
 
-		<span *ngIf="isStandalone" class="right-col" [ngSwitch]="mode">
-			<ng-template [ngSwitchCase]="'view'"> 
+		<span *ngIf="!embedded" class="right-col" [ngSwitch]="mode">
+			<ng-template [ngSwitchCase]="'view'">
 				<div class="header command-zone" i18n="View physiodata|Title">View physiological data</div>
 			</ng-template>
-			<ng-template ngSwitchDefault> 
+			<ng-template ngSwitchDefault>
 				<div class="header command-zone" i18n="Edit physiodata|Title">Add physiological data</div>
 			</ng-template>
 		</span>
 
 		<fieldset>
-			<legend *ngIf="!isStandalone">Physiological data</legend>
+			<legend *ngIf="!embedded">Physiological data</legend>
 			<ol>
-				<li>   
+				<li>
 					<label i18n="Edit physiodata|hasHeartRate label">Heart Rate data</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{isYesOrNo(physioData.has_heart_rate)}}
+						<ng-template [ngSwitchCase]="'view'">
+								{{isYesOrNo(physioData.hasHeartRate)}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="radio" formControlName="has_heart_rate" [value]="true" i18n="Edit physioData|hasHeartRate label" [checked]="physioData.has_heart_rate == true" (change)="changePhysio()" />Yes
-							<input type="radio" formControlName="has_heart_rate" [value]="false" i18n="Edit physioData|hasNotHeartRate label" [checked]="physioData.has_heart_rate" (change)="changePhysio()" />No
+							<input type="radio" formControlName="hasHeartRate" [value]="true" i18n="Edit physioData|hasHeartRate label" (change)="emitEvent()" />Yes
+							<input type="radio" formControlName="hasHeartRate" [value]="false" i18n="Edit physioData|hasNotHeartRate label" (change)="emitEvent()" />No
 						</ng-template>
-					</span>	
+					</span>
 				</li>
-				<li>   
+				<li>
 					<label i18n="Edit physiodata|hasRespiratoryRate label">Respiratory Rate data</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{isYesOrNo(physioData.has_respiratory_rate)}}
+						<ng-template [ngSwitchCase]="'view'">
+								{{isYesOrNo(physioData.hasRespiratoryRate)}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="radio" formControlName="has_respiratory_rate" [value]="true" i18n="Edit physioData|hasRespiratoryRate label" [checked]="physioData.has_respiratory_rate == true" (change)="changePhysio()" />Yes
-							<input type="radio" formControlName="has_respiratory_rate" [value]="false" i18n="Edit physioData|hasNotRespiratoryRate label" [checked]="physioData.has_respiratory_rate" (change)="changePhysio()"/>No
+							<input type="radio" formControlName="hasRespiratoryRate" [value]="true" i18n="Edit physioData|hasRespiratoryRate label" (change)="emitEvent()" />Yes
+							<input type="radio" formControlName="hasRespiratoryRate" [value]="false" i18n="Edit physioData|hasNotRespiratoryRate label" (change)="emitEvent()"/>No
 						</ng-template>
-					</span>	
+					</span>
 				</li>
-				<li>   
+				<li>
 					<label i18n="Edit physiodata|hasSao2 label">SaO2 data</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{isYesOrNo(physioData.has_sao2)}}
+						<ng-template [ngSwitchCase]="'view'">
+								{{isYesOrNo(physioData.hasSao2)}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="radio" formControlName="has_sao2" [value]="true" i18n="Edit physioData|hasSao2 label" [checked]="physioData.has_sao2 == true" (change)="changePhysio()" />Yes
-							<input type="radio" formControlName="has_sao2" [value]="false" i18n="Edit physioData|hasNotSao2 label" [checked]="physioData.has_sao2" (change)="changePhysio()" />No
+							<input type="radio" formControlName="hasSao2" [value]="true" i18n="Edit physioData|hasSao2 label" (change)="emitEvent()" />Yes
+							<input type="radio" formControlName="hasSao2" [value]="false" i18n="Edit physioData|hasNotSao2 label" (change)="emitEvent()" />No
 						</ng-template>
-					</span>	
+					</span>
 					<span class="right-col">
 					</span>
 				</li>
-				<li>   
+				<li>
 					<label i18n="Edit physiodata|hasTemperature label">Temperature data</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{isYesOrNo(physioData.has_temperature)}}
+						<ng-template [ngSwitchCase]="'view'">
+								{{isYesOrNo(physioData.hasTemperature)}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="radio" formControlName="has_temperature" [value]="true" i18n="Edit physioData|hasTemperature label" [checked]="physioData.has_temperature == true" (change)="changePhysio()" />Yes
-							<input type="radio" formControlName="has_temperature" [value]="false" i18n="Edit physioData|hasNotTemperature label" [checked]="physioData.has_temperature" (change)="changePhysio()"/>No
+							<input type="radio" formControlName="hasTemperature" [value]="true" i18n="Edit physioData|hasTemperature label" (change)="emitEvent()" />Yes
+							<input type="radio" formControlName="hasTemperature" [value]="false" i18n="Edit physioData|hasNotTemperature label" (change)="emitEvent()"/>No
 						</ng-template>
 					</span>
 					<span class="right-col">
-						
+
 					</span>
 				</li>
 				<li  class="required">
@@ -93,21 +93,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template  [ngSwitchCase]="'view'">
                             {{physioData.filename}}
-                            <button *ngIf="physioData?.filename" class="button-picto clickable" (click)="downloadFile()">
+                            <button *ngIf="physioData?.filename" class="download" (click)="downloadFile()">
                                 <i class="fas fa-download"></i>
                             </button>
 						</ng-template>
 						<ng-template  [ngSwitchCase]="'create'">
-							<input type="file" id="physioDataFile" name="physioDataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+							<upload-file name="physioDataFile" [noFilename]="true" (fileChange)="fileChangeEvent($event.target.files)"></upload-file>
 						</ng-template>
 						<ng-template  [ngSwitchCase]="'edit'">
 							{{physioData.filename}}
-							<input type="file" id="physioDataFile" name="physioDataFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+							<upload-file name="physioDataFile" [noFilename]="true" (fileChange)="fileChangeEvent($event.target.files)"></upload-file>
 						</ng-template>
 					</span>
-					
-				</li>				
+
+				</li>
 			</ol>
 		</fieldset>
-	</form>  
+	</form>
 </div>

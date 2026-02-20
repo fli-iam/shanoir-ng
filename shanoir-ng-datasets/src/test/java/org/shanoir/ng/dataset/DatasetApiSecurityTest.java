@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -40,7 +41,7 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
@@ -118,7 +119,7 @@ public class DatasetApiSecurityTest {
     private SolrService solrService;
 
     @MockBean
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @BeforeEach
     public void setup() {
@@ -282,12 +283,13 @@ public class DatasetApiSecurityTest {
         //massiveDownloadByDatasetIds(List<Long>, String, HttpServletResponse)
         given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
         su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_DOWNLOAD));
-        assertAccessAuthorized(api::massiveDownloadByDatasetIds, Utils.toList(1L), "file", 1L, null);
-        assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 3L), "file", 1L, null);
-        assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(3L), "file", 1L, null);
-        assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(1L, 2L), "file", 1L, null);
-        assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(2L), "file", 1L, null);
-        assertAccessDenied(api::massiveDownloadByDatasetIds, Utils.toList(4L), "file", 1L, null);
+        HttpServletResponse mockResponse = Mockito.mock(HttpServletResponse.class);
+        assertAccessAuthorized(() -> api.massiveDownloadByDatasetIds(Utils.toList(1L), "file", 1L, null, mockResponse));
+        assertAccessDenied(() -> api.massiveDownloadByDatasetIds(Utils.toList(1L, 3L), "file", 1L, null, mockResponse));
+        assertAccessDenied(() -> api.massiveDownloadByDatasetIds(Utils.toList(3L), "file", 1L, null, mockResponse));
+        assertAccessDenied(() -> api.massiveDownloadByDatasetIds(Utils.toList(1L, 2L), "file", 1L, null, mockResponse));
+        assertAccessDenied(() -> api.massiveDownloadByDatasetIds(Utils.toList(2L), "file", 1L, null, mockResponse));
+        assertAccessDenied(() -> api.massiveDownloadByDatasetIds(Utils.toList(4L), "file", 1L, null, mockResponse));
 
         //massiveDownloadByStudyId(Long, String, HttpServletResponse)
         assertAccessAuthorized(api::massiveDownloadByStudyId, 1L, "file", null);

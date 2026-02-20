@@ -22,9 +22,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloogGasUniqueConstraintManager;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
@@ -49,6 +46,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class ExtraDataApiController implements ExtraDataApi {
@@ -134,7 +133,7 @@ public class ExtraDataApiController implements ExtraDataApi {
         }
         // Guarantees it is a creation, not an update
         extradata.setId(null);
-        extradata.setExtradatatype("Extra data");
+        extradata.setExtraDataType("Extra data");
         try {
             final ExaminationExtraData createdExtraData = extraDataService.save(extradata);
             return new ResponseEntity<>(createdExtraData, HttpStatus.OK);
@@ -163,7 +162,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 
         // Guarantees it is a creation, not an update
         extradata.setId(null);
-        extradata.setExtradatatype("Physiological data");
+        extradata.setExtraDataType("Physiological data");
 
         /* Save extradata in db. */
         try {
@@ -192,7 +191,7 @@ public class ExtraDataApiController implements ExtraDataApi {
         }
         // Guarantees it is a creation, not an update
         extradata.setId(null);
-        extradata.setExtradatatype("Blood gas data");
+        extradata.setExtraDataType("Blood gas data");
         try {
             final BloodGasData createdExtraData = bloodGasDataService.save(extradata);
             return new ResponseEntity<>(createdExtraData, HttpStatus.OK);

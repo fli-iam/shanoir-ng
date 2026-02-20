@@ -716,10 +716,10 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/*"
+        "SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/*"
       ],
       "webOrigins": [
-        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST"
+        "SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST"
       ],
       "notBefore": 0,
       "bearerOnly": false,

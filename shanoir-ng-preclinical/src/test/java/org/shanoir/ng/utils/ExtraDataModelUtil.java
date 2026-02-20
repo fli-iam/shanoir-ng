@@ -35,7 +35,6 @@ public final class ExtraDataModelUtil {
     public static final Long PHYSIOLOGICALDATA_ID = 2L;
     public static final String PHYSIOLOGICALDATA_TYPE = "Physiological data";
     public static final Long BLOODGASDATA_ID = 3L;
-    public static final String BLOODGASDATA_TYPE = "Blood gas data";
     public static final String EXTRADATA_FILEPATH = "/home/sloury/Documents/FLI-IAM/SHANOIR_NG/upload/";
     public static final String EXTRADATA_FILENAME = "extradata.txt";
 
@@ -48,7 +47,7 @@ public final class ExtraDataModelUtil {
         ExaminationExtraData extradata = new ExaminationExtraData();
         extradata.setId(EXTRADATA_ID);
         extradata.setExaminationId(EXAMINATION_ID);
-        extradata.setExtradatatype(EXTRADATA_TYPE);
+        extradata.setExtraDataType(EXTRADATA_TYPE);
         extradata.setFilename(EXTRADATA_FILENAME);
         extradata.setFilepath(EXTRADATA_FILEPATH);
         return extradata;
@@ -57,7 +56,7 @@ public final class ExtraDataModelUtil {
         PhysiologicalData extradata = new PhysiologicalData();
         extradata.setId(PHYSIOLOGICALDATA_ID);
         extradata.setExaminationId(EXAMINATION_ID);
-        extradata.setExtradatatype(PHYSIOLOGICALDATA_TYPE);
+        extradata.setExtraDataType(PHYSIOLOGICALDATA_TYPE);
         extradata.setFilename(EXTRADATA_FILENAME);
         extradata.setFilepath(EXTRADATA_FILEPATH);
         extradata.setHasHeartRate(true);
@@ -70,7 +69,7 @@ public final class ExtraDataModelUtil {
         BloodGasData extradata = new BloodGasData();
         extradata.setId(BLOODGASDATA_ID);
         extradata.setExaminationId(EXAMINATION_ID);
-        extradata.setExtradatatype(BLOODGASDATA_TYPE);
+        extradata.setExtraDataType(BloodGasData.BLOODGASDATA_TYPE);
         extradata.setFilename(EXTRADATA_FILENAME);
         extradata.setFilepath(EXTRADATA_FILEPATH);
         return extradata;

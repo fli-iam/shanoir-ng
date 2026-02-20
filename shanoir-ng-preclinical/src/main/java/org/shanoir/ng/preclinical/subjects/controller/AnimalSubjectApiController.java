@@ -16,17 +16,15 @@ package org.shanoir.ng.preclinical.subjects.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
+
 import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
-import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
-import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDtoService;
+import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDtoService;
 import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectEditableByManager;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectUniqueValidator;
-import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -48,6 +46,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
@@ -63,12 +63,10 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
     @Autowired
     private AnimalSubjectService subjectService;
+
     @Autowired
     private RefsService refsService;
-    @Autowired
-    private SubjectPathologyService subjectPathologyService;
-    @Autowired
-    private SubjectTherapyService subjectTherapyService;
+
     @Autowired
     private ShanoirEventService eventService;
 
@@ -79,22 +77,22 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
     private AnimalSubjectEditableByManager editableOnlyValidator;
 
     @Autowired
-    private PreclinicalSubjectDtoService dtoService;
+    private AnimalSubjectDtoService dtoService;
 
     @Override
-    public ResponseEntity<PreclinicalSubjectDto> createAnimalSubject(
-            @Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final PreclinicalSubjectDto dto,
+    public ResponseEntity<AnimalSubjectDto> createAnimalSubject(
+            @Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final AnimalSubjectDto dto,
             final BindingResult result) throws RestServiceException {
         try {
             SubjectDto createdSubjectDto = this.createSubject(dto.getSubject());
-            AnimalSubject animalSubject = dtoService.getAnimalSubjectFromPreclinicalDto(dto);
-            animalSubject.setSubjectId(createdSubjectDto.getId());
+            AnimalSubject animalSubject = dtoService.getAnimalSubjectFromAnimalSubjectDto(dto);
             this.validateAnimalSubjectCreation(animalSubject, result);
+            animalSubject.setId(createdSubjectDto.getId());
             final AnimalSubject createdAnimal = subjectService.save(animalSubject);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_PRECLINICAL_SUBJECT_EVENT, createdAnimal.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-            PreclinicalSubjectDto preclinicalDto = dtoService.getPreclinicalDtoFromAnimalSubject(createdAnimal);
-            preclinicalDto.setSubject(createdSubjectDto);
-            return new ResponseEntity<>(preclinicalDto, HttpStatus.OK);
+            AnimalSubjectDto animalSubjectDto = dtoService.getAnimalSubjectDtoFromAnimalSubject(createdAnimal);
+            animalSubjectDto.setSubject(createdSubjectDto);
+            return new ResponseEntity<>(animalSubjectDto, HttpStatus.OK);
         } catch (ShanoirException e) {
             throw new RestServiceException(e,
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, null));
@@ -104,22 +102,22 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
     private SubjectDto createSubject(SubjectDto dto) throws ShanoirException, RestServiceException {
         if (subjectService.isSubjectNameAlreadyUsedInStudy(dto.getName(), dto.getStudy().getId())) {
             FieldErrorMap errorMap = new FieldErrorMap();
-            List<FieldError> errors = new ArrayList();
+            List<FieldError> errors = new ArrayList<>();
             errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", dto.getName()));
             errorMap.put("name", errors);
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errorMap)));
         }
         dto.setPreclinical(true);
-        Long subjectId;
+        Long id;
         try {
-            subjectId = subjectService.createSubject(dto);
-        } catch (Exception ex) {
+            id = subjectService.createSubject(dto);
+        } catch (JsonProcessingException | ShanoirException ex) {
             String msg = "Failed to create subject. Animal subject can't be created.";
             LOG.error(msg, ex);
             throw new ShanoirException(msg, ex);
         }
-        dto.setId(subjectId);
+        dto.setId(id);
         return dto;
     }
 
@@ -144,46 +142,46 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
     }
 
     @Override
-    public ResponseEntity<AnimalSubjectDto> getAnimalSubjectBySubjectId(
+    public ResponseEntity<AnimalSubjectDto> getAnimalSubjectById(
             @Parameter(name = "subject id of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id) {
-        final AnimalSubjectDto subject = dtoService.getPreclinicalDtoFromAnimalSubject(subjectService.getBySubjectId(id)).getAnimalSubject();
+        final AnimalSubject subject = subjectService.getById(id);
         if (subject == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(subject, HttpStatus.OK);
+        AnimalSubjectDto dto = dtoService.getAnimalSubjectDtoFromAnimalSubject(subject);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<AnimalSubjectDto>> findBySubjectIds(List<Long> subjectIds) {
-        final List<AnimalSubjectDto> subjects = dtoService.getAnimalSubjectDtoListFromAnimalSubjectList(subjectService.findBySubjectIds(subjectIds));
+    public ResponseEntity<List<AnimalSubjectDto>> findByIds(List<Long> ids) {
+        final List<AnimalSubject> subjects = subjectService.findByIds(ids);
         if (subjects.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(subjects, HttpStatus.OK);
+        List<AnimalSubjectDto> dtos = subjects.stream()
+                .map(subject -> dtoService.getAnimalSubjectDtoFromAnimalSubject(subject))
+                .toList();
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> updateAnimalSubject(
-            @Parameter(name = "subject id of animalSubject that needs to be updated", required = true) @PathVariable("id") Long subjectId,
-            @Parameter(name = "Subject object that needs to be updated", required = true) @RequestBody AnimalSubjectDto dto,
+            @Parameter(name = "subject id of animalSubject that needs to be updated", required = true) @PathVariable("id") Long id,
+            @Parameter(name = "Subject object that needs to be updated", required = true) @RequestBody AnimalSubjectDto animalSubject,
             final BindingResult result) throws RestServiceException {
 
-        // IMPORTANT : avoid any confusion that could lead to security breach
-
-        Long id = subjectService.getIdBySubjectId(subjectId);
-
-        if (id == null) {
+        AnimalSubject existingAnimalSubject = subjectService.getById(id);
+        if (existingAnimalSubject == null) {
             throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No animal subject found for this subject id", null));
         }
 
-        AnimalSubject subject = dtoService.getAnimalSubjectFromAnimalSubjectDto(dto);
-        subject.setId(id);
-
-        this.validateAnimalSubjectUpdate(subject, result);
+        AnimalSubject subjectToUpdate = dtoService.getAnimalSubjectFromAnimalSubjectDto(animalSubject);
+        subjectToUpdate.setId(id);
+        this.validateAnimalSubjectUpdate(subjectToUpdate, result);
 
         /* Update template in db. */
         try {
-            subjectService.update(subject);
+            subjectService.update(subjectToUpdate);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_PRECLINICAL_SUBJECT_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
         } catch (ShanoirException e) {
             LOG.error("Error while trying to update animal subject [{}]", id, e);

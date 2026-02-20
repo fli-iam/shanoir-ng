@@ -52,7 +52,11 @@ export class UserComponent extends EntityComponent<User> {
             private userService: UserService,
             private roleService: RoleService,
             private studyService: StudyService) {
-        super(route, 'user');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'user';
     }
 
     public get user(): User { return this.entity; }

@@ -38,9 +38,11 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -55,6 +57,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyRightsService;
@@ -129,6 +132,9 @@ public class DatasetServiceImpl implements DatasetService {
     private DatasetAsyncService datasetAsyncService;
 
     @Autowired
+    private DatasetFileRepository datasetFileRepository;
+
+    @Autowired
     private ProcessingResourceRepository processingResourceRepository;
 
     @Autowired
@@ -140,6 +146,10 @@ public class DatasetServiceImpl implements DatasetService {
     @Autowired
     private StudyCardService studyCardService;
 
+    @Autowired
+    @Lazy
+    private SubjectRepository subjectRepository;
+
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
     private void delete(Dataset entity) throws ShanoirException, SolrServerException, IOException, RestServiceException {
@@ -150,7 +160,16 @@ public class DatasetServiceImpl implements DatasetService {
         processingService.removeDatasetFromAllProcessingInput(id);
         processingResourceRepository.deleteByDatasetId(id);
         propertyService.deleteByDatasetId(id);
-        repository.deleteById(id);
+
+        List<Long> expressionIds = entity.getDatasetExpressions().stream()
+                .map(DatasetExpression::getId)
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (!expressionIds.isEmpty()) {
+            datasetFileRepository.deleteByDatasetExpressionIds(expressionIds);
+        }
+        repository.delete(entity);
     }
 
     /**
@@ -530,6 +549,23 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
+    public OverallStatistics getOverallStatistics() {
+        List<OverallStatistics> result = repository.getOverallStatistics();
+        if (result == null || result.isEmpty()) {
+            LOG.error("No overall statistics found in database.");
+            return null;
+        // handle the case where storage_size is null
+        } else if (result.get(0) != null && result.get(0).getStorageSize() == null) {
+            result.get(0).setStorageSize(0D);
+        }
+        // We get only one row with 4 columns so we select the first row
+        OverallStatistics stats = result.get(0);
+        // We convert the byte value of storage_size to gigabytes
+        double storageInGb = Math.round(stats.getStorageSize() / (1024 * 1024 * 1024));
+        stats.setStorageSize(storageInGb);
+        return stats;
+    }
+
     public List<DatasetDownloadData> getDownloadDataByAcquisitionAndExaminationIds(List<Long> acquisitionIds,
             List<Long> examinationIds) {
 

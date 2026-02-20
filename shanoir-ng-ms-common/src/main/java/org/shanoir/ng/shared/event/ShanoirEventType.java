@@ -95,6 +95,10 @@ public final class ShanoirEventType {
 
     /** Download dataset. */
     public static final String DOWNLOAD_DATASET_EVENT = "downloadDataset.event";
+
+    /** Mass Download of datasets. */
+    public static final String MASSIVE_OUTPUTS_DOWNLOAD = "massiveOutputsDownload.event";
+
     /** Download statistics. */
     public static final String DOWNLOAD_STATISTICS_EVENT = "downloadStatistics.event";
 
@@ -107,6 +111,7 @@ public final class ShanoirEventType {
     /** User added to a study. */
     public static final String USER_ADD_TO_STUDY_EVENT = "userAddToStudy.event";
 
+    /** Apply quality card */
     public static final String CHECK_QUALITY_EVENT = "checkQuality.event";
 
     /** Index all datasets in solr */
