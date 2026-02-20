@@ -244,27 +244,6 @@ public class StudyApiController implements StudyApi {
         }
     }
 
-    // @Override
-    // public ResponseEntity<String> copyDatasetsToStudy(
-    //         List<Long> datasetIds,
-    //         String studyIdAsStr,
-    //         List<Long> centerIds,
-    //         List<String> subjectIdStudyIds) {
-    //     String res;
-    //     try {
-    //         Long studyId = Long.valueOf(studyIdAsStr);
-    //         relatedDatasetService.createSubjectsInTargetStudy(subjectIdStudyIds, studyId);
-    //         res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
-    //     } catch (SecurityException e) {
-    //         LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
-    //         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-    //     } catch (ShanoirException e) {
-    //         LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
-    //         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    //     }
-    //     return new ResponseEntity<>(res, HttpStatus.OK);
-    // }
-
     @Override
     public ResponseEntity<Void> copyDatasetsToStudy(
             @Parameter(description = "Data to copy", required = true) CopyData copyData) throws RestServiceException {

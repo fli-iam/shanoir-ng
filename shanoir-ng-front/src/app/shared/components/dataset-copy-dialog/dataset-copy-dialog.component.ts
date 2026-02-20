@@ -54,6 +54,7 @@ export class DatasetCopyDialogComponent {
     protected centerIds: number[] = [];
     protected subjectIds: number[] = [];
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    protected readonly BATCH_SIZE: number = 1000;
 
     constructor(private http: HttpClient,
         private studyRightsService: StudyRightsService,
@@ -116,28 +117,58 @@ export class DatasetCopyDialogComponent {
             } else if (this.isDatasetInStudy) {
                 this.statusMessage = 'Selected dataset(s) already belong to selected study.';
             } else {
-                const copyData: CopyData = {
-                    datasetIds: Array.from(this.inputDatasets.map(d => d.datasetId)),
-                    targetStudyId: this.selectedStudy.id,
-                    centerIds: Array.from(this.centerIds),
-                    subjects: Array.from(this.subjectIds.map(s => {
-                        return {
-                            id: s,
-                            newName: null
-                        }
-                    }))
-                };
-                return this.copyDataService.copyData(copyData).then(() => {
-                        this.close();
-                        this.consoleService.log('info', 'The copy of ' + this.inputDatasets.length + ' datasets towards study ' + this.selectedStudy.name + ' has started.');
-                    }).catch(reason => {
-                        this.canCopy = true;
-                        if (reason.status == 403) {
-                            this.statusMessage = "You must be admin or expert.";
-                        } else throw Error(reason);
-                    });
+                return this.doCopy().then(() => {
+                    this.close();
+                }).catch(reason => {
+                    this.canCopy = true;
+                    if (reason.status == 403) {
+                        this.statusMessage = "You must be admin or expert.";
+                    } else throw Error(reason);
+                });
             }
         });
+    }
+
+    private doCopy(): Promise<void> {
+        const nbPages: number = Math.ceil(this.inputDatasets.length / this.BATCH_SIZE);
+        const copyData: CopyData[] = [];
+        for (let page = 1; page <= nbPages; page++) {
+            copyData.push(this.buildCopyData(page, this.BATCH_SIZE));
+        }
+        let promise: Promise<void> = Promise.resolve();
+        if (copyData.length > 1) {
+            this.consoleService.log('info', 'The copy of ' + this.inputDatasets.length + ' datasets towards study ' 
+                + this.selectedStudy.name + ' has started in batch mode, it may take a while. '
+                + copyData.length + ' batch(es) will be processed sequentially.');
+        } else {
+            this.consoleService.log('info', 'The copy of ' + this.inputDatasets.length + ' datasets towards study ' 
+                + this.selectedStudy.name + ' has started.');
+        }
+        copyData.forEach(cd => {
+            promise = promise.then(() => {
+                return this.copyDataService.copyData(cd);
+            });
+        });
+        return promise;
+    }
+
+    private buildCopyData(page: number, pageSize: number): CopyData {
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        const datasetSlice = this.inputDatasets.slice(start, end);
+        const centerIdSet = new Set(datasetSlice.map(d => d.centerId));
+        const subjectIdSet = new Set(datasetSlice.map(d => d.subjectId));
+        return {
+            datasetIds: datasetSlice.map(d => d.datasetId),
+            targetStudyId: this.selectedStudy.id,
+            centerIds: this.centerIds.filter(c => centerIdSet.has(c)),
+            subjects: this.subjectIds
+                .filter(s => subjectIdSet.has(s))
+                .map(s => ({
+                    id: s,
+                    newName: null
+                }))
+        };
     }
 
     public checkDatasetBelongToStudy(lines: InputDataset[], studyId: number) {

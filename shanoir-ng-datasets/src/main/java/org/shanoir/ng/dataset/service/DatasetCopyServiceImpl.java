@@ -124,7 +124,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         }
     }
 
-    public DatasetAcquisition moveAcquisition(DatasetAcquisition oldAcq, Dataset newDs, Long studyId,
+    private DatasetAcquisition moveAcquisition(DatasetAcquisition oldAcq, Dataset newDs, Long studyId,
             Subject targetSubject, Map<Long, Examination> examMap, Long userId) {
         Examination newExam = null;
         // Get existing examination...
@@ -157,9 +157,8 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         return newDsAcq;
     }
 
-    public Examination moveExamination(DatasetAcquisition acq, Long studyId, Subject targetSubject, Long userId) {
+    private Examination moveExamination(DatasetAcquisition acq, Long studyId, Subject targetSubject, Long userId) {
         Examination oldExam = acq.getExamination();
-        Long oldSubjectId = oldExam.getSubject().getId();
         Study newStudy = studyService.findById(studyId);
         Examination newExamination = new Examination(oldExam, newStudy, targetSubject);
         oldExam.getCopies().add(newExamination);

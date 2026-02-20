@@ -448,7 +448,6 @@ public class RabbitMQDatasetsService {
             );
             event.setId(dto.getEventId());
             event.setReport("");
-
             for (Long datasetParentId : datasetParentIds) {
                 progress += 1f / countTotal;
                 event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + countProgress++ + "/" + countTotal);
@@ -465,7 +464,6 @@ public class RabbitMQDatasetsService {
                 } else if (dsCount != 0) {
                     LOG.info("[CopyDatasets] Dataset already exists in this study, copy aborted.");
                     countAlreadyExist++;
-
                 } else {
                     Object[] result = datasetCopyService.moveDataset(datasetParent, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
                     Long newDsId = (Long) result[0];

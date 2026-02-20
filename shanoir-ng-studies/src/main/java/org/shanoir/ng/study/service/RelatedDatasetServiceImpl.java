@@ -138,7 +138,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         return subjectMapping;
     }
 
-    //new
+    @Transactional
     private Subject createNewSubjectInTargetStudy(Study targetStudy, Subject sourceSubject, String newSubjectName,
             boolean withAMQP) throws ShanoirException {
         Subject clonedSubject = new Subject(sourceSubject, targetStudy);
@@ -155,9 +155,24 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             clonedSubject.setTags((clonedTags));
         }
         clonedSubject = subjectService.create(clonedSubject, withAMQP);
+        if (clonedSubject != null && clonedSubject.isPreclinical()) {
+            createNewAnimalSubject(sourceSubject.getId(), clonedSubject.getId());
+        }
         return clonedSubject;
     }
 
+    private void createNewAnimalSubject(Long sourceSubjectId, Long targetSubjectId) throws MicroServiceCommunicationException {
+        record CopyRequest(Long sourceId, Long targetId) { }
+        try {
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfiguration.COPY_ANIMAL_SUBJECT_QUEUE,
+                    objectMapper.writeValueAsString(new CopyRequest(sourceSubjectId, targetSubjectId)));
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException(
+                    "Error while communicating with datasets MS to copy datasets to study.", e);
+        }
+
+    }
 
     @Transactional
     private void addCentersInTargetStudy(List<Long> centerIds, Long studyId, ShanoirEvent event) throws ShanoirException {

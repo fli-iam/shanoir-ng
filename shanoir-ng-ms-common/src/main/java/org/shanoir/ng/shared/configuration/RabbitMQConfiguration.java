@@ -105,6 +105,9 @@ public class RabbitMQConfiguration {
     /** Delete animal subject => Delete associated subject. */
     public static final String DELETE_ANIMAL_SUBJECT_QUEUE = "delete-animal-subject-queue";
 
+    /** Copy animal subject given the subject exists. */
+    public static final String COPY_ANIMAL_SUBJECT_QUEUE = "copy-animal-subject-queue";
+
     /** Study deleted => Delete associated datasets. */
     public static final String DELETE_STUDY_QUEUE = "delete-study-queue";
 
@@ -316,6 +319,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue deleteAnimalSubjectQueue() {
         return new Queue(DELETE_ANIMAL_SUBJECT_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue copyAnimalSubjectQueue() {
+        return new Queue(COPY_ANIMAL_SUBJECT_QUEUE, true);
     }
 
     @Bean

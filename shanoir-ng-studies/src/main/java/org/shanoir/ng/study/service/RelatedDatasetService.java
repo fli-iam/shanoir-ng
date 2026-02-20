@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.study.service;
 
-import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.dto.CopyData;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,6 +28,6 @@ import org.springframework.stereotype.Service;
 public interface RelatedDatasetService {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    void copyData(CopyData copyData) throws ShanoirException, SecurityException;
+    void copyData(CopyData copyData) throws ShanoirException;
 
 }

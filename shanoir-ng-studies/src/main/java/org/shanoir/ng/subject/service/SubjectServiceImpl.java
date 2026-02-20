@@ -183,7 +183,9 @@ public class SubjectServiceImpl implements SubjectService {
     @Transactional
     public Subject findById(final Long id) {
         Subject subject = subjectRepository.findById(id).orElse(null);
-        Hibernate.initialize(subject.getTags());
+        if (subject != null) {
+            Hibernate.initialize(subject.getTags());
+        }
         return subject;
     }
 
