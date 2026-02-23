@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.shanoir.ng.shared.configuration.CacheNames;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,18 +33,6 @@ public class StudyRightsCacheService {
 
     @Autowired
     private StudyUserRightsRepository repo;
-
-    @Cacheable(value = CacheNames.USER_ID_STUDY_ID_RIGHTS, key = "#userId + '-' + #studyId + '-' + #rightStr")
-    @Transactional
-    public boolean hasRightOnStudyCached(Long userId, Long studyId, String rightStr) {
-        LOG.info("Cache miss - query executed for userId={}, studyId={}, right={}",
-                 userId, studyId, rightStr);
-        StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
-        return founded != null
-                && founded.getStudyUserRights() != null
-                && founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))
-                && founded.isConfirmed();
-    }
 
     @Cacheable(value = CacheNames.USER_ID_STUDY_ID, key = "#userId + '-' + #studyId")
     @Transactional

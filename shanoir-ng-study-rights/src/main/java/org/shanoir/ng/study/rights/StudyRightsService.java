@@ -48,7 +48,11 @@ public class StudyRightsService {
         if (userId == null) {
             throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
         }
-        return cache.hasRightOnStudyCached(userId, studyId, rightStr);
+        StudyUser founded = cache.findByUserIdAndStudyIdCached(userId, studyId);
+        return founded != null
+                && founded.getStudyUserRights() != null
+                && founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))
+                && founded.isConfirmed();
     }
 
     /**
