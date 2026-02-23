@@ -30,7 +30,6 @@ import org.shanoir.ng.study.dua.DataUserAgreementRepository;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
-import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
@@ -50,6 +49,8 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class StudySecurityService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(StudySecurityService.class);
+
     @Autowired
     private StudyRepository studyRepository;
 
@@ -57,15 +58,13 @@ public class StudySecurityService {
     private SubjectRepository subjectRepository;
 
     @Autowired
-    private StudyUserRepository studyUserRepository;
+    private StudySecurityCacheService cache;
 
     @Autowired
     private DataUserAgreementRepository dataUserAgreementRepository;
 
     @Autowired
     private StudyTagRepository studyTagRepository;
-
-    private static final Logger LOG = LoggerFactory.getLogger(StudySecurityService.class);
 
     /**
      * Check that the connected user has the given right for the given study.
@@ -123,7 +122,7 @@ public class StudySecurityService {
         if (userId == null) {
             throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
         }
-        StudyUser founded = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
+        StudyUser founded = cache.findByUserIdAndStudyIdCached(userId, studyId);
         return founded != null
                 && founded.getStudyUserRights() != null
                 && !founded.getStudyUserRights().isEmpty()
@@ -187,7 +186,7 @@ public class StudySecurityService {
             return true;
         }
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
-        List<StudyUser> studyUsers = studyUserRepository.findByUserId(KeycloakUtil.getTokenUserId());
+        List<StudyUser> studyUsers = cache.getUserRightsCached(KeycloakUtil.getTokenUserId());
         for (StudyUser su : studyUsers) {
             if (su.getStudyUserRights().contains(right) && su.isConfirmed()) {
                 return true;
@@ -663,7 +662,7 @@ public class StudySecurityService {
             return true;
         }
         Long userId = KeycloakUtil.getTokenUserId();
-        StudyUser su = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
+        StudyUser su = cache.findByUserIdAndStudyIdCached(userId, studyId);
         if (su == null || userId == null) {
             return false;
         }
