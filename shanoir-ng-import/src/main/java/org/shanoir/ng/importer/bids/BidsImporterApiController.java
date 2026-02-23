@@ -72,8 +72,6 @@ public class BidsImporterApiController implements BidsImporterApi {
     @Value("${shanoir.import.directory}")
     private String importDir;
 
-    private static final String DRAFT_STUDY = "The study you are trying to upload is draft. It must be approved before uploading any data to it.";
-
     private static final String WRONG_CONTENT_FILE_UPLOAD = "Wrong content type of file upload, .zip required.";
 
     private static final String NO_FILE_UPLOADED = "No file uploaded.";

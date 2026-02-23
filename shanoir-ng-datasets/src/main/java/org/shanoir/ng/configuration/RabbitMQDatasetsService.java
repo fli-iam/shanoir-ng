@@ -145,7 +145,7 @@ public class RabbitMQDatasetsService {
         listener.receiveStudyUsers(commandArrStr);
     }
 
-    @RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
     @RabbitHandler
     public String receiveStudyUpdate(final String studyAsString) {
         try {

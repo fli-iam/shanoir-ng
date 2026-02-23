@@ -197,7 +197,7 @@ public class RabbitMQConfiguration {
     public static final String STUDY_NAME_QUEUE = "study-name-queue";
 
     /** Study name updated => notify dataset MS to change database. */
-    public static final String STUDY_NAME_UPDATE_QUEUE = "study-name-update-queue";
+    public static final String STUDY_UPDATE_QUEUE = "study-update-queue";
 
     /** Study name updated => notify dataset MS to change database. */
     public static final String STUDY_DRAFT_STATE_QUEUE = "study-draft-state-queue";
@@ -496,7 +496,7 @@ public class RabbitMQConfiguration {
 
     @Bean
     public static Queue studyNameUpdateQueue() {
-        return new Queue(STUDY_NAME_UPDATE_QUEUE, true);
+        return new Queue(STUDY_UPDATE_QUEUE, true);
     }
 
     @Bean

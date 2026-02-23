@@ -92,6 +92,8 @@ public class StudyServiceImpl implements StudyService {
             studyCenter.setStudy(current);
         }
 
+        current.setIsDraft(updated.getIsDraft());
+
         this.repository.save(current);
     }
 

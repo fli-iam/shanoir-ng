@@ -36,10 +36,11 @@ import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.UserRights;
@@ -52,7 +53,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.AmqpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -77,6 +77,9 @@ public class DatasetSecurityService {
 
     @Autowired
     private SubjectRepository subjectRepository;
+
+    @Autowired
+    private StudyRepository studyRepository;
 
     @Autowired
     private StudyRightsService studyRightsService;
@@ -1118,23 +1121,10 @@ public class DatasetSecurityService {
     }
 
     public boolean isDraftStudy(Long studyId) throws EntityNotFoundException {
-        try {
-            String response = (String) rabbitTemplate.convertSendAndReceive(
-                    RabbitMQConfiguration.STUDY_DRAFT_STATE_QUEUE,
-                    String.valueOf(studyId)
-            );
-
-            if (response == null || "NOT_FOUND".equals(response)) {
-                throw new EntityNotFoundException("Cannot find study.");
-            }
-
-            if ("ERROR".equals(response)) {
-                throw new EntityNotFoundException("Error checking study state.");
-            }
-
-            return Boolean.parseBoolean(response);
-        } catch (AmqpException e) {
-            throw new EntityNotFoundException("Study service unavailable.");
+        Study study = studyRepository.findById(studyId).orElse(null);
+        if (study == null) {
+            return false;
         }
+        return study.getIsDraft();
     }
 }

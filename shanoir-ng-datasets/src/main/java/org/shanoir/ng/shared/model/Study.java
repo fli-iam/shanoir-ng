@@ -33,6 +33,8 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * @author yyao
@@ -47,6 +49,10 @@ public class Study extends IdName {
     private Long id;
 
     private String name;
+
+    @NotNull
+    @Column(name = "is_draft")
+    private boolean isDraft;
 
     @ManyToMany
     @JoinTable(name = "related_datasets", joinColumns = @JoinColumn(name = "study_id"), inverseJoinColumns = @JoinColumn(name = "dataset_id"))
@@ -143,6 +149,14 @@ public class Study extends IdName {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean getIsDraft() {
+        return isDraft;
+    }
+
+    public void setIsDraft(boolean isDraft) {
+        this.isDraft = isDraft;
     }
 
     public List<Examination> getExaminations() {

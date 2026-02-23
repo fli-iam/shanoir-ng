@@ -56,8 +56,6 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
     private static final String BAD_ARGUMENTS = "Bad arguments";
 
-    private static final String DRAFT_STUDY = "The study you are trying to upload is draft. It must be approved before uploading any data to it.";
-
     /**
      * Logger
      */

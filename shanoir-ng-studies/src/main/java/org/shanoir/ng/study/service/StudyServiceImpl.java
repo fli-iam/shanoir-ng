@@ -273,6 +273,7 @@ public class StudyServiceImpl implements StudyService {
         }
         study.setIsDraft(false);
         studyRepository.save(study);
+        updateStudyName(studyMapper.studyToStudyDTODetailed(study));
         sendMembersApprovalEmailReport(study);
         return study;
     }
@@ -896,7 +897,7 @@ public class StudyServiceImpl implements StudyService {
 
     public String updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
         try {
-            return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
+            return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(study));
         } catch (AmqpException | JsonProcessingException e) {
             throw new MicroServiceCommunicationException(
