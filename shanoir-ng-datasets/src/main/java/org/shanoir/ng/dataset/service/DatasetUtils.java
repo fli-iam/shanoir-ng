@@ -19,7 +19,22 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 
-import org.shanoir.ng.dataset.modality.*;
+import org.shanoir.ng.dataset.modality.BidsDataset;
+import org.shanoir.ng.dataset.modality.CalibrationDataset;
+import org.shanoir.ng.dataset.modality.CtDataset;
+import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.GenericDataset;
+import org.shanoir.ng.dataset.modality.MegDataset;
+import org.shanoir.ng.dataset.modality.MeshDataset;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
+import org.shanoir.ng.dataset.modality.PetDataset;
+import org.shanoir.ng.dataset.modality.RegistrationDataset;
+import org.shanoir.ng.dataset.modality.SegmentationDataset;
+import org.shanoir.ng.dataset.modality.SpectDataset;
+import org.shanoir.ng.dataset.modality.StatisticalDataset;
+import org.shanoir.ng.dataset.modality.TemplateDataset;
+import org.shanoir.ng.dataset.modality.XaDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -27,7 +42,6 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.solr.repository.ShanoirMetadataRepositoryImpl;
 
 public final class DatasetUtils {
 
@@ -147,29 +161,6 @@ public final class DatasetUtils {
             case BIDS -> new BidsDataset(d);
             case XA -> new XaDataset(d);
             default -> new GenericDataset(d);
-        };
-    }
-
-    public static String getMetadataQueryNameFromDataset(Dataset d) {
-        DatasetType type = d.getType();
-        return switch (type) {
-            case CALIBRATION -> null;
-            case CT -> ShanoirMetadataRepositoryImpl.CT_QUERY;
-            case EEG -> ShanoirMetadataRepositoryImpl.EEG_QUERY;
-            case MEASUREMENT -> ShanoirMetadataRepositoryImpl.MEASUREMENT_QUERY;
-            case MEG -> null;
-            case MESH -> null;
-            case MR -> ShanoirMetadataRepositoryImpl.MR_QUERY;
-            case PARAMETER_QUANTIFICATION -> null;
-            case PET -> ShanoirMetadataRepositoryImpl.PET_QUERY;
-            case REGISTRATION -> null;
-            case SEGMENTATION -> ShanoirMetadataRepositoryImpl.SEGMENTATION_QUERY;
-            case SPECT -> null;
-            case STATISTICAL -> null;
-            case TEMPLATE -> null;
-            case BIDS -> ShanoirMetadataRepositoryImpl.BIDS_QUERY;
-            case XA -> ShanoirMetadataRepositoryImpl.XA_QUERY;
-            default -> ShanoirMetadataRepositoryImpl.GENERIC_QUERY;
         };
     }
 
