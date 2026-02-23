@@ -33,6 +33,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplate;
 
 /**
  * @author yyao
@@ -71,6 +72,9 @@ public class Study extends IdName {
 
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudyCenter> studyCenterList;
+
+    @OneToMany(mappedBy = "study", fetch = FetchType.LAZY,  cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ExecutionTemplate> executionTemplates;
 
     /**
      * @return the tags
@@ -119,7 +123,7 @@ public class Study extends IdName {
     }
 
     /**
-     * @param subjectStudyList the subjectStudyList to set
+     * @param subjectList the subjectStudyList to set
      */
     public void setSubjectStudyList(List<Subject> subjectList) {
         this.subjectList = subjectList;

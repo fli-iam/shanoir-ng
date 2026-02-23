@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.vip.path;
+package org.shanoir.ng.vip.processingResource.controller;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Tag(name = "carmin-data")
 @RequestMapping("/carmin-data/path")
-public interface PathApi {
+public interface ProcessingResourceApi {
 
     @Operation(summary = "Get content or information for a given path", description = "Download a file (or a directory) or retun information about a specific path. The response format and content depends on the mandatory action query parameter (see the parameter description). Basically, the \"content\" action downloads the raw file, and the other actions return various information in a JSON record.", tags = { })
     @ApiResponses(value = {
