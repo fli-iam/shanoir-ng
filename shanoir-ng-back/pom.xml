@@ -100,14 +100,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-cache</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.github.ben-manes.caffeine</groupId>
-			<artifactId>caffeine</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<!-- do not put scope test here: compile errors: org.json package will be missing -->
 		</dependency>
