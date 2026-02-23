@@ -144,9 +144,6 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
-  threads:
-    virtual:
-      enabled: true
 front.server:
   address: https://shanoir-ng-nginx/shanoir-ng/
   url: https://shanoir-ng-nginx
