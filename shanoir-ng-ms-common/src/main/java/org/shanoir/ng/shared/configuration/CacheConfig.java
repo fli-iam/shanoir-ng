@@ -45,6 +45,7 @@ public class CacheConfig {
                 CacheNames.STUDY_USER_CENTER_IDS,
                 CacheNames.USER_ID_RIGHTS);
         cacheManager.setCaffeine(Caffeine.newBuilder()
+                .recordStats()
                 .expireAfterWrite(6, TimeUnit.HOURS)
                 .maximumSize(10000));
         LOG.info("CaffeineCacheManager loaded.");
