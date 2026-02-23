@@ -30,7 +30,6 @@ import org.shanoir.ng.importer.eeg.edf.EDFAnnotation;
 import org.shanoir.ng.importer.eeg.edf.EDFParser;
 import org.shanoir.ng.importer.eeg.edf.EDFParserResult;
 import org.shanoir.ng.importer.model.*;
-import org.shanoir.ng.importer.service.StudyService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -138,9 +137,6 @@ public class ImporterApiController implements ImporterApi {
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
-    private StudyService studyService;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -240,12 +236,6 @@ public class ImporterApiController implements ImporterApi {
     public ResponseEntity<Void> startImportJob(
             @Parameter(name = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
                     throws RestServiceException {
-
-        if (studyService.isDraft(importJob.getStudyId())) {
-            LOG.error("Cannot import data into a draft study.");
-            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-
         File userImportDir = ImportUtils.getUserImportDir(importDir);
         final Long userId = KeycloakUtil.getTokenUserId();
         importJob.setUserId(userId);
@@ -618,11 +608,6 @@ public class ImporterApiController implements ImporterApi {
     public ResponseEntity<Void> startImportEEGJob(
             @Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob)
             throws RestServiceException {
-        if (studyService.isDraft(importJob.getStudyId())) {
-            LOG.error("Cannot import data into a draft study.");
-            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-
         // Comment: Anonymisation is not necessary for pure brainvision EEGs data
         try {
             importJob.setUsername(KeycloakUtil.getTokenUserName());

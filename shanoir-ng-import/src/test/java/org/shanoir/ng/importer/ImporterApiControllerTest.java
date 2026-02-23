@@ -36,7 +36,6 @@ import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.EegDataset;
 import org.shanoir.ng.importer.model.EegImportJob;
-import org.shanoir.ng.importer.service.StudyService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.utils.ImportUtils;
@@ -95,9 +94,6 @@ public class ImporterApiControllerTest {
 
     @MockBean
     private ShanoirEventService shanoirEventService;
-
-    @MockBean
-    private StudyService studyService;
 
     public MockMultipartFile createFile(boolean withParticipants, boolean studyDescription,
             boolean sourceData, boolean importJson) throws IOException {

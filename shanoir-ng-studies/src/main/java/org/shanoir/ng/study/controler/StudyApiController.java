@@ -218,7 +218,7 @@ public class StudyApiController implements StudyApi {
 
         Study createdStudy;
         try {
-            study.setIsDraft(true);
+            study.setIsDraft(!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN"));
             addCurrentUserAsStudyUserIfEmptyStudyUsers(study);
             createdStudy = studyService.create(study);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_STUDY_EVENT,
@@ -232,7 +232,7 @@ public class StudyApiController implements StudyApi {
 
     @Override
     @Transactional
-    public ResponseEntity<StudyDTO> approveDraftStudy(@PathVariable("studyId") final Long studyId)
+    public ResponseEntity<StudyDTO> approveDraftStudy(final Long studyId)
             throws RestServiceException {
         Study study;
         try {

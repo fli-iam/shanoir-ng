@@ -14,15 +14,22 @@
 
 package org.shanoir.ng.utils;
 
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 @Service
 public class ImportSecurityService {
 
     @Autowired
     private StudyRightsService rightsService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * Check that the connected user has the given right for the given study.
@@ -66,4 +73,30 @@ public class ImportSecurityService {
         return KeycloakUtil.canImportFromPACS();
     }
 
+    /**
+     * Checks if the user has the required right on the study and the study is not draft.
+     *
+     * @param studyId the study ID
+     * @return true if the the study is draft
+     */
+    public boolean isDraftStudy(Long studyId, String right) throws EntityNotFoundException {
+        try {
+            String response = (String) rabbitTemplate.convertSendAndReceive(
+                    RabbitMQConfiguration.STUDY_DRAFT_STATE_QUEUE,
+                    String.valueOf(studyId)
+            );
+
+            if (response == null || "NOT_FOUND".equals(response)) {
+                throw new EntityNotFoundException("Cannot find study.");
+            }
+
+            if ("ERROR".equals(response)) {
+                throw new EntityNotFoundException("Error checking study state.");
+            }
+
+            return Boolean.parseBoolean(response);
+        } catch (AmqpException e) {
+            throw new EntityNotFoundException("Study service unavailable.");
+        }
+    }
 }

@@ -35,7 +35,6 @@ import org.shanoir.ng.importer.ImporterApiController;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Subject;
-import org.shanoir.ng.importer.service.StudyService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -99,9 +98,6 @@ public class BidsImporterApiController implements BidsImporterApi {
     @Autowired
     private ShanoirEventService eventService;
 
-    @Autowired
-    private StudyService studyService;
-
     private static final Logger LOG = LoggerFactory.getLogger(BidsImporterApiController.class);
 
     /**
@@ -114,11 +110,6 @@ public class BidsImporterApiController implements BidsImporterApi {
             @Parameter(name = "name of the study", required = true) @PathVariable("studyName") String studyName,
             @Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId)
                     throws RestServiceException, ShanoirException, IOException {
-
-        if (studyService.isDraft(studyId)) {
-            throw new RestServiceException(new ErrorModel(HttpStatus.FORBIDDEN.value(), DRAFT_STUDY, null));
-        }
-
         // STEP 1: Analyze folder and unzip it.
         if (bidsFile == null) {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));

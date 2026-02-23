@@ -94,8 +94,6 @@ public class EmailServiceImpl implements EmailService {
 
     private static final String LINK = "link";
 
-    private static final String IS_DRAFT = "isDraft";
-
     private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
 
     @Autowired
