@@ -23,7 +23,7 @@ for path in pathlib.Path("db-changes").glob("*"):
         if proc.returncode == 0:
             released_migrations = set(line.split("\t", 1)[1] for line in proc.stdout.splitlines())
 
-        elif "Not a valid object name" in proc.stderr:
+        elif "not a valid object name" in proc.stderr.lower():
             released_migrations = []
             latest_migration = ""
         else:
