@@ -1120,7 +1120,7 @@ public class DatasetSecurityService {
         return hasRightOnEveryDataset(new ArrayList<>(dsIds), StudyUserRight.CAN_EXECUTE.toString());
     }
 
-    public boolean isDraftStudy(Long studyId) throws EntityNotFoundException {
+    public boolean isDraftStudy(Long studyId) {
         Study study = studyRepository.findById(studyId).orElse(null);
         if (study == null) {
             return false;

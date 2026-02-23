@@ -112,9 +112,10 @@ public class Study extends IdName {
      * @param id
      * @param name
      */
-    public Study(Long id, String name) {
+    public Study(Long id, String name, boolean isDraft) {
         this.setId(id);
         this.setName(name);
+        this.setIsDraft(isDraft);
     }
 
     /**
