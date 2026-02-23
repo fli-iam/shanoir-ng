@@ -39,6 +39,7 @@ public class StudyUserUpdateService {
 
     @CacheEvict(value = {CacheNames.USER_ID_STUDY_ID, CacheNames.STUDY_USER_CENTER_IDS, CacheNames.USER_ID_STUDY_ID_RIGHTS, CacheNames.USER_ID_RIGHTS}, allEntries = true)
     public void processCommands(Iterable<StudyUserCommand> commands) {
+        LOG.info("@CacheEvict called on study user caches.");
         List<StudyUser> toBeCreated = new ArrayList<>();
         Map<Long, StudyUser> toBeUpdated = new HashMap<>();
         Set<Long> toBeDeleted = new HashSet<>();
