@@ -606,7 +606,7 @@ export class StudyComponent extends EntityComponent<Study> {
             } else if (newStudy) {
                 DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);
             }
-            this.studyService.getDraftStudies();
+            this.studyService.findDraftStudies();
             return study;
         });
     }

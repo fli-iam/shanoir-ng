@@ -33,7 +33,7 @@ export class DraftStudiesListComponent {
         private studyService: StudyService,
         private breadcrumbsService: BreadcrumbsService) {
 
-        studyService.getDraftStudies().then(draftStudies => this.draftStudies = draftStudies);
+        studyService.findDraftStudies().then(draftStudies => this.draftStudies = draftStudies);
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = 'Draft Studies';

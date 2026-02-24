@@ -103,7 +103,7 @@ export class AppComponent implements OnInit {
     }
 
     private draftStudiesAlert() {
-        this.studyService.getDraftStudies();
+        this.studyService.findDraftStudies();
     }
 
     private askForDuaSigning() {

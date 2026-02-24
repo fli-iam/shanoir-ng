@@ -962,6 +962,11 @@ public class StudyServiceImpl implements StudyService {
     }
 
     @Override
+    public List<Study> findDraftStudies() {
+        return this.studyRepository.findByIsDraftTrue();
+    }
+
+    @Override
     public StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId) {
         StudyStorageVolumeDTO dto;
         try {

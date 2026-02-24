@@ -155,6 +155,23 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise().then((studies) => { return studies })
     }
 
+    findDraftStudies(): Promise<Study[]> {
+        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL + '/draft')
+            .toPromise()
+            .then((studies) => {
+                this._draftStudies = studies ? studies.length : 0;
+                return studies;
+            })
+    }
+
+    get draftStudies(): number {
+        return this._draftStudies;
+    }
+
+    decreaseDraftStudies() {
+        this._draftStudies --;
+    }
+
     uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'dua'): Promise<any> {
         const endpoint = this.API_URL + '/' + fileType + '-upload/' + studyId;
         const formData: FormData = new FormData();
@@ -330,20 +347,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise();
     }
 
-    get draftStudies(): number {
-        return this._draftStudies;
-    }
-
-    getDraftStudies(): Promise<Study[]> {
-        return this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL)
-            .toPromise()
-            .then(studies => {
-                const draftStudies = studies.filter(s => s.isDraft === true)
-                this._draftStudies = draftStudies ? draftStudies.length : 0;
-                return draftStudies;
-            });
-    }
-
     async approveStudyById(id: number): Promise<boolean> {
         const confirmed = await this.confirmDialogService.confirm(
             'Approve Study',
@@ -363,12 +366,8 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .put<any>(AppUtils.BACKEND_API_STUDY_URL + '/approveDraftStudy/' + id, null)
             .toPromise();
 
-        this.getDraftStudies();
+        this.findDraftStudies();
 
         return true;
-    }
-
-    decreaseDraftStudies() {
-        this._draftStudies --;
     }
 }

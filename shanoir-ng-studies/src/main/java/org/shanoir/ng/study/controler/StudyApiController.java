@@ -173,6 +173,16 @@ public class StudyApiController implements StudyApi {
         return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
     }
 
+    @Override
+    @Transactional
+    public ResponseEntity<List<StudyDTO>> findDraftStudies() {
+        List<Study> studies = studyService.findDraftStudies();
+        if (studies.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
+    }
+
     public ResponseEntity<List<StudyLightDTO>> findStudiesLight() {
         List<Study> studies = studyService.findAll();
         if (studies.isEmpty()) {
