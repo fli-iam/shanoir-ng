@@ -555,6 +555,7 @@ public class QueryPACSService {
         DicomParam[] params = {
             modality,
             studyInstanceUID,
+            new DicomParam(Tag.StudyDate),
             new DicomParam(Tag.SeriesInstanceUID),
             new DicomParam(Tag.NumberOfSeriesRelatedInstances),
             new DicomParam(Tag.SeriesDescription),
