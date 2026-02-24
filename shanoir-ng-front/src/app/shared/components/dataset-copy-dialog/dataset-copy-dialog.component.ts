@@ -130,7 +130,7 @@ export class DatasetCopyDialogComponent {
                     }).catch(reason => {
                         this.canCopy = true;
                         if (reason.status == 403) {
-                            this.statusMessage = "You must be admin or expert.";
+                            this.statusMessage = reason.error;
                         } else throw Error(reason);
                     });
             }

@@ -291,16 +291,24 @@ public class StudyApiController implements StudyApi {
             List<String> subjectIds) {
         String res;
         try {
-            Long studyId = Long.valueOf(studyIdAsStr);
+            Study study = studyService.findById(Long.valueOf(studyIdAsStr));
+            if (study.getIsDraft()) {
+                String errorMsg = "Copy dataset(s): The study " + studyIdAsStr + " is draft. An administrator must approve the study before it's use.";
+                LOG.error(errorMsg);
+                return new ResponseEntity<>(errorMsg, HttpStatus.FORBIDDEN);
+            }
+
             Map<Long, Long> subjectMapping = new HashMap<>();
-            relatedDatasetService.createSubjectsInTargetStudy(subjectIds, studyId, subjectMapping, subjectName);
-            res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds, subjectMapping);
+            relatedDatasetService.createSubjectsInTargetStudy(subjectIds, study, subjectMapping, subjectName);
+            res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, study, centerIds, subjectMapping);
         } catch (SecurityException e) {
-            LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            String errorMsg = "Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : " + e;
+            LOG.error(errorMsg);
+            return new ResponseEntity<>(errorMsg, HttpStatus.FORBIDDEN);
         } catch (ShanoirException e) {
-            LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            String errorMsg = "Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : " + e;
+            LOG.error(errorMsg);
+            return new ResponseEntity<>(errorMsg, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
