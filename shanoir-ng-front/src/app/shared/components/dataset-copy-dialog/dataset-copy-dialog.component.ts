@@ -70,7 +70,7 @@ export class DatasetCopyDialogComponent {
     }
 
     private fetchStudies(): Promise<void> {
-        return this.studyService.findStudyIdNamesIcanAdmin().then(studies => {
+        return this.studyService.findApprovedStudies().then(studies => {
             this.studies = studies;
         });
     }

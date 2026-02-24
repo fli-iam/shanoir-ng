@@ -40,6 +40,8 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
     @EntityGraph(attributePaths = { "studyTags", "profile" })
     List<Study> findByVisibleByDefaultTrueAndIsDraftFalse();
 
+    List<Study> findByIsDraftFalse();
+
     //@EntityGraph(attributePaths = { "profile", "tags" })
     List<Study> findAll();
 

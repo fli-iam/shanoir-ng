@@ -163,6 +163,13 @@ public interface StudyService {
      */
     List<Study> findPublicStudies();
 
+    /**
+     * Returns all approved studies the user can access;
+     */
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
+    @PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_SEE_ALL')")
+    List<Study> findApprovedStudies();
+
     StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId);
 
     Map<Long, StudyStorageVolumeDTO> getDetailedStorageVolumeByStudy(List<Long> studyIds);

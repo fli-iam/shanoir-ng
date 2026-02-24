@@ -150,6 +150,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         return this.findStudiesIcanAdmin().then(studies => studies?.map(study => new IdName(study.id, study.name)));
     }
 
+    findApprovedStudies(): Promise <Study[]> {
+        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL + '/approved')
+            .toPromise().then((studies) => { return studies })
+    }
+
     uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'dua'): Promise<any> {
         const endpoint = this.API_URL + '/' + fileType + '-upload/' + studyId;
         const formData: FormData = new FormData();

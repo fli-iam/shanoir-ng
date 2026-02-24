@@ -22,7 +22,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
-@Service
+@Service("importSecurityService")
 public class ImportSecurityService {
 
     @Autowired
@@ -79,7 +79,7 @@ public class ImportSecurityService {
      * @param studyId the study ID
      * @return true if the the study is draft
      */
-    public boolean isDraftStudy(Long studyId, String right) throws EntityNotFoundException {
+    public boolean isDraftStudy(Long studyId) throws EntityNotFoundException {
         try {
             String response = (String) rabbitTemplate.convertSendAndReceive(
                     RabbitMQConfiguration.STUDY_DRAFT_STATE_QUEUE,
