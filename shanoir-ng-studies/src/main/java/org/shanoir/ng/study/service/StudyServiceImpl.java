@@ -951,7 +951,7 @@ public class StudyServiceImpl implements StudyService {
 
     @Override
     public List<Study> findPublicStudies() {
-        List<Study> studies = this.studyRepository.findByVisibleByDefaultTrue();
+        List<Study> studies = this.studyRepository.findByVisibleByDefaultTrueAndIsDraftFalse();
         setNumberOfSubjectsAndExaminations(studies);
         return studies;
     }
