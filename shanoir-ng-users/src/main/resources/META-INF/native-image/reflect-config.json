@@ -1,7 +1,17 @@
 [
     {
-    "name": "org.keycloak.admin.client.spi.ResteasyClientClassicProvider",
-    "allDeclaredConstructors": true,
-    "allDeclaredMethods": true
+        "name": "org.keycloak.admin.client.spi.ResteasyClientClassicProvider",
+        "allDeclaredConstructors": true,
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl",
+        "allDeclaredConstructors": true,
+        "allDeclaredMethods": true
+    },
+    {
+        "name": "org.shanoir.ng.study.rights.command.StudyUserCommand",
+        "allDeclaredConstructors": true,
+        "allDeclaredMethods": true
     }
 ]
