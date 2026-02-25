@@ -26,7 +26,6 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.security.EditableOnlyBy;
 import org.shanoir.ng.shared.security.VisibleOnlyBy;
-import org.shanoir.ng.shared.validation.ExtensionWithMotivation;
 import org.shanoir.ng.shared.validation.Unique;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -50,7 +49,6 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @Table(name = "users")
 @JsonPropertyOrder({ "_links", "id", "firstName", "lastName", "username", "email" })
-@ExtensionWithMotivation
 public class User extends HalEntity implements UserDetails {
 
     /**
