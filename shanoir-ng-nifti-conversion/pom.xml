@@ -36,10 +36,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <artifactId>shanoir-ng-ms-common</artifactId>
             <version>3.4.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

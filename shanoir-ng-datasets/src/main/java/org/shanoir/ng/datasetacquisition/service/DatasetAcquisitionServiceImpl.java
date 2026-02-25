@@ -119,7 +119,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     }
 
     @Override
-    public Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID) {
+    public Optional<DatasetAcquisition> findByExaminationIdAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID) {
         return repository.findByExaminationAndSeriesInstanceUIDWithDatasets(examinationId, seriesInstanceUID);
     }
 
@@ -173,16 +173,16 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return savedEntity;
     }
 
-    private void indexDatasets(DatasetAcquisition datasetAcquisition) {
-        DatasetAcquisition acq = findByIdWithDatasets(datasetAcquisition.getId());
+    private void indexDatasets(DatasetAcquisition acquisition) {
+        DatasetAcquisition acq = findByIdWithDatasets(acquisition.getId());
         if (acq != null && acq.getDatasets() != null && !acq.getDatasets().isEmpty()) {
             List<Long> datasetIds = acq.getDatasets().stream()
                     .map(Dataset::getId)
                     .collect(Collectors.toList());
             solrService.indexDatasets(datasetIds);
-            LOG.info("Indexed {} datasets for acquisition {}", datasetIds.size(), datasetAcquisition.getId());
+            LOG.info("Indexed {} datasets for acquisition {}", datasetIds.size(), acquisition.getId());
         } else {
-            LOG.warn("No datasets found for acquisition {}", datasetAcquisition.getId());
+            LOG.warn("No datasets found for acquisition {}", acquisition.getId());
         }
     }
 
@@ -200,9 +200,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         }
         updateValues(entity, entityDb);
         DatasetAcquisition acq = repository.save(entityDb);
-
         shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
-
         return acq;
     }
 

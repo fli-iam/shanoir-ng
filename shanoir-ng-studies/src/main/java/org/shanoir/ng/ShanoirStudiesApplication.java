@@ -19,6 +19,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 
@@ -31,9 +33,11 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
         servers = @Server(url = "/shanoir-ng/studies", description = "Studies"),
         security = { @SecurityRequirement(name = "BearerAuth"), @SecurityRequirement(name = "OAuth2Auth") }
 )
+@EnableCaching
+@EnableScheduling
 public class ShanoirStudiesApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(ShanoirStudiesApplication.class, args);
     }
+
 }

@@ -20,6 +20,7 @@
 package org.shanoir.ng.solr.service;
 
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
@@ -59,7 +60,7 @@ public interface SolrService {
      * Index dataset to the existing index from its id
      * @param datasetId the dataset id relative to dataset to index
      */
-    void indexDataset(Long datasetId);
+    void indexDataset(Dataset dataset);
 
     /**
      * Index datasets to the existing index from their ids

@@ -189,7 +189,6 @@ public class StudyUser implements StudyUserInterface {
         this.id = id;
     }
 
-
     public List<Long> getCenterIds() {
         return centerIds;
     }

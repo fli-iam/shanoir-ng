@@ -55,6 +55,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.shanoir.uploader.ShUpConfig;
@@ -65,6 +66,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -90,16 +92,16 @@ public final class Util {
     /** Time pattern for file system. */
     public static final String TIME_PATTERN_FILE_SYSTEM = "yyyy_MM_dd_HH_mm_ss_SSS";
 
-    public static ObjectMapper objectMapper = new ObjectMapper();
+    public static ObjectMapper mapper = new ObjectMapper();
 
     public static ObjectWriter objectWriter;
 
     static {
-        objectMapper
+        mapper
             .registerModule(new JavaTimeModule())
             .registerModule(new Jdk8Module())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
+        objectWriter = mapper.writer().withDefaultPrettyPrinter();
     }
 
     /**
@@ -344,10 +346,10 @@ public final class Util {
         StringBuffer result = new StringBuffer();
         result = readStringBuffer(response);
         if (result != null) {
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             try {
-                JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, classname);
-                List<T> myObjects = objectMapper.readValue(result.toString(), type);
+                JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, classname);
+                List<T> myObjects = mapper.readValue(result.toString(), type);
                 return myObjects;
             } catch (JsonGenerationException e) {
                 LOG.error(e.getMessage(), e);
@@ -364,10 +366,10 @@ public final class Util {
         StringBuffer result = new StringBuffer();
         result = readStringBuffer(response);
         if (result != null) {
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             try {
-                JavaType type = objectMapper.constructType(classname);
-                T myObjects = objectMapper.readValue(result.toString(), type);
+                JavaType type = mapper.constructType(classname);
+                T myObjects = mapper.readValue(result.toString(), type);
                 return myObjects;
             } catch (JsonGenerationException e) {
                 LOG.error(e.getMessage(), e);
@@ -376,6 +378,20 @@ public final class Util {
             } catch (IOException e) {
                 LOG.error(e.getMessage(), e);
             }
+        }
+        return null;
+    }
+
+    public static <T> List<T> getMappedPageContent(CloseableHttpResponse response, Class<T> clazz) throws IOException {
+        try {
+            String responseBody = EntityUtils.toString(response.getEntity());
+            JsonNode root = mapper.readTree(responseBody);
+            JsonNode contentNode = root.get("content");
+            JavaType type = mapper.getTypeFactory()
+                    .constructCollectionType(List.class, clazz);
+            return mapper.readValue(contentNode.toString(), type);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
         return null;
     }

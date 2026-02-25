@@ -41,4 +41,5 @@ public interface ShanoirMetadataRepositoryCustom {
     List<ShanoirMetadata> findSolrDocs(List<Long> datasetIds);
 
     Map<Long, List<String>> findAllTags(List<Long> datasetIds);
+
 }

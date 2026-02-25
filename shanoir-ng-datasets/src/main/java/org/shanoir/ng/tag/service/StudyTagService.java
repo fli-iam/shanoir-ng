@@ -58,7 +58,7 @@ public class StudyTagService {
         }
         dataset.setTags(new ArrayList<>(datasetTags));
         datasetRepository.save(dataset);
-        solrService.indexDataset(dataset.getId());
+        solrService.indexDataset(dataset);
     }
 
     @Transactional
@@ -73,6 +73,6 @@ public class StudyTagService {
 
         dataset.setTags(new ArrayList<>(datasetTags));
         datasetRepository.save(dataset);
-        solrService.indexDataset(dataset.getId());
+        solrService.indexDataset(dataset);
     }
 }

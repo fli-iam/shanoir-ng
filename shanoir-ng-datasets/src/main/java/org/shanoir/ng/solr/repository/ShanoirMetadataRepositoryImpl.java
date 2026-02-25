@@ -408,7 +408,6 @@ public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryC
             }
             return processed.get(0);
         }
-
         List<ShanoirMetadata> acquisitions = findSolrAcquisitions(" AND d.id = " + datasetId + " AND d.dataset_processing_id IS NULL");
         if (acquisitions.isEmpty()) {
             return null;

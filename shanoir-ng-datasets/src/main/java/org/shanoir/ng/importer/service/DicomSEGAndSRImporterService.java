@@ -47,7 +47,6 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,9 +78,6 @@ public class DicomSEGAndSRImporterService {
     private ExaminationRepository examinationRepository;
 
     @Autowired
-    private SolrService solrService;
-
-    @Autowired
     private DatasetService datasetService;
 
     @Autowired
@@ -104,7 +100,6 @@ public class DicomSEGAndSRImporterService {
             LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
             return false;
         }
-
         // Find related dataset
         Dataset dataset = findDataset(examination, datasetAttributes);
         if (dataset == null) {
@@ -300,7 +295,6 @@ public class DicomSEGAndSRImporterService {
         createMetadata(datasetAttributes, dataset.getOriginMetadata().getDatasetModalityType(), newMsOrSegDataset);
         dicomImporterService.manageDatasetExpression(datasetAttributes, newMsOrSegDataset);
         Dataset createdDataset = datasetService.create(newMsOrSegDataset);
-        solrService.indexDataset(createdDataset.getId());
     }
 
     /**

@@ -40,7 +40,6 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,9 +72,6 @@ public class ProcessedDatasetImporterService {
 
     @Autowired
     private ShanoirEventService eventService;
-
-    @Autowired
-    private SolrService solrService;
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
@@ -123,7 +119,6 @@ public class ProcessedDatasetImporterService {
             expression.setDatasetFiles(Collections.singletonList(datasetFile));
 
             dataset = datasetService.create(dataset);
-            solrService.indexDataset(dataset.getId());
 
             event.setStatus(ShanoirEvent.SUCCESS);
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")] "
