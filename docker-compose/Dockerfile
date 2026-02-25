@@ -371,6 +371,7 @@ COPY --link --chmod=0755 \
     database/2_add_users.sql \
     database/3_add_statistics_procedure.sql \
     database/4_add_studyStatistics_procedure.sql \
+    database/5_add_computeOverallStatistics_procedure.sql \
     /docker-entrypoint-initdb.d/
 
 COPY --link database/db-changes /opt/db-changes
