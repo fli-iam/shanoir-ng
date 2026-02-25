@@ -95,7 +95,7 @@ public class CardsProcessingService {
      * @param updateTags
      * @throws MicroServiceCommunicationException
      */
-    public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Examination examination, boolean updateTags) throws MicroServiceCommunicationException {
+    public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Examination examination, boolean updateTags) throws MicroServiceCommunicationException, PacsException {
         long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
         if (examination == null) throw new IllegalArgumentException("examination can't be null");
@@ -143,7 +143,7 @@ public class CardsProcessingService {
      * @param stop
      * @throws MicroServiceCommunicationException
      */
-    public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException {
+    public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException, PacsException {
         long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId(), 4, qualityCard.getStudyId());
@@ -185,6 +185,8 @@ public class CardsProcessingService {
                     try {
                         result.merge(applyQualityCardOnExamination(qualityCard, examination, false));
                     } catch (MicroServiceCommunicationException e) {
+                        throw new StreamExceptionWrapper(e);
+                    } catch (PacsException e) {
                         throw new StreamExceptionWrapper(e);
                     }
                     i.incrementAndGet();
@@ -265,7 +267,7 @@ public class CardsProcessingService {
      * @param qualityCard
      * @throws MicroServiceCommunicationException
      */
-    public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags) throws MicroServiceCommunicationException {
+    public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags) throws MicroServiceCommunicationException, PacsException {
         return applyQualityCardOnStudy(qualityCard, updateTags, null, null);
     }
 
@@ -275,7 +277,7 @@ public class CardsProcessingService {
      * @param qualityCard
      * @throws MicroServiceCommunicationException
      */
-    public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, Integer start, Integer stop) throws MicroServiceCommunicationException {
+    public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, Integer start, Integer stop) throws MicroServiceCommunicationException, PacsException {
         return applyQualityCardOnStudy(qualityCard, false, start, stop);
     }
 

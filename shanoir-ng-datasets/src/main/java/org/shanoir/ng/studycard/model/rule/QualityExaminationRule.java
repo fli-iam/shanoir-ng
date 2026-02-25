@@ -23,11 +23,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
@@ -84,21 +85,27 @@ public class QualityExaminationRule extends AbstractEntity {
         this.orConditions = orConditions;
     }
 
-    public void apply(Examination examination, QualityCardResult result, WADODownloaderService downloader) {
+    public void apply(Examination examination, QualityCardResult result, WADODownloaderService downloader) throws PacsException{
         apply(examination, null, result, downloader);
     }
 
-    public void apply(ExaminationData examination, QualityCardResult result, WADODownloaderService downloader) {
+    public void apply(ExaminationData examination, QualityCardResult result, WADODownloaderService downloader) throws PacsException {
         apply(examination, null, result, downloader);
     }
 
-    public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
+    public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) throws PacsException {
         ExaminationData examData = new ExaminationData(examination);
         apply(examData, examinationDicomAttributes, result, downloader);
     }
 
-    public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
+    public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) throws PacsException {
+        // if piloted by DICOM attributes then examinationDicomAttributes should not be null, otherwise we fetch DICOM examination attributes.
+        if (examinationDicomAttributes == null) {
+            examinationDicomAttributes = new ExaminationAttributes<>(downloader.getWadoURLHandler());
+        } 
         for (DatasetAcquisition da : examination.getDatasetAcquisitions()) {
+            AcquisitionAttributes<Long> daDicomAttributes = downloader.getDicomAttributesForAcquisition(da);
+
             // In case a rule was added without condition (= set as Always in gui)
             if (this.getConditions() == null || this.getConditions().isEmpty()) {
                 QualityCardResultEntry resultEntry = initResult(da);
@@ -108,7 +115,7 @@ public class QualityExaminationRule extends AbstractEntity {
                 result.addUpdatedDatasetAcquisition(
                     setTagToDatasetAcquisition(da.getId()));
             } else {
-                ConditionResult conditionResult = conditionsfulfilled(examinationDicomAttributes, examination, result, downloader);
+                ConditionResult conditionResult = conditionsfulfilled(daDicomAttributes, da, result);
                 if (conditionResult.isFulfilled()) {
                     result.addUpdatedDatasetAcquisition(
                         setTagToDatasetAcquisition(da.getId()));
@@ -134,19 +141,6 @@ public class QualityExaminationRule extends AbstractEntity {
 
     /**
      *
-     * @param subjectStudies
-     * @return list of updated subject studies
-     */
-    private Subject setTagToSubject(Long subjectId) {
-        // don't touch subjectStudy as we later will compare the original with the updated
-        Subject subjectCopy = new Subject();
-        subjectCopy.setId(subjectId);
-        subjectCopy.setQualityTag(getQualityTag());
-        return subjectCopy;
-    }
-
-    /**
-     *
      * @param datasetAcquisitionId
      * @return an updated dataset acquisition
      */
@@ -165,31 +159,23 @@ public class QualityExaminationRule extends AbstractEntity {
      * @param result
      * @return
      */
-    private ConditionResult conditionsfulfilled(ExaminationAttributes<?> dicomAttributes, ExaminationData examination, QualityCardResult result, WADODownloaderService downloader) {
+    private ConditionResult conditionsfulfilled(AcquisitionAttributes<Long> dicomAttributes, DatasetAcquisition da, QualityCardResult result) {
         boolean allFulfilled = true;
         ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level
-        boolean pilotedByDicomAttributes;
-        ExaminationAttributes<Long> examinationAttributesCache = null;
-        if (dicomAttributes != null) {
-            pilotedByDicomAttributes = true;
-        } else {
-            pilotedByDicomAttributes = false;
-            examinationAttributesCache = new ExaminationAttributes<>(downloader.getWadoURLHandler());
-        }
+        // We create a list containing only the acquisition we want to apply the rule on, to use the same condition fulfillment methods as for study card conditions on datasets or acquisitions list.
+        List<DatasetAcquisition> acquisitionList = new ArrayList<>();
+        acquisitionList.add(da);
+        
         for (StudyCardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();
             boolean fulfilled = true;
             if (condition instanceof StudyCardDICOMConditionOnDatasets) {
-                if (pilotedByDicomAttributes) {
-                    fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
-                } else {
-                    fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), examinationAttributesCache, downloader, msg);
-                }
+                fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes);
             } else if (condition instanceof ExamMetadataCondOnAcq) {
-                fulfilled = ((ExamMetadataCondOnAcq) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
+                fulfilled = ((ExamMetadataCondOnAcq) condition).fulfilled(acquisitionList, msg);
             } else if (condition instanceof ExamMetadataCondOnDatasets) {
-                fulfilled = ((ExamMetadataCondOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
+                fulfilled = ((ExamMetadataCondOnDatasets) condition).fulfilled(acquisitionList, msg);
             } else {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }
@@ -214,8 +200,8 @@ public class QualityExaminationRule extends AbstractEntity {
     private QualityCardResultEntry initResult(DatasetAcquisition datasetAcquisition) {
         QualityCardResultEntry result = new QualityCardResultEntry();
         result.setDatasetAcquisitionId(datasetAcquisition.getId());
-        // result.setExaminationDate(examination.getExaminationDate());
-        // result.setExaminationComment(examination.getExaminationComment());
+        result.setExaminationDate(datasetAcquisition.getExamination().getExaminationDate());
+        result.setExaminationComment(datasetAcquisition.getExamination().getComment());
         return result;
     }
 
