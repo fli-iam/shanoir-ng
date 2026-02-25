@@ -16,6 +16,7 @@ import { Component } from '@angular/core';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
 
 @Component({
@@ -31,9 +32,11 @@ export class DraftStudiesListComponent {
 
     constructor(
         private studyService: StudyService,
+        private keycloakService: KeycloakService,
         private breadcrumbsService: BreadcrumbsService) {
 
-        studyService.findDraftStudies().then(draftStudies => this.draftStudies = draftStudies);
+        if (this.keycloakService.isUserAdmin())
+            studyService.findDraftStudies().then(draftStudies => this.draftStudies = draftStudies);
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = 'Draft Studies';

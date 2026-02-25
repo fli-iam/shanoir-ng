@@ -46,6 +46,7 @@ export class AppComponent implements OnInit {
             private globalService: GlobalService,
             private windowService: WindowService,
             private element: ElementRef,
+            private keycloakService: KeycloakService,
             private keycloakSessionService: KeycloakSessionService,
             private confirmService: ConfirmDialogService,
             protected router: Router,
@@ -60,10 +61,12 @@ export class AppComponent implements OnInit {
     ngOnInit() {
         this.globalService.registerGlobalClick(this.element);
         this.windowService.width = window.innerWidth;
-        if(this.keycloakSessionService.isAuthenticated()) {
+        if (this.keycloakSessionService.isAuthenticated()) {
             this.userService.getAccessRequestsForAdmin();
             this.duaAlert();
-            this.draftStudiesAlert();
+
+            if (this.keycloakService.isUserAdmin())
+                this.draftStudiesAlert();
         }
     }
 
