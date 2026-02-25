@@ -1,0 +1,7 @@
+[
+    {
+    "name": "org.keycloak.admin.client.spi.ResteasyClientClassicProvider",
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true
+    }
+]
