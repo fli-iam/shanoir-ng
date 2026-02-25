@@ -21,6 +21,9 @@
         "name": "java.lang.Integer"
     },
     {
+        "name": "java.lang.Long"
+    },
+    {
         "name": "java.lang.Boolean"
     },
     {
