@@ -211,6 +211,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <builder>paketobuildpacks/builder-jammy-base:latest</builder>
                         <env>
                             <BP_NATIVE_IMAGE>true</BP_NATIVE_IMAGE>
+                            <BP_NATIVE_IMAGE_BUILD_ARGUMENTS>-H:+AddAllCharsets</BP_NATIVE_IMAGE_BUILD_ARGUMENTS>
                         </env>
                     </image>
                 </configuration>
