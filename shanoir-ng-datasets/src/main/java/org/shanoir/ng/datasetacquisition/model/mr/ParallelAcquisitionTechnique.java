@@ -45,7 +45,10 @@ public enum ParallelAcquisitionTechnique {
 
     CSENSE(6),
 
-    OTHER(7);
+    OTHER(7),
+
+    // Simultaneous Multi-Slice
+    SMS(8);
 
     private int id;
 
@@ -96,7 +99,7 @@ public enum ParallelAcquisitionTechnique {
         try {
             return ParallelAcquisitionTechnique.valueOf(technique);
         } catch (IllegalArgumentException e) {
-            LOG.error("ERROR: Parrallel acquisition technique not found: {}, null was set.", technique);
+            LOG.error("ERROR: Parallel acquisition technique not found: {}, null was set.", technique);
             // If not found, just return null and log it instead of blocking all import.
             return null;
         }
