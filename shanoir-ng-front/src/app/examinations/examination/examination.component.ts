@@ -214,7 +214,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
 
     getStudies(): void {
         this.studyService
-            .getStudiesNames()
+            .findApprovedStudies()
             .then(studies => {
                 this.studies = studies;
             });

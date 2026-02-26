@@ -81,7 +81,7 @@ export class DicomUploadComponent implements OnDestroy {
             breadcrumbsService.currentStep.importMode = 'DICOM';
         });
 
-        this.studyService.getAll().then(allStudies => {
+        this.studyService.findApprovedStudies().then(allStudies => {
             for (const study of allStudies) {
                     const studyOption: Option<Study> = new Option(study, study.name);
                     this.studyOptions.push(studyOption);
