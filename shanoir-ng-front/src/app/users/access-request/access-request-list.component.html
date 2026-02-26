@@ -18,9 +18,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label i18n="access request|user label@@user">User</label>
             <span class="right-col">
-                <a [routerLink]="['/user/details/', accessRequest.user.id]">
-                    {{accessRequest.user.username}}
-                </a>
+                <ng-container *ngIf="isAdmin(); else plainText">
+                  <a [routerLink]="['/user/details/', accessRequest.user.id]">
+                    {{ accessRequest.user.username}}
+                  </a>
+                </ng-container>
+
+                <ng-template #plainText>
+                  <span>{{ accessRequest.user.username}}</span>
+                </ng-template>
             </span>
         </li>
         <li>
@@ -49,4 +55,49 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </form>
 <p *ngIf="!(accessRequests?.length > 0)">
     No pending access request.
+</p>
+
+<h2>Account Creations</h2>
+<form *ngFor="let accountCreation of accountCreations; let i = index" @disapearUp>
+    <ul>
+        <li>
+            <label i18n="access request|user label@@user">User</label>
+            <span class="right-col">
+                <ng-container *ngIf="isAdmin(); else plainText">
+                  <a [routerLink]="['/user/details/', accountCreation.user.id]">
+                    {{ accountCreation.user.username}}
+                  </a>
+                </ng-container>
+
+                <ng-template #plainText>
+                  <span>{{ accountCreation.user.username}}</span>
+                </ng-template>
+            </span>
+        </li>
+        <li>
+            <label i18n="access request|study label@@study">Study</label>
+            <span class="right-col">
+                <a [routerLink]="['/study/details/', accountCreation.studyId]">
+                    {{accountCreation.studyName}}
+                </a>
+            </span>
+        </li>
+        <li>
+            <label i18n="access request|study label@@study" class="required-label">Motivation</label>
+            <span class="right-col">
+                {{accountCreation.motivation}}
+            </span>
+        </li>
+    </ul>
+    <button type="button" (click)="decide(i, true)" class="accept right-icon">
+        Accept
+        <i class="fa-solid fa-thumbs-up"></i>
+    </button>
+    <button type="button" (click)="decide(i, false)" class="refuse right-icon">
+        Refuse
+        <i class="fa-solid fa-thumbs-down"></i>
+    </button>
+</form>
+<p *ngIf="!(accountCreations?.length > 0)">
+    No pending account creation.
 </p>
