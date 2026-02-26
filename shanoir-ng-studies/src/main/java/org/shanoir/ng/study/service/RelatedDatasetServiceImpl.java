@@ -145,23 +145,35 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
     public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Study study, List<Long> centerIds, Map<Long, Long> subjectMapping) throws SecurityException {
         String result = "";
         Long userId = KeycloakUtil.getTokenUserId();
-        StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, study.getId());
-        if (!KeycloakUtil.isAdmin() && studyUser == null) {
-            throw new SecurityException("User not member of study " + study.getName() + ".");
-        } else {
-            List<StudyUserRight> rights = studyUser.getStudyUserRights();
-            if (rights.contains(StudyUserRight.CAN_ADMINISTRATE) || rights.contains(StudyUserRight.CAN_IMPORT)) {
-                addCentersToStudy(study, centerIds);
-                try {
-                    copyDatasetsToStudy(datasetIds, study.getId(), userId, subjectMapping);
-                } catch (MicroServiceCommunicationException e) {
-                    throw new RuntimeException(e);
-                }
+        // Check rights in case of not ROLE_ADMIN
+        if (!KeycloakUtil.isAdmin()) {
+            StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, study.getId());
+            if (studyUser == null) {
+                throw new SecurityException("User (userId: " + userId
+                    + ") is not member of study " + study.getName() + ".");
             } else {
-                throw new SecurityException("Missing IMPORT or ADMIN rights on destination study " + study.getName());
+                List<StudyUserRight> rights = studyUser.getStudyUserRights();
+                if (rights != null) {
+                    if (!rights.contains(StudyUserRight.CAN_ADMINISTRATE)
+                            && !rights.contains(StudyUserRight.CAN_IMPORT)) {
+                        throw new SecurityException(
+                                "Missing IMPORT or ADMIN rights on target study " + study.getName());
+                    }
+                } else {
+                    throw new SecurityException(
+                            "Missing any right on target study " + study.getName());
+                }
             }
-            return result;
+
         }
+        addCentersToStudy(study, centerIds);
+        try {
+            copyDatasetsToStudy(datasetIds, study.getId(), userId, subjectMapping);
+        } catch (MicroServiceCommunicationException e) {
+            throw new RuntimeException("Error in RabbitMQ message for copy datasets in MS Datasets.", e);
+        }
+        return result;
+
     }
 
     private void addCentersToStudy(Study study, List<Long> centerIds) {
