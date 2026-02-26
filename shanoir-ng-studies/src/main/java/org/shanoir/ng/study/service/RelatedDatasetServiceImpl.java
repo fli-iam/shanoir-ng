@@ -179,15 +179,26 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         eventService.publishEvent(event, "Adding centers in target study...", 0f);
         Long userId = KeycloakUtil.getTokenUserId();
         Study study = studyService.findById(studyId);
-        StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
-        if (!KeycloakUtil.isAdmin() && studyUser == null) {
-            throw new SecurityException("User not member of study " + study.getName() + ".");
-        } else {
-            List<StudyUserRight> rights = studyUser.getStudyUserRights();
-            if (rights.contains(StudyUserRight.CAN_ADMINISTRATE) || rights.contains(StudyUserRight.CAN_IMPORT)) {
-                addCentersToStudy(study, centerIds);
+        // Check rights in case of not ROLE_ADMIN
+        if (!KeycloakUtil.isAdmin()) {
+            StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
+            if (studyUser == null) {
+                throw new SecurityException("User (userId: " + userId
+                    + ") is not member of study " + study.getName() + ".");
             } else {
-                throw new SecurityException("Missing IMPORT or ADMIN rights on destination study " + study.getName());
+                List<StudyUserRight> rights = studyUser.getStudyUserRights();
+                if (rights != null) {
+                    if (rights.contains(StudyUserRight.CAN_ADMINISTRATE)
+                            && rights.contains(StudyUserRight.CAN_IMPORT)) {
+                        addCentersToStudy(study, centerIds);
+                    } else {
+                        throw new SecurityException(
+                            "Missing IMPORT or ADMIN rights on target study " + study.getName());
+                    }
+                } else {
+                    throw new SecurityException(
+                            "Missing any right on target study " + study.getName());
+                }
             }
         }
     }
