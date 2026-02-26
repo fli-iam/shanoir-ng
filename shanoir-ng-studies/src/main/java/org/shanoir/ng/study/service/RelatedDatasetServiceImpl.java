@@ -156,9 +156,8 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             } else {
                 List<StudyUserRight> rights = studyUser.getStudyUserRights();
                 if (rights != null) {
-                    if (rights.contains(StudyUserRight.CAN_ADMINISTRATE)
-                            || rights.contains(StudyUserRight.CAN_IMPORT)) {
-                    } else {
+                    if (!rights.contains(StudyUserRight.CAN_ADMINISTRATE)
+                            && !rights.contains(StudyUserRight.CAN_IMPORT)) {
                         throw new SecurityException(
                                 "Missing IMPORT or ADMIN rights on target study " + study.getName());
                     }
