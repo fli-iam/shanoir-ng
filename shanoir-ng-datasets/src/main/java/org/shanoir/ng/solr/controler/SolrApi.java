@@ -19,12 +19,10 @@
  */
 package org.shanoir.ng.solr.controler;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
@@ -38,8 +36,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.io.IOException;
-import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 /**
  * @author yyao
@@ -78,5 +80,16 @@ public interface SolrApi {
         @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/byIds", consumes = {"application/json" }, produces = { "application/json" }, method = RequestMethod.POST)
     ResponseEntity<Page<ShanoirSolrDocument>> findByIdIn(@Parameter(description = "dataset ids", required = true) @Valid @RequestBody List<Long> datasetIds, Pageable pageable) throws RestServiceException;
+
+
+    @Operation(summary = "", description = "Find all dataset IDs for a query, with a limit on the number of results to avoid memory issues.")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset IDs"),
+        @ApiResponse(responseCode = "204", description = "nothing found"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "413", description = "too many results"),
+        @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/datasetIds", consumes = {"application/json" }, produces = { "application/json" }, method = RequestMethod.POST)
+    ResponseEntity<Set<Long>> findAllDatasetIdsForQuery(@Parameter(description = "facets", required = true) @Valid @RequestBody ShanoirSolrQuery query) throws RestServiceException;
 
 }

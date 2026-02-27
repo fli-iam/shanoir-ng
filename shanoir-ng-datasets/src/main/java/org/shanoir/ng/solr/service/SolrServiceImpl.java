@@ -20,7 +20,14 @@
 package org.shanoir.ng.solr.service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.ListUtils;
@@ -31,6 +38,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.TooManyResultsException;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
@@ -105,6 +113,8 @@ public class SolrServiceImpl implements SolrService {
     public void deleteAll() throws SolrServerException, IOException {
         solrJWrapper.deleteAll();
     }
+
+
 
     @Async
     @Transactional
@@ -236,6 +246,18 @@ public class SolrServiceImpl implements SolrService {
                 0f);
         eventService.publishEvent(event);
         return event;
+    }
+
+    @Override
+    public Set<Long> findAllDatasetIdsForQuery(ShanoirSolrQuery shanoirQuery) throws RestServiceException, TooManyResultsException {
+        Set<Long> result;
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            result = solrJWrapper.findAllDatasetIdsForQuery(shanoirQuery, null);
+        } else {
+            Map<Long, List<String>> studiesCenter = getStudiesCenter();
+            result = solrJWrapper.findAllDatasetIdsForQuery(shanoirQuery, studiesCenter);
+        }
+        return result;
     }
 
     /**
