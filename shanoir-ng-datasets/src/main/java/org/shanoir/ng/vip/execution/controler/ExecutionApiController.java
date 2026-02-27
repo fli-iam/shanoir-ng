@@ -41,12 +41,12 @@ public class ExecutionApiController implements ExecutionApi {
 
     @Override
     public ResponseEntity<IdName> createExecution(
-            @Parameter(description = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException {
+            @Parameter(description = "execution", required = true) @RequestBody final List<ExecutionCandidateDTO> candidate) throws EntityNotFoundException, SecurityException, RestServiceException {
 
-        List<Dataset> inputDatasets = executionService.getDatasetsFromParams(candidate.getDatasetParameters());
+        List<List<Dataset>> inputDatasets = executionService.getDatasetsFromParams(candidate.getDatasetParameters());
         IdName createdMonitoring = executionService.createExecution(candidate, inputDatasets);
 
-        return new ResponseEntity<>(createdMonitoring, HttpStatus.OK);
+        return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {
