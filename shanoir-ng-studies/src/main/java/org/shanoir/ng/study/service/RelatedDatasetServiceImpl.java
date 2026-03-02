@@ -32,10 +32,8 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.CopyData;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
@@ -177,19 +175,8 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
     @Transactional
     private void addCentersInTargetStudy(List<Long> centerIds, Long studyId, ShanoirEvent event) throws ShanoirException {
         eventService.publishEvent(event, "Adding centers in target study...", 0f);
-        Long userId = KeycloakUtil.getTokenUserId();
         Study study = studyService.findById(studyId);
-        StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
-        if (!KeycloakUtil.isAdmin() && studyUser == null) {
-            throw new SecurityException("User not member of study " + study.getName() + ".");
-        } else {
-            List<StudyUserRight> rights = studyUser.getStudyUserRights();
-            if (rights.contains(StudyUserRight.CAN_ADMINISTRATE) || rights.contains(StudyUserRight.CAN_IMPORT)) {
-                addCentersToStudy(study, centerIds);
-            } else {
-                throw new SecurityException("Missing IMPORT or ADMIN rights on destination study " + study.getName());
-            }
-        }
+        addCentersToStudy(study, centerIds);
     }
 
     private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Map<Long, Long> subjectMapping, ShanoirEvent event) throws ShanoirException {

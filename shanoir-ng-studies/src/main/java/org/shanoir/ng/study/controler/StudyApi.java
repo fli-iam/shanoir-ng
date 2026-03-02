@@ -218,7 +218,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/tags/{studyId}", produces = { "application/json" }, consumes = {
             "application/json" }, method = RequestMethod.GET)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasAnyRightOnStudy(#studyId, {'CAN_SEE_ALL', 'CAN_IMPORT', 'CAN_ADMINISTRATE'}))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasAnyRightOnStudy(#studyId, 'CAN_SEE_ALL', 'CAN_IMPORT', 'CAN_ADMINISTRATE'))")
     ResponseEntity<List<org.shanoir.ng.tag.model.Tag>> tags(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException;

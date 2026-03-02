@@ -15,6 +15,7 @@
 package org.shanoir.ng.study.security;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -91,10 +92,10 @@ public class StudySecurityService {
      * Check that the connected user has any of the given rights for the given study.
      *
      * @param studyId the study id
-     * @param rightStr the right
+     * @param rightStrs the rights
      * @return true or false
      */
-    public boolean hasAnyRightOnStudy(Long studyId, List<String> rightStrs) throws EntityNotFoundException {
+    public boolean hasAnyRightOnStudy(Long studyId, String... rightStrs) throws EntityNotFoundException {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             return true;
         }
@@ -105,7 +106,7 @@ public class StudySecurityService {
         if (study == null) {
             throw new EntityNotFoundException("Cannot find study with id " + studyId);
         }
-        List<StudyUserRight> rights = rightStrs.stream().map(str -> StudyUserRight.valueOf(str)).collect(Collectors.toList());
+        List<StudyUserRight> rights = Arrays.stream(rightStrs).map(str -> StudyUserRight.valueOf(str)).collect(Collectors.toList());
         return hasAnyPrivilege(study, rights);
     }
 
@@ -283,15 +284,17 @@ public class StudySecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnSubjects(List<Long> subjectIds, String rightStr) throws EntityNotFoundException {
-        List<Subject> subjects = Utils.toList(subjectRepository.findAllById(subjectIds));
-        if (subjects == null || subjects.isEmpty()) {
+        List<Long> studyIds = Utils.toList(studyRepository.findStudyIdsBySubjectIds(subjectIds));
+        if (studyIds == null || studyIds.isEmpty()) {
             return true;
         }
-        for (Subject subject : subjects) {
-            StudyUserRight right = StudyUserRight.valueOf(rightStr);
-            return subject.getStudy() != null && hasPrivilege(subject.getStudy(), right);
+        List<StudyUser> studyUserList = new ArrayList<>();
+        for (Long studyId : studyIds) {
+            studyUserList.addAll(studyUserRepository.findByStudy_Id(studyId));
         }
-        return true;
+
+        StudyUserRight right = StudyUserRight.valueOf(rightStr);
+        return !studyUserList.isEmpty() && hasPrivilege(studyUserList, right);
     }
 
     /**

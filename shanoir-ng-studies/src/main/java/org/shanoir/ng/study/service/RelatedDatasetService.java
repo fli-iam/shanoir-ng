@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 @Service
 public interface RelatedDatasetService {
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasAnyRightOnStudy(#copyData.targetStudyId, 'CAN_ADMINISTRATE', 'CAN_IMPORT'))")
     void copyData(CopyData copyData) throws ShanoirException;
 
 }
