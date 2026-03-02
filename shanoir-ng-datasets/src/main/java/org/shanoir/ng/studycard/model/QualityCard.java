@@ -18,9 +18,10 @@ import java.util.List;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
-import org.shanoir.ng.download.ExaminationAttributes;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
@@ -71,7 +72,7 @@ public class QualityCard extends HalEntity implements Card {
      */
     @PostLoad
     public void initLinks() {
-        this.addLink(Links.REL_SELF, "studycard/" + getId());
+        this.addLink(Links.REL_SELF, "qualitycard/" + getId());
     }
 
     public String getName() {
@@ -104,57 +105,11 @@ public class QualityCard extends HalEntity implements Card {
     * @param studyCard
     * @param dicomAttributes
     */
-    public QualityCardResult apply(Examination examination, ExaminationAttributes<?> dicomAttributes, WADODownloaderService downloader) {
+    public QualityCardResult apply(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> dicomAttributes, WADODownloaderService downloader) throws PacsException {
         QualityCardResult result = new QualityCardResult();
         if (this.getRules() != null) {
             for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, dicomAttributes, result, downloader);
-            }
-        }
-        return result;
-    }
-
-    /**
-    * Application during import, when dicoms are present in tmp directory.
-    * @param examination
-    * @param studyCard
-    * @param dicomAttributes
-    */
-    public QualityCardResult apply(ExaminationData examination, ExaminationAttributes<?> dicomAttributes, WADODownloaderService downloader) {
-        QualityCardResult result = new QualityCardResult();
-        if (this.getRules() != null) {
-            for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, dicomAttributes, result, downloader);
-            }
-        }
-        return result;
-    }
-
-    /**
-    * Application during import, when dicoms are present in tmp directory.
-    * @param examination
-    * @param studyCard
-    */
-    public QualityCardResult apply(Examination examination, WADODownloaderService downloader) {
-        QualityCardResult result = new QualityCardResult();
-        if (this.getRules() != null) {
-            for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, result, downloader);
-            }
-        }
-        return result;
-    }
-
-    /**
-    * Application during import, when dicoms are present in tmp directory.
-    * @param examination
-    * @param studyCard
-    */
-    public QualityCardResult apply(ExaminationData examination, WADODownloaderService downloader) {
-        QualityCardResult result = new QualityCardResult();
-        if (this.getRules() != null) {
-            for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, result, downloader);
+                rule.apply(datasetAcquisition, dicomAttributes, result, downloader);
             }
         }
         return result;
