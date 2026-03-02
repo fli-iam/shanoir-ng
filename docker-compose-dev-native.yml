@@ -140,7 +140,7 @@ services:
       - SHANOIR_SMTP_HOST
       - SHANOIR_SMTP_PORT
     volumes:
-      - "logs:/var/log/shanoir-ng-logs"
+      - "logs:/workspace/logs"
       - "certificate-share-data:/etc/ssl/certs/java:ro"
     networks:
       - shanoir_ng_network

@@ -104,7 +104,7 @@ kc.admin.client:
 # logging configuration
 logging:
   file:
-    name: /var/log/shanoir-ng-logs/shanoir-ng-users.log
+    name: /workspace/logs/shanoir-ng-users.log
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
