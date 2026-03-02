@@ -426,9 +426,7 @@ public class QueryPACSService {
         synchronized (patient.getStudies()) {
             patient.getStudies().add(study);
         }
-        // use now study date returned from the DICOM server
-        String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
-        querySeries(association, study, modality, dicomResponseStudyDate);
+        querySeries(association, study, modality);
     }
 
     /**
@@ -479,8 +477,7 @@ public class QueryPACSService {
                     LOG.info("Study found in DICOM server: " + study.toString());
                     studies.add(study);
                 }
-                String dicomResponseStudyDate = studyAttr.getString(Tag.StudyDate);
-                querySeries(association, study, modality, dicomResponseStudyDate);
+                querySeries(association, study, modality);
             });
             studies.sort(new StudyDateSorter());
             patient.setStudies(studies);
@@ -553,13 +550,12 @@ public class QueryPACSService {
      * @param called
      * @param study
      */
-    private void querySeries(Association association, Study study, DicomParam modality, String studyDateStr) {
+    private void querySeries(Association association, Study study, DicomParam modality) {
         DicomParam studyInstanceUID = initDicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID());
-        DicomParam studyDate = initDicomParam(Tag.StudyDate, studyDateStr);
         DicomParam[] params = {
             modality,
             studyInstanceUID,
-            studyDate,
+            new DicomParam(Tag.StudyDate),
             new DicomParam(Tag.SeriesInstanceUID),
             new DicomParam(Tag.NumberOfSeriesRelatedInstances),
             new DicomParam(Tag.SeriesDescription),

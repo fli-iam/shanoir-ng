@@ -35,11 +35,9 @@ public interface StudyUserRepository extends CrudRepository<StudyUser, Long> {
 
     List<StudyUser> findByUserId(Long userId);
 
-
     StudyUser findByUserIdAndStudy_Id(Long userId, Long studyId);
 
     @EntityGraph(attributePaths = "studyUserRights")
-
     List<StudyUser> findByStudy_Id(Long studyId);
 
     @Query("SELECT DISTINCT su.centers FROM StudyUser su WHERE su.study.id = :studyId")
