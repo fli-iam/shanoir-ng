@@ -45,7 +45,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-public class QualityCardRule extends AbstractEntity {
+public class ConditionResult extends AbstractEntity {
 
     private Integer tag;
 

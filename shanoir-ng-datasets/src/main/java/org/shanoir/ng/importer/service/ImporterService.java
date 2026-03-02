@@ -173,7 +173,7 @@ public class ImporterService {
             }
 
             // Send success mail
-            mailService.sendImportEmail(importJob, userId, examination, generatedAcquisitions);
+            mailService.sendImportEmail(importJob, userId, examination, generatedAcquisitions); // TODO : add quality result in mail  or link to qr in case of da not imported because of quality check failure
 
         } catch (QualityException e) {
             String msg = e.buildErrorMessage();
