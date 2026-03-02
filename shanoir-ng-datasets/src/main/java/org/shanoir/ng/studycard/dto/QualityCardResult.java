@@ -18,15 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.quality.QualityTag;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * This class contains the result of an application of a study card
+ * This class contains the result of an application of a quality card
  * on an entire study. For each examination, when the result is wrong
  * on the examination level already, we will not check deeper on the
  * acquisition level. When everything is clear on the examination level,
@@ -42,48 +41,48 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEntry> {
 
-    private List<Subject> updatedSubjects = new CopyOnWriteArrayList<>();
+    private List<DatasetAcquisition> updatedDatasetAcquisitions = new CopyOnWriteArrayList<>();
 
-    public List<Subject> getUpdatedSubjects() {
-        return updatedSubjects;
+    public List<DatasetAcquisition> getUpdatedDatasetAcquisitions() {
+        return updatedDatasetAcquisitions;
     }
 
-    private void setUpdatedSubjects(List<Subject> updatedSubjects) {
-        this.updatedSubjects = updatedSubjects;
+    private void setUpdatedDatasetAcquisitions(List<DatasetAcquisition> updatedDatasetAcquisitions) {
+        this.updatedDatasetAcquisitions = updatedDatasetAcquisitions;
     }
 
-    public void addUpdatedSubject(Subject subject) {
-        if (getUpdatedSubjects() == null) setUpdatedSubjects(new ArrayList<>());
-        if (subject == null || subject.getId() == null) return;
-        for (Subject presentSub : getUpdatedSubjects()) {
-            if (subject.getId().equals(presentSub.getId())
-                    && presentSub.getQualityTag().getId() >= subject.getQualityTag().getId()) {
+    public void addUpdatedDatasetAcquisition(DatasetAcquisition datasetAcquisition) {
+        if (getUpdatedDatasetAcquisitions() == null) setUpdatedDatasetAcquisitions(new ArrayList<>());
+        if (datasetAcquisition == null || datasetAcquisition.getId() == null) return;
+        for (DatasetAcquisition presentDatasetAcq : getUpdatedDatasetAcquisitions()) {
+            if (datasetAcquisition.getId().equals(presentDatasetAcq.getId())
+                    && presentDatasetAcq.getQualityTag().getId() >= datasetAcquisition.getQualityTag().getId()) {
                 return;
             }
         }
-        getUpdatedSubjects().add(subject);
+        getUpdatedDatasetAcquisitions().add(datasetAcquisition);
     }
 
-    /***
-     * Remove unchanged subject-studies
-     * @param study the study containing the original subject-studies
-     */
-    public void removeUnchanged(Study study) {
-        if (getUpdatedSubjects() == null) return;
-        for (Subject original : study.getSubjectList()) {
-            getUpdatedSubjects().removeIf(updated ->
-                    updated.getId().equals(original.getId())
-                    && updated.getQualityTag() != null
-                    && updated.getQualityTag().equals(original.getQualityTag())
-            );
-        }
-    }
+    // /***
+    //  * Remove unchanged subject-studies
+    //  * @param study the study containing the original subject-studies
+    //  */
+    // public void removeUnchanged(Study study) {
+    //     if (getUpdatedSubjects() == null) return;
+    //     for (Subject original : study.getSubjectList()) {
+    //         getUpdatedSubjects().removeIf(updated ->
+    //                 updated.getId().equals(original.getId())
+    //                 && updated.getQualityTag() != null
+    //                 && updated.getQualityTag().equals(original.getQualityTag())
+    //         );
+    //     }
+    // }
 
     public void merge(QualityCardResult result) {
         this.addAll(result);
-        if (result.getUpdatedSubjects() != null) {
-            for (Subject subjectStudy : result.getUpdatedSubjects()) {
-                this.addUpdatedSubject(subjectStudy);
+        if (result.getUpdatedDatasetAcquisitions() != null) {
+            for (DatasetAcquisition datasetAcquisition : result.getUpdatedDatasetAcquisitions()) {
+                this.addUpdatedDatasetAcquisition(datasetAcquisition);
             }
         }
     }

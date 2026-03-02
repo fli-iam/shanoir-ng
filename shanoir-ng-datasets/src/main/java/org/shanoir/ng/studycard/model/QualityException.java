@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.studycard.model;
 
-import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 
@@ -23,30 +23,29 @@ import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
  */
 public class QualityException extends Exception {
 
-    private Examination examination;
+    private DatasetAcquisition datasetAcquisition;
 
     private QualityCardResult qualityResult;
 
 
-    public QualityException(Examination examination, QualityCardResult qualityResult) {
+    public QualityException(DatasetAcquisition datasetAcquisition, QualityCardResult qualityResult) {
         super();
-        this.examination = examination;
+        this.datasetAcquisition = datasetAcquisition;
         this.qualityResult = qualityResult;
     }
 
-    public QualityException(Examination examination, QualityCardResult qualityResult, Throwable cause) {
+    public QualityException(DatasetAcquisition datasetAcquisition, QualityCardResult qualityResult, Throwable cause) {
         super(cause);
-        this.examination = examination;
+        this.datasetAcquisition = datasetAcquisition;
         this.qualityResult = qualityResult;
     }
 
-
-    public Examination getExamination() {
-        return examination;
+    public DatasetAcquisition getDatasetAcquisition() {
+        return datasetAcquisition;
     }
 
-    public void setExamination(Examination examination) {
-        this.examination = examination;
+    public void setDatasetAcquisition(DatasetAcquisition datasetAcquisition) {
+        this.datasetAcquisition = datasetAcquisition;
     }
 
     public QualityCardResult getQualityResult() {
@@ -57,21 +56,21 @@ public class QualityException extends Exception {
         this.qualityResult = qualityResult;
     }
 
-    public String buildErrorMessage() {
+    public String buildErrorMessage() { // TODO : improve error messages
         StringBuilder sb = new StringBuilder();
         sb.append("Study : ")
-            .append(this.getExamination().getStudy().getName())
-            .append(" (").append(this.getExamination().getStudy().getId()).append(")");
+            .append(this.getDatasetAcquisition().getExamination().getStudy().getName())
+            .append(" (").append(this.getDatasetAcquisition().getExamination().getStudy().getId()).append(")");
         sb.append("\n");
         sb.append("Subject : ")
-            .append(this.getExamination().getSubject().getName())
-            .append(" (").append(this.getExamination().getSubject().getId()).append(")");
+            .append(this.getDatasetAcquisition().getExamination().getSubject().getName())
+            .append(" (").append(this.getDatasetAcquisition().getExamination().getSubject().getId()).append(")");
         sb.append("\n");
         sb.append("Examination : ")
-            .append(this.getExamination().getComment())
-            .append(" (").append(this.getExamination().getId()).append(")");
+            .append(this.getDatasetAcquisition().getExamination().getComment())
+            .append(" (").append(this.getDatasetAcquisition().getExamination().getId()).append(")");
         sb.append("\n");
-        sb.append("Examination : ");
+        sb.append("Dataset Acquisition : ");
         for (QualityCardResultEntry qcResult : this.getQualityResult()) {
             sb.append("\n- ");
             sb.append(qcResult.getMessage());

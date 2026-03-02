@@ -70,7 +70,7 @@ public interface DatasetAcquisitionService {
     DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.filterDatasetAcquisitionList(#entities, 'CAN_ADMINISTRATE')")
-    Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities);
+    Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities) throws EntityNotFoundException;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
     void deleteById(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
