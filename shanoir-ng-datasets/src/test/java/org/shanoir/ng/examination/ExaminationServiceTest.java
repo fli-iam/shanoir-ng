@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -85,7 +85,7 @@ public class ExaminationServiceTest {
     private ObjectMapper mapper;
 
     @Mock
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Mock
     private DICOMWebService dicomWebService;

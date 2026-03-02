@@ -31,7 +31,7 @@ import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
@@ -79,7 +79,7 @@ public class DatasetSecurityService {
     private StudyRightsService studyRightsService;
 
     @Autowired
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     /**
      * Check that the connected user has the given right for the given study.

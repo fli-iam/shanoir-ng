@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -85,63 +86,96 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
     @Transactional
     @Override
-    public void createSubjectsInTargetStudy(List<String> subjectIdStudyIds, Long studyId) throws ShanoirException {
+    public void createSubjectsInTargetStudy(List<String> subjectIdsStr, Long studyId,
+            Map<Long, Long> subjectMapping, String subjectName) throws ShanoirException {
         LOG.info("Starting createSubjectsInTargetStudy");
         long startTime = System.currentTimeMillis();
         List<Long> subjectIds = new ArrayList<>();
-        for (String s : subjectIdStudyIds) {
-            subjectIds.add(Long.valueOf(s.substring(0, s.indexOf("/"))));
+        for (String s : subjectIdsStr) {
+            subjectIds.add(Long.valueOf(s));
         }
         Study targetStudy = studyService.findById(studyId);
+        List<Subject> createdSubjects = new ArrayList<>();
         for (Long subjectId : subjectIds) {
             Subject sourceSubject = subjectService.findById(subjectId);
             if (sourceSubject == null) {
                 throw new SecurityException(
-                    "Copy dataset(s): source subject with ID " + subjectId + " not found.");
+                        "Copy dataset(s): source subject with ID " + subjectId + " not found.");
             }
             Subject targetSubject = subjectService.findByStudyIdAndName(targetStudy.getId(), sourceSubject.getName());
             if (targetSubject == null) {
-                Subject clonedSubject = new Subject(sourceSubject, targetStudy);
-                if (sourceSubject.getTags() != null && !sourceSubject.getTags().isEmpty()) {
-                    Set<Tag> clonedTags = new HashSet<>();
-                    List<Long> tagIds = sourceSubject.getTags().stream()
-                            .map(Tag::getId)
-                            .collect(Collectors.toList());
-                    Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
-                    managedTagsIt.forEach(clonedTags::add);
-                    clonedSubject.setTags((clonedTags));
+                Subject createdSubject = null;
+                if (createdSubjects.isEmpty()) {
+                    createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, subjectName, false);
+                } else {
+                    createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, null, false);
                 }
-                // true: synchronize subjects with MS Datasets
-                clonedSubject = subjectService.create(clonedSubject, true);
+                subjectMapping.put(subjectId, createdSubject.getId());
+                createdSubjects.add(createdSubject);
             }
+        }
+        if (!createdSubjects.isEmpty()) {
+            subjectService.updateSubjectBatchInMicroservices(createdSubjects);
         }
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
         LOG.info("Finished createSubjectsInTargetStudy: " + elapsedTime + "ms");
     }
 
+    private Subject createNewSubjectInTargetStudy(Study targetStudy, Subject sourceSubject, String newSubjectName,
+            boolean withAMQP)
+            throws ShanoirException {
+        Subject clonedSubject = new Subject(sourceSubject, targetStudy);
+        if (newSubjectName != null && !newSubjectName.trim().isEmpty()) {
+            clonedSubject.setName(newSubjectName);
+        }
+        if (sourceSubject.getTags() != null && !sourceSubject.getTags().isEmpty()) {
+            Set<Tag> clonedTags = new HashSet<>();
+            List<Long> tagIds = sourceSubject.getTags().stream()
+                    .map(Tag::getId)
+                    .collect(Collectors.toList());
+            Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
+            managedTagsIt.forEach(clonedTags::add);
+            clonedSubject.setTags((clonedTags));
+        }
+        clonedSubject = subjectService.create(clonedSubject, withAMQP);
+        return clonedSubject;
+    }
+
     @Override
-    public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds) throws SecurityException {
+    public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds, Map<Long, Long> subjectMapping) throws SecurityException {
         String result = "";
         Long userId = KeycloakUtil.getTokenUserId();
         Study study = studyService.findById(studyId);
-        StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
-        if (!KeycloakUtil.isAdmin() && studyUser == null) {
-            throw new SecurityException("User not member of study " + study.getName() + ".");
-        } else {
-            List<StudyUserRight> rights = studyUser.getStudyUserRights();
-            if (rights.contains(StudyUserRight.CAN_ADMINISTRATE) || rights.contains(StudyUserRight.CAN_IMPORT)) {
-                addCentersToStudy(study, centerIds);
-                try {
-                    copyDatasetsToStudy(datasetIds, studyId, userId);
-                } catch (MicroServiceCommunicationException e) {
-                    throw new RuntimeException(e);
-                }
+        // Check rights in case of not ROLE_ADMIN
+        if (!KeycloakUtil.isAdmin()) {
+            StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
+            if (studyUser == null) {
+                throw new SecurityException("User (userId: " + userId
+                    + ") is not member of study " + study.getName() + ".");
             } else {
-                throw new SecurityException("Missing IMPORT or ADMIN rights on destination study " + study.getName());
+                List<StudyUserRight> rights = studyUser.getStudyUserRights();
+                if (rights != null) {
+                    if (!rights.contains(StudyUserRight.CAN_ADMINISTRATE)
+                            && !rights.contains(StudyUserRight.CAN_IMPORT)) {
+                        throw new SecurityException(
+                                "Missing IMPORT or ADMIN rights on target study " + study.getName());
+                    }
+                } else {
+                    throw new SecurityException(
+                            "Missing any right on target study " + study.getName());
+                }
             }
-            return result;
+
         }
+        addCentersToStudy(study, centerIds);
+        try {
+            copyDatasetsToStudy(datasetIds, studyId, userId, subjectMapping);
+        } catch (MicroServiceCommunicationException e) {
+            throw new RuntimeException("Error in RabbitMQ message for copy datasets in MS Datasets.", e);
+        }
+        return result;
+
     }
 
     private void addCentersToStudy(Study study, List<Long> centerIds) {
@@ -167,7 +201,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         studyRepository.save(study);
     }
 
-    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Long userId) throws MicroServiceCommunicationException {
+    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Long userId, Map<Long, Long> subjectMapping) throws MicroServiceCommunicationException {
         // datasetIds order is : selected datasets in solr from top of the table to bottom
         // reverse that order so that the first dataset to be treated is the last selected in solr
         Collections.sort(datasetIds);
@@ -175,6 +209,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         dto.setStudyId(studyId);
         dto.setDatasetIds(datasetIds);
         dto.setUserId(userId);
+        dto.setSubjectMapping(subjectMapping);
         try {
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, objectMapper.writeValueAsString(dto));
         } catch (AmqpException | JsonProcessingException e) {

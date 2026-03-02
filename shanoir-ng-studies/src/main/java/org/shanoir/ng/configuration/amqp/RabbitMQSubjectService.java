@@ -132,13 +132,27 @@ public class RabbitMQSubjectService {
         }
     }
 
-    @RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    public Long createOrUpdateSubject(String subjectAsString) {
+    public Long createOrUpdateSubjectWithAMQP(String subjectAsString) {
         try {
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             Subject subject = mapper.readValue(subjectAsString, Subject.class);
-            subject = manageSubject(subject);
+            subject = manageSubject(subject, true);
+            return subject.getId();
+        } catch (Exception e) {
+            LOG.error("Error while creating the new subject: ", e);
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+    }
+
+    @RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE_WITHOUT_DATASETS, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    public Long createOrUpdateSubjectWithoutAMQP(String subjectAsString) {
+        try {
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+            Subject subject = mapper.readValue(subjectAsString, Subject.class);
+            subject = manageSubject(subject, false);
             return subject.getId();
         } catch (Exception e) {
             LOG.error("Error while creating the new subject: ", e);
@@ -147,7 +161,7 @@ public class RabbitMQSubjectService {
     }
 
     @Transactional
-    private Subject manageSubject(Subject subject) throws ShanoirException {
+    private Subject manageSubject(Subject subject, boolean withAMQP) throws ShanoirException {
         Long studyId = null;
         if (subject.getStudy() != null) {
             studyId = subject.getStudy().getId();
@@ -158,7 +172,7 @@ public class RabbitMQSubjectService {
         }
         Subject subjectOld = subjectRepository.findByStudyIdAndName(studyId, subject.getName());
         if (subjectOld == null) {
-            return subjectService.create(subject, true);
+            return subjectService.create(subject, withAMQP);
         } else {
             return subjectOld;
         }
