@@ -92,6 +92,7 @@ services:
       - SHANOIR_CERTIFICATE_PEM_KEY
     volumes:
       - "certificate-share-data:/etc/ssl/certs/java"
+      - "logs:/var/log/shanoir-ng-logs"
   #
   # Database for all Shanoir microservices
   #
