@@ -126,6 +126,7 @@ public class DatasetExpression extends AbstractEntity {
 
         this.datasetFiles = new ArrayList<>(dexp.getDatasetFiles().size());
         for (DatasetFile df : dexp.getDatasetFiles()) {
+            // If perf issues when saving the copied, use batches
             this.datasetFiles.add(new DatasetFile(df, this));
         }
 

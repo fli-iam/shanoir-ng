@@ -41,6 +41,8 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import jakarta.transaction.Transactional;
+
 
 @Service
 public class DatasetCopyServiceImpl implements DatasetCopyService {
@@ -66,8 +68,14 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     private static final Logger LOG = LoggerFactory.getLogger(DatasetCopyServiceImpl.class);
 
     @Override
-    public Object[] moveDataset(Dataset ds, Long studyId, Map<Long, Long> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws JsonProcessingException {
+    @Transactional
+    public Object[] moveDataset(Long dsId, Long studyId, Map<Long, Long> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws JsonProcessingException {
         try {
+            Dataset ds = datasetRepository.findById(dsId).orElseThrow();
+            if (ds.getSource() != null) {
+                LOG.info("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
+                return new Object[] {0, 0, 0, 1};
+            }
             int countProcessed = 0;
             int countSuccess = 0;
             Long oldDsId = ds.getId();
@@ -79,6 +87,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             // Creation of new dataset according to its type
             Dataset newDs = null;
             if (ds.getDatasetAcquisition() != null &&  ds.getDatasetAcquisition().getId() != null) {
+
                 newDs = DatasetUtils.copyDatasetFromDataset(ds);
                 ds.getCopies().add(newDs);
                 newDs.setSource(ds);
@@ -117,9 +126,9 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 countProcessed++;
             }
 
-            return new Object[]{newDs != null ? newDs.getId() : null, countProcessed, countSuccess};
+            return new Object[]{newDs != null ? newDs.getId() : null, countProcessed, countSuccess, 0};
         } catch (Exception e) {
-            LOG.error("[CopyDatasets] Error during the copy of dataset [" + ds.getId() + "] to study [" + studyId + "].");
+            LOG.error("[CopyDatasets] Error during the copy of dataset [" + dsId + "] to study [" + studyId + "].");
             throw e;
         }
     }

@@ -25,7 +25,6 @@ import java.util.Set;
 
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -414,7 +413,6 @@ public class RabbitMQDatasetsService {
      */
     @RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    @Transactional
     @Async
     public void copyDatasetsToStudy(final String data) {
         Map<Long, Examination> examMap = new HashMap<>();
@@ -456,19 +454,16 @@ public class RabbitMQDatasetsService {
 
                 LOG.info("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
                 Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
-                Dataset datasetParent = datasetService.findById(datasetParentId);
 
-                if (datasetParent.getSource() != null) {
-                    LOG.info("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
-                    countCopy++;
-                } else if (dsCount != 0) {
+                if (dsCount != 0) {
                     LOG.info("[CopyDatasets] Dataset already exists in this study, copy aborted.");
                     countAlreadyExist++;
                 } else {
-                    Object[] result = datasetCopyService.moveDataset(datasetParent, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
+                    Object[] result = datasetCopyService.moveDataset(datasetParentId, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
                     Long newDsId = (Long) result[0];
                     countProcessed += (int) result[1];
                     countSuccess += (int) result[2];
+                    countCopy += (int) result[3];
                     LOG.info("countProcessed : " + countProcessed);
                     if (newDsId != null)
                         newDatasets.add(newDsId);
