@@ -27,6 +27,8 @@ public class RelatedDataset {
 
     private Long userId;
 
+    private Long eventId;
+
     public RelatedDataset() {
     }
 
@@ -62,4 +64,11 @@ public class RelatedDataset {
         this.userId = userId;
     }
 
+    public Long getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(Long eventId) {
+        this.eventId = eventId;
+    }
 }

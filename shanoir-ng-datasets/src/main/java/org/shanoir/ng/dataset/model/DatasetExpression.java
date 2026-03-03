@@ -14,15 +14,22 @@
 
 package org.shanoir.ng.dataset.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Dataset expression.
@@ -119,6 +126,7 @@ public class DatasetExpression extends AbstractEntity {
 
         this.datasetFiles = new ArrayList<>(dexp.getDatasetFiles().size());
         for (DatasetFile df : dexp.getDatasetFiles()) {
+            // If perf issues when saving the copied, use batches
             this.datasetFiles.add(new DatasetFile(df, this));
         }
 

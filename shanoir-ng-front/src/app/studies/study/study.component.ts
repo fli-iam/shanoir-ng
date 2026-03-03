@@ -78,6 +78,7 @@ export class StudyComponent extends EntityComponent<Study> {
     openHistory: SuperPromise<void> = new SuperPromise<void>();
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
+    protected hasCopyRight: boolean;
     accessRequests: AccessRequest[];
     isStudyAdmin: boolean;
     subjectTagsInUse: Tag[] = [];
@@ -161,6 +162,8 @@ export class StudyComponent extends EntityComponent<Study> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin()
                 || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_DOWNLOAD));
+            this.hasCopyRight = this.keycloakService.isUserAdmin()
+                || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
         })
 
         this.setLabeledSizes(this.study);

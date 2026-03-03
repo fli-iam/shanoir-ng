@@ -25,8 +25,8 @@ import java.util.Set;
 
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -128,6 +128,9 @@ public class RabbitMQDatasetsService {
 
     @Autowired
     private StudyService studyService;
+
+    @Autowired
+    private DatasetSecurityService securityService;
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
@@ -414,7 +417,6 @@ public class RabbitMQDatasetsService {
      */
     @RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    @Transactional
     @Async
     public void copyDatasetsToStudy(final String data) {
         Map<Long, Examination> examMap = new HashMap<>();
@@ -431,8 +433,14 @@ public class RabbitMQDatasetsService {
         ShanoirEvent event = null;
         try {
             RelatedDataset dto = objectMapper.readValue(data, RelatedDataset.class);
-            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             Long userId = dto.getUserId();
+            /** Check rights */
+            if (!securityService.checkDatasetRelatedDatasets(dto.getDatasetIds(), userId)) {
+                LOG.error("User {} is not allowed to copy datasets {}, copy aborted.", userId, dto.getDatasetIds());
+                return;
+            }
+            /* */
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             Long studyId = dto.getStudyId();
             datasetParentIds = dto.getDatasetIds();
             countTotal = datasetParentIds.size();
@@ -446,8 +454,8 @@ public class RabbitMQDatasetsService {
                     Float.valueOf(countProgress / countTotal),
                     studyId
             );
+            event.setId(dto.getEventId());
             event.setReport("");
-
             for (Long datasetParentId : datasetParentIds) {
                 progress += 1f / countTotal;
                 event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + countProgress++ + "/" + countTotal);
@@ -456,20 +464,16 @@ public class RabbitMQDatasetsService {
 
                 LOG.info("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
                 Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
-                Dataset datasetParent = datasetService.findById(datasetParentId);
 
-                if (datasetParent.getSource() != null) {
-                    LOG.info("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
-                    countCopy++;
-                } else if (dsCount != 0) {
+                if (dsCount != 0) {
                     LOG.info("[CopyDatasets] Dataset already exists in this study, copy aborted.");
                     countAlreadyExist++;
-
                 } else {
-                    Object[] result = datasetCopyService.moveDataset(datasetParent, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
+                    Object[] result = datasetCopyService.moveDataset(datasetParentId, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
                     Long newDsId = (Long) result[0];
                     countProcessed += (int) result[1];
                     countSuccess += (int) result[2];
+                    countCopy += (int) result[3];
                     LOG.info("countProcessed : " + countProcessed);
                     if (newDsId != null)
                         newDatasets.add(newDsId);

@@ -16,10 +16,10 @@ import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 
 import { StudyService } from 'src/app/studies/shared/study.service';
+import { CopyData, CopyDataService } from 'src/app/studies/shared/copy-data.service';
 
 import { StudyRightsService } from "../../../studies/shared/study-rights.service";
 import { StudyUserRight } from "../../../studies/shared/study-user-right.enum";
-import * as AppUtils from "../../../utils/app.utils";
 import { ServiceLocator } from "../../../utils/locator.service";
 import { ConsoleService } from "../../console/console.service";
 import { KeycloakService } from "../../keycloak/keycloak.service";
@@ -53,11 +53,13 @@ export class DatasetCopyDialogComponent {
     protected centerIds: number[] = [];
     protected subjectIds: number[] = [];
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    protected readonly BATCH_SIZE: number = 2;
 
     constructor(private http: HttpClient,
         private studyRightsService: StudyRightsService,
         private studyService: StudyService,
-        private keycloakService: KeycloakService) {
+        private keycloakService: KeycloakService,
+        private copyDataService: CopyDataService) {
     }
 
     public setUp(inputDatasets: InputDataset[], modalRef: any) {
@@ -114,27 +116,32 @@ export class DatasetCopyDialogComponent {
             } else if (this.isDatasetInStudy) {
                 this.statusMessage = 'Selected dataset(s) already belong to selected study.';
             } else {
-                const formData: FormData = new FormData();
-                formData.set('datasetIds', Array.from(this.inputDatasets.map(d => d.datasetId)).join(","));
-                formData.set('studyId', this.selectedStudy.id.toString());
-                if (this.subjectName && this.subjectName.trim() !== '') {
-                    formData.set('subjectName', this.subjectName.trim());
-                }
-                formData.set('centerIds', Array.from(this.centerIds).join(","));
-                formData.set('subjectIds', Array.from(this.subjectIds).join(","));
-                return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json' })
-                    .toPromise()
-                    .then(() => {
-                        this.close();
-                        this.consoleService.log('info', 'The copy of ' + this.inputDatasets.length + ' datasets towards study ' + this.selectedStudy.name + ' has started.');
-                    }).catch(reason => {
-                        this.canCopy = true;
-                        if (reason.status == 403) {
-                            this.statusMessage = "You must be admin or expert.";
-                        } else throw Error(reason);
-                    });
+                return this.copyDataService.copy(this.buildCopyData()).then(() => {
+                    this.close();
+                }).catch(reason => {
+                    this.canCopy = true;
+                    if (reason.status == 403) {
+                        this.statusMessage = "You must be admin or expert.";
+                    } else throw Error(reason);
+                });
             }
         });
+    }
+
+    private buildCopyData(): CopyData {
+        return {
+            datasets: this.inputDatasets.map(d => ({
+                datasetId: d.datasetId,
+                centerId: d.centerId,
+                subjectId: d.subjectId
+            })),
+            targetStudyId: this.selectedStudy.id,
+            subjects: this.subjectIds
+                .map(s => ({
+                    id: s,
+                    newName: null
+                }))
+        };
     }
 
     public checkDatasetBelongToStudy(lines: InputDataset[], studyId: number) {

@@ -23,6 +23,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(dismiss)="goToView()"
 					(back)="goBack()">
 				<button *ngIf="mode == 'view' && hasDownloadRight && downloadService.advancedDownloadCompat" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
+				<button *ngIf="mode == 'view'" class="right-icon" type="button">
+					<copy-from-csv [studyId]="id"></copy-from-csv>
+				</button>
 			</form-footer>
 
 			<span [ngSwitch]="mode">
