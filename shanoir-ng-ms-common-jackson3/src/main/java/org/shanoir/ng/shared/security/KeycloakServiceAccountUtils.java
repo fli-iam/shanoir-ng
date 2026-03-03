@@ -14,21 +14,21 @@
 
 package org.shanoir.ng.shared.security;
 
-import org.keycloak.representations.AccessTokenResponse;
+import java.time.Duration;
+import java.util.Map;
+
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
  * Keycloak Service account utility class
@@ -52,38 +52,60 @@ public class KeycloakServiceAccountUtils {
     private String clientSecret;
 
     @Autowired
-    private RestClient restClient;
+    private WebClient webClient;
 
     /**
-     * Get an access token using service account
+     * Get an access token using service account credentials.
      *
-     * @return AccessTokenResponse
+     * @return a Map containing the token response fields (access_token, expires_in, etc.)
+     * @throws SecurityException if the token request fails
      */
-    public AccessTokenResponse getServiceAccountAccessToken() throws SecurityException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("client_id", this.clientId);
-        map.add("client_secret", this.clientSecret);
-        map.add("grant_type", GRANT_TYPE);
+    public Map<String, Object> getServiceAccountAccessToken() throws SecurityException {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("client_id", this.clientId);
+        form.add("client_secret", this.clientSecret);
+        form.add("grant_type", GRANT_TYPE);
+
         try {
-            ResponseEntity<AccessTokenResponse> response = this.restClient
-                    .post()
+            Map<String, Object> response = webClient.post()
                     .uri(this.serverUrl)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .body(map)
+                    .body(BodyInserters.fromFormData(form))
                     .retrieve()
-                    .toEntity(AccessTokenResponse.class);
-            return response.getBody();
-        } catch (HttpStatusCodeException e) {
-            // in case of error with a response payload.
-            LOG.error("Unexpected error while retrieving access token.", e);
+                    .bodyToMono(Map.class)
+                    .cast(Map.class)
+                    .map(m -> (Map<String, Object>) m)
+                    .block(Duration.ofSeconds(10));
+
+            if (response == null || !response.containsKey("access_token")) {
+                throw new SecurityException("Empty or invalid token response from Keycloak.");
+            }
+            return response;
+
+        } catch (WebClientResponseException e) {
+            // Error with a response payload (4xx, 5xx)
+            LOG.error("Unexpected error while retrieving access token. Status: {}, Body: {}",
+                    e.getStatusCode(), e.getResponseBodyAsString(), e);
             throw new SecurityException("Unexpected error while retrieving access token.", e);
-        } catch (RestClientException e) {
-            // in case of an error but no response payload;
-            LOG.error("No response payload for service account token request", e);
-            throw new SecurityException("No response payload for service account token request", e);
+
+        } catch (SecurityException e) {
+            throw e;
+
+        } catch (Exception e) {
+            // No response payload or connection error
+            LOG.error("No response payload for service account token request.", e);
+            throw new SecurityException("No response payload for service account token request.", e);
         }
+    }
+
+    /**
+     * Convenience method to extract the raw access token string.
+     *
+     * @return the access token string
+     * @throws SecurityException if the token request fails
+     */
+    public String getAccessTokenString() throws SecurityException {
+        return (String) getServiceAccountAccessToken().get("access_token");
     }
 
 }
