@@ -1110,4 +1110,31 @@ public class DatasetSecurityService {
         }
         return hasRightOnEveryDataset(new ArrayList<>(dsIds), StudyUserRight.CAN_EXECUTE.toString());
     }
+
+    /**
+     * Check that the GIVEN user has the CAN_SEE_ALL right for every dataset.
+     * This is static because it is used in a rabbit listener, where the user is not the connected user
+     * @param datasetIds
+     * @param userId
+     * @return
+     */
+    public boolean checkDatasetRelatedDatasets(List<Long> datasetIds, Long userId) {
+        // If the entry is empty, return an empty list
+        if (datasetIds == null || datasetIds.isEmpty()) {
+            return true;
+        }
+        List<DatasetForRights> dtos = datasetRepository.findDatasetsForRights(datasetIds)
+                .stream()
+                .map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
+                .collect(Collectors.toList());
+        UserRights userRights = studyRightsService.getUserRights(userId);
+        for (DatasetForRights dataset : dtos) {
+            Set<Long> studyIds = dataset.getAllStudiesIds();
+            Long centerId = dataset.getCenterId();
+            if (!userRights.hasStudiesCenterRights(studyIds, centerId, StudyUserRight.CAN_SEE_ALL.toString())) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

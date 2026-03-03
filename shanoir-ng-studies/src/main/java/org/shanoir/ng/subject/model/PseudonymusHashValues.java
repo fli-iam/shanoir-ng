@@ -69,6 +69,9 @@ public class PseudonymusHashValues  extends HalEntity implements Serializable {
     public PseudonymusHashValues() { }
 
     public PseudonymusHashValues(PseudonymusHashValues other) {
+        if (other == null) {
+            return;
+        }
         this.birthNameHash1 = other.birthNameHash1;
         this.birthNameHash2 = other.birthNameHash2;
         this.birthNameHash3 = other.birthNameHash3;

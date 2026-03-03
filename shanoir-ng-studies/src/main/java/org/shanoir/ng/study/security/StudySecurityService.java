@@ -663,6 +663,7 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean hasRightOnCopy(CopyData copyData) throws EntityNotFoundException {
+        // rights on datasets are checked in the dataset microservice as this ms does not have access to datasets
         if (copyData == null || copyData.getTargetStudyId() == null) {
             return false;
         } else if (!hasRightOnStudy(copyData.getTargetStudyId(), StudyUserRight.CAN_ADMINISTRATE.name())) {

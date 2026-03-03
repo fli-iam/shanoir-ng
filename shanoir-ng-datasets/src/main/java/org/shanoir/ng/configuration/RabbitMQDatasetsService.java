@@ -26,6 +26,7 @@ import java.util.Set;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -127,6 +128,9 @@ public class RabbitMQDatasetsService {
 
     @Autowired
     private StudyService studyService;
+
+    @Autowired
+    private DatasetSecurityService securityService;
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
@@ -429,8 +433,14 @@ public class RabbitMQDatasetsService {
         ShanoirEvent event = null;
         try {
             RelatedDataset dto = objectMapper.readValue(data, RelatedDataset.class);
-            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             Long userId = dto.getUserId();
+            /** Check rights */
+            if (!securityService.checkDatasetRelatedDatasets(dto.getDatasetIds(), userId)) {
+                LOG.error("User {} is not allowed to copy datasets {}, copy aborted.", userId, dto.getDatasetIds());
+                return;
+            }
+            /* */
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             Long studyId = dto.getStudyId();
             datasetParentIds = dto.getDatasetIds();
             countTotal = datasetParentIds.size();
