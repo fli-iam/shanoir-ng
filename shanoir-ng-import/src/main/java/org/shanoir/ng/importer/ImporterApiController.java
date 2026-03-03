@@ -103,18 +103,6 @@ public class ImporterApiController implements ImporterApi {
     /** The Constant BUFFER_SIZE. */
     private static final int BUFFER_SIZE = 10 * KB;
 
-    @Value("${ms.url.shanoir-ng-datasets-eeg}")
-    private String datasetsMsUrl;
-
-    @Value("${ms.url.shanoir-ng-studies-commons}")
-    private String studiesCommonMsUrl;
-
-    @Value("${ms.url.shanoir-ng-studies-subjects-names}")
-    private String studiesSubjectsNamesMsUrl;
-
-    @Value("${ms.url.shanoir-ng-create-examination}")
-    private String createExaminationMsUrl;
-
     @Value("${shanoir.import.directory}")
     private String importDir;
 
