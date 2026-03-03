@@ -72,7 +72,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 COPY --link common/entrypoint_cert_init /usr/bin/
 COPY --link common/entrypoint_common    /usr/bin/
 RUN chmod +x /usr/bin/entrypoint_cert_init /usr/bin/entrypoint_common
-RUN chown -R /var/log/shanoir-ng-logs
 ENTRYPOINT ["/usr/bin/entrypoint_cert_init"]
 
 

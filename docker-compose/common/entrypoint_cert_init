@@ -31,4 +31,6 @@ then
     fi
 fi
 
+chown -R /var/log/shanoir-ng-logs
+
 abort_if_error
