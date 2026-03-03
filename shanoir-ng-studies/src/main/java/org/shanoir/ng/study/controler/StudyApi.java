@@ -79,16 +79,6 @@ public interface StudyApi {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<StudyDTO>> findStudies();
 
-    @Operation(summary = "", description = "If exists, returns the approved studies that the user is allowed to see")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found approved studies"),
-            @ApiResponse(responseCode = "401", description = "unauthorized"),
-            @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "404", description = "no study found"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/approved", produces = { "application/json" }, method = RequestMethod.GET)
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<StudyDTO>> findApprovedStudies();
-
     @Operation(summary = "", description = "If exists, returns the draft studies that the user is allowed to see")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found approved studies"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),

@@ -281,10 +281,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
 
     loadAllStudies(): void {
         this.studyService
-            .findApprovedStudies()
+            .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
             });
+        console.log(123)
     }
 
     studyNameForSubject() {

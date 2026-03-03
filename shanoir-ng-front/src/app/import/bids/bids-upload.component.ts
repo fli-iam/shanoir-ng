@@ -50,7 +50,7 @@ export class BidsUploadComponent {
             private breadcrumbsService: BreadcrumbsService,
             private studyService: StudyService) {
 
-    Promise.all([this.studyService.findApprovedStudies(), this.centerService.getAll()])
+    Promise.all([this.studyService.getAll(), this.centerService.getAll()])
         .then(([allStudies, allCenters]) => {
             this.studyOptions = [];
             for (const study of allStudies) {

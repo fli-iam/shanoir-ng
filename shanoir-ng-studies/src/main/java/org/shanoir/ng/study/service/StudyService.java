@@ -164,13 +164,6 @@ public interface StudyService {
     List<Study> findPublicStudies();
 
     /**
-     * Returns all approved studies the user can access;
-     */
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-    @PostFilter("@studySecurityService.hasRightOnTrustedStudy(filterObject, 'CAN_IMPORT')")
-    List<Study> findApprovedStudies();
-
-    /**
      * Returns all draft studies the user can access;
      */
     @PreAuthorize("hasRole('ADMIN')")

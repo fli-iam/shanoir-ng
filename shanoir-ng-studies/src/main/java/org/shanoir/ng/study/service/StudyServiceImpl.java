@@ -957,11 +957,6 @@ public class StudyServiceImpl implements StudyService {
     }
 
     @Override
-    public List<Study> findApprovedStudies() {
-        return this.studyRepository.findByIsDraftFalse();
-    }
-
-    @Override
     public List<Study> findDraftStudies() {
         return this.studyRepository.findByIsDraftTrue();
     }

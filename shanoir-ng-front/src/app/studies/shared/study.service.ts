@@ -150,11 +150,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         return this.findStudiesIcanAdmin().then(studies => studies?.map(study => new IdName(study.id, study.name)));
     }
 
-    findApprovedStudies(): Promise <Study[]> {
-        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL + '/approved')
-            .toPromise().then((studies) => { return studies })
-    }
-
     findDraftStudies(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL + '/draft')
             .toPromise()

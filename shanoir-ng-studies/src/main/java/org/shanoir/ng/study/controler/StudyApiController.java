@@ -165,16 +165,6 @@ public class StudyApiController implements StudyApi {
 
     @Override
     @Transactional
-    public ResponseEntity<List<StudyDTO>> findApprovedStudies() {
-        List<Study> studies = studyService.findApprovedStudies();
-        if (studies.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
-    }
-
-    @Override
-    @Transactional
     public ResponseEntity<List<StudyDTO>> findDraftStudies() {
         List<Study> studies = studyService.findDraftStudies();
         if (studies.isEmpty()) {
