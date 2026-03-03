@@ -142,7 +142,7 @@ public class Subject extends HalEntity {
         this.imagedObjectCategory = other.imagedObjectCategory;
         this.qualityTag = other.qualityTag;
         this.preclinical = other.preclinical;
-        this.pseudonymusHashValues = other.pseudonymusHashValues;
+        this.pseudonymusHashValues = new PseudonymusHashValues(other.pseudonymusHashValues);
     }
 
     /**
