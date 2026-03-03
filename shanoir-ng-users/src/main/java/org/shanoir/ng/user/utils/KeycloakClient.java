@@ -226,23 +226,19 @@ public class KeycloakClient {
         payload.put("firstName", user.getFirstName());
         payload.put("lastName", user.getLastName());
         payload.put("enabled", user.isEnabled());
-
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put("userId", List.of(user.getId().toString()));
-        attributes.put("canImportFromPACS", List.of(String.valueOf(user.isCanAccessToDicomAssociation())));
+        attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
         if (user.getExpirationDate() != null) {
-            attributes.put("expirationDate", List.of(user.getExpirationDate().toString()));
+            attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
         }
-
         payload.put("attributes", attributes);
-
         if (rawPassword != null) {
             payload.put("credentials", List.of(Map.of(
                     "type", "password",
                     "temporary", true,
                     "value", rawPassword)));
         }
-
         return payload;
     }
 
