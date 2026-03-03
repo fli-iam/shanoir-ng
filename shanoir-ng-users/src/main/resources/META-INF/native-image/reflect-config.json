@@ -10,6 +10,11 @@
         "allDeclaredMethods": true
     },
     {
+        "name": "org.jboss.resteasy.resteasy_jaxrs.i18n.LogMessages",
+        "allDeclaredConstructors": true,
+        "allDeclaredMethods": true
+    },
+    {
         "name": "org.shanoir.ng.study.rights.command.StudyUserCommand",
         "allDeclaredConstructors": true,
         "allDeclaredMethods": true
