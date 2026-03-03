@@ -20,7 +20,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EmailStudyUsersAdded extends EmailBase {
 
-    public EmailStudyUsersAdded() {}
+    public EmailStudyUsersAdded() {
+    }
 
     @JsonProperty
     private List<Long> studyUsers;
