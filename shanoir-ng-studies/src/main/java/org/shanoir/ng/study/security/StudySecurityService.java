@@ -320,6 +320,8 @@ public class StudySecurityService {
                 return false;
             }
         // @todo: remove later usage of subject study list
+        } else if (subject.getSubjectStudyList() == null) {
+            return false;
         } else {
             for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
                 // As the subject is already from the database, study object is valid
