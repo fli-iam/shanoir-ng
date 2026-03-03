@@ -76,15 +76,19 @@ public class OutputService {
         if (userImportDir.exists()) {
             for (File archive : getArchivesToProcess(userImportDir)) {
                 File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
-                List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
+                try {
+                    List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
 
-                for (OutputHandler outputHandler : outputHandlers) {
-                    if (outputHandler.canProcess(monitoring)) {
-                        LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
-                        outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
+                    for (OutputHandler outputHandler : outputHandlers) {
+                        if (outputHandler.canProcess(monitoring)) {
+                            LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
+                            outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
+                        }
                     }
+                } finally {
+                    System.gc();
+                    deleteTemporaryDirectory(cacheFolder);
                 }
-                deleteTemporaryDirectory(cacheFolder);
             }
         }
 

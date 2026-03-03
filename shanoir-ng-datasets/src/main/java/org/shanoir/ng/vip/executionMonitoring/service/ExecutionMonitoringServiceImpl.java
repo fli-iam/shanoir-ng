@@ -170,7 +170,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                         case FINISHED -> emProxyService.processFinishedJob(monitoring, event, dto.getEndDate());
                         case UNKNOWN, EXECUTION_FAILED, KILLED ->
                                 emProxyService.processKilledJob(monitoring, event, dto);
-                        default ->  emProxyService.processKilledJob(monitoring, event, dto);
+                        default ->  { }
                     }
                     if (!Objects.equals(dto.getStatus(), ExecutionStatus.RUNNING)) {
                         monitoringQueue.remove(emMap);
@@ -179,7 +179,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                 } catch (Exception e) {
                     // Unwrap ReactiveException thrown from async method
                     Throwable ex = Exceptions.unwrap(e);
-                    LOG.error("Error while monitoring the processing {}. Stopping the monitoring ...", monitoring.getId(), ex.getCause());
+                    LOG.error("Error while monitoring processing {}. Stopping the monitoring ...", monitoring.getId(), ex.getCause());
                     if (Objects.nonNull(event)) {
                         setEventInError(event, execLabel + " : " + ex.getMessage());
                     }
