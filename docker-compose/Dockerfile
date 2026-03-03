@@ -66,12 +66,13 @@ ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/urandom", 
     "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", \
     "-Djavax.net.ssl.trustStorePassword=changeit"]
 
-FROM base-microservice AS cert-init
+FROM base-microservice AS init-cert-and-logs
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq && apt-get install -qqy openssl
 COPY --link common/entrypoint_cert_init /usr/bin/
 COPY --link common/entrypoint_common    /usr/bin/
 RUN chmod +x /usr/bin/entrypoint_cert_init /usr/bin/entrypoint_common
+RUN chown -R /var/log/shanoir-ng-logs
 ENTRYPOINT ["/usr/bin/entrypoint_cert_init"]
 
 

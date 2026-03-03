@@ -79,12 +79,13 @@ services:
   #
   # Init service: run and stop. Create temporary certificate
   # related to SHANOIR_URL_HOST for all Shanoir microservices
+  # and set rights on log folder for native images
   #  
-  cert-init:
-    container_name: "${SHANOIR_PREFIX}cert-init"
+  init-cert-and-logs:
+    container_name: "${SHANOIR_PREFIX}init-cert-and-logs"
     build:
       context: docker-compose
-      target: cert-init
+      target: init-cert-and-logs
     environment:
       - SHANOIR_URL_HOST
       - SHANOIR_CERTIFICATE
@@ -92,6 +93,7 @@ services:
       - SHANOIR_CERTIFICATE_PEM_KEY
     volumes:
       - "certificate-share-data:/etc/ssl/certs/java"
+      - "logs:/var/log/shanoir-ng-logs"
   #
   # Database for all Shanoir microservices
   #
@@ -140,7 +142,7 @@ services:
       - SHANOIR_SMTP_HOST
       - SHANOIR_SMTP_PORT
     volumes:
-      - "logs:/tmp"
+      - "logs:/var/log/shanoir-ng-logs"
       - "certificate-share-data:/etc/ssl/certs/java:ro"
     networks:
       - shanoir_ng_network
@@ -148,7 +150,7 @@ services:
       - "9901:9901"
       - "9911:9911"
     depends_on:
-      cert-init:
+      init-cert-and-logs:
         condition: service_completed_successfully
       database:
         condition: service_started
@@ -180,7 +182,7 @@ services:
      - "9902:9902"
      - "9912:9912"
     depends_on:
-      cert-init:
+      init-cert-and-logs:
         condition: service_completed_successfully
       database:
         condition: service_started
@@ -215,7 +217,7 @@ services:
      # do not add by default, as it blocks local ShUp from using 44105
      # - "44105:44105"
     depends_on:
-      cert-init:
+      init-cert-and-logs:
         condition: service_completed_successfully
       database:
         condition: service_started
@@ -252,7 +254,7 @@ services:
      - "9904:9904"
      - "9914:9914"
     depends_on:
-      cert-init:
+      init-cert-and-logs:
         condition: service_completed_successfully
       database:
         condition: service_started
@@ -286,7 +288,7 @@ services:
      - "9905:9905"
      - "9915:9915"
     depends_on:
-      cert-init:
+      init-cert-and-logs:
         condition: service_completed_successfully
       database:
         condition: service_started
@@ -424,7 +426,7 @@ services:
     ports:
      - "443:443"
     depends_on:
-      - "cert-init"
+      - "init-cert-and-logs"
       - "users"
       - "studies"
       - "import"
