@@ -299,6 +299,10 @@ public class StudyServiceImpl implements StudyService {
     public Study update(Study study) throws ShanoirException {
         Study studyDb = studyRepository.findById(study.getId()).orElse(null);
 
+        if (study.getIsDraft() && hasMembershipChanged(study, studyDb)) {
+            throw new ShanoirException("Cannot change study members or their rights while the study is in draft state.");
+        }
+
         List<Long> tagsToDelete = getTagsToDelete(study, studyDb);
         List<Long> studyTagsToDelete = getStudyTagsToDelete(study, studyDb);
 
@@ -461,6 +465,32 @@ public class StudyServiceImpl implements StudyService {
         }
 
         return studyDb;
+    }
+
+    private boolean hasMembershipChanged(Study study, Study studyDb) {
+        Set<Long> existingUserIds = studyDb.getStudyUserList().stream()
+                .map(StudyUser::getUserId)
+                .collect(Collectors.toSet());
+        Set<Long> incomingUserIds = study.getStudyUserList() == null ? Collections.emptySet()
+                : study.getStudyUserList().stream()
+                        .map(StudyUser::getUserId)
+                        .collect(Collectors.toSet());
+
+        if (!existingUserIds.equals(incomingUserIds)) {
+            return true;
+        }
+
+        if (study.getStudyUserList() != null) {
+            Map<Long, StudyUser> existingByUserId = studyDb.getStudyUserList().stream()
+                    .collect(Collectors.toMap(StudyUser::getUserId, su -> su));
+
+            return study.getStudyUserList().stream().anyMatch(incoming -> {
+                StudyUser existing = existingByUserId.get(incoming.getUserId());
+                return existing != null && !new HashSet<>(existing.getStudyUserRights())
+                        .equals(new HashSet<>(incoming.getStudyUserRights()));
+            });
+        }
+        return false;
     }
 
     private boolean hasSubjectChanged(Subject oldSub, Subject newSub) {
