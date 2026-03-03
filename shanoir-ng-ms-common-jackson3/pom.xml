@@ -32,7 +32,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <java.version>25</java.version>
         <spring.version>4.0.2</spring.version>
         <dcm4che.version>5.31.1</dcm4che.version>
-        <keycloak.version>26.0.5</keycloak.version>
         <checkstyle.header.file>${project.basedir}/../shanoir-ng-back/java-header</checkstyle.header.file>
         <checkstyle.config.file>${project.basedir}/../shanoir-ng-back/checkstyle.xml</checkstyle.config.file>
         <checkstyle.suppressions.file>${project.basedir}/../shanoir-ng-back/suppressions.xml</checkstyle.suppressions.file>
@@ -117,19 +116,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.20.0</version>
-        </dependency>
-
-        <!-- Keycloak -->
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-admin-client</artifactId>
-            <version>${keycloak.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.sun.activation</groupId>
-                    <artifactId>jakarta.activation</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 

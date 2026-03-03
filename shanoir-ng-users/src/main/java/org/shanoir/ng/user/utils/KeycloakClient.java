@@ -14,216 +14,236 @@
 
 package org.shanoir.ng.user.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.time.Duration;
+import java.util.*;
 
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.RoleRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
-import org.shanoir.ng.utils.KeycloakShanoirUtil;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
-/**
- * Keycloak client. Used to execute requests to Keycloak server.
- *
- * @author msimon
- *
- */
+import reactor.core.publisher.Mono;
+
 @Component
 public class KeycloakClient {
 
-    /**
-     * Logger
-     */
     private static final Logger LOG = LoggerFactory.getLogger(KeycloakClient.class);
 
     @Value("${kc.admin.client.server.url}")
-    private String kcAdminClientServerUrl;
+    private String serverUrl;
 
     @Value("${kc.admin.client.realm}")
-    private String kcAdminClientRealm;
+    private String adminRealm;
 
     @Value("${kc.admin.client.client.id}")
-    private String kcAdminClientClientId;
+    private String clientId;
 
     @Value("${SHANOIR_KEYCLOAK_USER}")
-    private String kcAdminClientUsername;
+    private String username;
 
     @Value("${SHANOIR_KEYCLOAK_PASSWORD}")
-    private String kcAdminClientPassword;
+    private String password;
 
     @Value("${kc.admin.client.realm.users}")
-    private String keycloakRealm;
+    private String userRealm;
 
-    private Keycloak keycloak;
+    private final RoleRepository roleRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    private final WebClient webClient;
 
-    protected Keycloak getKeycloak() {
-        if (keycloak == null) {
-            keycloak = Keycloak.getInstance(kcAdminClientServerUrl, kcAdminClientRealm,
-                    kcAdminClientUsername, kcAdminClientPassword, kcAdminClientClientId);
-        }
-        return keycloak;
+    public KeycloakClient(RoleRepository roleRepository,
+            @Value("${kc.admin.client.server.url}") String serverUrl) {
+        this.roleRepository = roleRepository;
+        this.webClient = WebClient.builder()
+                .baseUrl(serverUrl)
+                .build();
     }
 
-    /**
-     * Create a user with a password.
-     *
-     * @param user
-     *            user to create.
-     * @param password
-     *            user password.
-     * @return keycloak user id.
-     * @throws SecurityException
-     */
-    public String createUserWithPassword(final User user, final String password) throws SecurityException {
+    private String getAdminToken() throws SecurityException {
+        Map<String, String> form = new HashMap<>();
+        form.put("grant_type", "password");
+        form.put("client_id", clientId);
+        form.put("username", username);
+        form.put("password", password);
+        Map<?, ?> response = webClient.post()
+                .uri("/realms/" + adminRealm + "/protocol/openid-connect/token")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(
+                        "grant_type", "password")
+                        .with("client_id", clientId)
+                        .with("username", username)
+                        .with("password", password))
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block(Duration.ofSeconds(10));
+        if (response == null || !response.containsKey("access_token")) {
+            throw new SecurityException("Unable to retrieve admin token from Keycloak.");
+        }
+        return response.get("access_token").toString();
+    }
+
+    public String createUserWithPassword(User user, String rawPassword) throws SecurityException {
         try {
-            final String keycloakId = KeycloakShanoirUtil
-                    .getCreatedUserId(getKeycloak().realm(keycloakRealm).users().create(getUserRepresentation(user)));
-
-            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
-            // Reset user password
-            final CredentialRepresentation credential = new CredentialRepresentation();
-            credential.setType(CredentialRepresentation.PASSWORD);
-            credential.setValue(password);
-            credential.setTemporary(Boolean.TRUE);
-            userResource.resetPassword(credential);
-
-            // Get user role
-            Optional<Role> roleOpt = roleRepository.findById(user.getRole().getId());
-            if (roleOpt.isPresent()) {
-                final String userRoleName = roleOpt.get().getName();
-                // Add realm role
-                userResource.roles().realmLevel().add(Arrays
-                        .asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
-                return keycloakId;
-            } else {
-                throw new NoSuchElementException("Role not found in roleRepository.");
+            String token = getAdminToken();
+            Map<String, Object> body = buildUserPayload(user, rawPassword);
+            var response = webClient.post()
+                    .uri("/admin/realms/" + userRealm + "/users")
+                    .headers(h -> h.setBearerAuth(token))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(body)
+                    .exchangeToMono(clientResponse -> {
+                        if (!clientResponse.statusCode().is2xxSuccessful()) {
+                            return Mono.error(new SecurityException("Failed to create user in Keycloak."));
+                        }
+                        return Mono.just(clientResponse.headers().asHttpHeaders());
+                    })
+                    .block(Duration.ofSeconds(10));
+            if (response == null) {
+                throw new SecurityException("Failed to create user in Keycloak.");
             }
+            String location = Objects.requireNonNull(response.getLocation()).getPath();
+            String keycloakId = location.replaceAll(".*/([^/]+)$", "$1");
+            assignRealmRole(keycloakId, user.getRole().getId(), token);
+            return keycloakId;
+        } catch (SecurityException e) {
+            throw e;
         } catch (Exception e) {
             throw new SecurityException("Could not register the new user into Keycloak.", e);
         }
     }
 
-    /**
-     * This methods resets the password of th given user and sets a temporary password.
-     * @param keycloakId the keycloak ID of the user to update.
-     * @return the password newly created
-     */
-    public String resetPassword(String keycloakId) {
-        // Create new temporary password
-        String newPassword = PasswordUtils.generatePassword();
-
-        final CredentialRepresentation credential = new CredentialRepresentation();
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setTemporary(Boolean.TRUE);
-        credential.setValue(newPassword);
-
-        final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
-        userResource.resetPassword(credential);
-
-        return newPassword;
-    }
-
-    /**
-     * Create a user with a password.
-     *
-     * @param user
-     *            user to create.
-     * @return keycloak user id.
-     * @throws SecurityException
-     */
-    public String createUserWithPassword(final User user) throws SecurityException {
+    public String createUserWithPassword(User user) throws SecurityException {
         return createUserWithPassword(user, user.getPassword());
     }
 
-
-    /**
-     * Delete a user.
-     *
-     * @param username
-     *            user name.
-     */
-    public void deleteUser(final String keycloakId) {
+    public void deleteUser(String keycloakId) {
         try {
-            getKeycloak().realm(keycloakRealm).users().delete(keycloakId);
+            String token = getAdminToken();
+            webClient.delete()
+                    .uri("/admin/realms/" + userRealm + "/users/" + keycloakId)
+                    .headers(h -> h.setBearerAuth(token))
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block(Duration.ofSeconds(10));
         } catch (Exception e) {
-            LOG.error("Error while deleting user with keycloak id " + keycloakId + " on Keycloak server", e);
+            LOG.error("Error deleting user {}", keycloakId, e);
         }
     }
 
-    /**
-     * Update a user.
-     *
-     * @param user
-     *            user to update.
-     */
-    public void updateUser(final User user) {
+    public void updateUser(User user) {
         try {
-            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(user.getKeycloakId());
-            userResource.update(getUserRepresentation(user));
+            String token = getAdminToken();
+            webClient.put()
+                    .uri("/admin/realms/" + userRealm + "/users/" + user.getKeycloakId())
+                    .headers(h -> h.setBearerAuth(token))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(buildUserPayload(user, null))
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block(Duration.ofSeconds(10));
+            removeAllManagedRealmRoles(user.getKeycloakId(), token);
+            assignRealmRole(user.getKeycloakId(), user.getRole().getId(), token);
+        } catch (Exception e) {
+            LOG.error("Error updating user {}", user.getKeycloakId(), e);
+        }
+    }
 
-            // Remove old realm role
-            final List<String> roleNames = roleRepository.getAllNames();
-            final List<RoleRepresentation> roleRepresentations = new ArrayList<>(
-                    userResource.roles().realmLevel().listAll());
-            for (RoleRepresentation roleRepresentation : roleRepresentations) {
-                if (roleNames.contains(roleRepresentation.getName())) {
-                    userResource.roles().realmLevel().remove(Arrays.asList(roleRepresentation));
-                }
+    public String resetPassword(String keycloakId) throws SecurityException {
+        String newPassword = PasswordUtils.generatePassword();
+        String token = getAdminToken();
+        Map<String, Object> body = Map.of(
+                "type", "password",
+                "temporary", true,
+                "value", newPassword);
+        webClient.put()
+                .uri("/admin/realms/" + userRealm + "/users/" + keycloakId + "/reset-password")
+                .headers(h -> h.setBearerAuth(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(10));
+        return newPassword;
+    }
+
+    private void assignRealmRole(String userId, Long roleId, String token) {
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new NoSuchElementException("Role not found"));
+        Map<?, ?> roleRepresentation = webClient.get()
+                .uri("/admin/realms/" + userRealm + "/roles/" + role.getName())
+                .headers(h -> h.setBearerAuth(token))
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block(Duration.ofSeconds(10));
+        webClient.post()
+                .uri("/admin/realms/" + userRealm + "/users/" + userId + "/role-mappings/realm")
+                .headers(h -> h.setBearerAuth(token))
+                .bodyValue(List.of(roleRepresentation))
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(10));
+    }
+
+    private void removeAllManagedRealmRoles(String userId, String token) {
+        List<String> managedRoleNames = roleRepository.getAllNames();
+        List<Map<String, Object>> roles = webClient.get()
+                .uri("/admin/realms/" + userRealm + "/users/" + userId + "/role-mappings/realm")
+                .headers(h -> h.setBearerAuth(token))
+                .retrieve()
+                .bodyToMono(List.class)
+                .block(Duration.ofSeconds(10));
+        if (roles == null)
+            return;
+        List<Map<String, Object>> toRemove = new ArrayList<>();
+        for (Map<String, Object> role : roles) {
+            if (managedRoleNames.contains(role.get("name"))) {
+                toRemove.add(role);
             }
-            // Get user role
-            final String userRoleName = roleRepository.findById(user.getRole().getId()).orElse(null).getName();
-            // Add realm role
-            userResource.roles().realmLevel().add(Arrays
-                    .asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
-        } catch (Exception e) {
-            LOG.error("Error while updating user with keycloak id " + user.getKeycloakId() + " on Keycloak server", e);
+        }
+        if (!toRemove.isEmpty()) {
+            webClient.method(org.springframework.http.HttpMethod.DELETE)
+                    .uri("/admin/realms/" + userRealm + "/users/" + userId + "/role-mappings/realm")
+                    .headers(h -> h.setBearerAuth(token))
+                    .bodyValue(toRemove)
+                    .retrieve()
+                    .toBodilessEntity()
+                    .block(Duration.ofSeconds(10));
         }
     }
 
-    /*
-     * Parse user to keycloak user representation.
-     *
-     * @param user user.
-     *
-     * @return keycloak user representation.
-     */
-    private UserRepresentation getUserRepresentation(final User user) {
-        final Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put("userId", Arrays.asList(user.getId().toString()));
-        attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
+    private Map<String, Object> buildUserPayload(User user, String rawPassword) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("username", user.getUsername());
+        payload.put("email", user.getEmail());
+        payload.put("firstName", user.getFirstName());
+        payload.put("lastName", user.getLastName());
+        payload.put("enabled", user.isEnabled());
+
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("userId", List.of(user.getId().toString()));
+        attributes.put("canImportFromPACS", List.of(String.valueOf(user.isCanAccessToDicomAssociation())));
         if (user.getExpirationDate() != null) {
-            attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
+            attributes.put("expirationDate", List.of(user.getExpirationDate().toString()));
         }
 
-        final UserRepresentation userRepresentation = new UserRepresentation();
-        userRepresentation.setAttributes(attributes);
-        userRepresentation.setEmail(user.getEmail());
-        userRepresentation.setEnabled(user.isEnabled() && (user.isAccountRequestDemand() == null || !user.isAccountRequestDemand()));
-        userRepresentation.setFirstName(user.getFirstName());
-        userRepresentation.setLastName(user.getLastName());
-        userRepresentation.setUsername(user.getUsername());
+        payload.put("attributes", attributes);
 
-        return userRepresentation;
+        if (rawPassword != null) {
+            payload.put("credentials", List.of(Map.of(
+                    "type", "password",
+                    "temporary", true,
+                    "value", rawPassword)));
+        }
+
+        return payload;
     }
 
 }
