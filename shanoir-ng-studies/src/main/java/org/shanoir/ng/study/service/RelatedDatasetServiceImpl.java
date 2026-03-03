@@ -200,7 +200,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             }
             if (add) {
                 StudyCenter centerToAdd = new StudyCenter();
-                centerToAdd.setStudy(study);
+                //centerToAdd.setStudy(study);
                 centerToAdd.setCenter(center);
                 centerToAdd.setSubjectNamePrefix(null);
                 studyCenterList.add(centerToAdd);
