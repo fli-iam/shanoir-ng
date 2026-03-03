@@ -15,6 +15,7 @@
 package org.shanoir.ng;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -315,9 +316,9 @@ public class ShanoirUsersManagement implements ApplicationRunner {
     private Map<String, Object> buildUserRepresentation(User user) {
         Map<String, List<String>> attributes = new HashMap<>();
         attributes.put("userId", List.of(user.getId().toString()));
-        attributes.put("canImportFromPACS", List.of("" + user.isCanAccessToDicomAssociation()));
+        attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
         if (user.getExpirationDate() != null) {
-            attributes.put("expirationDate", List.of("" + user.getExpirationDate()));
+            attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
         }
         Map<String, Object> body = new HashMap<>();
         body.put("attributes", attributes);
