@@ -3,5 +3,11 @@
         "name": "org.shanoir.ng.study.rights.command.StudyUserCommand",
         "allDeclaredConstructors": true,
         "allDeclaredMethods": true
+    },
+    {
+        "name": "org.shanoir.ng.shared.email.EmailStudyUsersAdded",
+        "allDeclaredConstructors": true,
+        "allDeclaredMethods": true,
+        "allDeclaredFields": true
     }
 ]
