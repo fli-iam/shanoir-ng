@@ -141,6 +141,7 @@ services:
       - VIP_SERVICE_EMAIL
       - SHANOIR_SMTP_HOST
       - SHANOIR_SMTP_PORT
+      - SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - "certificate-share-data:/etc/ssl/certs/java:ro"
