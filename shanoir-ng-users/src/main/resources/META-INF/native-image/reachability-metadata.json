@@ -7,14 +7,6 @@
                     "name": "serialVersionUID"
                 }
             ]
-        },
-        {
-            "type": "org.jboss.resteasy.resteasy_jaxrs.i18n.Messages_$bundle",
-            "fields": [
-                {
-                    "name": "INSTANCE"
-                }
-            ]
         }
     ]
 }
