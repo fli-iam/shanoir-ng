@@ -2,6 +2,10 @@
 set -e
 . /bin/entrypoint_common
 
+mkdir -p /var/log/shanoir-ng-logs
+chmod -R 777 /var/log/shanoir-ng-logs
+chown -R 1000:1000 /var/log/shanoir-ng-logs || true
+
 optional SHANOIR_CERTIFICATE
 require  SHANOIR_URL_HOST
 require  SHANOIR_CERTIFICATE_PEM_CRT
@@ -30,7 +34,5 @@ then
         mv /tmp/crt   "$crt"
     fi
 fi
-
-chown -R /var/log/shanoir-ng-logs
 
 abort_if_error
