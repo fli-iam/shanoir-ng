@@ -258,8 +258,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
      */
     private boolean checkIfSameDatasetVolume(Dataset dataset, JSONObject volume) {
         try {
-            LOG.info("JSON : " + volume.getJSONObject("shanoirId").getString("value") + ", ds : " + dataset.getId());
-            String shanoirId = volume.getJSONObject("shanoirId").getString("value");
+            String shanoirId = volume.getString("shanoirId");
 
             if (shanoirId.contains(",")) {
                 return Arrays.stream(shanoirId.split(",")).anyMatch(split -> Objects.equals(Long.valueOf(split), dataset.getId()));
@@ -321,7 +320,8 @@ public class OFSEPSeqIdHandler extends OutputHandler {
      * Update dataset from pipeline output serie & volume
      */
     private void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
-        if (!Objects.equals("IGNORED", vol.getJSONObject("volume").getString("type"))) {
+        LOG.info("JSON : \n" + vol.getJSONObject("volume"));
+        if (!vol.getJSONObject("volume").has("status") || !Objects.equals("IGNORED", vol.getJSONObject("volume").getString("status"))) {
             DatasetMetadataField.NAME.update(ds, vol.getJSONObject("volume").getString(TYPE));
             datasetRepository.save(ds);
 
@@ -418,14 +418,14 @@ public class OFSEPSeqIdHandler extends OutputHandler {
         DatasetProperty institutionName = new DatasetProperty();
         institutionName.setDataset(ds);
         institutionName.setName("dicom.InstitutionName");
-        institutionName.setValue("\"" + attributes.getString(Tag.InstitutionName) + "\"");
+        institutionName.setValue(Objects.isNull(attributes.getString(Tag.InstitutionName)) ? "null" : attributes.getString(Tag.InstitutionName));
         institutionName.setProcessing(monitoring);
         properties.add(institutionName);
 
         DatasetProperty institutionAddress = new DatasetProperty();
         institutionAddress.setDataset(ds);
         institutionAddress.setName("dicom.InstitutionAddress");
-        institutionAddress.setValue("\"" + attributes.getString(Tag.InstitutionAddress) + "\"");
+        institutionAddress.setValue(Objects.isNull(attributes.getString(Tag.InstitutionAddress)) ? "null" : attributes.getString(Tag.InstitutionAddress));
         institutionAddress.setProcessing(monitoring);
         properties.add(institutionAddress);
 
