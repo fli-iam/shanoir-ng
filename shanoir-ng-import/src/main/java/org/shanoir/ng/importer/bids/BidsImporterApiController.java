@@ -108,7 +108,6 @@ public class BidsImporterApiController implements BidsImporterApi {
             @Parameter(name = "name of the study", required = true) @PathVariable("studyName") String studyName,
             @Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId)
                     throws RestServiceException, ShanoirException, IOException {
-
         // STEP 1: Analyze folder and unzip it.
         if (bidsFile == null) {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
