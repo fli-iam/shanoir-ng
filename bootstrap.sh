@@ -145,7 +145,7 @@ if [ -n "$deploy" ] ; then
 	docker compose -f docker-compose-dev.yml up -d database
 	wait_tcp_ready database 3306
 
-	# 2. keycloak-database + keycloak + cert-init
+	# 2. keycloak-database + keycloak + init-cert-and-logs
 	if [ -n "$keycloak" ] ; then
 		step "init: keycloak-database"
 		docker compose -f docker-compose-dev.yml up -d keycloak-database
@@ -160,8 +160,8 @@ if [ -n "$deploy" ] ; then
 				' INFO  \[io.quarkus\] .* Keycloak .* started in [0-9]*'	\
 				-- docker compose logs --no-color --follow keycloak >/dev/null
 
-		step "start and stop: cert-init"
-		docker compose -f docker-compose-dev.yml up -d cert-init
+		step "start and stop: init-cert-and-logs"
+		docker compose -f docker-compose-dev.yml up -d init-cert-and-logs
 	fi
 
 	# 3. infrastructure services: dcm4chee
