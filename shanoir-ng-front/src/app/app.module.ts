@@ -129,6 +129,7 @@ import { HandleErrorService } from './shared/utils/handle-error.service';
 import { SolrSearchComponent } from './solr/solr.search.component';
 import { SolrService } from './solr/solr.service';
 import { StudyService } from './studies/shared/study.service';
+import { DraftStudiesListComponent } from './studies/draft-studies-list/draft-studies-list.component';
 import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyComponent } from './studies/study/study.component';
 import { DicomService } from './study-cards/shared/dicom.service';
@@ -310,6 +311,7 @@ import { DatasetCopyDialogService } from './shared/components/dataset-copy-dialo
         MenuItemComponent,
         StudyComponent,
         StudyListComponent,
+        DraftStudiesListComponent,
         SubjectExaminationPipe,
         SubjectStudyPipe,
         TableComponent,

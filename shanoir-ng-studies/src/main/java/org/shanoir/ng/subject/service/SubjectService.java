@@ -172,6 +172,8 @@ public interface SubjectService {
      */
     boolean updateSubjectInMicroservices(SubjectDTO subjectToSubjectDTO) throws MicroServiceCommunicationException;
 
+    boolean updateSubjectBatchInMicroservices(List<Subject> subjects) throws MicroServiceCommunicationException;
+
     /**
      * Returns a filtered page by clinical subject name.
      *

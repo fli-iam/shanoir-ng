@@ -18,9 +18,12 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,6 +35,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.VR;
+import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.io.DicomOutputStream;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -43,16 +50,13 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.json.Json;
@@ -61,6 +65,7 @@ import jakarta.mail.BodyPart;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.util.ByteArrayDataSource;
+import reactor.core.publisher.Mono;
 
 /**
  * This class is used to download files on using WADO URLs:
@@ -119,14 +124,20 @@ public class WADODownloaderService {
     private static final String CONTENT_TYPE = "&contentType";
 
     @Autowired
-    private RestTemplate restTemplate;
+    private WebClient.Builder webClientBuilder;
 
     @Autowired
     private WADOURLHandler wadoURLHandler;
 
+    private WebClient webClient;
+
     @PostConstruct
-    public void initRestTemplate() {
-        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+    public void initWebClient() {
+        this.webClient = webClientBuilder
+                .codecs(configurer -> configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(16 * 1024 * 1024)) // 16MB buffer for large DICOM files
+                .build();
     }
 
     /**
@@ -145,11 +156,10 @@ public class WADODownloaderService {
      *
      */
     public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, DatasetDownloadError downloadResult) {
-        int i = 0;
         List<String> files = new ArrayList<>();
         Set<String> zippedUrls = new HashSet<>();
         long duplicates = 0;
-        for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
+        for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
             String url = iterator.next().toString();
             if (!zippedUrls.contains(url)) {
                 zippedUrls.add(url);
@@ -158,7 +168,12 @@ public class WADODownloaderService {
                 String name = buildFileName(subjectName, dataset, datasetFilePath, sopInstanceUID);
                 // Download and zip
                 try {
-                    String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name);
+                    String zipedFile = null;
+                    if (dataset.getSource() != null) {
+                        zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name, subjectName);
+                    } else {
+                        zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name, null);
+                    }
                     if (zipedFile != null) {
                         files.add(zipedFile);
                     }
@@ -179,7 +194,6 @@ public class WADODownloaderService {
     private String buildFileName(String subjectName, Dataset dataset, String datasetFilePath, String instanceUID) {
         String serieDescription = dataset.getUpdatedMetadata().getName();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-
         dataset = dataset.getFirstRealInput();
         String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
         String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
@@ -202,11 +216,11 @@ public class WADODownloaderService {
      * @throws ZipPacsFileException
      * @throws IOException when couldn't write into the stream
      */
-    private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name) throws ZipPacsFileException {
+    private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name, String subjectName) throws ZipPacsFileException {
         byte[] responseBody = null;
         try {
             responseBody = downloadFileFromPACS(url);
-            this.extractDICOMZipFromMHTMLFile(responseBody, name, zipOutputStream, url.contains(WADO_REQUEST_TYPE_WADO_RS));
+            extractDICOMZipFromMHTMLFile(responseBody, name, zipOutputStream, url.contains(WADO_REQUEST_TYPE_WADO_RS), subjectName);
             return name + DCM;
         } catch (IOException | MessagingException e) {
             LOG.error("Error in downloading/writing file [{}] from pacs to zip", name, e);
@@ -241,7 +255,11 @@ public class WADODownloaderService {
                 if (indexInstanceUID > 0) {
                     sopInstanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
                     byte[] responseBody = downloadFileFromPACS(url);
-                    extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder);
+                    if (dataset.getSource() != null) {
+                        extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder, subjectName);
+                    } else {
+                        extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder, null);
+                    }
                 } else {
                     // handle and check secondly for WADO-URI URLs by "objectUID="
                     // instanceUID == objectUID
@@ -339,37 +357,58 @@ public class WADODownloaderService {
     }
 
     /**
-     * This method contacts the PACS with a WADO-RS url and does the actual download.
+     * This method contacts the PACS with a WADO-RS url and does the actual
+     * download. Uses async WebClient internally but maintains synchronous
+     * method signature.
      *
      * @param url
      * @return
      * @throws IOException
      */
     private byte[] downloadFileFromPACS(final String url) throws IOException, HttpClientErrorException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, entity, byte[].class, "1");
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return response.getBody();
-        } else {
-            throw new IOException("Download did not work: wrong status code received.");
+        try {
+            return downloadFileFromPACSAsync(url)
+                    .block(); // Block at the end to convert Mono to sync result
+        } catch (WebClientResponseException e) {
+            throw new HttpClientErrorException(e.getStatusCode(),
+                    "Download failed: " + e.getMessage());
+        } catch (Exception e) {
+            throw new IOException("Download failed: " + e.getMessage(), e);
         }
     }
 
     private String downloadMetadataFromPACS(final String url) throws IOException {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        LOG.debug("Download metadata from pacs, url : " + url);
-        ResponseEntity<String> response = restTemplate.exchange(url,
-                HttpMethod.GET, entity, String.class, "1");
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return response.getBody();
-        } else {
-            throw new IOException("Download did not work: wrong status code received.");
+        try {
+            return downloadMetadataFromPACSAsync(url)
+                    .block(); // Block at the end to convert Mono to sync result
+        } catch (WebClientResponseException e) {
+            throw new IOException("Download failed: " + e.getStatusCode() + " - " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new IOException("Download failed: " + e.getMessage(), e);
         }
+    }
+
+    // Internal async methods for potential reuse
+    private Mono<byte[]> downloadFileFromPACSAsync(final String url) {
+        return webClient.get()
+                .uri(url)
+                .header(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";")
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        response -> Mono.error(new IOException("Download did not work: wrong status code received.")))
+                .bodyToMono(byte[].class)
+                .timeout(Duration.ofMinutes(5));
+    }
+
+    private Mono<String> downloadMetadataFromPACSAsync(final String url) {
+        return webClient.get()
+                .uri(url)
+                .header(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        response -> Mono.error(new IOException("Download did not work: wrong status code received.")))
+                .bodyToMono(String.class)
+                .timeout(Duration.ofSeconds(30));
     }
 
     /**
@@ -387,7 +426,7 @@ public class WADODownloaderService {
      * @throws IOException
      * @throws MessagingException
      */
-    private void extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder)
+    private void extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder, String subjectName)
             throws IOException, MessagingException {
         try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
             ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
@@ -404,7 +443,23 @@ public class WADODownloaderService {
                 } else {
                     extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + i + DCM);
                 }
-                Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
+                if (subjectName != null && !subjectName.trim().isEmpty()) {
+                    modifyAndSaveDicomFile(bodyPart.getInputStream(), extractedDicomFile, subjectName);
+                } else {
+                    Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
+                }
+            }
+        }
+    }
+
+    private void modifyAndSaveDicomFile(InputStream inputStream, File outputFile, String subjectName)
+            throws IOException {
+        try (DicomInputStream dis = new DicomInputStream(inputStream)) {
+            Attributes attributes = dis.readDataset();
+            attributes.setString(Tag.PatientName, VR.PN, subjectName);
+            attributes.setString(Tag.PatientID, VR.LO, subjectName);
+            try (DicomOutputStream dos = new DicomOutputStream(outputFile)) {
+                dos.writeDataset(dis.getFileMetaInformation(), attributes);
             }
         }
     }
@@ -426,14 +481,19 @@ public class WADODownloaderService {
      * @throws IOException
      * @throws MessagingException
      */
-    private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, String name, ZipOutputStream zipOutputStream, boolean isMultipart)
+    private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, String name, ZipOutputStream zipOutputStream,
+            boolean isMultipart, String subjectName)
             throws IOException, MessagingException {
         try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
             // Not multipart
             if (!isMultipart) {
                 ZipEntry entry = new ZipEntry(name + DCM);
                 zipOutputStream.putNextEntry(entry);
-                bIS.transferTo(zipOutputStream);
+                if (subjectName != null && !subjectName.trim().isEmpty()) {
+                    modifyAndWriteDicomToStream(bIS, zipOutputStream, subjectName);
+                } else {
+                    bIS.transferTo(zipOutputStream);
+                }
                 zipOutputStream.closeEntry();
                 return;
             }
@@ -447,9 +507,7 @@ public class WADODownloaderService {
                     throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
                 }
                 ZipEntry entry = new ZipEntry(name + DCM);
-                zipOutputStream.putNextEntry(entry);
-                bodyPart.getInputStream().transferTo(zipOutputStream);
-                zipOutputStream.closeEntry();
+                addEntry(zipOutputStream, subjectName, bodyPart, entry);
                 return;
             }
             // Multipart with multiple parts
@@ -459,10 +517,32 @@ public class WADODownloaderService {
                     throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
                 }
                 ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
-                zipOutputStream.putNextEntry(entry);
-                bodyPart.getInputStream().transferTo(zipOutputStream);
-                zipOutputStream.closeEntry();
+                addEntry(zipOutputStream, subjectName, bodyPart, entry);
             }
+        }
+    }
+
+    private void addEntry(ZipOutputStream zipOutputStream, String subjectName, BodyPart bodyPart, ZipEntry entry)
+            throws IOException, MessagingException {
+        zipOutputStream.putNextEntry(entry);
+        if (subjectName != null && !subjectName.trim().isEmpty()) {
+            modifyAndWriteDicomToStream(bodyPart.getInputStream(), zipOutputStream, subjectName);
+        } else {
+            bodyPart.getInputStream().transferTo(zipOutputStream);
+        }
+        zipOutputStream.closeEntry();
+    }
+
+    private void modifyAndWriteDicomToStream(InputStream inputStream, OutputStream outputStream, String subjectName)
+            throws IOException {
+        try (DicomInputStream dis = new DicomInputStream(inputStream)) {
+            Attributes attributes = dis.readDataset();
+            attributes.setString(Tag.PatientName, VR.PN, subjectName);
+            attributes.setString(Tag.PatientID, VR.LO, subjectName);
+            @SuppressWarnings("resource")
+            DicomOutputStream dos = new DicomOutputStream(outputStream, "1.2.840.10008.1.2.1");
+            dos.writeDataset(dis.getFileMetaInformation(), attributes);
+            dos.flush();
         }
     }
 

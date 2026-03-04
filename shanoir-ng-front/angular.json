@@ -27,7 +27,14 @@
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
-              "sha.js"
+              "sha.js",
+              "buffer",
+              "html2canvas",
+              "canvg",
+              "core-js",
+              "raf",
+              "rgbcolor",
+              "reflect-metadata"
             ],
             "extractLicenses": false,
             "sourceMap": true,

@@ -36,6 +36,7 @@ import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
+import org.shanoir.ng.subject.dto.SubjectBatchDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
@@ -189,8 +190,14 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     @Transactional
     public Subject create(Subject subject, boolean withAMQP) throws ShanoirException {
-        subject = mapSubjectStudyListToSubject(subject);
+        try {
+            subject = mapSubjectStudyListToSubject(subject);
+        } catch (ShanoirException e) {
+            throw e;
+        }
+
         Subject subjectDb = subjectRepository.save(subject);
+        LOG.info("New subject created with ID: {} and Name: {}", subjectDb.getId(), subjectDb.getName());
         if (withAMQP) {
             try {
                 updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectDb));
@@ -241,6 +248,17 @@ public class SubjectServiceImpl implements SubjectService {
      */
     private Subject mapSubjectStudyListToSubject(Subject subject) throws ShanoirException {
         List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+
+        if (subject.getStudy() != null && subject.getStudy().getId() != null) {
+            Long studyId = subject.getStudy().getId();
+            Boolean isDraft = studyRepository.findIsDraftById(studyId);
+            if (Boolean.TRUE.equals(isDraft)) {
+                throw new ShanoirException(
+                    "Cannot create subjects in draft studies. Study must be approved first.",
+                    HttpStatus.FORBIDDEN.value());
+            }
+        }
+
         // Old versions of ShUp will still send subject study objects, and no studyId in
         // subject
         if (subjectStudyList != null && !subjectStudyList.isEmpty()) {
@@ -400,6 +418,23 @@ public class SubjectServiceImpl implements SubjectService {
         } catch (AmqpException | JsonProcessingException e) {
             throw new MicroServiceCommunicationException(
                     "Error while communicating with MS Datasets to update subject.");
+        }
+    }
+
+    @Override
+    public boolean updateSubjectBatchInMicroservices(List<Subject> subjects) throws MicroServiceCommunicationException {
+        try {
+            List<SubjectDTO> subjectDTOs = subjects.stream()
+                    .map(subject -> subjectMapper.subjectToSubjectDTO(subject))
+                    .collect(Collectors.toList());
+            SubjectBatchDTO batchDTO = new SubjectBatchDTO();
+            batchDTO.setSubjects(subjectDTOs);
+            rabbitTemplate.convertSendAndReceive(
+                    RabbitMQConfiguration.SUBJECT_BATCH_UPDATE_QUEUE,
+                    objectMapper.writeValueAsString(batchDTO));
+            return true;
+        } catch (AmqpException | JsonProcessingException e) {
+            throw new MicroServiceCommunicationException("Error while communicating with MS Datasets to batch update subjects.");
         }
     }
 
