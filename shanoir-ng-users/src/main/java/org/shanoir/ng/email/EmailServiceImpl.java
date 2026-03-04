@@ -132,7 +132,6 @@ public class EmailServiceImpl implements EmailService {
             messageHelper.setText(content, true);
         };
         mailSender.send(messagePreparator);
-
     }
 
     @Override
@@ -183,7 +182,6 @@ public class EmailServiceImpl implements EmailService {
     public void notifyAdminAccountExtensionRequest(User user) {
         // Get admins emails
         final List<String> adminEmails = userRepository.findAdminEmails();
-
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom(administratorEmail);
@@ -239,7 +237,6 @@ public class EmailServiceImpl implements EmailService {
             messageHelper.setText(content, true);
         };
         mailSender.send(messagePreparator);
-
     }
 
     @Override
@@ -293,7 +290,6 @@ public class EmailServiceImpl implements EmailService {
         // Get admins emails
         final List<String> adminEmails = userRepository.findAdminEmails();
         User userAdmin = userRepository.findById(KeycloakUtil.getTokenUserId()).orElse(null);
-
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom(administratorEmail);
@@ -313,7 +309,6 @@ public class EmailServiceImpl implements EmailService {
     private void notifyAdminAccountRequestDenied(final User user) {
         // Get admins emails
         final List<String> adminEmails = userRepository.findAdminEmails();
-
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom(administratorEmail);
@@ -331,7 +326,6 @@ public class EmailServiceImpl implements EmailService {
         // Get admins emails
         final List<String> adminEmails = userRepository.findAdminEmails();
         User userAdmin = userRepository.findById(KeycloakUtil.getTokenUserId()).orElse(null);
-
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom(administratorEmail);
@@ -351,7 +345,6 @@ public class EmailServiceImpl implements EmailService {
     private void notifyAdminExtensionRequestDenied(final User user) {
         // Get admins emails
         final List<String> adminEmails = userRepository.findAdminEmails();
-
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom(administratorEmail);
@@ -669,7 +662,6 @@ public class EmailServiceImpl implements EmailService {
      */
     public void notifyUserRefusedFromStudy(AccessRequest refusedRequest) {
         User user = refusedRequest.getUser();
-
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom(administratorEmail);

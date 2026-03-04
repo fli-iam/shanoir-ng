@@ -1,0 +1,32 @@
+[
+    {
+        "name": "org.springframework.hateoas.RepresentationModel"
+    },
+    {
+        "name": "org.springframework.hateoas.Link"
+    },
+    {
+        "name": "org.springframework.hateoas.Links"
+    },
+    {
+        "name": "java.util.Date"
+    },
+    {
+        "name": "java.sql.Timestamp"
+    },
+    {
+        "name": "java.lang.Number"
+    },
+    {
+        "name": "java.lang.Integer"
+    },
+    {
+        "name": "java.lang.Long"
+    },
+    {
+        "name": "java.lang.Boolean"
+    },
+    {
+        "name": "java.math.BigDecimal"
+    }
+]

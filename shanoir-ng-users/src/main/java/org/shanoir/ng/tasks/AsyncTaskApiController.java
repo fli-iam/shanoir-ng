@@ -15,7 +15,11 @@
 package org.shanoir.ng.tasks;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.time.DateUtils;
@@ -28,10 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import io.swagger.v3.oas.annotations.Parameter;
 
 /**
  * API to manage asynchronous tasks:
@@ -80,8 +81,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
     }
 
     @Override
-    public ResponseEntity<ShanoirEvent> getTaskDetails(
-            @Parameter(name = "id of the task", required = true) @PathVariable("taskId") Long taskId) {
+    public ResponseEntity<ShanoirEvent> getTaskDetails(Long taskId) {
         ShanoirEvent event = taskService.findById(taskId);
         if (event == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
