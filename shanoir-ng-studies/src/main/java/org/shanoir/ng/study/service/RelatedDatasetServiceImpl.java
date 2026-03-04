@@ -125,6 +125,8 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                 Subject createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, subjectCopy.getNewName(), false);
                 subjectMapping.put(sourceSubject.getId(), createdSubject.getId());
                 createdSubjects.add(createdSubject);
+            } else {
+                subjectMapping.put(sourceSubject.getId(), targetSubject.getId());
             }
         }
         if (!createdSubjects.isEmpty()) {
@@ -200,7 +202,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             }
             if (add) {
                 StudyCenter centerToAdd = new StudyCenter();
-                //centerToAdd.setStudy(study);
+                centerToAdd.setStudy(study);
                 centerToAdd.setCenter(center);
                 centerToAdd.setSubjectNamePrefix(null);
                 studyCenterList.add(centerToAdd);

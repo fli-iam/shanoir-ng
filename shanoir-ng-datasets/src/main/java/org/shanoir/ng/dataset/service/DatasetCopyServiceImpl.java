@@ -21,10 +21,12 @@ import java.util.Map;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -32,8 +34,8 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.shared.service.StudyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 
@@ -48,7 +51,7 @@ import jakarta.transaction.Transactional;
 public class DatasetCopyServiceImpl implements DatasetCopyService {
 
     @Autowired
-    private StudyService studyService;
+    private StudyRepository studyRepository;
 
     @Autowired
     private DatasetAcquisitionRepository datasetAcquisitionRepository;
@@ -65,6 +68,14 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     @Autowired
     private ShanoirEventService eventService;
 
+    @Autowired
+    private DatasetExpressionRepository datasetExpressionRepository;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    private static final int BATCH_SIZE = 1000;
+
     private static final Logger LOG = LoggerFactory.getLogger(DatasetCopyServiceImpl.class);
 
     @Override
@@ -79,9 +90,8 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             int countProcessed = 0;
             int countSuccess = 0;
             Long oldDsId = ds.getId();
-            Subject sourceSubject = subjectRepository.findById(ds.getSubjectId()).orElseThrow();
-            Long targetSubjectId = subjectMap.get(sourceSubject.getId());
-            Subject targetSubject = subjectRepository.findById(targetSubjectId).orElseThrow();
+            Long targetSubjectId = subjectMap.get(ds.getSubjectId());
+            Subject targetSubjectRef = subjectRepository.getReferenceById(targetSubjectId);
             LOG.info("[CopyDatasets] moveDataset : " + oldDsId + " to study : " + studyId);
 
             // Creation of new dataset according to its type
@@ -89,10 +99,9 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             if (ds.getDatasetAcquisition() != null &&  ds.getDatasetAcquisition().getId() != null) {
 
                 newDs = DatasetUtils.copyDatasetFromDataset(ds);
-                ds.getCopies().add(newDs);
                 newDs.setSource(ds);
                 newDs.setCopies(new ArrayList<>());
-                newDs.setSubjectId(targetSubject.getId());
+                newDs.setSubjectId(targetSubjectRef.getId());
 
                 // Handling of DatasetAcquisition and Examination
                 DatasetAcquisition newDsAcq = null;
@@ -105,7 +114,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                         newDsAcq = datasetAcquisitionRepository.findBySourceIdAndExaminationStudy_Id(oldAcqId, studyId);
                     }
                     if (newDsAcq == null) {
-                        newDsAcq = moveAcquisition(ds.getDatasetAcquisition(), newDs, studyId, targetSubject, examMap, userId);
+                        newDsAcq = moveAcquisition(ds.getDatasetAcquisition(), newDs, studyId, targetSubjectRef, examMap, userId);
                     }
                 }
                 // Create the DatasetExpression for the new Dataset
@@ -118,7 +127,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 // Set dataset.subjectId
                 newDs.setSubjectId(newDs.getDatasetAcquisition().getExamination().getSubject().getId());
 
-                datasetRepository.save(newDs);
+                saveDatasetWithDatasetFileBatch(newDs);
                 acqMap.put(oldAcqId, newDsAcq);
                 countSuccess++;
             } else if (ds.getDatasetProcessing() != null) {
@@ -131,6 +140,37 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             LOG.error("[CopyDatasets] Error during the copy of dataset [" + dsId + "] to study [" + studyId + "].");
             throw e;
         }
+    }
+
+    // Save dataset and dataset files in batch to avoid memory overflow
+    @Transactional
+    public void saveDatasetWithDatasetFileBatch(Dataset dataset) {
+        List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions(); // save list
+        dataset.setDatasetExpressions(List.of()); // empty it
+        Dataset savedDataset = datasetRepository.save(dataset); // save dataset without dataset expressions
+        int fileCount = 0;
+        for (DatasetExpression dexp : datasetExpressions) { // for each dataset expression
+            List<DatasetFile> dexpFiles = dexp.getDatasetFiles(); // save list of dataset files
+            dexp.setDataset(savedDataset); // attach the saved dataset to the dataset expression
+            dexp.setDatasetFiles(List.of()); // empty the list of dataset files
+            DatasetExpression savedDexp = datasetExpressionRepository.save(dexp); // save the dataset expression without dataset files
+
+            for (DatasetFile df : dexpFiles) { // for each dataset file
+                df.setDatasetExpression(savedDexp); // attach the saved dataset expression
+                entityManager.persist(df); // persist, but not flush yet to avoid memory overflow
+
+                fileCount++;
+                if (fileCount % BATCH_SIZE == 0) { // every multiple of BATCH_SIZE
+                    entityManager.flush(); // flush a batch of dataset files
+                    entityManager.clear();
+                    // after flush and clear, we need to reattach the savedDataset and savedDexp to the persistence context
+                    savedDataset = entityManager.getReference(Dataset.class, savedDataset.getId());
+                    savedDexp = entityManager.getReference(DatasetExpression.class, savedDexp.getId());
+                }
+            }
+        }
+        entityManager.flush(); // at the end, flush the remaining dataset files
+        entityManager.clear();
     }
 
     private DatasetAcquisition moveAcquisition(DatasetAcquisition oldAcq, Dataset newDs, Long studyId,
@@ -168,7 +208,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
     private Examination moveExamination(DatasetAcquisition acq, Long studyId, Subject targetSubject, Long userId) {
         Examination oldExam = acq.getExamination();
-        Study newStudy = studyService.findById(studyId);
+        Study newStudy = studyRepository.getReferenceById(studyId);
         Examination newExamination = new Examination(oldExam, newStudy, targetSubject);
         oldExam.getCopies().add(newExamination);
         newExamination.setSource(oldExam);

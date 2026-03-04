@@ -54,6 +54,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class DatasetSecurityService {
 
@@ -1118,6 +1120,7 @@ public class DatasetSecurityService {
      * @param userId
      * @return
      */
+    @Transactional
     public boolean checkDatasetRelatedDatasets(List<Long> datasetIds, Long userId) {
         // If the entry is empty, return an empty list
         if (datasetIds == null || datasetIds.isEmpty()) {

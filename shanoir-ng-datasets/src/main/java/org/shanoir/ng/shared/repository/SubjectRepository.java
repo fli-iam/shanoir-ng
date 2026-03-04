@@ -17,14 +17,14 @@ import java.util.List;
 
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 
 /**
  * @author yyao
  *
  */
-public interface SubjectRepository extends CrudRepository<Subject, Long> {
+public interface SubjectRepository extends JpaRepository<Subject, Long> {
 
     Subject findByName(String name);
 

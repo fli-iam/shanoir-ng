@@ -434,28 +434,33 @@ public class RabbitMQDatasetsService {
         try {
             RelatedDataset dto = objectMapper.readValue(data, RelatedDataset.class);
             Long userId = dto.getUserId();
-            /** Check rights */
-            if (!securityService.checkDatasetRelatedDatasets(dto.getDatasetIds(), userId)) {
-                LOG.error("User {} is not allowed to copy datasets {}, copy aborted.", userId, dto.getDatasetIds());
-                return;
-            }
-            /* */
-            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             Long studyId = dto.getStudyId();
             datasetParentIds = dto.getDatasetIds();
             countTotal = datasetParentIds.size();
-
             event = new ShanoirEvent(
-                    ShanoirEventType.COPY_DATASET_EVENT,
-                    null,
-                    userId,
-                    "Copy of dataset " + countProgress++ + "/" + countTotal + " to study [" + studyId + "].",
-                    ShanoirEvent.IN_PROGRESS,
-                    Float.valueOf(countProgress / countTotal),
-                    studyId
+                ShanoirEventType.COPY_DATASET_EVENT,
+                null,
+                userId,
+                "Copy of dataset " + countProgress++ + "/" + countTotal + " to study [" + studyId + "].",
+                ShanoirEvent.IN_PROGRESS,
+                Float.valueOf(countProgress / countTotal),
+                studyId
             );
             event.setId(dto.getEventId());
             event.setReport("");
+
+            /** Check rights */
+            if (!securityService.checkDatasetRelatedDatasets(dto.getDatasetIds(), userId)) {
+                LOG.error("User {} is not allowed to copy datasets {}, copy aborted.", userId, dto.getDatasetIds());
+                event.setMessage("User don't have the rights to copy these datasets, copy aborted.");
+                event.setStatus(ShanoirEvent.ERROR);
+                event.setProgress(-1f);
+                eventService.publishEvent(event);
+                return;
+            }
+            /* */
+
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             for (Long datasetParentId : datasetParentIds) {
                 progress += 1f / countTotal;
                 event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + countProgress++ + "/" + countTotal);

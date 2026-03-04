@@ -18,14 +18,14 @@ import java.math.BigInteger;
 import java.util.List;
 
 import org.shanoir.ng.shared.model.Study;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 
 /**
  * @author yyao
  *
  */
-public interface StudyRepository extends CrudRepository<Study, Long> {
+public interface StudyRepository extends JpaRepository<Study, Long> {
 
     @Query(value = "select rd.study_id from related_datasets rd where dataset_id = ?1",
             nativeQuery = true)
