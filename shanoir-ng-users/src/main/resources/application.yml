@@ -106,6 +106,7 @@ logging:
   file:
     name: /var/log/shanoir-ng-logs/shanoir-ng-users.log
   level:
+    org.shanoir: INFO
     org.springframework.web: ERROR
     org.hibernate: ERROR
 
