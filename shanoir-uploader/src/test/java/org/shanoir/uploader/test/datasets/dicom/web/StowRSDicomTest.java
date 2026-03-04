@@ -26,7 +26,7 @@ public class StowRSDicomTest extends AbstractTest {
                 File file = new File(resource.toURI());
                 shUpClient.postDicom(file);
             }
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             logger.error("Error while reading file", e);
         }
     }
