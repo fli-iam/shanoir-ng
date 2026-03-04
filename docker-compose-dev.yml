@@ -79,6 +79,7 @@ services:
   #
   # Init service: run and stop. Create temporary certificate
   # related to SHANOIR_URL_HOST for all Shanoir microservices
+  # and set rights on log folder for native images
   #  
   init-cert-and-logs:
     container_name: "${SHANOIR_PREFIX}init-cert-and-logs"
