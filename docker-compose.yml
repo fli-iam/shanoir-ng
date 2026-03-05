@@ -81,8 +81,6 @@ services:
     command: --max_allowed_packet 20000000
     env_file:
       - ./docker-compose/database/variables.env
-    environment:
-      - SHANOIR_MIGRATION
     ulimits:
       nofile:
         soft: 262144
@@ -93,6 +91,20 @@ services:
      - "3307:3306"
     networks:
       - shanoir_ng_network
+  #
+  # Migrations for the database
+  #
+  database-migrations:
+    container_name: "${SHANOIR_PREFIX}database-migrations"
+    image: "ghcr.io/fli-iam/shanoir-ng/database-migrations:NG_v2.9.1"
+    environment:
+      - SHANOIR_MIGRATION
+    networks:
+      - shanoir_ng_network
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: "no"
   #
   # Users microservice
   #
@@ -122,8 +134,12 @@ services:
      - "9901:9901"
      - "9911:9911"
     depends_on:
-      - "database"
-      - "rabbitmq"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
   #
   # Studies microservice
   #
@@ -148,9 +164,14 @@ services:
      - "9902:9902"
      - "9912:9912"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
   #
   # Import microservice
   #
@@ -176,9 +197,14 @@ services:
      # do not add by default, as it blocks local ShUp from using 44105
      # - "44105:44105"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
   #
   # Datasets microservice
   #
@@ -206,10 +232,19 @@ services:
      - "9904:9904"
      - "9914:9914"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
-
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
+      solr:
+        condition: service_started
+  #
+  # Preclinical microservice
+  #
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"
     image: "ghcr.io/fli-iam/shanoir-ng/preclinical:NG_v2.9.1"
@@ -229,9 +264,14 @@ services:
      - "9905:9905"
      - "9915:9915"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
   #
   # Nifti conversion microservice
   #
