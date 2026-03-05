@@ -182,8 +182,8 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
     private void addCentersToStudy(Study study, List<Long> centerIds) {
         List<StudyCenter> list = Optional.ofNullable(study.getStudyCenterList()).orElseGet(ArrayList::new);
         Set<Long> existing = list.stream()
-            .map(sc -> sc.getCenter().getId())
-            .collect(Collectors.toSet());
+                .map(sc -> sc.getCenter().getId())
+                .collect(Collectors.toSet());
         for (Center center : centerRepository.findAllById(centerIds)) {
             if (existing.add(center.getId())) {
                 StudyCenter sc = new StudyCenter();
