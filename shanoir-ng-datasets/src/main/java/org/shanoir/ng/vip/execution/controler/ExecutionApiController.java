@@ -15,7 +15,6 @@
 package org.shanoir.ng.vip.execution.controler;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -41,12 +40,13 @@ public class ExecutionApiController implements ExecutionApi {
 
     @Override
     public ResponseEntity<IdName> createExecution(
-            @Parameter(description = "execution", required = true) @RequestBody final List<ExecutionCandidateDTO> candidate) throws EntityNotFoundException, SecurityException, RestServiceException {
+            @Parameter(description = "execution", required = true) @RequestBody final List<ExecutionCandidateDTO> candidates) throws EntityNotFoundException, SecurityException, RestServiceException {
+        if (candidates == null || candidates.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }
+        IdName createdMonitoring = executionService.createExecutions(candidates);
 
-        List<List<Dataset>> inputDatasets = executionService.getDatasetsFromParams(candidate.getDatasetParameters());
-        IdName createdMonitoring = executionService.createExecution(candidate, inputDatasets);
-
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return ResponseEntity.ok(createdMonitoring);
     }
 
     public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {

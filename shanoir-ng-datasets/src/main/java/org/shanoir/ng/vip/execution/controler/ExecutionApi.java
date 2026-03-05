@@ -53,7 +53,7 @@ public interface ExecutionApi {
             produces = {"application/json"},
             consumes = {"application/json"},
             method = RequestMethod.POST)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExecutionCandidate(#candidate))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExecutionCandidates(#candidates))")
     ResponseEntity<IdName> createExecution(
             @Parameter(description = "execution", required = true) @RequestBody final List<ExecutionCandidateDTO> candidates) throws EntityNotFoundException, SecurityException, RestServiceException;
 

@@ -32,6 +32,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.shanoir.ng.vip.processingResource.service.ProcessingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -186,14 +187,16 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Processing must be linked to a study.", null);
             throw new RestServiceException(error);
         }
-        if (processing.getInputDatasets() == null || processing.getInputDatasets().isEmpty()) {
-            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "There must be at least one input dataset.", null);
-            throw new RestServiceException(error);
-        }
-        for (Dataset dataset : processing.getInputDatasets()) {
-            if (!processing.getStudyId().equals(datasetService.getStudyId(dataset))) {
-                ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Input dataset [" + dataset.getId() + "] is not linked to the processing study.", null);
+        if (!(processing instanceof ExecutionMonitoring)) {
+            if (processing.getInputDatasets() == null || processing.getInputDatasets().isEmpty()) {
+                ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "There must be at least one input dataset.", null);
                 throw new RestServiceException(error);
+            }
+            for (Dataset dataset : processing.getInputDatasets()) {
+                if (!processing.getStudyId().equals(datasetService.getStudyId(dataset))) {
+                    ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Input dataset [" + dataset.getId() + "] is not linked to the processing study.", null);
+                    throw new RestServiceException(error);
+                }
             }
         }
     }
