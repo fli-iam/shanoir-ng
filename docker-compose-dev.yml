@@ -109,7 +109,6 @@ services:
       - docker-compose/database-migrations/variables.env
     environment:
       - SHANOIR_MIGRATION
-      - MYSQL_HOST
     networks:
       - shanoir_ng_network
     depends_on:
