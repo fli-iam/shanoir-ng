@@ -48,7 +48,7 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
     List<Subject> findAllById(Iterable<Long> ids);
 
     @EntityGraph(attributePaths = {"tags"})
-    List<Subject> findAllByIdWithTags(Iterable<Long> ids);
+    List<Subject> findWithTagsByIdIn(Iterable<Long> ids);
 
     List<Subject> findByName(String name);
 

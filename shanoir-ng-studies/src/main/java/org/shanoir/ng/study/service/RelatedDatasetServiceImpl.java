@@ -113,7 +113,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         Map<Long, Long> subjectMapping = new HashMap<>();
         List<Subject> createdSubjects = new ArrayList<>();
         int i = 0;
-        Map<Long, Subject> sourceSubjects = subjectRepository.findAllByIdWithTags(subjects.stream().map(CopyData.SubjectCopy::getId).toList()).stream()
+        Map<Long, Subject> sourceSubjects = subjectRepository.findWithTagsByIdIn(subjects.stream().map(CopyData.SubjectCopy::getId).toList()).stream()
                 .collect(Collectors.toMap(Subject::getId, s -> s));
         List<String> names = subjects.stream()
                 .map(CopyData.SubjectCopy::getNewName)
