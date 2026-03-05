@@ -1115,15 +1115,15 @@ public class DatasetSecurityService {
 
     /**
      * Check that the GIVEN user has the CAN_SEE_ALL right for every dataset.
-     * This is static because it is used in a rabbit listener, where the user is not the connected user
      * @param datasetIds
      * @param userId
-     * @return
+     * @param role
+     * @return true or false
      */
     @Transactional
-    public boolean checkDatasetRelatedDatasets(List<Long> datasetIds, Long userId) {
+    public boolean checkDatasetRelatedDatasets(List<Long> datasetIds, Long userId, KeycloakUtil.UserRole role) {
         // If the entry is empty, return an empty list
-        if (datasetIds == null || datasetIds.isEmpty()) {
+        if (KeycloakUtil.UserRole.ADMIN.equals(role) || datasetIds == null || datasetIds.isEmpty()) {
             return true;
         }
         List<DatasetForRights> dtos = datasetRepository.findDatasetsForRights(datasetIds)

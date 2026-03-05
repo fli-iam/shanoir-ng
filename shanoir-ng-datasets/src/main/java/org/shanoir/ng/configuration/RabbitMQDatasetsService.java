@@ -53,6 +53,7 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -434,6 +435,7 @@ public class RabbitMQDatasetsService {
         try {
             RelatedDataset dto = objectMapper.readValue(data, RelatedDataset.class);
             Long userId = dto.getUserId();
+            KeycloakUtil.UserRole role = dto.getUserRole();
             Long studyId = dto.getStudyId();
             datasetParentIds = dto.getDatasetIds();
             countTotal = datasetParentIds.size();
@@ -450,7 +452,7 @@ public class RabbitMQDatasetsService {
             event.setReport("");
 
             /** Check rights */
-            if (!securityService.checkDatasetRelatedDatasets(dto.getDatasetIds(), userId)) {
+            if (!securityService.checkDatasetRelatedDatasets(dto.getDatasetIds(), userId, role)) {
                 LOG.error("User {} is not allowed to copy datasets {}, copy aborted.", userId, dto.getDatasetIds());
                 event.setMessage("User don't have the rights to copy these datasets, copy aborted.");
                 event.setStatus(ShanoirEvent.ERROR);
@@ -459,8 +461,18 @@ public class RabbitMQDatasetsService {
                 return;
             }
             /* */
-
-            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+            switch (role) {
+                case ADMIN -> SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+                case EXPERT -> SecurityContextUtil.initAuthenticationContext("ROLE_EXPERT");
+                default -> {
+                    LOG.error("User {} has an unauthorized role {}, copy aborted.", userId, role);
+                    event.setMessage("User has an unauthorized role, copy aborted.");
+                    event.setStatus(ShanoirEvent.ERROR);
+                    event.setProgress(-1f);
+                    eventService.publishEvent(event);
+                    return;
+                }
+            }
             for (Long datasetParentId : datasetParentIds) {
                 progress += 1f / countTotal;
                 event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + countProgress++ + "/" + countTotal);

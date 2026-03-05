@@ -17,6 +17,8 @@ package org.shanoir.ng.shared.dataset;
 import java.util.List;
 import java.util.Map;
 
+import org.shanoir.ng.utils.KeycloakUtil.UserRole;
+
 public class RelatedDataset {
 
     private Long studyId;
@@ -26,6 +28,8 @@ public class RelatedDataset {
     private List<Long> datasetIds;
 
     private Long userId;
+
+    private UserRole userRole;
 
     private Long eventId;
 
@@ -71,4 +75,16 @@ public class RelatedDataset {
     public void setEventId(Long eventId) {
         this.eventId = eventId;
     }
+
+    public UserRole getUserRole() {
+        if (userRole == null) {
+            return UserRole.USER;
+        }
+        return userRole;
+    }
+
+    public void setUserRole(UserRole userRole) {
+        this.userRole = userRole;
+    }
+
 }
