@@ -366,6 +366,17 @@ CMD ["mysqld"]
 
 
 
+################ database-migrations #######################################
+
+FROM mysql:5.7 AS database-migrations
+
+COPY --link --chmod=0755 database-migrations/shanoir-entrypoint.sh /
+COPY --link database-migrations/db-changes /opt/db-changes
+
+ENTRYPOINT ["/shanoir-entrypoint.sh"]
+
+
+
 ################ keycloak-database ##################################################
 
 FROM mysql/mysql-server:5.7 AS keycloak-database
