@@ -105,8 +105,6 @@ services:
     build:
       context: docker-compose
       target: database-migrations
-    env_file:
-      - docker-compose/database-migrations/variables.env
     environment:
       - SHANOIR_MIGRATION
     networks:
