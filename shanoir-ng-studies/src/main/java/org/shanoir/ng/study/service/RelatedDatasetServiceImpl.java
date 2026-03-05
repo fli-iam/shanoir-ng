@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,8 +35,6 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.dto.CopyData;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.repository.StudyRepository;
-import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.service.SubjectService;
@@ -61,16 +60,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
     @Autowired
-    private StudyUserRepository studyUserRepository;
-
-    @Autowired
     private StudyService studyService;
 
     @Autowired
     private CenterRepository centerRepository;
-
-    @Autowired
-    private StudyRepository studyRepository;
 
     @Autowired
     private SubjectService subjectService;
@@ -91,6 +84,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
 
     @Override
+    @Transactional
     public void copyData(CopyData copyData) throws ShanoirException {
         ShanoirEvent event = new ShanoirEvent(
                 ShanoirEventType.COPY_DATASET_EVENT,
@@ -105,8 +99,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         copyDatasetsToStudy(copyData.getDatasetIds(), copyData.getTargetStudyId(), subjectMapping, event);
     }
 
-
-    @Transactional
     private Map<Long, Long> createSubjectsInTargetStudy(List<CopyData.SubjectCopy> subjects, Long studyId, ShanoirEvent event) throws ShanoirException {
         LOG.info("Starting createSubjectsInTargetStudy");
         eventService.publishEvent(event, "Creating subjects in target study", 0f);
@@ -138,7 +130,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         return subjectMapping;
     }
 
-    @Transactional
     private Subject createNewSubjectInTargetStudy(Study targetStudy, Subject sourceSubject, String newSubjectName,
             boolean withAMQP) throws ShanoirException {
         Subject clonedSubject = new Subject(sourceSubject, targetStudy);
@@ -174,7 +165,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
     }
 
-    @Transactional
     private void addCentersInTargetStudy(List<Long> centerIds, Long studyId, ShanoirEvent event) throws ShanoirException {
         eventService.publishEvent(event, "Adding centers in target study...", 0f);
         Study study = studyService.findById(studyId);
@@ -190,26 +180,20 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
     }
 
     private void addCentersToStudy(Study study, List<Long> centerIds) {
-        Iterable<Center> centers = centerRepository.findAllById(centerIds);
-        List<StudyCenter> studyCenterList = study.getStudyCenterList();
-        for (Center center : centers) {
-            boolean add = true;
-            for (StudyCenter sc : studyCenterList) {
-                if (center != null && sc.getCenter().getId().equals(center.getId())) {
-                    add = false;
-                    break;
-                }
-            }
-            if (add) {
-                StudyCenter centerToAdd = new StudyCenter();
-                centerToAdd.setStudy(study);
-                centerToAdd.setCenter(center);
-                centerToAdd.setSubjectNamePrefix(null);
-                studyCenterList.add(centerToAdd);
+        List<StudyCenter> list = Optional.ofNullable(study.getStudyCenterList()).orElseGet(ArrayList::new);
+        Set<Long> existing = list.stream()
+            .map(sc -> sc.getCenter().getId())
+            .collect(Collectors.toSet());
+        for (Center center : centerRepository.findAllById(centerIds)) {
+            if (existing.add(center.getId())) {
+                StudyCenter sc = new StudyCenter();
+                sc.setStudy(study);
+                sc.setCenter(center);
+                sc.setSubjectNamePrefix(null);
+                list.add(sc);
             }
         }
-        study.setStudyCenterList(studyCenterList);
-        studyRepository.save(study);
+        study.setStudyCenterList(list);
     }
 
     private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Long userId, Map<Long, Long> subjectMapping, Long eventId) throws MicroServiceCommunicationException {
