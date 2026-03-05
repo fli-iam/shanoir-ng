@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -109,6 +110,8 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         LOG.info("Starting createSubjectsInTargetStudy");
         eventService.publishEvent(event, "Creating subjects in target study", 0f);
         long startTime = System.currentTimeMillis();
+        deDuplicateSubjectNames(subjects);
+
         Study targetStudy = studyService.findById(studyId);
         Map<Long, Long> subjectMapping = new HashMap<>();
         List<Subject> createdSubjects = new ArrayList<>();
@@ -146,6 +149,37 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         long elapsedTime = stopTime - startTime;
         LOG.info("Finished createSubjectsInTargetStudy: " + elapsedTime + "ms");
         return subjectMapping;
+    }
+
+    /**
+     * If there are several subjects with the same new name, we add a suffix to make them unique, otherwise the copy will fail because of the unique constraint on subject name within a study.
+     * We do that before creating any subject in the target study to avoid creating then deleting subjects if there are duplicates.
+     * Suffix is added to all subjects with the same new name, even the first one, to make it clearer for users that there was a duplication and that names have been modified.
+     */
+    private void deDuplicateSubjectNames(List<CopyData.SubjectCopy> subjects) {
+        if (subjects == null || subjects.isEmpty()) return;
+
+        // Group by normalized newName (trim, case-sensitive kept; adjust if you want case-insensitive)
+        Map<String, List<CopyData.SubjectCopy>> byName = new LinkedHashMap<>();
+        for (CopyData.SubjectCopy sc : subjects) {
+            if (sc == null) continue;
+            String name = sc.getNewName();
+            if (name == null) continue;
+            String key = name.trim();
+            byName.computeIfAbsent(key, k -> new ArrayList<>()).add(sc);
+        }
+
+        // For each duplicated group, suffix every entry (including the first)
+        for (Map.Entry<String, List<CopyData.SubjectCopy>> e : byName.entrySet()) {
+            String base = e.getKey();
+            List<CopyData.SubjectCopy> group = e.getValue();
+            if (group.size() <= 1) continue;
+
+            for (int i = 0; i < group.size(); i++) {
+                // Example: "John" -> "John (1)", "John (2)", ...
+                group.get(i).setNewName(base + " (" + (i + 1) + ")");
+            }
+        }
     }
 
     private Subject createNewSubjectInTargetStudy(Study targetStudy, Subject sourceSubject, String newSubjectName,
