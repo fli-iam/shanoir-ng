@@ -50,7 +50,6 @@ public class ShanoirEvent {
     @JsonProperty("eventProperties")
     private Map<String, String> eventProperties;
 
-
     public ShanoirEvent() {
     }
 
@@ -225,4 +224,5 @@ public class ShanoirEvent {
     public void setEventProperties(Map<String, String> eventProperties) {
         this.eventProperties = eventProperties;
     }
+
 }

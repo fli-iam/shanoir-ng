@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 
 /**
  * Service to send every event created.
@@ -35,9 +34,6 @@ public class ShanoirEventService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
-
-    @Autowired
-    private ObjectMapper mapper;
 
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventService.class);
 
@@ -57,8 +53,7 @@ public class ShanoirEventService {
                 .append("progress=").append(event.getProgress()).append("]");
         LOG.info(builder.toString());
         try {
-            String str = mapper.writeValueAsString(event);
-            rabbitTemplate.convertAndSend(RabbitMQConfiguration.EVENTS_EXCHANGE, event.getEventType(), str);
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.EVENTS_EXCHANGE, event.getEventType(), event);
         } catch (JacksonException e) {
             LOG.error("Error while sending event: event {}, user: {}, reference: {}", event.getEventType(), event.getUserId(), event.getObjectId());
             LOG.error("Thrown exception: {}", e);

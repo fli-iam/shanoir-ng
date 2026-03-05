@@ -26,30 +26,39 @@ public class ShanoirEvent {
     public static final int SUCCESS = 1;
     public static final int IN_PROGRESS = 2;
 
+    @JsonProperty
     private Long id;
 
+    @JsonProperty
     private String eventType;
 
+    @JsonProperty
     private String objectId;
 
+    @JsonProperty
     private Long userId;
 
+    @JsonProperty
     private String message;
 
+    @JsonProperty
     private String report;
 
+    @JsonProperty
     private int status;
 
+    @JsonProperty
     private Float progress;
 
+    @JsonProperty
     private Long studyId;
 
+    @JsonProperty
     private Long timestamp;
 
     @Transient
     @JsonProperty("eventProperties")
     private Map<String, String> eventProperties;
-
 
     public ShanoirEvent() {
     }
@@ -225,4 +234,5 @@ public class ShanoirEvent {
     public void setEventProperties(Map<String, String> eventProperties) {
         this.eventProperties = eventProperties;
     }
+
 }

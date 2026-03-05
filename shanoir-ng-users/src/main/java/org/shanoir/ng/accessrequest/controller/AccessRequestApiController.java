@@ -239,7 +239,6 @@ public class AccessRequestApiController implements AccessRequestApi {
                     studyId);
             eventService.publishEvent(subscription);
 
-
             // User exists => return an access request to be added
             // create a new access request to return
             AccessRequest request = new AccessRequest();
@@ -254,7 +253,7 @@ public class AccessRequestApiController implements AccessRequestApi {
             if (isEmail) {
                 StudyInvitationEmail mail = new StudyInvitationEmail();
                 mail.setInvitedMail(emailOrLogin);
-                mail.setStudyId(studyId.toString());
+                mail.setStudyId(studyId);
                 mail.setStudyName(studyName);
                 mail.setInvitationIssuer(issuer);
                 mail.setFunction(function);

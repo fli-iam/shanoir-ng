@@ -402,7 +402,7 @@ public class AccessRequestApiControllerTest {
         Mockito.verify(this.emailService).inviteToStudy(emailCaptor.capture());
 
         assertEquals("mail@mail", emailCaptor.getValue().getInvitedMail());
-        assertEquals("1", emailCaptor.getValue().getStudyId());
+        assertEquals(Long.valueOf("1"), emailCaptor.getValue().getStudyId());
         assertEquals("name", emailCaptor.getValue().getStudyName());
     }
 

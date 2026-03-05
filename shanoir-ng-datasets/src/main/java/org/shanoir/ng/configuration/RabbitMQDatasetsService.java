@@ -345,10 +345,6 @@ public class RabbitMQDatasetsService {
         }
     }
 
-    /**
-     * Receives a shanoirEvent as a json object, concerning a subject deletion
-     * @param eventAsString the task as a json string.
-     */
     @RabbitListener(bindings = @QueueBinding(
             key = ShanoirEventType.DELETE_STUDY_EVENT,
             value = @Queue(value = RabbitMQConfiguration.DELETE_STUDY_QUEUE, durable = "true"),
@@ -356,12 +352,10 @@ public class RabbitMQDatasetsService {
             autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
             )
     @Transactional
-    public void deleteStudy(String eventAsString) throws AmqpRejectAndDontRequeueException {
+    public void deleteStudy(ShanoirEvent event) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
         try {
-            ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
-
             // Delete associated examinations and datasets from solr repository then from database
             for (Examination exam : examinationRepository.findByStudy_Id(Long.valueOf(event.getObjectId()))) {
                 examinationService.deleteById(exam.getId(), null);

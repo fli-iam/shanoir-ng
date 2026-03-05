@@ -18,6 +18,7 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,16 @@ public class RabbitMQConfiguration {
     @Autowired
     private ConnectionFactory connectionFactory;
 
+    @Bean
+    public ContentTypeDelegatingMessageConverter contentTypeDelegatingConverter() {
+        ContentTypeDelegatingMessageConverter converter =
+                new ContentTypeDelegatingMessageConverter(
+                        new SimpleMessageConverter());
+        converter.addDelegate("application/json", new JacksonJsonMessageConverter());
+        converter.addDelegate("text/x-json", new JacksonJsonMessageConverter());
+        return converter;
+    }
+
     @Bean(name = "multipleConsumersFactory")
     public SimpleRabbitListenerContainerFactory multipleConsumersFactory() {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
@@ -50,6 +61,7 @@ public class RabbitMQConfiguration {
         factory.setConsecutiveActiveTrigger(1);
         factory.setAutoStartup(true);
         factory.setPrefetchCount(1);
+        factory.setMessageConverter(contentTypeDelegatingConverter());
         return factory;
     }
 
@@ -58,14 +70,8 @@ public class RabbitMQConfiguration {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setConcurrentConsumers(1);
-        factory.setMessageConverter(new SimpleMessageConverter());
+        factory.setMessageConverter(contentTypeDelegatingConverter());
         return factory;
-    }
-
-    @Bean
-    public JacksonJsonMessageConverter jsonMessageConverter() {
-        JacksonJsonMessageConverter jsonConverter = new JacksonJsonMessageConverter();
-        return jsonConverter;
     }
 
     ////////////////// QUEUES //////////////////

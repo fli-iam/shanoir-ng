@@ -15,14 +15,14 @@
 package org.shanoir.ng.configuration.amqp;
 
 import org.shanoir.ng.email.EmailService;
-import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
-import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.EmailStudy;
+import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
@@ -57,6 +57,7 @@ public class RabbitMQUserService {
 
     @Autowired
     private RabbitMqStudyUserService listener;
+
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_USERS, durable = "true"),
             exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
@@ -66,20 +67,15 @@ public class RabbitMQUserService {
         listener.receiveStudyUsers(commandArrStr);
     }
 
-    /**
-     * Receives a shanoirEvent as a json object, thus create a event in the queue
-     * @param commandArrStr the task as a json string.
-     */
     @RabbitListener(bindings = @QueueBinding(
             key = "*.event",
             value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
             exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
                 autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
     )
-    public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
-        LOG.info("Receiving event: " + eventAsString);
+    public void receiveEvent(ShanoirEvent event) throws AmqpRejectAndDontRequeueException {
+        LOG.info("Receiving event: " + event.toString());
         try {
-            ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
             eventsService.addEvent(event);
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the event.", e);

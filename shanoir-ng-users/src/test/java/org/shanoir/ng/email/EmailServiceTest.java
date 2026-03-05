@@ -134,7 +134,7 @@ public class EmailServiceTest {
         // send back a list of administrators
         EmailDatasetsImported mail = new EmailDatasetsImported();
         mail.setStudyName("StudyName");
-        mail.setStudyId("12");
+        mail.setStudyId(12L);
         mail.setUserId(1L);
         mail.setRecipients(Arrays.asList(1L));
         Map<Long, String> datasets = new HashMap<>();

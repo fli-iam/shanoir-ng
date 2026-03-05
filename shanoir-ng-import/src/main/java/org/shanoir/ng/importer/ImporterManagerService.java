@@ -228,7 +228,7 @@ public class ImporterManagerService {
     private void sendFailureMail(ImportJob importJob, String errorMessage) {
         EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
         generatedMail.setExaminationId(importJob.getExaminationId().toString());
-        generatedMail.setStudyId(importJob.getStudyId().toString());
+        generatedMail.setStudyId(importJob.getStudyId());
         generatedMail.setSubjectName(importJob.getSubjectName());
         generatedMail.setStudyName(importJob.getStudyName());
         generatedMail.setUserId(importJob.getUserId());
