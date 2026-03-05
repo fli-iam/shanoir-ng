@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.shared.configuration;
 
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
+import org.springframework.boot.amqp.autoconfigure.RabbitTemplateCustomizer;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +31,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class CommonConfiguration {
 
     @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+    RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder.build();
     }
 
@@ -41,6 +43,11 @@ public class CommonConfiguration {
     @Bean
     WebClient webClient() {
         return WebClient.builder().build();
+    }
+
+    @Bean
+    RabbitTemplateCustomizer rabbitTemplateCustomizer() {
+        return template -> template.setMessageConverter(new JacksonJsonMessageConverter());
     }
 
 }

@@ -21,19 +21,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public abstract class EmailBase {
 
     @JsonProperty
-    private Long userId;
+    protected Long userId;
 
     @JsonProperty
-    private List<Long> recipients;
+    protected List<Long> recipients;
 
     @JsonProperty
-    private Long studyId;
+    protected Long studyId;
 
     @JsonProperty
-    private String studyCardId;
+    protected String studyCardId;
 
     @JsonProperty
-    private String studyName;
+    protected String studyName;
 
     public Long getUserId() {
         return userId;
