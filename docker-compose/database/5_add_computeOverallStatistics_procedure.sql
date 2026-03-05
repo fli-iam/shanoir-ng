@@ -10,5 +10,21 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-ALTER TABLE study ADD COLUMN is_draft TINYINT(1) DEFAULT 1;
-UPDATE study SET is_draft = 0;
+
+USE datasets;
+
+DROP PROCEDURE IF EXISTS computeOverallStatistics;
+
+delimiter //
+CREATE PROCEDURE computeOverallStatistics()
+BEGIN
+DELETE FROM overall_statistics WHERE stats_date = CURDATE();
+INSERT into overall_statistics (stats_date, studies_count, subjects_count, dataset_acquisitions_count)
+VALUES (CURDATE(),
+    (SELECT COUNT(*) FROM study),
+    (SELECT COUNT(*) FROM subject where study_id IS NOT NULL),
+    (SELECT COUNT(DISTINCT dataset_acquisition_id) FROM dataset)
+);
+END //
+
+delimiter ;

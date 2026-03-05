@@ -190,7 +190,12 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     @Transactional
     public Subject create(Subject subject, boolean withAMQP) throws ShanoirException {
-        subject = mapSubjectStudyListToSubject(subject);
+        try {
+            subject = mapSubjectStudyListToSubject(subject);
+        } catch (ShanoirException e) {
+            throw e;
+        }
+
         Subject subjectDb = subjectRepository.save(subject);
         LOG.info("New subject created with ID: {} and Name: {}", subjectDb.getId(), subjectDb.getName());
         if (withAMQP) {
@@ -243,6 +248,17 @@ public class SubjectServiceImpl implements SubjectService {
      */
     private Subject mapSubjectStudyListToSubject(Subject subject) throws ShanoirException {
         List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+
+        if (subject.getStudy() != null && subject.getStudy().getId() != null) {
+            Long studyId = subject.getStudy().getId();
+            Boolean isDraft = studyRepository.findIsDraftById(studyId);
+            if (Boolean.TRUE.equals(isDraft)) {
+                throw new ShanoirException(
+                    "Cannot create subjects in draft studies. Study must be approved first.",
+                    HttpStatus.FORBIDDEN.value());
+            }
+        }
+
         // Old versions of ShUp will still send subject study objects, and no studyId in
         // subject
         if (subjectStudyList != null && !subjectStudyList.isEmpty()) {
