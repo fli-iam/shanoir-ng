@@ -355,10 +355,6 @@ RUN npm install -g @angular/cli@20.3.7
 
 FROM mysql/mysql-server:5.7 AS database
 
-COPY --link --chmod=0755 database/shanoir-entrypoint.sh /
-ENTRYPOINT ["/shanoir-entrypoint.sh"]
-CMD ["mysqld"]
-
 COPY --link --chmod=0755 \
     database/1_create_databases.sh \
     database/2_add_users.sql \
@@ -366,7 +362,7 @@ COPY --link --chmod=0755 \
     database/4_add_studyStatistics_procedure.sql \
     /docker-entrypoint-initdb.d/
 
-COPY --link database/db-changes /opt/db-changes
+CMD ["mysqld"]
 
 
 
