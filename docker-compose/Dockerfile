@@ -353,11 +353,7 @@ RUN npm install -g @angular/cli@20.3.7
 
 ################ database ##################################################
 
-FROM mysql/mysql-server:5.7 AS database
-
-COPY --link --chmod=0755 database/shanoir-entrypoint.sh /
-ENTRYPOINT ["/shanoir-entrypoint.sh"]
-CMD ["mysqld"]
+FROM mariadb:10.11 AS database
 
 COPY --link --chmod=0755 \
     database/1_create_databases.sh \
@@ -367,7 +363,18 @@ COPY --link --chmod=0755 \
     database/5_add_computeOverallStatistics_procedure.sql \
     /docker-entrypoint-initdb.d/
 
-COPY --link database/db-changes /opt/db-changes
+CMD ["mariadbd"]
+
+
+
+################ database-migrations #######################################
+
+FROM mariadb:10.11 AS database-migrations
+
+COPY --link --chmod=0755 database-migrations/shanoir-entrypoint.sh /
+COPY --link database-migrations/db-changes /opt/db-changes
+
+ENTRYPOINT ["/shanoir-entrypoint.sh"]
 
 
 
