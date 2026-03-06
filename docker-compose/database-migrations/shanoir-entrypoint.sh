@@ -4,7 +4,7 @@
 #
 # - migrations are provided as sql scripts : "$DB_CHANGES_DIR/<DBNAME>/<SCRIPT>.sql"
 #
-# - the 'migrations.migrations' mysql table stores the list of migrations
+# - the 'migrations.migrations' mariadb table stores the list of migrations
 #   already applied ("<DBNAME>/<SCRIPT>.sql")
 #
 # - migration are applied in alphabetical order of the filename ("<SCRIPT>.sql")
@@ -16,8 +16,8 @@
 #              migrations in the DB_CHANGES_DIR and exit
 #              (to be used for setting up a new shanoir instance)
 #
-#   auto    -> run the mysqld as pid 1, then initialise or apply migrations in a
-#              background process. The mysql daemon is killed in case of
+#   auto    -> run the mariadbd as pid 1, then initialise or apply migrations in a
+#              background process. The mariadb daemon is killed in case of
 #              migration failure (fail-fast)
 #
 #   manual  -> apply the migrations manually and exit
@@ -35,27 +35,27 @@ DB_CHANGES_DIR="/opt/db-changes"
 MIGRATION_DB=migrations
 MIGRATION_USER=migrations
 MIGRATION_PASSWORD=password
-MYSQL_HOST="${MYSQL_HOST:-database}"
+MARIADB_HOST="${MARIADB_HOST:-database}"
 
 HEADER="[Shanoir Entrypoint]"
 
-MYSQL="mysql           -h$MYSQL_HOST -u$MIGRATION_USER -p$MIGRATION_PASSWORD"
-MYSQLADMIN="mysqladmin -h$MYSQL_HOST -u$MIGRATION_USER -p$MIGRATION_PASSWORD"
+MARIADB="mariadb           -h$MARIADB_HOST -u$MIGRATION_USER -p$MIGRATION_PASSWORD"
+MARIADBADMIN="mariadbadmin -h$MARIADB_HOST -u$MIGRATION_USER -p$MIGRATION_PASSWORD"
 
-# wait until the mysqld server is ready
-wait_mysqld()
+# wait until the mariadbd server is ready
+wait_mariadbd()
 {
-	echo "$HEADER wait mysqld"
+	echo "$HEADER wait mariadbd"
 	for i in {30..0} ; do
-		if $MYSQLADMIN ping --silent; then
-			echo "$HEADER wait mysqld done"
+		if $MARIADBADMIN ping --silent; then
+			echo "$HEADER wait mariadbd done"
 			break
 		fi
 		echo "$HEADER Waiting for server"
 		sleep 1
 	done
 	if [ "$i" = 0 ] ; then
-		echo >&2 "$HEADER Timeout during MySQL init  at $MYSQL_HOST."
+		echo >&2 "$HEADER Timeout during MySQL init  at $MARIADB_HOST."
 		exit 1
 	fi
 }
@@ -63,7 +63,7 @@ wait_mysqld()
 # return true if the migrations table exists
 check_migrations_db()
 {
-	local tbs="`$MYSQL "$MIGRATION_DB" -e "SHOW TABLES LIKE 'migrations';"`" || exit 1
+	local tbs="`$MARIADB "$MIGRATION_DB" -e "SHOW TABLES LIKE 'migrations';"`" || exit 1
 	if [ -n "$tbs" ] ; then
 		echo "$HEADER migration table exists"
 		return 0
@@ -84,7 +84,7 @@ list_all_migrations()
 # in the 'migrations' table)
 list_applied_migrations()
 {
-	$MYSQL "$MIGRATION_DB" --skip-column-names -e 'select script from migrations;' || exit 1
+	$MARIADB "$MIGRATION_DB" --skip-column-names -e 'select script from migrations;' || exit 1
 }
 
 # initialise the migrations table
@@ -105,7 +105,7 @@ init_migrations()
 			comma=,
 		done
 		echo ';'
-	) | $MYSQL "$MIGRATION_DB" || return 1
+	) | $MARIADB "$MIGRATION_DB" || return 1
 	echo "$HEADER done migrations init"
 	return 0
 }
@@ -135,8 +135,8 @@ apply_migrations()
 			[[ "$migration" =~ ^([^/]+)/ ]] || return 1
 			db="${BASH_REMATCH[1]}"
 
-			if $MYSQL "$db" <"$DB_CHANGES_DIR/$migration" &&
-			   $MYSQL "$MIGRATION_DB" -e "INSERT INTO migrations VALUES ('$migration');"
+			if $MARIADB "$db" <"$DB_CHANGES_DIR/$migration" &&
+			   $MARIADB "$MIGRATION_DB" -e "INSERT INTO migrations VALUES ('$migration');"
 			then
 				status=done
 			else
@@ -162,7 +162,7 @@ init)
   #   - if yes, apply de migrations
   # - exit
 
-  wait_mysqld
+  wait_mariadbd
   init_migrations
   exit $?
   ;;
@@ -173,7 +173,7 @@ never)
 auto)
   # automatic mode
   # - init db or apply migrations in a background process
-  wait_mysqld
+  wait_mariadbd
   if check_migrations_db ; then
     apply_migrations
   else
@@ -185,7 +185,7 @@ manual)
   # manual mode
   # - apply migrations
   # - exit
-  wait_mysqld
+  wait_mariadbd
   apply_migrations
   exit $?
   ;;
