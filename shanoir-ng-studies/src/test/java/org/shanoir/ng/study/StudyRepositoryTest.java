@@ -16,6 +16,7 @@ package org.shanoir.ng.study;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,9 @@ public class StudyRepositoryTest {
 
         final Study study = new Study();
         study.setName("StudyTest");
+        study.setStartDate(LocalDate.now());
+        study.setEndDate(LocalDate.now().plusMonths(6));
+
         StudyCenter studyCenter = new StudyCenter();
         studyCenter.setStudy(study);
         studyCenter.setCenter(center);
@@ -61,6 +65,7 @@ public class StudyRepositoryTest {
         studyCenters.add(studyCenter);
         study.setStudyCenterList(studyCenters);
         study.setStudyStatus(StudyStatus.IN_PROGRESS);
+
         final Study newStudy = studyRepository.save(study);
         assertEquals("StudyTest", newStudy.getName());
     }
