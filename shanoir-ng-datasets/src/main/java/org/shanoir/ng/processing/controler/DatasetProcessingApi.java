@@ -123,7 +123,7 @@ public interface DatasetProcessingApi {
             @ApiResponse(responseCode = "500", description = "unexpected error")})
     @PostMapping(value = "", produces = {"application/json"}, consumes = {
             "application/json"})
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and !@datasetSecurityService.isDraftStudy(#datasetProcessing.getStudyId()")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and !@datasetSecurityService.isDraftStudy(#datasetProcessing.getStudyId())")
     ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(@Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
                                                                   BindingResult result) throws RestServiceException;
 
