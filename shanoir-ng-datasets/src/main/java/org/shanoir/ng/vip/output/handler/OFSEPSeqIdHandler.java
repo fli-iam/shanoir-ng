@@ -297,20 +297,24 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                     LOG.error("No volume from serie [{}] could be match with dataset [{}].", serieId, ds.getId());
                     continue;
                 }
+                JSONObject volume = vol.getJSONObject("volume");
+                if (!volume.has("status") || !Objects.equals("IGNORED", volume.getString("status"))) {
+                    try {
+                        updateDataset(serie, ds, vol);
+                    } catch (CheckedIllegalClassException | EntityNotFoundException | SolrServerException | IOException e) {
+                        LOG.error("Error while updating dataset [{}]", ds.getId(), e);
+                        throw e;
+                    }
 
-                try {
-                    updateDataset(serie, ds, vol);
-                } catch (CheckedIllegalClassException | EntityNotFoundException | SolrServerException | IOException e) {
-                    LOG.error("Error while updating dataset [{}]", ds.getId(), e);
-                    throw e;
+                    LOG.info("Dataset {} updated", ds.getId());
+
+                    List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, execution);
+                    addDatasetTags(ds, properties);
+                    properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, execution));
+                    datasetPropertyService.createAll(properties);
+                } else {
+                    LOG.info("Dataset {} ignored, no update", ds.getId());
                 }
-
-                LOG.info("Dataset {} updated", ds.getId());
-
-                List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, execution);
-                addDatasetTags(ds, properties);
-                properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, execution));
-                datasetPropertyService.createAll(properties);
             }
         }
         LOG.info("Output.json processed for execution {}", execution.getId());
@@ -320,7 +324,6 @@ public class OFSEPSeqIdHandler extends OutputHandler {
      * Update dataset from pipeline output serie & volume
      */
     private void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
-        LOG.info("JSON : \n" + vol.getJSONObject("volume"));
         if (!vol.getJSONObject("volume").has("status") || !Objects.equals("IGNORED", vol.getJSONObject("volume").getString("status"))) {
             DatasetMetadataField.NAME.update(ds, vol.getJSONObject("volume").getString(TYPE));
             datasetRepository.save(ds);
@@ -370,43 +373,33 @@ public class OFSEPSeqIdHandler extends OutputHandler {
         JSONObject volume = json.getJSONObject("volume");
         JSONObject serie = json.getJSONObject("serie");
 
-        if (Objects.equals("IGNORED", volume.getString("type"))) {
+        for (String name : SERIE_PROPERTIES) {
+            if (!serie.has(name)) {
+                continue;
+            }
+
             DatasetProperty property = new DatasetProperty();
             property.setDataset(ds);
-            property.setName("volume.type");
-            property.setValue("IGNORED");
+            property.setName("serie." + name);
+            property.setValue(serie.getString(name));
             property.setProcessing(monitoring);
             properties.add(property);
-            return properties;
-        } else {
-            for (String name : SERIE_PROPERTIES) {
-                if (!serie.has(name)) {
-                    continue;
-                }
-
-                DatasetProperty property = new DatasetProperty();
-                property.setDataset(ds);
-                property.setName("serie." + name);
-                property.setValue(serie.getString(name));
-                property.setProcessing(monitoring);
-                properties.add(property);
-            }
-
-
-            for (String name : VOLUME_PROPERTIES) {
-                if (!volume.has(name)) {
-                    continue;
-                }
-
-                DatasetProperty property = new DatasetProperty();
-                property.setDataset(ds);
-                property.setName("volume." + name);
-                property.setValue(volume.getString(name));
-                property.setProcessing(monitoring);
-                properties.add(property);
-            }
-            return properties;
         }
+
+
+        for (String name : VOLUME_PROPERTIES) {
+            if (!volume.has(name)) {
+                continue;
+            }
+
+            DatasetProperty property = new DatasetProperty();
+            property.setDataset(ds);
+            property.setName("volume." + name);
+            property.setValue(volume.getString(name));
+            property.setProcessing(monitoring);
+            properties.add(property);
+        }
+        return properties;
     }
 
     /**

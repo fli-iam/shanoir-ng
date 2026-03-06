@@ -142,39 +142,48 @@ SELECT subject.id AS patient_id,
     WHERE de.dataset_id = dataset.id
     AND de.dataset_expression_format = 6) AS dicom_size_mo,
 
-    (SELECT CASE
-    WHEN proc.id IS NOT NULL
-    AND COUNT(prop.id) = 0 THEN 'IGNORED'
+    (
+    SELECT CASE
     WHEN proc.id IS NULL THEN NULL
-    ELSE JSON_OBJECT('execution_name', exe.name, 'status', CASE
+    WHEN COUNT(prop.id) = 0 THEN 'IGNORED'
+    ELSE JSON_OBJECT(
+    'execution_name', exe.name,
+    'status', CASE
     WHEN exe.status = 0 THEN 'RUNNING'
     WHEN exe.status = 1 THEN 'FINISHED'
     WHEN exe.status = 2 THEN 'EXECUTION_FAILED'
     WHEN exe.status = 4 THEN 'KILLED'
     ELSE 'UNKNOWN'
-    END, 'processing_date', proc.processing_date, 'properties', JSON_ARRAYAGG(CASE
-    WHEN prop.name IS NOT NULL THEN JSON_OBJECT(prop.name, prop.value)
-    END))
+    END,
+    'processing_date', proc.processing_date,
+    'properties', JSON_ARRAYAGG(
+    CASE
+    WHEN prop.name IS NOT NULL
+    THEN JSON_OBJECT(prop.name, prop.value)
     END
+    )
+    )
+    END
+
     FROM dataset ds
-    LEFT JOIN dataset_property prop ON prop.dataset_id = ds.id
-    LEFT JOIN dataset_processing proc ON prop.dataset_processing_id = proc.id
-    LEFT JOIN execution_monitoring exe ON proc.id = exe.id
-    WHERE (proc.id =
-    (SELECT property.dataset_processing_id
-    FROM dataset_property property
-    RIGHT JOIN dataset ds ON property.dataset_id = ds.id
-    RIGHT JOIN dataset_acquisition acq ON acq.id = ds.dataset_acquisition_id
-    RIGHT JOIN dataset_acquisition acq_from_init_dataset ON acq_from_init_dataset.examination_id = acq.examination_id
-    WHERE dataset.dataset_acquisition_id = acq_from_init_dataset.id
-    ORDER BY property.dataset_processing_id DESC
-    LIMIT 1)
-    OR proc.id IS NULL)
-    AND ds.id = dataset.id
-    GROUP BY exe.name,
-    exe.status,
-    proc.processing_date,
-    proc.id) AS execution
+    LEFT JOIN dataset_processing proc
+    ON proc.id = (
+    SELECT p.dataset_processing_id
+    FROM dataset_property p
+    JOIN dataset d2 ON d2.id = p.dataset_id
+    JOIN dataset_acquisition acq ON acq.id = d2.dataset_acquisition_id
+    JOIN dataset_acquisition acq_init ON acq_init.examination_id = acq.examination_id
+    WHERE ds.dataset_acquisition_id = acq_init.id
+    ORDER BY p.dataset_processing_id DESC
+    LIMIT 1
+    )
+    LEFT JOIN dataset_property prop
+    ON prop.dataset_processing_id = proc.id AND prop.dataset_id = ds.id
+    LEFT JOIN execution_monitoring exe
+    ON exe.id = proc.id
+    WHERE ds.id = dataset.id
+    GROUP BY proc.id, exe.name, exe.status, proc.processing_date
+    ) AS execution
 FROM dataset
     LEFT JOIN dataset_acquisition ON (dataset_acquisition.id = dataset.dataset_acquisition_id)
     LEFT JOIN dataset_metadata ON (dataset_metadata.id = dataset.updated_metadata_id)
