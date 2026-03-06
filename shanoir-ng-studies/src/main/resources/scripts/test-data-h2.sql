@@ -19,6 +19,13 @@ VALUES
 	(2,'shanoirStudy2', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 0, 0, 0, 0, 1, 1, 0, 0),
 	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 1, 0, 0);
 
+INSERT INTO study_extra_details
+	(id, expected_nb_of_subjects, average_examination_size, estimated_total_volume, expected_nb_of_centers, inclusion_rate, inclusion_rate_unit, sponsor, principal_investigator, scientific_advisor, study_id)
+VALUES
+	(1, 100, 5, 500, 1, 5, 2, 'INRIA', 'INRIA', 'INRIA', 1);
+	(2, 200, 5, 1000, 1, 5, 2, 'INRIA', 'INRIA', 'INRIA', 1);
+	(3, 400, 5, 2000, 1, 5, 2, 'INRIA', 'INRIA', 'INRIA', 1);
+
 INSERT INTO study_user
 	(id, receive_study_user_report, receive_new_import_report, confirmed, study_id, user_id, user_name)
 VALUES
