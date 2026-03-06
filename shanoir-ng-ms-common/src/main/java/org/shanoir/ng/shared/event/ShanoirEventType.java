@@ -119,4 +119,7 @@ public final class ShanoirEventType {
 
     /** TEMPORARY: Delete existing niftis in shanoir. */
     public static final String DELETE_NIFTI_EVENT = "deleteNiftis.event";
+
+    /** BIDS export **/
+    public static final String BIDS_EXPORT = "bidsExport.event";
 }

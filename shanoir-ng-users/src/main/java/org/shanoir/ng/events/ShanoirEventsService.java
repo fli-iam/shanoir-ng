@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.events;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +23,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
 import org.shanoir.ng.tasks.UserSseEmitter;
-import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -35,7 +33,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
  * Service managing ShanoirEvents
@@ -51,9 +48,6 @@ public class ShanoirEventsService {
 
     @Autowired
     private ShanoirEventRepositoryCustom repositoryCustom;
-
-    @Autowired
-    private UserRepository userRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventsService.class);
 
@@ -75,7 +69,8 @@ public class ShanoirEventsService {
                 || ShanoirEventType.DELETE_DATASET_EVENT.equals(event.getEventType())
                 || ShanoirEventType.MASSIVE_OUTPUTS_DOWNLOAD.equals(event.getEventType())
                 || ShanoirEventType.DELETE_EXAMINATION_EVENT.equals(event.getEventType())
-                || ShanoirEventType.DELETE_NIFTI_EVENT.equals(event.getEventType())) {
+                || ShanoirEventType.DELETE_NIFTI_EVENT.equals(event.getEventType())
+                || ShanoirEventType.BIDS_EXPORT.equals(event.getEventType())) {
             sendSseEventsToUI(saved);
         }
     }
@@ -137,40 +132,33 @@ public class ShanoirEventsService {
      * @param notification the event to send
      */
     public void sendSseEventsToUI(ShanoirEvent notification) {
-        List<UserSseEmitter> sseEmitterListToRemove = new ArrayList<>();
-        AsyncTaskApiController.EMITTERS.forEach((UserSseEmitter emitter) -> {
-            // ! IMPORTANT filter on user id
-            if (notification.getUserId() != null && notification.getUserId().equals(emitter.getUserId())) {
-                if (notification.getLastUpdate() == null) {
-                    notification.setLastUpdate(new Date());
-                }
-                try {
-                    emitter.send(notification, MediaType.APPLICATION_JSON);
-                } catch (IOException e2) {
-                    emitter.complete();
-                    sseEmitterListToRemove.add(emitter);
-                    LOG.error("Error while send task to UI ", e2);
-                } catch (Exception e) {
-                    emitter.complete();
-                    sseEmitterListToRemove.add(emitter);
-                    LOG.error("Error while send task to UI ", e);
-                    throw e;
-                }
+        if (notification == null || notification.getUserId() == null) {
+            return;
+        }
+        if (notification.getLastUpdate() == null) {
+            notification.setLastUpdate(new Date());
+        }
+        for (UserSseEmitter emitter : AsyncTaskApiController.EMITTERS) {
+            if (!notification.getUserId().equals(emitter.getUserId())) {
+                continue;
             }
-        });
-        AsyncTaskApiController.EMITTERS.removeAll(sseEmitterListToRemove);
+            try {
+                emitter.send(notification, MediaType.APPLICATION_JSON);
+            } catch (Exception ex) {
+                AsyncTaskApiController.EMITTERS.remove(emitter);
+                LOG.debug("SSE send failed, removing emitter for userId={}", emitter.getUserId(), ex);
+            }
+        }
     }
 
     @Scheduled(fixedDelay = 30000)
     private void keepConnectionAlive() {
-        List<SseEmitter> sseEmitterListToRemove = new ArrayList<>();
-        AsyncTaskApiController.EMITTERS.forEach((SseEmitter emitter) -> {
+        List<UserSseEmitter> sseEmitterListToRemove = new ArrayList<>();
+        AsyncTaskApiController.EMITTERS.forEach((UserSseEmitter emitter) -> {
             try {
                 emitter.send("{}", MediaType.APPLICATION_JSON);
             } catch (Exception e) {
-                // This happens when the user's connection reset, do not log anything.
-                emitter.complete();
-                sseEmitterListToRemove.add(emitter);
+                AsyncTaskApiController.EMITTERS.remove(emitter);
             }
         });
         AsyncTaskApiController.EMITTERS.removeAll(sseEmitterListToRemove);
