@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyExtraDetails;
 import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
@@ -57,6 +58,13 @@ public class StudyRepositoryTest {
         study.setName("StudyTest");
         study.setStartDate(LocalDate.now());
         study.setEndDate(LocalDate.now().plusMonths(6));
+
+        final StudyExtraDetails studyExtraDetails = new StudyExtraDetails();
+        studyExtraDetails.setExpectedNbOfCenters(1L);
+        studyExtraDetails.setExpectedNbOfSubjects(100L);
+        studyExtraDetails.setPrincipalInvestigator("test");
+        studyExtraDetails.setSponsor("test");
+        study.setExtraDetails(studyExtraDetails);
 
         StudyCenter studyCenter = new StudyCenter();
         studyCenter.setStudy(study);
