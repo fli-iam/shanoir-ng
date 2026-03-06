@@ -1,12 +1,12 @@
 -- Shanoir NG - Import, manage and share neuroimaging data
 -- Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 -- Contact us on https://project.inria.fr/shanoir/
--- 
+--
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
 -- the Free Software Foundation, either version 3 of the License, or
 -- (at your option) any later version.
--- 
+--
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -22,10 +22,10 @@ use datasets;
 -- INSERT INTO `study_card_condition` VALUES (2,528446,'tse_vfl_WIP607',2,3),(3,1573009,'200',6,5),(4,1573009,'150',5,5),(5,1573009,'150',5,6),(6,1573013,'781.00',2,6);
 
 INSERT INTO study
-	(id, name)
+	(id, name, is_draft)
 VALUES
-	(1, 'DemoStudy');
-	
+	(1, 'DemoStudy', 0);
+
 INSERT INTO subject
 	(id, name, study_id)
 VALUES
@@ -38,5 +38,5 @@ VALUES
 
 INSERT INTO study_cards
 	(id, acquisition_equipment_id, disabled, last_edit_timestamp, name, nifti_converter_id, study_id)
-VALUES 
+VALUES
 	(1,1,false,0,'StudyCard1',1,1);
