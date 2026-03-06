@@ -26,6 +26,7 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -41,6 +42,7 @@ import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyExtraDetails;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
@@ -255,9 +257,25 @@ public class StudyServiceImpl implements StudyService {
 
             // Use newly created study "studyDb" to decide, to send email to which user
             sendStudyUserReport(studyDb, studyDb.getStudyUserList());
+            if (studyDb.getIsDraft()) {
+                // Notify users service to send emails to study admins about new study
+                sendAdminEmailReport(studyDb, true);
+            }
         }
 
         return studyDb;
+    }
+
+    public Study approveDraftStudy(Long studyId) throws ShanoirException {
+        Study study = studyRepository.findById(studyId).orElse(null);
+        if (study == null) {
+            throw new EntityNotFoundException(Study.class, studyId);
+        }
+        study.setIsDraft(false);
+        studyRepository.save(study);
+        updateStudyName(studyMapper.studyToStudyDTODetailed(study));
+        sendMembersApprovalEmailReport(study);
+        return study;
     }
 
     private class StudyEqualCheck implements EqualCheckInterface<StudyCenter> {
@@ -281,6 +299,10 @@ public class StudyServiceImpl implements StudyService {
     public Study update(Study study) throws ShanoirException {
         Study studyDb = studyRepository.findById(study.getId()).orElse(null);
 
+        if (study.getIsDraft() && hasMembershipChanged(study, studyDb)) {
+            throw new ShanoirException("Cannot change study members or their rights while the study is in draft state.");
+        }
+
         List<Long> tagsToDelete = getTagsToDelete(study, studyDb);
         List<Long> studyTagsToDelete = getStudyTagsToDelete(study, studyDb);
 
@@ -300,6 +322,27 @@ public class StudyServiceImpl implements StudyService {
         studyDb.setVisibleByDefault(study.isVisibleByDefault());
         studyDb.setStudyCardPolicy(study.getStudyCardPolicy());
         studyDb.setWithExamination(study.isWithExamination());
+
+        if (study.getExtraDetails() != null) {
+            StudyExtraDetails incoming = study.getExtraDetails();
+            StudyExtraDetails existing = studyDb.getExtraDetails();
+
+            if (existing == null) {
+                // First time setting extra details — link it properly
+                studyDb.setExtraDetails(incoming);
+            } else {
+                // Update fields on the existing managed entity to avoid a duplicate insert
+                existing.setExpectedNbOfSubjects(incoming.getExpectedNbOfSubjects());
+                existing.setExpectedNbOfCenters(incoming.getExpectedNbOfCenters());
+                existing.setAverageExaminationSize(incoming.getAverageExaminationSize());
+                existing.setEstimatedTotalVolume(incoming.getEstimatedTotalVolume());
+                existing.setInclusionRate(incoming.getInclusionRate());
+                existing.setInclusionRateUnit(incoming.getInclusionRateUnit());
+                existing.setSponsor(incoming.getSponsor());
+                existing.setPrincipalInvestigator(incoming.getPrincipalInvestigator());
+                existing.setScientificAdvisor(incoming.getScientificAdvisor());
+            }
+        }
 
         if (study.getStudyCenterList() != null) {
             for (StudyCenter studyCenter : studyDb.getStudyCenterList()) {
@@ -417,7 +460,37 @@ public class StudyServiceImpl implements StudyService {
             throw new ShanoirException(error);
         }
 
+        if (studyDb.getIsDraft()) {
+            sendAdminEmailReport(studyDb, false);
+        }
+
         return studyDb;
+    }
+
+    private boolean hasMembershipChanged(Study study, Study studyDb) {
+        Set<Long> existingUserIds = studyDb.getStudyUserList().stream()
+                .map(StudyUser::getUserId)
+                .collect(Collectors.toSet());
+        Set<Long> incomingUserIds = study.getStudyUserList() == null ? Collections.emptySet()
+                : study.getStudyUserList().stream()
+                        .map(StudyUser::getUserId)
+                        .collect(Collectors.toSet());
+
+        if (!existingUserIds.equals(incomingUserIds)) {
+            return true;
+        }
+
+        if (study.getStudyUserList() != null) {
+            Map<Long, StudyUser> existingByUserId = studyDb.getStudyUserList().stream()
+                    .collect(Collectors.toMap(StudyUser::getUserId, su -> su));
+
+            return study.getStudyUserList().stream().anyMatch(incoming -> {
+                StudyUser existing = existingByUserId.get(incoming.getUserId());
+                return existing != null && !new HashSet<>(existing.getStudyUserRights())
+                        .equals(new HashSet<>(incoming.getStudyUserRights()));
+            });
+        }
+        return false;
     }
 
     private boolean hasSubjectChanged(Subject oldSub, Subject newSub) {
@@ -753,6 +826,73 @@ public class StudyServiceImpl implements StudyService {
         }
     }
 
+    private void sendAdminEmailReport(Study study, boolean isNew) {
+        EmailStudy email = buildAdminEmailReport(study);
+        email.setIsNew(isNew);
+
+        try {
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfiguration.DRAFT_STUDY_MAIL_QUEUE,
+                    objectMapper.writeValueAsString(email)
+            );
+        } catch (Exception e) {
+            LOG.error("Could not send study email event.", e);
+        }
+    }
+
+    private void sendMembersApprovalEmailReport(Study study) {
+        EmailStudy email = new EmailStudy();
+        email.setUserId(KeycloakUtil.getTokenUserId());
+        email.setStudyId(study.getId().toString());
+        email.setStudyName(study.getName());
+        List<Long> studyUserIds = study.getStudyUserList().stream().map(StudyUser::getUserId).collect(Collectors.toList());
+        email.setStudyUsers(studyUserIds);
+        try {
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.APPROVE_STUDY_MAIL_QUEUE,
+                    objectMapper.writeValueAsString(email));
+        } catch (Exception e) {
+            LOG.error("Could not send study approval email event.", e);
+        }
+    }
+
+    private EmailStudy buildAdminEmailReport(Study study) {
+        EmailStudy email = new EmailStudy();
+        email.setUserId(KeycloakUtil.getTokenUserId());
+        email.setStudyId(study.getId().toString());
+        email.setStudyName(study.getName());
+
+        email.setDescription(study.getDescription());
+        email.setLicense(study.getLicense());
+        email.setStartDate(study.getStartDate());
+        email.setEndDate(study.getEndDate());
+        email.setStudyStatus(study.getStudyStatus() != null ? study.getStudyStatus().name() : null);
+        email.setProfile(study.getProfile() != null ? study.getProfile().getProfileName() : null);
+        email.setStudyCardPolicy(study.getStudyCardPolicy() != null ? study.getStudyCardPolicy().name() : null);
+        email.setClinical(study.isClinical());
+        email.setChallenge(study.isChallenge());
+
+        // Study users
+        List<Long> studyUserIds = study.getStudyUserList()
+                .stream()
+                .map(StudyUser::getUserId)
+                .collect(Collectors.toList());
+        email.setStudyUsers(studyUserIds);
+
+        // Extra details
+        StudyExtraDetails details = study.getExtraDetails();
+        email.setExpectedNbOfSubjects(details.getExpectedNbOfSubjects());
+        email.setAverageExaminationSize(details.getAverageExaminationSize());
+        email.setEstimatedTotalVolume(details.getEstimatedTotalVolume());
+        email.setExpectedNbOfCenters(details.getExpectedNbOfCenters());
+        email.setInclusionRate(details.getInclusionRate());
+        email.setInclusionRateUnit(details.getInclusionRateUnit() != null ? details.getInclusionRateUnit().name() : null);
+        email.setSponsor(details.getSponsor());
+        email.setPrincipalInvestigator(details.getPrincipalInvestigator());
+        email.setScientificAdvisor(details.getScientificAdvisor());
+
+        return email;
+    }
+
     @Override
     public void addStudyUserToStudy(StudyUser studyUser, Study study) {
         studyUserRepository.save(studyUser);
@@ -787,7 +927,7 @@ public class StudyServiceImpl implements StudyService {
 
     public String updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
         try {
-            return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
+            return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_UPDATE_QUEUE,
                     objectMapper.writeValueAsString(study));
         } catch (AmqpException | JsonProcessingException e) {
             throw new MicroServiceCommunicationException(
@@ -841,9 +981,14 @@ public class StudyServiceImpl implements StudyService {
 
     @Override
     public List<Study> findPublicStudies() {
-        List<Study> studies = this.studyRepository.findByVisibleByDefaultTrue();
+        List<Study> studies = this.studyRepository.findByVisibleByDefaultTrueAndIsDraftFalse();
         setNumberOfSubjectsAndExaminations(studies);
         return studies;
+    }
+
+    @Override
+    public List<Study> findDraftStudies() {
+        return this.studyRepository.findByIsDraftTrue();
     }
 
     @Override

@@ -138,7 +138,10 @@ public interface ImporterApi {
         @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
     @PostMapping(value = "/start_import_job/", consumes = {"application/json"}, produces = {"application/json"})
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
+    @PreAuthorize("!@importSecurityService.isDraftStudy(#importJob.getStudyId()) and "
+              + "(hasRole('ADMIN') or "
+              + "(hasAnyRole('EXPERT', 'USER') and "
+              + "@importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT')))")
     ResponseEntity<Void> startImportJob(@Parameter(name = "ImportJob", required = true) @RequestBody ImportJob importJob) throws RestServiceException;
 
     @Operation(summary = "Start analysis of EEG job", description = "Start analysis eeg job")
@@ -160,7 +163,10 @@ public interface ImporterApi {
     @PostMapping(value = "/start_import_eeg_job/",
             produces = {"application/json"},
             consumes = {"application/json"})
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
+    @PreAuthorize("!@importSecurityService.isDraftStudy(#importJob.getStudyId()) and "
+              + "(hasRole('ADMIN') or "
+              + "(hasAnyRole('EXPERT', 'USER') and "
+              + "@importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT')))")
     ResponseEntity<Void> startImportEEGJob(@Parameter(name = "EegImportJob", required = true) @RequestBody EegImportJob importJob) throws RestServiceException;
 
     @Operation(summary = "ImportFromPACS: Query PACS", description = "ImportFromPACS: Query PACS")

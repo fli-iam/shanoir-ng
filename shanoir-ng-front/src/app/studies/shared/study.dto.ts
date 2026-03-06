@@ -158,6 +158,19 @@ export class StudyDTOService {
             entity.detailedSizes = this.studyStorageVolumeDTOToDetailedSizes(dto.storageVolume)
         }
 
+        entity.isDraft = dto.isDraft;
+        if (dto.extraDetails) {
+            entity.expectedNbOfSubjects = dto.extraDetails.expectedNbOfSubjects;
+            entity.averageExaminationSize = dto.extraDetails.averageExaminationSize;
+            entity.estimatedTotalVolume = dto.extraDetails.estimatedTotalVolume;
+            entity.expectedNbOfCenters = dto.extraDetails.expectedNbOfCenters;
+            entity.inclusionRate = dto.extraDetails.inclusionRate;
+            entity.inclusionRateUnit = dto.extraDetails.inclusionRateUnit;
+            entity.sponsor = dto.extraDetails.sponsor;
+            entity.principalInvestigator = dto.extraDetails.principalInvestigator;
+            entity.scientificAdvisor = dto.extraDetails.scientificAdvisor;
+        }
+
         return entity;
     }
 
@@ -273,6 +286,8 @@ export class StudyDTO {
     description: string;
     license: string;
     storageVolume: StudyStorageVolumeDTO;
+    isDraft: boolean;
+    extraDetails: StudyExtraDetailsDTO;
 
     constructor(study: Study) {
         this.id = study.id ? study.id : null;
@@ -311,12 +326,22 @@ export class StudyDTO {
         this.studyTags = study.studyTags;
         this.description = study.description;
         this.license = study.license;
+        this.isDraft = study.isDraft;
+        this.extraDetails = {
+            "expectedNbOfSubjects": study.expectedNbOfSubjects,
+            "averageExaminationSize": study.averageExaminationSize,
+            "estimatedTotalVolume": study.estimatedTotalVolume,
+            "expectedNbOfCenters": study.expectedNbOfCenters,
+            "inclusionRate": study.inclusionRate,
+            "inclusionRateUnit": study.inclusionRateUnit,
+            "sponsor": study.sponsor,
+            "principalInvestigator": study.principalInvestigator,
+            "scientificAdvisor": study.scientificAdvisor
+        }
     }
-
 }
 
 export class CenterStudyDTO {
-
     id: number;
     name: string;
     studyCenterList: StudyCenterDTO[];
@@ -339,21 +364,42 @@ export class StudyLight {
   license: string;
   studyTags: Tag[];
   profile: Profile;
+  isDraft: boolean;
 }
 
 
 export class StudyStorageVolumeDTO {
-
     total: number;
     volumeByFormat: VolumeByFormatDTO[];
     extraDataSize: number;
-
 }
 
 
 export class VolumeByFormatDTO {
-
     format: DatasetExpressionFormat;
     size: number;
+}
 
+class StudyExtraDetailsDTO {
+    expectedNbOfSubjects: number;
+    averageExaminationSize: number;
+    estimatedTotalVolume: number;
+    expectedNbOfCenters: number;
+    inclusionRate: number;
+    inclusionRateUnit: 'PER_DAY' | 'PER_WEEK' | 'PER_MONTH' | 'PER_YEAR';
+    sponsor: string;
+    principalInvestigator: string;
+    scientificAdvisor: string;
+
+    constructor(study: Study) {
+        this.expectedNbOfSubjects = study.expectedNbOfSubjects;
+        this.averageExaminationSize = study.averageExaminationSize;
+        this.estimatedTotalVolume = study.estimatedTotalVolume;
+        this.expectedNbOfCenters = study.expectedNbOfCenters;
+        this.inclusionRate = study.inclusionRate;
+        this.inclusionRateUnit = study.inclusionRateUnit;
+        this.sponsor = study.sponsor;
+        this.principalInvestigator = study.principalInvestigator;
+        this.scientificAdvisor = study.scientificAdvisor
+    }
 }
