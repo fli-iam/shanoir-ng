@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.vip.executionMonitoring.service;
 
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -58,6 +57,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringService {
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+    private final DateTimeFormatter readableFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
     public static final float DEFAULT_PROGRESS = 0.5f;
     @Value("${vip.sleep-time}")
     private long sleepTime;
@@ -88,18 +88,19 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     @Lazy
     private ExecutionMonitoringServiceImpl emProxyService;
 
-    public ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) throws RestServiceException {
+    public ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO sample) throws RestServiceException {
         ExecutionMonitoring executionMonitoring = new ExecutionMonitoring();
-        executionMonitoring.setName(execution.getName());
-        executionMonitoring.setPipelineIdentifier(execution.getPipelineIdentifier());
+
+        executionMonitoring.setName(sample.getPipelineIdentifier().replaceAll("[/.]", "_") + "_" + LocalDateTime.now().format(readableFormatter));
+        executionMonitoring.setPipelineIdentifier(sample.getPipelineIdentifier());
         executionMonitoring.setResultsLocation(KeycloakUtil.getTokenUserId() + "/" + formatter.format(LocalDateTime.now()));
         executionMonitoring.setTimeout(20);
-        executionMonitoring.setStudyId(execution.getStudyIdentifier());
+        executionMonitoring.setStudyId(sample.getStudyIdentifier());
         executionMonitoring.setStatus(ExecutionStatus.RUNNING);
-        executionMonitoring.setComment(execution.getName());
-        executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(execution.getProcessingType()));
-        executionMonitoring.setOutputProcessing(execution.getOutputProcessing());
-        executionMonitoring.setInputDatasets(inputDatasets);
+        executionMonitoring.setComment(executionMonitoring.getName());
+        executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(sample.getProcessingType()));
+        executionMonitoring.setOutputProcessing(null);
+        executionMonitoring.setInputDatasets(null);
         executionMonitoring.setUsername(KeycloakUtil.getTokenUserName());
         datasetProcessingService.validateDatasetProcessing(executionMonitoring);
         return repository.save(executionMonitoring);
@@ -183,6 +184,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                     if (Objects.nonNull(event)) {
                         setEventInError(event, execLabel + " : " + ex.getMessage());
                     }
+                    monitoringQueue.remove(emMap);
                 }
             }
             while (System.currentTimeMillis() - startTime < sleepTime) {
