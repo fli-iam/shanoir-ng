@@ -16,22 +16,22 @@ package org.shanoir.ng.shared.email;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class EmailStudyUsersAdded extends EmailBase {
 
     public EmailStudyUsersAdded() {
     }
 
-    @JsonProperty
     private List<Long> studyUsers;
 
+    @JsonProperty("studyUsers")
     public List<Long> getStudyUsers() {
         return studyUsers;
     }
 
+    @JsonSetter("studyUsers")
     public void setStudyUsers(List<Long> studyUsers) {
         this.studyUsers = studyUsers;
     }
