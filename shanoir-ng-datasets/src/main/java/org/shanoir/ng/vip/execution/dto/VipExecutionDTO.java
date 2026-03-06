@@ -27,7 +27,7 @@ public class VipExecutionDTO {
     private String pipelineIdentifier;
     private int timeout;
     private ExecutionStatus status;
-    private Map<String, java.lang.Object> inputValues;
+    private Map<String, List<String>> inputValues;
     private Map<String, List<java.lang.Object>> returnedFiles;
     private String studyIdentifier;
     private Integer errorCode;
@@ -83,11 +83,11 @@ public class VipExecutionDTO {
         this.status = status;
     }
 
-    public Map<String, java.lang.Object> getInputValues() {
+    public Map<String, List<String>> getInputValues() {
         return inputValues;
     }
 
-    public void setInputValues(Map<String, java.lang.Object> inputValues) {
+    public void setInputValues(Map<String, List<String>> inputValues) {
         this.inputValues = inputValues;
     }
 
