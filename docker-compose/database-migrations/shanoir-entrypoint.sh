@@ -168,6 +168,7 @@ init)
   ;;
 never)
   # TODO: (warn/fail/alter healthcheck) if there are pending migrations
+  echo "$HEADER mode '$SHANOIR_MIGRATION': migrations are skipped"
   ;;
 auto)
   # automatic mode
@@ -182,9 +183,7 @@ auto)
   ;;
 manual)
   # manual mode
-  # - run mysqld in a background process
   # - apply migrations
-  # - stop mysqld
   # - exit
   wait_mysqld
   apply_migrations
