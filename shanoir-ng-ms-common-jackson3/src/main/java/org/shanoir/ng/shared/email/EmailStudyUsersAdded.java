@@ -16,8 +16,10 @@ package org.shanoir.ng.shared.email;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class EmailStudyUsersAdded extends EmailBase {
 
     public EmailStudyUsersAdded() {

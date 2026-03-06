@@ -17,26 +17,49 @@ package org.shanoir.ng.shared.email;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class EmailStudy extends EmailBase {
+
     private String description;
+
     private String license;
+
     private LocalDate startDate;
+
     private LocalDate endDate;
+
     private String studyStatus;
+
     private String profile;
+
     private String studyCardPolicy;
+
     private boolean clinical;
+
     private boolean challenge;
+
     private Long expectedNbOfSubjects;
+
     private Float averageExaminationSize;
+
     private Float estimatedTotalVolume;
+
     private Long expectedNbOfCenters;
+
     private Long inclusionRate;
+
     private String inclusionRateUnit;
+
     private String sponsor;
+
     private String principalInvestigator;
+
     private String scientificAdvisor;
+
     private List<Long> studyUsers;
+
     private Boolean isNew;
 
     public String getDescription() {
@@ -198,4 +221,5 @@ public class EmailStudy extends EmailBase {
     public void setIsNew(Boolean isNew) {
         this.isNew = isNew;
     }
+
 }
