@@ -430,8 +430,10 @@ public class RabbitMQDatasetsService {
         int countCopy = 0;
         int countSuccess = 0;
         int countTotal = 0;
+        List<String> errors = new ArrayList<>();
         float progress = 0f;
         ShanoirEvent event = null;
+
         try {
             RelatedDataset dto = objectMapper.readValue(data, RelatedDataset.class);
             Long userId = dto.getUserId();
@@ -477,6 +479,7 @@ public class RabbitMQDatasetsService {
                 progress += 1f / countTotal;
                 event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + countProgress++ + "/" + countTotal);
                 event.setProgress(progress);
+                event.setReport(buildReport(datasetParentIds, countProcessed, countAlreadyExist, countCopy, countSuccess, errors));
                 eventService.publishEvent(event);
 
                 LOG.info("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
@@ -486,25 +489,27 @@ public class RabbitMQDatasetsService {
                     LOG.info("[CopyDatasets] Dataset already exists in this study, copy aborted.");
                     countAlreadyExist++;
                 } else {
-                    Object[] result = datasetCopyService.moveDataset(datasetParentId, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
-                    Long newDsId = (Long) result[0];
-                    countProcessed += (int) result[1];
-                    countSuccess += (int) result[2];
-                    countCopy += (int) result[3];
-                    LOG.info("countProcessed : " + countProcessed);
-                    if (newDsId != null)
-                        newDatasets.add(newDsId);
+                    try {
+                        DatasetCopyService.DatasetCopyResult result = datasetCopyService.moveDataset(datasetParentId, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
+                        Long newDsId = result.getNewDsId();
+                        countProcessed += result.getCountProcessed();
+                        countSuccess += result.getCountSuccess();
+                        countCopy += result.getCountCopy();
+                        LOG.info("countProcessed : " + countProcessed);
+                        if (newDsId != null) newDatasets.add(newDsId);
+                    } catch (DatasetCopyService.NotFoundSubjectIdException e) {
+                        LOG.error("[CopyDatasets] No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId);
+                        errors.add("No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId);
+                    }
                 }
             }
 
-            event.setMessage("Copy successful for " + countSuccess + "/" + countTotal + " datasets to study [" + studyId + "].\n"
-                    + countCopy + " were already copied datasets.\n"
-                    + countAlreadyExist + " already existed in destination study.\n"
-                    + countProcessed + " are processed datasets and cannot be copied.");
+            event.setMessage("Copy ended");
             event.setStatus(ShanoirEvent.SUCCESS);
             event.setProgress(1.0f);
+            event.setReport(buildReport(datasetParentIds, countProcessed, countAlreadyExist, countCopy, countSuccess, errors));
             eventService.publishEvent(event);
-            if (newDatasets.size() > 0)
+            if (!newDatasets.isEmpty())
                 solrService.indexDatasets(newDatasets);
 
         } catch (Exception e) {
@@ -512,11 +517,21 @@ public class RabbitMQDatasetsService {
                 event.setMessage("[CopyDatasets] Error during the copy of dataset.");
                 event.setStatus(ShanoirEvent.ERROR);
                 event.setProgress(-1f);
+                event.setReport(e.getMessage());
                 eventService.publishEvent(event);
             }
             LOG.error("Something went wrong during the copy. {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
         }
+    }
+
+    private String buildReport(List<Long> datasetParentIds, int countProcessed, int countAlreadyExist,
+            int countCopy, int countSuccess, List<String> errors) {
+        return "Copy successful for " + countSuccess + "/" + datasetParentIds.size() + " datasets.\n"
+                + countCopy + " were already copied datasets.\n"
+                + countAlreadyExist + " already existed in destination study.\n"
+                + countProcessed + " are processed datasets and cannot be copied.\n"
+                + (!errors.isEmpty() ? "Errors: " + String.join("\n", errors) : "");
     }
 
 }

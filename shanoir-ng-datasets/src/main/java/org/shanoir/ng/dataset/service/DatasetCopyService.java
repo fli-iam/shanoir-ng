@@ -18,9 +18,64 @@ import java.util.Map;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface DatasetCopyService {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
-    Object[] moveDataset(Long dsId, Long studyId, Map<Long, Long> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws Exception;
+    DatasetCopyResult moveDataset(Long dsId, Long studyId, Map<Long, Long> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws DatasetCopyService.NotFoundSubjectIdException, JsonProcessingException;
+
+    public class DatasetCopyResult {
+        private final Long newDsId;
+        private int countProcessed;
+        private int countSuccess;
+        private int countCopy;
+
+        public DatasetCopyResult(Long newDsId) {
+            this.newDsId = newDsId;
+        }
+
+        public Long getNewDsId() {
+            return newDsId;
+        }
+
+        public int getCountProcessed() {
+            return countProcessed;
+        }
+
+        public int getCountSuccess() {
+            return countSuccess;
+        }
+
+        public int getCountCopy() {
+            return countCopy;
+        }
+
+        public void incrementProcessed() {
+            this.countProcessed++;
+        }
+
+        public void incrementSuccess() {
+            this.countSuccess++;
+        }
+
+        public void incrementCopy() {
+            this.countCopy++;
+        }
+    }
+
+    public class NotFoundSubjectIdException extends ShanoirException {
+        private final Long subjectId;
+
+        public NotFoundSubjectIdException(Long subjectId) {
+            super("No mapping found for subject with id = " + subjectId);
+            this.subjectId = subjectId;
+        }
+
+        public Long getSubjectId() {
+            return subjectId;
+        }
+    }
 }

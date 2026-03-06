@@ -80,17 +80,21 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
     @Override
     @Transactional
-    public Object[] moveDataset(Long dsId, Long studyId, Map<Long, Long> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws JsonProcessingException {
+    public DatasetCopyService.DatasetCopyResult moveDataset(Long dsId, Long studyId, Map<Long, Long> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws DatasetCopyService.NotFoundSubjectIdException, JsonProcessingException {
+        DatasetCopyService.DatasetCopyResult result = new DatasetCopyService.DatasetCopyResult(dsId);
         try {
             Dataset ds = datasetRepository.findById(dsId).orElseThrow();
             if (ds.getSource() != null) {
                 LOG.info("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
-                return new Object[] {0, 0, 0, 1};
+                result.incrementCopy();
+                return result;
             }
-            int countProcessed = 0;
-            int countSuccess = 0;
             Long oldDsId = ds.getId();
             Long targetSubjectId = subjectMap.get(ds.getSubjectId());
+            if (targetSubjectId == null) {
+                LOG.error("[CopyDatasets] No mapping found for subject with id = " + ds.getSubjectId() + ". Dataset with id = " + oldDsId + " cannot be copied.");
+                throw new DatasetCopyService.NotFoundSubjectIdException(ds.getSubjectId());
+            }
             Subject targetSubjectRef = subjectRepository.getReferenceById(targetSubjectId);
             LOG.info("[CopyDatasets] moveDataset : " + oldDsId + " to study : " + studyId);
 
@@ -129,13 +133,13 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
                 saveDatasetWithDatasetFileBatch(newDs);
                 acqMap.put(oldAcqId, newDsAcq);
-                countSuccess++;
+                result.incrementSuccess();
             } else if (ds.getDatasetProcessing() != null) {
                 LOG.error("[CopyDatasets] Dataset selected is a processed dataset, it can't be copied.");
-                countProcessed++;
+                result.incrementProcessed();
             }
 
-            return new Object[]{newDs != null ? newDs.getId() : null, countProcessed, countSuccess, 0};
+            return result;
         } catch (Exception e) {
             LOG.error("[CopyDatasets] Error during the copy of dataset [" + dsId + "] to study [" + studyId + "].");
             throw e;
