@@ -33,12 +33,11 @@ public interface ExecutionService {
     /**
      * Update monitoring with vip execution details and persist it in DB
      *
-     * @param candidate
-     * @param inputDatasets
+     * @param candidates list of the exec candidates
      * @return Id and Name of execution
      * @throws EntityNotFoundException
      */
-    IdName createExecution(ExecutionCandidateDTO candidate, List<Dataset> inputDatasets) throws SecurityException, EntityNotFoundException, RestServiceException;
+    IdName createExecutions(List<ExecutionCandidateDTO> candidates) throws SecurityException, EntityNotFoundException, RestServiceException;
 
     /**
      * Get datasets from JSON id values
