@@ -666,9 +666,9 @@ public class StudySecurityService {
         // rights on datasets are checked in the dataset microservice as this ms does not have access to datasets
         if (copyData == null || copyData.getTargetStudyId() == null) {
             return false;
-        } else if (!hasRightOnStudy(copyData.getTargetStudyId(), StudyUserRight.CAN_ADMINISTRATE.name())) {
+        } else if (!hasRightOnStudy(copyData.getTargetStudyId(), StudyUserRight.CAN_IMPORT.name())) {
             return false;
-        } else if (!hasRightOnSubjects(copyData.getSubjectIds(), StudyUserRight.CAN_DOWNLOAD.name())) {
+        } else if (!hasRightOnSubjects(copyData.getSubjectIds(), StudyUserRight.CAN_IMPORT.name())) {
             return false;
         }
         // Can not check datasets as they are not stored in this microservice

@@ -53,7 +53,6 @@ export class DatasetCopyDialogComponent {
     protected centerIds: number[] = [];
     protected subjectIds: number[] = [];
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
-    protected readonly BATCH_SIZE: number = 2;
 
     constructor(private http: HttpClient,
         private studyRightsService: StudyRightsService,
