@@ -14,7 +14,14 @@
 
 package org.shanoir.ng.shared.configuration;
 
+import org.shanoir.ng.shared.email.EmailBase;
+import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
+import org.shanoir.ng.shared.email.EmailDatasetsImported;
+import org.shanoir.ng.shared.email.EmailStudy;
+import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.boot.amqp.autoconfigure.RabbitTemplateCustomizer;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +35,14 @@ import org.springframework.web.reactive.function.client.WebClient;
  *
  */
 @Configuration
+@RegisterReflectionForBinding({
+        EmailBase.class,
+        EmailDatasetsImported.class,
+        EmailDatasetImportFailed.class,
+        EmailStudy.class,
+        EmailStudyUsersAdded.class,
+        StudyInvitationEmail.class
+})
 public class CommonConfiguration {
 
     @Bean

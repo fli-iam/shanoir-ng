@@ -17,23 +17,27 @@ package org.shanoir.ng.shared.email;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
 
 public class EmailStudyUsersAdded extends EmailBase {
 
     public EmailStudyUsersAdded() {
     }
 
+    @JsonProperty("studyUsers")
     private List<Long> studyUsers;
 
-    @JsonProperty("studyUsers")
     public List<Long> getStudyUsers() {
         return studyUsers;
     }
 
-    @JsonSetter("studyUsers")
     public void setStudyUsers(List<Long> studyUsers) {
         this.studyUsers = studyUsers;
+    }
+
+    @Override
+    public String toString() {
+        return "EmailStudyUsersAdded [userId=" + this.getUserId() + ", recipients=" + this.getRecipients() + ", studyUsers=" + this.getStudyUsers()
+                + ", studyId=" + this.getStudyId() + ", studyCardId=" + this.getStudyCardId() + ", studyName=" + this.getStudyName() + "]";
     }
 
 }

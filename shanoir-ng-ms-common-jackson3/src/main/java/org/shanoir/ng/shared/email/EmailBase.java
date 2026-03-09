@@ -17,66 +17,60 @@ package org.shanoir.ng.shared.email;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
 
 public abstract class EmailBase {
 
+    @JsonProperty("userId")
     private Long userId;
 
+    @JsonProperty("recipients")
     private List<Long> recipients;
 
+    @JsonProperty("studyId")
     private Long studyId;
 
+    @JsonProperty("studyCardId")
     private String studyCardId;
 
+    @JsonProperty("studyName")
     private String studyName;
 
-    @JsonProperty("userId")
     public Long getUserId() {
         return userId;
     }
 
-    @JsonSetter("userId")
     public void setUserId(Long userId) {
         this.userId = userId;
     }
 
-    @JsonProperty("recipients")
     public List<Long> getRecipients() {
         return recipients;
     }
 
-    @JsonSetter("recipients")
     public void setRecipients(List<Long> recipients) {
         this.recipients = recipients;
     }
 
-    @JsonProperty("studyId")
     public Long getStudyId() {
         return studyId;
     }
 
-    @JsonSetter("studyId")
     public void setStudyId(Long studyId) {
         this.studyId = studyId;
     }
 
-    @JsonProperty("studyCardId")
     public String getStudyCardId() {
         return studyCardId;
     }
 
-    @JsonSetter("studyCardId")
     public void setStudyCardId(String studyCardId) {
         this.studyCardId = studyCardId;
     }
 
-    @JsonProperty("studyName")
     public String getStudyName() {
         return studyName;
     }
 
-    @JsonSetter("studyName")
     public void setStudyName(String studyName) {
         this.studyName = studyName;
     }
