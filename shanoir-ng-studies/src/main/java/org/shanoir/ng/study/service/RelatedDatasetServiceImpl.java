@@ -270,7 +270,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         dto.setEventId(eventId);
         dto.setSubjectMapping(subjectMapping);
         try {
-            rabbitTemplate.convertAndSend(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, objectMapper.writeValueAsString(dto));
+            rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, objectMapper.writeValueAsString(dto));
         } catch (AmqpException | JsonProcessingException e) {
             throw new MicroServiceCommunicationException(
                     "Error while communicating with datasets MS to copy datasets to study.", e);

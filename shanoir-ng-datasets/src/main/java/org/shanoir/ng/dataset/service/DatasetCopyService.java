@@ -11,7 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 package org.shanoir.ng.dataset.service;
 
 import java.util.Map;
@@ -24,10 +23,22 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface DatasetCopyService {
+
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
-    DatasetCopyResult moveDataset(Long dsId, Long studyId, Map<Long, Long> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws DatasetCopyService.NotFoundSubjectIdException, JsonProcessingException;
+    DatasetCopyResult moveDataset(
+            Long dsId,
+            Long studyId,
+            Map<Long, Long> subjectMap,
+            Map<Long, Examination> examMap,
+            Map<Long, DatasetAcquisition> acqMap,
+            Long userId
+    ) throws
+            DatasetCopyService.NotFoundSubjectIdException,
+            DatasetCopyService.NotFoundDatasetIdException,
+            JsonProcessingException;
 
     public class DatasetCopyResult {
+
         private final Long newDsId;
         private int countProcessed;
         private int countSuccess;
@@ -67,6 +78,7 @@ public interface DatasetCopyService {
     }
 
     public class NotFoundSubjectIdException extends ShanoirException {
+
         private final Long subjectId;
 
         public NotFoundSubjectIdException(Long subjectId) {
@@ -76,6 +88,20 @@ public interface DatasetCopyService {
 
         public Long getSubjectId() {
             return subjectId;
+        }
+    }
+
+    public class NotFoundDatasetIdException extends ShanoirException {
+
+        private final Long datasetId;
+
+        public NotFoundDatasetIdException(Long datasetId) {
+            super("No dataset found with id = " + datasetId);
+            this.datasetId = datasetId;
+        }
+
+        public Long getDatasetId() {
+            return datasetId;
         }
     }
 }

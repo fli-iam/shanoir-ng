@@ -66,7 +66,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -418,8 +417,7 @@ public class RabbitMQDatasetsService {
      */
     @RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    @Async
-    public void copyDatasetsToStudy(final String data) {
+    public String copyDatasetsToStudy(final String data) {
         Map<Long, Examination> examMap = new HashMap<>();
         Map<Long, DatasetAcquisition> acqMap = new HashMap<>();
         List<Long> datasetParentIds;
@@ -460,7 +458,7 @@ public class RabbitMQDatasetsService {
                 event.setStatus(ShanoirEvent.ERROR);
                 event.setProgress(-1f);
                 eventService.publishEvent(event);
-                return;
+                return "NO RIGHTS";
             }
             /* */
             switch (role) {
@@ -472,7 +470,7 @@ public class RabbitMQDatasetsService {
                     event.setStatus(ShanoirEvent.ERROR);
                     event.setProgress(-1f);
                     eventService.publishEvent(event);
-                    return;
+                    return "UNAUTHORIZED_ROLE";
                 }
             }
             for (Long datasetParentId : datasetParentIds) {
@@ -499,7 +497,17 @@ public class RabbitMQDatasetsService {
                         if (newDsId != null) newDatasets.add(newDsId);
                     } catch (DatasetCopyService.NotFoundSubjectIdException e) {
                         LOG.error("[CopyDatasets] No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId);
-                        errors.add("No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId);
+                        errors.add("No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId
+                                + ". The csv input might be associating the wrong subject id to the dataset.");
+                    } catch (DatasetCopyService.NotFoundDatasetIdException e) {
+                        LOG.error("[CopyDatasets] No dataset found with id = " + e.getDatasetId() + ", copy aborted for dataset " + datasetParentId);
+                        errors.add("No dataset found with id = " + e.getDatasetId() + ", copy aborted for dataset " + datasetParentId);
+                    } catch (JsonProcessingException e) {
+                        LOG.error("[CopyDatasets] Error processing json during the copy of dataset " + datasetParentId, e);
+                        errors.add("Error processing json during the copy of dataset " + datasetParentId + ": " + e.getMessage());
+                    } catch (Exception e) {
+                        LOG.error("[CopyDatasets] Unexpected error during the copy of dataset " + datasetParentId, e);
+                        errors.add("Unexpected error during the copy of dataset " + datasetParentId + ": " + e.getMessage());
                     }
                 }
             }
@@ -511,6 +519,7 @@ public class RabbitMQDatasetsService {
             eventService.publishEvent(event);
             if (!newDatasets.isEmpty())
                 solrService.indexDatasets(newDatasets);
+            return "SUCCESS";
 
         } catch (Exception e) {
             if (event != null) {

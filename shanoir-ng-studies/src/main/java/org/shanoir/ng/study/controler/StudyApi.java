@@ -157,7 +157,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/copyDatasets", produces = { "application/json" }, method = RequestMethod.POST)
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @studySecurityService.hasRightOnCopy(#copyData))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnCopy(#copyData))")
     ResponseEntity<Void> copyDatasetsToStudy(
             @Parameter(description = "Data to copy", required = true) @RequestBody CopyData copyData) throws RestServiceException;
 

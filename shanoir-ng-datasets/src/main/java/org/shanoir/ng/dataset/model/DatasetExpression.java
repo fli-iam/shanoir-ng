@@ -115,9 +115,13 @@ public class DatasetExpression extends AbstractEntity {
     }
 
     public DatasetExpression(DatasetExpression dexp, Dataset d) {
+        this(dexp, d, true);
+    }
+
+    public DatasetExpression(DatasetExpression dexp, Dataset d, boolean copyFiles) {
         this.comingFromDatasetExpressions = new ArrayList<>(dexp.getComingFromDatasetExpressions().size());
         for (DatasetExpression de : dexp.getComingFromDatasetExpressions()) {
-            this.comingFromDatasetExpressions.add(new DatasetExpression(de, d));
+            this.comingFromDatasetExpressions.add(new DatasetExpression(de, d, copyFiles));
         }
         this.creationDate = dexp.getExpressionCreationDate();
         this.dataset = d;
@@ -125,9 +129,10 @@ public class DatasetExpression extends AbstractEntity {
         this.size = dexp.getSize();
 
         this.datasetFiles = new ArrayList<>(dexp.getDatasetFiles().size());
-        for (DatasetFile df : dexp.getDatasetFiles()) {
-            // If perf issues when saving the copied, use batches
-            this.datasetFiles.add(new DatasetFile(df, this));
+        if (copyFiles) {
+            for (DatasetFile df : dexp.getDatasetFiles()) {
+                this.datasetFiles.add(new DatasetFile(df, this));
+            }
         }
 
         if (dexp.getDatasetProcessingType() != null) {
