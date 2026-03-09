@@ -149,6 +149,27 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         return this.findStudiesICanImport().then(studies => studies?.map(study => new IdName(study.id, study.name)));
     }
 
+    private findStudiesIcanAdmin(): Promise<Study[]> {
+        if (this.keycloakService.isUserAdmin()) {
+            return this.getAll();
+        } else {
+            return this.getAll().then(studies => {
+                const myId: number = KeycloakService.auth.userId;
+                return studies?.filter(study => {
+                    return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0;
+                });
+            });
+        }
+    }
+
+    findStudyIdsIcanAdmin(): Promise<number[]> {
+        return this.findStudiesIcanAdmin().then(studies => studies?.map(study => study.id));
+    }
+
+    findStudyIdNamesIcanAdmin(): Promise<IdName[]> {
+        return this.findStudiesIcanAdmin().then(studies => studies?.map(study => new IdName(study.id, study.name)));
+    }
+
     uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'dua'): Promise<any> {
         const endpoint = this.API_URL + '/' + fileType + '-upload/' + studyId;
         const formData: FormData = new FormData();
