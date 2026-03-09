@@ -267,7 +267,7 @@ ENV	\
 
 # Use the below line for remote debugging
 #CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9911", "-jar", "/shanoir-ng-users.jar", "--syncAllUsersToKeycloak=true"]
-CMD ["-jar", "/shanoir-ng-users.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-users.jar"]
 
 
 
