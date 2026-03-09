@@ -65,14 +65,14 @@ export class DatasetCopyDialogComponent {
     public setUp(inputDatasets: InputDataset[], modalRef: any) {
         this.fetchStudies().then(() => {
             this.sortStudies();
-            this.checkAdminRightsOnDatasets();
+            this.checkImportRightsOnDatasets();
         });
         this.ownRef = modalRef;
         this.inputDatasets = inputDatasets;
     }
 
     private fetchStudies(): Promise<void> {
-        return this.studyService.findStudyIdNamesIcanAdmin().then(studies => {
+        return this.studyService.findStudyIdNamesCanImport().then(studies => {
             this.studies = studies;
         });
     }
@@ -96,12 +96,12 @@ export class DatasetCopyDialogComponent {
         }
     }
 
-    private checkAdminRightsOnDatasets() {
+    private checkImportRightsOnDatasets() {
         const hasEveryForAll: boolean = this.inputDatasets.every(ds => {
             return this.studies.find(s => s.id === ds.studyId);
         });
         if (!hasEveryForAll) {
-            this.statusMessage = "You must have ADMIN right on all the studies of the selected datasets to proceed with the copy.";
+            this.statusMessage = "You must have IMPORT right on all the studies of the selected datasets to proceed with the copy.";
             this.canCopy = false;
         }
     }
