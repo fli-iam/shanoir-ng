@@ -17,11 +17,10 @@ package org.shanoir.ng.shared.event;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import tools.jackson.core.JacksonException;
 
 /**
  * Service to send every event created.
@@ -53,9 +52,11 @@ public class ShanoirEventService {
                 .append("progress=").append(event.getProgress()).append("]");
         LOG.info(builder.toString());
         try {
+            LOG.debug("MessageConverter in use: {}", rabbitTemplate.getMessageConverter().getClass().getName());
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.EVENTS_EXCHANGE, event.getEventType(), event);
-        } catch (JacksonException e) {
-            LOG.error("Error while sending event: event {}, user: {}, reference: {}", event.getEventType(), event.getUserId(), event.getObjectId());
+        } catch (AmqpException e) {
+            LOG.error("Error while sending event: event {}, user: {}, reference: {}",
+                    event.getEventType(), event.getUserId(), event.getObjectId());
             LOG.error("Thrown exception: {}", e);
         }
     }

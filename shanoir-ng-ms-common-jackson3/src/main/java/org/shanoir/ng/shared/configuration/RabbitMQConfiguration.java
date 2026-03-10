@@ -18,6 +18,7 @@ import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.SimpleMessageConverter;
@@ -72,6 +73,14 @@ public class RabbitMQConfiguration {
         factory.setConcurrentConsumers(1);
         factory.setMessageConverter(contentTypeDelegatingConverter());
         return factory;
+    }
+
+    @Bean
+    public RabbitTemplate rabbitTemplate() {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        JacksonJsonMessageConverter jsonConverter = new JacksonJsonMessageConverter();
+        rabbitTemplate.setMessageConverter(jsonConverter);
+        return rabbitTemplate;
     }
 
     ////////////////// QUEUES //////////////////
