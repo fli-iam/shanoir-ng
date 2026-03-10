@@ -56,6 +56,7 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -112,6 +113,7 @@ public class RabbitMQStudiesService {
             )
     @RabbitHandler
     @Transactional
+    @Async
     public void linkExamination(final String eventStr) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
