@@ -346,6 +346,7 @@ public class DatasetApiSecurityTest {
         Study study = new Study();
         study.setId(id);
         study.setName("");
+        study.setIsDraft(false);
         study.setRelatedDatasets(new ArrayList<>());
         study.setSubjectStudyList(new ArrayList<>());
         study.setTags(new ArrayList<>());

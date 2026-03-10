@@ -337,4 +337,20 @@ public class RabbitMQStudiesService {
         }
         return null;
     }
+
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_DRAFT_STATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @Transactional
+    public String getStudyDraftState(String studyIdStr) {
+        try {
+            Long studyId = Long.valueOf(studyIdStr);
+            Study study = studyRepo.findById(studyId).orElse(null);
+            if (study == null) {
+                return "NOT_FOUND";
+            }
+            return String.valueOf(study.getIsDraft());
+        } catch (Exception e) {
+            LOG.error("Error getting study draft state", e);
+            return "ERROR";
+        }
+    }
 }

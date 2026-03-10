@@ -295,7 +295,7 @@ RUN /opt/keycloak/bin/kc.sh build
 #
 # Create actual image, based on builder before
 #
-FROM keycloak-base as keycloak
+FROM keycloak-base AS keycloak
 
 COPY --from=keycloak-builder /opt/keycloak/ /opt/keycloak/
 COPY --chown=keycloak keycloak/themes/. /opt/keycloak/themes
