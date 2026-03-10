@@ -230,7 +230,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             throw new Exception("The extraction " + extraction.get("extraction_identifier") + "has no filters array.");
         } else if (!extraction.get("filter").isArray() || extraction.get("filter").isEmpty()) {
             throw new Exception("There is no extraction filter defined for the extraction " + extraction.get("extraction_identifier") + ".");
-        } else if (StreamSupport.stream(extraction.get("filter").spliterator(), false).map(it -> it.get("type").asText()).noneMatch(filterType -> filterType.contains("processing"))) {
+        } else if (StreamSupport.stream(extraction.get("filter").spliterator(), false).map(it -> it.get("type").asText()).noneMatch(filterType -> filterType.contains("processing") || filterType.contains("dataset"))) {
             throw new Exception("There is no specific processing filter defined for the extraction " + extraction.get("extraction_identifier") + ".");
         }
 
