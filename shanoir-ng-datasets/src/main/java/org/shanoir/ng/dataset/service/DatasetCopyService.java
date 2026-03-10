@@ -24,7 +24,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface DatasetCopyService {
 
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#dsId, 'CAN_IMPORT'))")
     DatasetCopyResult moveDataset(
             Long dsId,
             Long studyId,
