@@ -460,7 +460,7 @@ public class RabbitMQDatasetsService {
                 event.setStatus(ShanoirEvent.ERROR);
                 event.setProgress(-1f);
                 eventService.publishEvent(event);
-                return "NO RIGHTS";
+                return;
             }
             /* */
             switch (role) {
@@ -472,7 +472,7 @@ public class RabbitMQDatasetsService {
                     event.setStatus(ShanoirEvent.ERROR);
                     event.setProgress(-1f);
                     eventService.publishEvent(event);
-                    return "UNAUTHORIZED_ROLE";
+                    return;
                 }
             }
             for (Long datasetParentId : datasetParentIds) {
@@ -521,7 +521,6 @@ public class RabbitMQDatasetsService {
             eventService.publishEvent(event);
             if (!newDatasets.isEmpty())
                 solrService.indexDatasets(newDatasets);
-            return "SUCCESS";
 
         } catch (Exception e) {
             if (event != null) {
