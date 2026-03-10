@@ -466,6 +466,7 @@ public class RabbitMQDatasetsService {
             switch (role) {
                 case ADMIN -> SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
                 case EXPERT -> SecurityContextUtil.initAuthenticationContext("ROLE_EXPERT");
+                case USER -> SecurityContextUtil.initAuthenticationContext("ROLE_USER");
                 default -> {
                     LOG.error("User {} has an unauthorized role {}, copy aborted.", userId, role);
                     event.setMessage("User has an unauthorized role, copy aborted.");
