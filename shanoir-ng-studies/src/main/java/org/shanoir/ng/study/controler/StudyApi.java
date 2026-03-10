@@ -158,7 +158,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/copyDatasets", produces = { "application/json" }, method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnCopy(#copyData))")
-    ResponseEntity<Void> copyDatasetsToStudy(
+    ResponseEntity<Long> copyDatasetsToStudy(
             @Parameter(description = "Data to copy", required = true) @RequestBody CopyData copyData) throws RestServiceException;
 
     @Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")

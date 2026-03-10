@@ -86,5 +86,4 @@ public class RelatedDataset {
     public void setUserRole(UserRole userRole) {
         this.userRole = userRole;
     }
-
 }

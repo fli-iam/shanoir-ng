@@ -42,6 +42,7 @@ public class CopyData {
     private List<SubjectCopy> subjects;
     private List<Long> centerIds;
     private Long targetStudyId;
+    private Long taskId;
 
     public List<Long> getDatasetIds() {
         return datasetIds;
@@ -80,5 +81,13 @@ public class CopyData {
 
     public void setTargetStudyId(Long targetStudyId) {
         this.targetStudyId = targetStudyId;
+    }
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
     }
 }

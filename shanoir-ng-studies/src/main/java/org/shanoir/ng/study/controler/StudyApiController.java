@@ -245,12 +245,12 @@ public class StudyApiController implements StudyApi {
     }
 
     @Override
-    public ResponseEntity<Void> copyDatasetsToStudy(
+    public ResponseEntity<Long> copyDatasetsToStudy(
             @Parameter(description = "Data to copy", required = true) CopyData copyData) throws RestServiceException {
 
         try {
-            relatedDatasetService.copyData(copyData);
-            return new ResponseEntity<>(HttpStatus.OK);
+            Long taskId = relatedDatasetService.copyData(copyData);
+            return new ResponseEntity<>(taskId, HttpStatus.OK);
         } catch (ShanoirException e) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),

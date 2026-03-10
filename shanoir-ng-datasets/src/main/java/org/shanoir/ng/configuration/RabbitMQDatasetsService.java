@@ -66,6 +66,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -417,7 +418,8 @@ public class RabbitMQDatasetsService {
      */
     @RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    public String copyDatasetsToStudy(final String data) {
+    @Async
+    public void copyDatasetsToStudy(final String data) {
         Map<Long, Examination> examMap = new HashMap<>();
         Map<Long, DatasetAcquisition> acqMap = new HashMap<>();
         List<Long> datasetParentIds;

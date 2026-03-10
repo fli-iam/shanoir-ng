@@ -24,7 +24,7 @@ export class CopyDataService {
     
     private http: HttpClient = inject(HttpClient);
     private consoleService = inject(ConsoleService);
-    private readonly BATCH_SIZE: number = 5000;
+    private readonly BATCH_SIZE: number = 50000000;
 
     public copy(copyData: CopyData): Promise<void> {
         const nbPages: number = Math.ceil(copyData.datasets.length / this.BATCH_SIZE);
@@ -32,7 +32,7 @@ export class CopyDataService {
         for (let page = 1; page <= nbPages; page++) {
             copyDataBatches.push(this.buildCopyDataDTO(copyData, page, this.BATCH_SIZE));
         }
-        let promise: Promise<void> = Promise.resolve();
+        let promise: Promise<string> = Promise.resolve(null);
         if (copyDataBatches.length > 1) {
             this.consoleService.log('info', 'The copy of ' + copyData.datasets.length 
                 + ' datasets has started in batch mode, it may take a while. '
@@ -42,11 +42,12 @@ export class CopyDataService {
                 + ' datasets has started.');
         }
         copyDataBatches.forEach(cd => {
-            promise = promise.then(() => {
+            promise = promise.then(taskId => {
+                cd.taskId = taskId;
                 return this.copyData(cd);
             });
         });
-        return promise;
+        return promise.then();
     }
     
     private copyData(data: DataCopyDTO): Promise<any> {
@@ -82,6 +83,7 @@ export interface DataCopyDTO {
     }[];
     centerIds: number[];
     targetStudyId?: number;
+    taskId?: string;
 }
 
 export interface CopyData {

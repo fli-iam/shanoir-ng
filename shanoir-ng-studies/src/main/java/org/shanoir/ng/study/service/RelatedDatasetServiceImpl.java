@@ -92,7 +92,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
     @Override
     @Transactional
-    public void copyData(CopyData copyData) throws ShanoirException {
+    public Long copyData(CopyData copyData) throws ShanoirException {
         ShanoirEvent event = new ShanoirEvent(
                 ShanoirEventType.COPY_DATASET_EVENT,
                 String.valueOf(copyData.getTargetStudyId()),
@@ -100,10 +100,16 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                 "Copy datasets, starting...",
                 ShanoirEvent.IN_PROGRESS
         );
+        if (copyData.getTaskId() != null) {
+            // if taskId is provided, it means that the copy process has already been started and we are in
+            // the context of a batch copy
+            event.setId(copyData.getTaskId());
+        }
         eventService.publishEvent(event);
         Map<Long, Long> subjectMapping = createSubjectsInTargetStudy(copyData.getSubjects(), copyData.getTargetStudyId(), event);
         addCentersInTargetStudy(copyData.getCenterIds(), copyData.getTargetStudyId(), event);
         copyDatasetsToStudy(copyData.getDatasetIds(), copyData.getTargetStudyId(), subjectMapping, event);
+        return event.getId();
     }
 
     private Map<Long, Long> createSubjectsInTargetStudy(List<CopyData.SubjectCopy> subjects, Long studyId, ShanoirEvent event) throws ShanoirException {
