@@ -49,7 +49,7 @@ public interface BidsImporterApi {
     @PostMapping(value = "/{studyId}/{studyName}/{centerId}",
             produces = {"application/json"},
             consumes = {"multipart/form-data"})
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and !@importSecurityService.isDraftStudy(#studyId)")
     ResponseEntity<ImportJob> importAsBids(@Parameter(name = "file detail") @RequestPart("file") MultipartFile bidsZipFile,
             @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(name = "name of the study", required = true) @PathVariable("studyName") String studyName,
