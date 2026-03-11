@@ -21,7 +21,6 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
-import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,7 +45,7 @@ public class RabbitMQConfiguration {
     public ContentTypeDelegatingMessageConverter contentTypeDelegatingConverter() {
         ContentTypeDelegatingMessageConverter converter =
                 new ContentTypeDelegatingMessageConverter(
-                        new SimpleMessageConverter());
+                        new JacksonJsonMessageConverter());
         converter.addDelegate("application/json", new JacksonJsonMessageConverter());
         converter.addDelegate("text/x-json", new JacksonJsonMessageConverter());
         return converter;
@@ -78,8 +77,7 @@ public class RabbitMQConfiguration {
     @Bean
     public RabbitTemplate rabbitTemplate() {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        JacksonJsonMessageConverter jsonConverter = new JacksonJsonMessageConverter();
-        rabbitTemplate.setMessageConverter(jsonConverter);
+        rabbitTemplate.setMessageConverter(contentTypeDelegatingConverter());
         return rabbitTemplate;
     }
 
