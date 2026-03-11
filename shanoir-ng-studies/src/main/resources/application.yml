@@ -95,13 +95,6 @@ front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
-# microservices url
-ms.url:
-  shanoir-ng-users: http://${SHANOIR_PREFIX}users:9901/users
-  shanoir-ng-import: http://${SHANOIR_PREFIX}import:9903/niftiConverter
-  shanoir-ng-studycards: http://${SHANOIR_PREFIX}datasets:9904/studycards
-  shanoir-ng-examinations: http://${SHANOIR_PREFIX}datasets:9904/examinations
-  shanoir-ng-bids: http://${SHANOIR_PREFIX}datasets:9904/bids
 # data paths
 studies-data: /var/studies-data
 # Data folder configuration
@@ -152,12 +145,6 @@ front.server:
   url: https://shanoir-ng-nginx
 keycloak:
   auth-server-url: https://shanoir-ng-nginx/auth
-ms.url:
-  shanoir-ng-users: http://localhost:9901/users
-  shanoir-ng-import: http://localhost:9903/niftiConverter
-  shanoir-ng-studycards: http://localhost:9904/studycards
-  shanoir-ng-examinations: http://localhost:9904/examinations
-  shanoir-ng-bids: http://localhost:9904/bids
 # data paths
 studies-data: /tmp
 # Data folder configuration
