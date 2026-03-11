@@ -86,7 +86,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
     @Transactional
     @Override
-    public void createSubjectsInTargetStudy(List<String> subjectIdsStr, Long studyId,
+    public void createSubjectsInTargetStudy(List<String> subjectIdsStr, Study targetStudy,
             Map<Long, Long> subjectMapping, String subjectName) throws ShanoirException {
         LOG.info("Starting createSubjectsInTargetStudy");
         long startTime = System.currentTimeMillis();
@@ -94,7 +94,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         for (String s : subjectIdsStr) {
             subjectIds.add(Long.valueOf(s));
         }
-        Study targetStudy = studyService.findById(studyId);
         List<Subject> createdSubjects = new ArrayList<>();
         for (Long subjectId : subjectIds) {
             Subject sourceSubject = subjectService.findById(subjectId);
@@ -143,13 +142,12 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
     }
 
     @Override
-    public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds, Map<Long, Long> subjectMapping) throws SecurityException {
+    public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Study study, List<Long> centerIds, Map<Long, Long> subjectMapping) throws SecurityException {
         String result = "";
         Long userId = KeycloakUtil.getTokenUserId();
-        Study study = studyService.findById(studyId);
         // Check rights in case of not ROLE_ADMIN
         if (!KeycloakUtil.isAdmin()) {
-            StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
+            StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, study.getId());
             if (studyUser == null) {
                 throw new SecurityException("User (userId: " + userId
                     + ") is not member of study " + study.getName() + ".");
@@ -170,7 +168,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         }
         addCentersToStudy(study, centerIds);
         try {
-            copyDatasetsToStudy(datasetIds, studyId, userId, subjectMapping);
+            copyDatasetsToStudy(datasetIds, study.getId(), userId, subjectMapping);
         } catch (MicroServiceCommunicationException e) {
             throw new RuntimeException("Error in RabbitMQ message for copy datasets in MS Datasets.", e);
         }

@@ -159,6 +159,11 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             },
             { headerName: "Name", field: "name" },
             {
+                headerName: "State", field: "isDraft", width: '70px', cellRenderer: function (params: any) {
+                    return params.data.isDraft ? 'Draft' : 'Active';
+                }
+            },
+            {
                 headerName: "Status", field: "studyStatus", width: '70px', cellRenderer: function (params: any) {
                     return capitalsAndUnderscoresToDisplayable(params.data.studyStatus);
                 }
