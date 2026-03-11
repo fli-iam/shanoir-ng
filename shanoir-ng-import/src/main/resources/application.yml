@@ -79,7 +79,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
-
+          jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL}/auth/realms/shanoir-ng/protocol/openid-connect/certs
 springdoc:
   api-docs:
     path: '/api-docs'
