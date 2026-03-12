@@ -20,6 +20,13 @@ server:
       enabled: false
 ##### Database #####
 spring:
+  cloud:
+    aws:
+      s3:
+        region: eu-west-1
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
   datasource:
     url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: studies
@@ -95,10 +102,16 @@ front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
-# data paths
-studies-data: /var/studies-data
+storage:
+  type: filesystem # or "s3"
+  file-system:
+    studies-data: /var/studies-data
+  s3:
+    bucket-name: studies-data-bucket
+
 # Data folder configuration
 bids-data-folder: /var/datasets-data/bids-data
+
 # logging configuration
 logging:
   pattern:

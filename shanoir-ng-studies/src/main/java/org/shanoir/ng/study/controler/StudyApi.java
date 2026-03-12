@@ -227,7 +227,7 @@ public interface StudyApi {
     ResponseEntity<Void> updateStudy(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "study to update", required = true) @RequestBody Study study, BindingResult result)
-            throws RestServiceException;
+            throws Exception;
 
     @Operation(summary = "", description = "Get my rights on this study")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "here are your rights"),
@@ -299,7 +299,7 @@ public interface StudyApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_DOWNLOAD'))")
     void downloadProtocolFile(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
+            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws Exception;
 
     @Operation(summary = "", description = "If one or more exist, return a list of data user agreements (DUAs) waiting for the given user id")
     @ApiResponses(value = {
@@ -363,9 +363,9 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "dua-download/{studyId}/{fileName:.+}/")
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    void downloadDataUserAgreement(
+    void downloadDataUseAgreement(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
+            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws Exception;
 
     @Operation(summary = "", description = "Deletes the user of a study")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "user removed from study"),

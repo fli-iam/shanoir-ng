@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.shared.storage.StorageException;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.model.Study;
@@ -112,7 +113,7 @@ public interface StudyService {
      * @throws AccessDeniedException
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE') and @studySecurityService.studyUsersMatchStudy(#study)")
-    Study update(Study study) throws ShanoirException;
+    Study update(Study study) throws ShanoirException, StorageException;
 
     /**
      * Adds one studyUser to a study.
@@ -146,17 +147,6 @@ public interface StudyService {
      * @param studyId       the linked study ID
      */
     void deleteExamination(Long examinationId, Long studyId);
-
-    /**
-     * Gets the protocol or data user agreement file path
-     *
-     * @param studyId
-     *                 id of the study
-     * @param fileName
-     *                 name of the file
-     * @return the file path of the file
-     */
-    String getStudyFilePath(Long studyId, String fileName);
 
     /**
      * Returns all publicly available studies;
