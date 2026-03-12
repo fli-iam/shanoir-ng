@@ -146,7 +146,7 @@ public class WADODownloaderService {
         this.webClient = webClientBuilder
                 .codecs(configurer -> configurer
                         .defaultCodecs()
-                        .maxInMemorySize(16 * 1024 * 1024)) // 16MB buffer for large DICOM files
+                        .maxInMemorySize(-1)) // illimited as we use streaming for downloads
                 .build();
     }
 
@@ -256,7 +256,7 @@ public class WADODownloaderService {
             extractDICOMZipFromMHTMLFile(pipedInputStream, name, zipOutputStream,
                     url.contains(WADO_REQUEST_TYPE_WADO_RS), subjectName);
 
-            // Attendre la fin du download
+            // Wait until the end of download
             downloadFuture.join();
 
             return name + DCM;
@@ -295,11 +295,11 @@ public class WADODownloaderService {
                 if (indexInstanceUID > 0) {
                     sopInstanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
 
-                    // Streamer directement dans un PipedInputStream/PipedOutputStream
+                    // Stream directly in a PipedInputStream/PipedOutputStream
                     PipedOutputStream pipedOutputStream = new PipedOutputStream();
                     PipedInputStream pipedInputStream = new PipedInputStream(pipedOutputStream);
 
-                    // Lancer le download dans un thread séparé pour éviter le deadlock
+                    // Run the download in a separated thread to avoid the deadlock
                     CompletableFuture.runAsync(() -> {
                         try {
                             downloadFileFromPACS(url, pipedOutputStream).block();
@@ -456,16 +456,16 @@ public class WADODownloaderService {
     }
 
     // Internal async methods for potential reuse
-    // private Mono<byte[]> downloadFileFromPACSAsync(final String url) {
-    //     return webClient.get()
-    //             .uri(url)
-    //             .header(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";")
-    //             .retrieve()
-    //             .onStatus(HttpStatusCode::isError,
-    //                     response -> Mono.error(new IOException("Download did not work: wrong status code received.")))
-    //             .bodyToMono(byte[].class)
-    //             .timeout(Duration.ofMinutes(5));
-    // }
+    private Mono<byte[]> downloadFileFromPACSAsync(final String url) {
+        return webClient.get()
+                .uri(url)
+                .header(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";")
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        response -> Mono.error(new IOException("Download did not work: wrong status code received.")))
+                .bodyToMono(byte[].class)
+                .timeout(Duration.ofMinutes(5));
+    }
 
     private String downloadMetadataFromPACS(final String url) throws IOException {
         try {
