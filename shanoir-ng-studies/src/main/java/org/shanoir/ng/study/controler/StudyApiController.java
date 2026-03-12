@@ -164,6 +164,16 @@ public class StudyApiController implements StudyApi {
         return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
     }
 
+    @Override
+    @Transactional
+    public ResponseEntity<List<StudyDTO>> findDraftStudies() {
+        List<Study> studies = studyService.findDraftStudies();
+        if (studies.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
+    }
+
     public ResponseEntity<List<StudyLightDTO>> findStudiesLight() {
         List<Study> studies = studyService.findAll();
         if (studies.isEmpty()) {
@@ -219,6 +229,7 @@ public class StudyApiController implements StudyApi {
 
         Study createdStudy;
         try {
+            study.setIsDraft(!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN"));
             addCurrentUserAsStudyUserIfEmptyStudyUsers(study);
             createdStudy = studyService.create(study);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_STUDY_EVENT,
@@ -228,6 +239,24 @@ public class StudyApiController implements StudyApi {
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", e));
         }
         return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<StudyDTO> approveDraftStudy(final Long studyId)
+            throws RestServiceException {
+        Study study;
+        try {
+            study = studyService.approveDraftStudy(studyId);
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_STUDY_EVENT, studyId.toString(),
+                    KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ShanoirException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), e));
+        }
+
+        return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
     }
 
     private void addCurrentUserAsStudyUserIfEmptyStudyUsers(final Study study) {

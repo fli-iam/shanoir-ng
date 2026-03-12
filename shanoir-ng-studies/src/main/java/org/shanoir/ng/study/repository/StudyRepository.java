@@ -38,7 +38,9 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     void deleteById(Long id);
 
     @EntityGraph(attributePaths = { "studyTags", "profile" })
-    List<Study> findByVisibleByDefaultTrue();
+    List<Study> findByVisibleByDefaultTrueAndIsDraftFalse();
+
+    List<Study> findByIsDraftTrue();
 
     //@EntityGraph(attributePaths = { "profile", "tags" })
     List<Study> findAll();
@@ -94,4 +96,7 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
 
     @Query("SELECT distinct s.study.id from Subject s where s.id in :subjectIds")
     List<Long> findStudyIdsBySubjectIds(List<Long> subjectIds);
+
+    @Query("SELECT s.isDraft FROM Study s WHERE s.id = :studyId")
+    Boolean findIsDraftById(@Param("studyId") Long id);
 }

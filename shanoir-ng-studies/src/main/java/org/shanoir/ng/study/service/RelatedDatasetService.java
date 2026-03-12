@@ -14,6 +14,11 @@
 
 package org.shanoir.ng.study.service;
 
+import java.util.List;
+import java.util.Map;
+
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.dto.CopyData;
 import org.springframework.security.access.prepost.PreAuthorize;

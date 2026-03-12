@@ -44,6 +44,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     API_URL = AppUtils.BACKEND_API_STUDY_URL;
     private _duasToSign: number = 0;
+    private _draftStudies: number = 0;
     subscriptions: Subscription[] = [];
     fileUploads: Map<number, Promise<void>> = new Map(); // current uploads
     private studyVolumesCache: Map<number, StudyStorageVolumeDTO> = new Map();
@@ -168,6 +169,23 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     findStudyIdNamesIcanAdmin(): Promise<IdName[]> {
         return this.findStudiesIcanAdmin().then(studies => studies?.map(study => new IdName(study.id, study.name)));
+    }
+
+    findDraftStudies(): Promise<Study[]> {
+        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL + '/draft')
+            .toPromise()
+            .then((studies) => {
+                this._draftStudies = studies ? studies.length : 0;
+                return studies;
+            })
+    }
+
+    get draftStudies(): number {
+        return this._draftStudies;
+    }
+
+    decreaseDraftStudies() {
+        this._draftStudies --;
     }
 
     uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'dua'): Promise<any> {
@@ -345,4 +363,27 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise();
     }
 
+    async approveStudyById(id: number): Promise<boolean> {
+        const confirmed = await this.confirmDialogService.confirm(
+            'Approve Study',
+            'Are you sure you want to approve this study?\n\n'
+            + 'Once approved, the study will be available to its members according to their permissions.\n\n'
+            + 'This means:\n'
+            + '• Editing the start date will be disabled\n'
+            + '• Dataset importation will be enabled\n'
+            + '• Members will be able to create and manage related entities (e.g., subjects, examinations, datasets) based on their assigned rights.'
+        );
+
+        if (!confirmed) {
+            return false;
+        }
+
+        await this.http
+            .put<any>(AppUtils.BACKEND_API_STUDY_URL + '/approveDraftStudy/' + id, null)
+            .toPromise();
+
+        this.findDraftStudies();
+
+        return true;
+    }
 }
