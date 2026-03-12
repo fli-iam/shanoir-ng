@@ -30,9 +30,6 @@ import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository
 import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -64,9 +61,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
     @Autowired
     private SubjectRepository subjectRepository;
-
-    @Autowired
-    private ShanoirEventService eventService;
 
     @Autowired
     private DatasetExpressionRepository datasetExpressionRepository;
@@ -140,6 +134,14 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 }
                 acqMap.put(oldAcqId, newDsAcq);
                 result.incrementSuccess();
+                if (newDsAcq != null && newDsAcq.getExamination() != null) {
+                    result.setExaminationId(newDsAcq.getExamination().getId());
+                    result.setCenterId(newDsAcq.getExamination().getCenterId());
+                }
+                result.setSubjectId(targetSubjectId);
+        // userId,
+        // newExamination.getCenterId()
+        // (newExamination.getSubject() != null ? newExamination.getSubject().getId() : null),
             } else if (ds.getDatasetProcessing() != null) {
                 LOG.error("[CopyDatasets] Dataset selected is a processed dataset, it can't be copied.");
                 result.incrementProcessed();
@@ -207,14 +209,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         newExamination.setSource(oldExam);
         newExamination.setCopies(new ArrayList<>());
         examinationRepository.save(newExamination);
-        eventService.publishEvent(
-                new ShanoirEvent(
-                        ShanoirEventType.CREATE_EXAMINATION_EVENT,
-                        newExamination.getId().toString(),
-                        userId,
-                        "centerId:" + newExamination.getCenterId() + ";subjectId:" + (newExamination.getSubject() != null ? newExamination.getSubject().getId() : null),
-                        ShanoirEvent.SUCCESS,
-                        newExamination.getStudyId()));
         LOG.info("[CopyDatasets] New examination created with id = " + newExamination.getId());
         return newExamination;
     }

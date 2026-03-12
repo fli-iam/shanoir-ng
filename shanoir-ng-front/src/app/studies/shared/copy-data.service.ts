@@ -24,30 +24,12 @@ export class CopyDataService {
     
     private http: HttpClient = inject(HttpClient);
     private consoleService = inject(ConsoleService);
-    private readonly BATCH_SIZE: number = 50000000;
 
     public copy(copyData: CopyData): Promise<void> {
-        const nbPages: number = Math.ceil(copyData.datasets.length / this.BATCH_SIZE);
-        const copyDataBatches: DataCopyDTO[] = [];
-        for (let page = 1; page <= nbPages; page++) {
-            copyDataBatches.push(this.buildCopyDataDTO(copyData, page, this.BATCH_SIZE));
-        }
-        let promise: Promise<string> = Promise.resolve(null);
-        if (copyDataBatches.length > 1) {
-            this.consoleService.log('info', 'The copy of ' + copyData.datasets.length 
-                + ' datasets has started in batch mode, it may take a while. '
-                + copyDataBatches.length + ' batch(es) will be processed sequentially.');
-        } else {
-            this.consoleService.log('info', 'The copy of ' + copyData.datasets.length 
-                + ' datasets has started.');
-        }
-        copyDataBatches.forEach(cd => {
-            promise = promise.then(taskId => {
-                cd.taskId = taskId;
-                return this.copyData(cd);
-            });
-        });
-        return promise.then();
+        this.consoleService.log('info', 'The copy of ' + copyData.datasets.length 
+            + ' datasets has started.');
+        const dto: DataCopyDTO = this.buildCopyDataDTO(copyData);
+        return this.copyData(dto);
     }
     
     private copyData(data: DataCopyDTO): Promise<any> {
@@ -55,14 +37,11 @@ export class CopyDataService {
             .toPromise();
     }
 
-    private buildCopyDataDTO(copyData: CopyData, page: number, pageSize: number): DataCopyDTO {
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-        const datasetSlice = copyData.datasets.slice(start, end);
-        const centerIdSet: Set<number> = new Set(datasetSlice.map(d => d.centerId));
-        const subjectIdSet: Set<number> = new Set(datasetSlice.map(d => d.subjectId));
+    private buildCopyDataDTO(copyData: CopyData): DataCopyDTO {
+        const centerIdSet: Set<number> = new Set(copyData.datasets.map(d => d.centerId));
+        const subjectIdSet: Set<number> = new Set(copyData.datasets.map(d => d.subjectId));
         return {
-            datasetIds: datasetSlice.map(d => d.datasetId),
+            datasetIds: copyData.datasets.map(d => d.datasetId),
             targetStudyId: copyData.targetStudyId,
             centerIds: Array.from(centerIdSet),
             subjects: copyData.subjects

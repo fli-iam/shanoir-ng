@@ -36,9 +36,11 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
+import org.shanoir.ng.shared.dto.StudyExaminationsDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
@@ -476,6 +478,7 @@ public class RabbitMQDatasetsService {
                     return;
                 }
             }
+            StudyExaminationsDTO propagatedExams = new StudyExaminationsDTO(studyId);
             for (Long datasetParentId : datasetParentIds) {
                 progress += 1f / countTotal;
                 event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + countProgress++ + "/" + countTotal);
@@ -498,6 +501,7 @@ public class RabbitMQDatasetsService {
                         countCopy += result.getCountCopy();
                         LOG.info("countProcessed : " + countProcessed);
                         if (newDsId != null) newDatasets.add(newDsId);
+                        propagatedExams.addExam(result.getExaminationId(), result.getCenterId(), result.getSubjectId());
                     } catch (DatasetCopyService.NotFoundSubjectIdException e) {
                         LOG.error("[CopyDatasets] No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId);
                         errors.add("No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId
@@ -514,6 +518,8 @@ public class RabbitMQDatasetsService {
                     }
                 }
             }
+
+            propagateExaminations(propagatedExams);
 
             event.setMessage("Copy ended");
             event.setStatus(ShanoirEvent.SUCCESS);
@@ -533,6 +539,22 @@ public class RabbitMQDatasetsService {
             }
             LOG.error("Something went wrong during the copy. {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
+        }
+    }
+
+    private void propagateExaminations(StudyExaminationsDTO propagatedExams) throws ShanoirException {
+        Long userId = KeycloakUtil.getTokenUserId();
+        try {
+            eventService.publishEvent(
+                    new ShanoirEvent(
+                            ShanoirEventType.CREATE_EXAMINATIONS_EVENT,
+                            null,
+                            userId,
+                            objectMapper.writeValueAsString(propagatedExams),
+                            ShanoirEvent.SUCCESS,
+                            propagatedExams.getStudyId()));
+        } catch (JsonProcessingException e) {
+            throw new ShanoirException("Error processing json during the propagation of examinations after dataset copy.", e);
         }
     }
 

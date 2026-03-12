@@ -21,11 +21,13 @@ import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetRightsView;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -188,5 +190,13 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     Set<DatasetStudyCenter> getDatasetsByAcquisitionAndExaminationIds(
             @Param("acquisitionIds") List<Long> acquisitionIds,
             @Param("examinationIds") List<Long> examinationIds);
+
+    @EntityGraph(attributePaths = {
+        "relatedStudies",
+        "datasetProcessing",
+        "datasetAcquisition",
+        "datasetAcquisition.examination"
+    })
+    DatasetRightsView findOneForRightsCheckById(@Param("id") Long id);
 
 }

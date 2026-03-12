@@ -37,6 +37,7 @@ import org.shanoir.ng.dataset.dto.DatasetForRights;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetRightsView;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -174,6 +175,8 @@ public class DatasetApiSecurityTest {
         if ("ROLE_USER".equals(role)) {
             assertAccessDenied(api::deleteDataset, 1L);
         } else if ("ROLE_EXPERT".equals(role)) {
+            DatasetRightsView drv = mockDatasetRightsView(100L, 1L, 1L);
+            given(datasetRepository.findOneForRightsCheckById(1L)).willReturn(drv);
             assertAccessAuthorized(api::deleteDataset, 1L);
         }
 
@@ -194,6 +197,8 @@ public class DatasetApiSecurityTest {
         //findDatasetById(Long)
         given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
         su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
+        DatasetRightsView drv = mockDatasetRightsView(1L, 1L, 1L);
+        given(datasetRepository.findOneForRightsCheckById(1L)).willReturn(drv);
         assertAccessAuthorized(api::findDatasetById, 1L);
         assertAccessDenied(api::findDatasetById, 2L);
         assertAccessDenied(api::findDatasetById, 3L);
@@ -209,6 +214,8 @@ public class DatasetApiSecurityTest {
 
             Dataset ds = mockDataset(100L, 1L, 1L, 2L, 1L);
             given(datasetRepository.findById(ds.getId())).willReturn(Optional.of(ds));
+            drv = mockDatasetRightsView(100L, 2L, 1L);
+            given(datasetRepository.findOneForRightsCheckById(ds.getId())).willReturn(drv);
 
             assertAccessDenied(api::updateDataset, 1L, ds, mockBindingResult);
         }
@@ -319,6 +326,77 @@ public class DatasetApiSecurityTest {
         ds.setStudyId(studyId);
         ds.setDatasetAcquisition(mockDsAcq(dsAcqId, examId, centerId, studyId));
         return ds;
+    }
+
+    private DatasetRightsView mockDatasetRightsView(Long id, Long centerId, Long studyId) {
+        record DatasetRightsViewTestImpl(
+                Long id,
+                Long centerId,
+                DatasetProcessingView datasetProcessing,
+                DatasetAcquisitionView datasetAcquisition,
+                Set<StudyIdView> relatedStudies
+        ) implements DatasetRightsView {
+
+            @Override
+            public Long getId() {
+                return id;
+            }
+
+            @Override
+            public Long getCenterId() {
+                return centerId;
+            }
+
+            @Override
+            public DatasetProcessingView getDatasetProcessing() {
+                return datasetProcessing;
+            }
+
+            @Override
+            public DatasetAcquisitionView getDatasetAcquisition() {
+                return datasetAcquisition;
+            }
+
+            @Override
+            public Set<StudyIdView> getRelatedStudies() {
+                return relatedStudies;
+            }
+
+            record DatasetProcessingViewTestImpl(Long studyId) implements DatasetProcessingView {
+                @Override
+                public Long getStudyId() {
+                    return studyId;
+                }
+            }
+            record DatasetAcquisitionViewTestImpl(ExaminationView examination) implements DatasetAcquisitionView {
+                @Override
+                public ExaminationView getExamination() {
+                    return examination;
+                }
+            }
+            record ExaminationViewTestImpl(Long studyId) implements ExaminationView {
+                @Override
+                public Long getStudyId() {
+                    return studyId;
+                }
+            }
+            record StudyIdViewTestImpl(Long id) implements StudyIdView {
+                @Override
+                public Long getId() {
+                    return id;
+                }
+            }
+        }
+        DatasetRightsView view = new DatasetRightsViewTestImpl(
+                id,
+                centerId,
+                new DatasetRightsViewTestImpl.DatasetProcessingViewTestImpl(studyId),
+                new DatasetRightsViewTestImpl.DatasetAcquisitionViewTestImpl(
+                        new DatasetRightsViewTestImpl.ExaminationViewTestImpl(studyId)
+                ),
+                Set.of(new DatasetRightsViewTestImpl.StudyIdViewTestImpl(studyId))
+        );
+        return view;
     }
 
     private DatasetAcquisition mockDsAcq(Long id, Long examId, Long centerId, Long studyId) {
@@ -455,18 +533,24 @@ public class DatasetApiSecurityTest {
         // dataset 1
         Dataset dataset1 = mockDataset(1L, 1L, 1L, 1L, 1L);
         given(datasetRepository.findById(1L)).willReturn(Optional.of(dataset1));
+        DatasetRightsView drv = mockDatasetRightsView(100L, 2L, 1L);
+        given(datasetRepository.findOneForRightsCheckById(dataset1.getId())).willReturn(drv);
         given(datasetRepository.findByDatasetAcquisitionExaminationId(1L)).willReturn(Arrays.asList(new Dataset[]{dataset1}));
         exam1.setDatasetAcquisitions(Utils.toList(dsAcq1));
         dsAcq1.setDatasets(Arrays.asList(new Dataset[]{dataset1}));
         // dataset 2
         Dataset dataset2 = mockDataset(2L, 2L, 2L, 2L, 3L);
         given(datasetRepository.findById(2L)).willReturn(Optional.of(dataset2));
+        DatasetRightsView drv2 = mockDatasetRightsView(100L, 2L, 3L);
+        given(datasetRepository.findOneForRightsCheckById(dataset2.getId())).willReturn(drv2);
         given(datasetRepository.findByDatasetAcquisitionExaminationId(2L)).willReturn(Arrays.asList(new Dataset[]{dataset2}));
         exam2.setDatasetAcquisitions(Utils.toList(dsAcq2));
         dsAcq2.setDatasets(Arrays.asList(new Dataset[]{dataset2}));
         // dataset 3
         Dataset dataset3 = mockDataset(3L, 3L, 3L, 3L, 1L);
         given(datasetRepository.findById(3L)).willReturn(Optional.of(dataset3));
+        DatasetRightsView drv3 = mockDatasetRightsView(100L, 3L, 1L);
+        given(datasetRepository.findOneForRightsCheckById(dataset3.getId())).willReturn(drv3);
         given(datasetRepository.findByDatasetAcquisitionExaminationId(3L)).willReturn(Arrays.asList(new Dataset[]{dataset3}));
         exam3.setDatasetAcquisitions(Utils.toList(dsAcq3));
         dsAcq3.setDatasets(Arrays.asList(new Dataset[]{dataset3}));
@@ -474,6 +558,8 @@ public class DatasetApiSecurityTest {
         Dataset dataset4 = mockDataset(4L, 4L, 4L, 4L, 4L);
 
         given(datasetRepository.findById(4L)).willReturn(Optional.of(dataset4));
+        DatasetRightsView drv4 = mockDatasetRightsView(100L, 4L, 4L);
+        given(datasetRepository.findOneForRightsCheckById(dataset4.getId())).willReturn(drv4);
         given(datasetRepository.findByDatasetAcquisitionExaminationId(4L)).willReturn(Arrays.asList(new Dataset[]{dataset4}));
 
         try {

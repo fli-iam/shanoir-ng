@@ -43,6 +43,10 @@ public interface DatasetCopyService {
         private int countProcessed;
         private int countSuccess;
         private int countCopy;
+        private Long examinationId;
+        private Long centerId;
+        private Long subjectId;
+
 
         public DatasetCopyResult(Long newDsId) {
             this.newDsId = newDsId;
@@ -74,6 +78,30 @@ public interface DatasetCopyService {
 
         public void incrementCopy() {
             this.countCopy++;
+        }
+
+        public Long getExaminationId() {
+            return examinationId;
+        }
+
+        public void setExaminationId(Long examinationId) {
+            this.examinationId = examinationId;
+        }
+
+        public Long getCenterId() {
+            return centerId;
+        }
+
+        public void setCenterId(Long centerId) {
+            this.centerId = centerId;
+        }
+
+        public Long getSubjectId() {
+            return subjectId;
+        }
+
+        public void setSubjectId(Long subjectId) {
+            this.subjectId = subjectId;
         }
     }
 

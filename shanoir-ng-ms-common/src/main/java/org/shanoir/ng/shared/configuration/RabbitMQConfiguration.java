@@ -135,6 +135,9 @@ public class RabbitMQConfiguration {
     /** Queue used to get information for study_examination relationship.*/
     public static final String EXAMINATION_STUDY_QUEUE = "examination-study-queue";
 
+    /** Queue used to get information for multiple study_examination relationships.*/
+    public static final String EXAMINATION_STUDIES_QUEUE = "examination-studies-queue";
+
     /** Queue used to get information for study_examination deletion relationship.*/
     public static final String EXAMINATION_STUDY_DELETE_QUEUE = "examination-study-delete-queue";
 

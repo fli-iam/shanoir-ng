@@ -21,12 +21,12 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.study.model.Study;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepositoryCustom {
+public interface StudyRepository extends JpaRepository<Study, Long>, StudyRepositoryCustom {
 
     @EntityGraph("Study.All")
     Optional<Study> findById(Long id);

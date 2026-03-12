@@ -25,6 +25,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetForRights;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetRightsView;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
@@ -321,11 +322,12 @@ public class DatasetSecurityService {
      * @return true or false
      * @throws EntityNotFoundException
      */
+    @Transactional
     public boolean hasRightOnDataset(Long datasetId, String rightStr) throws EntityNotFoundException {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }
-        Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
+        DatasetRightsView dataset = datasetRepository.findOneForRightsCheckById(datasetId);
         if (dataset == null) {
             throw new EntityNotFoundException("Cannot find dataset with id " + datasetId);
         }
@@ -467,7 +469,44 @@ public class DatasetSecurityService {
         return hasRightOnStudiesCenter(dataset.getCenterId(), studies, rightStr);
     }
 
+    /**
+     * Check that the connected user has the given right for the given dataset.
+     *
+     * @param dataset the dataset
+     * @param rightStr the right
+     * @return true or false
+     */
+    public boolean hasRightOnTrustedDataset(DatasetRightsView dataset, String rightStr) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        if (dataset == null) {
+            throw new IllegalArgumentException("Dataset cannot be null here.");
+        }
+
+        Long studyId = getStudyIdFromDataset(dataset);
+
+        Set<Long> studies = new HashSet<>();
+        studies.add(studyId);
+        CollectionUtils.emptyIfNull(dataset.getRelatedStudies()).forEach(s -> studies.add(s.getId()));
+        return hasRightOnStudiesCenter(dataset.getCenterId(), studies, rightStr);
+    }
+
     private static Long getStudyIdFromDataset(Dataset dataset) {
+        Long studyId;
+        if (dataset.getDatasetProcessing() != null) {
+            studyId = dataset.getDatasetProcessing().getStudyId();
+        } else if (dataset.getDatasetAcquisition() != null
+                && dataset.getDatasetAcquisition().getExamination() != null
+                && dataset.getDatasetAcquisition().getExamination().getStudyId() != null) {
+            studyId = dataset.getDatasetAcquisition().getExamination().getStudyId();
+        } else {
+            throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");
+        }
+        return studyId;
+    }
+
+    private static Long getStudyIdFromDataset(DatasetRightsView dataset) {
         Long studyId;
         if (dataset.getDatasetProcessing() != null) {
             studyId = dataset.getDatasetProcessing().getStudyId();
