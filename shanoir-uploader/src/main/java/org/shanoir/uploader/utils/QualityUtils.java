@@ -93,6 +93,9 @@ public class QualityUtils {
         // Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
         imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), isImportFromPACS, null, true);
 
+        // Convert Import ms ImportJob into Datasets ms ImportJob
+        //org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
+
         for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
             List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
             for (Iterator<org.shanoir.ng.importer.model.Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
