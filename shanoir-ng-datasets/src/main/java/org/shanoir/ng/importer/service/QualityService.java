@@ -21,6 +21,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.importer.dto.ImportJob;
+import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
@@ -39,9 +40,7 @@ public class QualityService {
     private WADODownloaderService downloader;
 
 
-    public QualityCardResult checkQuality(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> acquisitionAttributes, List<QualityCard> qualityCards) throws ShanoirException {
-        
-
+    public QualityCardResult checkQuality(DatasetAcquisition datasetAcquisition, Serie serie, AcquisitionAttributes<?> acquisitionAttributes, List<QualityCard> qualityCards) throws ShanoirException {
         if (!hasQualityChecksAtImport(qualityCards)) {
             return null;
         }

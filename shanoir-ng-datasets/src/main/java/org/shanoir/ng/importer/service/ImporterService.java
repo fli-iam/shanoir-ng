@@ -259,7 +259,7 @@ public class ImporterService {
                             + " on dataset acquisition : " + dicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesDescription) 
                             + " with quality cards : " + qualitycards.stream().map(QualityCard::getName).toList() + ".");
                             
-                            qualityResult = qualityService.checkQuality(acquisition, dicomAttributes, qualitycards);
+                            qualityResult = qualityService.checkQuality(acquisition, null, dicomAttributes, qualitycards);
                         } else {
                             // We retrieve quality card result from ShUp import job
                             qualityResult = qualityService.retrieveQualityCardResult(importJob);

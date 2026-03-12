@@ -23,6 +23,8 @@ import java.util.List;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.shanoir.ng.dicom.DicomProcessing;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.DatasetsCreatorService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dto.Patient;
@@ -33,10 +35,10 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.service.QualityService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
-import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.model.mapper.SerieMapper;
 import org.shanoir.uploader.model.mapper.StudyMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +61,6 @@ public class QualityUtils {
     public static QualityCardResult checkQualityAtImport(ImportJob importJob, boolean isImportFromPACS) throws Exception {
 
         QualityCardResult qualityCardResult = new QualityCardResult();
-        ExaminationData examinationData = new ExaminationData();
         final File importJobDir = new File(importJob.getWorkFolder());
         List<QualityCard> qualityCards = new ArrayList<>();
 
@@ -80,7 +81,30 @@ public class QualityUtils {
         // Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
         imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), isImportFromPACS, null, true);
 
+        // Convert Import ms ImportJob into Datasets ms ImportJob
+        //org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
+
         // Construct Dicom datasets from images
+        // for (Patient patient : importJobDto.getPatients()) {
+        //     List<Study> studies = patient.getStudies();
+        //     for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
+        //         Study study = studiesIt.next();
+        //         List<org.shanoir.ng.importer.dto.Serie> series = study.getSelectedSeries();
+        //         for (Iterator<org.shanoir.ng.importer.dto.Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
+        //             org.shanoir.ng.importer.dto.Serie serie = seriesIt.next();
+        //             try {
+        //                 serie.setDatasets(new ArrayList<org.shanoir.ng.importer.dto.Dataset>());
+        //                 datasetsCreatorService.constructDicom(null, SerieMapper.INSTANCE.toDto(serie), true);
+        //                 // TODO : retrieve DICOM attributes from the dto serie but the importJobDto does not contain series
+        //                 AcquisitionAttributes<String> dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serie);
+        //                 qualityCardResult.merge(qualityService.checkQuality(serie, importJobDto, qualityCards));
+        //             } catch (SecurityException e) {
+        //                 LOG.error(e.getMessage());
+        //             }
+        //         }
+        //     }
+        // }
+
         for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
             List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
             for (Iterator<org.shanoir.ng.importer.model.Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
@@ -91,26 +115,15 @@ public class QualityUtils {
                     try {
                         serie.setDatasets(new ArrayList<Dataset>());
                         datasetsCreatorService.constructDicom(null, serie, true);
+                        org.shanoir.ng.importer.dto.Serie serieDto = SerieMapper.INSTANCE.toDto(serie);
+                        AcquisitionAttributes<String> dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serieDto);
+                        qualityCardResult = qualityService.checkQuality(null, serieDto, dicomAttributes, qualityCards);
                     } catch (SecurityException e) {
                         LOG.error(e.getMessage());
                     }
                 }
             }
         }
-
-        // Convert Import ms ImportJob into Datasets ms ImportJob
-        org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
-
-        examinationData.setStudyId(importJob.getStudyId());
-        examinationData.setSubjectId(importJob.getSubject().getId());
-
-        try {
-            qualityCardResult = qualityService.checkQuality(examinationData, importJobDto, qualityCards);
-        } catch (Exception e) {
-            LOG.error("Error while checking quality at import for examination " + importJob.getExaminationId() + " : " + e.getMessage());
-            throw e;
-        }
-
         return qualityCardResult;
     }
 

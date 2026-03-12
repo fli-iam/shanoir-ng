@@ -97,7 +97,7 @@ public class QualityExaminationRule extends AbstractEntity {
      */
 
     public void apply(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> acquisitionDicomAttributes, QualityCardResult result, WADODownloaderService downloader) throws PacsException {
-        // if applied at import then acquisitionDicomAttributes should not be null, otherwise we fetch DICOM acquisition attributes.
+        // if applied at import and not from ShUp then acquisitionDicomAttributes should not be null, otherwise we fetch DICOM acquisition attributes.
         if (acquisitionDicomAttributes == null) {
             acquisitionDicomAttributes = downloader.getDicomAttributesForAcquisition(datasetAcquisition);
         }
