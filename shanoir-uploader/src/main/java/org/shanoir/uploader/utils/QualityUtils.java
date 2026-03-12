@@ -96,9 +96,6 @@ public class QualityUtils {
         // Convert Import ms ImportJob into Datasets ms ImportJob
         //org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
 
-        // Convert Import ms ImportJob into Datasets ms ImportJob
-        //org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
-
         for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
             List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
             for (Iterator<org.shanoir.ng.importer.model.Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
