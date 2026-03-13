@@ -43,6 +43,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.shared.storage.FileSystemStorageService;
 import org.shanoir.ng.shared.storage.StorageException;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
@@ -102,6 +103,9 @@ public class StudyServiceTest {
     private StudyMapper studyMapperMock;
 
     @Mock
+    private FileSystemStorageService fileSystemStorageService;
+
+    @Mock
     private ObjectMapper objectMapper;
 
     @TempDir
@@ -109,7 +113,7 @@ public class StudyServiceTest {
 
     @BeforeEach
     public void setup() {
-        ReflectionTestUtils.setField(studyService, "dataDir", tempFolder.getAbsolutePath() + "/tmp/");
+        ReflectionTestUtils.setField(fileSystemStorageService, "baseDir", tempFolder.getAbsolutePath() + "/tmp/");
 
         given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
         given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(ModelsUtil.createStudy()));
