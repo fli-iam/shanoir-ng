@@ -14,14 +14,13 @@
 
 package org.shanoir.ng.studycard.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Hibernate;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.AcquisitionAttributes;
@@ -95,47 +94,31 @@ public class CardsProcessingService {
      * @param updateTags
      * @throws MicroServiceCommunicationException
      */
-    public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Examination examination, boolean updateTags) throws MicroServiceCommunicationException, PacsException {
+    public QualityCardResult applyQualityCardOnDatasetAcquisition(QualityCard qualityCard, DatasetAcquisition acquisition) throws MicroServiceCommunicationException, PacsException {
         long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
-        if (examination == null) throw new IllegalArgumentException("examination can't be null");
-        LOG.debug("Quality check for examination " + examination.getId() + " started");
-        if (qualityCard.getStudyId() != examination.getStudy().getId()) throw new IllegalStateException("the study id of the quality card doesn't match the study id of the examination");
-        if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
-            QualityCardResult result = new QualityCardResult();
-            if (updateTags) {
-                List<DatasetAcquisition> datasetAcquisitions = datasetAcquisitionService.findByExamination(examination.getId());
-                resetDatasetAcquisitions(datasetAcquisitions);
-                try {
-                    datasetAcquisitionService.update(datasetAcquisitions);
-                } catch (EntityNotFoundException e) { } // too bad
-            }
-            List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
-            if (acquisitions != null && !acquisitions.isEmpty()) {
-                LOG.debug(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
-                LOG.debug(qualityCard.getRules().size() + " rules found for quality card with id: " + qualityCard.getId() + " and name: " + qualityCard.getName());
-                long rulesStartTs = new Date().getTime();
-                for (DatasetAcquisition acquisition : acquisitions) {
-                    AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
-                    for (QualityExaminationRule rule : qualityCard.getRules()) {
-                    rule.apply(acquisition, dicomAttributes, result, downloader);
-                    }
-                }
-                
-                LOG.debug("Quality check for examination " + examination.getId() + " : rules application took " + (new Date().getTime() - rulesStartTs) + "ms");
-            }
-            if (updateTags) { // move inside brackets to avoid useless update if no acquisition or no rule
-                try {
-                    datasetAcquisitionService.update(result.getUpdatedDatasetAcquisitions());
-                } catch (EntityNotFoundException e) {
-                    throw new IllegalStateException("Could not update dataset acquisitions", e);
-                }
-            }
-            LOG.info("Quality check for examination " + examination.getId() + " finished in " + (new Date().getTime() - startTs) + " ms");
-            return result;
-        } else {
-            throw new RestClientException("Quality card used with emtpy rules.");
+        if (acquisition == null) throw new IllegalArgumentException("dataset acquisition can't be null");
+        LOG.debug("Quality check for dataset acquisition " + acquisition.getId() + " started");
+
+        if (CollectionUtils.isEmpty(qualityCard.getRules())) {
+            throw new RestClientException("Quality card used with empty rules.");
         }
+
+        QualityCardResult result = new QualityCardResult();
+
+        LOG.debug(qualityCard.getRules().size() + " rules found for quality card with id: " + qualityCard.getId() + " and name: " + qualityCard.getName());
+
+        // We retrieve dicom attributes for this dataset acquisition/DICOM serie
+        AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
+
+        // We apply each rule of the quality card on the acquisition
+        for (QualityExaminationRule rule : qualityCard.getRules()) {
+            rule.apply(acquisition, dicomAttributes, result, downloader);
+        }
+
+        LOG.debug("Quality check for acquisition " + acquisition.getId() + " finished in " + (new Date().getTime() - startTs) + " ms");
+        
+        return result;
     }
 
     /**
@@ -150,104 +133,90 @@ public class CardsProcessingService {
     public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException, PacsException {
         long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
+
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId(), 4, qualityCard.getStudyId());
         eventService.publishEvent(event);
+
         Study study = studyService.findById(qualityCard.getStudyId());
         if (study == null) throw new IllegalArgumentException("study can't be null");
-        if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
-        if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {
-            if (updateTags) { // first reset dataset acquisitions
-                event.setMessage("resetting dataset acquisitions quality tags");
-                eventService.publishEvent(event);
-                for (Examination examination : study.getExaminations()) { // for each examination, reset quality tag of dataset acquisitions -> to be optimized
-                    List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
-                    resetDatasetAcquisitions(datasetAcquisitions);
-                    try {
-                        datasetAcquisitionService.update(datasetAcquisitions);
-                    } catch (EntityNotFoundException e) { } // too bad
-                }
-            }
-            QualityCardResult result = new QualityCardResult();
-            AtomicInteger i = new AtomicInteger(0);
-            List<Examination> examinations;
-            if (start != null && stop != null) {
-                examinations = study.getExaminations().subList(start, stop < study.getExaminations().size() ? stop : study.getExaminations().size());
-            } else {
-                examinations = study.getExaminations();
-            }
-            // Load lazy data before go parallel
-            loadExaminationsLazyCollections(study.getExaminations(), event);
-            loadRulesLazyCollections(qualityCard.getRules(), event);
-            // main loop
-            try {
-                examinations.parallelStream().forEach(examination -> {
-                    event.setStatus(2);
-                    event.setProgress(0.5f + (i.floatValue() * 0.5f / examinations.size()));
-                    event.setMessage("checking quality for examination " + examination.getComment());
-                    //event.setReport(result.toString()); // too heavy, too slow
-                    eventService.publishEvent(event);
-                    try {
-                        result.merge(applyQualityCardOnExamination(qualityCard, examination, false));
-                    } catch (MicroServiceCommunicationException e) {
-                        throw new StreamExceptionWrapper(e);
-                    } catch (PacsException e) {
-                        throw new StreamExceptionWrapper(e);
-                    }
-                    i.incrementAndGet();
-                });
-            } catch (StreamExceptionWrapper e) {
-                throw (MicroServiceCommunicationException) (e.getCause());
-            }
-            if (updateTags) { // update dataset acquisitions
-                try {
-                    event.setMessage("setting dataset acquisitions quality tags");
-                    eventService.publishEvent(event);
-                    datasetAcquisitionService.update(result.getUpdatedDatasetAcquisitions());
-                } catch (EntityNotFoundException e) {
-                    throw new IllegalStateException("Could not update dataset acquisitions", e);
-                }
-            }
-            event.setProgress(1f);
-            event.setStatus(1);
-            event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - startTs) + " ms.");
-            event.setReport(result.toString());
-            eventService.publishEvent(event);
-            return result;
-        } else {
+        if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and qualityCard study ids don't match");
+
+        if (CollectionUtils.isEmpty(qualityCard.getRules())) {
             event.setStatus(-1);
             event.setMessage("Quality card used with empty rules.");
             event.setProgress(1f);
             eventService.publishEvent(event);
             throw new RestClientException("Quality card used with empty rules.");
         }
-    }
 
-    private void loadExaminationsLazyCollections(List<Examination> examinations, ShanoirEvent event) {
-        if (examinations != null) {
-            int i = 0;
-            for (Examination examination : examinations) {
-                event.setMessage("Loading examination " + examination.getComment() + " data from Shanoir database");
-                event.setProgress(i * 0.4f / examinations.size());
-                eventService.publishEvent(event);
-                if (examination.getSubject() != null) {
-                    Hibernate.initialize(examination.getSubject().getStudy());
-                }
-                if (examination.getDatasetAcquisitions() != null) {
-                    for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
-                        if (acquisition.getDatasets() != null) {
-                            for (Dataset dataset : acquisition.getDatasets()) {
-                                if (dataset.getDatasetExpressions() != null) {
-                                    for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-                                        Hibernate.initialize(expression.getDatasetFiles());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                i++;
-            }
+        // Load lazy data before go parallel
+        loadRulesLazyCollections(qualityCard.getRules(), event);
+
+        List<Examination> examinations = study.getExaminations();
+        // if start and stop are specified, we apply quality card only on a subset of examinations, for testing purpose
+        if (start != null && stop != null) {
+            examinations = examinations.subList(start, stop < examinations.size() ? stop : examinations.size());
         }
+
+        QualityCardResult result = new QualityCardResult();
+        AtomicInteger examinationIndex = new AtomicInteger(0);
+        int totalExaminations = examinations.size();
+
+        for (Examination examination : examinations) {
+            event.setMessage("Processing examination " + examination.getComment());
+            event.setProgress(examinationIndex.floatValue() / totalExaminations);
+            eventService.publishEvent(event);
+
+            // We only load the DatasetAcquisitions from one examination at a time
+            List<DatasetAcquisition> datasetAcquisitions = datasetAcquisitionService
+                .findByExamination(examination.getId());
+
+            if (updateTags) {
+                resetDatasetAcquisitions(datasetAcquisitions);
+            }
+
+            // We apply the quality card on DatasetAcquisitions in parallel for one examination only
+            List<DatasetAcquisition> updatedAcquisitions = new ArrayList<>();
+            try {
+                datasetAcquisitions.parallelStream().forEach(datasetAcquisition -> {
+                    event.setStatus(2);
+                    event.setMessage("Checking quality for acquisition " + datasetAcquisition.getId() 
+                        + " in examination " + examination.getComment());
+                    eventService.publishEvent(event);
+                    try {
+                        QualityCardResult acquisitionResult = applyQualityCardOnDatasetAcquisition(
+                            qualityCard, datasetAcquisition);
+                        result.merge(acquisitionResult);
+                        synchronized (updatedAcquisitions) {
+                            updatedAcquisitions.addAll(acquisitionResult.getUpdatedDatasetAcquisitions());
+                        }
+                    } catch (MicroServiceCommunicationException | PacsException e) {
+                        throw new StreamExceptionWrapper(e);
+                    }
+                });
+            } catch (StreamExceptionWrapper e) {
+                throw (MicroServiceCommunicationException) e.getCause();
+            }
+
+            if (updateTags && !updatedAcquisitions.isEmpty()) {
+                try {
+                    datasetAcquisitionService.update(updatedAcquisitions);
+                } catch (EntityNotFoundException e) {
+                    throw new IllegalStateException("Could not update dataset acquisitions for examination " + examination.getComment(), e);
+                }
+            }
+
+            datasetAcquisitions.clear();
+            updatedAcquisitions.clear();
+            examinationIndex.incrementAndGet();
+        }
+
+            event.setProgress(1f);
+            event.setStatus(1);
+            event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - startTs) + " ms.");
+            event.setReport(result.toString());
+            eventService.publishEvent(event);
+            return result;
     }
 
     private void loadRulesLazyCollections(List<QualityExaminationRule> rules, ShanoirEvent event) {
@@ -288,7 +257,7 @@ public class CardsProcessingService {
     private void resetDatasetAcquisitions(List<DatasetAcquisition> datasetAcquisitions) {
         if (datasetAcquisitions != null) {
             for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-                datasetAcquisition.setQualityTag(null);
+            datasetAcquisition.setQualityTag(null);
             }
         }
     }
