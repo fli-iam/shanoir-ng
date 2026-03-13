@@ -43,6 +43,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.shared.storage.StorageException;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -162,7 +163,7 @@ public class StudyServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-    public void updateTest() throws ShanoirException, IOException {
+    public void updateTest() throws ShanoirException, IOException, StorageException {
         // Also test protocol file path
         File protocol = new File(tempFolder.getAbsolutePath() + "/tmp/study-1/old.txt");
 
@@ -194,7 +195,7 @@ public class StudyServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-    public void updateStudyUsersTest() throws ShanoirException {
+    public void updateStudyUsersTest() throws ShanoirException, StorageException {
         Study existing = createStudy();
         existing.setStudyUserList(new ArrayList<StudyUser>());
         existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
@@ -218,7 +219,7 @@ public class StudyServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-    public void testUpdateStudyUsersNoDUA() {
+    public void testUpdateStudyUsersNoDUA() throws StorageException {
         // We delete the DUA from the old study
         Study existing = createStudy();
         existing.setDataUserAgreementPaths(Collections.singletonList("test"));
@@ -259,7 +260,7 @@ public class StudyServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-    public void testUpdateStudyUsersAddDUA() {
+    public void testUpdateStudyUsersAddDUA() throws StorageException {
         // In this method, a new DUA is added
         Study existing = createStudy();
         existing.setStudyUserList(new ArrayList<StudyUser>());

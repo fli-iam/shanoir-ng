@@ -173,25 +173,18 @@ public class StudyApiControllerTest {
     @Test
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void testUploadProtocolFile() throws IOException {
-        Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn(tempFolderPath + "study-1/test-import-extra-data.pdf");
-
         File importZip = new File(tempFolderPath + "/test-import-extra-data.zip");
         File saved = new File(tempFolderPath + "study-1/test-import-extra-data.pdf");
-
         if (saved.exists()) {
             saved.delete();
         }
-
         try {
             new File(tempFolderPath).mkdirs();
             importZip.createNewFile();
             MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.pdf", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
-
             // WHEN The file is added to the examination
-
             mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/protocol-file-upload/1").file(file))
                     .andExpect(status().isOk());
-
             // THEN the file is saved
             assertTrue(saved.exists());
         } catch (Exception e) {
@@ -203,12 +196,9 @@ public class StudyApiControllerTest {
     @Test
     @WithMockUser
     public void testDownloadProtocolFile() throws IOException {
-        Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn(tempFolderPath + "study-1/file.pdf");
-
         // GIVEN an study with protocol file
         File todow = new File(tempFolderPath + "study-1/file.pdf");
         todow.getParentFile().mkdirs();
-
         // WHEN we download protocolFile
         try {
             todow.createNewFile();
@@ -216,7 +206,6 @@ public class StudyApiControllerTest {
             MvcResult result = mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/protocol-file-download/1/file.pdf/"))
                     .andExpect(status().isOk())
                     .andReturn();
-
             // THEN the file is downloaded
             assertNotNull(result.getResponse().getContentAsString());
             System.out.println(result.getResponse().getContentAsString());
