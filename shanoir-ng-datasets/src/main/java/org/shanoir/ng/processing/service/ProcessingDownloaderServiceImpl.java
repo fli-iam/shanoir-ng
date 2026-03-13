@@ -236,15 +236,15 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
         Map<String, List<String>> queryFilters = new HashMap<>();
         String query = "SELECT DISTINCT dataset.id FROM dataset dataset "
-                + "JOIN dataset_metadata AS metadata ON metadata.id = dataset.updated_metadata_id "
-                + "JOIN dataset_processing AS processing ON dataset.dataset_processing_id = processing.id "
+                + "LEFT JOIN dataset_metadata AS metadata ON metadata.id = dataset.updated_metadata_id "
+                + "LEFT JOIN dataset_processing AS processing ON dataset.dataset_processing_id = processing.id "
                 + "LEFT JOIN execution_monitoring AS monitoring ON monitoring.id = processing.parent_id "
-                + "JOIN input_of_dataset_processing AS input_link ON processing.id = input_link.processing_id "
-                + "JOIN dataset AS input_dataset ON input_link.dataset_id = input_dataset.id "
-                + "JOIN dataset_acquisition AS acquisition ON input_dataset.dataset_acquisition_id = acquisition.id "
-                + "JOIN examination AS examination ON acquisition.examination_id = examination.id "
-                + "JOIN subject ON dataset.subject_id = subject.id "
-                + "JOIN study ON examination.study_id = study.id "
+                + "LEFT JOIN input_of_dataset_processing AS input_link ON processing.id = input_link.processing_id "
+                + "LEFT JOIN dataset AS input_dataset ON input_link.dataset_id = input_dataset.id "
+                + "LEFT JOIN dataset_acquisition AS acquisition ON input_dataset.dataset_acquisition_id = acquisition.id "
+                + "LEFT JOIN examination AS examination ON acquisition.examination_id = examination.id "
+                + "LEFT JOIN subject ON dataset.subject_id = subject.id "
+                + "LEFT JOIN study ON examination.study_id = study.id "
                 + "WHERE ";
 
         for (JsonNode jsonFilter : extraction.get("filter")) {
