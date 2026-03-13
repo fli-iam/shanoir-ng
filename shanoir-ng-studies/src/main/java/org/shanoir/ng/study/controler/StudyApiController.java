@@ -132,7 +132,7 @@ public class StudyApiController implements StudyApi {
             if (!CollectionUtils.isEmpty(duas)) {
                 this.dataUserAgreementService.deleteAll(duas);
             }
-            storageService.delete("study-" + studyId, "");
+            storageService.deleteDirectory("study-" + studyId);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_STUDY_EVENT, studyId.toString(),
                     KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

@@ -16,6 +16,8 @@ package org.shanoir.ng.shared.storage;
 
 import java.io.InputStream;
 import java.time.Duration;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +32,12 @@ import io.awspring.cloud.s3.S3Exception;
 import io.awspring.cloud.s3.S3Template;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 
 @Service
 @ConditionalOnProperty(name = "storage.type", havingValue = "s3")
@@ -91,9 +98,34 @@ public class S3StorageService implements StorageService {
     @Override
     public void delete(String directory, String filename) throws StorageException {
         try {
-            s3Template.deleteObject(bucketName, directory + "/" + filename);
-        } catch (Exception e) {
-            throw new StorageException("S3 delete failed for: " + filename, e);
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(directory + "/" + filename)
+                    .build());
+        } catch (S3Exception e) {
+            throw new StorageException("Failed to delete S3 object " + filename, e);
+        }
+    }
+
+    @Override
+    public void deleteDirectory(String directory) throws StorageException {
+        try {
+            ListObjectsV2Response listing = s3Client.listObjectsV2(
+                    ListObjectsV2Request.builder()
+                            .bucket(bucketName)
+                            .prefix(directory + "/")
+                            .build());
+            if (listing.contents().isEmpty())
+                return;
+            List<ObjectIdentifier> keys = listing.contents().stream()
+                    .map(s3Obj -> ObjectIdentifier.builder().key(s3Obj.key()).build())
+                    .collect(Collectors.toList());
+            s3Client.deleteObjects(DeleteObjectsRequest.builder()
+                    .bucket(bucketName)
+                    .delete(Delete.builder().objects(keys).build())
+                    .build());
+        } catch (S3Exception e) {
+            throw new StorageException("Failed to delete S3 directory " + directory, e);
         }
     }
 

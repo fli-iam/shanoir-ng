@@ -30,6 +30,8 @@ public interface StorageService {
 
     void delete(String directory, String filename) throws StorageException;
 
+    void deleteDirectory(String directory) throws StorageException;
+
     void move(String directory, String sourceFilename, String targetFilename) throws StorageException;
 
 }

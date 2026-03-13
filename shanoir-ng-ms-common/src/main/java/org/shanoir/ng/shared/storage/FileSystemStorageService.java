@@ -16,10 +16,12 @@ package org.shanoir.ng.shared.storage;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +76,26 @@ public class FileSystemStorageService implements StorageService {
             Files.deleteIfExists(Paths.get(baseDir, directory, filename));
         } catch (IOException e) {
             throw new StorageException("Failed to delete file " + filename, e);
+        }
+    }
+
+    @Override
+    public void deleteDirectory(String directory) throws StorageException {
+        Path dirPath = Paths.get(baseDir, directory);
+        if (!Files.exists(dirPath))
+            return;
+        try {
+            Files.walk(dirPath)
+                    .sorted(Comparator.reverseOrder())
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+                    });
+        } catch (UncheckedIOException | IOException e) {
+            throw new StorageException("Failed to delete directory " + directory, e);
         }
     }
 
