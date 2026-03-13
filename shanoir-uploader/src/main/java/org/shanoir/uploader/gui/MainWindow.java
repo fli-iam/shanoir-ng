@@ -284,6 +284,9 @@ public class MainWindow extends JFrame {
 
         JCheckBoxMenuItem pseudonymizeAfterCopyOrDownloadMenuItem = new JCheckBoxMenuItem(
                 resourceBundle.getString("shanoir.uploader.configurationMenu.pseudonymizeAfterCopyOrDownload"));
+        // Feature added for challenge purposes, not activated by default and not available for all profiles
+        pseudonymizeAfterCopyOrDownloadMenuItem.setSelected(false);
+        pseudonymizeAfterCopyOrDownloadMenuItem.setEnabled(!ShUpConfig.profilesProperties.getProperty(ShUpConfig.PROFILES_PROPERTY).contains(shanoirUploaderConfiguration.profileSelected));
         mnConfiguration.add(pseudonymizeAfterCopyOrDownloadMenuItem);
 
         JMenu mnHelp = new JMenu(resourceBundle.getString("shanoir.uploader.helpMenu"));
