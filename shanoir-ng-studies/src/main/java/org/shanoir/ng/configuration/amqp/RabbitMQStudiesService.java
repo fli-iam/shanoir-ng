@@ -100,10 +100,6 @@ public class RabbitMQStudiesService {
     @Autowired
     private AcquisitionEquipmentService acquisitionEquipmentService;
 
-    /**
-     * Receives a shanoirEvent as a json object, concerning an examination creation
-     * @param commandArrStr the task as a json string.
-     */
     @RabbitListener(bindings = @QueueBinding(
             key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
             value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_QUEUE, durable = "true"),
@@ -112,10 +108,9 @@ public class RabbitMQStudiesService {
             )
     @RabbitHandler
     @Transactional
-    public void linkExamination(final String eventStr) {
+    public void linkExamination(final ShanoirEvent event) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
-            ShanoirEvent event =  mapper.readValue(eventStr, ShanoirEvent.class);
             Long examinationId = Long.valueOf(event.getObjectId());
             Long studyId = event.getStudyId();
             String message = event.getMessage();

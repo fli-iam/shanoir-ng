@@ -14,28 +14,34 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.shanoir.ng.email.EmailService;
-import org.shanoir.ng.events.ShanoirEvent;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
-import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.EmailStudy;
+import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import tools.jackson.databind.ObjectMapper;
+
 @Component
+@Profile("!test")
 public class RabbitMQUserService {
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQUserService.class);
@@ -51,6 +57,7 @@ public class RabbitMQUserService {
 
     @Autowired
     private RabbitMqStudyUserService listener;
+
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = RabbitMQConfiguration.STUDY_USER_QUEUE_USERS, durable = "true"),
             exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
@@ -60,20 +67,15 @@ public class RabbitMQUserService {
         listener.receiveStudyUsers(commandArrStr);
     }
 
-    /**
-     * Receives a shanoirEvent as a json object, thus create a event in the queue
-     * @param commandArrStr the task as a json string.
-     */
     @RabbitListener(bindings = @QueueBinding(
             key = "*.event",
             value = @Queue(value = RabbitMQConfiguration.SHANOIR_EVENTS_QUEUE, durable = "true"),
             exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
                 autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
     )
-    public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
-        LOG.info("Receiving event: " + eventAsString);
+    public void receiveEvent(ShanoirEvent event) throws AmqpRejectAndDontRequeueException {
+        LOG.info("Receiving event: " + event.toString());
         try {
-            ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
             eventsService.addEvent(event);
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the event.", e);
@@ -176,4 +178,5 @@ public class RabbitMQUserService {
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the dua draft event.", e);
         }
     }
+
 }

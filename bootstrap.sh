@@ -15,7 +15,7 @@
 print_help()
 {
 	cat <<EOF
-Build and deploy Shanoir NG
+Build and deploy Shanoir
 usage:
 	$0 --clean|--force|--no-deploy [--no-build] [--no-keycloak] [--no-dcm4chee] [-h|--help]
 
@@ -145,7 +145,7 @@ if [ -n "$deploy" ] ; then
 	docker compose -f docker-compose-dev.yml up -d database
 	wait_tcp_ready database 3306
 
-	# 2. keycloak-database + keycloak
+	# 2. keycloak-database + keycloak + init-cert-and-logs
 	if [ -n "$keycloak" ] ; then
 		step "init: keycloak-database"
 		docker compose -f docker-compose-dev.yml up -d keycloak-database
@@ -160,6 +160,8 @@ if [ -n "$deploy" ] ; then
 				' INFO  \[io.quarkus\] .* Keycloak .* started in [0-9]*'	\
 				-- docker compose logs --no-color --follow keycloak >/dev/null
 
+		step "start and stop: init-cert-and-logs"
+		docker compose -f docker-compose-dev.yml up -d init-cert-and-logs
 	fi
 
 	# 3. infrastructure services: dcm4chee
@@ -180,8 +182,8 @@ if [ -n "$deploy" ] ; then
 		docker compose -f docker-compose-dev.yml up -d "$infra_ms"
 	done
 	
-	# 5. Shanoir-NG microservices
-	step "start: sh-ng microservices"
+	# 5. Shanoir microservices
+	step "start: shanoir microservices"
 	for ms in users studies datasets import preclinical nifti-conversion
 	do
 		step "init: $ms microservice"

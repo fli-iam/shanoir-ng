@@ -813,7 +813,7 @@ public class StudyServiceImpl implements StudyService {
             emailStudyUserAdded.setRecipients(recipients);
             final Long userId = KeycloakUtil.getTokenUserId();
             emailStudyUserAdded.setUserId(userId);
-            emailStudyUserAdded.setStudyId(study.getId().toString());
+            emailStudyUserAdded.setStudyId(study.getId());
             emailStudyUserAdded.setStudyName(study.getName());
             List<Long> studyUserIds = created.stream().map(StudyUser::getUserId).collect(Collectors.toList());
             emailStudyUserAdded.setStudyUsers(studyUserIds);
@@ -843,7 +843,7 @@ public class StudyServiceImpl implements StudyService {
     private void sendMembersApprovalEmailReport(Study study) {
         EmailStudy email = new EmailStudy();
         email.setUserId(KeycloakUtil.getTokenUserId());
-        email.setStudyId(study.getId().toString());
+        email.setStudyId(study.getId());
         email.setStudyName(study.getName());
         List<Long> studyUserIds = study.getStudyUserList().stream().map(StudyUser::getUserId).collect(Collectors.toList());
         email.setStudyUsers(studyUserIds);
@@ -858,7 +858,7 @@ public class StudyServiceImpl implements StudyService {
     private EmailStudy buildAdminEmailReport(Study study) {
         EmailStudy email = new EmailStudy();
         email.setUserId(KeycloakUtil.getTokenUserId());
-        email.setStudyId(study.getId().toString());
+        email.setStudyId(study.getId());
         email.setStudyName(study.getName());
 
         email.setDescription(study.getDescription());

@@ -14,23 +14,19 @@
 
 package org.shanoir.ng;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.RoleResource;
-import org.keycloak.admin.client.resource.UserResource;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
-import org.shanoir.ng.utils.KeycloakShanoirUtil;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
@@ -39,9 +35,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import jakarta.ws.rs.core.Response;
+import reactor.core.publisher.Mono;
 
 /**
  * This class does the user(s) management for Shanoir-NG in relation with
@@ -78,17 +80,8 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 
     private static final String SYNC_ALL_USERS_TO_KEYCLOAK = "syncAllUsersToKeycloak";
 
-    /**
-     * Logger
-     */
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirUsersManagement.class);
 
-    /**
-     * Five values are necessary to init the Keycloak client: url, realm, client-id, login, pw
-     * Login and pw are given from the command line to avoid admin pw storage on the disk and
-     * in application.yml. URL, realm and client-id come from application.yml or env configuration.
-     *
-     */
     @Value("${kc.admin.client.server.url}")
     private String kcAdminClientServerUrl;
 
@@ -113,8 +106,6 @@ public class ShanoirUsersManagement implements ApplicationRunner {
     @Value("${service-account.user.email}")
     private String vipSrvEmail;
 
-    private Keycloak keycloak = null;
-
     @Autowired
     private UserRepository userRepository;
 
@@ -124,18 +115,23 @@ public class ShanoirUsersManagement implements ApplicationRunner {
     @Autowired
     private StudyRightsService commService;
 
+    private WebClient webClient;
+
     @Override
     public void run(final ApplicationArguments args) throws Exception {
-
         if (args.getOptionNames().isEmpty()) {
-            LOG.info("ShanoirUsersManagement called without option. Starting up MS Users without additional operation.");
+            LOG.info(
+                    "ShanoirUsersManagement called without option. Starting up MS Users without additional operation.");
             return;
         }
 
         if (args.containsOption(SYNC_ALL_USERS_TO_KEYCLOAK)
                 && "true".equals(args.getOptionValues(SYNC_ALL_USERS_TO_KEYCLOAK).get(0))) {
 
-            initKeycloakAdminClient();
+            this.webClient = WebClient.builder()
+                    .baseUrl(kcAdminClientServerUrl)
+                    .build();
+
             if (!StringUtils.isBlank(vipSrvEmail)) {
                 this.setVIPServiceAccountEmail();
             }
@@ -148,9 +144,10 @@ public class ShanoirUsersManagement implements ApplicationRunner {
                     success = true;
                 } catch (Exception e) {
                     tries++;
-                    String msg = "Try [" + tries + "] failed for updating keycloak users on startup (" + e.getMessage() + ")";
-                    LOG.error(msg, e); // users logs
-                    System.out.println(msg); // docker compose console
+                    String msg = "Try [" + tries + "] failed for updating keycloak users on startup (" + e.getMessage()
+                            + ")";
+                    LOG.error(msg, e);
+                    System.out.println(msg);
                     TimeUnit.SECONDS.sleep(5);
                 }
             }
@@ -160,91 +157,178 @@ public class ShanoirUsersManagement implements ApplicationRunner {
         }
     }
 
-    private void initKeycloakAdminClient() {
-
-        if (this.keycloak != null) {
-            return;
+    private String getAdminToken() {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("grant_type", "password");
+        form.add("client_id", kcAdminClientClientId);
+        form.add("username", kcAdminClientUsername);
+        form.add("password", kcAdminClientPassword);
+        Map<?, ?> response = webClient.post()
+                .uri("/realms/" + kcAdminClientRealm + "/protocol/openid-connect/token")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(form))
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block(Duration.ofSeconds(10));
+        if (response == null || !response.containsKey("access_token")) {
+            throw new IllegalStateException("Failed to obtain admin token from Keycloak.");
         }
-
-        this.keycloak = Keycloak.getInstance(
-            kcAdminClientServerUrl,
-            kcAdminClientRealm,
-            kcAdminClientUsername,
-            kcAdminClientPassword,
-            kcAdminClientClientId);
+        return (String) response.get("access_token");
     }
 
     private void createUsersIfNotExisting() {
         LOG.info(SYNC_ALL_USERS_TO_KEYCLOAK);
+        final String token = getAdminToken();
         final Iterable<User> users = userRepository.findAll();
         for (final User user : users) {
-            final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().search(user.getUsername());
-            if (userRepresentationList != null && !userRepresentationList.isEmpty()) {
+            List<?> existing = searchUserByUsername(user.getUsername(), token);
+            if (existing != null && !existing.isEmpty()) {
                 LOG.debug("User already existing in Keycloak. Do nothing.");
             } else {
-                // Add user to Keycloak and save its keycloakId in the users database after
-                final UserRepresentation userRepresentation = getUserRepresentation(user);
-                final Response response = keycloak.realm(keycloakRealm).users().create(userRepresentation);
-                final String keycloakId = KeycloakShanoirUtil.getCreatedUserId(response);
+                String keycloakId = createUser(user, token);
                 user.setKeycloakId(keycloakId);
                 userRepository.save(user);
-                // Reset user password, which is stored in Keycloak only
-                final CredentialRepresentation credential = new CredentialRepresentation();
-                credential.setType(CredentialRepresentation.PASSWORD);
                 String newPassword = PasswordUtils.generatePassword();
-                credential.setValue(newPassword);
-                credential.setTemporary(true);
-                final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
-                userResource.resetPassword(credential);
-                final RoleResource roleResource = keycloak.realm(keycloakRealm).roles().get(user.getRole().getName());
-                userResource.roles().realmLevel().add(Arrays.asList(roleResource.toRepresentation()));
-                // Notify user
+                resetPassword(keycloakId, newPassword, token);
+                assignRealmRole(keycloakId, user.getRole().getName(), token);
                 emailService.notifyUserResetPassword(user, newPassword);
             }
         }
     }
 
-    private UserRepresentation getUserRepresentation(final User user) {
-        final Map<String, List<String>> attributes = new HashMap<>();
-        attributes.put("userId", List.of(user.getId().toString()));
-        attributes.put("canImportFromPACS", List.of("" + user.isCanAccessToDicomAssociation()));
-        if (user.getExpirationDate() != null) {
-            attributes.put("expirationDate", List.of("" + user.getExpirationDate()));
+    private List<?> searchUserByUsername(String username, String token) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/realms/" + keycloakRealm + "/users")
+                        .queryParam("username", username)
+                        .queryParam("exact", true)
+                        .build())
+                .headers(h -> h.setBearerAuth(token))
+                .retrieve()
+                .bodyToMono(List.class)
+                .block(Duration.ofSeconds(10));
+    }
+
+    private String createUser(User user, String token) {
+        Map<String, Object> body = buildUserRepresentation(user);
+        HttpHeaders headers = webClient.post()
+                .uri("/admin/realms/" + keycloakRealm + "/users")
+                .headers(h -> h.setBearerAuth(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .exchangeToMono(response -> {
+                    if (!response.statusCode().is2xxSuccessful()) {
+                        return Mono.error(new IllegalStateException(
+                                "Failed to create user in Keycloak. Status: " + response.statusCode()));
+                    }
+                    return Mono.just(response.headers().asHttpHeaders());
+                })
+                .block(Duration.ofSeconds(10));
+        String location = Objects.requireNonNull(
+                Objects.requireNonNull(headers).getLocation(),
+                "No Location header returned after user creation").getPath();
+        return location.replaceAll(".*/([^/]+)$", "$1");
+    }
+
+    private void resetPassword(String keycloakId, String newPassword, String token) {
+        Map<String, Object> credential = new HashMap<>();
+        credential.put("type", "password");
+        credential.put("value", newPassword);
+        credential.put("temporary", true);
+        webClient.put()
+                .uri("/admin/realms/" + keycloakRealm + "/users/" + keycloakId + "/reset-password")
+                .headers(h -> h.setBearerAuth(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(credential)
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(10));
+    }
+
+    private void assignRealmRole(String keycloakId, String roleName, String token) {
+        // 1. Fetch the role representation
+        Map<?, ?> role = webClient.get()
+                .uri("/admin/realms/" + keycloakRealm + "/roles/" + roleName)
+                .headers(h -> h.setBearerAuth(token))
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block(Duration.ofSeconds(10));
+        if (role == null) {
+            throw new IllegalStateException("Role not found in Keycloak: " + roleName);
         }
-        final UserRepresentation userRepresentation = new UserRepresentation();
-        userRepresentation.setAttributes(attributes);
-        userRepresentation.setEmail(user.getEmail());
-        userRepresentation.setEmailVerified(Boolean.TRUE);
-        userRepresentation.setEnabled(user.isEnabled());
-        userRepresentation.setFirstName(user.getFirstName());
-        userRepresentation.setLastName(user.getLastName());
-        userRepresentation.setUsername(user.getUsername());
-        return userRepresentation;
+        // 2. Assign the role to the user
+        webClient.post()
+                .uri("/admin/realms/" + keycloakRealm + "/users/" + keycloakId + "/role-mappings/realm")
+                .headers(h -> h.setBearerAuth(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(List.of(role))
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(10));
     }
 
     /**
      * Set up the email ${service-account.user.email}
-     * of the keycloak user ${service-account.user.name} ('service-account-service-account')
+     * of the keycloak user ${service-account.user.name}
+     * ('service-account-service-account')
      * associated with the keycloak client 'service-account'
      *
      * See service-account.user.* application properties
      */
     private void setVIPServiceAccountEmail() {
+        String token = getAdminToken();
 
-        final List<UserRepresentation> userRepresentationList = keycloak.realm(keycloakRealm).users().searchByUsername(this.vipSrvUsername, true);
-        if (userRepresentationList == null || userRepresentationList.isEmpty()) {
-            LOG.debug("User [{}] does not exists in Keycloak. Do nothing.", this.vipSrvUsername);
+        List<?> users = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/realms/" + keycloakRealm + "/users")
+                        .queryParam("username", vipSrvUsername)
+                        .queryParam("exact", true)
+                        .build())
+                .headers(h -> h.setBearerAuth(token))
+                .retrieve()
+                .bodyToMono(List.class)
+                .block(Duration.ofSeconds(10));
+
+        if (users == null || users.isEmpty()) {
+            LOG.debug("User [{}] does not exist in Keycloak. Do nothing.", vipSrvUsername);
             return;
         }
-        if (userRepresentationList.size() > 1) {
-            LOG.error("Multiple users [{}] found in Keycloak.", this.vipSrvUsername);
+        if (users.size() > 1) {
+            LOG.error("Multiple users [{}] found in Keycloak.", vipSrvUsername);
             return;
         }
-        UserRepresentation user = userRepresentationList.get(0);
-        user.setEmail(this.vipSrvEmail);
 
-        UserResource userResource = keycloak.realm(keycloakRealm).users().get(user.getId());
-        userResource.update(user);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> userRep = (Map<String, Object>) users.get(0);
+        String userId = (String) userRep.get("id");
+        userRep.put("email", vipSrvEmail);
+
+        webClient.put()
+                .uri("/admin/realms/" + keycloakRealm + "/users/" + userId)
+                .headers(h -> h.setBearerAuth(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(userRep)
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(10));
+    }
+
+    private Map<String, Object> buildUserRepresentation(User user) {
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("userId", List.of(user.getId().toString()));
+        attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
+        if (user.getExpirationDate() != null) {
+            attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
+        }
+        Map<String, Object> body = new HashMap<>();
+        body.put("attributes", attributes);
+        body.put("email", user.getEmail());
+        body.put("emailVerified", true);
+        body.put("enabled", user.isEnabled());
+        body.put("firstName", user.getFirstName());
+        body.put("lastName", user.getLastName());
+        body.put("username", user.getUsername());
+        return body;
     }
 
     /**
@@ -263,4 +347,5 @@ public class ShanoirUsersManagement implements ApplicationRunner {
         }
         return commService.hasRightOnStudy(studyId, rightStr);
     }
+
 }

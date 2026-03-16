@@ -56,4 +56,12 @@ public class ShanoirEvent extends ShanoirEventLight {
         return light;
     }
 
+    @Override
+    public String toString() {
+        return "ShanoirEvent [getId()=" + getId() + ", getEventType()=" + getEventType() + ", getObjectId()="
+                + getObjectId() + ", getUserId()=" + getUserId() + ", getMessage()=" + getMessage()
+                + ", getCreationDate()=" + getCreationDate() + ", getLastUpdate()=" + getLastUpdate() + ", getStatus()="
+                + getStatus() + ", getProgress()=" + getProgress() + ", getStudyId()=" + getStudyId() + "]";
+    }
+
 }

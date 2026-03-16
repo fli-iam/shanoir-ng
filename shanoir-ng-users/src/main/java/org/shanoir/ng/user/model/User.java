@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
 import org.shanoir.ng.role.model.Role;
@@ -27,7 +26,6 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.security.EditableOnlyBy;
 import org.shanoir.ng.shared.security.VisibleOnlyBy;
-import org.shanoir.ng.shared.validation.ExtensionWithMotivation;
 import org.shanoir.ng.shared.validation.Unique;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -42,6 +40,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -50,7 +49,6 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @Table(name = "users")
 @JsonPropertyOrder({ "_links", "id", "firstName", "lastName", "username", "email" })
-@ExtensionWithMotivation
 public class User extends HalEntity implements UserDetails {
 
     /**

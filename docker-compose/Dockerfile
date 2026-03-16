@@ -47,12 +47,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 FROM base-debian-with-adoptium AS jdk
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    apt-get update -qq && apt-get install -qqy temurin-21-jdk maven bzip2 git
+    apt-get update -qq && apt-get install -qqy temurin-25-jdk maven bzip2 git
 
 FROM base-debian-with-adoptium AS base-microservice
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq \
-    && apt-get install -qqy temurin-21-jre ca-certificates-java \
+    && apt-get install -qqy temurin-25-jre ca-certificates-java \
     && update-ca-certificates
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
@@ -65,6 +65,14 @@ COPY --link \
 ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/urandom", \
     "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts", \
     "-Djavax.net.ssl.trustStorePassword=changeit"]
+
+FROM base-microservice AS init-cert-and-logs
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    apt-get update -qq && apt-get install -qqy openssl
+COPY --link common/entrypoint_cert_init /usr/bin/
+COPY --link common/entrypoint_common    /usr/bin/
+RUN chmod +x /usr/bin/entrypoint_cert_init /usr/bin/entrypoint_common
+ENTRYPOINT ["/usr/bin/entrypoint_cert_init"]
 
 
 ################ datasets ##################################################
@@ -253,14 +261,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 COPY --link users/shanoir-ng-users.jar shanoir-ng-users.jar
 COPY --link users/entrypoint /usr/bin/
 
-
 ENV	\
 	kc.admin.client.client.id="admin-cli"	\
 	kc.admin.client.realm="master"
 
 # Use the below line for remote debugging
 #CMD ["-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=0.0.0.0:9911", "-jar", "/shanoir-ng-users.jar", "--syncAllUsersToKeycloak=true"]
-CMD ["-jar", "/shanoir-ng-users.jar"]
+CMD ["-Dspring.aot.enabled=true", "-jar", "/shanoir-ng-users.jar"]
 
 
 

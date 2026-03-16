@@ -24,7 +24,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.tasks.AsyncTaskApiController;
 import org.shanoir.ng.tasks.UserSseEmitter;
-import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -53,15 +52,15 @@ public class ShanoirEventsService {
     private ShanoirEventRepositoryCustom repositoryCustom;
 
     @Autowired
-    private UserRepository userRepository;
+    private ShanoirEventMapper shanoirEventMapper;
 
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventsService.class);
 
     public static final long INACTIVE_TIMEOUT = 5 * DateUtils.MILLIS_PER_MINUTE;
 
-    public void addEvent(ShanoirEvent event) {
-        // Call repository
-        repository.save(event);
+    public void addEvent(org.shanoir.ng.shared.event.ShanoirEvent event) {
+        org.shanoir.ng.events.ShanoirEvent localEvent = shanoirEventMapper.toLocalEvent(event);
+        repository.save(localEvent);
         // This is sad but with the @CreationTimestamp the date is not returned by the
         // save method
         ShanoirEvent saved = repository.findById(event.getId()).orElse(null);
@@ -93,7 +92,8 @@ public class ShanoirEventsService {
             list.add(type);
         }
         List<ShanoirEvent> dbEvents = Utils
-                .toList(repository.findByUserIdAndEventTypeInAndLastUpdateYoungerThan7Days(userId, list));
+                .toList(repository.findByUserIdAndEventTypeInAndLastUpdateGreaterThan(userId, list,
+                        DateUtils.addDays(new Date(), -1 * ShanoirEventRepository.TIMEOUT_DAYS)));
         List<ShanoirEventLight> events = new ArrayList<>();
         cleanEvents(dbEvents);
         for (ShanoirEvent event : dbEvents) {
@@ -195,7 +195,8 @@ public class ShanoirEventsService {
      * @return number of events
      */
     public Long countPassedEvents(Integer days) {
-        return repository
+        return repositoryCustom
                 .countByLastUpdateAfter(new Date(System.currentTimeMillis() - days * DateUtils.MILLIS_PER_DAY));
     }
+
 }

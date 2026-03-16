@@ -71,7 +71,7 @@ public class ImporterMailService {
         }
         generatedMail.setExamDate(examination.getExaminationDate().toString());
         generatedMail.setExaminationId(examination.getId().toString());
-        generatedMail.setStudyId(importJob.getStudyId().toString());
+        generatedMail.setStudyId(importJob.getStudyId());
         generatedMail.setSubjectName(importJob.getSubjectName());
         generatedMail.setStudyName(importJob.getStudyName());
         generatedMail.setUserId(userId);
@@ -92,7 +92,7 @@ public class ImporterMailService {
     public void sendFailureMail(ImportJob importJob, Long userId, String errorMessage) {
         EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
         generatedMail.setExaminationId(importJob.getExaminationId().toString());
-        generatedMail.setStudyId(importJob.getStudyId().toString());
+        generatedMail.setStudyId(importJob.getStudyId());
         generatedMail.setStudyCardId(importJob.getStudyCardId() != null ? importJob.getStudyCardId().toString() : "");
         generatedMail.setSubjectName(importJob.getSubjectName());
         generatedMail.setStudyName(importJob.getStudyName());
