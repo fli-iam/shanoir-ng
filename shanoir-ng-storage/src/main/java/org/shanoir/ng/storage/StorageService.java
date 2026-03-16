@@ -20,7 +20,7 @@ import org.springframework.core.io.Resource;
 
 public interface StorageService {
 
-    String storeDatasets(Long examinationId, String fileName,
+    String storeExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException;
 
@@ -37,6 +37,8 @@ public interface StorageService {
     void deleteStudies(String directory, String fileName) throws StorageException;
 
     void deleteDirectoryDatasets(String directory) throws StorageException;
+
+    void deleteDirectoryExtraData(Long examinationId) throws StorageException;
 
     void deleteDirectoryStudies(String directory) throws StorageException;
 

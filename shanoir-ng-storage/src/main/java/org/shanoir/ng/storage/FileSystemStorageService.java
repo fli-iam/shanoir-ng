@@ -44,7 +44,7 @@ public class FileSystemStorageService implements StorageService {
     private String baseDirDatasets;
 
     @Override
-    public String storeDatasets(Long examinationId, String fileName,
+    public String storeExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
         String directory = "/examination-" + examinationId + "/";
@@ -121,6 +121,11 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public void deleteDirectoryStudies(String directory) throws StorageException {
         deleteDirectory(baseDirStudies, directory);
+    }
+
+    @Override
+    public void deleteDirectoryExtraData(Long examinationId) throws StorageException {
+        deleteDirectoryDatasets("examination-" + examinationId);
     }
 
     private void deleteDirectory(String baseDir, String directory) throws StorageException {

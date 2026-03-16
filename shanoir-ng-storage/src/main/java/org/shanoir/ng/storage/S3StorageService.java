@@ -59,7 +59,7 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public String storeDatasets(Long examinationId, String filename,
+    public String storeExtraData(Long examinationId, String filename,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
         String directory = "examination-" + examinationId;
@@ -108,6 +108,11 @@ public class S3StorageService implements StorageService {
     @Override
     public void deleteDirectoryDatasets(String directory) throws StorageException {
         deleteDirectoryFromBucket(datasetsBucket, directory);
+    }
+
+    @Override
+    public void deleteDirectoryExtraData(Long examinationId) throws StorageException {
+        deleteDirectoryFromBucket(datasetsBucket, "examination-" + examinationId);
     }
 
     @Override
