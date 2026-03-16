@@ -103,12 +103,12 @@ front.server:
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
 storage:
-  type: filesystem # or "s3"
+  type: file-system # or "s3"
   file-system:
     studies-data: /var/studies-data
     bids-data: /var/datasets-data/bids-data # only temporary, not in S3
   s3:
-    bucket-name: shanoir-data-bucket
+    bucket-name-studies: bucket-name-studies
 
 # logging configuration
 logging:

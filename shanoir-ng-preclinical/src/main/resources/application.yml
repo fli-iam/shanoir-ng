@@ -20,8 +20,13 @@ server:
       enabled: false
 ##### Database #####
 spring:
-  config:
-    import: "classpath:/shanoir-shared.yml"
+  cloud:
+    aws:
+      s3:
+        region: eu-west-1
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
   datasource:
     url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/preclinical?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: preclinical
@@ -98,11 +103,15 @@ logging:
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
-#Upload Extradata
-preclinical:
-  uploadExtradataFolder: /var/extra-data
-  uploadBrukerFolder: /tmp/
-  separator: /
+
+storage:
+  type: file-system # or "s3"
+  file-system:
+    uploadExtradataFolder: /var/extra-data
+    uploadBrukerFolder: /tmp/
+    separator: /
+  s3:
+    bucket-name-datasets: bucket-name-datasets
 
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #

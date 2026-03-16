@@ -36,14 +36,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>shanoir-ng-ms-common</artifactId>
 			<version>3.4.0</version>
 		</dependency>
+        <dependency>
+            <groupId>org.shanoir-ng</groupId>
+            <artifactId>shanoir-ng-storage</artifactId>
+            <version>3.4.0</version>
+        </dependency>
 
-		<!-- SpringFox Swagger UI -->
+        <!-- SpringFox Swagger UI -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-joda</artifactId>
 		</dependency>
 
-		<!-- AMQP -->
+        <!-- AMQP -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -55,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<version>2.10.10</version>
 		</dependency>
 
-		<!-- Apache common collection utils -->
+        <!-- Apache common collection utils -->
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
@@ -65,7 +70,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<build>
 		<plugins>
-			<!-- Package shanoir-ng-preclinical.jar as Spring Boot executable: Avoid
+            <!-- Package shanoir-ng-preclinical.jar as Spring Boot executable: Avoid
 				error: no main manifest attribute, in /shanoir-ng-preclinical.jar -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -83,7 +88,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Copy shanoir-ng-preclinical.jar for docker-compose up running -->
+            <!-- Copy shanoir-ng-preclinical.jar for docker-compose up running -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>

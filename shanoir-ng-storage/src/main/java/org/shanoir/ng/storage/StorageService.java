@@ -20,18 +20,28 @@ import org.springframework.core.io.Resource;
 
 public interface StorageService {
 
-    void store(String directory, String filename,
+    String storeDatasets(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException;
 
-    Resource load(String directory, String filename) throws StorageException;
+    Resource loadDatasets(String directory, String fileName) throws StorageException;
 
-    String getPublicLocation(String directory, String filename) throws StorageException;
+    Resource loadStudies(String directory, String fileName) throws StorageException;
 
-    void delete(String directory, String filename) throws StorageException;
+    String getPublicLocationDatasets(String directory, String fileName) throws StorageException;
 
-    void deleteDirectory(String directory) throws StorageException;
+    String getPublicLocationStudies(String directory, String fileName) throws StorageException;
 
-    void move(String directory, String sourceFilename, String targetFilename) throws StorageException;
+    void deleteDatasets(String directory, String fileName) throws StorageException;
+
+    void deleteStudies(String directory, String fileName) throws StorageException;
+
+    void deleteDirectoryDatasets(String directory) throws StorageException;
+
+    void deleteDirectoryStudies(String directory) throws StorageException;
+
+    void moveDatasets(String directory, String sourceFileName, String targetFileName) throws StorageException;
+
+    void moveStudies(String directory, String sourceFileName, String targetFileName) throws StorageException;
 
 }

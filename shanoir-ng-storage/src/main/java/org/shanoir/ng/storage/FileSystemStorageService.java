@@ -32,32 +32,52 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 @Service
-@ConditionalOnProperty(name = "storage.type", havingValue = "filesystem", matchIfMissing = true)
+@ConditionalOnProperty(name = "storage.type", havingValue = "file-system", matchIfMissing = true)
 public class FileSystemStorageService implements StorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemStorageService.class);
 
     @Value("${storage.file-system.studies-data}")
-    private String baseDir;
+    private String baseDirStudies;
+
+    @Value("${storage.file-system.datasets-data}")
+    private String baseDirDatasets;
 
     @Override
-    public void store(String directory, String filename,
-                      InputStream inputStream, String contentType, long size)
+    public String storeDatasets(Long examinationId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        String directory = "/examination-" + examinationId + "/";
+        return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
+    }
+
+    private String store(String baseDir, String directory, String fileName,
+            InputStream inputStream, String contentType, long size)
             throws StorageException {
         try {
             Path dirPath = Paths.get(baseDir, directory);
             Files.createDirectories(dirPath);
-            Path filePath = dirPath.resolve(filename);
+            Path filePath = dirPath.resolve(fileName);
             LOG.info("Storing file at: {}", filePath);
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+            return filePath.toString();
         } catch (IOException e) {
-            throw new StorageException("Failed to store file " + filename, e);
+            throw new StorageException("Failed to store file " + fileName, e);
         }
     }
 
     @Override
-    public Resource load(String directory, String filename) throws StorageException {
-        Path filePath = Paths.get(baseDir, directory, filename);
+    public Resource loadDatasets(String directory, String fileName) throws StorageException {
+        return load(baseDirDatasets, directory, fileName);
+    }
+
+    @Override
+    public Resource loadStudies(String directory, String fileName) throws StorageException {
+        return load(baseDirStudies, directory, fileName);
+    }
+
+    private Resource load(String baseDir, String directory, String fileName) throws StorageException {
+        Path filePath = Paths.get(baseDir, directory, fileName);
         Resource resource = new FileSystemResource(filePath);
         if (!resource.exists()) {
             throw new StorageException("File not found: " + filePath, null);
@@ -66,21 +86,44 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public String getPublicLocation(String directory, String filename) throws StorageException {
-        return Paths.get(baseDir, directory, filename).toUri().toString();
+    public String getPublicLocationDatasets(String directory, String fileName) throws StorageException {
+        return Paths.get(baseDirDatasets, directory, fileName).toUri().toString();
     }
 
     @Override
-    public void delete(String directory, String filename) throws StorageException {
+    public String getPublicLocationStudies(String directory, String fileName) throws StorageException {
+        return Paths.get(baseDirStudies, directory, fileName).toUri().toString();
+    }
+
+    @Override
+    public void deleteDatasets(String directory, String fileName) throws StorageException {
+        delete(baseDirDatasets, directory, fileName);
+    }
+
+    @Override
+    public void deleteStudies(String directory, String fileName) throws StorageException {
+        delete(baseDirStudies, directory, fileName);
+    }
+
+    private void delete(String baseDir, String directory, String fileName) throws StorageException {
         try {
-            Files.deleteIfExists(Paths.get(baseDir, directory, filename));
+            Files.deleteIfExists(Paths.get(baseDir, directory, fileName));
         } catch (IOException e) {
-            throw new StorageException("Failed to delete file " + filename, e);
+            throw new StorageException("Failed to delete file " + fileName, e);
         }
     }
 
     @Override
-    public void deleteDirectory(String directory) throws StorageException {
+    public void deleteDirectoryDatasets(String directory) throws StorageException {
+        deleteDirectory(baseDirDatasets, directory);
+    }
+
+    @Override
+    public void deleteDirectoryStudies(String directory) throws StorageException {
+        deleteDirectory(baseDirStudies, directory);
+    }
+
+    private void deleteDirectory(String baseDir, String directory) throws StorageException {
         Path dirPath = Paths.get(baseDir, directory);
         if (!Files.exists(dirPath))
             return;
@@ -100,15 +143,26 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public void move(String directory, String sourceFilename, String targetFilename)
+    public void moveDatasets(String directory, String sourceFileName, String targetFileName)
+            throws StorageException {
+        move(baseDirDatasets, directory, sourceFileName, targetFileName);
+    }
+
+    @Override
+    public void moveStudies(String directory, String sourceFileName, String targetFileName)
+            throws StorageException {
+        move(baseDirStudies, directory, sourceFileName, targetFileName);
+    }
+
+    private void move(String baseDir, String directory, String sourceFileName, String targetFileName)
             throws StorageException {
         try {
-            Path source = Paths.get(baseDir, directory, sourceFilename);
-            Path target = Paths.get(baseDir, directory, targetFilename);
+            Path source = Paths.get(baseDir, directory, sourceFileName);
+            Path target = Paths.get(baseDir, directory, targetFileName);
             Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
             LOG.info("Moved file from {} to {}", source, target);
         } catch (IOException e) {
-            throw new StorageException("Failed to move " + sourceFilename + " -> " + targetFilename, e);
+            throw new StorageException("Failed to move " + sourceFileName + " -> " + targetFileName, e);
         }
     }
 

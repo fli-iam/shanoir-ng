@@ -108,13 +108,13 @@ front.server:
 solr.host: http://${SHANOIR_PREFIX}solr:8983/solr/shanoir
 
 storage:
-  type: filesystem # or "s3"
+  type: file-system # or "s3"
   file-system:
     datasets-data: /var/datasets-data
     bids-data: /var/datasets-data/bids-data # only temporary, not in S3
     vip-data: /var/datasets-data/vip-data # only temporary, not in S3
   s3:
-    bucket-name: shanoir-data-bucket
+    bucket-name-datasets: bucket-name-datasets
 
 # logging configuration
 logging:
