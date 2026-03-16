@@ -18,17 +18,31 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>org.shanoir-ng</groupId>
-		<artifactId>shanoir-ng-back</artifactId>
-		<version>3.4.0</version>
-		<relativePath>../shanoir-ng-back</relativePath>
-	</parent>
-
-	<artifactId>shanoir-ng-ms-common</artifactId>
+    <groupId>org.shanoir-ng</groupId>
+    <artifactId>shanoir-ng-storage</artifactId>
+    <version>3.4.0</version>
 	<packaging>jar</packaging>
 
-	<name>shanoir-ng-ms-common</name>
-	<description>Shanoir microservices common project</description>
+	<name>shanoir-ng-storage</name>
+	<description>Shanoir persistent storage: file system or S3</description>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.awspring.cloud</groupId>
+                <artifactId>spring-cloud-aws-dependencies</artifactId>
+                <version>3.1.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.awspring.cloud</groupId>
+            <artifactId>spring-cloud-aws-starter-s3</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

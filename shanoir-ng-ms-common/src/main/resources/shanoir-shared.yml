@@ -1,17 +1,3 @@
-spring:
-  cloud:
-    aws:
-      s3:
-        region: eu-west-1
-      credentials:
-        access-key: ${AWS_ACCESS_KEY_ID}
-        secret-key: ${AWS_SECRET_ACCESS_KEY}
-storage:
-  type: filesystem # or "s3"
-  file-system:
-    studies-data: /var/studies-data
-  s3:
-    bucket-name: studies-data-bucket
 shanoir:
   import:
     # In a dicom file. Format "tag==value;" If it is not needed to separate image files into separated folders for a dicom serie.

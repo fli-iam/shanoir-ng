@@ -20,6 +20,13 @@ server:
       enabled: false
 ##### Database #####
 spring:
+  cloud:
+    aws:
+      s3:
+        region: eu-west-1
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
   config:
     import: "classpath:/shanoir-shared.yml"
   datasource:
@@ -99,10 +106,16 @@ front.server:
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
 solr.host: http://${SHANOIR_PREFIX}solr:8983/solr/shanoir
-# Data folder configuration
-datasets-data: /var/datasets-data
-vip-data-folder: /var/datasets-data/vip-data
-bids-data-folder: /var/datasets-data/bids-data
+
+storage:
+  type: filesystem # or "s3"
+  file-system:
+    datasets-data: /var/datasets-data
+    bids-data: /var/datasets-data/bids-data # only temporary, not in S3
+    vip-data: /var/datasets-data/vip-data # only temporary, not in S3
+  s3:
+    bucket-name: shanoir-data-bucket
+
 # logging configuration
 logging:
   pattern:
@@ -196,10 +209,8 @@ keycloak:
   auth-server-url: https://shanoir-ng-nginx/auth
 dcm4chee-arc:
   host: dcm4chee-arc
-# Data folder configuration
-datasets-data: /var/datasets-data
-vip-data-folder: /var/datasets-data/vip-data
-bids-data-folder: /var/datasets-data/bids-data
+
+
 # logging configuration
 logging:
   file:

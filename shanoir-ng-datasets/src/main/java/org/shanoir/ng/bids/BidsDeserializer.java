@@ -37,7 +37,7 @@ import org.springframework.util.CollectionUtils;
 @Component
 public class BidsDeserializer {
 
-    @Value("${bids-data-folder}")
+    @Value("${storage.file-system.bids-data}")
     private String bidsStorageDir;
 
     public BidsElement deserialize(File studyFile) throws IOException {

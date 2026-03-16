@@ -51,7 +51,7 @@ public class BIDSServiceImpl implements BIDSService {
     @Autowired
     private StudyRepository studyRepository;
 
-    @Value("${bids-data-folder}")
+    @Value("${storage.file-system.bids-data}")
     private String bidsStorageDir;
 
     @Autowired

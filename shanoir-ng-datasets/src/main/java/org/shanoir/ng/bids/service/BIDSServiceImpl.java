@@ -119,7 +119,7 @@ public class BIDSServiceImpl implements BIDSService {
         NATURE_MAP = Collections.unmodifiableMap(aMap);
     }
 
-    @Value("${bids-data-folder}")
+    @Value("${storage.file-system.bids-data}")
     private String bidsStorageDir;
 
     @Autowired
