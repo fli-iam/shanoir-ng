@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -117,6 +118,8 @@ public class SubjectServiceImpl implements SubjectService {
         }
         // Delete all associated study_examination
         studyExaminationRepository.deleteBySubjectId(id);
+        subject.get().getTags().clear();
+        subjectRepository.deleteSubjectStudyTagsBySubjectId(id);
         subjectRepository.deleteById(id);
         if (subject.get().isPreclinical())
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
@@ -192,13 +195,13 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     @Transactional
     public Subject create(Subject subject, boolean withAMQP) throws ShanoirException {
+        subject = mapSubjectStudyListToSubject(subject);
+        Subject subjectDb;
         try {
-            subject = mapSubjectStudyListToSubject(subject);
-        } catch (ShanoirException e) {
-            throw e;
+            subjectDb = subjectRepository.save(subject);
+        } catch (DataIntegrityViolationException e) {
+            throw new ShanoirException("Subject with the same name already exists in the study.", HttpStatus.CONFLICT.value());
         }
-
-        Subject subjectDb = subjectRepository.save(subject);
         LOG.info("New subject created with ID: {} and Name: {}", subjectDb.getId(), subjectDb.getName());
         if (withAMQP) {
             try {

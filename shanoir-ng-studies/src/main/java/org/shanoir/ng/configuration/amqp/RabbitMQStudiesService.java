@@ -174,7 +174,8 @@ public class RabbitMQStudiesService {
     public void linkExaminations(final String eventStr) {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
-            StudyExaminationsDTO examinations = mapper.readValue(eventStr, new TypeReference<StudyExaminationsDTO>() { });
+            ShanoirEvent event =  mapper.readValue(eventStr, ShanoirEvent.class);
+            StudyExaminationsDTO examinations = mapper.readValue(event.getMessage(), StudyExaminationsDTO.class);
             studyService.addExaminationsToStudy(examinations.getExaminations(), examinations.getStudyId());
         } catch (Exception e) {
             LOG.error("Could not index examinations on given study ", e);

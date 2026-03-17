@@ -78,7 +78,6 @@ public class StudyExaminationBulkRepositoryImpl implements StudyExaminationBulkR
                 AND se.examination_id = v.examination_id
                 WHERE se.id IS NULL
                 """);
-
         jdbcTemplate.update(sql.toString(), params.toArray());
     }
 }

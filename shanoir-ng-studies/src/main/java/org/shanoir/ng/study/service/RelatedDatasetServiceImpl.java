@@ -48,7 +48,6 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -91,7 +90,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
 
     @Override
-    @Transactional
     public Long copyData(CopyData copyData) throws ShanoirException {
         ShanoirEvent event = new ShanoirEvent(
                 ShanoirEventType.COPY_DATASET_EVENT,

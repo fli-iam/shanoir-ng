@@ -56,6 +56,7 @@ import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
@@ -343,7 +344,15 @@ public class RabbitMQDatasetsService {
             }
 
             // Delete subject from datasets database
-            subjectRepository.deleteById(subjectId);
+            Subject subject = subjectRepository.findById(subjectId).orElse(null);
+            if (subject != null) {
+                for (Tag tag : subject.getTags()) {
+                    tag.getSubjects().remove(subject);
+                }
+                subject.getTags().clear();
+                subjectRepository.save(subject);
+                subjectRepository.delete(subject);
+            }
 
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the event. {}", e.getMessage());

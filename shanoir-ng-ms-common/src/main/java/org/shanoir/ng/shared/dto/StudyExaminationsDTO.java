@@ -43,6 +43,15 @@ public class StudyExaminationsDTO {
     }
 
     public void addExam(Long examinationId, Long centerId, Long subjectId) {
+        // first check if exist
+        for (StudyExaminationDTO exam : examinations) {
+            if (exam.getExaminationId().equals(examinationId)
+                    && exam.getCenterId().equals(centerId)
+                    && exam.getSubjectId().equals(subjectId)) {
+                return;
+            }
+        }
+        // else add it
         StudyExaminationDTO exam = new StudyExaminationDTO();
         exam.setExaminationId(examinationId);
         exam.setCenterId(centerId);
@@ -50,7 +59,7 @@ public class StudyExaminationsDTO {
         examinations.add(exam);
     }
 
-    public class StudyExaminationDTO {
+    public static class StudyExaminationDTO {
 
         private Long examinationId;
         private Long centerId;
