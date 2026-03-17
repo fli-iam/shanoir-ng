@@ -136,7 +136,7 @@ public class WADODownloaderService {
         this.webClient = webClientBuilder
                 .codecs(configurer -> configurer
                         .defaultCodecs()
-                        .maxInMemorySize(16 * 1024 * 1024)) // 16MB buffer for large DICOM files
+                        .maxInMemorySize(500 * 1024 * 1024)) // 500MB buffer for large DICOM files
                 .build();
     }
 
