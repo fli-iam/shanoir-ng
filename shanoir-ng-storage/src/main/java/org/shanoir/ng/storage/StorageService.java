@@ -48,7 +48,7 @@ public interface StorageService {
 
     void deleteExtraData(Long examinationId, String fileName) throws StorageException;
 
-    void deleteStudies(String directory, String fileName) throws StorageException;
+    void deleteStudyFile(Long studyId, String fileName) throws StorageException;
 
     void deleteDirectoryDatasets(String directory) throws StorageException;
 
@@ -58,6 +58,6 @@ public interface StorageService {
 
     void moveDatasets(String directory, String sourceFileName, String targetFileName) throws StorageException;
 
-    void moveStudies(String directory, String sourceFileName, String targetFileName) throws StorageException;
+    void moveStudyFile(Long studyId, String sourceFileName, String targetFileName) throws StorageException;
 
 }

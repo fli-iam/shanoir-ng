@@ -198,7 +198,8 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public void deleteStudies(String directory, String fileName) throws StorageException {
+    public void deleteStudyFile(Long studyId, String fileName) throws StorageException {
+        String directory = STUDY + studyId;
         try {
             s3Client.deleteObject(DeleteObjectRequest.builder()
                     .bucket(studiesBucket)
@@ -216,9 +217,10 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public void moveStudies(String directory, String sourceFilename, String targetFileName)
+    public void moveStudyFile(Long studyId, String sourceFileName, String targetFileName)
             throws StorageException {
-        moveInBucket(studiesBucket, directory, sourceFilename, targetFileName);
+        String directory = STUDY + studyId;
+        moveInBucket(studiesBucket, directory, sourceFileName, targetFileName);
     }
 
     private void moveInBucket(String bucket, String directory,

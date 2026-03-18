@@ -133,7 +133,8 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public void deleteStudies(String directory, String fileName) throws StorageException {
+    public void deleteStudyFile(Long studyId, String fileName) throws StorageException {
+        String directory = STUDY + studyId;
         delete(baseDirStudies, directory, fileName);
     }
 
@@ -187,8 +188,9 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public void moveStudies(String directory, String sourceFileName, String targetFileName)
+    public void moveStudyFile(Long studyId, String sourceFileName, String targetFileName)
             throws StorageException {
+        String directory = STUDY + studyId;
         move(baseDirStudies, directory, sourceFileName, targetFileName);
     }
 
