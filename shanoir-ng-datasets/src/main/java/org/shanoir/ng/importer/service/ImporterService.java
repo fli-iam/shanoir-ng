@@ -223,79 +223,80 @@ public class ImporterService {
 
     private Set<DatasetAcquisition> generateAcquisitions(Examination examination, ImportJob importJob, ShanoirEvent event) throws Exception {
         StudyCard studyCard = getStudyCard(importJob);
-        List<QualityCard> qualitycards = qualityCardService.findByStudy(examination.getStudyId());
+        List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());
+        boolean hasQualityCards = qualityCards != null && !qualityCards.isEmpty();
+        boolean isFromShanoirUploader = importJob.isFromShanoirUploader();
         Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
         int rank = 0;
-        for (Patient patient : importJob.getPatients()) {
-            for (Study study : patient.getStudies()) {
-                float progress = 0.5f;
-                for (Serie serie : study.getSelectedSeries()) {
-                    // get dicomAttributes
-                    AcquisitionAttributes<String> dicomAttributes = null;
-                    try {
-                        dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serie);
-                    } catch (PacsException e) {
-                        throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
-                    }
 
-                    manageStudyInstanceUIDs(examination, importJob, dicomAttributes);
+        // We use flatMap to get all selected series from all patients and studies in the import job
+        // as for now each importJob contains only one patient
+        List<Serie> selectedSeries = importJob.getPatients().stream()
+            .flatMap(patient -> patient.getStudies().stream())
+            .flatMap(study -> study.getSelectedSeries().stream())
+            .toList();
 
-                    // Generate acquisition object with all sub objects : datasets, protocols, expressions, ...
-                    DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob, dicomAttributes);
+        int totalSeries = selectedSeries.size();
 
-                    // apply study card if needed
-                    if (studyCard != null) {
-                        importJob.setStudyCardName(studyCard.getName());
-                        studyCard.apply(acquisition, dicomAttributes);
-                    }
+        QualityCardResult shUpQualityResult = null;
+        if (hasQualityCards && isFromShanoirUploader) {
+            shUpQualityResult = qualityService.retrieveQualityCardResult(importJob);
+            if (!shUpQualityResult.isEmpty()) {
+                LOG.info("Quality control result retrieved from ShanoirUploader for examination {}.", importJob.getExaminationId());
+            }
+        }
 
-                    // apply quality card if needed
-                    if (qualitycards != null && !qualitycards.isEmpty()) {
-                        QualityCardResult qualityResult;
-                        
-                        // If import comes from ShanoirUploader, the check quality at import has already been done
-                        if (!importJob.isFromShanoirUploader()) {
-                            LOG.info("Checking quality at import for examination : " + importJob.getExaminationId() 
-                            + " on dataset acquisition : " + dicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesDescription) 
-                            + " with quality cards : " + qualitycards.stream().map(QualityCard::getName).toList() + ".");
-                            
-                            qualityResult = qualityService.checkQuality(acquisition, null, dicomAttributes, qualitycards);
-                        } else {
-                            // We retrieve quality card result from ShUp import job
-                            qualityResult = qualityService.retrieveQualityCardResult(importJob);
-                            if (!qualityResult.isEmpty()) {
-                                LOG.info("Quality control result retrieved from ShanoirUploader for examination {}.", importJob.getExaminationId());
-                            } 
-                        }
-                        // Has quality check passed ?
-                        if (qualityResult != null) {
-                            if (qualityResult.hasError()) {
-                                // We unselect the serie to avoid importing its data into the pacs
-                                serie.setSelected(false);
-                                // event.setReport(qualityResult.toString()); ???
-                                // throw new QualityException(acquisition, qualityResult);
-                            } else if (qualityResult.hasWarning() || qualityResult.hasFailedValid()) {
-                                event.setReport(qualityResult.toString());
-                            } 
-                            // add tag to dataset acquisition
-                            acquisition.setQualityTag(qualityResult.hasError() ? QualityTag.ERROR : qualityResult.hasWarning() ? QualityTag.WARNING : qualityResult.hasFailedValid() ? null : QualityTag.VALID);
-                        }
-                    }
+        final QualityCardResult finalShUpQualityResult = shUpQualityResult;
 
-                    // add acq to collection only if quality tag is not ERROR in case quality check was done at import
-                    if (acquisition != null) {
-                        if (acquisition.getQualityTag() != null && QualityTag.ERROR.equals(acquisition.getQualityTag())) {
-                            LOG.info("Dataset acquisition for serie instance UID {} has quality tag ERROR, it will not be imported.", acquisition.getSeriesInstanceUID());
-                        } else {
-                            generatedAcquisitions.add(acquisition);
-                        }
-                    }
-                    rank++;
-                    progress += 0.25f / study.getSelectedSeries().size();
-                    event.setMessage("Generating Shanoir data from serie " + serie.getSeriesDescription() + " to examination " + importJob.getExaminationId());
-                    event.setProgress(progress);
-                    eventService.publishEvent(event);
+        for (Serie serie : selectedSeries) {
+            try {
+                // get dicomAttributes
+                AcquisitionAttributes<String> dicomAttributes;
+                try {
+                    dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serie);
+                } catch (PacsException e) {
+                    throw new ShanoirException("Unable to retrieve dicom attributes in file " 
+                        + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
                 }
+                manageStudyInstanceUIDs(examination, importJob, dicomAttributes);
+
+                // Generate acquisition object with all sub objects : datasets, protocols, expressions, ...
+                DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob, dicomAttributes);
+
+                if (acquisition == null) {
+                    continue; // skip study card and quality check if no acquisition generated for this serie
+                }
+
+                // apply study card if needed
+                if (studyCard != null) {
+                    importJob.setStudyCardName(studyCard.getName());
+                    studyCard.apply(acquisition, dicomAttributes);
+                }
+
+                // apply quality card if needed
+                if (hasQualityCards) {
+                    QualityCardResult qualityResult = isFromShanoirUploader
+                        ? finalShUpQualityResult
+                        : applyQualityCheck(acquisition, dicomAttributes, qualityCards, importJob);
+
+                    applyQualityResult(acquisition, serie, qualityResult, event);
+                }
+
+                // if quality tag is ERROR, we do not add the acquisition to the list of acquisitions to import into pacs
+                if (!QualityTag.ERROR.equals(acquisition.getQualityTag())) {
+                    generatedAcquisitions.add(acquisition);
+                } else {
+                    LOG.info("Dataset acquisition for serie instance UID {} has quality tag ERROR, it will not be imported.",
+                        acquisition.getSeriesInstanceUID());
+                }
+
+            } finally {
+                rank++;
+                event.setMessage("Generating Shanoir data from serie " 
+                    + serie.getSeriesDescription() 
+                    + " to examination " + importJob.getExaminationId());
+                event.setProgress(0.5f + (0.25f * rank / totalSeries));
+                eventService.publishEvent(event);
             }
         }
         return generatedAcquisitions;
@@ -344,6 +345,52 @@ public class ImporterService {
             LOG.warn("No studycard given for this import.");
             return null;
         }
+    }
+
+    /**
+     * Apply quality check to the acquisition and update its quality tag according to the result of the check. 
+     * If quality check is not passed, the acquisition will be tagged with ERROR and will not be imported into the pacs.
+     * @param acquisition
+     * @param dicomAttributes
+     * @param qualityCards
+     * @param importJob
+     * @return
+     * @throws ShanoirException 
+     */
+    private QualityCardResult applyQualityCheck(DatasetAcquisition acquisition, 
+        AcquisitionAttributes<String> dicomAttributes,
+        List<QualityCard> qualityCards, 
+        ImportJob importJob) throws ShanoirException {
+        LOG.info("Checking quality at import for examination : {} on dataset acquisition : {} with quality cards : {}.",
+            importJob.getExaminationId(),
+            dicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesDescription),
+            qualityCards.stream().map(QualityCard::getName).toList());
+        return qualityService.checkQuality(acquisition, dicomAttributes, qualityCards);
+    }
+
+    /**
+     * Apply the result of the quality check to the acquisition and update its quality tag.
+     * @param acquisition
+     * @param serie
+     * @param qualityResult
+     * @param event
+     */
+    private void applyQualityResult(DatasetAcquisition acquisition, Serie serie, 
+        QualityCardResult qualityResult, ShanoirEvent event) {
+        if (qualityResult == null) return;
+
+        if (qualityResult.hasError()) {
+            serie.setSelected(false);
+        } else if (qualityResult.hasWarning() || qualityResult.hasFailedValid()) {
+            event.setReport(qualityResult.toString());
+        }
+
+        acquisition.setQualityTag(
+            qualityResult.hasError()       ? QualityTag.ERROR :
+            qualityResult.hasWarning()     ? QualityTag.WARNING :
+            qualityResult.hasFailedValid() ? null :
+            QualityTag.VALID
+        );
     }
 
     /**

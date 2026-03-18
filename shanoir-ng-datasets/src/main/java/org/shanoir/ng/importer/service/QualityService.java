@@ -21,7 +21,6 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.importer.dto.ImportJob;
-import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
@@ -40,33 +39,29 @@ public class QualityService {
     private WADODownloaderService downloader;
 
 
-    public QualityCardResult checkQuality(DatasetAcquisition datasetAcquisition, Serie serie, AcquisitionAttributes<?> acquisitionAttributes, List<QualityCard> qualityCards) throws ShanoirException {
-        if (!hasQualityChecksAtImport(qualityCards)) {
+    public QualityCardResult checkQuality(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> acquisitionAttributes, List<QualityCard> qualityCards) throws ShanoirException {
+        if (qualityCards == null || qualityCards.isEmpty()) {
+            LOG.warn("No qualitycard given for this import.");
             return null;
         }
+
+        List<QualityCard> cardsToCheck = qualityCards.stream()
+            .filter(QualityCard::isToCheckAtImport)
+            .toList();
+
+        if (cardsToCheck.isEmpty()) {
+            return null;
+        }
+        
         QualityCardResult qualityResult = new QualityCardResult();
-        for (QualityCard qualityCard : qualityCards) {
+        for (QualityCard qualityCard : cardsToCheck) {
             // In case multiple quality cards are used with different roles, we check them all
-            if (qualityCard.isToCheckAtImport()) {
-                qualityResult.merge(qualityCard.apply(datasetAcquisition, acquisitionAttributes, downloader));
-            }
+            qualityResult.merge(qualityCard.apply(datasetAcquisition, acquisitionAttributes, downloader));
         }
         return qualityResult;
     }
 
-    public boolean hasQualityChecksAtImport(List<QualityCard> qualityCards) {
-        if (qualityCards == null || qualityCards.isEmpty()) {
-            LOG.warn("No qualitycard given for this import.");
-            return false;
-        }
-        for (QualityCard qualityCard : qualityCards) {
-            if (qualityCard.isToCheckAtImport()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    // TODO : QualityCardResult should be stored in ImportJob and not only returned by this method
     public QualityCardResult retrieveQualityCardResult(ImportJob importJob) {
         if (importJob.getQualityTag() == null) {
             return new QualityCardResult();

@@ -17,6 +17,7 @@ package org.shanoir.ng.studycard.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -139,7 +140,7 @@ public class CardsProcessingService {
 
         Study study = studyService.findById(qualityCard.getStudyId());
         if (study == null) throw new IllegalArgumentException("study can't be null");
-        if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and qualityCard study ids don't match");
+        if (!Objects.equals(qualityCard.getStudyId(), study.getId())) throw new IllegalStateException("study and qualityCard study ids don't match");
 
         if (CollectionUtils.isEmpty(qualityCard.getRules())) {
             event.setStatus(-1);
