@@ -106,9 +106,11 @@ storage:
   type: file-system # or "s3"
   file-system:
     studies-data: /var/studies-data
+    datasets-data: /var/datasets-data
     bids-data: /var/datasets-data/bids-data # only temporary, not in S3
   s3:
     bucket-name-studies: bucket-name-studies
+    bucket-name-datasets: bucket-name-datasets
 
 # logging configuration
 logging:
