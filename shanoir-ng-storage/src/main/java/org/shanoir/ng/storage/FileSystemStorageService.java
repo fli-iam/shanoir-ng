@@ -47,7 +47,7 @@ public class FileSystemStorageService implements StorageService {
     public String storeExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
-        String directory = "/examination-" + examinationId + "/";
+        String directory = EXAMINATION + examinationId + "/";
         return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
     }
 
@@ -86,6 +86,19 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException {
+        try {
+            Path filePath = Paths.get(baseDirDatasets, EXAMINATION + examinationId, fileName);
+            if (!Files.exists(filePath)) {
+                return 0L;
+            }
+            return Files.size(filePath);
+        } catch (IOException e) {
+            throw new StorageException("Failed to get size of file: " + fileName, e);
+        }
+    }
+
+    @Override
     public String getPublicLocationDatasets(String directory, String fileName) throws StorageException {
         return Paths.get(baseDirDatasets, directory, fileName).toUri().toString();
     }
@@ -98,6 +111,11 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public void deleteDatasets(String directory, String fileName) throws StorageException {
         delete(baseDirDatasets, directory, fileName);
+    }
+
+    @Override
+    public void deleteExtraData(Long examinationId, String fileName) throws StorageException {
+        delete(baseDirDatasets, EXAMINATION + examinationId, fileName);
     }
 
     @Override
@@ -125,7 +143,7 @@ public class FileSystemStorageService implements StorageService {
 
     @Override
     public void deleteDirectoryExtraData(Long examinationId) throws StorageException {
-        deleteDirectoryDatasets("examination-" + examinationId);
+        deleteDirectoryDatasets(EXAMINATION + examinationId);
     }
 
     private void deleteDirectory(String baseDir, String directory) throws StorageException {

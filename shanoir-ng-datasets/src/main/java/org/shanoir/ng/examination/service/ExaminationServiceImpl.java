@@ -15,9 +15,10 @@
 package org.shanoir.ng.examination.service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -47,12 +47,13 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.SecurityService;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
@@ -100,14 +101,15 @@ public class ExaminationServiceImpl implements ExaminationService {
 
     @Autowired
     private ObjectMapper objectMapper;
-    @Value("${datasets-data}")
-    private String dataDir;
 
     @Autowired
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Autowired
     private DICOMWebService dicomWebService;
+
+    @Autowired
+    private StorageService storageService;
 
     @Override
     public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
@@ -164,15 +166,10 @@ public class ExaminationServiceImpl implements ExaminationService {
     @Transactional
     public void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event) {
         try {
-            String dataPath = getExtraDataFilePath(examinationId, "");
-            File fileToDelete = new File(dataPath);
-            if (fileToDelete.exists()) {
-                FileUtils.deleteDirectory(fileToDelete);
-            }
+            storageService.deleteDirectoryExtraData(examinationId);
             deleteById(examinationId, event);
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, objectMapper.writeValueAsString(event));
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
-
         } catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("Error during deletion of examination with id : " + examinationId);
@@ -263,7 +260,7 @@ public class ExaminationServiceImpl implements ExaminationService {
     }
 
     @Override
-    public Examination update(final Examination examination) throws EntityNotFoundException, ShanoirException {
+    public Examination update(final Examination examination) throws EntityNotFoundException, ShanoirException, StorageException {
         final Examination examinationDb = examinationRepository.findById(examination.getId()).orElse(null);
         if (examinationDb == null) {
             throw new EntityNotFoundException(Examination.class, examination.getId());
@@ -289,15 +286,14 @@ public class ExaminationServiceImpl implements ExaminationService {
      * @param examinationDb examination found in database.
      * @param examination examination with new values.
      * @return database examination with new values.
+     * @throws StorageException
      */
-    private Examination updateExaminationValues(final Examination examinationDb, final Examination examination) {
+    private Examination updateExaminationValues(final Examination examinationDb, final Examination examination) throws StorageException {
         // Update extra data paths => delete files not present anymore
         if (examinationDb.getExtraDataFilePathList() != null) {
             for (String filePath : examinationDb.getExtraDataFilePathList()) {
                 if (!examination.getExtraDataFilePathList().contains(filePath)) {
-                    // Delete file
-                    String filePathToDelete = getExtraDataFilePath(examinationDb.getId(), filePath);
-                    FileUtils.deleteQuietly(new File(filePathToDelete));
+                    storageService.deleteExtraData(examination.getId(), filePath);
                 }
             }
         }
@@ -335,17 +331,12 @@ public class ExaminationServiceImpl implements ExaminationService {
     }
 
     @Override
-    public Long getExtraDataSizeByStudyId(Long studyId) {
-
+    public Long getExtraDataSizeByStudyId(Long studyId) throws StorageException {
         List<Examination> exams = this.findByStudyId(studyId);
-
         long size = 0L;
         for (Examination exam : exams) {
             for (String path : exam.getExtraDataFilePathList()) {
-                File f = new File(this.getExtraDataFilePath(exam.getId(), path));
-                if (f.exists()) {
-                    size += f.length();
-                }
+                size += storageService.getFileSizeExtraData(exam.getId(), path);
             }
         }
         return size;
@@ -353,45 +344,35 @@ public class ExaminationServiceImpl implements ExaminationService {
 
     @Override
     public String addExtraData(final Long examinationId, final MultipartFile file) {
-        String filePath = getExtraDataFilePath(examinationId, file.getOriginalFilename());
-        File fileToCreate = new File(filePath);
-        fileToCreate.getParentFile().mkdirs();
         try {
-            LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
-            file.transferTo(new File(filePath));
+            LOG.info("Saving file {} for examination: {}", file.getOriginalFilename(), examinationId);
+            return storageService.storeExtraData(
+                    examinationId,
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getContentType(),
+                    file.getSize());
         } catch (Exception e) {
-            LOG.error("Error while loading files on examination: {}. File not uploaded. {}", examinationId, e);
-            e.printStackTrace();
+            LOG.error("Error while uploading file {} for examination: {}. File not uploaded. {}",
+                    file.getOriginalFilename(), examinationId, e);
             return null;
         }
-        return filePath;
     }
 
     @Override
     public String addExtraDataFromFile(final Long examinationId, final File file) {
-        String filePath = getExtraDataFilePath(examinationId, file.getName());
-        File fileToCreate = new File(filePath);
-        fileToCreate.getParentFile().mkdirs();
         try {
-            LOG.info("Saving file {} to destination: {}", file.getName(), filePath);
-            Files.copy(Path.of(file.getAbsolutePath()), Path.of(filePath));
+            LOG.info("Saving file {} for examination: {}", file.getName(), examinationId);
+            try (InputStream inputStream = new FileInputStream(file)) {
+                return storageService.storeExtraData(examinationId, file.getName(), inputStream,
+                        Files.probeContentType(file.toPath()), // detect MIME type from file
+                        file.length());
+            }
         } catch (Exception e) {
-            LOG.error("Error while loading files on examination: {}. File not uploaded. {}", examinationId, e);
-            e.printStackTrace();
+            LOG.error("Error while uploading file {} for examination: {}. File not uploaded. {}",
+                    file.getName(), examinationId, e);
             return null;
         }
-        return filePath;
-    }
-
-    /**
-     * Gets the extra data file path
-     * @param examinationId id of the examination
-     * @param fileName name of the file
-     * @return the file path of the file
-     */
-    @Override
-    public String getExtraDataFilePath(Long examinationId, String fileName) {
-        return dataDir + "/examination-" + examinationId + "/" + fileName;
     }
 
 }

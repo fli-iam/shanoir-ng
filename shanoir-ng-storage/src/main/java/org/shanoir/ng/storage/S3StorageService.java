@@ -33,8 +33,11 @@ import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 
 @Service
@@ -59,49 +62,77 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public String storeExtraData(Long examinationId, String filename,
+    public String storeExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
-        String directory = "examination-" + examinationId;
-        String key = directory + "/" + filename;
+        String directory = EXAMINATION + examinationId;
+        String key = directory + "/" + fileName;
         try {
             s3Template.upload(datasetsBucket, key, inputStream,
                     ObjectMetadata.builder().contentType(contentType).build());
             LOG.info("Stored dataset file to S3: s3://{}/{}", datasetsBucket, key);
-            return getPublicLocationDatasets(directory, filename);
+            return getPublicLocationDatasets(directory, fileName);
         } catch (Exception e) {
-            throw new StorageException("S3 upload failed for: " + filename, e);
+            throw new StorageException("S3 upload failed for: " + fileName, e);
         }
     }
 
     @Override
-    public Resource loadDatasets(String directory, String filename) throws StorageException {
+    public Resource loadDatasets(String directory, String fileName) throws StorageException {
         try {
-            return s3Template.download(datasetsBucket, directory + "/" + filename);
+            return s3Template.download(datasetsBucket, directory + "/" + fileName);
         } catch (Exception e) {
-            throw new StorageException("S3 download failed for: " + filename, e);
+            throw new StorageException("S3 download failed for: " + fileName, e);
         }
     }
 
     @Override
-    public String getPublicLocationDatasets(String directory, String filename) throws StorageException {
+    public long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException {
+        String key = EXAMINATION + examinationId + "/" + fileName;
         try {
-            return s3Template.createSignedGetURL(datasetsBucket, directory + "/" + filename,
+            HeadObjectResponse metadata = s3Client.headObject(HeadObjectRequest.builder()
+                    .bucket(datasetsBucket)
+                    .key(key)
+                    .build());
+            return metadata.contentLength();
+        } catch (NoSuchKeyException e) {
+            return 0L;
+        } catch (Exception e) {
+            throw new StorageException("Failed to get S3 object size for: " + key, e);
+        }
+    }
+
+    @Override
+    public String getPublicLocationDatasets(String directory, String fileName) throws StorageException {
+        try {
+            return s3Template.createSignedGetURL(datasetsBucket, directory + "/" + fileName,
                     Duration.ofHours(1)).toString();
         } catch (Exception e) {
-            throw new StorageException("S3 pre-sign failed for: " + filename, e);
+            throw new StorageException("S3 pre-sign failed for: " + fileName, e);
         }
     }
 
     @Override
-    public void deleteDatasets(String directory, String filename) throws StorageException {
+    public void deleteDatasets(String directory, String fileName) throws StorageException {
         try {
             s3Client.deleteObject(DeleteObjectRequest.builder()
                     .bucket(datasetsBucket)
-                    .key(directory + "/" + filename)
+                    .key(directory + "/" + fileName)
                     .build());
         } catch (Exception e) {
-            throw new StorageException("Failed to delete dataset S3 object: " + filename, e);
+            throw new StorageException("Failed to delete dataset S3 object: " + fileName, e);
+        }
+    }
+
+    @Override
+    public void deleteExtraData(Long examinationId, String fileName) throws StorageException {
+        try {
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(datasetsBucket)
+                    .key(EXAMINATION + examinationId + "/" + fileName)
+                    .build());
+        } catch (Exception e) {
+            throw new StorageException("Failed to delete dataset S3 object: " + fileName, e);
         }
     }
 
@@ -116,39 +147,39 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public void moveDatasets(String directory, String sourceFilename, String targetFilename)
+    public void moveDatasets(String directory, String sourceFileName, String targetFileName)
             throws StorageException {
-        moveInBucket(datasetsBucket, directory, sourceFilename, targetFilename);
+        moveInBucket(datasetsBucket, directory, sourceFileName, targetFileName);
     }
 
     @Override
-    public Resource loadStudies(String directory, String filename) throws StorageException {
+    public Resource loadStudies(String directory, String fileName) throws StorageException {
         try {
-            return s3Template.download(studiesBucket, directory + "/" + filename);
+            return s3Template.download(studiesBucket, directory + "/" + fileName);
         } catch (Exception e) {
-            throw new StorageException("S3 download failed for: " + filename, e);
+            throw new StorageException("S3 download failed for: " + fileName, e);
         }
     }
 
     @Override
-    public String getPublicLocationStudies(String directory, String filename) throws StorageException {
+    public String getPublicLocationStudies(String directory, String fileName) throws StorageException {
         try {
-            return s3Template.createSignedGetURL(studiesBucket, directory + "/" + filename,
+            return s3Template.createSignedGetURL(studiesBucket, directory + "/" + fileName,
                     Duration.ofHours(1)).toString();
         } catch (Exception e) {
-            throw new StorageException("S3 pre-sign failed for: " + filename, e);
+            throw new StorageException("S3 pre-sign failed for: " + fileName, e);
         }
     }
 
     @Override
-    public void deleteStudies(String directory, String filename) throws StorageException {
+    public void deleteStudies(String directory, String fileName) throws StorageException {
         try {
             s3Client.deleteObject(DeleteObjectRequest.builder()
                     .bucket(studiesBucket)
-                    .key(directory + "/" + filename)
+                    .key(directory + "/" + fileName)
                     .build());
         } catch (Exception e) {
-            throw new StorageException("Failed to delete study S3 object: " + filename, e);
+            throw new StorageException("Failed to delete study S3 object: " + fileName, e);
         }
     }
 
@@ -158,15 +189,15 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public void moveStudies(String directory, String sourceFilename, String targetFilename)
+    public void moveStudies(String directory, String sourceFilename, String targetFileName)
             throws StorageException {
-        moveInBucket(studiesBucket, directory, sourceFilename, targetFilename);
+        moveInBucket(studiesBucket, directory, sourceFilename, targetFileName);
     }
 
     private void moveInBucket(String bucket, String directory,
-            String sourceFilename, String targetFilename) throws StorageException {
-        String sourceKey = directory + "/" + sourceFilename;
-        String targetKey = directory + "/" + targetFilename;
+            String sourceFileName, String targetFileName) throws StorageException {
+        String sourceKey = directory + "/" + sourceFileName;
+        String targetKey = directory + "/" + targetFileName;
         try {
             s3Client.copyObject(CopyObjectRequest.builder()
                     .sourceBucket(bucket)

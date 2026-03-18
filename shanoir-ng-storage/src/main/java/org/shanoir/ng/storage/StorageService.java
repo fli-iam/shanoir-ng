@@ -20,6 +20,8 @@ import org.springframework.core.io.Resource;
 
 public interface StorageService {
 
+    public static final String EXAMINATION = "examination-";
+
     String storeExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException;
@@ -28,11 +30,15 @@ public interface StorageService {
 
     Resource loadStudies(String directory, String fileName) throws StorageException;
 
+    long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException;
+
     String getPublicLocationDatasets(String directory, String fileName) throws StorageException;
 
     String getPublicLocationStudies(String directory, String fileName) throws StorageException;
 
     void deleteDatasets(String directory, String fileName) throws StorageException;
+
+    void deleteExtraData(Long examinationId, String fileName) throws StorageException;
 
     void deleteStudies(String directory, String fileName) throws StorageException;
 
