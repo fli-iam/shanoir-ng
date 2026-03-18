@@ -15,6 +15,8 @@ import { Component, ElementRef, HostListener, inject, Input, ViewChild } from '@
 
 import { CopyData, CopyDataService } from '../shared/copy-data.service';
 
+import { TreeService } from './tree.service';
+
 @Component({
     selector: 'copy-from-csv',
     template: `
@@ -30,6 +32,7 @@ export class CopyFromCsvComponent {
     @Input() studyId: any;
     @ViewChild('input') inputEl: ElementRef;
     private copyDataService: CopyDataService = inject(CopyDataService);
+    private treeService = inject(TreeService);
 
     @HostListener('click') onClick() {
         this.inputEl?.nativeElement.click();
@@ -39,7 +42,9 @@ export class CopyFromCsvComponent {
         (event.target as HTMLInputElement).files[0].text().then(csv => {
             const rawData: string[][] = this.parseCsv(csv);
             const copyData = this.convertToCopyData(rawData);
-            this.copyDataService.copy(copyData);
+            this.copyDataService.copy(copyData).then(() => {
+                this.treeService.updateTree();
+            });
         });
     }
 
