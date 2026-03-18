@@ -41,6 +41,7 @@ import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -138,6 +139,9 @@ public class ExaminationApiControllerTest {
     @MockBean
     private ExaminationRepository examRepo;
 
+    @MockBean
+    private StorageService storageService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -154,12 +158,8 @@ public class ExaminationApiControllerTest {
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void deleteExaminationTest() throws Exception {
         given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-        given(examinationServiceMock.getExtraDataFilePath(1L, "")).willReturn("nonExisting");
-
         mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
-
-        // Test event here
     }
 
     @Test
@@ -174,8 +174,6 @@ public class ExaminationApiControllerTest {
         // GIVEN an examination to delete with extra data files
         File extraData = new File(tempFolderPath + "examination-1");
         extraData.mkdirs();
-
-        given(examinationServiceMock.getExtraDataFilePath(1L, "")).willReturn(extraData.getPath());
 
         // WHEN we delete the examination
         try {
@@ -285,7 +283,6 @@ public class ExaminationApiControllerTest {
     public void testDownloadExtraDataNotExisting() throws IOException {
         // GIVEN an examination with no extra-data
         given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-        given(examinationServiceMock.getExtraDataFilePath(1L, "file.pdf")).willReturn("notExisting");
         // WHEN we download extra-data
         try {
             // THEN we have a "no content" answer.
@@ -306,8 +303,6 @@ public class ExaminationApiControllerTest {
         File todow = new File(tempFolderPath + "examination-1/file1.pdf");
         //File todow = new File("/var/datasets-data/examination-1/file.pdf");
         todow.getParentFile().mkdirs();
-
-        given(examinationServiceMock.getExtraDataFilePath(1L, "file1.pdf")).willReturn(todow.getPath());
 
         // WHEN we download extra-data
         try {
