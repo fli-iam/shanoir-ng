@@ -39,6 +39,7 @@ import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.controler.StudyApiController;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
@@ -114,6 +115,9 @@ public class StudyApiControllerTest {
 
     @MockBean
     private RelatedDatasetService relatedDatasetService;
+
+    @MockBean
+    private StorageService storageService;
 
     @TempDir
     private static File tempFolder;
