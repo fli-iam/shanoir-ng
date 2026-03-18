@@ -23,6 +23,7 @@ import java.util.List;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.DatasetsCreatorService;
@@ -32,6 +33,7 @@ import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.importer.service.QualityService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
@@ -53,6 +55,8 @@ public class QualityUtils {
     private static final Logger LOG = LoggerFactory.getLogger(QualityUtils.class);
 
     private static QualityService qualityService = new QualityService();
+
+    private static ImporterService importerService = new ImporterService();
 
     private static ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
 
@@ -117,7 +121,8 @@ public class QualityUtils {
                         datasetsCreatorService.constructDicom(null, serie, true);
                         org.shanoir.ng.importer.dto.Serie serieDto = SerieMapper.INSTANCE.toDto(serie);
                         AcquisitionAttributes<String> dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serieDto);
-                        qualityCardResult = qualityService.checkQuality(null, serieDto, dicomAttributes, qualityCards);
+                        DatasetAcquisition datasetAcquisition = importerService.createDatasetAcquisitionForSerie(serieDto, 0, null, convertImportJob(importJob), dicomAttributes);
+                        qualityCardResult = qualityService.checkQuality(datasetAcquisition, dicomAttributes, qualityCards);
                     } catch (SecurityException e) {
                         LOG.error(e.getMessage());
                     }
