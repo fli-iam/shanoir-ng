@@ -178,7 +178,8 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public Resource loadStudies(String directory, String fileName) throws StorageException {
+    public Resource loadStudyFile(Long studyId, String fileName) throws StorageException {
+        String directory = STUDY + studyId;
         try {
             return s3Template.download(studiesBucket, directory + "/" + fileName);
         } catch (Exception e) {

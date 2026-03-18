@@ -85,7 +85,8 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public Resource loadStudies(String directory, String fileName) throws StorageException {
+    public Resource loadStudyFile(Long studyId, String fileName) throws StorageException {
+        String directory = STUDY + studyId;
         return load(baseDirStudies, directory, fileName);
     }
 

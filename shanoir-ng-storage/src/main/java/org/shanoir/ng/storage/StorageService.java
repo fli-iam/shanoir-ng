@@ -36,7 +36,7 @@ public interface StorageService {
 
     Resource loadDatasets(String directory, String fileName) throws StorageException;
 
-    Resource loadStudies(String directory, String fileName) throws StorageException;
+    Resource loadStudyFile(Long studyId, String fileName) throws StorageException;
 
     long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException;
 

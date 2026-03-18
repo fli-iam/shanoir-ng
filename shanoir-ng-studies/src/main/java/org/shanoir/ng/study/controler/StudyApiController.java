@@ -375,7 +375,7 @@ public class StudyApiController implements StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
             HttpServletResponse response) throws Exception {
-        Resource resource = storageService.loadStudies(StorageService.STUDY + studyId, fileName);
+        Resource resource = storageService.loadStudyFile(studyId, fileName);
         File fileToDownLoad = resource.getFile();
         if (!fileToDownLoad.exists()) {
             response.sendError(HttpStatus.NO_CONTENT.value());
@@ -497,7 +497,7 @@ public class StudyApiController implements StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
             HttpServletResponse response) throws Exception {
-        Resource resource = storageService.load("study-" + studyId, fileName);
+        Resource resource = storageService.loadStudyFile(studyId, fileName);
         File fileToDownLoad = resource.getFile();
         if (!fileToDownLoad.exists()) {
             response.sendError(HttpStatus.NO_CONTENT.value());

@@ -1053,7 +1053,7 @@ public class StudyServiceImpl implements StudyService {
         for (String path : paths) {
             Resource resource;
             try {
-                resource = storageService.load("study-" + study.getId(), path);
+                resource = storageService.loadStudyFile(study.getId(), path);
                 File f = resource.getFile();
                 if (f.exists()) {
                     size += f.length();
