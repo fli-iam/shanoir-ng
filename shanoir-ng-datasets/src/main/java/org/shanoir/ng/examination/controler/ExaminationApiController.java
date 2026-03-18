@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.examination.controler;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -43,14 +41,18 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -91,6 +93,9 @@ public class ExaminationApiController implements ExaminationApi {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private StorageService storageService;
 
     private final HttpServletRequest request;
 
@@ -200,7 +205,7 @@ public class ExaminationApiController implements ExaminationApi {
     public ResponseEntity<Void> updateExamination(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
             @Parameter(description = "the examination to update", required = true) @RequestBody @Valid final ExaminationDTO examination,
-            final BindingResult result) throws RestServiceException {
+            final BindingResult result) throws Exception {
         /* Update examination in db. */
         try {
             examinationService.update(examinationMapper.examinationDTOToExamination(examination));
@@ -283,21 +288,25 @@ public class ExaminationApiController implements ExaminationApi {
     @Override
     public void downloadExtraData(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
-        String filePath = this.examinationService.getExtraDataFilePath(examinationId, fileName);
-        LOG.info("Retrieving file : {}", filePath);
-        File fileToDownLoad = new File(filePath);
-        if (!fileToDownLoad.exists()) {
-            response.sendError(HttpStatus.NO_CONTENT.value());
-            return;
-        }
-        String contentType = request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath());
-        try (InputStream is = new FileInputStream(fileToDownLoad);) {
-            response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
+            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
+            HttpServletResponse response) throws RestServiceException, IOException {
+        try {
+            Resource fileToDownload = storageService.loadExtraData(examinationId, fileName);
+            String contentType = request.getServletContext().getMimeType(fileName);
+            if (contentType == null) {
+                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+            }
+            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
             response.setContentType(contentType);
-            response.setContentLengthLong(fileToDownLoad.length());
-            org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
-            response.flushBuffer();
+            if (fileToDownload.isReadable() && fileToDownload.contentLength() > 0) {
+                response.setContentLengthLong(fileToDownload.contentLength());
+            }
+            try (InputStream is = fileToDownload.getInputStream()) {
+                org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+                response.flushBuffer();
+            }
+        } catch (StorageException e) {
+            LOG.error("Error downloading file {} for examination {}: {}", fileName, examinationId, e);
         }
     }
 

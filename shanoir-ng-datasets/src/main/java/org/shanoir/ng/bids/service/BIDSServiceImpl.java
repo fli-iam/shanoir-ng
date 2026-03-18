@@ -60,6 +60,8 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,6 +141,9 @@ public class BIDSServiceImpl implements BIDSService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private StorageService storageService;
 
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 
@@ -329,11 +334,12 @@ public class BIDSServiceImpl implements BIDSService {
      * @param subjectName the subject name
      * @return data from the examination formatted as BIDS in a .zip file.
      * @throws IOException
+     * @throws StorageException
      */
-    private void exportAsBids(final Examination examination, final File examDir, final String studyName, final String subjectName) throws IOException {
+    private void exportAsBids(final Examination examination, final File examDir, final String studyName, final String subjectName) throws IOException, StorageException {
         // Add examination extra-data
         for (String filePath : examination.getExtraDataFilePathList()) {
-            File file = new File(this.examService.getExtraDataFilePath(examination.getId(), filePath));
+            File file = storageService.loadExtraData(examination.getId(), filePath).getFile();
             if (file.exists()) {
                 Path bidsExtraFilePath = Path.of(examDir.getAbsolutePath() + "/" + file.getName());
                 Files.createLink(bidsExtraFilePath, file.toPath());

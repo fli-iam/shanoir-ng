@@ -78,6 +78,15 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
+    public Resource loadExtraData(Long examinationId, String fileName) throws StorageException {
+        try {
+            return s3Template.download(datasetsBucket, EXAMINATION + examinationId + "/" + fileName);
+        } catch (Exception e) {
+            throw new StorageException("S3 download failed for: " + fileName, e);
+        }
+    }
+
+    @Override
     public Resource loadDatasets(String directory, String fileName) throws StorageException {
         try {
             return s3Template.download(datasetsBucket, directory + "/" + fileName);

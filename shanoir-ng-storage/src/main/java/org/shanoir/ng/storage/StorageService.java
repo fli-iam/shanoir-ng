@@ -26,6 +26,8 @@ public interface StorageService {
             InputStream inputStream, String contentType, long size)
             throws StorageException;
 
+    Resource loadExtraData(Long examinationId, String fileName) throws StorageException;
+
     Resource loadDatasets(String directory, String fileName) throws StorageException;
 
     Resource loadStudies(String directory, String fileName) throws StorageException;

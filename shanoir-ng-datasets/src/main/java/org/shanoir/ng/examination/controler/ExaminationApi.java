@@ -163,7 +163,7 @@ public interface ExaminationApi {
     ResponseEntity<Void> updateExamination(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
             @Parameter(description = "examination to update", required = true) @Valid @RequestBody ExaminationDTO examination,
-            final BindingResult result) throws RestServiceException;
+            final BindingResult result) throws Exception;
 
     @Operation(summary = "", description = "Add extra data to an examination")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "examination updated"),

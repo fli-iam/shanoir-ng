@@ -50,11 +50,12 @@ import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
-import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -386,7 +387,7 @@ public class RabbitMQDatasetsService {
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
-    public String getDetailedStudyStorageVolume(Long studyId) {
+    public String getDetailedStudyStorageVolume(Long studyId) throws StorageException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         StudyStorageVolumeDTO dto = new StudyStorageVolumeDTO(datasetService.getVolumeByFormat(studyId),
                 examinationService.getExtraDataSizeByStudyId(studyId));
@@ -405,7 +406,11 @@ public class RabbitMQDatasetsService {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         Map<Long, StudyStorageVolumeDTO> studyStorageVolumes = new HashMap<>();
         datasetService.getVolumeByFormatByStudyId(studyIds).forEach((id, volumeByFormat) -> {
-            studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
+            try {
+                studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
+            } catch (StorageException e) {
+                LOG.error(e.getMessage(), e);
+            }
         });
         try {
             return objectMapper.writeValueAsString(studyStorageVolumes);

@@ -67,6 +67,11 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public Resource loadExtraData(Long examinationId, String fileName) throws StorageException {
+        return loadDatasets(EXAMINATION + examinationId, fileName);
+    }
+
+    @Override
     public Resource loadDatasets(String directory, String fileName) throws StorageException {
         return load(baseDirDatasets, directory, fileName);
     }
