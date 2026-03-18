@@ -22,7 +22,13 @@ public interface StorageService {
 
     public static final String EXAMINATION = "examination-";
 
+    public static final String STUDY = "study-";
+
     String storeExtraData(Long examinationId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException;
+
+    String storeStudyFile(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException;
 
@@ -48,7 +54,7 @@ public interface StorageService {
 
     void deleteDirectoryExtraData(Long examinationId) throws StorageException;
 
-    void deleteDirectoryStudies(String directory) throws StorageException;
+    void deleteDirectoryStudyFile(Long studyId) throws StorageException;
 
     void moveDatasets(String directory, String sourceFileName, String targetFileName) throws StorageException;
 

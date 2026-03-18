@@ -349,7 +349,7 @@ public interface StudyApi {
     @PostMapping(value = "dua-upload/{studyId}", produces = { "application/json" }, consumes = {
             "multipart/form-data" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
-    ResponseEntity<Void> uploadDataUserAgreement(
+    ResponseEntity<Void> uploadDataUseAgreement(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
             throws RestServiceException;

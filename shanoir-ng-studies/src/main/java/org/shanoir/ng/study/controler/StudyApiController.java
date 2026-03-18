@@ -132,7 +132,7 @@ public class StudyApiController implements StudyApi {
             if (!CollectionUtils.isEmpty(duas)) {
                 this.dataUserAgreementService.deleteAll(duas);
             }
-            storageService.deleteDirectory("study-" + studyId);
+            storageService.deleteDirectoryStudyFile(studyId);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_STUDY_EVENT, studyId.toString(),
                     KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -375,7 +375,7 @@ public class StudyApiController implements StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
             HttpServletResponse response) throws Exception {
-        Resource resource = storageService.load("study-" + studyId, fileName);
+        Resource resource = storageService.loadStudies(StorageService.STUDY + studyId, fileName);
         File fileToDownLoad = resource.getFile();
         if (!fileToDownLoad.exists()) {
             response.sendError(HttpStatus.NO_CONTENT.value());
@@ -395,8 +395,8 @@ public class StudyApiController implements StudyApi {
             @PathVariable("studyId") Long studyId,
             @Valid @RequestBody MultipartFile file) throws RestServiceException {
         try {
-            storageService.store(
-                    "study-" + studyId,
+            storageService.storeStudyFile(
+                    studyId,
                     file.getOriginalFilename(),
                     file.getInputStream(),
                     file.getContentType(),
@@ -465,7 +465,7 @@ public class StudyApiController implements StudyApi {
     }
 
     @Override
-    public ResponseEntity<Void> uploadDataUserAgreement(
+    public ResponseEntity<Void> uploadDataUseAgreement(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "dua to upload", required = true) @Valid @RequestBody MultipartFile file)
             throws RestServiceException {
@@ -480,8 +480,8 @@ public class StudyApiController implements StudyApi {
                 studyService.update(study);
                 return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
             }
-            storageService.store(
-                    "study-" + studyId,
+            storageService.storeStudyFile(
+                    studyId,
                     file.getOriginalFilename(),
                     file.getInputStream(),
                     file.getContentType(),

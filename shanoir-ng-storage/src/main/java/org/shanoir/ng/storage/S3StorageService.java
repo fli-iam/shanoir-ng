@@ -78,6 +78,22 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
+    public String storeStudyFile(Long studyId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        String directory = STUDY + studyId;
+        String key = directory + "/" + fileName;
+        try {
+            s3Template.upload(datasetsBucket, key, inputStream,
+                    ObjectMetadata.builder().contentType(contentType).build());
+            LOG.info("Stored dataset file to S3: s3://{}/{}", datasetsBucket, key);
+            return getPublicLocationDatasets(directory, fileName);
+        } catch (Exception e) {
+            throw new StorageException("S3 upload failed for: " + fileName, e);
+        }
+    }
+
+    @Override
     public Resource loadExtraData(Long examinationId, String fileName) throws StorageException {
         try {
             return s3Template.download(datasetsBucket, EXAMINATION + examinationId + "/" + fileName);
@@ -193,7 +209,8 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public void deleteDirectoryStudies(String directory) throws StorageException {
+    public void deleteDirectoryStudyFile(Long studyId) throws StorageException {
+        String directory = STUDY + studyId;
         deleteDirectoryFromBucket(studiesBucket, directory);
     }
 
