@@ -21,7 +21,12 @@ INSERT INTO profile (id, profile_name) VALUES (1,'Profile Neurinfo'), (2,'Profil
 INSERT INTO study
 	(id, clinical, coordinator_id, downloadable_by_default, end_date, name, start_date, study_status, study_type, visible_by_default, with_examination, challenge, profile_id, is_draft)
 VALUES
-	(1, '\0', NULL, '\0', NULL, 'DemoStudy', '2020-11-02 00:00:00', 1, 3, '\0', 1, 0, 1, 0);
+	(1, '\0', NULL, '\0', '2021-11-02 00:00:00', 'DemoStudy', '2020-11-02 00:00:00', 1, 3, '\0', 1, 0, 1, 0);
+
+INSERT INTO study_extra_details
+	(id, expected_nb_of_subjects, average_examination_size, estimated_total_volume, expected_nb_of_centers, inclusion_rate, inclusion_rate_unit, sponsor, principal_investigator, scientific_advisor, study_id)
+VALUES
+	(1, 100, 5, 500, 1, 5, 2, 'INRIA', 'INRIA', 'INRIA', 1);
 
 INSERT INTO center(id, country, name, phone_number, postal_code, street, city, website)
 VALUES
