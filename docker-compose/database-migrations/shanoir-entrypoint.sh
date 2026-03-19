@@ -180,9 +180,8 @@ echo "$HEADER migration mode '$SHANOIR_MIGRATION'"
 case "$SHANOIR_MIGRATION" in
 init)
   # init mode
-  # - check if the db migrations exists
-  #   - if no, initialise the migrations db
-  #   - if yes, apply de migrations
+  # - create and populate the migrations table
+  # - create the procedures
   # - exit
 
   wait_mysqld
@@ -196,7 +195,8 @@ never)
   ;;
 auto)
   # automatic mode
-  # - init db or apply migrations in a background process
+  # - execute the 'init'   tasks if the migrations table does not exist
+  # - execute the 'manual' tasks if the migrations table exists
   wait_mysqld
   if check_migrations_db ; then
     apply_migrations
