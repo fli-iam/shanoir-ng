@@ -116,6 +116,7 @@ storage:
     vip-data: /var/datasets-data/vip-data # only temporary, not in S3
   s3:
     bucket-name-datasets: bucket-name-datasets
+    bucket-name-studies: bucket-name-studies
 
 # logging configuration
 logging:

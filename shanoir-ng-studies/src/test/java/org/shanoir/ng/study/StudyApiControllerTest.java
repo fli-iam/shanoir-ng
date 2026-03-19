@@ -131,7 +131,7 @@ public class StudyApiControllerTest {
     @BeforeAll
     public static void beforeAll() throws IOException {
         tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-        System.setProperty("studies-data", tempFolderPath);
+        System.setProperty("storage.file-system.studies-data", tempFolderPath);
         File tempFile = new File(tempFolder, "test-file.txt");
         Files.writeString(tempFile.toPath(), "test content");
         tempResource = new FileSystemResource(tempFile);
