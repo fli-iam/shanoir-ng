@@ -17,6 +17,7 @@ package org.shanoir.ng.subject.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -88,4 +89,11 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>, Subject
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM SubjectStudyTag sst WHERE sst.subjectStudy.subject.id = :subjectId")
     void deleteSubjectStudyTagsBySubjectId(@Param("subjectId") Long subjectId);
+
+    @Query("""
+            select new org.shanoir.ng.shared.core.model.IdName(s.id, s.name)
+            from Subject s
+            where s.id in :ids
+            """)
+    List<IdName> findNamesByIdIn(@Param("ids") Iterable<Long> ids);
 }

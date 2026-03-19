@@ -25,7 +25,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetForRights;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetRightsView;
+import org.shanoir.ng.dataset.model.DatasetRightsDTO;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
@@ -38,10 +38,10 @@ import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.UserRights;
@@ -336,11 +336,13 @@ public class DatasetSecurityService {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }
-        DatasetRightsView dataset = datasetRepository.findOneForRightsCheckById(datasetId);
-        if (dataset == null) {
+        DatasetRightsDTO dto = datasetRepository.findRightsDtoBaseById(datasetId);
+        if (dto == null) {
             throw new EntityNotFoundException("Cannot find dataset with id " + datasetId);
         }
-        return hasRightOnTrustedDataset(dataset, rightStr);
+        Set<Long> related = datasetRepository.findRelatedStudyIds(datasetId);
+        dto.setRelatedStudies(related);
+        return hasRightOnTrustedDataset(dto, rightStr);
     }
 
     /**
@@ -485,7 +487,7 @@ public class DatasetSecurityService {
      * @param rightStr the right
      * @return true or false
      */
-    public boolean hasRightOnTrustedDataset(DatasetRightsView dataset, String rightStr) {
+    public boolean hasRightOnTrustedDataset(DatasetRightsDTO dataset, String rightStr) {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }
@@ -515,7 +517,7 @@ public class DatasetSecurityService {
         return studyId;
     }
 
-    private static Long getStudyIdFromDataset(DatasetRightsView dataset) {
+    private static Long getStudyIdFromDataset(DatasetRightsDTO dataset) {
         Long studyId;
         if (dataset.getDatasetProcessing() != null) {
             studyId = dataset.getDatasetProcessing().getStudyId();

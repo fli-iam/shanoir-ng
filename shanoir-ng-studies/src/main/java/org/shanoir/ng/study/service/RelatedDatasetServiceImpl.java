@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -129,6 +130,8 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                 .toList();
         Map<String, Subject> existingByName = subjectRepository.findByStudyIdAndNameIn(targetStudy.getId(), names).stream()
                 .collect(Collectors.toMap(Subject::getName, s -> s));
+        System.out.println("##################################### Source subjects: " + targetStudy.getId() + " / " + names);
+        System.out.println("##################################### Subjects to copy: " + subjectRepository.findByStudyIdAndNameIn(targetStudy.getId(), names));
         for (CopyData.SubjectCopy subjectCopy : subjects) {
             Subject sourceSubject = sourceSubjects.get(subjectCopy.getId());
             if (sourceSubject == null) {
@@ -165,6 +168,8 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
     private void deDuplicateSubjectNames(List<CopyData.SubjectCopy> subjects) {
         if (subjects == null || subjects.isEmpty()) return;
 
+        completeSubjectNames(subjects);
+
         // Group by normalized newName (trim, case-sensitive kept; adjust if you want case-insensitive)
         Map<String, List<CopyData.SubjectCopy>> byName = new LinkedHashMap<>();
         for (CopyData.SubjectCopy sc : subjects) {
@@ -184,6 +189,21 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             for (int i = 0; i < group.size(); i++) {
                 // Example: "John" -> "John (1)", "John (2)", ...
                 group.get(i).setNewName(base + " (" + (i + 1) + ")");
+            }
+        }
+    }
+
+    private void completeSubjectNames(List<CopyData.SubjectCopy> subjects) {
+        // check if there are subjects with no new name
+        List<CopyData.SubjectCopy> missingNameSubjects = subjects.stream()
+                .filter(sc -> sc != null && sc.getNewName() == null)
+                .toList();
+        if (!missingNameSubjects.isEmpty()) {
+            List<IdName> idToNameList = subjectRepository.findNamesByIdIn(missingNameSubjects.stream().map(CopyData.SubjectCopy::getId).toList());
+            Map<Long, String> idToName = idToNameList.stream()
+                    .collect(Collectors.toMap(IdName::getId, IdName::getName));
+            for (CopyData.SubjectCopy sc : missingNameSubjects) {
+                sc.setNewName(idToName.get(sc.getId()));
             }
         }
     }

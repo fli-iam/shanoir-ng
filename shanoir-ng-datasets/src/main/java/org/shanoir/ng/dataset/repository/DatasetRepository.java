@@ -11,7 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 package org.shanoir.ng.dataset.repository;
 
 import java.util.List;
@@ -21,13 +20,12 @@ import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetRightsView;
+import org.shanoir.ng.dataset.model.DatasetRightsDTO;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -77,7 +75,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN dataset_acquisition inputAcq ON inputs.dataset_acquisition_id = inputAcq.id "
             + "WHERE acq.examination_id = :examId OR inputAcq.examination_id = :examId", nativeQuery = true)
     List<Long> findDatasetAndOutputByExaminationId(Long examId);
-
 
     @Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr "
             + "WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL "
@@ -191,12 +188,24 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             @Param("acquisitionIds") List<Long> acquisitionIds,
             @Param("examinationIds") List<Long> examinationIds);
 
-    @EntityGraph(attributePaths = {
-        "relatedStudies",
-        "datasetProcessing",
-        "datasetAcquisition",
-        "datasetAcquisition.examination"
-    })
-    DatasetRightsView findOneForRightsCheckById(@Param("id") Long id);
+    @Query("""
+            SELECT new org.shanoir.ng.dataset.model.DatasetRightsDTO(
+            d.id,
+            d.centerId,
+            dp.study.id,
+            da.examination.study.id,
+            null
+            )
+            FROM Dataset d
+            LEFT JOIN d.datasetProcessing dp
+            LEFT JOIN d.datasetAcquisition da
+            WHERE d.id = :id
+            """)
+    DatasetRightsDTO findRightsDtoBaseById(Long id);
+
+    @Query("""
+            SELECT rs.id FROM Dataset d JOIN d.relatedStudies rs WHERE d.id = :id
+            """)
+    Set<Long> findRelatedStudyIds(Long id);
 
 }
