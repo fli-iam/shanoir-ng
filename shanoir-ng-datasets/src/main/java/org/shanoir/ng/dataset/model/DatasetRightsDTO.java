@@ -40,6 +40,13 @@ public class DatasetRightsDTO {
         }
     }
 
+    public DatasetRightsDTO(Long id,
+            Long centerId,
+            Long processingStudyId,
+            Long acquisitionStudyId) {
+        this(id, centerId, processingStudyId, acquisitionStudyId, null);
+    }
+
     public Long getId() {
         return id;
     }
