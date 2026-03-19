@@ -373,6 +373,7 @@ COPY --link database-migrations/db-changes /opt/db-changes
 COPY --link database-migrations/db-init-procedures /opt/db-init-procedures
 
 ENTRYPOINT ["/shanoir-entrypoint.sh"]
+CMD []
 
 
 

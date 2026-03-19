@@ -192,6 +192,7 @@ init)
 never)
   # TODO: (warn/fail/alter healthcheck) if there are pending migrations
   echo "$HEADER mode '$SHANOIR_MIGRATION': migrations are skipped"
+  exit 0
   ;;
 auto)
   # automatic mode
@@ -226,5 +227,3 @@ dev)
   echo "$HEADER error: invalid SHANOIR_MIGRATION value: '$SHANOIR_MIGRATION'" >&2
   exit 1
 esac
-
-exec /entrypoint.sh "$@"
