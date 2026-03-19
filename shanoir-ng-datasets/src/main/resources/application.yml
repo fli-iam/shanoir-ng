@@ -111,6 +111,7 @@ storage:
   type: file-system # or "s3"
   file-system:
     datasets-data: /var/datasets-data
+    studies-data: /var/studies-data
     bids-data: /var/datasets-data/bids-data # only temporary, not in S3
     vip-data: /var/datasets-data/vip-data # only temporary, not in S3
   s3:
