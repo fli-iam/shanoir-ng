@@ -56,7 +56,7 @@ public class FileSystemStorageService implements StorageService {
             InputStream inputStream, String contentType, long size)
             throws StorageException {
         String directory = STUDY + studyId;
-        return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
+        return store(baseDirStudies, directory, fileName, inputStream, contentType, size);
     }
 
     private String store(String baseDir, String directory, String fileName,
