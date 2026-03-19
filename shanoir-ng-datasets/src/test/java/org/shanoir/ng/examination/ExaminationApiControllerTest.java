@@ -99,7 +99,7 @@ public class ExaminationApiControllerTest {
     @BeforeEach
     public void beforeClass() {
         tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-        System.setProperty("datasets-data", tempFolderPath);
+        System.setProperty("storage.file-system.datasets-data", tempFolderPath);
     }
 
     private static final String REQUEST_PATH = "/examinations";

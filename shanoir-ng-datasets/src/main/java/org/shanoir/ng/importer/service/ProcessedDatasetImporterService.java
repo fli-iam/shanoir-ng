@@ -59,7 +59,7 @@ public class ProcessedDatasetImporterService {
 
     private static final String SUBJECT_PREFIX = "sub-";
 
-    @Value("${datasets-data}")
+    @Value("${storage.file-system.datasets-data}")
     private String niftiStorageDir;
 
     @Autowired

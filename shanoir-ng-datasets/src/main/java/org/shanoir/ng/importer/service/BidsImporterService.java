@@ -92,7 +92,7 @@ public class BidsImporterService {
     @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
 
-    @Value("${datasets-data}")
+    @Value("${storage.file-system.datasets-data}")
     private String niftiStorageDir;
 
     private static final Logger LOG = LoggerFactory.getLogger(BidsImporterService.class);

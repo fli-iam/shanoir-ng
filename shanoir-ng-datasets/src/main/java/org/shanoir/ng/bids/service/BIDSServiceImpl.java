@@ -99,7 +99,7 @@ public class BIDSServiceImpl implements BIDSService {
 
     private static final String SUBJECT_PREFIX = "sub-";
 
-    private static final String STUDY_PREFIX = "stud-";
+    private static final String STUDY_PREFIX = "study-";
 
     private static final Logger LOG = LoggerFactory.getLogger(BIDSServiceImpl.class);
 

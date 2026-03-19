@@ -54,7 +54,7 @@ public class EegImporterService {
 
     private static final Logger LOG = LoggerFactory.getLogger(EegImporterService.class);
 
-    @Value("${datasets-data}")
+    @Value("${storage.file-system.datasets-data}")
     private String niftiStorageDir;
 
     @Autowired

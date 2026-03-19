@@ -117,7 +117,7 @@ public class DatasetApiController implements DatasetApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
 
-    @Value("${datasets-data}")
+    @Value("${storage.file-system.datasets-data}")
     private String niftiStorageDir;
 
     @Autowired

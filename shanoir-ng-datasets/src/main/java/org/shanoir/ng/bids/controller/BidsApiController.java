@@ -96,8 +96,8 @@ public class BidsApiController implements BidsApi {
             @Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath,
             HttpServletResponse response) throws RestServiceException, IOException {
         // Check filePath too
-        // /var/datasets-data/bids-data/stud-1_NATIVE
-        if (!filePath.startsWith("/var/datasets-data/bids-data/stud-" + studyId)) {
+        // /var/datasets-data/bids-data/study-1_NATIVE
+        if (!filePath.startsWith("/var/datasets-data/bids-data/study-" + studyId)) {
             response.sendError(HttpStatus.UNAUTHORIZED.value());
             return;
         }
