@@ -113,8 +113,7 @@ public class StudyServiceTest {
 
     @BeforeEach
     public void setup() {
-        ReflectionTestUtils.setField(fileSystemStorageService, "baseDir", tempFolder.getAbsolutePath() + "/tmp/");
-
+        ReflectionTestUtils.setField(fileSystemStorageService, "baseDirStudies", tempFolder.getAbsolutePath() + "/tmp/");
         given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
         given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(ModelsUtil.createStudy()));
         given(studyRepository.save(Mockito.any(Study.class))).willReturn(ModelsUtil.createStudy(1L));
