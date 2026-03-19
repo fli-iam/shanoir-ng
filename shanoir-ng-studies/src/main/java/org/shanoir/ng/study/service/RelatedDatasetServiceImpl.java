@@ -130,8 +130,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                 .toList();
         Map<String, Subject> existingByName = subjectRepository.findByStudyIdAndNameIn(targetStudy.getId(), names).stream()
                 .collect(Collectors.toMap(Subject::getName, s -> s));
-        System.out.println("##################################### Source subjects: " + targetStudy.getId() + " / " + names);
-        System.out.println("##################################### Subjects to copy: " + subjectRepository.findByStudyIdAndNameIn(targetStudy.getId(), names));
         for (CopyData.SubjectCopy subjectCopy : subjects) {
             Subject sourceSubject = sourceSubjects.get(subjectCopy.getId());
             if (sourceSubject == null) {
