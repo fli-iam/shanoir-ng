@@ -118,7 +118,7 @@ export class DatasetCopyDialogComponent {
                 return this.copyDataService.copy(this.buildCopyData()).then(() => {
                     this.close();
                 }).catch(reason => {
-                    this.canCopy = true;
+                    this.canCopy = false;
                     if (reason.status == 403) {
                         this.statusMessage = "You must have IMPORT right.";
                     } else throw Error(reason);
@@ -139,7 +139,7 @@ export class DatasetCopyDialogComponent {
             subjects: this.subjectIds
                 .map(s => ({
                     id: s,
-                    newName: null
+                    newName: this.subjectIds.length == 1 ? this.subjectName : null
                 }))
         };
     }
