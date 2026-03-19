@@ -84,10 +84,10 @@ public class S3StorageService implements StorageService {
         String directory = STUDY + studyId;
         String key = directory + "/" + fileName;
         try {
-            s3Template.upload(datasetsBucket, key, inputStream,
+            s3Template.upload(studiesBucket, key, inputStream,
                     ObjectMetadata.builder().contentType(contentType).build());
-            LOG.info("Stored dataset file to S3: s3://{}/{}", datasetsBucket, key);
-            return getPublicLocationDatasets(directory, fileName);
+            LOG.info("Stored dataset file to S3: s3://{}/{}", studiesBucket, key);
+            return getPublicLocationStudies(directory, fileName);
         } catch (Exception e) {
             throw new StorageException("S3 upload failed for: " + fileName, e);
         }
