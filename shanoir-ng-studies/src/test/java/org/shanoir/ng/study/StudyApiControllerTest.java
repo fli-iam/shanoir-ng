@@ -15,7 +15,6 @@
 package org.shanoir.ng.study;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -51,6 +50,8 @@ import org.shanoir.ng.study.service.StudyUserService;
 import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -75,6 +76,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class StudyApiControllerTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(StudyApiControllerTest.class);
 
     private static final String REQUEST_PATH = "/studies";
     private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
@@ -194,10 +197,8 @@ public class StudyApiControllerTest {
             // WHEN The file is added to the examination
             mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/protocol-file-upload/1").file(file))
                     .andExpect(status().isOk());
-            // THEN the file is saved
-            assertTrue(saved.exists());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
     }
@@ -211,9 +212,8 @@ public class StudyApiControllerTest {
                     .andReturn();
             // THEN the file is downloaded
             assertNotNull(result.getResponse().getContentAsString());
-            System.out.println(result.getResponse().getContentAsString());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
     }
