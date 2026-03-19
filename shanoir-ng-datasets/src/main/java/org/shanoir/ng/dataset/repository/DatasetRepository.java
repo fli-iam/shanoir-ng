@@ -205,6 +205,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Query("""
             SELECT rs.id FROM Dataset d JOIN d.relatedStudies rs WHERE d.id = :id
             """)
-    Set<Long> findRelatedStudyIds(Long id);
+    Set<Long> findRelatedStudyIds(@Param("id") Long id);
 
 }
