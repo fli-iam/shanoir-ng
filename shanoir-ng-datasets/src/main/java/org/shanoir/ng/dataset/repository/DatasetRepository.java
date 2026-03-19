@@ -191,16 +191,17 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Query("""
             SELECT new org.shanoir.ng.dataset.model.DatasetRightsDTO(
                 d.id,
-                da.examination.centerId,
-                dp.study.id,
-                da.examination.study.id
+                e.centerId,
+                dp.studyId,
+                e.study.id
             )
             FROM Dataset d
             LEFT JOIN d.datasetProcessing dp
             LEFT JOIN d.datasetAcquisition da
+            LEFT JOIN da.examination e
             WHERE d.id = :id
             """)
-    DatasetRightsDTO findRightsDtoBaseById(Long id);
+    DatasetRightsDTO findRightsDtoBaseById(@Param("id") Long id);
 
     @Query("""
             SELECT rs.id FROM Dataset d JOIN d.relatedStudies rs WHERE d.id = :id
