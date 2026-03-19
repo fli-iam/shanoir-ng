@@ -202,6 +202,7 @@ auto)
     apply_migrations
   else
     init_migrations
+    apply_init_procedures
   fi
   exit $?
   ;;
