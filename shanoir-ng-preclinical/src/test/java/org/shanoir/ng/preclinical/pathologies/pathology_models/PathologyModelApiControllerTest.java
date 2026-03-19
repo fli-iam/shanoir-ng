@@ -91,7 +91,7 @@ public class PathologyModelApiControllerTest {
     public void setup() throws ShanoirException {
         File tmpFolder = new File(tempFolder, "/tmp/");
         tmpFolder.mkdirs();
-        System.setProperty("preclinical.uploadExtradataFolder", tmpFolder.getAbsolutePath());
+        System.setProperty("storage.file-system.uploadExtradataFolder", tmpFolder.getAbsolutePath());
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
         doNothing().when(modelServiceMock).deleteById(1L);

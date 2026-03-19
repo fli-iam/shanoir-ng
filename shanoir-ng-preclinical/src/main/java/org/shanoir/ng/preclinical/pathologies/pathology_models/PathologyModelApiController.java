@@ -67,7 +67,7 @@ public class PathologyModelApiController implements PathologyModelApi {
     @Autowired
     private ShanoirEventService eventService;
 
-    @Value("${preclinical.uploadExtradataFolder}")
+    @Value("${storage.file-system.uploadExtradataFolder}")
     private String extraDataPath;
 
     @Autowired

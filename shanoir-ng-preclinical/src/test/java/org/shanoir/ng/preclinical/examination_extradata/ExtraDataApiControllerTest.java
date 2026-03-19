@@ -115,7 +115,7 @@ public class ExtraDataApiControllerTest {
 
     @BeforeAll
     public static void beforeClass() {
-        System.setProperty("preclinical.uploadExtradataFolder",  tempFolder.getAbsolutePath() + "/tmp/");
+        System.setProperty("storage.file-system.uploadExtradataFolder",  tempFolder.getAbsolutePath() + "/tmp/");
     }
 
     @BeforeEach

@@ -65,7 +65,7 @@ public class ExtraDataApiController implements ExtraDataApi {
     @Autowired
     private ExtraDataService<BloodGasData> bloodGasDataService;
 
-    @Value("${preclinical.uploadExtradataFolder}")
+    @Value("${storage.file-system.uploadExtradataFolder}")
     private String extraDataPath;
 
     private final HttpServletRequest request;
