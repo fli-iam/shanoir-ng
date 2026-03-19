@@ -292,18 +292,23 @@ public class ExaminationApiController implements ExaminationApi {
             HttpServletResponse response) throws RestServiceException, IOException {
         try {
             Resource fileToDownload = storageService.loadExtraData(examinationId, fileName);
-            String contentType = request.getServletContext().getMimeType(fileName);
-            if (contentType == null) {
-                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
-            }
-            response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-            response.setContentType(contentType);
-            if (fileToDownload.isReadable() && fileToDownload.contentLength() > 0) {
-                response.setContentLengthLong(fileToDownload.contentLength());
-            }
-            try (InputStream is = fileToDownload.getInputStream()) {
-                org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
-                response.flushBuffer();
+            if (fileToDownload != null) {
+                String contentType = request.getServletContext().getMimeType(fileName);
+                if (contentType == null) {
+                    contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+                }
+                response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+                response.setContentType(contentType);
+                if (fileToDownload.isReadable() && fileToDownload.contentLength() > 0) {
+                    response.setContentLengthLong(fileToDownload.contentLength());
+                }
+                try (InputStream is = fileToDownload.getInputStream()) {
+                    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+                    response.flushBuffer();
+                }
+            } else {
+                response.sendError(HttpStatus.NO_CONTENT.value());
+                return;
             }
         } catch (StorageException e) {
             LOG.error("Error downloading file {} for examination {}: {}", fileName, examinationId, e);
