@@ -144,6 +144,11 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         else return this.rights && this.rights.has(studyId) && this.rights.get(studyId).includes(StudyUserRight.CAN_ADMINISTRATE);
     }
 
+    hasImportRight(studyId: number) {
+        if (this.role == 'admin') return true;
+        else return this.rights && this.rights.has(studyId) && this.rights.get(studyId).includes(StudyUserRight.CAN_IMPORT);
+    }
+
     hasDownloadRight(studyId: number) {
         if (this.role == 'admin') return true;
         else return this.rights && this.rights.has(studyId) && this.rights.get(studyId).includes(StudyUserRight.CAN_DOWNLOAD);
@@ -625,7 +630,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             }
         }
         this.hasCopyRight = this.selectedStudies.every(data => {
-            return (this.hasAdminRight(Number(data)) == true)
+            return (this.hasImportRight(Number(data)) == true)
         });
         if (this.selectedDatasetIds.size == 0) this.hasCopyRight = false;
     }
@@ -678,7 +683,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 studyId: Number(line.studyId)
             })));
         } else {
-            this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to copy datasets from studies that you don\'t administrate.');
+            this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to copy datasets from studies where you can\'t import.');
         }
     }
 }

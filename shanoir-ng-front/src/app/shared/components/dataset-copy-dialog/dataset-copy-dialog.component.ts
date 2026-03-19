@@ -128,6 +128,7 @@ export class DatasetCopyDialogComponent {
     }
 
     private buildCopyData(): CopyData {
+        console.log("Building copy data with input datasets: ", this.inputDatasets);
         return {
             datasets: this.inputDatasets.map(d => ({
                 datasetId: d.datasetId,
