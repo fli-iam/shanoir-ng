@@ -12,5 +12,5 @@ JOIN study_examination se2
 -- Drop temporary index
 DROP INDEX idx_study_exam ON study_examination;
 
--- Add unique constraint to prevent future duplicates
-ALTER TABLE study_examination ADD UNIQUE KEY uk_study_exam (study_id, examination_id);
+-- Add unique constraint as the table is actually a replication of examination
+ALTER TABLE study_examination ADD UNIQUE KEY uk_examination (examination_id);
