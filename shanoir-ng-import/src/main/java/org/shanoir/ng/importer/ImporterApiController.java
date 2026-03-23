@@ -594,7 +594,8 @@ public class ImporterApiController implements ImporterApi {
      */
     @Override
     public ResponseEntity<Void> startImportEEGJob(
-            @Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob) {
+            @Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob)
+            throws RestServiceException {
         // Comment: Anonymisation is not necessary for pure brainvision EEGs data
         try {
             importJob.setUsername(KeycloakUtil.getTokenUserName());

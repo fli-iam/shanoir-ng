@@ -79,6 +79,16 @@ public interface StudyApi {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<StudyDTO>> findStudies();
 
+    @Operation(summary = "", description = "If exists, returns the draft studies that the user is allowed to see")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found approved studies"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/draft", produces = { "application/json" }, method = RequestMethod.GET)
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    ResponseEntity<List<StudyDTO>> findDraftStudies();
+
     @Operation(summary = "", description = "If exists, returns the studies that the user is allowed to see")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -146,6 +156,18 @@ public interface StudyApi {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     ResponseEntity<StudyDTO> saveNewStudy(
             @Parameter(description = "study to create", required = true) @RequestBody Study study, BindingResult result)
+            throws RestServiceException;
+
+    @Operation(summary = "", description = "If exists, approve the study")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "approved study"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/approveDraftStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.PUT)
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<StudyDTO> approveDraftStudy(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException;
 
     @Operation(summary = "", description = "Copy a list of dataset to a study")
