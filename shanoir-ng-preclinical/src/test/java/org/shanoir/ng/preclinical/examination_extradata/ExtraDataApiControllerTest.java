@@ -38,6 +38,7 @@ import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysioDataUnique
 import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalData;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.ExtraDataModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -109,6 +110,9 @@ public class ExtraDataApiControllerTest {
 
     @MockBean
     private ExtraDataEditableByManager editableOnlyValidator;
+
+    @MockBean
+    private StorageService storageService;
 
     @TempDir
     private static File tempFolder;
