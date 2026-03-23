@@ -31,6 +31,7 @@
 #              by the microservices with spring.jpa.hibernate.ddl-auto=update)
 
 DB_CHANGES_DIR="/opt/db-changes"
+DB_INIT_PROCEDURES_DIR="/opt/db-init-procedures"
 
 MIGRATION_DB=migrations
 MIGRATION_USER=migrations
@@ -151,33 +152,58 @@ apply_migrations()
 	return 0
 }
 
+# apply all procedures to load on fresh install
+apply_init_procedures()
+{
+  echo "$HEADER applying procedures..."
+
+  for sql_file in $(find "$DB_INIT_PROCEDURES_DIR" -name "*.sql" | sort); do
+    echo "    $sql_file..."
+    # extract the target DB from the USE statement in the file
+    db=$(grep -i '^\s*USE\s' "$sql_file" | head -1 | sed 's/[Uu][Ss][Ee]\s*//;s/;//;s/\s//g')
+    if [ -z "$db" ]; then
+      echo "$HEADER error: could not determine target DB for $sql_file" >&2
+      return 1
+    fi
+    if ! $MYSQL "$db" < "$sql_file"; then
+      echo "$HEADER error: failed to apply $sql_file" >&2
+      return 1
+    fi
+    done
+    echo "$HEADER done applying init procedures"
+    return 0
+}
+
 echo "$HEADER Shanoir NG migrations entrypoint"
 echo "$HEADER migration mode '$SHANOIR_MIGRATION'"
 
 case "$SHANOIR_MIGRATION" in
 init)
   # init mode
-  # - check if the db migrations exists
-  #   - if no, initialise the migrations db
-  #   - if yes, apply de migrations
+  # - create and populate the migrations table
+  # - create the procedures
   # - exit
 
   wait_mariadbd
   init_migrations
+  apply_init_procedures
   exit $?
   ;;
 never)
   # TODO: (warn/fail/alter healthcheck) if there are pending migrations
   echo "$HEADER mode '$SHANOIR_MIGRATION': migrations are skipped"
+  exit 0
   ;;
 auto)
   # automatic mode
-  # - init db or apply migrations in a background process
+  # - execute the 'init'   tasks if the migrations table does not exist
+  # - execute the 'manual' tasks if the migrations table exists
   wait_mariadbd
   if check_migrations_db ; then
     apply_migrations
   else
     init_migrations
+    apply_init_procedures
   fi
   exit $?
   ;;
@@ -201,5 +227,3 @@ dev)
   echo "$HEADER error: invalid SHANOIR_MIGRATION value: '$SHANOIR_MIGRATION'" >&2
   exit 1
 esac
-
-exec /entrypoint.sh "$@"

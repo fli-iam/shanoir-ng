@@ -63,7 +63,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     protected getRoutingName(): string {
-        return 'examination';
+        return 'acquisition-equipment';
     }
 
     getService(): EntityService<AcquisitionEquipment> {
