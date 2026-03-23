@@ -10,14 +10,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-version: '3'
 services:
   #
   # Keycloak: database and service
   #
   keycloak-database:
     container_name: "${SHANOIR_PREFIX}keycloak-database"
-    image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:NG_v2.9.1"
+    image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:NG_v2.9.3"
     environment:
       - MYSQL_DATABASE=keycloak
     ulimits:
@@ -50,7 +49,7 @@ services:
       - SHANOIR_SMTP_STARTTLS_ENABLE
       - SHANOIR_SMTP_STARTTLS_REQUIRED
       - SHANOIR_SMTP_FROM
-    image: "ghcr.io/fli-iam/shanoir-ng/keycloak:NG_v2.9.1"
+    image: "ghcr.io/fli-iam/shanoir-ng/keycloak:NG_v2.9.3"
     volumes:
       - "keycloak-logs:/opt/keycloak/data/log"
     networks:
@@ -77,12 +76,10 @@ services:
   #
   database:
     container_name: "${SHANOIR_PREFIX}database"
-    image: "ghcr.io/fli-iam/shanoir-ng/database:NG_v2.9.1"
+    image: "ghcr.io/fli-iam/shanoir-ng/database:NG_v2.9.3"
     command: --max_allowed_packet 20000000
     env_file:
       - ./docker-compose/database/variables.env
-    environment:
-      - SHANOIR_MIGRATION
     ulimits:
       nofile:
         soft: 262144
@@ -93,12 +90,32 @@ services:
      - "3307:3306"
     networks:
       - shanoir_ng_network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
+  #
+  # Migrations for the database
+  #
+  database-migrations:
+    container_name: "${SHANOIR_PREFIX}database-migrations"
+    image: "ghcr.io/fli-iam/shanoir-ng/database-migrations:NG_v2.9.3"
+    environment:
+      - SHANOIR_MIGRATION
+    networks:
+      - shanoir_ng_network
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: "no"
   #
   # Users microservice
   #
   users:
     container_name: "${SHANOIR_PREFIX}users"
-    image: "ghcr.io/fli-iam/shanoir-ng/users:NG_v2.9.1"
+    image: "ghcr.io/fli-iam/shanoir-ng/users:NG_v2.9.3"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -122,14 +139,18 @@ services:
      - "9901:9901"
      - "9911:9911"
     depends_on:
-      - "database"
-      - "rabbitmq"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
   #
   # Studies microservice
   #
   studies:
     container_name: "${SHANOIR_PREFIX}studies"
-    image: "ghcr.io/fli-iam/shanoir-ng/studies:NG_v2.9.1"
+    image: "ghcr.io/fli-iam/shanoir-ng/studies:NG_v2.9.3"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -148,15 +169,20 @@ services:
      - "9902:9902"
      - "9912:9912"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
   #
   # Import microservice
   #
   import:
     container_name: "${SHANOIR_PREFIX}import"
-    image: "ghcr.io/fli-iam/shanoir-ng/import:NG_v2.9.1"
+    image: "ghcr.io/fli-iam/shanoir-ng/import:NG_v2.9.3"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -176,15 +202,20 @@ services:
      # do not add by default, as it blocks local ShUp from using 44105
      # - "44105:44105"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
   #
   # Datasets microservice
   #
   datasets:
     container_name: "${SHANOIR_PREFIX}datasets"
-    image: "ghcr.io/fli-iam/shanoir-ng/datasets:NG_v2.9.1"
+    image: "ghcr.io/fli-iam/shanoir-ng/datasets:NG_v2.9.3"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -206,13 +237,22 @@ services:
      - "9904:9904"
      - "9914:9914"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
-
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
+      solr:
+        condition: service_started
+  #
+  # Preclinical microservice
+  #
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"
-    image: "ghcr.io/fli-iam/shanoir-ng/preclinical:NG_v2.9.1"
+    image: "ghcr.io/fli-iam/shanoir-ng/preclinical:NG_v2.9.3"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -229,15 +269,20 @@ services:
      - "9905:9905"
      - "9915:9915"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
   #
   # Nifti conversion microservice
   #
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
-    image: "ghcr.io/fli-iam/shanoir-ng/nifti-conversion:NG_v2.9.1"
+    image: "ghcr.io/fli-iam/shanoir-ng/nifti-conversion:NG_v2.9.3"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -255,7 +300,7 @@ services:
   #
   solr:
     container_name: "${SHANOIR_PREFIX}solr"
-    image: "ghcr.io/fli-iam/shanoir-ng/solr:NG_v2.9.1"
+    image: "ghcr.io/fli-iam/shanoir-ng/solr:NG_v2.9.3"
     environment:
       - SOLR_LOG_LEVEL=SEVERE
     volumes:
@@ -328,7 +373,7 @@ services:
   #
   nginx:
     container_name: shanoir-ng-nginx
-    image: "ghcr.io/fli-iam/shanoir-ng/nginx:NG_v2.9.1"
+    image: "ghcr.io/fli-iam/shanoir-ng/nginx:NG_v2.9.3"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
