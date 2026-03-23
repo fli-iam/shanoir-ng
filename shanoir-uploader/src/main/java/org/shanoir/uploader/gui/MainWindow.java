@@ -74,6 +74,7 @@ import org.shanoir.uploader.action.ImportDialogOpener;
 import org.shanoir.uploader.action.RSDocumentListener;
 import org.shanoir.uploader.action.SelectionActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.service.rest.UpdateCheckerService;
 import org.shanoir.uploader.service.rest.UrlConfig;
 import org.shanoir.uploader.utils.PropertiesUtil;
 import org.slf4j.Logger;
@@ -300,6 +301,15 @@ public class MainWindow extends JFrame {
                 AboutWindow aboutW = new AboutWindow(resourceBundle);
             }
         });
+      
+        JMenuItem mntmCheckUpdates = new JMenuItem(resourceBundle.getString("shanoir.uploader.helpMenu.checkUpdates"));
+		    mnHelp.add(mntmCheckUpdates);
+		    mntmCheckUpdates.addActionListener(new ActionListener() {
+			    @Override
+			    public void actionPerformed(ActionEvent arg0) {
+				    UpdateCheckerService.checkForUpdates(frame, resourceBundle);
+			    }
+		    });
 
         JMenu profileSelected = new JMenu("<html>"
                 + "[ " + resourceBundle.getString("shanoir.uploader.profileMenu") + ShUpConfig.profileSelected + " ]"
