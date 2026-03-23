@@ -197,18 +197,28 @@ public class RabbitMQConfiguration {
     public static final String STUDY_NAME_QUEUE = "study-name-queue";
 
     /** Study name updated => notify dataset MS to change database. */
-    public static final String STUDY_NAME_UPDATE_QUEUE = "study-name-update-queue";
+    public static final String STUDY_UPDATE_QUEUE = "study-update-queue";
+
+    /** Study name updated => notify dataset MS to change database. */
+    public static final String STUDY_DRAFT_STATE_QUEUE = "study-draft-state-queue";
 
     /** Queue to create a study_user when subscribing to a study */
     public static final String STUDY_SUBSCRIPTION_QUEUE = "study-subscription-queue";
 
     /** Create tags on subject-study via quality control using study cards: ms datasets -> ms studies */
     public static final String STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG = "studies-subject-study-study-card-tag";
+
     /** Queue used to get participants.tsv of a study. */
     public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
 
     /** Send a mail from studies microservice to ms users */
     public static final String STUDY_USER_MAIL_QUEUE = "study-user-mail-queue";
+
+    /** Send a mail from studies microservice when a study is created */
+    public static final String DRAFT_STUDY_MAIL_QUEUE = "draft-study-mail-queue";
+
+    /** Send a mail from studies microservice when a study is created */
+    public static final String APPROVE_STUDY_MAIL_QUEUE = "approve-study-mail-queue";
 
     /** Queue to notify when a user / study is updated / deleted. */
     public static final String STUDY_USER_QUEUE = "study-user";
@@ -486,7 +496,12 @@ public class RabbitMQConfiguration {
 
     @Bean
     public static Queue studyNameUpdateQueue() {
-        return new Queue(STUDY_NAME_UPDATE_QUEUE, true);
+        return new Queue(STUDY_UPDATE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyDraftStateQueue() {
+        return new Queue(STUDY_DRAFT_STATE_QUEUE, true);
     }
 
     @Bean
@@ -502,6 +517,16 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyUserMailQueue() {
         return new Queue(STUDY_USER_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyCreatedMailQueue() {
+        return new Queue(DRAFT_STUDY_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyDraftStateMailQueue() {
+        return new Queue(APPROVE_STUDY_MAIL_QUEUE, true);
     }
 
     @Bean

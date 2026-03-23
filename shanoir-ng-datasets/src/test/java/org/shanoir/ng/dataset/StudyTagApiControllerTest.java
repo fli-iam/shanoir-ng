@@ -181,7 +181,7 @@ public class StudyTagApiControllerTest {
     private ObjectMapper mapper;
 
     private Subject subject = new Subject(3L, "name");
-    private Study study = new Study(1L, "studyName");
+    private Study study = new Study(1L, "studyName", false);
 
     private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
     private DatasetMetadata updatedMetadata = new DatasetMetadata();
