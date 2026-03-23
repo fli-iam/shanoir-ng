@@ -100,11 +100,11 @@ export class AnimalSubjectFormComponent extends EntityComponent<AnimalSubject> {
             private downloadService: MassDownloadService) {
 
         super(route);
+        this.differ = this.differs.find({}).create();
     }
 
     protected getRoutingName(): string {
         return 'preclinical-subject';
-        this.differ = this.differs.find({}).create();
 
     }
 

@@ -43,6 +43,7 @@ import org.shanoir.ng.shared.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectBatchDTO;
 import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -51,7 +52,9 @@ import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,6 +123,9 @@ public class RabbitMQDatasetsService {
     private StudyCardRepository studyCardRepository;
 
     @Autowired
+    private QualityCardRepository qualityCardRepository;
+
+    @Autowired
     private BIDSService bidsService;
 
     @Autowired
@@ -139,7 +145,7 @@ public class RabbitMQDatasetsService {
         listener.receiveStudyUsers(commandArrStr);
     }
 
-    @RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitListener(queues = RabbitMQConfiguration.STUDY_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
     @RabbitHandler
     public String receiveStudyUpdate(final String studyAsString) {
         try {
@@ -186,11 +192,14 @@ public class RabbitMQDatasetsService {
      */
     @Transactional
     private void manageSubjectUpdate(final String subjectStr) throws JsonProcessingException, JsonMappingException {
-        Subject received = objectMapper.readValue(subjectStr, Subject.class);
-        received = subjectRepository.save(received);
+        Subject subject = objectMapper.readValue(subjectStr, Subject.class);
+        subject = subjectRepository.save(subject);
+        LOG.info("Subject replicated in MS Datasets with ID: {} and Name: {}",
+                subject.getId(), subject.getName()
+        );
         // Update BIDS
         Set<Long> studyIds = new HashSet<>();
-        for (Examination exam : examinationRepository.findBySubjectId(received.getId())) {
+        for (Examination exam : examinationRepository.findBySubjectId(subject.getId())) {
             studyIds.add(exam.getStudyId());
         }
         for (Study stud : studyRepository.findAllById(studyIds)) {
@@ -198,11 +207,48 @@ public class RabbitMQDatasetsService {
         }
         // Update solr references
         List<Long> subjectIdList = new ArrayList<Long>();
-        subjectIdList.add(received.getId());
+        subjectIdList.add(subject.getId());
         try {
             solrService.updateSubjectsAsync(subjectIdList);
         } catch (Exception e) {
             LOG.error("Solr update failed for subjects {}", subjectIdList, e);
+        }
+    }
+
+    @RabbitListener(queues = RabbitMQConfiguration.SUBJECT_BATCH_UPDATE_QUEUE, containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    public boolean receiveSubjectBatchUpdate(final String subjectBatchStr) {
+        try {
+            manageSubjectBatchUpdate(subjectBatchStr);
+            return true;
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
+        }
+    }
+
+    @Transactional
+    private void manageSubjectBatchUpdate(final String subjectBatchStr) throws JsonProcessingException {
+        SubjectBatchDTO batchDTO = objectMapper.readValue(subjectBatchStr, SubjectBatchDTO.class);
+        Set<Long> allStudyIds = new HashSet<>();
+        List<Long> allSubjectIds = new ArrayList<>();
+        for (Subject subject : batchDTO.getSubjects()) {
+            subject = subjectRepository.save(subject);
+            allSubjectIds.add(subject.getId());
+            LOG.info("Subject replicated in MS Datasets with ID: {} and Name: {}",
+                    subject.getId(), subject.getName());
+            for (Examination exam : examinationRepository.findBySubjectId(subject.getId())) {
+                allStudyIds.add(exam.getStudyId());
+            }
+        }
+        // Update BIDS for all affected studies
+        for (Study stud : studyRepository.findAllById(allStudyIds)) {
+            bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+        }
+        // Update Solr references in batch
+        try {
+            solrService.updateSubjectsAsync(allSubjectIds);
+        } catch (Exception e) {
+            LOG.error("Solr update failed for subjects {}", allSubjectIds, e);
         }
     }
 
@@ -324,6 +370,10 @@ public class RabbitMQDatasetsService {
             for (StudyCard sc : studyCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
                 studyCardRepository.delete(sc);
             }
+            // also delete associated quality cards
+            for (QualityCard qc : qualityCardRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
+                qualityCardRepository.delete(qc);
+            }
 
             // Delete study from datasets database
             studyRepository.deleteById(Long.valueOf(event.getObjectId()));
@@ -425,7 +475,7 @@ public class RabbitMQDatasetsService {
                     countAlreadyExist++;
 
                 } else {
-                    Object[] result = datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap, userId);
+                    Object[] result = datasetCopyService.moveDataset(datasetParent, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
                     Long newDsId = (Long) result[0];
                     countProcessed += (int) result[1];
                     countSuccess += (int) result[2];

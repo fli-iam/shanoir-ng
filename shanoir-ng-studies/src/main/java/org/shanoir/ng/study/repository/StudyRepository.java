@@ -38,7 +38,9 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
     void deleteById(Long id);
 
     @EntityGraph(attributePaths = { "studyTags", "profile" })
-    List<Study> findByVisibleByDefaultTrue();
+    List<Study> findByVisibleByDefaultTrueAndIsDraftFalse();
+
+    List<Study> findByIsDraftTrue();
 
     //@EntityGraph(attributePaths = { "profile", "tags" })
     List<Study> findAll();
@@ -91,4 +93,7 @@ public interface StudyRepository extends CrudRepository<Study, Long>, StudyRepos
 
     @Query("SELECT su.study.id FROM StudyUser su WHERE su.userId = :userId AND :right MEMBER OF su.studyUserRights")
     List<Long> findByUserIdAndStudyUserRight(Long userId, Integer right);
+
+    @Query("SELECT s.isDraft FROM Study s WHERE s.id = :studyId")
+    Boolean findIsDraftById(@Param("studyId") Long id);
 }

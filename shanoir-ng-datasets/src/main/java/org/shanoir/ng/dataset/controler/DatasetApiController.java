@@ -23,16 +23,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetDownloadDataInput;
 import org.shanoir.ng.dataset.dto.DatasetLight;
+import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
@@ -40,11 +45,12 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.download.DatasetDownloadError;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -60,6 +66,8 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -69,6 +77,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -83,7 +92,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.context.event.EventListener;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -128,6 +139,9 @@ public class DatasetApiController implements DatasetApi {
     private ExaminationService examinationService;
 
     @Autowired
+    private SubjectService subjectService;
+
+    @Autowired
     private ImporterService importerService;
 
     @Autowired
@@ -148,6 +162,9 @@ public class DatasetApiController implements DatasetApi {
     @Qualifier("datasetDownloaderServiceImpl")
     @Autowired
     private DatasetDownloaderServiceImpl datasetDownloaderService;
+
+    @Autowired
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDAndSubjectNameHandler;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -357,16 +374,24 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public ResponseEntity<String> getDicomMetadataByDatasetId(
-            Long datasetId) throws IOException, MessagingException {
+    public ResponseEntity<String> getDicomMetadataByDatasetId(Long datasetId)
+            throws IOException, MessagingException {
         final Dataset dataset = datasetService.findById(datasetId);
-        DatasetDownloadError result = new DatasetDownloadError();
-        List<URL> pathURLs = new ArrayList<>();
-        DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, result);
-        if (pathURLs.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        Optional<URL> firstWADOURL = DatasetFileUtils.getFirstDatasetFilePathURL(
+                dataset,
+                DatasetExpressionFormat.DICOM);
+        if (firstWADOURL.isPresent()) {
+            String dicomJson = downloader.downloadDicomMetadataForURL(firstWADOURL.orElseThrow());
+            if (dataset.getSource() != null) {
+                Optional<Subject> subjectOpt = subjectService.findById(dataset.getSubjectId());
+                String subjectName = subjectOpt.get().getName();
+                JsonNode root = objectMapper.readTree(dicomJson);
+                studyInstanceUIDAndSubjectNameHandler.replacePatientInfo(root, subjectName);
+                dicomJson = objectMapper.writeValueAsString(root);
+            }
+            return ResponseEntity.ok(dicomJson);
         } else {
-            return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);
+            return ResponseEntity.noContent().build();
         }
     }
 
@@ -481,7 +506,6 @@ public class DatasetApiController implements DatasetApi {
     @Override
     public ResponseEntity<List<DatasetDownloadData>> getDownloadData(
             @Parameter(description = "Input arguments", required = true) @Valid @RequestBody DatasetDownloadDataInput input) {
-
         List<DatasetDownloadData> downloadDataList = datasetService.getDownloadDataByAcquisitionAndExaminationIds(input.getAcquisitionIds(), input.getExaminationIds());
         return new ResponseEntity<>(downloadDataList, HttpStatus.OK);
     }
@@ -586,8 +610,6 @@ public class DatasetApiController implements DatasetApi {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-
-
     @Override
     public ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(String eventId) throws IOException {
         try {
@@ -633,8 +655,37 @@ public class DatasetApiController implements DatasetApi {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Compute overall statistics on application startup.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void computeOverallStatisticsOnStartup() {
+        computeOverallStatistics();
+    }
+
+    /**
+     * Scheduled method to compute overall statistics daily at 6 AM to display up to date stats on welcome page.
+     */
+    @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
+    public void computeOverallStatistics() {
+        try {
+            createStatisticsService.computeOverallStatistics();
+        } catch (Exception e) {
+            LOG.error("Error while computing overall statistics.", e);
+        }
+    }
+
+    @Override
+    public ResponseEntity<OverallStatistics> getOverallStatistics() throws IOException {
+        OverallStatistics statistics = datasetService.getOverallStatistics();
+        if (statistics == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(statistics, HttpStatus.OK);
     }
 
     public ResponseEntity<Resource> extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws RestServiceException {

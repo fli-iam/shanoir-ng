@@ -21,14 +21,17 @@ import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long> {
 
@@ -66,11 +69,14 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     @Query(value = "SELECT ds.id FROM dataset ds "
             + "LEFT JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id "
+            + "WHERE acq.examination_id = :examId "
+            + "UNION "
+            + "SELECT ds.id FROM dataset ds "
             + "LEFT JOIN dataset_processing processing ON ds.dataset_processing_id = processing.id "
             + "LEFT JOIN input_of_dataset_processing tempo ON tempo.processing_id = processing.id "
             + "LEFT JOIN dataset inputs ON tempo.dataset_id = inputs.id "
             + "LEFT JOIN dataset_acquisition inputAcq ON inputs.dataset_acquisition_id = inputAcq.id "
-            + "WHERE acq.examination_id = :examId OR inputAcq.examination_id = :examId", nativeQuery = true)
+            + "WHERE inputAcq.examination_id = :examId", nativeQuery = true)
     List<Long> findDatasetAndOutputByExaminationId(Long examId);
 
 
@@ -83,6 +89,9 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "WHERE expr.dataset.datasetAcquisition.examination.study.id in (:studyIds) AND expr.size IS NOT NULL "
             + "GROUP BY expr.dataset.datasetAcquisition.examination.study.id, expr.datasetExpressionFormat")
     List<Object[]> findExpressionSizesTotalByStudyIdGroupByFormat(List<Long> studyIds);
+
+    @Query("SELECT SUM(expr.size) FROM DatasetExpression expr WHERE expr.size IS NOT NULL")
+    Long findDatasetsExpressionSizesSum();
 
     List<Dataset> deleteByDatasetProcessingId(Long id);
 
@@ -158,6 +167,19 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN e.subject sub "
             + "WHERE s.id = :studyId")
     List<DatasetLight> findAllLightByStudyId(Long studyId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "CALL computeOverallStatistics()", nativeQuery = true)
+    void computeOverallStatistics();
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE overall_statistics os SET os.storage_size = :totalStorageVolume WHERE os.stats_date = CURDATE()", nativeQuery = true)
+    void addTotalStorageVolume(@Param("totalStorageVolume") Long totalStorageVolume);
+
+    @Query(value = "SELECT os from OverallStatistics os WHERE os.statsDate = (SELECT MAX(os2.statsDate) FROM OverallStatistics os2)")
+    List<OverallStatistics> getOverallStatistics();
 
     @Query("SELECT new org.shanoir.ng.dataset.dto.DatasetStudyCenter("
             + "ds.id, ex.study.id, ex.centerId) "

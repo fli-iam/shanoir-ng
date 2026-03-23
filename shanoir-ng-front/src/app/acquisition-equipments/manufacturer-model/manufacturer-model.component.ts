@@ -44,11 +44,11 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
             private manufService: ManufacturerService) {
 
         super(route);
+        this.datasetModalityTypes = DatasetModalityType.options;
     }
 
     protected getRoutingName(): string {
         return 'manufacturer-model';
-        this.datasetModalityTypes = DatasetModalityType.options;
     }
 
     get manufModel(): ManufacturerModel { return this.entity; }

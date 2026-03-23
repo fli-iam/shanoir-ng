@@ -41,7 +41,7 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
@@ -119,7 +119,7 @@ public class DatasetApiSecurityTest {
     private SolrService solrService;
 
     @MockBean
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @BeforeEach
     public void setup() {
@@ -346,6 +346,7 @@ public class DatasetApiSecurityTest {
         Study study = new Study();
         study.setId(id);
         study.setName("");
+        study.setIsDraft(false);
         study.setRelatedDatasets(new ArrayList<>());
         study.setSubjectStudyList(new ArrayList<>());
         study.setTags(new ArrayList<>());

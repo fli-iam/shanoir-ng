@@ -73,7 +73,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .addFilterAfter(mdcFilter, FilterSecurityInterceptor.class)
                 .authorizeHttpRequests(
-                    matcher -> matcher.requestMatchers("/accountrequest", "/extensionrequest", "/last_login_date")
+                    matcher -> matcher.requestMatchers("/accountrequest", "/extensionrequest", "/last_login_date", "/users/count", "/events/count")
                         // the swagger API is not exposed here for security reasons (MK)
                         .permitAll()
                     .anyRequest()
