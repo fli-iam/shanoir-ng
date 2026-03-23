@@ -18,15 +18,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label i18n="access request|user label@@user">User</label>
             <span class="right-col">
-                <ng-container *ngIf="isAdmin(); else plainText">
-                  <a [routerLink]="['/user/details/', accessRequest.user.id]">
-                    {{ accessRequest.user.username}}
-                  </a>
-                </ng-container>
-
-                <ng-template #plainText>
-                  <span>{{ accessRequest.user.username}}</span>
-                </ng-template>
+                @if (isAdmin()) {
+                    <a [routerLink]="['/user/details/', accessRequest.user.id]">
+                        {{ accessRequest.user.username}}
+                    </a>
+                } @else {
+                    <span>{{ accessRequest.user.username}}</span>
+                }
             </span>
         </li>
         <li>
@@ -63,15 +61,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label i18n="access request|user label@@user">User</label>
             <span class="right-col">
-                <ng-container *ngIf="isAdmin(); else plainText">
-                  <a [routerLink]="['/user/details/', accountCreation.user.id]">
-                    {{ accountCreation.user.username}}
-                  </a>
-                </ng-container>
-
-                <ng-template #plainText>
-                  <span>{{ accountCreation.user.username}}</span>
-                </ng-template>
+                @if (isAdmin()) {
+                    <a [routerLink]="['/user/details/', accountCreation.user.id]">
+                        {{ accountCreation.user.username}}
+                    </a>
+                } @else {
+                    <span>{{ accountCreation.user.username}}</span>
+                }
             </span>
         </li>
         <li>
