@@ -97,7 +97,7 @@ public class BidsApiControllerTest {
         // GIVEN a study with a bids folder to generate
 
         // WHEN we call the API to generate the folder
-        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_EXPORT).param("filePath", "/var/datasets-data/bids-data/study-1_NATIVE/truc.pdf")).andExpect(status().isNoContent());
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_EXPORT).param("filePath", "/var/bids-data/study-1_NATIVE/truc.pdf")).andExpect(status().isNoContent());
 
         // THEN the service is called
     }

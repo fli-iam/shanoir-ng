@@ -52,6 +52,14 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public String storePathologyModelData(Long pathologyModelId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        String directory = PATHOLOGY_MODEL + pathologyModelId;
+        return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
+    }
+
+    @Override
     public String storeStudyFile(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {

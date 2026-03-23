@@ -39,6 +39,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -68,6 +69,9 @@ public class BidsApiController implements BidsApi {
     @Autowired
     private StudyRepository studyRepo;
 
+    @Value("${storage.file-system.bids-data}")
+    private String bidsStorageDir;
+
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -96,8 +100,8 @@ public class BidsApiController implements BidsApi {
             @Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath,
             HttpServletResponse response) throws RestServiceException, IOException {
         // Check filePath too
-        // /var/datasets-data/bids-data/study-1_NATIVE
-        if (!filePath.startsWith("/var/datasets-data/bids-data/study-" + studyId)) {
+        // /var/bids-data/study-1_NATIVE
+        if (!filePath.startsWith(bidsStorageDir + "/study-" + studyId)) {
             response.sendError(HttpStatus.UNAUTHORIZED.value());
             return;
         }

@@ -109,12 +109,11 @@ storage:
   file-system:
     datasets-data: /var/datasets-data
     studies-data: /var/studies-data
-    uploadExtradataFolder: /var/extra-data
     uploadBrukerFolder: /tmp/
     separator: /
   s3:
-    bucket-name-datasets: bucket-name-datasets
-    bucket-name-studies: bucket-name-studies
+    datasets-bucket-name: datasets-bucket-name
+    studies-bucket-name: studies-bucket-name
 
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #

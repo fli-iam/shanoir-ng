@@ -50,10 +50,10 @@ public class S3StorageService implements StorageService {
 
     private final S3Client s3Client;
 
-    @Value("${storage.s3.bucket-name-datasets}")
+    @Value("${storage.s3.datasets-bucket-name}")
     private String datasetsBucket;
 
-    @Value("${storage.s3.bucket-name-studies}")
+    @Value("${storage.s3.studies-bucket-name}")
     private String studiesBucket;
 
     public S3StorageService(S3Template s3Template, S3Client s3Client) {
@@ -71,6 +71,22 @@ public class S3StorageService implements StorageService {
             s3Template.upload(datasetsBucket, key, inputStream,
                     ObjectMetadata.builder().contentType(contentType).build());
             LOG.info("Stored dataset file to S3: s3://{}/{}", datasetsBucket, key);
+            return getPublicLocationDatasets(directory, fileName);
+        } catch (Exception e) {
+            throw new StorageException("S3 upload failed for: " + fileName, e);
+        }
+    }
+
+    @Override
+    public String storePathologyModelData(Long pathologyModelId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        String directory = PATHOLOGY_MODEL + pathologyModelId;
+        String key = directory + "/" + fileName;
+        try {
+            s3Template.upload(datasetsBucket, key, inputStream,
+                    ObjectMetadata.builder().contentType(contentType).build());
+            LOG.info("Stored pathology model file to S3: s3://{}/{}", datasetsBucket, key);
             return getPublicLocationDatasets(directory, fileName);
         } catch (Exception e) {
             throw new StorageException("S3 upload failed for: " + fileName, e);

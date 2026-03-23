@@ -32,10 +32,10 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -65,9 +65,6 @@ public class ExtraDataApiController implements ExtraDataApi {
     @Autowired
     private ExtraDataService<BloodGasData> bloodGasDataService;
 
-    @Value("${storage.file-system.uploadExtradataFolder}")
-    private String extraDataPath;
-
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -86,6 +83,9 @@ public class ExtraDataApiController implements ExtraDataApi {
 
     @Autowired
     private ExtraDataEditableByManager editableOnlyValidator;
+
+    @Autowired
+    private StorageService storageService;
 
     @Override
     public ResponseEntity<ExaminationExtraData> uploadExtraData(
@@ -352,28 +352,23 @@ public class ExtraDataApiController implements ExtraDataApi {
         return editableOnlyValidator.validate(extraData);
     }
 
-    private ExaminationExtraData saveUploadedFile(ExaminationExtraData extradata, MultipartFile file) throws IOException {
-
-        File createdFolder = new File(extraDataPath + "/models/" + extradata.getId());
-        if (!createdFolder.mkdirs()) {
-            LOG.error("Could not create directory [{}]", createdFolder.getAbsolutePath());
-        }
-
-        // Path to file
-        File fileToGet = new File(createdFolder + "/" + file.getOriginalFilename());
+    private ExaminationExtraData saveUploadedFile(ExaminationExtraData examinationExtraData, MultipartFile file) throws IOException {
         try {
-            if (!fileToGet.createNewFile()) {
-                LOG.error("Could not create file [{}]", fileToGet.getAbsolutePath());
-            }
-            file.transferTo(fileToGet);
-        } catch (IOException e) {
-            LOG.error("Error while saving file [{}] to [{}].", file.getOriginalFilename(), fileToGet.getAbsolutePath());
-            throw e;
+            LOG.info("Saving file {} for examination: {}", file.getOriginalFilename(), examinationExtraData.getId());
+            String filePath = storageService.storeExtraData(
+                    examinationExtraData.getId(),
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getContentType(),
+                    file.getSize());
+            examinationExtraData.setFilename(file.getOriginalFilename());
+            examinationExtraData.setFilepath(filePath);
+        } catch (Exception e) {
+            LOG.error("Error while uploading file {} for examination: {}. File not uploaded. {}",
+                    file.getOriginalFilename(), examinationExtraData.getId(), e);
+            return null;
         }
-
-        extradata.setFilename(file.getOriginalFilename());
-        extradata.setFilepath(fileToGet.getAbsolutePath());
-        return extradata;
+        return examinationExtraData;
     }
 
 }

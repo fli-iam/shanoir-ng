@@ -107,10 +107,13 @@ storage:
   file-system:
     studies-data: /var/studies-data
     datasets-data: /var/datasets-data
-    bids-data: /var/datasets-data/bids-data # only temporary, not in S3
+    bids-data: /var/bids-data
+    vip-data: /var/vip-data
   s3:
-    bucket-name-studies: bucket-name-studies
-    bucket-name-datasets: bucket-name-datasets
+    studies-bucket-name: studies-bucket-name
+    datasets-bucket-name: datasets-bucket-name
+    bids-bucket-name: bids-bucket-name
+    vip-bucket-name: vip-bucket-name
 
 # logging configuration
 logging:

@@ -24,7 +24,13 @@ public interface StorageService {
 
     public static final String STUDY = "study-";
 
+    public static final String PATHOLOGY_MODEL = "pathology-model-";
+
     String storeExtraData(Long examinationId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException;
+
+    String storePathologyModelData(Long pathologyModelId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException;
 

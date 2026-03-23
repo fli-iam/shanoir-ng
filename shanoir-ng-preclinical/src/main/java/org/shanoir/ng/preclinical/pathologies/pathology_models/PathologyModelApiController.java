@@ -31,11 +31,11 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -67,14 +67,14 @@ public class PathologyModelApiController implements PathologyModelApi {
     @Autowired
     private ShanoirEventService eventService;
 
-    @Value("${storage.file-system.uploadExtradataFolder}")
-    private String extraDataPath;
-
     @Autowired
     private PathologyModelUniqueValidator uniqueValidator;
 
     @Autowired
     private PathologyModelEditableByManager editableOnlyValidator;
+
+    @Autowired
+    private StorageService storageService;
 
     @Override
     public ResponseEntity<PathologyModel> createPathologyModel(
@@ -268,15 +268,21 @@ public class PathologyModelApiController implements PathologyModelApi {
     }
 
     private PathologyModel saveUploadedFile(PathologyModel model, MultipartFile file) throws IOException {
-        // Create corresponding folders
-        File createdFolder = new File(extraDataPath + "/models/" + model.getId());
-        createdFolder.mkdirs();
-        // Path to file
-        File fileToGet = new File(createdFolder + "/" + file.getOriginalFilename());
-        file.transferTo(fileToGet);
-
-        model.setFilename(file.getOriginalFilename());
-        model.setFilepath(fileToGet.getAbsolutePath());
+        try {
+            LOG.info("Saving file {} for pathology model: {}", file.getOriginalFilename(), model.getId());
+            String filePath = storageService.storePathologyModelData(
+                    model.getId(),
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getContentType(),
+                    file.getSize());
+            model.setFilename(file.getOriginalFilename());
+            model.setFilepath(filePath);
+        } catch (Exception e) {
+            LOG.error("Error while uploading file {} for pathology model: {}. File not uploaded. {}",
+                    file.getOriginalFilename(), model.getId(), e);
+            return null;
+        }
         return model;
     }
 
