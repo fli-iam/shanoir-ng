@@ -46,6 +46,7 @@ import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -61,6 +62,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControllerSecurityService;
+import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.tag.mapper.StudyTagMapper;
 import org.shanoir.ng.tag.service.StudyTagService;
@@ -121,6 +123,12 @@ public class StudyTagApiControllerTest {
     private ExaminationService examinationService;
 
     @MockBean
+    private SubjectService subjectService;
+
+    @MockBean
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDAndSubjectNameHandler;
+
+    @MockBean
     private WADODownloaderService downloader;
 
     @MockBean(name = "datasetSecurityService")
@@ -173,7 +181,7 @@ public class StudyTagApiControllerTest {
     private ObjectMapper mapper;
 
     private Subject subject = new Subject(3L, "name");
-    private Study study = new Study(1L, "studyName");
+    private Study study = new Study(1L, "studyName", false);
 
     private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
     private DatasetMetadata updatedMetadata = new DatasetMetadata();

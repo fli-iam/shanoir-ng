@@ -1,12 +1,12 @@
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -23,7 +23,7 @@ spring:
   config:
     import: "classpath:/shanoir-shared.yml"
   datasource:
-    url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:datasets}?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: datasets
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -98,11 +98,7 @@ front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
-# Solr
-solr.host: http://${SHANOIR_PREFIX}solr:8983/solr/shanoir
-# microservices url
-ms.url:
-  shanoir-ng-studies: http://${SHANOIR_PREFIX}studies:9902/
+solr.host: http://${SHANOIR_SOLR_HOST:${SHANOIR_PREFIX}solr}:8983/solr/shanoir
 # Data folder configuration
 datasets-data: /var/datasets-data
 vip-data-folder: /var/datasets-data/vip-data
@@ -200,11 +196,6 @@ keycloak:
   auth-server-url: https://shanoir-ng-nginx/auth
 dcm4chee-arc:
   host: dcm4chee-arc
-# Solr
-spring.data.solr.host: http://solr:8983/solr/shanoir/
-# microservices url
-ms.url:
-  shanoir-ng-studies: http://studies:9902/
 # Data folder configuration
 datasets-data: /var/datasets-data
 vip-data-folder: /var/datasets-data/vip-data

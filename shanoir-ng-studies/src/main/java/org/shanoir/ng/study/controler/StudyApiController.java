@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -162,6 +163,16 @@ public class StudyApiController implements StudyApi {
         return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
     }
 
+    @Override
+    @Transactional
+    public ResponseEntity<List<StudyDTO>> findDraftStudies() {
+        List<Study> studies = studyService.findDraftStudies();
+        if (studies.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
+    }
+
     public ResponseEntity<List<StudyLightDTO>> findStudiesLight() {
         List<Study> studies = studyService.findAll();
         if (studies.isEmpty()) {
@@ -217,6 +228,7 @@ public class StudyApiController implements StudyApi {
 
         Study createdStudy;
         try {
+            study.setIsDraft(!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN"));
             addCurrentUserAsStudyUserIfEmptyStudyUsers(study);
             createdStudy = studyService.create(study);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_STUDY_EVENT,
@@ -226,6 +238,24 @@ public class StudyApiController implements StudyApi {
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", e));
         }
         return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<StudyDTO> approveDraftStudy(final Long studyId)
+            throws RestServiceException {
+        Study study;
+        try {
+            study = studyService.approveDraftStudy(studyId);
+            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_STUDY_EVENT, studyId.toString(),
+                    KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ShanoirException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), e));
+        }
+
+        return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
     }
 
     private void addCurrentUserAsStudyUserIfEmptyStudyUsers(final Study study) {
@@ -246,19 +276,29 @@ public class StudyApiController implements StudyApi {
     public ResponseEntity<String> copyDatasetsToStudy(
             List<Long> datasetIds,
             String studyIdAsStr,
+            String subjectName,
             List<Long> centerIds,
-            List<String> subjectIdStudyIds) {
+            List<String> subjectIds) {
         String res;
         try {
-            Long studyId = Long.valueOf(studyIdAsStr);
-            relatedDatasetService.createSubjectsInTargetStudy(subjectIdStudyIds, studyId);
-            res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
+            Study study = studyService.findById(Long.valueOf(studyIdAsStr));
+            if (study.getIsDraft()) {
+                String errorMsg = "Copy dataset(s): The study " + studyIdAsStr + " is draft. An administrator must approve the study before it's use.";
+                LOG.error(errorMsg);
+                return new ResponseEntity<>(errorMsg, HttpStatus.FORBIDDEN);
+            }
+
+            Map<Long, Long> subjectMapping = new HashMap<>();
+            relatedDatasetService.createSubjectsInTargetStudy(subjectIds, study, subjectMapping, subjectName);
+            res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, study, centerIds, subjectMapping);
         } catch (SecurityException e) {
-            LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            String errorMsg = "Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : " + e;
+            LOG.error(errorMsg);
+            return new ResponseEntity<>(errorMsg, HttpStatus.FORBIDDEN);
         } catch (ShanoirException e) {
-            LOG.error("Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : ", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            String errorMsg = "Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : " + e;
+            LOG.error(errorMsg);
+            return new ResponseEntity<>(errorMsg, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(res, HttpStatus.OK);
     }

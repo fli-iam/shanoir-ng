@@ -109,6 +109,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
                     // find the correct equipment for each study card and add it
                     if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
                         studyCard.setAcquisitionEquipment(acquisitionEquipment);
+                        studyCard.setCenterId(acquisitionEquipment.getCenter().getId());
                     }
                 }
             }
