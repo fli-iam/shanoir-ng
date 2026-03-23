@@ -40,28 +40,15 @@ public class QualityService {
 
 
     public QualityCardResult checkQuality(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> acquisitionAttributes, List<QualityCard> qualityCards) throws ShanoirException {
-        if (qualityCards == null || qualityCards.isEmpty()) {
-            LOG.warn("No qualitycard given for this import.");
-            return null;
-        }
-
-        List<QualityCard> cardsToCheck = qualityCards.stream()
-            .filter(QualityCard::isToCheckAtImport)
-            .toList();
-
-        if (cardsToCheck.isEmpty()) {
-            return null;
-        }
         
         QualityCardResult qualityResult = new QualityCardResult();
-        for (QualityCard qualityCard : cardsToCheck) {
+        for (QualityCard qualityCard : qualityCards) {
             // In case multiple quality cards are used with different roles, we check them all
             qualityResult.merge(qualityCard.apply(datasetAcquisition, acquisitionAttributes, downloader));
         }
         return qualityResult;
     }
 
-    // TODO : QualityCardResult should be stored in ImportJob and not only returned by this method
     public QualityCardResult retrieveQualityCardResult(ImportJob importJob) {
         if (importJob.getQualityTag() == null) {
             return new QualityCardResult();

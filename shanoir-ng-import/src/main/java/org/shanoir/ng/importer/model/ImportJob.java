@@ -21,7 +21,6 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.quality.QualityTag;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -116,8 +115,6 @@ public class ImportJob implements Serializable {
     private Long centerId;
 
     private String errorMessage;
-
-    private QualityTag qualityTag;
 
     // Used by ShanoirUploader to store the upload state
     private UploadState uploadState;
@@ -341,14 +338,6 @@ public class ImportJob implements Serializable {
 
     public void setPatientVerification(PatientVerification patientVerification) {
         this.patientVerification = patientVerification;
-    }
-
-    public QualityTag getQualityTag() {
-        return qualityTag;
-    }
-
-    public void setQualityTag(QualityTag qualityTag) {
-        this.qualityTag = qualityTag;
     }
 
     public UploadState getUploadState() {

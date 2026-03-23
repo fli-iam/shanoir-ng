@@ -259,6 +259,7 @@ public class ImportFinishActionListener implements ActionListener {
         try {
             QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob,
                     mainWindow.isFromPACS);
+            
             // If quality check resulted in errors, show a message and do not start the
             // import
             if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError())) {

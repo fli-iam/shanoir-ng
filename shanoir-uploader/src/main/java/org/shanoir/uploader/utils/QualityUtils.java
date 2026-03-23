@@ -65,8 +65,9 @@ public class QualityUtils {
     public static QualityCardResult checkQualityAtImport(ImportJob importJob, boolean isImportFromPACS) throws Exception {
 
         QualityCardResult qualityCardResult = new QualityCardResult();
-        final File importJobDir = new File(importJob.getWorkFolder());
         List<QualityCard> qualityCards = new ArrayList<>();
+        List<QualityCard> cardsToCheck = new ArrayList<>();
+        final File importJobDir = new File(importJob.getWorkFolder());
 
         // Call Shanoir server to get all quality cards for the selected study
         try {
@@ -76,10 +77,15 @@ public class QualityUtils {
             throw e;
         }
 
-        // If no quality cards are found for the study we skip the quality control
-        if (qualityCards == null || qualityCards.isEmpty()) {
-            LOG.info("Quality Control At Import - No quality cards found for study " + importJob.getStudyId());
+        // If no quality cards are found or none of them are to be checked at importfor the study we skip the quality control
+        if (qualityCards == null || qualityCards.isEmpty() || qualityCards.stream().noneMatch(QualityCard::isToCheckAtImport)) {
+            LOG.info("Quality Control At Import - No quality cards found or none to be checked at import for study " + importJob.getStudyId());
             return qualityCardResult;
+        } else {
+            cardsToCheck = qualityCards.stream()
+            .filter(QualityCard::isToCheckAtImport)
+            .toList();
+            LOG.info("Quality Control At Import - " + qualityCards.size() + " quality card(s) found for study " + importJob.getStudyId() + ", " + cardsToCheck.size() + " to be checked at import.");
         }
 
         // Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
@@ -114,6 +120,7 @@ public class QualityUtils {
             for (Iterator<org.shanoir.ng.importer.model.Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
                 org.shanoir.ng.importer.model.Study study = studiesIt.next();
                 List<Serie> series = study.getSelectedSeries();
+                int rank = 0;
                 for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
                     Serie serie = seriesIt.next();
                     try {
@@ -121,11 +128,13 @@ public class QualityUtils {
                         datasetsCreatorService.constructDicom(null, serie, true);
                         org.shanoir.ng.importer.dto.Serie serieDto = SerieMapper.INSTANCE.toDto(serie);
                         AcquisitionAttributes<String> dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serieDto);
-                        DatasetAcquisition datasetAcquisition = importerService.createDatasetAcquisitionForSerie(serieDto, 0, null, convertImportJob(importJob), dicomAttributes);
-                        qualityCardResult = qualityService.checkQuality(datasetAcquisition, dicomAttributes, qualityCards);
+                        DatasetAcquisition datasetAcquisition = importerService.createDatasetAcquisitionForSerie(serieDto, rank, null, convertImportJob(importJob), dicomAttributes); // Not useful ?
+                        qualityCardResult = qualityService.checkQuality(datasetAcquisition, dicomAttributes, cardsToCheck);
+
                     } catch (SecurityException e) {
                         LOG.error(e.getMessage());
                     }
+                    rank++;
                 }
             }
         }
@@ -158,17 +167,28 @@ public class QualityUtils {
         return importJobDto;
     }
 
-    public static String getQualityControlreport(QualityCardResult qualityCardResult) {
-        String qualityCardReport = "";
-
-        if (!qualityCardResult.isEmpty()) {
-            for (QualityCardResultEntry entry : qualityCardResult) {
-                //We set two return lines to separate the different quality card entries
-                qualityCardReport = qualityCardReport + entry.getMessage() + "\n" + "\n";
+    // TODO : complete this method to remove from the import job the series that do not pass the quality
+    public static ImportJob filterOutSeriesInError(ImportJob importJob, QualityCardResult qualityCardResult) {
+        for (QualityCardResultEntry entry : qualityCardResult) {
+            if (entry.isError()) {
+                String seriesInstanceUID = entry.getSeriesInstanceUID();
+                for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
+                    List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
+                    for (Iterator<org.shanoir.ng.importer.model.Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
+                        org.shanoir.ng.importer.model.Study study = studiesIt.next();
+                        List<Serie> series = study.getSelectedSeries();
+                        for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
+                            Serie serie = seriesIt.next();
+                            if (serie.getSeriesInstanceUID().equals(seriesInstanceUID)) {
+                                LOG.info("Removing serie with SeriesInstanceUID " + seriesInstanceUID + " from import job because of quality control error.");
+                                seriesIt.remove();
+                            }
+                        }
+                    }
+                }
             }
         }
-
-        return qualityCardReport;
+        return null;
     }
 
     public static JScrollPane getQualityControlreportScrollPane(QualityCardResult qualityControlResult) {
@@ -186,6 +206,19 @@ public class QualityUtils {
         JScrollPane scrollPane = new JScrollPane(textArea);
 
         return scrollPane;
+    }
+
+    public static String getQualityControlreport(QualityCardResult qualityCardResult) {
+        String qualityCardReport = "";
+
+        if (!qualityCardResult.isEmpty()) {
+            for (QualityCardResultEntry entry : qualityCardResult) {
+                //We set two return lines to separate the different quality card entries
+                qualityCardReport = qualityCardReport + entry.getMessage() + "\n" + "\n";
+            }
+        }
+
+        return qualityCardReport;
     }
 
 }
