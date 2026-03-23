@@ -651,7 +651,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         } else {
             let task: Task;
             let csvStr: string = '';
-            csvStr += this.columnDefs.map(col => col.headerName).join(','); // headers
+            const exportedColumns: ColumnDefinition[] = this.columnDefs.filter(col => !col.hidden && !['button', 'progress'].includes(col.type));
+            csvStr += exportedColumns.map(col => col.headerName).join(','); // headers
             let completion: Promise<void> = Promise.resolve();
             const startTs: number = performance.now();
             for (let i = 0; i < this.page.totalPages; i++) { // here we could use a fixed page size
@@ -671,12 +672,12 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                     if (getPage instanceof Promise) {
                         return getPage.then(page => {
                             for (const entry of page.content) {
-                                csvStr += '\n' + this.columnDefs.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
+                                csvStr += '\n' + exportedColumns.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
                             }
                         });
                     } else if (getPage instanceof Page) {
                         for (const entry of getPage.content) {
-                            csvStr += '\n' + this.columnDefs.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
+                            csvStr += '\n' + exportedColumns.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
                         }
                         return Promise.resolve();
                     }

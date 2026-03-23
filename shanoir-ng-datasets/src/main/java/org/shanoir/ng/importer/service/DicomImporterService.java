@@ -58,6 +58,7 @@ import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -212,10 +213,10 @@ public class DicomImporterService {
     public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes, String modality)
             throws Exception {
         String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
-        Sequence deIdentificationActionSequence = attributes.getSequence(Tag.DeidentificationActionSequence);
+        Sequence deIdentificationMethodCodeSequence = attributes.getSequence(Tag.DeidentificationMethodCodeSequence);
         if (!StringUtils.isNotBlank(deIdentificationMethod)
-                && (deIdentificationActionSequence == null
-                || deIdentificationActionSequence.isEmpty())) {
+                && (deIdentificationMethodCodeSequence == null
+                || deIdentificationMethodCodeSequence.isEmpty())) {
             LOG.error("Only de-identified DICOM is allowed.");
             return false;
         }
@@ -310,11 +311,11 @@ public class DicomImporterService {
             if (dataset.getOriginMetadata().getImageOrientationPatient() != null) {
                 String iop = dataset.getOriginMetadata().getImageOrientationPatient();
                 if (iop != null && !iop.isBlank()) {
-                    iop = iop.trim().replaceAll("[\\\\\\s]+", ",");
-                    String[] parts = iop.split("\\s*,\\s*");
+                    iop = iop.trim();
+                    String[] parts = iop.split("[\\\\,\\s]+");
                     imageOrientationPatient = new double[parts.length];
                     for (int i = 0; i < parts.length; i++) {
-                        imageOrientationPatient[i] = Double.parseDouble(parts[i]);
+                        imageOrientationPatient[i] = Double.parseDouble(parts[i].trim());
                     }
                 }
             }
@@ -514,7 +515,7 @@ public class DicomImporterService {
     }
 
 
-    private Examination manageExamination(Attributes attributes, Study study, Long subjectId, Long centerId) {
+    private Examination manageExamination(Attributes attributes, Study study, Long subjectId, Long centerId) throws EntityNotFoundException {
         Examination examination = null;
         org.shanoir.ng.importer.dto.Study studyDICOM = new org.shanoir.ng.importer.dto.Study(attributes);
         List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, study.getId());
@@ -550,15 +551,16 @@ public class DicomImporterService {
             subjectDTO.setName(subjectName);
             subjectDTO.setStudy(new IdName(study.getId(), study.getName()));
             Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(
-                    RabbitMQConfiguration.SUBJECTS_QUEUE,
+                    RabbitMQConfiguration.SUBJECTS_QUEUE_WITHOUT_DATASETS,
                     objectMapper.writeValueAsString(subjectDTO));
             if (subjectId == null) {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
             }
             LOG.info("Subject created in MS Studies with ID: {}, Name: {}", subjectId, subjectName);
-            // We create subject here ourselves to avoid 1) transactional issues
-            // and 2) to much RabbitMQ communication
+            // We create subject here ourselves to avoid
+            // 1) transactional issues, that came up during tests
+            // and 2) to avoid too much RabbitMQ communication
             subject = new Subject();
             subject.setId(subjectId); // use same as MS Studies
             subject.setName(subjectName);

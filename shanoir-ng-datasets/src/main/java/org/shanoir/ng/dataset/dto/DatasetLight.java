@@ -37,6 +37,8 @@ public class DatasetLight {
 
     private IdName subject;
 
+    private Long centerId;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
     private LocalDate creationDate;
 
@@ -48,7 +50,8 @@ public class DatasetLight {
             Long studyId, String studyName,
             Long subjectId, String subjectName,
             LocalDate creationDate,
-            boolean hasProcessings
+            boolean hasProcessings,
+            Long centerId
     ) throws NoSuchMethodException, InstantiationException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         this.hasProcessings = hasProcessings;
         this.id = id;
@@ -56,6 +59,7 @@ public class DatasetLight {
         this.type = type.getDeclaredConstructor().newInstance().getType().name();
         this.study = new IdName(studyId, studyName);
         this.subject = new IdName(subjectId, subjectName);
+        this.centerId = centerId;
         this.creationDate = creationDate;
     }
 
@@ -113,5 +117,13 @@ public class DatasetLight {
 
     public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public Long getCenterId() {
+        return centerId;
+    }
+
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
     }
 }

@@ -39,7 +39,7 @@ import jakarta.validation.constraints.NotNull;
  */
 @Entity
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "manufacturer_model_id", "serialNumber" }, name = "model_number_idx") })
+        @UniqueConstraint(columnNames = { "manufacturer_model_id", "serialNumber", "center_id" }, name = "model_number_idx") })
 @JsonPropertyOrder({ "_links", "id", "serialNumber" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 public class AcquisitionEquipment extends HalEntity {

@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <ol>
-	<li *ngIf="mode == 'edit' && !studyOptions" class="info-txt">
+	<li *ngIf="mode == 'edit' && !studyOptions && !study?.isDraft" class="info-txt">
 		<h3>Invite a new user</h3>
 		Username or email address : <input type="text" [(ngModel)]="invitationMail" placeholder="email address / username">
 		<tool-tip>If an user with such email/username already exists, he will be directly added to the study, otherwise an email with an invitation will be sent.</tool-tip>
@@ -59,13 +59,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li>
 							<label>Receive Import Mail</label>
 							<span class="right-col">
-								<checkbox [mode]="mode == 'view' ? mode : 'edit'" [(ngModel)]="pannelStudyUser.receiveNewImportReport"></checkbox>
+								<checkbox [mode]="mode == 'view' ? mode : 'edit'" [(ngModel)]="pannelStudyUser.receiveNewImportReport" (userChange)="onStudyUserEdit()"></checkbox>
 							</span>
 						</li>
 						<li>
 							<label>Receive Member Mail</label>
 							<span class="right-col">
-								<checkbox [mode]="mode == 'view' ? mode : 'edit'" [(ngModel)]="pannelStudyUser.receiveStudyUserReport"></checkbox>
+								<checkbox [mode]="mode == 'view' ? mode : 'edit'" [(ngModel)]="pannelStudyUser.receiveStudyUserReport" (userChange)="onStudyUserEdit()"></checkbox>
 							</span>
 						</li>
 					</ul>
@@ -96,7 +96,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)"
 									(userChange)="onEditRight(StudyUserRight.CAN_SEE_ALL, pannelStudyUser, $event)"
-									[disabled]="newUser.includes(pannelStudyUser.user) || (pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) && pannelStudyUser.userId == getLoggedUserId())"
+									[disabled]="newUser.includes(pannelStudyUser.user) || (pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) && pannelStudyUser.userId == getLoggedUserId()) || study.isDraft"
 								></checkbox>
 							</span>
 						</li>
@@ -107,6 +107,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)"
 									(userChange)="onEditRight(StudyUserRight.CAN_DOWNLOAD, pannelStudyUser, $event)"
+                                    [disabled]="study.isDraft"
 								></checkbox>
 							</span>
 						</li>
@@ -117,6 +118,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_IMPORT)"
 									(userChange)="onEditRight(StudyUserRight.CAN_IMPORT, pannelStudyUser, $event)"
+                                    [disabled]="study.isDraft"
 								></checkbox>
 							</span>
 						</li>
@@ -127,6 +129,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_EXECUTE)"
 									(userChange)="onEditRight(StudyUserRight.CAN_EXECUTE, pannelStudyUser, $event)"
+                                    [disabled]="study.isDraft"
 								></checkbox>
 							</span>
 						</li>
@@ -137,6 +140,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)"
 									(userChange)="onEditRight(StudyUserRight.CAN_ADMINISTRATE, pannelStudyUser, $event)"
+                                    [disabled]="study.isDraft"
 								></checkbox>
 							</span>
 						</li>
@@ -151,6 +155,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								[mode]="mode == 'view' ? mode : 'edit'"
 								[ngModel]="!(pannelStudyUser.centers?.length > 0)"
 								(userChange)="onToggleAllCenters($event)"
+                                [disabled]="study.isDraft"
 							></checkbox>
 						</li>
 					</ul>
@@ -162,6 +167,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									[mode]="mode == 'view' ? mode : 'edit'"
 									[ngModel]="hasCenter(center, pannelStudyUser)"
 									(userChange)="onEditCenter(center, pannelStudyUser, $event)"
+                                    [disabled]="study.isDraft"
 								></checkbox>
 							</span>
 						</li>

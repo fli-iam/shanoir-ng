@@ -129,6 +129,7 @@ import { HandleErrorService } from './shared/utils/handle-error.service';
 import { SolrSearchComponent } from './solr/solr.search.component';
 import { SolrService } from './solr/solr.service';
 import { StudyService } from './studies/shared/study.service';
+import { DraftStudiesListComponent } from './studies/draft-studies-list/draft-studies-list.component';
 import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyComponent } from './studies/study/study.component';
 import { DicomService } from './study-cards/shared/dicom.service';
@@ -278,6 +279,7 @@ import { PipelineService } from "./vip/pipelines/pipeline/pipeline.service";
 import { PipelinesComponent } from './vip/pipelines/pipelines.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { SubjectPathologiesListComponent } from './preclinical/pathologies/subjectPathology/list/subject-pathology-list.component';
+import { DatasetCopyDialogService } from './shared/components/dataset-copy-dialog/dataset-copy-dialog.service';
 
 @NgModule({
     declarations: [
@@ -309,6 +311,7 @@ import { SubjectPathologiesListComponent } from './preclinical/pathologies/subje
         MenuItemComponent,
         StudyComponent,
         StudyListComponent,
+        DraftStudiesListComponent,
         SubjectExaminationPipe,
         SubjectStudyPipe,
         TableComponent,
@@ -564,6 +567,7 @@ import { SubjectPathologiesListComponent } from './preclinical/pathologies/subje
         ShanoirEventService,
         TreeService,
         DuaService,
+        DatasetCopyDialogService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi())
     ]

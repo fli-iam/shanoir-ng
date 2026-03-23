@@ -14,17 +14,22 @@
 
 package org.shanoir.ng.utils;
 
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
-@Service
+@Service("importSecurityService")
 public class ImportSecurityService {
-
-    private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     @Autowired
     private StudyRightsService rightsService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * Check that the connected user has the given right for the given study.
@@ -34,7 +39,7 @@ public class ImportSecurityService {
      * @return true or false
      */
     public boolean hasRightOnStudy(Long studyId, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         } else if (studyId == null) {
             return false;
@@ -50,7 +55,7 @@ public class ImportSecurityService {
      * @return true or false
      */
     public boolean hasRightOnOneStudy(String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         return rightsService.hasRightOnAtLeastOneStudy(rightStr);
@@ -62,10 +67,36 @@ public class ImportSecurityService {
      * @return a boolean
      */
     public boolean canImportFromPACS() {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         return KeycloakUtil.canImportFromPACS();
     }
 
+    /**
+     * Checks if the user has the required right on the study and the study is not draft.
+     *
+     * @param studyId the study ID
+     * @return true if the the study is draft
+     */
+    public boolean isDraftStudy(Long studyId) throws EntityNotFoundException {
+        try {
+            String response = (String) rabbitTemplate.convertSendAndReceive(
+                    RabbitMQConfiguration.STUDY_DRAFT_STATE_QUEUE,
+                    String.valueOf(studyId)
+            );
+
+            if (response == null || "NOT_FOUND".equals(response)) {
+                throw new EntityNotFoundException("Cannot find study.");
+            }
+
+            if ("ERROR".equals(response)) {
+                throw new EntityNotFoundException("Error checking study state.");
+            }
+
+            return Boolean.parseBoolean(response);
+        } catch (AmqpException e) {
+            throw new EntityNotFoundException("Study service unavailable.");
+        }
+    }
 }

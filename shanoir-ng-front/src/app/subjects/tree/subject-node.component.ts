@@ -26,7 +26,7 @@ import { SubjectExamination } from '../../examinations/shared/subject-examinatio
 import {
     ClinicalSubjectNode,
     ExaminationNode,
-    PreclinicalSubjectNode,
+    AnimalSubjectNode,
     ShanoirNode,
     SubjectNode,
     UNLOADED
@@ -64,7 +64,7 @@ export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode>
             if (this.input instanceof SubjectNode) {
                 this.node = this.input;
             } else if (this.input.subject.preclinical) {
-                this.node = new PreclinicalSubjectNode(
+                this.node = new AnimalSubjectNode(
                     this.node,
                     this.input.subject.id,
                     this.input.subject.name,

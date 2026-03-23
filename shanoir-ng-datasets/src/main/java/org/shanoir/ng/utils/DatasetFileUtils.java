@@ -19,12 +19,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -38,6 +36,8 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.DatasetDownloadError;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.UriUtils;
@@ -57,6 +57,8 @@ public final class DatasetFileUtils {
 
     public static final String INPUT = "input.json";
 
+    protected static final Logger LOG = LoggerFactory.getLogger(DatasetFileUtils.class);
+
     public static File getUserImportDir(String importDir) {
         final Long userId = KeycloakUtil.getTokenUserId();
         final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
@@ -73,24 +75,57 @@ public final class DatasetFileUtils {
      * @param pathURLs
      * @throws MalformedURLException
      */
-    public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format, DatasetDownloadError downloadResult) {
-        List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
-        for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
-            DatasetExpression datasetExpression = itExpressions.next();
-            if (datasetExpression.getDatasetExpressionFormat().equals(format)) {
-                List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
-                int i = 0;
-                for (Iterator<DatasetFile> itFiles = datasetFiles.iterator(); itFiles.hasNext(); i++) {
-                    DatasetFile datasetFile = itFiles.next();
-                    URL url;
-                    try {
-                        url = new URL(datasetFile.getPath().replaceAll("%20", " "));
-                        pathURLs.add(url);
-                    } catch (MalformedURLException e) {
-                        downloadResult.update("Malformed URI: " + datasetFile.getPath().replaceAll("%20", " "), DatasetDownloadError.PARTIAL_FAILURE);
-                    }
-                }
-            }
+    public static void getDatasetFilePathURLs(
+            final Dataset dataset,
+            final List<URL> pathURLs,
+            final DatasetExpressionFormat format,
+            DatasetDownloadError downloadResult) {
+        dataset.getDatasetExpressions().stream()
+                .filter(expr -> format.equals(expr.getDatasetExpressionFormat()))
+                .findFirst()
+                .ifPresent(expr -> expr.getDatasetFiles()
+                        .forEach(file -> processDatasetFile(file, pathURLs, downloadResult)));
+    }
+
+    private static void processDatasetFile(
+            DatasetFile file,
+            List<URL> pathURLs,
+            DatasetDownloadError downloadResult) {
+        String normalizedPath = file.getPath().replace("%20", " ");
+        try {
+            pathURLs.add(URI.create(normalizedPath).toURL());
+        } catch (IllegalArgumentException | MalformedURLException e) {
+            downloadResult.update(
+                    "Malformed URI: " + normalizedPath,
+                    DatasetDownloadError.PARTIAL_FAILURE
+            );
+        }
+    }
+
+    public static Optional<URL> getFirstDatasetFilePathURL(
+            final Dataset dataset,
+            final DatasetExpressionFormat format) {
+        return dataset.getDatasetExpressions().stream()
+                .filter(expr -> format.equals(expr.getDatasetExpressionFormat()))
+                .findFirst()
+                .flatMap(DatasetFileUtils::getFirstValidUrl);
+    }
+
+    private static Optional<URL> getFirstValidUrl(DatasetExpression expr) {
+        return expr.getDatasetFiles().stream()
+                .map(DatasetFile::getPath)
+                .map(path -> path.replace("%20", " "))
+                .map(DatasetFileUtils::createURL)
+                .filter(Objects::nonNull)
+                .findFirst();
+    }
+
+    private static URL createURL(String path) {
+        try {
+            return URI.create(path).toURL();
+        } catch (IllegalArgumentException | MalformedURLException e) {
+            LOG.warn("Invalid URL: {}", path, e);
+            return null;
         }
     }
 
@@ -101,12 +136,12 @@ public final class DatasetFileUtils {
      * @param urls
      * @param subjectName         the subjectName
      * @param datasetFilePath
-     * @param datasetDownloadName
+     * @param datasetDownloadNameListPerPath
      * @return
      * @throws IOException
      * @throws MessagingException
      */
-    public static List<String> copyFilesForDownload(final List<URL> urls, final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName, String datasetFilePath, String datasetDownloadName)
+    public static List<String> copyFilesForDownload(final List<URL> urls, final ZipOutputStream zipOutputStream, Dataset dataset, String subjectName, boolean keepName, String datasetFilePath, Map<String, List<String>> datasetDownloadNameListPerPath)
             throws IOException {
 
         List<String> filesInZip = new ArrayList<>();
@@ -117,8 +152,19 @@ public final class DatasetFileUtils {
             String srcPath = srcFile.getAbsolutePath();
 
             // Generate the target file name
-            String fileName = getFileName(keepName, srcFile, subjectName, dataset, index, datasetDownloadName);
-            fileName = fileName.replace(File.separator, UNDERSCORE);
+            String fileName = getFileName(keepName, srcFile, subjectName, dataset, index);
+            fileName = fileName.replace(File.separator, UNDERSCORE); // avoid nested folders
+
+            if (!datasetDownloadNameListPerPath.containsKey(datasetFilePath)) {
+                datasetDownloadNameListPerPath.put(datasetFilePath, new ArrayList<>(List.of(fileName)));
+            } else {
+                List<String> nameListForFilePath = datasetDownloadNameListPerPath.get(datasetFilePath);
+                String finalFileName = fileName;
+                if (nameListForFilePath.contains(finalFileName)) {
+                    fileName = fileName.replaceFirst("\\.", "_" + nameListForFilePath.stream().filter(name -> Objects.equals(name, finalFileName)).count() + ".");
+                }
+                nameListForFilePath.add(finalFileName);
+            }
 
             // Add folder path if specified
             if (datasetFilePath != null)
@@ -173,12 +219,14 @@ public final class DatasetFileUtils {
         zipOutputStream.closeEntry();
     }
 
-    public static String getFileName(boolean keepName, File srcFile, String subjectName, Dataset dataset, int index, String datasetDownloadName) {
-        if (dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
-            return datasetDownloadName;
-        }
+    public static String getFileName(boolean keepName, File srcFile, String subjectName, Dataset dataset, int index) {
         if (keepName) {
-            return srcFile.getName();
+            String fileName = srcFile.getName();
+            String prefix = fileName.split("\\.", 2)[0];
+            if (prefix.matches("\\d+") || prefix.matches("\\d+_info")) {
+                fileName = dataset.getName() + "_" + fileName;
+            }
+            return fileName;
         }
 
         // Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
@@ -204,6 +252,7 @@ public final class DatasetFileUtils {
         } else {
             name.append(FilenameUtils.getExtension(srcFile.getName()));
         }
+
         return name.toString();
     }
 

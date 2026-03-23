@@ -61,8 +61,6 @@ import java.util.stream.Collectors;
 @Controller
 public class AccessRequestApiController implements AccessRequestApi {
 
-    private static final String ROLE_ADMIN = "ROLE_ADMIN";
-
     @Autowired
     private ShanoirEventService eventService;
 
@@ -148,7 +146,7 @@ public class AccessRequestApiController implements AccessRequestApi {
         // Get all studies I administrate
 
         List<Long> studiesId;
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             studiesId = Utils.toList(this.studyUserRightsRepository.findAll()).stream().map(StudyUser::getStudyId
             ).collect(Collectors.toList());
         } else {

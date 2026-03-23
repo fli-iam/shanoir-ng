@@ -65,8 +65,12 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         private ingredientService: AnestheticIngredientService,
         private referenceService: ReferenceService) {
 
-        super(route, 'preclinical-anesthetic');
+        super(route);
         this.manageSaveEntity();
+    }
+
+    protected getRoutingName(): string {
+        return 'preclinical-anesthetic';
     }
 
     get anesthetic(): Anesthetic { return this.entity; }
@@ -202,7 +206,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         if (this.anesthetic && this.anesthetic.ingredients) {
             for (const ingredient of this.anesthetic.ingredients) {
                 let strIngredient = '';
-                strIngredient = strIngredient.concat(ingredient.name.value.substring(0, 3)).concat('. ');
+                strIngredient = strIngredient.concat(ingredient.name?.value?.substring(0, 3)).concat('. ');
                 if (ingredient.concentration) strIngredient = strIngredient.concat(String(ingredient.concentration));
                 if (ingredient.concentrationUnit) strIngredient = strIngredient.concat(ingredient.concentrationUnit.value);
                 strIngredient = strIngredient.concat(' ');
@@ -234,7 +238,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         this.createAIMode = false;
     }
 
-    refreshDisplay(ingredient: AnestheticIngredient){
+    refreshDisplay(ingredient: AnestheticIngredient) {
         this.toggleFormAI = false;
         this.createAIMode = false;
         if (ingredient && ingredient != null && !ingredient.id ){

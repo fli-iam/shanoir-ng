@@ -52,9 +52,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     protected studyOptions: Option<number>[] = [];
     protected subjectOptions: Option<Subject>[] = [];
     protected inputDatasetOptions: Option<Dataset>[] = [];
-    protected outputDatasetOptions: Option<Dataset>[] = [];
     protected inputDatasetsColumnDefs: ColumnDefinition[];
-    protected outputDatasetsColumnDefs: ColumnDefinition[];
     protected isExecutionMonitoring: boolean = false;
     protected executionMonitoring: ExecutionMonitoring;
 
@@ -68,13 +66,17 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             private vipClientService: ExecutionService
             ) {
 
-        super(route, 'dataset-processing');
+        super(route);
         this.createColumnDefs();
     }
 
+    protected getRoutingName(): string {
+        return 'dataset-processing';
+    }
+
     get subject(): Subject { return this._subject; }
-    
-    set subject(subject: Subject) { 
+
+    set subject(subject: Subject) {
         this._subject = subject;
         this.form.get('subject').setValue(subject);
     }
@@ -121,7 +123,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
                         const subjectId = dataset.subject?.id;
                         this.fetchDatasets();
                         this.subject = this.subjectOptions?.find(opt => opt.value.id == subjectId)?.value;
-                    }   
+                    }
                 });
 
             }
@@ -148,7 +150,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.datasetProcessing.inputDatasets = [];
         this.datasetProcessing.outputDatasets = [];
         this.inputDatasetOptions = [];
-        this.outputDatasetOptions = [];
         if (newValue) {
             this.fetchDatasets();
         }
@@ -214,7 +215,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         return this.datasetService.getByStudyIdAndSubjectId(this.datasetProcessing.studyId, this.subject.id).then(datasets => {
             for (const dataset of datasets) {
                 this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
-                this.outputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
             }
         });
     }
@@ -307,14 +307,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             {headerName: "Dataset type", field: "type"},
             {headerName: "Study", field: "study.name"},
             {headerName: "Subject", field: "subject.name"},
-            {headerName: "Creation date", field: "creationDate", type: "date"}
-        ];
-        this.outputDatasetsColumnDefs = [
-            {headerName: "ID", field: "id", type: "number"},
-            {headerName: "Name", field: "name", route: (dataset : Dataset)=>{
-                return `/dataset/details/${dataset.id}`
-            }},
-            {headerName: "Dataset type", field: "type"},
             {headerName: "Creation date", field: "creationDate", type: "date"}
         ];
     }

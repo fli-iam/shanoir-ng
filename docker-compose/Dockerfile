@@ -295,7 +295,7 @@ RUN /opt/keycloak/bin/kc.sh build
 #
 # Create actual image, based on builder before
 #
-FROM keycloak-base as keycloak
+FROM keycloak-base AS keycloak
 
 COPY --from=keycloak-builder /opt/keycloak/ /opt/keycloak/
 COPY --chown=keycloak keycloak/themes/. /opt/keycloak/themes
@@ -312,7 +312,7 @@ CMD []
 
 ################ nginx #####################################################
 
-FROM ohif/app:v3.9.0-beta.76 AS nginx-viewer
+FROM ohif/app:v3.11.0 AS nginx-viewer
 
 FROM nginx AS nginx
 
@@ -364,6 +364,7 @@ COPY --link --chmod=0755 \
     database/2_add_users.sql \
     database/3_add_statistics_procedure.sql \
     database/4_add_studyStatistics_procedure.sql \
+    database/5_add_computeOverallStatistics_procedure.sql \
     /docker-entrypoint-initdb.d/
 
 COPY --link database/db-changes /opt/db-changes

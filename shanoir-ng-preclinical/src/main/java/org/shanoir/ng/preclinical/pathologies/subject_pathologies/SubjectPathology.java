@@ -53,15 +53,15 @@ public class SubjectPathology extends HalEntity {
     @JsonManagedReference
     private AnimalSubject animalSubject = null;
 
-    @JsonProperty("pathology")
-    @ManyToOne
-    @NotNull
-    private Pathology pathology = null;
-
     @JsonProperty("pathologyModel")
     @ManyToOne
     // @NotNull
     private PathologyModel pathologyModel = null;
+
+    @JsonProperty("pathology")
+    @ManyToOne
+    @NotNull
+    private Pathology pathology = null;
 
     @JsonProperty("location")
     @RefValueExists
@@ -89,7 +89,6 @@ public class SubjectPathology extends HalEntity {
     }
 
     @JsonIgnore
-    @Schema(name = "none")
     public AnimalSubject getAnimalSubject() {
         return animalSubject;
     }
@@ -98,22 +97,17 @@ public class SubjectPathology extends HalEntity {
         this.animalSubject = animalSubject;
     }
 
-    public SubjectPathology pathology(Pathology pathology) {
-        this.pathology = pathology;
-        return this;
-    }
-
-    /**
-     * none
-     *
-     * @return subjectId
-     **/
-    @Schema(name = "none")
+    @JsonProperty("pathology")
+    @ManyToOne
+    @NotNull
     public Pathology getPathology() {
         return pathology;
     }
 
     public void setPathology(Pathology pathology) {
+        if (this.pathologyModel != null) {
+            this.pathologyModel.setPathology(pathology);
+        }
         this.pathology = pathology;
     }
 
@@ -197,14 +191,14 @@ public class SubjectPathology extends HalEntity {
             return false;
         }
         SubjectPathology subjectPathos = (SubjectPathology) o;
-        return Objects.equals(this.pathology, subjectPathos.pathology)
+        return Objects.equals(this.getPathology(), subjectPathos.getPathology())
                 && Objects.equals(this.pathologyModel, subjectPathos.pathologyModel)
                 && Objects.equals(this.location, subjectPathos.location);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pathology, pathologyModel, location);
+        return Objects.hash(getPathology(), pathologyModel, location);
     }
 
     @Override
@@ -212,7 +206,7 @@ public class SubjectPathology extends HalEntity {
         StringBuilder sb = new StringBuilder();
         sb.append("class SubjectPathologies {\n");
 
-        sb.append("    pathology: ").append(toIndentedString(pathology)).append("\n");
+        sb.append("    pathology: ").append(toIndentedString(getPathology())).append("\n");
         sb.append("    pathologyModel: ").append(toIndentedString(pathologyModel)).append("\n");
         sb.append("    location: ").append(toIndentedString(location)).append("\n");
         sb.append("    startDate: ").append(toIndentedString(startDate)).append("\n");

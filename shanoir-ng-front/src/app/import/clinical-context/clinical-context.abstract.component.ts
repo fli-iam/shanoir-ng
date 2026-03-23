@@ -25,7 +25,6 @@ import { Examination } from '../../examinations/shared/examination.model';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import { SubjectExaminationPipe } from '../../examinations/shared/subject-examination.pipe';
-import { PreclinicalSubject } from "../../preclinical/animalSubject/shared/preclinicalSubject.model";
 import { ConsoleService } from '../../shared/console/console.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { ShanoirError } from '../../shared/models/error.model';
@@ -112,7 +111,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 throw new ShanoirError({error: {message: 'the study list failed loading', details: error}});
             });
         } else {
-            this.fetchStudies(true).then( () => {
+            this.fetchStudies(true).then(() => {
                 this.getStudyCardPolicy(this.study).then(policy => {
                     this.study.studyCardPolicy = policy;
                 })
@@ -562,13 +561,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         this.router.navigate([createSubjectRoute]).then(() => {
             this.subscriptions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    let sub: Subject;
-                    if (entity instanceof Subject) {
-                        sub = entity;
-                    } else if (entity instanceof PreclinicalSubject) {
-                        sub = entity.subject;
-                    }
-                    this.importDataService.contextBackup(this.stepTs).subject = sub;
+                    this.importDataService.contextBackup(this.stepTs).subject = entity;
                 })
             );
         })

@@ -31,14 +31,16 @@ import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.UserRights;
@@ -50,14 +52,13 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DatasetSecurityService {
-
-    private static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     @Autowired
     private DatasetRepository datasetRepository;
@@ -78,10 +79,16 @@ public class DatasetSecurityService {
     private SubjectRepository subjectRepository;
 
     @Autowired
-    private StudyRightsService commService;
+    private StudyRepository studyRepository;
 
     @Autowired
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyRightsService studyRightsService;
+
+    @Autowired
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * Check that the connected user has the given right for the given study.
@@ -91,13 +98,29 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean hasRightOnStudy(Long studyId, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (studyId == null) {
             return false;
         }
-        return commService.hasRightOnStudy(studyId, rightStr);
+        return studyRightsService.hasRightOnStudy(studyId, rightStr);
+    }
+
+    /**
+     * Check that the connected user has the given right for the given study.
+     *
+     * @param studyId the study id
+     * @return true or false
+     */
+    public boolean hasAnyRightOnStudy(Long studyId) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        if (studyId == null) {
+            return false;
+        }
+        return studyRightsService.hasAnyRightOnStudy(studyId);
     }
 
     /**
@@ -108,7 +131,7 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean hasRightOnStudies(List<Long> studyIds, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (studyIds == null || studyIds.isEmpty()) {
@@ -117,7 +140,7 @@ public class DatasetSecurityService {
 
         Set<Long> givenIds = new HashSet<>(studyIds);
 
-        return givenIds.size() == commService.hasRightOnStudies(givenIds, rightStr).size();
+        return givenIds.size() == studyRightsService.hasRightOnStudies(givenIds, rightStr).size();
     }
 
     /**
@@ -128,14 +151,14 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean hasRightOnSubjectId(Long subjectId, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         Optional<Subject> subject = subjectRepository.findById(subjectId);
         if (subject.isEmpty()) {
             return false;
         }
-        boolean hasRight = commService.hasRightOnStudy(subject.get().getStudy().getId(), rightStr);
+        boolean hasRight = studyRightsService.hasRightOnStudy(subject.get().getStudy().getId(), rightStr);
         if (hasRight) {
             return true;
         }
@@ -150,14 +173,14 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean hasRightOnSubjectName(String subjectName, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         Subject subject = subjectRepository.findByName(subjectName);
         if (subject == null) {
             return false;
         }
-        boolean hasRight = commService.hasRightOnStudy(subject.getStudy().getId(), rightStr);
+        boolean hasRight = studyRightsService.hasRightOnStudy(subject.getStudy().getId(), rightStr);
         if (hasRight) {
             return true;
         }
@@ -183,7 +206,7 @@ public class DatasetSecurityService {
         if (sc == null) {
             throw new EntityNotFoundException("Cannot find study card with id " + studyCardId);
         }
-        return commService.hasRightOnStudy(sc.getStudyId(), rightStr);
+        return studyRightsService.hasRightOnStudy(sc.getStudyId(), rightStr);
     }
 
     /**
@@ -205,7 +228,7 @@ public class DatasetSecurityService {
         if (qc == null) {
             throw new EntityNotFoundException("Cannot find quality card with id " + qualityCardId);
         }
-        return commService.hasRightOnStudy(qc.getStudyId(), rightStr);
+        return studyRightsService.hasRightOnStudy(qc.getStudyId(), rightStr);
     }
 
     /**
@@ -232,7 +255,7 @@ public class DatasetSecurityService {
         if (card == null) {
             throw new EntityNotFoundException("Cannot find card with id " + cardId);
         }
-        return commService.hasRightOnStudy(card.getStudyId(), rightStr);
+        return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr);
     }
 
     /**
@@ -249,7 +272,7 @@ public class DatasetSecurityService {
         if (studyId == null) {
             return false;
         }
-        return commService.hasOneRightOnStudy(studyId, rightStrs);
+        return studyRightsService.hasOneRightOnStudy(studyId, rightStrs);
     }
 
     /**
@@ -271,7 +294,7 @@ public class DatasetSecurityService {
         if (sc == null) {
             throw new EntityNotFoundException("Cannot find study card with id " + studyCardId);
         }
-        return commService.hasOneRightOnStudy(sc.getStudyId(), rightStrs);
+        return studyRightsService.hasOneRightOnStudy(sc.getStudyId(), rightStrs);
     }
 
     /**
@@ -293,8 +316,8 @@ public class DatasetSecurityService {
         if (dbStudyCard == null) {
             throw new EntityNotFoundException("Cannot find study card with id " + studyCard.getId());
         }
-        return commService.hasOneRightOnStudy(dbStudyCard.getStudyId(), rightStrs) && (
-                dbStudyCard.getStudyId().equals(studyCard.getStudyId()) || commService.hasOneRightOnStudy(studyCard.getStudyId(), rightStrs));
+        return studyRightsService.hasOneRightOnStudy(dbStudyCard.getStudyId(), rightStrs) && (
+                dbStudyCard.getStudyId().equals(studyCard.getStudyId()) || studyRightsService.hasOneRightOnStudy(studyCard.getStudyId(), rightStrs));
     }
 
     /**
@@ -306,7 +329,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnDataset(Long datasetId, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
@@ -325,7 +348,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnNewDataset(Dataset dataset, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (dataset == null) {
@@ -385,7 +408,7 @@ public class DatasetSecurityService {
                 .stream()
                 .map(a -> new DatasetAcquisitionForRights(a.getId(), a.getCenterId(), a.getStudyId()))
                 .collect(Collectors.toList());
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (DatasetAcquisitionForRights acq : acqs) {
             Long studyId = acq.getStudyId();
             Long centerId = acq.getCenterId();
@@ -417,7 +440,7 @@ public class DatasetSecurityService {
                 .stream()
                 .map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
                 .collect(Collectors.toList());
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (DatasetForRights dataset : dtos) {
             Set<Long> studyIds = dataset.getAllStudiesIds();
             Long centerId = dataset.getCenterId();
@@ -436,7 +459,7 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean hasRightOnTrustedDataset(Dataset dataset, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (dataset == null) {
@@ -467,11 +490,11 @@ public class DatasetSecurityService {
 
 
     public boolean hasRightOnStudyCenter(Long centerId, Long studyId, String rightStr) {
-        return commService.hasRightOnStudy(studyId, rightStr) && commService.hasRightOnCenter(studyId, centerId);
+        return studyRightsService.hasRightOnStudy(studyId, rightStr) && studyRightsService.hasRightOnCenter(studyId, centerId);
     }
 
     private boolean hasRightOnStudiesCenter(Long centerId, Set<Long> studies, String rightStr) {
-        return !commService.hasRightOnStudies(new HashSet<>(studies), rightStr).isEmpty() && commService.hasRightOnCenter(studies, centerId);
+        return !studyRightsService.hasRightOnStudies(new HashSet<>(studies), rightStr).isEmpty() && studyRightsService.hasRightOnCenter(studies, centerId);
     }
 
     /**
@@ -484,7 +507,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasUpdateRightOnDataset(Dataset dataset, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (dataset == null) {
@@ -633,9 +656,9 @@ public class DatasetSecurityService {
             }
         } else throw new IllegalStateException("Cannot find the type of card");
         if (card.getStudyId().equals(dbCard.getStudyId())) { // study hasn't changed
-            return commService.hasRightOnStudy(card.getStudyId(), rightStr);
+            return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr);
         } else { // study has changed : check user has right on both studies
-            return commService.hasRightOnStudy(card.getStudyId(), rightStr) && commService.hasRightOnStudy(dbCard.getStudyId(), rightStr);
+            return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr) && studyRightsService.hasRightOnStudy(dbCard.getStudyId(), rightStr);
         }
     }
 
@@ -648,7 +671,7 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean checkDatasetPage(Iterable<Dataset> page, String rightStr) {
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (Dataset dataset : page) {
             Long studyId = dataset.getDatasetAcquisition().getExamination().getStudyId();
             Long centerId = dataset.getDatasetAcquisition().getExamination().getCenterId();
@@ -667,7 +690,7 @@ public class DatasetSecurityService {
      * @return true or false
      */
     public boolean checkDatasetDTOPage(Iterable<DatasetDTO> page, String rightStr) {
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (DatasetDTO dataset : page) {
             Long studyId = dataset.getStudyId();
             Long centerId = dataset.getCenterId();
@@ -686,7 +709,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterDatasetList(List<Dataset> list, String rightStr) {
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         Set<Dataset> toRemove = new HashSet<>();
         list.forEach((Dataset ds) -> {
             if (ds.getDatasetAcquisition() == null
@@ -724,7 +747,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterExaminationPage(Page<Examination> page, String rightStr) {
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (Examination exam : page) {
             Long studyId = exam.getStudyId();
             Long centerId = exam.getCenterId();
@@ -744,7 +767,7 @@ public class DatasetSecurityService {
      */
     public boolean filterExaminationList(List<Examination> list, String rightStr) {
         Set<Examination> toRemove = new HashSet<>();
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (Examination exam : list) {
             Long studyId = exam.getStudyId();
             Long centerId = exam.getCenterId();
@@ -773,7 +796,7 @@ public class DatasetSecurityService {
                 .map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
                 .collect(Collectors.toList());
         Set<Long> dsRemove = new HashSet<>();
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (DatasetForRights ds : dtos) {
             Set<Long> studyIds = ds.getAllStudiesIds();
             Long centerId = ds.getCenterId();
@@ -804,7 +827,7 @@ public class DatasetSecurityService {
     public boolean filterDatasetAcquisitionList(List<DatasetAcquisition> list, String rightStr) {
         if (list == null || list.isEmpty()) return true;
         Set<DatasetAcquisition> toRemove = new HashSet<>();
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (DatasetAcquisition da : list) {
             Long studyId = da.getExamination().getStudyId();
             Long centerId = da.getExamination().getCenterId();
@@ -826,7 +849,7 @@ public class DatasetSecurityService {
     public boolean filterDatasetAcquisitionDTOList(List<DatasetAcquisitionDTO> list, String rightStr) {
         if (list == null || list.isEmpty()) return true;
         Set<DatasetAcquisitionDTO> toRemove = new HashSet<>();
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (DatasetAcquisitionDTO da : list) {
             Long studyId = da.getExamination().getStudyId();
             Long centerId = da.getExamination().getCenterId();
@@ -846,7 +869,7 @@ public class DatasetSecurityService {
     * @return true
     */
     public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (list == null || list.isEmpty()) {
@@ -854,7 +877,7 @@ public class DatasetSecurityService {
         }
         List<Long> examinationIds = list.stream().map(dto -> dto.getExaminationId()).collect(Collectors.toList());
         Set<Long> examsToRemove = new HashSet<>();
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         List<ExaminationForRightsDTO> exams = examinationRepository.findExaminationsForRights(examinationIds);
         for (ExaminationForRightsDTO exam : exams) {
             Long studyId = exam.getStudyId();
@@ -879,7 +902,7 @@ public class DatasetSecurityService {
         if (page == null || page.isEmpty()) {
             return true;
         }
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (DatasetAcquisitionDTO acquisition : page) {
             Long studyId = acquisition.getExamination().getStudyId();
             Long centerId = acquisition.getExamination().getCenterId();
@@ -901,7 +924,7 @@ public class DatasetSecurityService {
         if (page == null || page.isEmpty()) {
             return true;
         }
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (DatasetAcquisition acquisition : page) {
             Long studyId = acquisition.getExamination().getStudyId();
             Long centerId = acquisition.getExamination().getCenterId();
@@ -927,7 +950,7 @@ public class DatasetSecurityService {
         list.forEach((Card sc) -> {
             studyIds.add(sc.getStudyId());
         });
-        Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+        Set<Long> checkedIds = studyRightsService.hasRightOnStudies(studyIds, rightStr);
         list.removeIf((Card sc) -> !checkedIds.contains(sc.getStudyId()));
 
         return true;
@@ -944,7 +967,7 @@ public class DatasetSecurityService {
         if (page == null || page.isEmpty()) {
             return true;
         }
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (ExaminationDTO exam : page) {
             Long studyId = exam.getStudyId();
             Long centerId = exam.getCenterId();
@@ -966,7 +989,7 @@ public class DatasetSecurityService {
         if (list == null || list.isEmpty()) {
             return true;
         }
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         Set<ExaminationDTO> examsToRemove = new HashSet<>();
         for (ExaminationDTO exam : list) {
             Long studyId = exam.getStudyId();
@@ -988,7 +1011,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnExamination(Long examinationId, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         Examination exam = examinationRepository.findById(examinationId).orElse(null);
@@ -1011,7 +1034,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnTrustedExaminationDTO(ExaminationDTO examination, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (examination == null) {
@@ -1030,14 +1053,14 @@ public class DatasetSecurityService {
     }
 
     public boolean hasRightOnEveryDatasetOfProcessings(List<Long> processingIds, String rightStr) {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN) || processingIds == null || processingIds.isEmpty()) {
+        if (KeycloakUtil.isAdmin() || processingIds == null || processingIds.isEmpty()) {
             return true;
         }
         List<DatasetForRights> datasets = datasetRepository.findAllInputsByProcessingId(processingIds)
                 .stream()
                 .map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
                 .collect(Collectors.toList());
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (DatasetForRights dataset : datasets) {
             Set<Long> studyIds = dataset.getAllStudiesIds();
             Long centerId = dataset.getCenterId();
@@ -1057,11 +1080,11 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnExaminations(List<Long> examinationIds, String rightStr) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         List<ExaminationForRightsDTO> exams = examinationRepository.findExaminationsForRights(examinationIds);
-        UserRights userRights = commService.getUserRights();
+        UserRights userRights = studyRightsService.getUserRights();
         for (ExaminationForRightsDTO exam : exams) {
             Long studyId = exam.getStudyId();
             Long centerId = exam.getCenterId();
@@ -1080,7 +1103,7 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnExecutionCandidate(ExecutionCandidateDTO executionCandidate) throws EntityNotFoundException {
-        if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+        if (KeycloakUtil.isAdmin()) {
             return true;
         }
         if (executionCandidate == null) {
@@ -1095,5 +1118,13 @@ public class DatasetSecurityService {
             }
         }
         return hasRightOnEveryDataset(new ArrayList<>(dsIds), StudyUserRight.CAN_EXECUTE.toString());
+    }
+
+    public boolean isDraftStudy(Long studyId) {
+        Study study = studyRepository.findById(studyId).orElse(null);
+        if (study == null) {
+            return false;
+        }
+        return study.getIsDraft();
     }
 }

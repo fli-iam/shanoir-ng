@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.preclinical.examination_extradata;
 
-import static org.mockito.BDDMockito.given;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +21,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -52,7 +51,6 @@ public class ExtraDataServiceTest {
     public static final Long PHYSIOLOGICALDATA_ID = 2L;
     public static final String PHYSIOLOGICALDATA_TYPE = "Physiological data";
     public static final Long BLOODGASDATA_ID = 3L;
-    public static final String BLOODGASDATA_TYPE = "Blood gas data";
     public static final String EXTRADATA_FILEPATH = "/home/sloury/Documents/FLI-IAM/SHANOIR_NG/upload/";
     public static final String EXTRADATA_FILENAME = "extradata.txt";
 
@@ -130,7 +128,7 @@ public class ExtraDataServiceTest {
         final ExaminationExtraData extradata = new ExaminationExtraData();
         extradata.setId(EXTRADATA_ID);
         extradata.setExaminationId(EXAMINATION_ID);
-        extradata.setExtradatatype(EXTRADATA_TYPE);
+        extradata.setExtraDataType(EXTRADATA_TYPE);
         extradata.setFilename(EXTRADATA_FILENAME);
         extradata.setFilepath(EXTRADATA_FILEPATH);
         return extradata;

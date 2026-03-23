@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.core.model.AbstractEntityInterface;
 import org.springframework.beans.BeanUtils;
 
 public final class ListDependencyUpdate {
@@ -33,7 +33,7 @@ public final class ListDependencyUpdate {
      * @param oldValues values to be updated
      * @param newValues new values
      */
-    public static <T extends AbstractEntity> void updateWith(List<T> oldValues, List<T> newValues) {
+    public static <T extends AbstractEntityInterface> void updateWith(List<T> oldValues, List<T> newValues) {
         updateWith(oldValues, newValues, null);
 
     }
@@ -46,7 +46,7 @@ public final class ListDependencyUpdate {
      * @param oldValues values to be updated
      * @param newValues new values
      */
-    public static <T extends AbstractEntity> void updateWith(List<T> oldValues, List<T> newValues, EqualCheckInterface<T> equalCheck) {
+    public static <T extends AbstractEntityInterface> void updateWith(List<T> oldValues, List<T> newValues, EqualCheckInterface<T> equalCheck) {
         if (newValues == null) throw new IllegalArgumentException("newValues cannot be null");
         if (oldValues == null) throw new IllegalArgumentException("oldValues cannot be null");
 
@@ -104,7 +104,7 @@ public final class ListDependencyUpdate {
      * @param oldValues values to be updated
      * @param newValues new values
      */
-    public static <T extends AbstractEntity> void updateWithNoRemove(List<T> oldValues, List<T> newValues) {
+    public static <T extends AbstractEntityInterface> void updateWithNoRemove(List<T> oldValues, List<T> newValues) {
         if (newValues == null) throw new IllegalArgumentException("newValues cannot be null");
         if (oldValues == null) throw new IllegalArgumentException("oldValues cannot be null");
         if (oldValues == newValues) throw new IllegalStateException("those cannot be the same object");
