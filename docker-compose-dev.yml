@@ -392,6 +392,20 @@ services:
       - "dcm4chee-arc-wildfly-data:/opt/wildfly/standalone"
       - "dcm4chee-arc-storage-data:/storage"
   #
+  # localstack: used to test S3StorageService implementation
+  #
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEFAULT_REGION=eu-west-1
+      - AWS_DEFAULT_REGION=eu-west-1
+    volumes:
+      - "./localstack-data:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+  #
   # Nginx
   #
   nginx:

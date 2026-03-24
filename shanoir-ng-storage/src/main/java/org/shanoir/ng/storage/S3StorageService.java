@@ -14,22 +14,31 @@
 
 package org.shanoir.ng.storage;
 
+import jakarta.annotation.PostConstruct;
+
+import java.util.Arrays;
 import java.io.InputStream;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import io.awspring.cloud.s3.ObjectMetadata;
 import io.awspring.cloud.s3.S3Template;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.BucketAlreadyOwnedByYouException;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
@@ -46,8 +55,10 @@ public class S3StorageService implements StorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3StorageService.class);
 
+    @Autowired
     private final S3Template s3Template;
 
+    @Autowired
     private final S3Client s3Client;
 
     @Value("${storage.s3.datasets-bucket-name}")
@@ -56,9 +67,41 @@ public class S3StorageService implements StorageService {
     @Value("${storage.s3.studies-bucket-name}")
     private String studiesBucket;
 
-    public S3StorageService(S3Template s3Template, S3Client s3Client) {
+    @Value("${storage.s3.bids-bucket-name}")
+    private String bidsBucket;
+
+    @Value("${storage.s3.vip-bucket-name}")
+    private String vipBucket;
+
+    @Autowired
+    private final Environment environment;
+
+    public S3StorageService(S3Template s3Template, S3Client s3Client, Environment environment) {
         this.s3Template = s3Template;
         this.s3Client = s3Client;
+        this.environment = environment;
+    }
+
+    @PostConstruct
+    void init() {
+        if (Arrays.asList(environment.getActiveProfiles()).contains("dev")) {
+            ensureBucketExists();
+        }
+    }
+
+    private void ensureBucketExists() {
+        try {
+            s3Client.createBucket(CreateBucketRequest.builder().bucket(datasetsBucket).build());
+            LOG.info("Dev bucket '{}' created", datasetsBucket);
+            s3Client.createBucket(CreateBucketRequest.builder().bucket(studiesBucket).build());
+            LOG.info("Dev bucket '{}' created", studiesBucket);
+            s3Client.createBucket(CreateBucketRequest.builder().bucket(bidsBucket).build());
+            LOG.info("Dev bucket '{}' created", bidsBucket);
+            s3Client.createBucket(CreateBucketRequest.builder().bucket(vipBucket).build());
+            LOG.info("Dev bucket '{}' created", vipBucket);
+        } catch (BucketAlreadyOwnedByYouException e) {
+            LOG.info("Dev buckets already exist.");
+        }
     }
 
     @Override
