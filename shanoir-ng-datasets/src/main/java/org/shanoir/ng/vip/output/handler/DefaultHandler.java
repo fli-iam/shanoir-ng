@@ -281,6 +281,7 @@ public class DefaultHandler extends OutputHandler {
         if (isSegmentation(sopClassUID)) return DatasetType.Names.SEGMENTATION;
         if (isRegistration(sopClassUID)) return DatasetType.Names.REGISTRATION;
         if (isSr(sopClassUID)) return DatasetType.Names.SR;
+        if (isMesh(sopClassUID)) return DatasetType.Names.MESH;
 
         return DatasetType.Names.GENERIC;
 
@@ -329,7 +330,6 @@ public class DefaultHandler extends OutputHandler {
     private boolean isSegmentation(String uid) {
         return Set.of(
             UID.SegmentationStorage,
-            UID.SurfaceSegmentationStorage
         ).contains(uid);
     }
 
@@ -350,6 +350,14 @@ public class DefaultHandler extends OutputHandler {
             UID.XRayRadiationDoseSRStorage,
             UID.ColonCADSRStorage,
             UID.ImplantationPlanSRStorage
+        ).contains(uid);
+    }
+
+    private boolean isMesh(String uid) {
+        return Set.of(
+            UID.SurfaceScanMeshStorage,
+            UID.SurfaceScanPointCloudStorage,
+            UID.SurfaceSegmentationStorage
         ).contains(uid);
     }
 }
