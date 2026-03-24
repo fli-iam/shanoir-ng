@@ -29,18 +29,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </ng-template>
                 </span>
             </form-footer>
+            <h2 class="header command-zone" [class.draft-title]="study?.isDraft">
+                @switch (mode) {
+                    @case ('view') {
+                        Details on study
+                    }
+                    @case ('edit') {
+                        Edit study
+                    }
+                    @case ('create') {
+                        Create study
+                    }
 
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">Details on study</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone" i18n="Edit study|Title@@studyDetailEditTitle">Edit study</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone" i18n="Create study|Title@@studyDetailCreateTitle">Create study</h2>
-				</ng-template>
-			</span>
+                }
+                @if(study?.isDraft) {
+                    <span class="draft-tag" title="Draft"><i class="fa-regular fa-clipboard"></i></span>
+                }
+            </h2>
 			<ul class="tabs">
 				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'" replaceUrl="true">
 					<span class="general">General</span>
@@ -153,10 +158,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li [ngSwitch]="mode">
-                        <label i18n="Study detail|Draft state label@@studyDetailApprovalStatus">State</label>
+                        <label i18n="Study detail|Draft state label@@studyDetailApprovalStatus">Draft</label>
                         <span class="right-col">
                             <ng-template [ngSwitchCase]="'view'">
-                                <span>{{ study.isDraft ? 'Draft' : 'Active' }}</span>
+                                @if (study.isDraft) {
+                                    <span class="bool-true"><i class="fas fa-check"></i></span>
+                                } @else {
+                                    <span class="bool-false"><i class="fas fa-times"></i></span>
+                                }
                             </ng-template>
                         </span>
                     </li>
