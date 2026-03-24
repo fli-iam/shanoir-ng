@@ -289,75 +289,75 @@ public class DefaultHandler extends OutputHandler {
 
     private boolean isMr(String uid) {
         return Set.of(
-            UID.MRImageStorage,
-            UID.EnhancedMRImageStorage,
-            UID.MRSpectroscopyStorage,
-            UID.EnhancedMRColorImageStorage
+                UID.MRImageStorage,
+                UID.EnhancedMRImageStorage,
+                UID.MRSpectroscopyStorage,
+                UID.EnhancedMRColorImageStorage
         ).contains(uid);
     }
 
     private boolean isCt(String uid) {
         return Set.of(
-            UID.CTImageStorage,
-            UID.EnhancedCTImageStorage
+                UID.CTImageStorage,
+                UID.EnhancedCTImageStorage
         ).contains(uid);
     }
 
     private boolean isXa(String uid) {
         return Set.of(
-            UID.XRayAngiographicImageStorage,
-            UID.EnhancedXAImageStorage,
-            UID.XRayRadiofluoroscopicImageStorage,
-            UID.EnhancedXRFImageStorage,
-            UID.XRay3DAngiographicImageStorage,
-            UID.XRay3DCraniofacialImageStorage
+                UID.XRayAngiographicImageStorage,
+                UID.EnhancedXAImageStorage,
+                UID.XRayRadiofluoroscopicImageStorage,
+                UID.EnhancedXRFImageStorage,
+                UID.XRay3DAngiographicImageStorage,
+                UID.XRay3DCraniofacialImageStorage
         ).contains(uid);
     }
 
     private boolean isPet(String uid) {
         return Set.of(
-            UID.PositronEmissionTomographyImageStorage,
-            UID.EnhancedPETImageStorage
+                UID.PositronEmissionTomographyImageStorage,
+                UID.EnhancedPETImageStorage
         ).contains(uid);
     }
 
     private boolean isSpect(String uid) {
         return Set.of(
-            UID.NuclearMedicineImageStorage
+                UID.NuclearMedicineImageStorage
         ).contains(uid);
     }
 
     private boolean isSegmentation(String uid) {
         return Set.of(
-            UID.SegmentationStorage,
+                UID.SegmentationStorage
         ).contains(uid);
     }
 
     private boolean isRegistration(String uid) {
         return Set.of(
-            UID.SpatialRegistrationStorage,
-            UID.DeformableSpatialRegistrationStorage
+                UID.SpatialRegistrationStorage,
+                UID.DeformableSpatialRegistrationStorage
         ).contains(uid);
     }
 
     private boolean isSr(String uid) {
         return Set.of(
-            UID.BasicTextSRStorage,
-            UID.EnhancedSRStorage,
-            UID.ComprehensiveSRStorage,
-            UID.MammographyCADSRStorage,
-            UID.ChestCADSRStorage,
-            UID.XRayRadiationDoseSRStorage,
-            UID.ColonCADSRStorage,
-            UID.ImplantationPlanSRStorage
+                UID.BasicTextSRStorage,
+                UID.EnhancedSRStorage,
+                UID.ComprehensiveSRStorage,
+                UID.MammographyCADSRStorage,
+                UID.ChestCADSRStorage,
+                UID.XRayRadiationDoseSRStorage,
+                UID.ColonCADSRStorage,
+                UID.ImplantationPlanSRStorage
         ).contains(uid);
     }
 
     private boolean isMesh(String uid) {
         return Set.of(
-            UID.SurfaceScanMeshStorage,
-            UID.SurfaceScanPointCloudStorage,
-            UID.SurfaceSegmentationStorage
+                UID.SurfaceScanMeshStorage,
+                UID.SurfaceScanPointCloudStorage,
+                UID.SurfaceSegmentationStorage
         ).contains(uid);
     }
 }
