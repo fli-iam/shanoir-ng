@@ -315,7 +315,6 @@ services:
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
-
   #
   # Solr microservice for Shanoir-NG search
   #
@@ -392,20 +391,15 @@ services:
       - "dcm4chee-arc-wildfly-data:/opt/wildfly/standalone"
       - "dcm4chee-arc-storage-data:/storage"
   #
-  # localstack: used to test S3StorageService implementation
+  # S3-Ninja: used to test S3StorageService implementation
   #
-  localstack:
-    container_name: "${SHANOIR_PREFIX}localstack"
-    image: localstack/localstack
+  ninja:
+    container_name: "${SHANOIR_PREFIX}ninja"
+    image: scireum/s3-ninja:8.7.0
     ports:
-      - "4566:4566"
-    environment:
-      - SERVICES=s3
-      - DEFAULT_REGION=eu-west-1
-      - AWS_DEFAULT_REGION=eu-west-1
-    volumes:
-      - "./localstack-data:/var/lib/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "9444:9000"
+    networks:
+      - shanoir_ng_network
   #
   # Nginx
   #
