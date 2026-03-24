@@ -154,6 +154,13 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
         this.closeModal.emit();
     }
 
+    @HostListener('click', ['$event'])
+    onClick(clickEvent) {
+        if (!this.window.nativeElement.contains(clickEvent.target)) {
+            this.cancel();
+        }
+    }
+    
     // This method checks if the list of given datasets has dicom or not.
     private hasDicomInDatasets(datasets: {type: DatasetType, hasProcessings: boolean}[]) {
         for (const dataset of datasets) {
