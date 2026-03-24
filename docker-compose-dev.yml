@@ -395,6 +395,7 @@ services:
   # localstack: used to test S3StorageService implementation
   #
   localstack:
+    container_name: "${SHANOIR_PREFIX}localstack"
     image: localstack/localstack
     ports:
       - "4566:4566"
