@@ -128,6 +128,21 @@ public class EmailServiceImpl implements EmailService {
         messageHelper.setFrom(new InternetAddress(administratorEmail, administratorName));
     }
 
+    private void setFromUser(MimeMessageHelper messageHelper, User user)
+            throws UnsupportedEncodingException, MessagingException {
+        String host = "shanoir";
+        try {
+            host = new URL(shanoirServerAddress).getHost();
+        } catch (Exception e) {
+        }
+        // Note: we put the user email in 'Reply-To' instead of 'From' to avoid
+        // sending emails with a source address in a foreign domain
+        messageHelper.setFrom(new InternetAddress(
+                administratorEmail,
+                String.format("%s %s (via %s)", user.getFirstName(), user.getLastName(), host)));
+        messageHelper.setReplyTo(user.getEmail());
+    }
+
     @Override
     public void notifyAccountWillExpire(User user) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
@@ -708,7 +723,7 @@ public class EmailServiceImpl implements EmailService {
         } else {
             MimeMessagePreparator messagePreparator = mimeMessage -> {
                 final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-                messageHelper.setFrom(user.get().getEmail());
+                this.setFromUser(messageHelper, user.get());
                 messageHelper.setTo(mail.getRecipienEmailAddress());
                 messageHelper.setSubject("[Shanoir] pleaser help configure DUA for study " + mail.getStudyName());
                 final Map<String, Object> variables = new HashMap<>();
