@@ -1949,6 +1949,7 @@
     "password": "SHANOIR_SMTP_PASSWORD",
     "user": "SHANOIR_SMTP_USERNAME",
     "from": "SHANOIR_ADMIN_EMAIL",
+    "fromDisplayName": "SHANOIR_ADMIN_NAME",
     "envelopeFrom": "SHANOIR_SMTP_FROM",
     "port": "SHANOIR_SMTP_PORT"
   },
