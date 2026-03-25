@@ -88,6 +88,11 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public Resource loadPathologyModelData(Long pathologyModelId, String fileName) throws StorageException {
+        return loadDatasets(PATHOLOGY_MODEL + pathologyModelId, fileName);
+    }
+
+    @Override
     public Resource loadDatasets(String directory, String fileName) throws StorageException {
         return load(baseDirDatasets, directory, fileName);
     }

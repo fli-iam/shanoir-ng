@@ -14,10 +14,8 @@
 
 package org.shanoir.ng.preclinical.pathologies.pathology_models;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -36,7 +34,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -232,23 +229,21 @@ public class PathologyModelApiController implements PathologyModelApi {
     public ResponseEntity<Resource> downloadModelSpecifications(
             @Parameter(name = "ID of model specifications file to download", required = true) @PathVariable("id") Long id)
             throws RestServiceException {
-
         final PathologyModel model = modelsService.findById(id);
         if (model != null) {
             try {
-                File toDownload = new File(model.getFilepath());
-                Path path = Paths.get(toDownload.getAbsolutePath());
-                ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
-
+                Resource resource = storageService.loadPathologyModelData(model.getId(), model.getFilepath());
+                if (!resource.exists()) {
+                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                }
                 HttpHeaders header = new HttpHeaders();
                 header.setContentType(MediaType.APPLICATION_PDF);
                 header.set(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename = " + model.getFilename().replace(" ", "_"));
-
-                return ResponseEntity.ok().headers(header).contentLength(toDownload.length())
+                return ResponseEntity.ok().headers(header).contentLength(resource.contentLength())
                         .contentType(MediaType.parseMediaType("application/octet-stream")).body((Resource) resource);
-            } catch (IOException ioe) {
-                LOG.error("Error while getting file to download " + ioe.getMessage(), ioe);
+            } catch (Exception e) {
+                LOG.error("Error while getting file to download " + e.getMessage(), e);
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         }

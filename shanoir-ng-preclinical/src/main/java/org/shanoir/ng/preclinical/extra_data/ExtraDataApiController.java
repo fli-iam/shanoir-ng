@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.preclinical.extra_data;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
