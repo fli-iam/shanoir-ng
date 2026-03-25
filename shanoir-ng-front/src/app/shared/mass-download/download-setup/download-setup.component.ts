@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Subscription } from 'rxjs';
@@ -69,7 +69,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
             deviceInformationService: AngularDeviceInformationService,
             private massDownloadService: MassDownloadService,
             private datasetService: DatasetService) {
-        
+
         this.subscriptions.push(
             globalService.onNavigate.subscribe(() => {
                 this.cancel();
@@ -115,7 +115,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     private buildForm(): UntypedFormGroup {
         const formGroup = this.formBuilder.group({
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
-            'converter': [{value: this.converter}, [this.massDownloadService.requiredIfTypeIsNii()]],
+            'converter': [null, [this.massDownloadService.requiredIfTypeIsNii()]],
             'nbQueues': [4, [Validators.required, Validators.min(1), Validators.max(1024)]],
             'unzip': [false],
             'subjectFolders': [true],
@@ -128,6 +128,10 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
         }
         this.subscriptions.push(formGroup.get('unzip').valueChanges.subscribe(val => {
             formGroup.get('datasetFolders').setValue(val);
+        }));
+
+        this.subscriptions.push(formGroup.get('format').valueChanges.subscribe(() => {
+            formGroup.get('converter').updateValueAndValidity();
         }));
         return formGroup;
     }
@@ -156,6 +160,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
             this.cancel();
         }
     }
+    
     // This method checks if the list of given datasets has dicom or not.
     private hasDicomInDatasets(datasets: {type: DatasetType, hasProcessings: boolean}[]) {
         for (const dataset of datasets) {
@@ -172,4 +177,21 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
         }
     }
 
+    hasError(fieldName: string, errors: string[]) {
+        const formError = this.formErrors(fieldName);
+        if (formError) {
+            for (const errorName of errors) {
+                if (formError[errorName]) return true;
+            }
+        }
+        return false;
+    }
+
+    formErrors(field: string): any {
+        if (!this.form) return;
+        const control = this.form.get(field);
+        if (control && !control.valid) {
+            return control.errors;
+        }
+    }
 }
