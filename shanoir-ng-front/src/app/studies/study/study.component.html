@@ -157,18 +157,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-					<li [ngSwitch]="mode">
-                        <label i18n="Study detail|Draft state label@@studyDetailApprovalStatus">Draft</label>
-                        <span class="right-col">
-                            <ng-template [ngSwitchCase]="'view'">
-                                @if (study.isDraft) {
-                                    <span class="bool-true"><i class="fas fa-check"></i></span>
-                                } @else {
-                                    <span class="bool-false"><i class="fas fa-times"></i></span>
-                                }
-                            </ng-template>
-                        </span>
-                    </li>
+                    <ng-container *ngIf="mode == 'view' || mode == 'edit'">
+                        <li>
+                            <label i18n="Study detail|Draft state label@@studyDetailApprovalStatus">Draft</label>
+                            <span class="right-col">
+                                    @if (study.isDraft) {
+                                        <span class="bool-true"><i class="fas fa-check"></i></span>
+                                    } @else {
+                                        <span class="bool-false"><i class="fas fa-times"></i></span>
+                                    }
+                            </span>
+                        </li>
+                    </ng-container>
 					<li>
 						<label>Pseudonymization profile</label>
 						<span class="right-col" [ngSwitch]="mode">
