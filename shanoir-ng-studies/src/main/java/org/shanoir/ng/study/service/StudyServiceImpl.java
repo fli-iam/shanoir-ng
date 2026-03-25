@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.study.service;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
