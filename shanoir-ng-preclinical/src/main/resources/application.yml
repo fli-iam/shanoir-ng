@@ -23,6 +23,8 @@ spring:
   cloud:
     aws:
       s3:
+        endpoint: http://${SHANOIR_PREFIX}ninja:9000
+        path-style-access-enabled: true
         region: eu-west-1
       credentials:
         access-key: ${AWS_ACCESS_KEY_ID}
@@ -105,7 +107,7 @@ logging:
     org.hibernate: ERROR
 
 storage:
-  type: file-system # or "s3"
+  type: file-system # "file-system" or "s3"
   file-system:
     datasets-data: /var/datasets-data
     studies-data: /var/studies-data

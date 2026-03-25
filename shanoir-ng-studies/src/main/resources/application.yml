@@ -27,8 +27,8 @@ spring:
         path-style-access-enabled: true
         region: eu-west-1
       credentials:
-        access-key: AKIAIOSFODNN7EXAMPLE
-        secret-key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
   datasource:
     url: jdbc:mysql://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:studies}?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: studies
@@ -105,7 +105,7 @@ front.server:
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
 storage:
-  type: s3 # "file-system" or "s3"
+  type: file-system # "file-system" or "s3"
   file-system:
     studies-data: /var/studies-data
     datasets-data: /var/datasets-data
