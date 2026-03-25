@@ -17,15 +17,24 @@ package org.shanoir.ng.bids.service;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -69,6 +78,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriUtils;
 
@@ -337,12 +347,14 @@ public class BIDSServiceImpl implements BIDSService {
      * @throws StorageException
      */
     private void exportAsBids(final Examination examination, final File examDir, final String studyName, final String subjectName) throws IOException, StorageException {
-        // Add examination extra-data
+        // Add examination extra-data: actually copy them out of file-system or S3 storage
         for (String filePath : examination.getExtraDataFilePathList()) {
-            File file = storageService.loadExtraData(examination.getId(), filePath).getFile();
-            if (file.exists()) {
-                Path bidsExtraFilePath = Path.of(examDir.getAbsolutePath() + "/" + file.getName());
-                Files.createLink(bidsExtraFilePath, file.toPath());
+            Resource resource = storageService.loadExtraData(examination.getId(), filePath);
+            if (resource.exists()) {
+                Path bidsExtraFilePath = Path.of(examDir.getAbsolutePath() + "/" + resource.getFilename());
+                try (InputStream inputStream = resource.getInputStream()) {
+                    Files.copy(inputStream, bidsExtraFilePath, StandardCopyOption.REPLACE_EXISTING);
+                }
             }
         }
 
