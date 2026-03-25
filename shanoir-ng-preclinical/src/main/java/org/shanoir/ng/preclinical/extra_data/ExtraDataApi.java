@@ -22,6 +22,7 @@ import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
 import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalData;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.storage.StorageException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -135,7 +136,7 @@ public interface ExtraDataApi {
     void downloadExtraData(
             @Parameter(name = "Examination extra data id to download", required = true) @PathVariable("id") Long id,
             HttpServletResponse response)
-            throws RestServiceException;
+            throws RestServiceException, StorageException;
 
     @Operation(summary = "Update an existing physiologicalData", description = "")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
