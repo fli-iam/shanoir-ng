@@ -43,6 +43,12 @@ public class FileSystemStorageService implements StorageService {
     @Value("${storage.file-system.datasets-data}")
     private String baseDirDatasets;
 
+    @Value("${storage.file-system.bids-data}")
+    private String baseDirBids;
+
+    @Value("${storage.file-system.vip-data}")
+    private String baseDirVip;
+
     @Override
     public String storeExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
