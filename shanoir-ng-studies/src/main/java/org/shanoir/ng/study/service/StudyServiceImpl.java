@@ -1054,9 +1054,8 @@ public class StudyServiceImpl implements StudyService {
             Resource resource;
             try {
                 resource = storageService.loadStudyFile(study.getId(), path);
-                File f = resource.getFile();
-                if (f.exists()) {
-                    size += f.length();
+                if (resource.exists()) {
+                    size += resource.contentLength();
                 }
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
