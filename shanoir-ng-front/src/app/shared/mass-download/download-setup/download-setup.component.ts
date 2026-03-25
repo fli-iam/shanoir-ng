@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, HostListener } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Subscription } from 'rxjs';
@@ -160,7 +160,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
             this.cancel();
         }
     }
-    
+
     // This method checks if the list of given datasets has dicom or not.
     private hasDicomInDatasets(datasets: {type: DatasetType, hasProcessings: boolean}[]) {
         for (const dataset of datasets) {
