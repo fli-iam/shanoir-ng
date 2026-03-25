@@ -376,13 +376,18 @@ public class StudyApiController implements StudyApi {
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
             HttpServletResponse response) throws Exception {
         Resource resource = storageService.loadStudyFile(studyId, fileName);
+        String contentType = request.getServletContext().getMimeType(fileName);
+        downloadFile(fileName, contentType, response, resource);
+    }
+
+    private void downloadFile(String fileName, String contentType, HttpServletResponse response, Resource resource) throws IOException {
         if (!resource.exists()) {
             response.sendError(HttpStatus.NO_CONTENT.value());
             return;
         }
         try (InputStream is = resource.getInputStream()) {
             response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
-            response.setContentType(request.getServletContext().getMimeType(fileName));
+            response.setContentType(contentType);
             response.setContentLengthLong(resource.contentLength());
             org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
             response.flushBuffer();
@@ -443,10 +448,8 @@ public class StudyApiController implements StudyApi {
     public ResponseEntity<Boolean> hasDUAByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws ShanoirException {
-
         DataUserAgreement dua = this.dataUserAgreementService.findDUAByUserIdAndStudyId(KeycloakUtil.getTokenUserId(),
                 studyId);
-
         return new ResponseEntity<>(dua != null, HttpStatus.OK);
     }
 
@@ -497,17 +500,8 @@ public class StudyApiController implements StudyApi {
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
             HttpServletResponse response) throws Exception {
         Resource resource = storageService.loadStudyFile(studyId, fileName);
-        File fileToDownLoad = resource.getFile();
-        if (!fileToDownLoad.exists()) {
-            response.sendError(HttpStatus.NO_CONTENT.value());
-            return;
-        }
-        try (InputStream is = new FileInputStream(fileToDownLoad);) {
-            response.setHeader("Content-Disposition", "attachment;filename = " + fileToDownLoad.getName());
-            response.setContentType(MediaType.APPLICATION_PDF_VALUE);
-            org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
-            response.flushBuffer();
-        }
+        String contentType = MediaType.APPLICATION_PDF_VALUE;
+        downloadFile(fileName, contentType, response, resource);
     }
 
     @Override
@@ -517,7 +511,6 @@ public class StudyApiController implements StudyApi {
             throws IOException {
         studyService.removeStudyUserFromStudy(studyId, userId);
         List<StudyUserRight> surList = studyUserService.getRightsForStudy(studyId);
-
         if (surList.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
