@@ -23,7 +23,7 @@ spring:
   cloud:
     aws:
       s3:
-        endpoint: http://ninja:9444/s3
+        endpoint: http://${SHANOIR_PREFIX}ninja:9000
         path-style-access-enabled: true
         region: eu-west-1
       credentials:
