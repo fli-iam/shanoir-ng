@@ -376,15 +376,14 @@ public class StudyApiController implements StudyApi {
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
             HttpServletResponse response) throws Exception {
         Resource resource = storageService.loadStudyFile(studyId, fileName);
-        File fileToDownLoad = resource.getFile();
-        if (!fileToDownLoad.exists()) {
+        if (!resource.exists()) {
             response.sendError(HttpStatus.NO_CONTENT.value());
             return;
         }
-        try (InputStream is = new FileInputStream(fileToDownLoad);) {
-            response.setHeader("Content-Disposition", "attachment;filename = " + fileToDownLoad.getName());
-            response.setContentType(request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath()));
-            response.setContentLengthLong(fileToDownLoad.length());
+        try (InputStream is = resource.getInputStream()) {
+            response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+            response.setContentType(request.getServletContext().getMimeType(fileName));
+            response.setContentLengthLong(resource.contentLength());
             org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
             response.flushBuffer();
         }
