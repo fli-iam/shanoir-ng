@@ -23,12 +23,12 @@ spring:
   cloud:
     aws:
       s3:
-        endpoint: http://localhost:4566
-        path-style-access-enabled: true   # required for LocalStack
+        endpoint: http://ninja:9444/s3
+        path-style-access-enabled: true
         region: eu-west-1
       credentials:
-        access-key: test
-        secret-key: test
+        access-key: AKIAIOSFODNN7EXAMPLE
+        secret-key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
   datasource:
     url: jdbc:mysql://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:studies}?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: studies
@@ -112,10 +112,10 @@ storage:
     bids-data: /var/bids-data
     vip-data: /var/vip-data
   s3:
-    studies-bucket-name: studies-bucket-name
-    datasets-bucket-name: datasets-bucket-name
-    bids-bucket-name: bids-bucket-name
-    vip-bucket-name: vip-bucket-name
+    studies-bucket-name: studies
+    datasets-bucket-name: datasets
+    bids-bucket-name: bids
+    vip-bucket-name: vip
 
 # logging configuration
 logging:
