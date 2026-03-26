@@ -30,6 +30,10 @@ public interface StorageService {
             InputStream inputStream, String contentType, long size)
             throws StorageException;
 
+    public String storePreclinicalExtraData(Long examinationId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException;
+
     String storePathologyModelData(Long pathologyModelId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException;
@@ -40,7 +44,11 @@ public interface StorageService {
 
     Resource loadExtraData(Long examinationId, String fileName) throws StorageException;
 
+    Resource loadPreclinicalExtraData(Long examinationId, String fileName) throws StorageException;
+
     Resource loadDatasets(String directory, String fileName) throws StorageException;
+
+    Resource loadPreclinical(String directory, String fileName) throws StorageException;
 
     Resource loadPathologyModelData(Long pathologyModelId, String fileName) throws StorageException;
 
@@ -54,13 +62,21 @@ public interface StorageService {
 
     void deleteDatasets(String directory, String fileName) throws StorageException;
 
+    void deletePreclinical(String directory, String fileName) throws StorageException;
+
     void deleteExtraData(Long examinationId, String fileName) throws StorageException;
+
+    void deletePreclinicalExtraData(Long examinationId, String fileName) throws StorageException;
 
     void deleteStudyFile(Long studyId, String fileName) throws StorageException;
 
     void deleteDirectoryDatasets(String directory) throws StorageException;
 
+    void deleteDirectoryPreclinical(String directory) throws StorageException;
+
     void deleteDirectoryExtraData(Long examinationId) throws StorageException;
+
+    void deleteDirectoryPreclinicalExtraData(Long examinationId) throws StorageException;
 
     void deleteDirectoryStudyFile(Long studyId) throws StorageException;
 

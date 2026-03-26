@@ -112,15 +112,17 @@ solr.host: http://${SHANOIR_SOLR_HOST:${SHANOIR_PREFIX}solr}:8983/solr/shanoir
 storage:
   type: file-system # "file-system" or "s3"
   file-system:
-    datasets-data: /var/datasets-data
     studies-data: /var/studies-data
+    datasets-data: /var/datasets-data
+    preclinical-data: /var/preclinical-data
+    # file-system only (by design, e.g. validator) and temporary data: no S3
     bids-data: /var/bids-data
+    # file-system only: temporary data: no S3
     vip-data: /var/vip-data
   s3:
     studies-bucket-name: studies
     datasets-bucket-name: datasets
-    bids-bucket-name: bids
-    vip-bucket-name: vip
+    preclinical-bucket-name: preclinical
 
 # logging configuration
 logging:

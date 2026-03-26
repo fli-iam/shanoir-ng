@@ -43,11 +43,8 @@ public class FileSystemStorageService implements StorageService {
     @Value("${storage.file-system.datasets-data}")
     private String baseDirDatasets;
 
-    @Value("${storage.file-system.bids-data}")
-    private String baseDirBids;
-
-    @Value("${storage.file-system.vip-data}")
-    private String baseDirVip;
+    @Value("${storage.file-system.preclinical-data}")
+    private String baseDirPreclinical;
 
     @Override
     public String storeExtraData(Long examinationId, String fileName,
@@ -58,11 +55,19 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public String storePreclinicalExtraData(Long examinationId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        String directory = EXAMINATION + examinationId;
+        return store(baseDirPreclinical, directory, fileName, inputStream, contentType, size);
+    }
+
+    @Override
     public String storePathologyModelData(Long pathologyModelId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
         String directory = PATHOLOGY_MODEL + pathologyModelId;
-        return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
+        return store(baseDirPreclinical, directory, fileName, inputStream, contentType, size);
     }
 
     @Override
@@ -94,13 +99,23 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public Resource loadPreclinicalExtraData(Long examinationId, String fileName) throws StorageException {
+        return loadPreclinical(EXAMINATION + examinationId, fileName);
+    }
+
+    @Override
     public Resource loadPathologyModelData(Long pathologyModelId, String fileName) throws StorageException {
-        return loadDatasets(PATHOLOGY_MODEL + pathologyModelId, fileName);
+        return loadPreclinical(PATHOLOGY_MODEL + pathologyModelId, fileName);
     }
 
     @Override
     public Resource loadDatasets(String directory, String fileName) throws StorageException {
         return load(baseDirDatasets, directory, fileName);
+    }
+
+    @Override
+    public Resource loadPreclinical(String directory, String fileName) throws StorageException {
+        return load(baseDirPreclinical, directory, fileName);
     }
 
     @Override
@@ -147,8 +162,18 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public void deletePreclinical(String directory, String fileName) throws StorageException {
+        delete(baseDirPreclinical, directory, fileName);
+    }
+
+    @Override
     public void deleteExtraData(Long examinationId, String fileName) throws StorageException {
         delete(baseDirDatasets, EXAMINATION + examinationId, fileName);
+    }
+
+    @Override
+    public void deletePreclinicalExtraData(Long examinationId, String fileName) throws StorageException {
+        delete(baseDirPreclinical, EXAMINATION + examinationId, fileName);
     }
 
     @Override
@@ -171,6 +196,11 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public void deleteDirectoryPreclinical(String directory) throws StorageException {
+        deleteDirectory(baseDirPreclinical, directory);
+    }
+
+    @Override
     public void deleteDirectoryStudyFile(Long studyId) throws StorageException {
         String directory = STUDY + studyId;
         deleteDirectory(baseDirStudies, directory);
@@ -179,6 +209,11 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public void deleteDirectoryExtraData(Long examinationId) throws StorageException {
         deleteDirectoryDatasets(EXAMINATION + examinationId);
+    }
+
+    @Override
+    public void deleteDirectoryPreclinicalExtraData(Long examinationId) throws StorageException {
+        deleteDirectoryPreclinical(EXAMINATION + examinationId);
     }
 
     private void deleteDirectory(String baseDir, String directory) throws StorageException {
