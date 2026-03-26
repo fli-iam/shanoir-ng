@@ -56,6 +56,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Output() rowEdit: EventEmitter<object> = new EventEmitter<object>();
     @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
+    @Input() greyedCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
     @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
@@ -581,6 +582,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     rowDisabled(item): boolean {
         return this.disableCondition && this.disableCondition(item);
+    }
+
+    rowGreyedOut(item): boolean {
+        return this.rowDisabled(item) || (this.greyedCondition && this.greyedCondition(item));
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
