@@ -408,7 +408,7 @@ volumes:
   database-data:
   studies-data:
   datasets-data:
-	preclinical-data:
+  preclinical-data:
   dcm4chee-ldap-data:
   dcm4chee-sldap-data:
   dcm4chee-database-data:
