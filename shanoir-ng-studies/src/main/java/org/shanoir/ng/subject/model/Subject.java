@@ -144,6 +144,7 @@ public class Subject extends HalEntity {
         this.preclinical = other.preclinical;
         if (other.pseudonymusHashValues != null) {
             this.pseudonymusHashValues = new PseudonymusHashValues(other.pseudonymusHashValues);
+            this.pseudonymusHashValues.setSubject(this);
         }
     }
 
