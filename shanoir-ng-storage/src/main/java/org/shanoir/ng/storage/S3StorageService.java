@@ -108,7 +108,7 @@ public class S3StorageService implements StorageService {
         try {
             s3Template.upload(datasetsBucket, key, inputStream,
                     ObjectMetadata.builder().contentType(contentType).build());
-            LOG.info("Stored dataset file to S3: s3://{}/{}", datasetsBucket, key);
+            LOG.info("Stored datasets file to S3: s3://{}/{}", datasetsBucket, key);
             return getPublicLocationDatasets(directory, fileName);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -125,7 +125,7 @@ public class S3StorageService implements StorageService {
         try {
             s3Template.upload(preclinicalBucket, key, inputStream,
                     ObjectMetadata.builder().contentType(contentType).build());
-            LOG.info("Stored dataset file to S3: s3://{}/{}", datasetsBucket, key);
+            LOG.info("Stored preclinical file to S3: s3://{}/{}", preclinicalBucket, key);
             return getPublicLocationDatasets(directory, fileName);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -159,7 +159,7 @@ public class S3StorageService implements StorageService {
         try {
             s3Template.upload(studiesBucket, key, inputStream,
                     ObjectMetadata.builder().contentType(contentType).build());
-            LOG.info("Stored dataset file to S3: s3://{}/{}", studiesBucket, key);
+            LOG.info("Stored studies file to S3: s3://{}/{}", studiesBucket, key);
             return getPublicLocationStudies(directory, fileName);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -249,7 +249,7 @@ public class S3StorageService implements StorageService {
                     .key(directory + "/" + fileName)
                     .build());
         } catch (Exception e) {
-            throw new StorageException("Failed to delete dataset S3 object: " + fileName, e);
+            throw new StorageException("Failed to delete preclinical S3 object: " + fileName, e);
         }
     }
 
@@ -273,7 +273,7 @@ public class S3StorageService implements StorageService {
                     .key(EXAMINATION + examinationId + "/" + fileName)
                     .build());
         } catch (Exception e) {
-            throw new StorageException("Failed to delete dataset S3 object: " + fileName, e);
+            throw new StorageException("Failed to delete preclinical S3 object: " + fileName, e);
         }
     }
 
