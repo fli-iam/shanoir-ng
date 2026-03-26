@@ -67,7 +67,7 @@ public class S3StorageService implements StorageService {
     @Value("${storage.s3.datasets-bucket-name}")
     private String datasetsBucket;
 
-    @Value("${storage.s3.preclinial-bucket-name}")
+    @Value("${storage.s3.preclinical-bucket-name}")
     private String preclinicalBucket;
 
     @Autowired
