@@ -262,7 +262,7 @@ public class ExtraDataApiController implements ExtraDataApi {
                 if (contentType == null) {
                     contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
                 }
-                Resource resource = storageService.loadExtraData(extraData.getExaminationId(), extraData.getFilepath());
+                Resource resource = storageService.loadPreclinicalExtraData(extraData.getExaminationId(), extraData.getFilepath());
                 if (!resource.exists()) {
                     response.sendError(HttpStatus.NO_CONTENT.value());
                     return;
@@ -359,7 +359,7 @@ public class ExtraDataApiController implements ExtraDataApi {
     private ExaminationExtraData saveUploadedFile(ExaminationExtraData examinationExtraData, MultipartFile file) throws IOException {
         try {
             LOG.info("Saving file {} for examination: {}", file.getOriginalFilename(), examinationExtraData.getId());
-            String filePath = storageService.storeExtraData(
+            String filePath = storageService.storePreclinicalExtraData(
                     examinationExtraData.getId(),
                     file.getOriginalFilename(),
                     file.getInputStream(),
