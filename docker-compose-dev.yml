@@ -391,16 +391,6 @@ services:
       - "dcm4chee-arc-wildfly-data:/opt/wildfly/standalone"
       - "dcm4chee-arc-storage-data:/storage"
   #
-  # S3-Ninja: used to test S3StorageService implementation
-  #
-  ninja:
-    container_name: "${SHANOIR_PREFIX}ninja"
-    image: scireum/s3-ninja:8.7.0
-    ports:
-      - "9444:9000"
-    networks:
-      - shanoir_ng_network
-  #
   # Nginx
   #
   nginx:
