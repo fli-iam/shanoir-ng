@@ -71,13 +71,13 @@ public class S3StorageService implements StorageService {
     @Value("${storage.s3.preclinical-bucket-name:UNUSED}")
     private String preclinicalBucket;
 
-    @Value("${storage.file-system.studies-data:'/var/studies-data'}")
+    @Value("${storage.file-system.studies-data:UNUSED}")
     private String baseDirStudies;
 
-    @Value("${storage.file-system.datasets-data:'/var/datasets-data'}")
+    @Value("${storage.file-system.datasets-data:UNUSED}")
     private String baseDirDatasets;
 
-    @Value("${storage.file-system.preclinical-data:'/var/preclinical-data'}")
+    @Value("${storage.file-system.preclinical-data:UNUSED}")
     private String baseDirPreclinical;
 
     @Autowired
@@ -91,6 +91,10 @@ public class S3StorageService implements StorageService {
 
     @PostConstruct
     void init() {
+        // remove prefix slash from base dirs to fit S3 URL scheme
+        baseDirStudies = baseDirStudies.substring(1);
+        baseDirDatasets = baseDirDatasets.substring(1);
+        baseDirPreclinical = baseDirPreclinical.substring(1);
         if (Arrays.asList(environment.getActiveProfiles()).contains("dev")) {
             ensureBucketExists();
         }
