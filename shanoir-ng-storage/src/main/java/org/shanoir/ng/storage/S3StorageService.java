@@ -71,13 +71,13 @@ public class S3StorageService implements StorageService {
     @Value("${storage.s3.preclinical-bucket-name:UNUSED}")
     private String preclinicalBucket;
 
-    @Value("${storage.file-system.studies-data:UNUSED}")
+    @Value("${storage.file-system.studies-data:'/var/studies-data'}")
     private String baseDirStudies;
 
-    @Value("${storage.file-system.datasets-data:UNUSED}")
+    @Value("${storage.file-system.datasets-data:'/var/datasets-data'}")
     private String baseDirDatasets;
 
-    @Value("${storage.file-system.preclinical-data:UNUSED}")
+    @Value("${storage.file-system.preclinical-data:'/var/preclinical-data'}")
     private String baseDirPreclinical;
 
     @Autowired
