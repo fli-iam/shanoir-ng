@@ -135,6 +135,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             Subject targetSubject = existingByName.get(subjectCopy.getNewName());
             if (targetSubject == null) {
                 Subject createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, subjectCopy.getNewName(), false);
+                existingByName.put(createdSubject.getName(), createdSubject);
                 subjectMapping.put(sourceSubject.getId(), createdSubject.getId());
                 createdSubjects.add(createdSubject);
                 if (++i % 200 == 0) {
