@@ -37,13 +37,13 @@ public class FileSystemStorageService implements StorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemStorageService.class);
 
-    @Value("${storage.file-system.studies-data}")
+    @Value("${storage.file-system.studies-data:UNUSED}")
     private String baseDirStudies;
 
-    @Value("${storage.file-system.datasets-data}")
+    @Value("${storage.file-system.datasets-data:UNUSED}")
     private String baseDirDatasets;
 
-    @Value("${storage.file-system.preclinical-data}")
+    @Value("${storage.file-system.preclinical-data:UNUSED}")
     private String baseDirPreclinical;
 
     @Override
@@ -94,34 +94,27 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public Resource loadStudyFile(Long studyId, String fileName) throws StorageException {
+        String directory = STUDY + studyId;
+        return load(baseDirStudies, directory, fileName);
+    }
+
+    @Override
     public Resource loadExtraData(Long examinationId, String fileName) throws StorageException {
-        return loadDatasets(EXAMINATION + examinationId, fileName);
-    }
-
-    @Override
-    public Resource loadPreclinicalExtraData(Long examinationId, String fileName) throws StorageException {
-        return loadPreclinical(EXAMINATION + examinationId, fileName);
-    }
-
-    @Override
-    public Resource loadPathologyModelData(Long pathologyModelId, String fileName) throws StorageException {
-        return loadPreclinical(PATHOLOGY_MODEL + pathologyModelId, fileName);
-    }
-
-    @Override
-    public Resource loadDatasets(String directory, String fileName) throws StorageException {
+        String directory = EXAMINATION + examinationId;
         return load(baseDirDatasets, directory, fileName);
     }
 
     @Override
-    public Resource loadPreclinical(String directory, String fileName) throws StorageException {
+    public Resource loadPreclinicalExtraData(Long examinationId, String fileName) throws StorageException {
+        String directory = EXAMINATION + examinationId;
         return load(baseDirPreclinical, directory, fileName);
     }
 
     @Override
-    public Resource loadStudyFile(Long studyId, String fileName) throws StorageException {
-        String directory = STUDY + studyId;
-        return load(baseDirStudies, directory, fileName);
+    public Resource loadPathologyModelData(Long pathologyModelId, String fileName) throws StorageException {
+        String directory = PATHOLOGY_MODEL + pathologyModelId;
+        return load(baseDirPreclinical, directory, fileName);
     }
 
     private Resource load(String baseDir, String directory, String fileName) throws StorageException {
@@ -147,23 +140,18 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public String getPublicLocationDatasets(String directory, String fileName) throws StorageException {
-        return Paths.get(baseDirDatasets, directory, fileName).toUri().toString();
-    }
-
-    @Override
     public String getPublicLocationStudies(String directory, String fileName) throws StorageException {
         return Paths.get(baseDirStudies, directory, fileName).toUri().toString();
     }
 
     @Override
-    public void deleteDatasets(String directory, String fileName) throws StorageException {
-        delete(baseDirDatasets, directory, fileName);
+    public String getPublicLocationDatasets(String directory, String fileName) throws StorageException {
+        return Paths.get(baseDirDatasets, directory, fileName).toUri().toString();
     }
 
     @Override
-    public void deletePreclinical(String directory, String fileName) throws StorageException {
-        delete(baseDirPreclinical, directory, fileName);
+    public String getPublicLocationPreclinical(String directory, String fileName) throws StorageException {
+        return Paths.get(baseDirPreclinical, directory, fileName).toUri().toString();
     }
 
     @Override
@@ -174,6 +162,11 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public void deletePreclinicalExtraData(Long examinationId, String fileName) throws StorageException {
         delete(baseDirPreclinical, EXAMINATION + examinationId, fileName);
+    }
+
+    @Override
+    public void deletePathologyModelData(Long pathologyModelId, String fileName) throws StorageException {
+        delete(baseDirPreclinical, PATHOLOGY_MODEL + pathologyModelId, fileName);
     }
 
     @Override

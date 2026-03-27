@@ -26,6 +26,14 @@ public interface StorageService {
 
     public static final String PATHOLOGY_MODEL = "pathology-model-";
 
+    public static final String UNUSED = "UNUSED";
+
+    public static final String SLASH = "/";
+
+    String storeStudyFile(Long studyId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException;
+
     String storeExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException;
@@ -38,47 +46,39 @@ public interface StorageService {
             InputStream inputStream, String contentType, long size)
             throws StorageException;
 
-    String storeStudyFile(Long studyId, String fileName,
-            InputStream inputStream, String contentType, long size)
-            throws StorageException;
+    Resource loadStudyFile(Long studyId, String fileName) throws StorageException;
 
     Resource loadExtraData(Long examinationId, String fileName) throws StorageException;
 
     Resource loadPreclinicalExtraData(Long examinationId, String fileName) throws StorageException;
 
-    Resource loadDatasets(String directory, String fileName) throws StorageException;
-
-    Resource loadPreclinical(String directory, String fileName) throws StorageException;
-
     Resource loadPathologyModelData(Long pathologyModelId, String fileName) throws StorageException;
-
-    Resource loadStudyFile(Long studyId, String fileName) throws StorageException;
 
     long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException;
 
-    String getPublicLocationDatasets(String directory, String fileName) throws StorageException;
-
     String getPublicLocationStudies(String directory, String fileName) throws StorageException;
 
-    void deleteDatasets(String directory, String fileName) throws StorageException;
+    String getPublicLocationDatasets(String directory, String fileName) throws StorageException;
 
-    void deletePreclinical(String directory, String fileName) throws StorageException;
+    String getPublicLocationPreclinical(String directory, String fileName) throws StorageException;
+
+    void deleteStudyFile(Long studyId, String fileName) throws StorageException;
 
     void deleteExtraData(Long examinationId, String fileName) throws StorageException;
 
     void deletePreclinicalExtraData(Long examinationId, String fileName) throws StorageException;
 
-    void deleteStudyFile(Long studyId, String fileName) throws StorageException;
+    void deletePathologyModelData(Long pathologyModelId, String fileName) throws StorageException;
 
-    void deleteDirectoryDatasets(String directory) throws StorageException;
-
-    void deleteDirectoryPreclinical(String directory) throws StorageException;
+    void deleteDirectoryStudyFile(Long studyId) throws StorageException;
 
     void deleteDirectoryExtraData(Long examinationId) throws StorageException;
 
     void deleteDirectoryPreclinicalExtraData(Long examinationId) throws StorageException;
 
-    void deleteDirectoryStudyFile(Long studyId) throws StorageException;
+    void deleteDirectoryDatasets(String directory) throws StorageException;
+
+    void deleteDirectoryPreclinical(String directory) throws StorageException;
 
     void moveDatasets(String directory, String sourceFileName, String targetFileName) throws StorageException;
 
