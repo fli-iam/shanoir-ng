@@ -19,6 +19,7 @@ server:
     whitelabel:
       enabled: false
   display-name: Shanoir
+  administrator.name: ${SHANOIR_ADMIN_NAME}
   administrator.email: ${SHANOIR_ADMIN_EMAIL}
 ##### Database #####
 spring:

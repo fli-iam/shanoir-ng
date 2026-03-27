@@ -56,7 +56,34 @@ public enum DatasetModalityType {
     NIRS_DATASET(11),
 
     // X-RAY ANGIOGRAPHY dataset
-    XA_DATASET(12);
+    XA_DATASET(12),
+
+    // SEGMENTATION dataset
+    SEG_DATASET(13),
+
+    // REGISTRATION dataset
+    REG_DATASET(14),
+
+    // SR dataset
+    SR_DATASET(15),
+
+    // CALIBRATION Dataset
+    CALIBRATION_DATASET(16),
+
+    // MESH Dataset
+    MESH_DATASET(17),
+
+    // STATISTICAL Dataset
+    STATISTICAL_DATASET(18),
+
+    // TEMPLATE Dataset
+    TEMPLATE_DATASET(19),
+
+    // PARAMETER_QUANTIFICATION Dataset
+    PARAMETER_QUANTIFICATION_DATASET(20),
+
+    // MEASUREMENT Dataset
+    MEASUREMENT_DATASET(21);
 
     private int id;
 
