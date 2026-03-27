@@ -47,9 +47,23 @@ public class FileSystemStorageService implements StorageService {
     private String baseDirPreclinical;
 
     @Override
+    public String storeStudyFile(Long studyId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        if (baseDirStudies.equals(UNUSED)) {
+            throw new StorageException("Missing studies directory configuration.", null);
+        }
+        String directory = STUDY + studyId;
+        return store(baseDirStudies, directory, fileName, inputStream, contentType, size);
+    }
+
+    @Override
     public String storeExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
+        if (baseDirDatasets.equals(UNUSED)) {
+            throw new StorageException("Missing datasets directory configuration.", null);
+        }
         String directory = EXAMINATION + examinationId;
         return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
     }
@@ -58,6 +72,9 @@ public class FileSystemStorageService implements StorageService {
     public String storePreclinicalExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
+        if (baseDirPreclinical.equals(UNUSED)) {
+            throw new StorageException("Missing preclinical directory configuration.", null);
+        }
         String directory = EXAMINATION + examinationId;
         return store(baseDirPreclinical, directory, fileName, inputStream, contentType, size);
     }
@@ -66,16 +83,11 @@ public class FileSystemStorageService implements StorageService {
     public String storePathologyModelData(Long pathologyModelId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
+        if (baseDirPreclinical.equals(UNUSED)) {
+            throw new StorageException("Missing preclinical directory configuration.", null);
+        }
         String directory = PATHOLOGY_MODEL + pathologyModelId;
         return store(baseDirPreclinical, directory, fileName, inputStream, contentType, size);
-    }
-
-    @Override
-    public String storeStudyFile(Long studyId, String fileName,
-            InputStream inputStream, String contentType, long size)
-            throws StorageException {
-        String directory = STUDY + studyId;
-        return store(baseDirStudies, directory, fileName, inputStream, contentType, size);
     }
 
     private String store(String baseDir, String directory, String fileName,

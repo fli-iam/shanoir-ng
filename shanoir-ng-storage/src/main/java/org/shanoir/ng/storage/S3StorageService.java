@@ -110,6 +110,26 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
+    public String storeStudyFile(Long studyId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        if (studiesBucket.equals(UNUSED)) {
+            throw new StorageException("Missing studies bucket configuration.", null);
+        }
+        String directory = baseDirStudies + SLASH + STUDY + studyId;
+        String key = directory + SLASH + fileName;
+        try {
+            s3Template.upload(studiesBucket, key, inputStream,
+                    ObjectMetadata.builder().contentType(contentType).build());
+            LOG.info("Stored studies file to S3: s3://{}/{}", studiesBucket, key);
+            return getPublicLocationStudies(directory, fileName);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw new StorageException("S3 upload failed for: " + fileName, e);
+        }
+    }
+
+    @Override
     public String storeExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
@@ -163,26 +183,6 @@ public class S3StorageService implements StorageService {
                     ObjectMetadata.builder().contentType(contentType).build());
             LOG.info("Stored pathology model file to S3: s3://{}/{}", preclinicalBucket, key);
             return getPublicLocationPreclinical(directory, fileName);
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw new StorageException("S3 upload failed for: " + fileName, e);
-        }
-    }
-
-    @Override
-    public String storeStudyFile(Long studyId, String fileName,
-            InputStream inputStream, String contentType, long size)
-            throws StorageException {
-        if (studiesBucket.equals(UNUSED)) {
-            throw new StorageException("Missing studies bucket configuration.", null);
-        }
-        String directory = baseDirStudies + SLASH + STUDY + studyId;
-        String key = directory + SLASH + fileName;
-        try {
-            s3Template.upload(studiesBucket, key, inputStream,
-                    ObjectMetadata.builder().contentType(contentType).build());
-            LOG.info("Stored studies file to S3: s3://{}/{}", studiesBucket, key);
-            return getPublicLocationStudies(directory, fileName);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw new StorageException("S3 upload failed for: " + fileName, e);

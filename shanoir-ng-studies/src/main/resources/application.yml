@@ -107,6 +107,7 @@ front.server:
 storage:
   type: file-system # "file-system" or "s3"
   file-system:
+    # required/used as pattern to store in S3
     studies-data: /var/studies-data
     # file-system only (by design, e.g. validator) and temporary data: no S3
     bids-data: /var/bids-data
