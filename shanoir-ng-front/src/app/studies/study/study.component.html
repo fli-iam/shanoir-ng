@@ -23,14 +23,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(dismiss)="goToView()"
 					(back)="goBack()">
 				<button *ngIf="mode == 'view' && hasDownloadRight && downloadService.advancedDownloadCompat" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
-			    <span [ngSwitch]="mode">
-                    <ng-template [ngSwitchCase]="'view'">
+			    @if (mode == 'view') {
+                    @if (hasStudyImportRight) {
                         <button *ngIf="mode == 'view'" class="right-icon" type="button">
                             <copy-from-csv [studyId]="id"></copy-from-csv>
                         </button>
-                        <button *ngIf="keycloakService.isUserAdmin() && study.isDraft" class="right-icon dl-button" type="button" (click)="approveStudy()">Approve<i class="fas fa-check"></i></button>
-                    </ng-template>
-                </span>
+                    }
+                    <button *ngIf="keycloakService.isUserAdmin() && study.isDraft" class="right-icon dl-button" type="button" (click)="approveStudy()">Approve<i class="fas fa-check"></i></button>
+                }
             </form-footer>
             <h2 class="header command-zone" [class.draft-title]="study?.isDraft">
                 @switch (mode) {
