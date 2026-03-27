@@ -157,12 +157,11 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     return (ret.data as Study).visibleByDefault && (ret.data as Study).locked;
                 }
             },
-            { headerName: "Name", field: "name" },
             {
-                headerName: "State", field: "isDraft", width: '70px', cellRenderer: function (params: any) {
-                    return params.data.isDraft ? 'Draft' : 'Active';
-                }
+                headerName: "", type: "boolean", field: "isDraft", awesome: 'fa-regular fa-clipboard', color: 'var(--color-a)', width: '15px',
+                tip: ret => ret.isDraft ? "draft" : null
             },
+            { headerName: "Name", field: "name" },
             {
                 headerName: "Status", field: "studyStatus", width: '70px', cellRenderer: function (params: any) {
                     return capitalsAndUnderscoresToDisplayable(params.data.studyStatus);
@@ -217,6 +216,10 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             edit: this.keycloakService.isUserAdminOrExpert(),
             delete: false
         };
+    }
+
+    greyedCondition(study: Study): boolean {
+        return study?.isDraft;
     }
 
     canEdit(study: Study): boolean {
