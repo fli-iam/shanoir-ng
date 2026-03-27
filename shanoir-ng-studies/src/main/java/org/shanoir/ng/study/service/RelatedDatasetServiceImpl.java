@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,7 +27,6 @@ import java.util.stream.Collectors;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -118,24 +116,22 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         LOG.info("Starting createSubjectsInTargetStudy");
         eventService.publishEvent(event, "Creating subjects in target study", 0f);
         long startTime = System.currentTimeMillis();
-        deDuplicateSubjectNames(subjects);
 
         Map<Long, Long> subjectMapping = new HashMap<>();
         List<Subject> createdSubjects = new ArrayList<>();
         int i = 0;
         Map<Long, Subject> sourceSubjects = subjectRepository.findWithTagsByIdIn(subjects.stream().map(CopyData.SubjectCopy::getId).toList()).stream()
                 .collect(Collectors.toMap(Subject::getId, s -> s));
+        checkInputSubjects(subjects, sourceSubjects);
+
         List<String> names = subjects.stream()
                 .map(CopyData.SubjectCopy::getNewName)
                 .toList();
         Map<String, Subject> existingByName = subjectRepository.findByStudyIdAndNameIn(targetStudy.getId(), names).stream()
                 .collect(Collectors.toMap(Subject::getName, s -> s));
+
         for (CopyData.SubjectCopy subjectCopy : subjects) {
-            Subject sourceSubject = sourceSubjects.get(subjectCopy.getId());
-            if (sourceSubject == null) {
-                throw new IllegalArgumentException(
-                    "Copy dataset(s): source subject with ID " + subjectCopy.getId() + " not found.");
-            }
+            Subject sourceSubject = sourceSubjects.get(subjectCopy.getId()); // cannot be null because of checkInputSubjects
             Subject targetSubject = existingByName.get(subjectCopy.getNewName());
             if (targetSubject == null) {
                 Subject createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, subjectCopy.getNewName(), false);
@@ -146,6 +142,8 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                     entityManager.clear();
                 }
             } else {
+                // subject with same name already exists in target study, whether it was created in this batch or already existed,
+                // we consider that it's the same subject and we map source subject to existing one in target study
                 subjectMapping.put(sourceSubject.getId(), targetSubject.getId());
             }
         }
@@ -158,50 +156,17 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         return subjectMapping;
     }
 
-    /**
-     * If there are several subjects with the same new name, we add a suffix to make them unique, otherwise the copy will fail because of the unique constraint on subject name within a study.
-     * We do that before creating any subject in the target study to avoid creating then deleting subjects if there are duplicates.
-     * Suffix is added to all subjects with the same new name, even the first one, to make it clearer for users that there was a duplication and that names have been modified.
-     */
-    private void deDuplicateSubjectNames(List<CopyData.SubjectCopy> subjects) {
-        if (subjects == null || subjects.isEmpty()) return;
-
-        completeSubjectNames(subjects);
-
-        // Group by normalized newName (trim, case-sensitive kept; adjust if you want case-insensitive)
-        Map<String, List<CopyData.SubjectCopy>> byName = new LinkedHashMap<>();
-        for (CopyData.SubjectCopy sc : subjects) {
-            if (sc == null) continue;
-            String name = sc.getNewName();
-            if (name == null) continue;
-            String key = name.trim();
-            byName.computeIfAbsent(key, k -> new ArrayList<>()).add(sc);
-        }
-
-        // For each duplicated group, suffix every entry (including the first)
-        for (Map.Entry<String, List<CopyData.SubjectCopy>> e : byName.entrySet()) {
-            String base = e.getKey();
-            List<CopyData.SubjectCopy> group = e.getValue();
-            if (group.size() <= 1) continue;
-
-            for (int i = 0; i < group.size(); i++) {
-                // Example: "John" -> "John (1)", "John (2)", ...
-                group.get(i).setNewName(base + " (" + (i + 1) + ")");
+    private void checkInputSubjects(List<CopyData.SubjectCopy> inputSubjects, Map<Long, Subject> sourceSubjects) throws IllegalArgumentException {
+        for (CopyData.SubjectCopy subjectCopy : inputSubjects) {
+            if (subjectCopy == null) {
+                throw new IllegalArgumentException("Subject copy entry is null.");
             }
-        }
-    }
-
-    private void completeSubjectNames(List<CopyData.SubjectCopy> subjects) {
-        // check if there are subjects with no new name
-        List<CopyData.SubjectCopy> missingNameSubjects = subjects.stream()
-                .filter(sc -> sc != null && sc.getNewName() == null)
-                .toList();
-        if (!missingNameSubjects.isEmpty()) {
-            List<IdName> idToNameList = subjectRepository.findNamesByIdIn(missingNameSubjects.stream().map(CopyData.SubjectCopy::getId).toList());
-            Map<Long, String> idToName = idToNameList.stream()
-                    .collect(Collectors.toMap(IdName::getId, IdName::getName));
-            for (CopyData.SubjectCopy sc : missingNameSubjects) {
-                sc.setNewName(idToName.get(sc.getId()));
+            if (subjectCopy.getId() == null) {
+                throw new IllegalArgumentException("Subject copy entry has null ID.");
+            }
+            if (!sourceSubjects.containsKey(subjectCopy.getId())) {
+                throw new IllegalArgumentException(
+                    "Copy dataset(s): source subject with ID " + subjectCopy.getId() + " not found.");
             }
         }
     }
