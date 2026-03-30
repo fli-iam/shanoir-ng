@@ -91,25 +91,39 @@ public class S3StorageService implements StorageService {
 
     @PostConstruct
     void init() {
-        // remove prefix slash from base dirs to fit S3 URL scheme
-        baseDirStudies = baseDirStudies.substring(1);
-        baseDirDatasets = baseDirDatasets.substring(1);
-        baseDirPreclinical = baseDirPreclinical.substring(1);
-        if (Arrays.asList(environment.getActiveProfiles()).contains("dev")) {
-            ensureBucketExists();
+        if (!baseDirStudies.equals("UNUSED")) {
+            baseDirStudies = stripLeadingSlash(baseDirStudies);
+            ensureBucketExists(studiesBucket, "studies");
+        }
+        if (!baseDirDatasets.equals("UNUSED")) {
+            baseDirDatasets = stripLeadingSlash(baseDirDatasets);
+            ensureBucketExists(datasetsBucket, "datasets");
+        }
+        if (!baseDirPreclinical.equals("UNUSED")) {
+            baseDirPreclinical = stripLeadingSlash(baseDirPreclinical);
+            ensureBucketExists(preclinicalBucket, "preclinical");
         }
     }
 
-    private void ensureBucketExists() {
+    private String stripLeadingSlash(String value) {
+        if (value != null && value.startsWith("/")) {
+            return value.substring(1);
+        }
+        return value;
+    }
+
+    private void ensureBucketExists(String bucketName, String label) {
+        if ("UNUSED".equals(bucketName)) {
+            LOG.info("Bucket '{}' is not configured (UNUSED), skipping creation.", label);
+            return;
+        }
         try {
-            s3Client.createBucket(CreateBucketRequest.builder().bucket(studiesBucket).build());
-            LOG.info("Dev bucket '{}' created", studiesBucket);
-            s3Client.createBucket(CreateBucketRequest.builder().bucket(datasetsBucket).build());
-            LOG.info("Dev bucket '{}' created", datasetsBucket);
-            s3Client.createBucket(CreateBucketRequest.builder().bucket(preclinicalBucket).build());
-            LOG.info("Dev bucket '{}' created", preclinicalBucket);
+            s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
+            LOG.info("Dev bucket '{}' ({}) created successfully.", label, bucketName);
         } catch (BucketAlreadyOwnedByYouException e) {
-            LOG.info("S3 buckets already exist.");
+            LOG.info("Dev bucket '{}' ({}) already exists, skipping.", label, bucketName);
+        } catch (Exception e) {
+            LOG.error("Failed to create bucket '{}' ({}): {}", label, bucketName, e.getMessage(), e);
         }
     }
 
