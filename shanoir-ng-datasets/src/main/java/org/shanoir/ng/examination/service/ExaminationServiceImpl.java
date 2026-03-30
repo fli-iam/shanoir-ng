@@ -403,10 +403,6 @@ public class ExaminationServiceImpl implements ExaminationService {
         if (studyInstanceUID == null) {
             throw new ShanoirException("Could not find StudyInstanceUID from WADO paths for examination: " + examinationId);
         }
-        String pacsResponse = dicomWebService.findStudy(studyInstanceUID, "all");
-        if (pacsResponse == null || pacsResponse.isBlank() || "[]".equals(pacsResponse.trim())) {
-            throw new ShanoirException("Study not found in PACS for StudyInstanceUID: " + studyInstanceUID + ", examination: " + examinationId);
-        }
         LOG.info("Syncing StudyInstanceUID {} from PACS for examination {}", studyInstanceUID, examinationId);
         examinationRepository.updateStudyInstanceUID(examinationId, studyInstanceUID);
     }
