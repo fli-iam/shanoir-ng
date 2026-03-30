@@ -45,6 +45,8 @@ import org.shanoir.uploader.model.mapper.StudyMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.introspect.TypeResolutionContext;
+
 /**
  * This class contains useful methods for Quality Control of series to be imported to the Shanoir server.
  * @author lvallet
@@ -85,7 +87,7 @@ public class QualityUtils {
             cardsToCheck = qualityCards.stream()
             .filter(QualityCard::isToCheckAtImport)
             .toList();
-            LOG.info("Quality Control At Import - " + qualityCards.size() + " quality card(s) found for study " + importJob.getStudyId() + ", " + cardsToCheck.size() + " to be checked at import.");
+            LOG.info("Quality Control At Import - " + qualityCards.size() + " quality card(s) found for study id " + importJob.getStudyId() + ", " + cardsToCheck.size() + " to be checked at import.");
         }
 
         // Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
@@ -128,9 +130,17 @@ public class QualityUtils {
                         datasetsCreatorService.constructDicom(null, serie, true);
                         org.shanoir.ng.importer.dto.Serie serieDto = SerieMapper.INSTANCE.toDto(serie);
                         AcquisitionAttributes<String> dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serieDto);
-                        DatasetAcquisition datasetAcquisition = importerService.createDatasetAcquisitionForSerie(serieDto, rank, null, convertImportJob(importJob), dicomAttributes); // Not useful ?
-                        qualityCardResult = qualityService.checkQuality(datasetAcquisition, dicomAttributes, cardsToCheck);
-
+                        //DatasetAcquisition datasetAcquisition = importerService.createDatasetAcquisitionForSerie(serieDto, rank, null, convertImportJob(importJob), dicomAttributes); // Not useful ?
+                        qualityCardResult = qualityService.checkQuality(null, dicomAttributes, cardsToCheck);
+                        // if quality card result contains an ERROR tag, we remove the serie from the selection
+                        if (!qualityCardResult.isEmpty() && qualityCardResult.hasError()) {
+                            serie.setSelected(false);
+                            importJob.getSelectedSeries().remove(serie); // useless
+                            LOG.info("Quality Control At Import - Serie with SeriesInstanceUID " + serie.getSeriesInstanceUID() + " did not pass quality control and will not be imported.");
+                        } else if (!qualityCardResult.hasFailedValid()) {
+                            // Handle the case where the serie passes quality control
+                            serie.setQualityTag(qualityCardResult.findById(serie.getSeriesInstanceUID()).map(QualityCardResultEntry::getTagSet).orElse(null));
+                        }
                     } catch (SecurityException e) {
                         LOG.error(e.getMessage());
                     }
@@ -165,30 +175,6 @@ public class QualityUtils {
         importJobDto.setUserId(importJob.getUserId());
         importJobDto.setUsername(importJob.getUsername());
         return importJobDto;
-    }
-
-    // TODO : complete this method to remove from the import job the series that do not pass the quality
-    public static ImportJob filterOutSeriesInError(ImportJob importJob, QualityCardResult qualityCardResult) {
-        for (QualityCardResultEntry entry : qualityCardResult) {
-            if (entry.isError()) {
-                String seriesInstanceUID = entry.getSeriesInstanceUID();
-                for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
-                    List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
-                    for (Iterator<org.shanoir.ng.importer.model.Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-                        org.shanoir.ng.importer.model.Study study = studiesIt.next();
-                        List<Serie> series = study.getSelectedSeries();
-                        for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
-                            Serie serie = seriesIt.next();
-                            if (serie.getSeriesInstanceUID().equals(seriesInstanceUID)) {
-                                LOG.info("Removing serie with SeriesInstanceUID " + seriesInstanceUID + " from import job because of quality control error.");
-                                seriesIt.remove();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return null;
     }
 
     public static JScrollPane getQualityControlreportScrollPane(QualityCardResult qualityControlResult) {

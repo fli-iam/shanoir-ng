@@ -290,12 +290,6 @@ public class ImportFinishActionListener implements ActionListener {
                     // qualityControlResult
                     // For Now if Failed Valid then the quality tag of the dataset acquisition on
                     // server side is not updated with an empty value
-                    if (!qualityControlResult.hasFailedValid()) {
-                        // Set qualityTag to the importJob in order to update dataset acquisition
-                        // qualityTag on server side
-                        importJob.setQualityTag(
-                                qualityControlResult.getUpdatedDatasetAcquisitions().get(0).getQualityTag());
-                    }
                 }
             }
         } catch (Exception ex) {

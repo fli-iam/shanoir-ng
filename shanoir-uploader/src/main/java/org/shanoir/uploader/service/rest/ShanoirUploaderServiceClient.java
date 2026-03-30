@@ -944,7 +944,7 @@ public class ShanoirUploaderServiceClient {
                     List<QualityCard> qualityCards = Util.getMappedList(response, QualityCard.class);
                     return qualityCards;
                 } else {
-                    LOG.error("Could not get quality cards for studyId : " +  studyIdentifier + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                    LOG.warn("Could not get quality cards for studyId : " +  studyIdentifier + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
                 }
             }
         } catch (JsonProcessingException e) {
