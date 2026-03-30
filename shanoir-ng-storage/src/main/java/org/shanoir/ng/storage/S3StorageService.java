@@ -119,9 +119,9 @@ public class S3StorageService implements StorageService {
         }
         try {
             s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
-            LOG.info("Dev bucket '{}' ({}) created successfully.", label, bucketName);
+            LOG.info("Bucket '{}' ({}) created successfully.", label, bucketName);
         } catch (BucketAlreadyOwnedByYouException e) {
-            LOG.info("Dev bucket '{}' ({}) already exists, skipping.", label, bucketName);
+            LOG.info("Bucket '{}' ({}) already exists, skipping.", label, bucketName);
         } catch (Exception e) {
             LOG.error("Failed to create bucket '{}' ({}): {}", label, bucketName, e.getMessage(), e);
         }
