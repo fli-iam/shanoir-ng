@@ -16,6 +16,8 @@ package org.shanoir.ng.studycard.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -123,6 +125,12 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
         } catch (JsonProcessingException e) {
             return "json error";
         }
+    }
+
+    public Optional<QualityCardResultEntry> findById(String id) {
+        return stream()
+                .filter(entry -> Objects.equals(entry.getDatasetAcquisitionId(), id))
+                .findFirst();
     }
 
 }

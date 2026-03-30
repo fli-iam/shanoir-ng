@@ -53,9 +53,11 @@ public class QualityExaminationRule extends AbstractEntity {
     private boolean orConditions;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    // there is a join table because a rule_id fk would lead to an ambiguity and bugs
+    // there is a join table because a rule_id fk would lead to an ambiguity and
+    // bugs
     // because it could refer to a study card or quality card rule
-    @JoinTable(name = "quality_card_condition_join", joinColumns = {@JoinColumn(name = "quality_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
+    @JoinTable(name = "quality_card_condition_join", joinColumns = {
+            @JoinColumn(name = "quality_card_rule_id") }, inverseJoinColumns = { @JoinColumn(name = "condition_id") })
     private List<StudyCardCondition> conditions;
 
     public QualityTag getQualityTag() {
@@ -82,56 +84,68 @@ public class QualityExaminationRule extends AbstractEntity {
         this.orConditions = orConditions;
     }
 
-    public void apply(DatasetAcquisition datasetAcquisition, QualityCardResult result, WADODownloaderService downloader) throws PacsException{
+    public void apply(DatasetAcquisition datasetAcquisition, QualityCardResult result, WADODownloaderService downloader)
+            throws PacsException {
         apply(datasetAcquisition, null, result, downloader);
     }
 
-     /**
+    /**
      *
-     * @param examinationDicomAttributes if null conditions will be checked on the examination data and dicom data will be fetched from pacs.
-     * Else conditions will be checked on the looping on the given dicom attributes
+     * @param examinationDicomAttributes if null conditions will be checked on the
+     *                                   examination data and dicom data will be
+     *                                   fetched from pacs.
+     *                                   Else conditions will be checked on the
+     *                                   looping on the given dicom attributes
      * @param examination
      * @param result
      * @param downloader
      * @throws PacsException
      */
 
-    public void apply(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> acquisitionDicomAttributes, QualityCardResult result, WADODownloaderService downloader) throws PacsException {
-        // if applied at import and not from ShUp then acquisitionDicomAttributes should not be null, otherwise we fetch DICOM acquisition attributes.
+    public void apply(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> acquisitionDicomAttributes,
+            QualityCardResult result, WADODownloaderService downloader) throws PacsException {
+        // if applied at import and not from ShUp then acquisitionDicomAttributes should
+        // not be null, otherwise we fetch DICOM acquisition attributes.
         if (acquisitionDicomAttributes == null) {
             acquisitionDicomAttributes = downloader.getDicomAttributesForAcquisition(datasetAcquisition);
         }
-            // In case a rule was added without condition (= set as Always in gui)
-            if (this.getConditions() == null || this.getConditions().isEmpty()) {
-                QualityCardResultEntry resultEntry = initResult(datasetAcquisition);
-                resultEntry.setTagSet(getQualityTag());
-                resultEntry.setMessage("Tag " + getQualityTag().name() + " was set by the quality card rule without any condition.");
-                result.add(resultEntry);
-                result.addUpdatedDatasetAcquisition(
+        // In case a rule was added without condition (= set as Always in gui)
+        if (this.getConditions() == null || this.getConditions().isEmpty()) {
+            QualityCardResultEntry resultEntry = initResult(datasetAcquisition);
+            resultEntry.setTagSet(getQualityTag());
+            resultEntry.setMessage(
+                    "Tag " + getQualityTag().name() + " was set by the quality card rule without any condition.");
+            result.add(resultEntry);
+            result.addUpdatedDatasetAcquisition(
                     setTagToDatasetAcquisition(datasetAcquisition.getId()));
-            } else {
-                ConditionResult conditionResult = conditionsfulfilled(acquisitionDicomAttributes, datasetAcquisition, result);
-                if (conditionResult.isFulfilled()) {
-                    result.addUpdatedDatasetAcquisition(
+        } else {
+            ConditionResult conditionResult = conditionsfulfilled(acquisitionDicomAttributes, datasetAcquisition,
+                    result);
+            if (conditionResult.isFulfilled()) {
+                result.addUpdatedDatasetAcquisition(
                         setTagToDatasetAcquisition(datasetAcquisition.getId()));
+            }
+            // if conditions not fulfilled for a VALID tag
+            // or if conditions fulfilled for a ERROR or WARNING tag
+            // then add an entry to the report
+            if ((conditionResult.isFulfilled() && !getQualityTag().equals(QualityTag.VALID))
+                    || (!conditionResult.isFulfilled() && getQualityTag().equals(QualityTag.VALID))) {
+                QualityCardResultEntry resultEntry = initResult(datasetAcquisition);
+                resultEntry.setFailedValid(QualityTag.VALID.equals(getQualityTag()) && !conditionResult.isFulfilled());
+                resultEntry.setTagSet(getQualityTag());
+                if (conditionResult.isFulfilled()) {
+                    resultEntry.setMessage(
+                            "Tag " + getQualityTag().name() + " was set because those conditions were fulfilled : "
+                                    + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
+                } else {
+                    resultEntry.setMessage(
+                            "Tag " + getQualityTag().name() + " could not be set because those conditions failed : "
+                                    + StringUtils.join(conditionResult.getUnfulfilledConditionsMsgList(), ", "));
                 }
-                // if conditions not fulfilled for a VALID tag
-                // or if conditions fulfilled for a ERROR or WARNING tag
-                // then add an entry to the report
-                if ((conditionResult.isFulfilled() && !getQualityTag().equals(QualityTag.VALID))
-                        || (!conditionResult.isFulfilled() && getQualityTag().equals(QualityTag.VALID))) {
-                    QualityCardResultEntry resultEntry = initResult(datasetAcquisition);
-                    resultEntry.setFailedValid(QualityTag.VALID.equals(getQualityTag()) && !conditionResult.isFulfilled());
-                    resultEntry.setTagSet(getQualityTag());
-                    if (conditionResult.isFulfilled()) {
-                        resultEntry.setMessage("Tag " + getQualityTag().name() + " was set because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
-                    } else {
-                        resultEntry.setMessage("Tag " + getQualityTag().name() + " could not be set because those conditions failed : " + StringUtils.join(conditionResult.getUnfulfilledConditionsMsgList(), ", "));
-                    }
-                    result.add(resultEntry);
-                }
+                result.add(resultEntry);
             }
         }
+    }
 
     /**
      *
@@ -147,20 +161,25 @@ public class QualityExaminationRule extends AbstractEntity {
 
     /**
      *
-     * @param dicomAttributes if null conditions will be checked on the examination data and dicom data will be fetched from pacs.
-     * Else conditions will be checked on the looping on the given dicom attributes
+     * @param dicomAttributes if null conditions will be checked on the examination
+     *                        data and dicom data will be fetched from pacs.
+     *                        Else conditions will be checked on the looping on the
+     *                        given dicom attributes
      * @param examination
      * @param result
      * @return
      */
-    private ConditionResult conditionsfulfilled(AcquisitionAttributes<?> dicomAttributes, DatasetAcquisition da, QualityCardResult result) {
+    private ConditionResult conditionsfulfilled(AcquisitionAttributes<?> dicomAttributes, DatasetAcquisition da,
+            QualityCardResult result) {
         boolean allFulfilled = true;
         ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level
-        // We create a list containing only the acquisition we want to apply the rule on, to use the same condition fulfillment methods as for study card conditions on datasets or acquisitions list.
+        // We create a list containing only the acquisition we want to apply the rule
+        // on, to use the same condition fulfillment methods as for study card
+        // conditions on datasets or acquisitions list.
         List<DatasetAcquisition> acquisitionList = new ArrayList<>();
         acquisitionList.add(da);
-        
+
         for (StudyCardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();
             boolean fulfilled = true;
@@ -171,7 +190,9 @@ public class QualityExaminationRule extends AbstractEntity {
             } else if (condition instanceof ExamMetadataCondOnDatasets) {
                 fulfilled = ((ExamMetadataCondOnDatasets) condition).fulfilled(acquisitionList, msg);
             } else {
-                throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
+                throw new IllegalStateException(
+                        "There might be an unimplemented condition type here. Condition class : "
+                                + condition.getClass());
             }
 
             if (fulfilled) {
@@ -204,6 +225,7 @@ public class QualityExaminationRule extends AbstractEntity {
         public int compare(StudyCardCondition cond1, StudyCardCondition cond2) {
             return priority(cond1) - priority(cond2);
         }
+
         /**
          * the higher the priority, the higher is the returned number.
          */
@@ -253,7 +275,7 @@ public class QualityExaminationRule extends AbstractEntity {
 
     public boolean hasDicomConditions() {
         if (getConditions() != null) {
-            for (StudyCardCondition condition: getConditions()) {
+            for (StudyCardCondition condition : getConditions()) {
                 if (condition instanceof StudyCardDICOMConditionOnDatasets) {
                     return true;
                 }
