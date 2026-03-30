@@ -298,7 +298,7 @@ public class ExaminationApiController implements ExaminationApi {
                 if (contentType == null) {
                     contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
                 }
-                response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+                response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
                 response.setContentType(contentType);
                 if (fileToDownload.isReadable() && fileToDownload.contentLength() > 0) {
                     response.setContentLengthLong(fileToDownload.contentLength());
