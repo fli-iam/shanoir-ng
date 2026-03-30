@@ -53,10 +53,12 @@ public class ConditionResult extends AbstractEntity {
     private boolean orConditions;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    // there is a join table because a rule_id fk would lead to an ambiguity and bugs
+    // there is a join table because a rule_id fk would lead to an ambiguity and
+    // bugs
     // because it could refer to a study card or quality card rule
-    @JoinTable(name = "quality_card_condition_join", joinColumns = {@JoinColumn(name = "quality_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
-    private List<CardCondition> conditions;
+    @JoinTable(name = "quality_card_condition_join", joinColumns = {
+            @JoinColumn(name = "quality_card_rule_id") }, inverseJoinColumns = { @JoinColumn(name = "condition_id") })
+    private List<StudyCardCondition> conditions;
 
     public QualityTag getQualityTag() {
         return QualityTag.get(tag);
@@ -180,7 +182,9 @@ public class ConditionResult extends AbstractEntity {
             } else if (condition instanceof ExamMetadataCondOnDatasets) {
                 fulfilled = ((ExamMetadataCondOnDatasets) condition).fulfilled(acquisitionList, msg);
             } else {
-                throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
+                throw new IllegalStateException(
+                        "There might be an unimplemented condition type here. Condition class : "
+                                + condition.getClass());
             }
 
             if (fulfilled) {
@@ -214,6 +218,7 @@ public class ConditionResult extends AbstractEntity {
         public int compare(CardCondition cond1, CardCondition cond2) {
             return priority(cond1) - priority(cond2);
         }
+
         /**
          * the higher the priority, the higher is the returned number.
          */
