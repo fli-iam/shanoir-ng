@@ -47,3 +47,6 @@ textarea { resize : both; }
 table.no-spacing { border-spacing:0; }
 td.volume-storage-left { padding-right: 10px; }
 td.volume-storage-total { border-top: 1px solid var(--grey); }
+
+.draft-tag { margin-left: 7px; color: var(--grey); }
+.draft-title { font-style: italic; color: var(--greyer); }

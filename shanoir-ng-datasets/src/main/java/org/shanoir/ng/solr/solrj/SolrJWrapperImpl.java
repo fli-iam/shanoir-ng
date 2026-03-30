@@ -470,10 +470,11 @@ public class SolrJWrapperImpl implements SolrJWrapper {
                         continue;
                     }
 
-                    if (isMissing) {
-                        renamedAndFilteredValues.add(new FacetField.Count(facetField, UNKNOWN, count.getCount()));
-                    } else {
+                    if (!isMissing) {
                         renamedAndFilteredValues.add(count);
+                    } else if (facetField.getValues().size() < pageableFacet.getPageSize()) {
+                        // only add <none> at the last page
+                        renamedAndFilteredValues.add(new FacetField.Count(facetField, UNKNOWN, count.getCount()));
                     }
                 }
 

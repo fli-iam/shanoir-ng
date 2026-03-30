@@ -143,7 +143,10 @@ public interface ExaminationApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PostMapping(value = {"", "/"}, produces = { "application/json" }, consumes = {
             "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT'))")
+    @PreAuthorize("!@datasetSecurityService.isDraftStudy(#examinationDTO.getStudyId()) and "
+              + "(hasRole('ADMIN') or "
+              + "(hasAnyRole('EXPERT', 'USER') and "
+              + "@datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT')))")
     ResponseEntity<ExaminationDTO> saveNewExamination(
             @Parameter(description = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
             final BindingResult result) throws RestServiceException;

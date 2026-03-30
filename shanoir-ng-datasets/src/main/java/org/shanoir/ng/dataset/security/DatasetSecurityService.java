@@ -31,14 +31,16 @@ import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.UserRights;
@@ -50,6 +52,7 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -76,10 +79,16 @@ public class DatasetSecurityService {
     private SubjectRepository subjectRepository;
 
     @Autowired
+    private StudyRepository studyRepository;
+
+    @Autowired
     private StudyRightsService studyRightsService;
 
     @Autowired
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * Check that the connected user has the given right for the given study.
@@ -1109,5 +1118,13 @@ public class DatasetSecurityService {
             }
         }
         return hasRightOnEveryDataset(new ArrayList<>(dsIds), StudyUserRight.CAN_EXECUTE.toString());
+    }
+
+    public boolean isDraftStudy(Long studyId) {
+        Study study = studyRepository.findById(studyId).orElse(null);
+        if (study == null) {
+            return false;
+        }
+        return study.getIsDraft();
     }
 }

@@ -34,7 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </span>
         <span *ngIf="options?.length == 0" class="label empty">Empty list</span>
         <span class="commands">
-            <span class="clear button" *ngIf="inputText && clear" (click)="onClear()"><i class="fas fa-times"></i></span>
+            <span class="clear button" [class.hidden]="!(inputText && clear)" (click)="onClear()"><i class="fas fa-times"></i></span>
             <span class="open button" (click)="isOpen() ? close() : open()"><i class="fas fa-chevron-down"></i></span>
             <a [routerLink]="viewRoute" *ngIf="viewRoute" (click)="clickView()" [class.disabled]="viewDisabled || !selectedOption" class="button"><i class="fa-regular fa-eye"></i></a>
             <span *ngIf="newClick.observers.length > 0 && !newHidden && !disabled" (click)="clickNew()" [class.disabled]="newDisabled" class="button new-file"><i class="far fa-file"></i><i class="fas fa-plus"></i></span>

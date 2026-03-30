@@ -93,6 +93,16 @@ public interface StudyService {
     Study create(Study study) throws MicroServiceCommunicationException;
 
     /**
+     * approve a draft study (or convert it back to draft)
+     *
+     * @param studyId
+     * @return created Study
+     * @throws ShanoirStudiesException
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    public Study approveDraftStudy(Long studyId) throws ShanoirException;
+
+    /**
      * Update a study
      *
      * @param study
@@ -124,7 +134,7 @@ public interface StudyService {
      * Links an examination to a study
      *
      * @param examinationId an examination ID
-     * @param studyId       the lionked study ID
+     * @param studyId       the linked study ID
      * @param centerId
      */
     void addExaminationToStudy(Long examinationId, Long studyId, Long centerId, Long subjectId);
@@ -152,6 +162,12 @@ public interface StudyService {
      * Returns all publicly available studies;
      */
     List<Study> findPublicStudies();
+
+    /**
+     * Returns all draft studies the user can access;
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    List<Study> findDraftStudies();
 
     StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId);
 

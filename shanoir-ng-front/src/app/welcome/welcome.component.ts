@@ -352,13 +352,14 @@ export class WelcomeComponent implements OnInit {
     }
 
     private fetchOverallStats() {
+        // get public studies data
+        this.fetchPublicStudies();
         // get the latest overall statistics
         this.datasetService.getOverallStatistics().then(stats => {
             this.studiesCount = stats.studiesCount;
             this.subjectsCount = stats.subjectsCount;
             this.datasetAcquisitionsCount = stats.datasetAcquisitionsCount;
             this.storageSize = stats.storageSize;
-            this.fetchPublicStudies();
             this.fetchUsersCount();
             this.fetchEventsCount();
             this.addSchemaToDOM();
