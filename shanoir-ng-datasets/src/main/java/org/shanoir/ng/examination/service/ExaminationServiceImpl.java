@@ -394,4 +394,21 @@ public class ExaminationServiceImpl implements ExaminationService {
         return dataDir + "/examination-" + examinationId + "/" + fileName;
     }
 
+    @Override
+    @Transactional
+    public void syncStudyInstanceUIDFromPacs(Long examinationId) throws EntityNotFoundException, ShanoirException {
+        Examination examination = examinationRepository.findByIdWithEagerAcquisitions(examinationId)
+                .orElseThrow(() -> new EntityNotFoundException(Examination.class, examinationId));
+        String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(examination);
+        if (studyInstanceUID == null) {
+            throw new ShanoirException("Could not find StudyInstanceUID from WADO paths for examination: " + examinationId);
+        }
+        String pacsResponse = dicomWebService.findStudy(studyInstanceUID, "all");
+        if (pacsResponse == null || pacsResponse.isBlank() || "[]".equals(pacsResponse.trim())) {
+            throw new ShanoirException("Study not found in PACS for StudyInstanceUID: " + studyInstanceUID + ", examination: " + examinationId);
+        }
+        LOG.info("Syncing StudyInstanceUID {} from PACS for examination {}", studyInstanceUID, examinationId);
+        examinationRepository.updateStudyInstanceUID(examinationId, studyInstanceUID);
+    }
+
 }
