@@ -65,19 +65,20 @@ public class CardsProcessingService {
     @Autowired
     private ShanoirEventService eventService;
 
-
     /**
      * Apply study card on given acquisitions
      *
      * @param studyCard
      * @param acquisitions
      * @throws PacsException
-     * @throws EntityNotFoundException 
+     * @throws EntityNotFoundException
      */
-    public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) throws PacsException, EntityNotFoundException {
+    public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions)
+            throws PacsException, EntityNotFoundException {
         boolean changeInAtLeastOneAcquisition = false;
         for (DatasetAcquisition acquisition : acquisitions) {
-            if (CollectionUtils.isNotEmpty(acquisition.getDatasets()) && CollectionUtils.isNotEmpty(studyCard.getRules())) {
+            if (CollectionUtils.isNotEmpty(acquisition.getDatasets())
+                    && CollectionUtils.isNotEmpty(studyCard.getRules())) {
                 AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
                 changeInAtLeastOneAcquisition = studyCard.apply(acquisition, dicomAttributes);
             }
@@ -95,7 +96,8 @@ public class CardsProcessingService {
      * @param updateTags
      * @throws MicroServiceCommunicationException
      */
-    public QualityCardResult applyQualityCardOnDatasetAcquisition(QualityCard qualityCard, DatasetAcquisition acquisition) throws MicroServiceCommunicationException, PacsException {
+    public QualityCardResult applyQualityCardOnDatasetAcquisition(QualityCard qualityCard,
+            DatasetAcquisition acquisition) throws MicroServiceCommunicationException, PacsException {
         long startTs = new Date().getTime();
         if (qualityCard == null)
             throw new IllegalArgumentException("qualityCard can't be null");
