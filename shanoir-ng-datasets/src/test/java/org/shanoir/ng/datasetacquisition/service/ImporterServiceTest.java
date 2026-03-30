@@ -212,7 +212,7 @@ public class ImporterServiceTest {
             when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
             when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
             when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(qualityCard)); // TODO perform quality card tests
-            when(qualityService.checkQuality(Mockito.eq(datasetAcq), acquisitionAttributes, Utils.toList(qualityCard))).thenReturn(qualityResult);
+            when(qualityService.checkQuality(Mockito.eq(datasetAcq), Mockito.eq(acquisitionAttributes), Mockito.eq(Utils.toList(qualityCard)))).thenReturn(qualityResult);
             //when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(qualityResult);
 
             // WHEN we treat this importjob
