@@ -174,6 +174,7 @@ public class ImportFromTableWindow extends JFrame {
             resourceBundle.getString("shanoir.uploader.import.table.column.studycard"),
             resourceBundle.getString("shanoir.uploader.import.table.column.common.name"),
             resourceBundle.getString("shanoir.uploader.import.table.column.comment"),
+            resourceBundle.getString("shanoir.uploader.import.table.column.data.reuse.agreement"),
             resourceBundle.getString("shanoir.uploader.import.table.column.error")
         };
         // Create table with data
@@ -208,8 +209,9 @@ public class ImportFromTableWindow extends JFrame {
         table.getColumnModel().getColumn(15).setMinWidth(150);
         table.getColumnModel().getColumn(16).setMinWidth(150);
         table.getColumnModel().getColumn(17).setMinWidth(150);
+        table.getColumnModel().getColumn(18).setMinWidth(300);
         // State
-        table.getColumnModel().getColumn(18).setMinWidth(350);
+        table.getColumnModel().getColumn(19).setMinWidth(350);
 
         // Add the table to the frame
         JPanel tablePanel = new JPanel(new BorderLayout());
@@ -290,6 +292,7 @@ public class ImportFromTableWindow extends JFrame {
             rowData.add(importJob.getStudyCardName());
             rowData.add(importJob.getSubjectName());
             rowData.add(importJob.getExaminationComment());
+            rowData.add(importJob.getExaminationDataReuseAgreement().toString());
             model.addRow(rowData.toArray());
         }
         this.error.setVisible(inError);

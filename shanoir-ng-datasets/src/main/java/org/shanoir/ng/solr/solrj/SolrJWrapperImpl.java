@@ -78,6 +78,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
     private static final String SUBJECT_NAME_FACET = "subjectName";
     private static final String SUBJECT_ID_FACET = "subjectId";
     private static final String SORTING_INDEX_FACET = "sortingIndex";
+    private static final String DATA_REUSE_AGREEMENT = "dataReuseAgreement";
     private static final String SUBJECT_TYPE_FACET = "subjectType";
     private static final String STUDY_NAME_FACET = "studyName";
     private static final String STUDY_ID_FACET = "studyId";
@@ -109,6 +110,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             STUDY_ID_FACET,
             SUBJECT_ID_FACET,
             SORTING_INDEX_FACET,
+            DATA_REUSE_AGREEMENT,
             SUBJECT_TYPE_FACET,
             CENTER_ID_FACET,
             SLICE_THICKNESS_FACET,
@@ -539,6 +541,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             solrDoc.setSubjectName((String) document.getFirstValue("subjectName"));
             solrDoc.setSubjectId((Long) document.getFirstValue("subjectId"));
             solrDoc.setSortingIndex((Integer) document.getFirstValue("sortingIndex"));
+            solrDoc.setDataReuseAgreement((Boolean) document.getFirstValue("dataReuseAgreement"));
             if (document.getFieldValues("tags") != null) {
                 solrDoc.setTags(document.getFieldValues("tags").stream()
                         .map(object -> Objects.toString(object, null))

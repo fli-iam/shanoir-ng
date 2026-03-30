@@ -123,6 +123,8 @@ public class ImportDialog extends JDialog {
     public JFormattedTextField mrExaminationDateDPTF;
     public JLabel mrExaminationCommentLabel;
     public JTextFieldMandatory mrExaminationCommentTF;
+    public JLabel mrExaminationDataReuseAgreementLabel;
+    public JCheckBox mrExaminationDataReuseAgreementCB;
 
     public JLabel mriCenterLabel;
     public JTextField mriCenterText;
@@ -772,11 +774,32 @@ public class ImportDialog extends JDialog {
         importDialogGBC.gridwidth = 1;
         formPanel.add(mrExaminationCommentTF, importDialogGBC);
 
+        mrExaminationDataReuseAgreementLabel = new JLabel(
+                resourceBundle.getString("shanoir.uploader.mrExaminationDataReuseAgreementLabel") + " *");
+        mrExaminationDataReuseAgreementLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        importDialogGBC.weightx = 0.2;
+        importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
+        importDialogGBC.insets = new Insets(5, 5, 5, 5);
+        importDialogGBC.gridx = 0;
+        importDialogGBC.gridy = 25;
+        importDialogGBC.gridwidth = 2;
+        importDialogGBC.gridheight = 1;
+        formPanel.add(mrExaminationDataReuseAgreementLabel, importDialogGBC);
+
+        mrExaminationDataReuseAgreementCB = new JCheckBox();
+        importDialogGBC.weightx = 0.7;
+        importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
+        importDialogGBC.insets = new Insets(5, 5, 5, 5);
+        importDialogGBC.gridx = 2;
+        importDialogGBC.gridy = 25;
+        importDialogGBC.gridwidth = 1;
+        formPanel.add(mrExaminationDataReuseAgreementCB, importDialogGBC);
+
         cancelButton = new JButton(resourceBundle.getString("shanoir.uploader.cancel"));
         importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
         importDialogGBC.weightx = 0;
         importDialogGBC.gridx = 1;
-        importDialogGBC.gridy = 25;
+        importDialogGBC.gridy = 26;
         importDialogGBC.gridwidth = 1;
         formPanel.add(cancelButton, importDialogGBC);
 
@@ -787,7 +810,7 @@ public class ImportDialog extends JDialog {
         importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
         importDialogGBC.weightx = 0;
         importDialogGBC.gridx = 2;
-        importDialogGBC.gridy = 25;
+        importDialogGBC.gridy = 26;
         importDialogGBC.gridwidth = 2;
         formPanel.add(exportButton, importDialogGBC);
         exportButton.addActionListener(importFinishAL);
