@@ -109,12 +109,13 @@ logging:
 storage:
   type: file-system # "file-system" or "s3"
   file-system:
-    # required/used as pattern to store in S3
     preclinical-data: /var/preclinical-data
     uploadBrukerFolder: /tmp/
     separator: /
   s3:
-    preclinical-bucket-name: preclinical
+    preclinical:
+      bucket: preclinical
+      prefix: preclinical/
 
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #

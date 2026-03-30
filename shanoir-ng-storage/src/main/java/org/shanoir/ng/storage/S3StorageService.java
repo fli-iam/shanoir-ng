@@ -62,23 +62,23 @@ public class S3StorageService implements StorageService {
     @Autowired
     private final S3Client s3Client;
 
-    @Value("${storage.s3.studies-bucket-name:UNUSED}")
+    @Value("${storage.s3.studies.bucket:UNUSED}")
     private String studiesBucket;
 
-    @Value("${storage.s3.datasets-bucket-name:UNUSED}")
+    @Value("${storage.s3.datasets.bucket:UNUSED}")
     private String datasetsBucket;
 
-    @Value("${storage.s3.preclinical-bucket-name:UNUSED}")
+    @Value("${storage.s3.preclinical.bucket:UNUSED}")
     private String preclinicalBucket;
 
-    @Value("${storage.file-system.studies-data:UNUSED}")
-    private String baseDirStudies;
+    @Value("${storage.s3.studies.prefix:UNUSED}")
+    private String studiesPrefix;
 
-    @Value("${storage.file-system.datasets-data:UNUSED}")
-    private String baseDirDatasets;
+    @Value("${storage.s3.datasets.prefix:UNUSED}")
+    private String datasetsPrefix;
 
-    @Value("${storage.file-system.preclinical-data:UNUSED}")
-    private String baseDirPreclinical;
+    @Value("${storage.s3.preclinical.prefix:UNUSED}")
+    private String preclinicalPrefix;
 
     @Autowired
     private final Environment environment;
@@ -90,26 +90,26 @@ public class S3StorageService implements StorageService {
     }
 
     @PostConstruct
-    void init() {
-        if (!baseDirStudies.equals("UNUSED")) {
-            baseDirStudies = stripLeadingSlash(baseDirStudies);
+    void init() throws StorageException {
+        if (!studiesPrefix.equals("UNUSED")) {
+            ensureValidPrefix(studiesPrefix, "studies");
             ensureBucketExists(studiesBucket, "studies");
         }
-        if (!baseDirDatasets.equals("UNUSED")) {
-            baseDirDatasets = stripLeadingSlash(baseDirDatasets);
+        if (!datasetsPrefix.equals("UNUSED")) {
+            ensureValidPrefix(datasetsPrefix, "datasets");
             ensureBucketExists(datasetsBucket, "datasets");
         }
-        if (!baseDirPreclinical.equals("UNUSED")) {
-            baseDirPreclinical = stripLeadingSlash(baseDirPreclinical);
+        if (!preclinicalPrefix.equals("UNUSED")) {
+            ensureValidPrefix(preclinicalPrefix, "preclinical");
             ensureBucketExists(preclinicalBucket, "preclinical");
         }
     }
 
-    private String stripLeadingSlash(String value) {
-        if (value != null && value.startsWith("/")) {
-            return value.substring(1);
+    private void ensureValidPrefix(String prefix, String label) throws StorageException {
+        if ((prefix != "") && (!prefix.endsWith(SLASH))) {
+            LOG.error("Bucket '{}' is configured with an invalid prefix '{}' (prefix must be empty or end with the '{}' delimiter)", label, prefix, SLASH);
+            throw new StorageException("Invalid S3 prefix", null);
         }
-        return value;
     }
 
     private void ensureBucketExists(String bucketName, String label) {
@@ -134,7 +134,7 @@ public class S3StorageService implements StorageService {
         if (studiesBucket.equals(UNUSED)) {
             throw new StorageException("Missing studies bucket configuration.", null);
         }
-        String directory = baseDirStudies + SLASH + STUDY + studyId;
+        String directory = studiesPrefix + STUDY + studyId;
         String key = directory + SLASH + fileName;
         try {
             s3Template.upload(studiesBucket, key, inputStream,
@@ -154,7 +154,7 @@ public class S3StorageService implements StorageService {
         if (datasetsBucket.equals(UNUSED)) {
             throw new StorageException("Missing datasets bucket configuration.", null);
         }
-        String directory = baseDirDatasets + SLASH + EXAMINATION + examinationId;
+        String directory = datasetsPrefix + EXAMINATION + examinationId;
         String key =  directory + SLASH + fileName;
         try {
             s3Template.upload(datasetsBucket, key, inputStream,
@@ -174,7 +174,7 @@ public class S3StorageService implements StorageService {
         if (preclinicalBucket.equals(UNUSED)) {
             throw new StorageException("Missing preclinical bucket configuration.", null);
         }
-        String directory = baseDirPreclinical + SLASH + EXAMINATION + examinationId;
+        String directory = preclinicalPrefix + EXAMINATION + examinationId;
         String key = directory + SLASH + fileName;
         try {
             s3Template.upload(preclinicalBucket, key, inputStream,
@@ -194,7 +194,7 @@ public class S3StorageService implements StorageService {
         if (preclinicalBucket.equals(UNUSED)) {
             throw new StorageException("Missing preclinical bucket configuration.", null);
         }
-        String directory = baseDirPreclinical + SLASH + PATHOLOGY_MODEL + pathologyModelId;
+        String directory = preclinicalPrefix + PATHOLOGY_MODEL + pathologyModelId;
         String key = directory + SLASH + fileName;
         try {
             s3Template.upload(preclinicalBucket, key, inputStream,
@@ -210,7 +210,7 @@ public class S3StorageService implements StorageService {
     @Override
     public Resource loadExtraData(Long examinationId, String fileName) throws StorageException {
         try {
-            String key = baseDirDatasets + SLASH + EXAMINATION + examinationId + SLASH + fileName;
+            String key = datasetsPrefix + EXAMINATION + examinationId + SLASH + fileName;
             return s3Template.download(datasetsBucket, key);
         } catch (Exception e) {
             throw new StorageException("S3 download failed for: " + fileName, e);
@@ -220,7 +220,7 @@ public class S3StorageService implements StorageService {
     @Override
     public Resource loadPreclinicalExtraData(Long examinationId, String fileName) throws StorageException {
         try {
-            String key = baseDirPreclinical + SLASH + EXAMINATION + examinationId + SLASH + fileName;
+            String key = preclinicalPrefix + EXAMINATION + examinationId + SLASH + fileName;
             return s3Template.download(preclinicalBucket, key);
         } catch (Exception e) {
             throw new StorageException("S3 download failed for: " + fileName, e);
@@ -229,7 +229,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException {
-        String key = baseDirDatasets + SLASH + EXAMINATION + examinationId + SLASH + fileName;
+        String key = datasetsPrefix + EXAMINATION + examinationId + SLASH + fileName;
         try {
             HeadObjectResponse metadata = s3Client.headObject(HeadObjectRequest.builder()
                     .bucket(datasetsBucket)
@@ -266,7 +266,7 @@ public class S3StorageService implements StorageService {
     @Override
     public void deleteExtraData(Long examinationId, String fileName) throws StorageException {
         try {
-            String key = baseDirDatasets + SLASH
+            String key = datasetsPrefix
                             + EXAMINATION + examinationId + SLASH + fileName;
             s3Client.deleteObject(DeleteObjectRequest.builder()
                     .bucket(datasetsBucket)
@@ -280,7 +280,7 @@ public class S3StorageService implements StorageService {
     @Override
     public void deletePreclinicalExtraData(Long examinationId, String fileName) throws StorageException {
         try {
-            String key = baseDirPreclinical + SLASH
+            String key = preclinicalPrefix
                             + EXAMINATION + examinationId + SLASH + fileName;
             s3Client.deleteObject(DeleteObjectRequest.builder()
                     .bucket(preclinicalBucket)
@@ -294,7 +294,7 @@ public class S3StorageService implements StorageService {
     @Override
     public void deletePathologyModelData(Long pathologyModelId, String fileName) throws StorageException {
         try {
-            String key = baseDirPreclinical + SLASH
+            String key = preclinicalPrefix
                     + PATHOLOGY_MODEL + pathologyModelId + SLASH + fileName;
             s3Client.deleteObject(DeleteObjectRequest.builder()
                     .bucket(preclinicalBucket)
@@ -317,12 +317,12 @@ public class S3StorageService implements StorageService {
 
     @Override
     public void deleteDirectoryExtraData(Long examinationId) throws StorageException {
-        deleteDirectoryFromBucket(datasetsBucket, baseDirDatasets + SLASH + EXAMINATION + examinationId);
+        deleteDirectoryFromBucket(datasetsBucket, datasetsPrefix + EXAMINATION + examinationId);
     }
 
     @Override
     public void deleteDirectoryPreclinicalExtraData(Long examinationId) throws StorageException {
-        deleteDirectoryFromBucket(preclinicalBucket, baseDirPreclinical + SLASH + EXAMINATION + examinationId);
+        deleteDirectoryFromBucket(preclinicalBucket, preclinicalPrefix + EXAMINATION + examinationId);
     }
 
     @Override
@@ -334,7 +334,7 @@ public class S3StorageService implements StorageService {
     @Override
     public Resource loadPathologyModelData(Long pathologyModelId, String fileName) throws StorageException {
         try {
-            String key = baseDirPreclinical + SLASH + PATHOLOGY_MODEL + pathologyModelId + SLASH + fileName;
+            String key = preclinicalPrefix + PATHOLOGY_MODEL + pathologyModelId + SLASH + fileName;
             return s3Template.download(preclinicalBucket, key);
         } catch (Exception e) {
             throw new StorageException("S3 download failed for: " + fileName, e);
@@ -343,7 +343,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public Resource loadStudyFile(Long studyId, String fileName) throws StorageException {
-        String key = baseDirStudies + SLASH + STUDY + studyId + SLASH + fileName;
+        String key = studiesPrefix + STUDY + studyId + SLASH + fileName;
         try {
             return s3Template.download(studiesBucket, key);
         } catch (Exception e) {
@@ -363,7 +363,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public void deleteStudyFile(Long studyId, String fileName) throws StorageException {
-        String key = baseDirStudies + SLASH + STUDY + studyId + SLASH + fileName;
+        String key = studiesPrefix + STUDY + studyId + SLASH + fileName;
         try {
             s3Client.deleteObject(DeleteObjectRequest.builder()
                     .bucket(studiesBucket)
@@ -376,14 +376,14 @@ public class S3StorageService implements StorageService {
 
     @Override
     public void deleteDirectoryStudyFile(Long studyId) throws StorageException {
-        String directory = baseDirStudies + SLASH + STUDY + studyId;
+        String directory = studiesPrefix + STUDY + studyId;
         deleteDirectoryFromBucket(studiesBucket, directory);
     }
 
     @Override
     public void moveStudyFile(Long studyId, String sourceFileName, String targetFileName)
             throws StorageException {
-        String directory = baseDirStudies + SLASH + STUDY + studyId;
+        String directory = studiesPrefix + STUDY + studyId;
         moveInBucket(studiesBucket, directory, sourceFileName, targetFileName);
     }
 
