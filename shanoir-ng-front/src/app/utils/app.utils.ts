@@ -319,9 +319,10 @@ export function extractState(event: HttpEvent<any>): Promise<TaskState> {
 }
 
 export function getFilename(response: HttpResponse<any>): string {
-    const prefix = 'attachment;filename=';
     const contentDispHeader: string = response.headers.get('Content-Disposition');
-    return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    if (!contentDispHeader) return null;
+    const match = contentDispHeader.match(/filename="?([^"]+)"?/);
+    return match ? match[1].trim() : null;
 }
 
 export function pad(n, width, z?): string {
