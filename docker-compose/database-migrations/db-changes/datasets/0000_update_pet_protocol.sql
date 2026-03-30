@@ -1,29 +1,16 @@
 -- Shanoir NG - Import, manage and share neuroimaging data
 -- Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 -- Contact us on https://project.inria.fr/shanoir/
---
+-- 
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
 -- the Free Software Foundation, either version 3 of the License, or
 -- (at your option) any later version.
---
+-- 
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-CREATE USER 'studies'@'%' IDENTIFIED BY 'password';
-GRANT ALL ON *.* TO 'studies'@'%';
-
-CREATE USER 'users'@'%' IDENTIFIED BY 'password';
-GRANT ALL ON *.* TO 'users'@'%';
-
-CREATE USER 'import'@'%' IDENTIFIED BY 'password';
-GRANT ALL ON *.* TO 'import'@'%';
-
-CREATE USER 'datasets'@'%' IDENTIFIED BY 'password';
-GRANT ALL ON *.* TO 'datasets'@'%';
-
-CREATE USER 'preclinical'@'%' IDENTIFIED BY 'password';
-GRANT ALL ON *.* TO 'preclinical'@'%';
-
-CREATE USER 'migrations'@'%' IDENTIFIED BY 'password';
-GRANT ALL ON *.* TO 'migrations'@'%';
+ALTER TABLE pet_protocol MODIFY COLUMN voxel_sizex double not null;
+ALTER TABLE pet_protocol MODIFY COLUMN voxel_sizey double not null;
+ALTER TABLE pet_protocol MODIFY COLUMN voxel_sizez double not null;
+ALTER TABLE pet_protocol MODIFY COLUMN rescale_slope int;

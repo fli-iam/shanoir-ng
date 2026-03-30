@@ -69,11 +69,14 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     @Query(value = "SELECT ds.id FROM dataset ds "
             + "LEFT JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id "
+            + "WHERE acq.examination_id = :examId "
+            + "UNION "
+            + "SELECT ds.id FROM dataset ds "
             + "LEFT JOIN dataset_processing processing ON ds.dataset_processing_id = processing.id "
             + "LEFT JOIN input_of_dataset_processing tempo ON tempo.processing_id = processing.id "
             + "LEFT JOIN dataset inputs ON tempo.dataset_id = inputs.id "
             + "LEFT JOIN dataset_acquisition inputAcq ON inputs.dataset_acquisition_id = inputAcq.id "
-            + "WHERE acq.examination_id = :examId OR inputAcq.examination_id = :examId", nativeQuery = true)
+            + "WHERE inputAcq.examination_id = :examId", nativeQuery = true)
     List<Long> findDatasetAndOutputByExaminationId(Long examId);
 
 

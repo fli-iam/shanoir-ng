@@ -100,6 +100,7 @@ public class Study extends HalEntity {
     private boolean downloadableByDefault;
 
     /** End date. */
+    @NotNull
     @LocalDateAnnotations
     private LocalDate endDate;
 
@@ -123,6 +124,7 @@ public class Study extends HalEntity {
     private List<String> dataUserAgreementPaths;
 
     /** Start date. */
+    @NotNull
     @LocalDateAnnotations
     private LocalDate startDate;
 

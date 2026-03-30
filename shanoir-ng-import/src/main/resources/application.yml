@@ -23,7 +23,7 @@ spring:
   config:
     import: "classpath:/shanoir-shared.yml"
   datasource:
-    url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:import}?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: import
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
