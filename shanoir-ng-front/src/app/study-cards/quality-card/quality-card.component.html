@@ -33,8 +33,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						type="button"
 						class="right-icon apply test"
 						(click)="test()"
-						[disabled]="true || applying || testing"
-                        title="Coming soon">
+						[disabled]="false || applying || testing"
+                        title="Test Quality Card rules on a subset of imported acquisitions of the selected study">
 					Test
                     <i *ngIf="!testing" class="fa-solid fa-play"></i>
                     <i *ngIf="testing" class="fa fa-cog fa-spin"></i>
@@ -44,8 +44,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						type="button"
 						class="alt right-icon apply"
 						(click)="apply()"
-						[disabled]="true || applying || testing"
-                        title="Coming soon">
+						[disabled]="false || applying || testing"
+                        title="Apply Quality Card rules to all the imported acquisitions of the selected study">
 					Apply now
 					<i *ngIf="!applying" class="fa-solid fa-play"></i>
                     <i *ngIf="applying" class="fa fa-cog fa-spin"></i>
@@ -119,7 +119,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend>
 					Rules
 					<tool-tip [large]="true">
-						<span class="bold"></span>This rule set will be applied to each DICOM serie/dataset acquisition of a given examination, and will set a VALID/WARNING/ERROR quality tag for each acquisition.</span>
+						<span class="bold">This rule set will be applied to each DICOM serie/dataset acquisition of a given examination, and will set a VALID/WARNING/ERROR quality tag for each acquisition.</span>
 						<ul>
 							<li>
 								The "Auto check at import" checkbox can set this quality card to automatically check the quality of acquisitions at import if needed.<br>
