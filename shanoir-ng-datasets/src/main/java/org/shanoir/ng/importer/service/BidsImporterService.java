@@ -73,6 +73,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class BidsImporterService {
 
+    private static final String STUDY_PREFIX = "study-";
+
     private static final String SUBJECT_PREFIX = "sub-";
 
     private static final String SESSION_PREFIX = "ses-";
@@ -265,7 +267,8 @@ public class BidsImporterService {
             final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
             final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
 
-            final File outDir = new File(niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + bidsDataType.getFolderName());
+            final File outDir = new File(niftiStorageDir + File.separator + STUDY_PREFIX + importJob.getStudyId()
+                + File.separator + subLabel + File.separator + sesLabel + File.separator + bidsDataType.getFolderName());
             outDir.mkdirs();
 
             // remove old subject and session names from files names
