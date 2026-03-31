@@ -231,6 +231,20 @@ public class ExaminationApiController implements ExaminationApi {
     }
 
     @Override
+    public ResponseEntity<Void> syncStudyInstanceUIDFromPacs(
+            @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
+            throws RestServiceException {
+        try {
+            examinationService.syncStudyInstanceUIDFromPacs(examinationId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ShanoirException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
+        }
+    }
+
+    @Override
     public ResponseEntity<Void> addExtraData(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
             @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
