@@ -76,7 +76,7 @@ public class FileSystemStorageService implements StorageService {
             throw new StorageException("Missing datasets directory configuration.", null);
         }
         String directory = STUDY + studyId
-                + SLASH + SUBJECT + subjectName + SLASH + EXAMINATION + examinationId + SLASH + dataTypeBIDS;
+                + SLASH + SUBJECT + subjectName + SLASH + SESSION + examinationId + SLASH + dataTypeBIDS;
         return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
     }
 

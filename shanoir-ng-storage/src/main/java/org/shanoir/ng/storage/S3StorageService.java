@@ -177,7 +177,7 @@ public class S3StorageService implements StorageService {
         String directory = datasetsPrefix
                 + STUDY + studyId
                 + SLASH + SUBJECT + subjectName
-                + SLASH + EXAMINATION + examinationId
+                + SLASH + SESSION + examinationId
                 + SLASH + dataTypeBIDS;
         String key = directory + SLASH + fileName;
         try {

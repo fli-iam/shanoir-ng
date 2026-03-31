@@ -26,6 +26,8 @@ public interface StorageService {
 
     public static final String EXAMINATION = "examination-";
 
+    public static final String SESSION = "ses-";
+
     public static final String PATHOLOGY_MODEL = "pathology-model-";
 
     public static final String UNUSED = "UNUSED";
