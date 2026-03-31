@@ -47,7 +47,7 @@ public class FileSystemStorageService implements StorageService {
     private String baseDirPreclinical;
 
     @Override
-    public String storeStudyFile(Long studyId, String fileName,
+    public String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
         if (baseDirStudies.equals(UNUSED)) {
@@ -65,6 +65,18 @@ public class FileSystemStorageService implements StorageService {
             throw new StorageException("Missing datasets directory configuration.", null);
         }
         String directory = EXAMINATION + examinationId;
+        return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
+    }
+
+    @Override
+    public String storeBIDSData(Long studyId, String subjectName, Long examinationId, String fileName,
+            String dataTypeBIDS, InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        if (baseDirDatasets.equals(UNUSED)) {
+            throw new StorageException("Missing datasets directory configuration.", null);
+        }
+        String directory = STUDY + studyId
+                + SLASH + SUBJECT + subjectName + SLASH + EXAMINATION + examinationId + SLASH + dataTypeBIDS;
         return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
     }
 
@@ -106,7 +118,7 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public Resource loadStudyFile(Long studyId, String fileName) throws StorageException {
+    public Resource loadStudyData(Long studyId, String fileName) throws StorageException {
         String directory = STUDY + studyId;
         return load(baseDirStudies, directory, fileName);
     }
@@ -182,7 +194,7 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public void deleteStudyFile(Long studyId, String fileName) throws StorageException {
+    public void deleteStudyData(Long studyId, String fileName) throws StorageException {
         String directory = STUDY + studyId;
         delete(baseDirStudies, directory, fileName);
     }
@@ -206,7 +218,7 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public void deleteDirectoryStudyFile(Long studyId) throws StorageException {
+    public void deleteDirectoryStudyData(Long studyId) throws StorageException {
         String directory = STUDY + studyId;
         deleteDirectory(baseDirStudies, directory);
     }
@@ -247,7 +259,7 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public void moveStudyFile(Long studyId, String sourceFileName, String targetFileName)
+    public void moveStudyData(Long studyId, String sourceFileName, String targetFileName)
             throws StorageException {
         String directory = STUDY + studyId;
         move(baseDirStudies, directory, sourceFileName, targetFileName);

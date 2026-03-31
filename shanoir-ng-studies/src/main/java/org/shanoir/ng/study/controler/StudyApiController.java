@@ -131,7 +131,7 @@ public class StudyApiController implements StudyApi {
             if (!CollectionUtils.isEmpty(duas)) {
                 this.dataUserAgreementService.deleteAll(duas);
             }
-            storageService.deleteDirectoryStudyFile(studyId);
+            storageService.deleteDirectoryStudyData(studyId);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_STUDY_EVENT, studyId.toString(),
                     KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -374,7 +374,7 @@ public class StudyApiController implements StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
             HttpServletResponse response) throws Exception {
-        Resource resource = storageService.loadStudyFile(studyId, fileName);
+        Resource resource = storageService.loadStudyData(studyId, fileName);
         String contentType = request.getServletContext().getMimeType(fileName);
         downloadFile(fileName, contentType, response, resource);
     }
@@ -398,7 +398,7 @@ public class StudyApiController implements StudyApi {
             @PathVariable("studyId") Long studyId,
             @Valid @RequestBody MultipartFile file) throws RestServiceException {
         try {
-            storageService.storeStudyFile(
+            storageService.storeStudyData(
                     studyId,
                     file.getOriginalFilename(),
                     file.getInputStream(),
@@ -481,7 +481,7 @@ public class StudyApiController implements StudyApi {
                 studyService.update(study);
                 return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
             }
-            storageService.storeStudyFile(
+            storageService.storeStudyData(
                     studyId,
                     file.getOriginalFilename(),
                     file.getInputStream(),
@@ -498,7 +498,7 @@ public class StudyApiController implements StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
             HttpServletResponse response) throws Exception {
-        Resource resource = storageService.loadStudyFile(studyId, fileName);
+        Resource resource = storageService.loadStudyData(studyId, fileName);
         String contentType = MediaType.APPLICATION_PDF_VALUE;
         downloadFile(fileName, contentType, response, resource);
     }

@@ -128,7 +128,7 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public String storeStudyFile(Long studyId, String fileName,
+    public String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
         if (studiesBucket.equals(UNUSED)) {
@@ -156,6 +156,30 @@ public class S3StorageService implements StorageService {
         }
         String directory = baseDirDatasets + SLASH + EXAMINATION + examinationId;
         String key =  directory + SLASH + fileName;
+        try {
+            s3Template.upload(datasetsBucket, key, inputStream,
+                    ObjectMetadata.builder().contentType(contentType).build());
+            LOG.info("Stored datasets file to S3: s3://{}/{}", datasetsBucket, key);
+            return getPublicLocationDatasets(directory, fileName);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw new StorageException("S3 upload failed for: " + fileName, e);
+        }
+    }
+
+    @Override
+    public String storeBIDSData(Long studyId, String subjectName, Long examinationId, String fileName,
+            String dataTypeBIDS, InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        if (datasetsBucket.equals(UNUSED)) {
+            throw new StorageException("Missing datasets bucket configuration.", null);
+        }
+        String directory = baseDirDatasets
+                + SLASH + STUDY + studyId
+                + SLASH + SUBJECT + subjectName
+                + SLASH + EXAMINATION + examinationId
+                + SLASH + dataTypeBIDS;
+        String key = directory + SLASH + fileName;
         try {
             s3Template.upload(datasetsBucket, key, inputStream,
                     ObjectMetadata.builder().contentType(contentType).build());
@@ -342,7 +366,7 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public Resource loadStudyFile(Long studyId, String fileName) throws StorageException {
+    public Resource loadStudyData(Long studyId, String fileName) throws StorageException {
         String key = baseDirStudies + SLASH + STUDY + studyId + SLASH + fileName;
         try {
             return s3Template.download(studiesBucket, key);
@@ -362,7 +386,7 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public void deleteStudyFile(Long studyId, String fileName) throws StorageException {
+    public void deleteStudyData(Long studyId, String fileName) throws StorageException {
         String key = baseDirStudies + SLASH + STUDY + studyId + SLASH + fileName;
         try {
             s3Client.deleteObject(DeleteObjectRequest.builder()
@@ -375,13 +399,13 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public void deleteDirectoryStudyFile(Long studyId) throws StorageException {
+    public void deleteDirectoryStudyData(Long studyId) throws StorageException {
         String directory = baseDirStudies + SLASH + STUDY + studyId;
         deleteDirectoryFromBucket(studiesBucket, directory);
     }
 
     @Override
-    public void moveStudyFile(Long studyId, String sourceFileName, String targetFileName)
+    public void moveStudyData(Long studyId, String sourceFileName, String targetFileName)
             throws StorageException {
         String directory = baseDirStudies + SLASH + STUDY + studyId;
         moveInBucket(studiesBucket, directory, sourceFileName, targetFileName);

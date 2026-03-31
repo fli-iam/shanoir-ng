@@ -17,10 +17,10 @@ package org.shanoir.ng.importer.service;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,6 +53,7 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,8 +94,8 @@ public class BidsImporterService {
     @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
 
-    @Value("${storage.file-system.datasets-data}")
-    private String niftiStorageDir;
+    @Autowired
+    private StorageService storageService;
 
     private static final Logger LOG = LoggerFactory.getLogger(BidsImporterService.class);
 
@@ -263,27 +263,31 @@ public class BidsImporterService {
 
             List<DatasetFile> files = expression.getDatasetFiles();
 
-            // Copy the data to "BIDS" folder
-            final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
-            final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
-
-            final File outDir = new File(niftiStorageDir + File.separator + STUDY_PREFIX + importJob.getStudyId()
-                + File.separator + subLabel + File.separator + sesLabel + File.separator + bidsDataType.getFolderName());
-            outDir.mkdirs();
-
             // remove old subject and session names from files names
-            String filename = importedFile.getName()
+            String fileName = importedFile.getName()
                     .replaceFirst("sub-[^_]+_", "")
                     .replaceFirst("ses-[^_]+_", "");
 
-            String outPath = outDir.getAbsolutePath() + File.separator + filename;
-            Path importedFileFinalLocation = Files.copy(importedFile.toPath(), Paths.get(outPath), StandardCopyOption.REPLACE_EXISTING);
+            try (InputStream is = Files.newInputStream(importedFile.toPath())) {
+                String contentType = Files.probeContentType(importedFile.toPath());
+                if (contentType == null) {
+                    contentType = URLConnection.guessContentTypeFromName(importedFile.getName());
+                }
+                if (contentType == null) {
+                    contentType = "application/octet-stream";
+                }
+                String filePath = storageService.storeBIDSData(
+                        importJob.getStudyId(), importJob.getSubjectName(), importJob.getExaminationId(),
+                        fileName, bidsDataType.getFolderName(), is, contentType, importedFile.length());
+                DatasetFile dsFile = new DatasetFile();
+                dsFile.setDatasetExpression(expression);
+                dsFile.setPacs(false);
+                dsFile.setPath(filePath);
+                files.add(dsFile);
+            } catch (Exception e) {
+                throw new RuntimeException("Could not read file: " + importedFile.getName(), e);
+            }
 
-            DatasetFile dsFile = new DatasetFile();
-            dsFile.setDatasetExpression(expression);
-            dsFile.setPacs(false);
-            dsFile.setPath(importedFileFinalLocation.toUri().toString().replaceAll(" ", "%20"));
-            files.add(dsFile);
             if (equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
                 // Check equipment in json file
                 //JSONParser json = new JSONParser(new FileReader(importedFile));
@@ -296,9 +300,8 @@ public class BidsImporterService {
                     equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
                 }
             }
-
             expression.setDatasetFiles(files);
-            expression.setSize(Files.size(importedFileFinalLocation));
+            expression.setSize(importedFile.length());
             datasets.add(datasetToCreate);
             datasetsByName.put(name, datasetToCreate);
         }

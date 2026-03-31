@@ -143,7 +143,7 @@ public class StudyApiControllerTest {
                 .willReturn(Arrays.asList(new StudyDTO()));
         given(studyMapperMock.studyToStudyDTO(Mockito.any(Study.class))).willReturn(new StudyDTO());
         doNothing().when(studyServiceMock).deleteById(1L);
-        given(storageService.loadStudyFile(1L, "file.pdf")).willReturn(tempResource);
+        given(storageService.loadStudyData(1L, "file.pdf")).willReturn(tempResource);
         given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
         given(studyServiceMock.findAllNames()).willReturn(Arrays.asList(new IdName()));
         given(studyServiceMock.create(Mockito.mock(Study.class))).willReturn(new Study());

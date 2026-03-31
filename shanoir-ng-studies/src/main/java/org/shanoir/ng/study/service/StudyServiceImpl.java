@@ -437,7 +437,7 @@ public class StudyServiceImpl implements StudyService {
         if (studyDb.getProtocolFilePaths() != null) {
             for (String filePath : studyDb.getProtocolFilePaths()) {
                 if (!study.getProtocolFilePaths().contains(filePath)) {
-                    storageService.deleteStudyFile(study.getId(), filePath);
+                    storageService.deleteStudyData(study.getId(), filePath);
                 }
             }
         }
@@ -790,7 +790,7 @@ public class StudyServiceImpl implements StudyService {
         String archiveFilename = "archive_"
                 + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())
                 + "_" + originalFilename;
-        storageService.moveStudyFile(study.getId(), originalFilename, archiveFilename);
+        storageService.moveStudyData(study.getId(), originalFilename, archiveFilename);
     }
 
     private void sendStudyUserReport(Study study, List<StudyUser> created) {
@@ -1052,7 +1052,7 @@ public class StudyServiceImpl implements StudyService {
         for (String path : paths) {
             Resource resource;
             try {
-                resource = storageService.loadStudyFile(study.getId(), path);
+                resource = storageService.loadStudyData(study.getId(), path);
                 if (resource.exists()) {
                     size += resource.contentLength();
                 }
