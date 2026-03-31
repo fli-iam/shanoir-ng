@@ -174,7 +174,7 @@ public class S3StorageService implements StorageService {
         if (datasetsBucket.equals(UNUSED)) {
             throw new StorageException("Missing datasets bucket configuration.", null);
         }
-        String directory = baseDirDatasets
+        String directory = datasetsPrefix
                 + SLASH + STUDY + studyId
                 + SLASH + SUBJECT + subjectName
                 + SLASH + EXAMINATION + examinationId
