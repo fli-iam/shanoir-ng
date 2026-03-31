@@ -163,9 +163,6 @@ public interface ExaminationService {
 
     String addExtraDataFromFile(Long examinationId, File file);
 
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD') or @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE')))")
-    String getExtraDataFilePath(Long examinationId, String fileName);
-
     /**
      * Retrieves the DICOM StudyInstanceUID from the backup PACS for the given examination
      * and updates it in the database. The UID is extracted from the WADO path stored in
