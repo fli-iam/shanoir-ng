@@ -73,12 +73,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class BidsImporterService {
 
-    private static final String STUDY_PREFIX = "study-";
-
-    private static final String SUBJECT_PREFIX = "sub-";
-
-    private static final String SESSION_PREFIX = "ses-";
-
     @Autowired
     private ShanoirEventService eventService;
 
