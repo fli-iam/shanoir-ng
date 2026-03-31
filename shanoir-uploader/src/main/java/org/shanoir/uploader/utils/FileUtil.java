@@ -140,7 +140,6 @@ public class FileUtil {
             File serieFolder = new File(workFolder
                     + File.separator + studyInstanceUID
                     + File.separator + seriesInstanceUID);
-            serieFolder.mkdirs();
             if (serieFolder.exists()) {
                 List<Instance> instances = new ArrayList<>();
                 File[] serieFiles = serieFolder.listFiles();

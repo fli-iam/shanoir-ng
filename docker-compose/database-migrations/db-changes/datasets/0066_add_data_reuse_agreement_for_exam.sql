@@ -10,5 +10,5 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-ALTER TABLE examination ADD COLUMN data_reuse_agreement bool;
-UPDATE examiantion SET data_reuse_agreement = 0 WHERE true;
+ALTER TABLE examination ADD COLUMN data_reuse_agreement bool DEFAULT false NOT NULL;
+UPDATE examiantion SET data_reuse_agreement = false WHERE true;

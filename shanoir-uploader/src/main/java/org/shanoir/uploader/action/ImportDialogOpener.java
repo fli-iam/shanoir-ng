@@ -17,12 +17,7 @@ package org.shanoir.uploader.action;
 import java.awt.Color;
 import java.io.File;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
@@ -274,7 +269,7 @@ public class ImportDialogOpener {
             throws ParseException {
         importDialog.mrExaminationNewDateModel.setValue(studyDate);
         importDialog.mrExaminationCommentTF.setText(studyDescription);
-        importDialog.mrExaminationDataReuseAgreementCB.setSelected(examinationDataReuseAgreement);
+        importDialog.mrExaminationDataReuseAgreementCB.setSelected(Objects.nonNull(examinationDataReuseAgreement) && examinationDataReuseAgreement);
     }
 
 }

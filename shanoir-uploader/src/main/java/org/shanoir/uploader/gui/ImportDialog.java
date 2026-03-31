@@ -775,7 +775,7 @@ public class ImportDialog extends JDialog {
         formPanel.add(mrExaminationCommentTF, importDialogGBC);
 
         mrExaminationDataReuseAgreementLabel = new JLabel(
-                resourceBundle.getString("shanoir.uploader.mrExaminationDataReuseAgreementLabel") + " *");
+                resourceBundle.getString("shanoir.uploader.mrExaminationDataReuseAgreementLabel"));
         mrExaminationDataReuseAgreementLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         importDialogGBC.weightx = 0.2;
         importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
