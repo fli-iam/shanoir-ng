@@ -15,6 +15,7 @@
 package org.shanoir.ng.storage;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 
 import org.springframework.core.io.Resource;
 
@@ -43,7 +44,7 @@ public interface StorageService {
             throws StorageException;
 
     String storeBIDSData(Long studyId, String subjectName, Long examinationId, String fileName,
-            String dataTypeBIDS, InputStream inputStream, String contentType, long size)
+            String dataTypeBIDS, Path filePath, String contentType, long size)
             throws StorageException;
 
     public String storePreclinicalExtraData(Long examinationId, String fileName,

@@ -17,7 +17,6 @@ package org.shanoir.ng.importer.service;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -73,6 +72,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class BidsImporterService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(BidsImporterService.class);
+
     @Autowired
     private ShanoirEventService eventService;
 
@@ -90,8 +91,6 @@ public class BidsImporterService {
 
     @Autowired
     private StorageService storageService;
-
-    private static final Logger LOG = LoggerFactory.getLogger(BidsImporterService.class);
 
     /**
      * Create BIDS dataset.
@@ -257,12 +256,12 @@ public class BidsImporterService {
 
             List<DatasetFile> files = expression.getDatasetFiles();
 
-            // remove old subject and session names from files names
+            // remove old subject name (in case) and session name (in case) from file names
             String fileName = importedFile.getName()
-                    .replaceFirst("sub-[^_]+_", "")
-                    .replaceFirst("ses-[^_]+_", "");
+                    .replaceFirst("sub-[^_]+_", "sub-" + importJob.getSubjectName() + "_")
+                    .replaceFirst("ses-[^_]+_", "ses-" + Long.toString(importJob.getExaminationId()) + "_");
 
-            try (InputStream is = Files.newInputStream(importedFile.toPath())) {
+            try {
                 String contentType = Files.probeContentType(importedFile.toPath());
                 if (contentType == null) {
                     contentType = URLConnection.guessContentTypeFromName(importedFile.getName());
@@ -270,19 +269,21 @@ public class BidsImporterService {
                 if (contentType == null) {
                     contentType = "application/octet-stream";
                 }
-                String filePath = storageService.storeBIDSData(
+                String path = storageService.storeBIDSData(
                         importJob.getStudyId(), importJob.getSubjectName(), importJob.getExaminationId(),
-                        fileName, bidsDataType.getFolderName(), is, contentType, importedFile.length());
+                        fileName, bidsDataType.getFolderName(),
+                        importedFile.toPath(), contentType, importedFile.length());
                 DatasetFile dsFile = new DatasetFile();
                 dsFile.setDatasetExpression(expression);
                 dsFile.setPacs(false);
-                dsFile.setPath(filePath);
+                dsFile.setPath(path);
                 files.add(dsFile);
             } catch (Exception e) {
                 throw new RuntimeException("Could not read file: " + importedFile.getName(), e);
             }
 
-            if (equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
+            if (equipmentId == 0L && importedFile.getName().endsWith(".json")
+                    && Files.size(Path.of(importedFile.getPath())) < 1000000) {
                 // Check equipment in json file
                 //JSONParser json = new JSONParser(new FileReader(importedFile));
                 // LinkedHashMap jsonObject = (LinkedHashMap) json.parse();

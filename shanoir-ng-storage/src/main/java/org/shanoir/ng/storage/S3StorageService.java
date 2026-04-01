@@ -16,8 +16,12 @@ package org.shanoir.ng.storage;
 
 import jakarta.annotation.PostConstruct;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -36,10 +40,13 @@ import org.springframework.stereotype.Service;
 
 import io.awspring.cloud.s3.ObjectMetadata;
 import io.awspring.cloud.s3.S3Template;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.BucketAlreadyOwnedByYouException;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
+import software.amazon.awssdk.services.s3.model.CompletedPart;
 import software.amazon.awssdk.services.s3.model.Delete;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
@@ -49,12 +56,17 @@ import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
+import software.amazon.awssdk.services.s3.model.UploadPartResponse;
 
 @Service
 @ConditionalOnProperty(name = "storage.type", havingValue = "s3")
 public class S3StorageService implements StorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3StorageService.class);
+
+    private static final long MULTIPART_THRESHOLD = 20 * 1024 * 1024L; // 20 MB
+
+    private static final long PART_SIZE = 8 * 1024 * 1024L; // 8 MB
 
     @Autowired
     private final S3Template s3Template;
@@ -137,8 +149,12 @@ public class S3StorageService implements StorageService {
         String directory = studiesPrefix + STUDY + studyId;
         String key = directory + SLASH + fileName;
         try {
-            s3Template.upload(studiesBucket, key, inputStream,
-                    ObjectMetadata.builder().contentType(contentType).build());
+            if (size > MULTIPART_THRESHOLD) {
+                uploadMultipart(studiesBucket, key, inputStream, contentType, size);
+            } else {
+                s3Template.upload(studiesBucket, key, inputStream,
+                        ObjectMetadata.builder().contentType(contentType).build());
+            }
             LOG.info("Stored studies file to S3: s3://{}/{}", studiesBucket, key);
             return getPublicLocationStudies(directory, fileName);
         } catch (Exception e) {
@@ -155,11 +171,15 @@ public class S3StorageService implements StorageService {
             throw new StorageException("Missing datasets bucket configuration.", null);
         }
         String directory = datasetsPrefix + EXAMINATION + examinationId;
-        String key =  directory + SLASH + fileName;
+        String key = directory + SLASH + fileName;
         try {
-            s3Template.upload(datasetsBucket, key, inputStream,
-                    ObjectMetadata.builder().contentType(contentType).build());
-            LOG.info("Stored datasets file to S3: s3://{}/{}", datasetsBucket, key);
+            if (size > MULTIPART_THRESHOLD) {
+                uploadMultipart(datasetsBucket, key, inputStream, contentType, size);
+            } else {
+                s3Template.upload(datasetsBucket, key, inputStream,
+                        ObjectMetadata.builder().contentType(contentType).build());
+            }
+            LOG.info("Stored datasets extra-data file to S3: s3://{}/{}", datasetsBucket, key);
             return getPublicLocationDatasets(directory, fileName);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -169,7 +189,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public String storeBIDSData(Long studyId, String subjectName, Long examinationId, String fileName,
-            String dataTypeBIDS, InputStream inputStream, String contentType, long size)
+            String dataTypeBIDS, Path path, String contentType, long size)
             throws StorageException {
         if (datasetsBucket.equals(UNUSED)) {
             throw new StorageException("Missing datasets bucket configuration.", null);
@@ -181,14 +201,79 @@ public class S3StorageService implements StorageService {
                 + SLASH + dataTypeBIDS;
         String key = directory + SLASH + fileName;
         try {
-            s3Template.upload(datasetsBucket, key, inputStream,
-                    ObjectMetadata.builder().contentType(contentType).build());
-            LOG.info("Stored datasets file to S3: s3://{}/{}", datasetsBucket, key);
+            s3Client.putObject(
+                    r -> r.bucket(datasetsBucket)
+                            .key(key)
+                            .contentType(contentType)
+                            .contentLength(size),
+                    path);
+            LOG.info("Stored BIDS data file to S3: s3://{}/{}", datasetsBucket, key);
             return getPublicLocationDatasets(directory, fileName);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw new StorageException("S3 upload failed for: " + fileName, e);
         }
+    }
+
+    private void uploadMultipart(String bucket, String key, InputStream inputStream,
+            String contentType, long size) throws StorageException {
+        CreateMultipartUploadResponse initResponse = s3Client.createMultipartUpload(r -> r
+                .bucket(bucket)
+                .key(key)
+                .contentType(contentType));
+        String uploadId = initResponse.uploadId();
+        List<CompletedPart> completedParts = new ArrayList<>();
+        int partNumber = 1;
+        try {
+            byte[] buffer = new byte[(int) PART_SIZE];
+            int bytesRead;
+            while ((bytesRead = readFully(inputStream, buffer)) > 0) {
+                final int partNum = partNumber;
+                final int length = bytesRead;
+                UploadPartResponse partResponse = s3Client.uploadPart(
+                        r -> r.bucket(bucket)
+                                .key(key)
+                                .uploadId(uploadId)
+                                .partNumber(partNum)
+                                .contentLength((long) length),
+                        RequestBody.fromByteBuffer(ByteBuffer.wrap(buffer, 0, length)));
+                completedParts.add(CompletedPart.builder()
+                        .partNumber(partNum)
+                        .eTag(partResponse.eTag())
+                        .build());
+                LOG.debug("Uploaded part {}/{} for key: {}", partNum,
+                        (int) Math.ceil((double) size / PART_SIZE), key);
+                partNumber++;
+            }
+            s3Client.completeMultipartUpload(r -> r
+                    .bucket(bucket)
+                    .key(key)
+                    .uploadId(uploadId)
+                    .multipartUpload(m -> m.parts(completedParts)));
+        } catch (Exception e) {
+            // Always abort to avoid orphaned multipart uploads (= unexpected S3 charges)
+            LOG.error("Multipart upload failed for key: {}. Aborting upload {}.", key, uploadId, e);
+            s3Client.abortMultipartUpload(r -> r
+                    .bucket(bucket)
+                    .key(key)
+                    .uploadId(uploadId));
+            throw new StorageException("Multipart S3 upload failed for: " + key, e);
+        }
+    }
+
+    /**
+     * Reads as many bytes as possible into the buffer (handles partial reads from
+     * stream).
+     * Returns total bytes read, or -1 at end-of-stream.
+     */
+    private int readFully(InputStream is, byte[] buffer) throws IOException {
+        int totalRead = 0;
+        int bytesRead;
+        while (totalRead < buffer.length
+                && (bytesRead = is.read(buffer, totalRead, buffer.length - totalRead)) != -1) {
+            totalRead += bytesRead;
+        }
+        return totalRead == 0 ? -1 : totalRead;
     }
 
     @Override
@@ -201,9 +286,13 @@ public class S3StorageService implements StorageService {
         String directory = preclinicalPrefix + EXAMINATION + examinationId;
         String key = directory + SLASH + fileName;
         try {
-            s3Template.upload(preclinicalBucket, key, inputStream,
+            if (size > MULTIPART_THRESHOLD) {
+                uploadMultipart(preclinicalBucket, key, inputStream, contentType, size);
+            } else {
+                s3Template.upload(preclinicalBucket, key, inputStream,
                     ObjectMetadata.builder().contentType(contentType).build());
-            LOG.info("Stored preclinical file to S3: s3://{}/{}", preclinicalBucket, key);
+            }
+            LOG.info("Stored preclinical extra-data to S3: s3://{}/{}", preclinicalBucket, key);
             return getPublicLocationPreclinical(directory, fileName);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -221,8 +310,12 @@ public class S3StorageService implements StorageService {
         String directory = preclinicalPrefix + PATHOLOGY_MODEL + pathologyModelId;
         String key = directory + SLASH + fileName;
         try {
-            s3Template.upload(preclinicalBucket, key, inputStream,
-                    ObjectMetadata.builder().contentType(contentType).build());
+            if (size > MULTIPART_THRESHOLD) {
+                uploadMultipart(preclinicalBucket, key, inputStream, contentType, size);
+            } else {
+                s3Template.upload(preclinicalBucket, key, inputStream,
+                        ObjectMetadata.builder().contentType(contentType).build());
+            }
             LOG.info("Stored pathology model file to S3: s3://{}/{}", preclinicalBucket, key);
             return getPublicLocationPreclinical(directory, fileName);
         } catch (Exception e) {
