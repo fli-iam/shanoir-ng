@@ -14,12 +14,14 @@
 
 package org.shanoir.ng.download;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.file.Files;
@@ -31,6 +33,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -50,6 +53,8 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -70,10 +75,13 @@ import reactor.core.publisher.Mono;
 /**
  * This class is used to download files on using WADO URLs:
  *
- * WADO-RS URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.5.html
- * WADO-URI URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.2.html
+ * WADO-RS URLs are supported:
+ * http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.5.html
+ * WADO-URI URLs are supported:
+ * http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.2.html
  *
- * WADO-RS: http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/rs/studies/1.4.9.12.22.1.8447.5189520782175635475761938816300281982444
+ * WADO-RS:
+ * http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/rs/studies/1.4.9.12.22.1.8447.5189520782175635475761938816300281982444
  * /series/1.4.9.12.22.1.3337.609981376830290333333439326036686033499
  * /instances/1.4.9.12.22.1.3327.13131999371192661094333587030092502791578
  *
@@ -81,7 +89,8 @@ import reactor.core.publisher.Mono;
  * this class extracts as well the files contained in the response to
  * the file system.
  *
- * WADO-URI: http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/wado?requestType=WADO
+ * WADO-URI:
+ * http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/wado?requestType=WADO
  * &studyUID=1.4.9.12.22.1.8444.518952078217568647576155668816300281982444
  * &seriesUID=1.4.9.12.22.1.8444.60998137683029030014444439326036686033499
  * &objectUID=1.4.9.12.22.1.8444.1313199937119266109555587030092502791578
@@ -90,7 +99,8 @@ import reactor.core.publisher.Mono;
  * WADO-URI Web Service Endpoint URL in dcm4chee arc light 5:
  * http[s]://<host>:<port>/dcm4chee-arc/aets/{AETitle}/wado
  *
- * This Spring service component uses the scope singleton, that is there by default,
+ * This Spring service component uses the scope singleton, that is there by
+ * default,
  * as one instance should be reused for all other instances, that require usage.
  * No need to create multiple.
  *
@@ -136,12 +146,13 @@ public class WADODownloaderService {
         this.webClient = webClientBuilder
                 .codecs(configurer -> configurer
                         .defaultCodecs()
-                        .maxInMemorySize(500 * 1024 * 1024)) // 500MB buffer for large DICOM files
+                        .maxInMemorySize(-1)) // illimited as we use streaming for downloads
                 .build();
     }
 
     /**
-     * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
+     * This method receives a list of URLs containing WADO-RS or WADO-URI urls and
+     * downloads
      * their received dicom files to a folder named workFolder.
      * Return the list of downloaded files
      *
@@ -155,7 +166,8 @@ public class WADODownloaderService {
      * @throws RestServiceException
      *
      */
-    public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, DatasetDownloadError downloadResult) {
+    public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream,
+            String subjectName, Dataset dataset, String datasetFilePath, DatasetDownloadError downloadResult) {
         List<String> files = new ArrayList<>();
         Set<String> zippedUrls = new HashSet<>();
         long duplicates = 0;
@@ -179,14 +191,17 @@ public class WADODownloaderService {
                     }
                 } catch (ZipPacsFileException e) {
                     LOG.error("Could not download dataset [{}] as dicom", dataset.getId(), e);
-                    downloadResult.update("Could not download dataset [" + dataset.getId() + "] as dicom : " + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
+                    downloadResult.update(
+                            "Could not download dataset [" + dataset.getId() + "] as dicom : " + e.getMessage(),
+                            DatasetDownloadError.PARTIAL_FAILURE);
                 }
             } else {
                 duplicates++;
             }
         }
         if (duplicates > 0) {
-            LOG.error("There were [" + duplicates + "] duplicate dataset_files when zipping dataset [" + dataset.getId() + "], they were ignored.");
+            LOG.error("There were [" + duplicates + "] duplicate dataset_files when zipping dataset [" + dataset.getId()
+                    + "], they were ignored.");
         }
         return files;
     }
@@ -207,20 +222,43 @@ public class WADODownloaderService {
     }
 
     /**
-     * Downloads and writes the file specified by url into zipOutputStream, using name + .DCM as filename.
+     * Downloads and writes the file specified by url into zipOutputStream, using
+     * name + .DCM as filename.
      * If the downloading fails, a text file is added instead and null is returned.
+     * If the downloading succeeds, the name of the added file is returned.
      * @param url
      * @param zipOutputStream
-     * @param name the filename without extension
+     * @param name            the filename without extension
      * @return the added file name, null if failed
      * @throws ZipPacsFileException
-     * @throws IOException when couldn't write into the stream
+     * @throws IOException          when couldn't write into the stream
      */
-    private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name, String subjectName) throws ZipPacsFileException {
-        byte[] responseBody = null;
+    private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name,
+            String subjectName) throws ZipPacsFileException {
         try {
-            responseBody = downloadFileFromPACS(url);
-            extractDICOMZipFromMHTMLFile(responseBody, name, zipOutputStream, url.contains(WADO_REQUEST_TYPE_WADO_RS), subjectName);
+            PipedOutputStream pipedOutputStream = new PipedOutputStream();
+            PipedInputStream pipedInputStream = new PipedInputStream(pipedOutputStream);
+
+            // We run the download in a separated thread to avoid the deadlock
+            CompletableFuture<Void> downloadFuture = CompletableFuture.runAsync(() -> {
+                try {
+                    downloadFileFromPACS(url, pipedOutputStream).block();
+                } catch (Exception e) {
+                    LOG.error("Error streaming DICOM from PACS", e);
+                } finally {
+                    try {
+                        pipedOutputStream.close();
+                    } catch (IOException ignored) {
+                    }
+                }
+            });
+
+            extractDICOMZipFromMHTMLFile(pipedInputStream, name, zipOutputStream,
+                    url.contains(WADO_REQUEST_TYPE_WADO_RS), subjectName);
+
+            // Wait until the end of download
+            downloadFuture.join();
+
             return name + DCM;
         } catch (IOException | MessagingException e) {
             LOG.error("Error in downloading/writing file [{}] from pacs to zip", name, e);
@@ -231,7 +269,8 @@ public class WADODownloaderService {
     }
 
     /**
-     * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
+     * This method receives a list of URLs containing WADO-RS or WADO-URI urls and
+     * downloads
      * their received dicom files to a folder named workFolder.
      * Return the list of downloaded files
      *
@@ -244,7 +283,8 @@ public class WADODownloaderService {
      * @return
      *
      */
-    public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset, DatasetDownloadError downloadResult) {
+    public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName,
+            Dataset dataset, DatasetDownloadError downloadResult) {
         List<File> files = new ArrayList<>();
         for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
             try {
@@ -254,11 +294,29 @@ public class WADODownloaderService {
                 int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
                 if (indexInstanceUID > 0) {
                     sopInstanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
-                    byte[] responseBody = downloadFileFromPACS(url);
+
+                    // Stream directly in a PipedInputStream/PipedOutputStream
+                    PipedOutputStream pipedOutputStream = new PipedOutputStream();
+                    PipedInputStream pipedInputStream = new PipedInputStream(pipedOutputStream);
+
+                    // Run the download in a separated thread to avoid the deadlock
+                    CompletableFuture.runAsync(() -> {
+                        try {
+                            downloadFileFromPACS(url, pipedOutputStream).block();
+                        } catch (Exception e) {
+                            LOG.error("Error streaming DICOM from PACS", e);
+                        } finally {
+                            try {
+                                pipedOutputStream.close();
+                            } catch (IOException ignored) {
+                            }
+                        }
+                    });
+
                     if (dataset.getSource() != null) {
-                        extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder, subjectName);
+                        extractDICOMFilesFromMHTMLFile(pipedInputStream, sopInstanceUID, workFolder, subjectName);
                     } else {
-                        extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder, null);
+                        extractDICOMFilesFromMHTMLFile(pipedInputStream, sopInstanceUID, workFolder, null);
                     }
                 } else {
                     // handle and check secondly for WADO-URI URLs by "objectUID="
@@ -269,7 +327,8 @@ public class WADODownloaderService {
 
                         String serieDescription = dataset.getUpdatedMetadata().getName();
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-                        String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
+                        String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate()
+                                .format(formatter);
                         String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + sopInstanceUID;
 
                         // Replace all forbidden characters.
@@ -277,27 +336,33 @@ public class WADODownloaderService {
 
                         File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
 
-                        byte[] responseBody = downloadFileFromPACS(url);
-                        try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
-                            Files.copy(bIS, extractedDicomFile.toPath());
+                        try (OutputStream outputStream = new FileOutputStream(extractedDicomFile)) {
+                            downloadFileFromPACS(url, outputStream).block();
                             files.add(extractedDicomFile);
                         }
                     } else {
-                        downloadResult.update("URL for download of dataset [" + dataset.getId() + "] is neither in WADO-RS nor in WADO-URI format", DatasetDownloadError.PARTIAL_FAILURE);
+                        downloadResult.update(
+                                "URL for download of dataset [" + dataset.getId()
+                                        + "] is neither in WADO-RS nor in WADO-URI format",
+                                DatasetDownloadError.PARTIAL_FAILURE);
                     }
                 }
             } catch (Exception e) {
                 LOG.error("A dicom file of dataset [{}] could not be downloaded from the pacs", dataset.getId(), e);
-                downloadResult.update("A dicom file of [" + dataset.getId() + "] could not be downloaded from the pacs :" + e.getMessage(), DatasetDownloadError.PARTIAL_FAILURE);
+                downloadResult.update("A dicom file of [" + dataset.getId()
+                        + "] could not be downloaded from the pacs :" + e.getMessage(),
+                        DatasetDownloadError.PARTIAL_FAILURE);
             }
         }
         return files;
     }
 
-    public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException, RestClientException {
+    public String downloadDicomMetadataForURL(final URL url)
+            throws IOException, MessagingException, RestClientException {
         if (url != null) {
             String urlStr = url.toString();
-            if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI)) urlStr = wadoURLHandler.convertWadoUriToWadoRs(urlStr);
+            if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI))
+                urlStr = wadoURLHandler.convertWadoUriToWadoRs(urlStr);
             urlStr = urlStr.split(CONTENT_TYPE)[0].concat("/metadata/");
             return downloadMetadataFromPACS(urlStr);
         } else {
@@ -319,7 +384,8 @@ public class WADODownloaderService {
                     LOG.error("Could not find dicom attributes for dataset [{}]", dataset.getId());
                 }
             } else {
-                LOG.error("Could not find dicom attributes for dataset [{}] : no pacs url for this dataset", dataset.getId());
+                LOG.error("Could not find dicom attributes for dataset [{}] : no pacs url for this dataset",
+                        dataset.getId());
             }
         } catch (IOException | MessagingException | RestClientException e) {
             throw new PacsException("Can not get dicom attributes for dataset [" + dataset.getId() + "]", e);
@@ -327,7 +393,8 @@ public class WADODownloaderService {
         return null;
     }
 
-    public AcquisitionAttributes<Long> getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
+    public AcquisitionAttributes<Long> getDicomAttributesForAcquisition(DatasetAcquisition acquisition)
+            throws PacsException {
         long ts = new Date().getTime();
         List<Dataset> datasets = new ArrayList<>();
         if (acquisition.getDatasets() != null) {
@@ -341,10 +408,12 @@ public class WADODownloaderService {
             try {
                 dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
             } catch (PacsException e) {
-                throw new RuntimeException("Could not get dataset [" + dataset.getId() + "] dicom attributes from pacs", e);
+                throw new RuntimeException("Could not get dataset [" + dataset.getId() + "] dicom attributes from pacs",
+                        e);
             }
         });
-        LOG.debug("get DICOM attributes for acquisition [" + acquisition.getId() + "] : " + (new Date().getTime() - ts) + " ms");
+        LOG.debug("get DICOM attributes for acquisition [" + acquisition.getId() + "] : " + (new Date().getTime() - ts)
+                + " ms");
         return dAcquisitionAttributes;
     }
 
@@ -365,27 +434,25 @@ public class WADODownloaderService {
      * @return
      * @throws IOException
      */
-    private byte[] downloadFileFromPACS(final String url) throws IOException, HttpClientErrorException {
-        try {
-            return downloadFileFromPACSAsync(url)
-                    .block(); // Block at the end to convert Mono to sync result
-        } catch (WebClientResponseException e) {
-            throw new HttpClientErrorException(e.getStatusCode(),
-                    "Download failed: " + e.getMessage());
-        } catch (Exception e) {
-            throw new IOException("Download failed: " + e.getMessage(), e);
-        }
-    }
-
-    private String downloadMetadataFromPACS(final String url) throws IOException {
-        try {
-            return downloadMetadataFromPACSAsync(url)
-                    .block(); // Block at the end to convert Mono to sync result
-        } catch (WebClientResponseException e) {
-            throw new IOException("Download failed: " + e.getStatusCode() + " - " + e.getMessage(), e);
-        } catch (Exception e) {
-            throw new IOException("Download failed: " + e.getMessage(), e);
-        }
+    private Mono<Void> downloadFileFromPACS(final String url, OutputStream outputStream) {
+        return this.webClient.get()
+                .uri(url)
+                .header(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";")
+                .retrieve()
+                .onStatus(status -> !status.is2xxSuccessful(),
+                        response -> Mono.error(new IOException("Download failed: wrong status code received.")))
+                .bodyToFlux(DataBuffer.class)
+                .doOnNext(dataBuffer -> {
+                    try {
+                        byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                        dataBuffer.read(bytes);
+                        DataBufferUtils.release(dataBuffer);
+                        outputStream.write(bytes);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .then();
     }
 
     // Internal async methods for potential reuse
@@ -400,6 +467,17 @@ public class WADODownloaderService {
                 .timeout(Duration.ofMinutes(5));
     }
 
+    private String downloadMetadataFromPACS(final String url) throws IOException {
+        try {
+            return downloadMetadataFromPACSAsync(url)
+                    .block(); // Block at the end to convert Mono to sync result
+        } catch (WebClientResponseException e) {
+            throw new IOException("Download failed: " + e.getStatusCode() + " - " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new IOException("Download failed: " + e.getMessage(), e);
+        }
+    }
+
     private Mono<String> downloadMetadataFromPACSAsync(final String url) {
         return webClient.get()
                 .uri(url)
@@ -412,42 +490,47 @@ public class WADODownloaderService {
     }
 
     /**
-     * This method reads in a file in format MHTML, one representation of a multipart/related response, that is given from
+     * This method reads in a file in format MHTML, one representation of a
+     * multipart/related response, that is given from
      * a PACS server, that supports WADO-RS requests.
      *
-     * MHTML, short for MIME Encapsulation of Aggregate HTML Documents, is a web page archive format used to combine in a single document
-     * the HTML code and its companion resources that are otherwise represented by external links (such as images, Flash animations, Java applets,
-     * and audio files). The content of an MHTML file is encoded as if it were an HTML e-mail message, using the MIME type multipart/related.
+     * MHTML, short for MIME Encapsulation of Aggregate HTML Documents, is a web
+     * page archive format used to combine in a single document
+     * the HTML code and its companion resources that are otherwise represented by
+     * external links (such as images, Flash animations, Java applets,
+     * and audio files). The content of an MHTML file is encoded as if it were an
+     * HTML e-mail message, using the MIME type multipart/related.
      *
-     * @param responseBody
+     * @param inputStream
      * @param instanceUID
      * @param workFolder
      * @throws FileNotFoundException
      * @throws IOException
      * @throws MessagingException
      */
-    private void extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder, String subjectName)
+    private void extractDICOMFilesFromMHTMLFile(final InputStream inputStream, final String instanceUID,
+            final File workFolder, String subjectName)
             throws IOException, MessagingException {
-        try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
-            ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
-            MimeMultipart multipart = new MimeMultipart(datasource);
-            int count = multipart.getCount();
-            for (int i = 0; i < count; i++) {
-                BodyPart bodyPart = multipart.getBodyPart(i);
-                if (isNotOnlyDicom(bodyPart)) {
-                    throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
-                }
-                File extractedDicomFile = null;
-                if (count == 1) {
-                    extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
-                } else {
-                    extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + i + DCM);
-                }
-                if (subjectName != null && !subjectName.trim().isEmpty()) {
-                    modifyAndSaveDicomFile(bodyPart.getInputStream(), extractedDicomFile, subjectName);
-                } else {
-                    Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
-                }
+        // We use directly InputStream instead of wrapping a ByteArrayInputStream
+        ByteArrayDataSource datasource = new ByteArrayDataSource(inputStream, CONTENT_TYPE_MULTIPART);
+        MimeMultipart multipart = new MimeMultipart(datasource);
+        int count = multipart.getCount();
+        for (int i = 0; i < count; i++) {
+            BodyPart bodyPart = multipart.getBodyPart(i);
+            if (isNotOnlyDicom(bodyPart)) {
+                throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
+            }
+            File extractedDicomFile = null;
+            if (count == 1) {
+                extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
+            } else {
+                extractedDicomFile = new File(
+                        workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + i + DCM);
+            }
+            if (subjectName != null && !subjectName.trim().isEmpty()) {
+                modifyAndSaveDicomFile(bodyPart.getInputStream(), extractedDicomFile, subjectName);
+            } else {
+                Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
             }
         }
     }
@@ -469,56 +552,60 @@ public class WADODownloaderService {
     }
 
     /**
-     * This method reads in a file in format MHTML, one representation of a multipart/related response, that is given from
+     * This method reads in a file in format MHTML, one representation of a
+     * multipart/related response, that is given from
      * a PACS server, that supports WADO-RS requests.
      *
-     * MHTML, short for MIME Encapsulation of Aggregate HTML Documents, is a web page archive format used to combine in a single document
-     * the HTML code and its companion resources that are otherwise represented by external links (such as images, Flash animations, Java applets,
-     * and audio files). The content of an MHTML file is encoded as if it were an HTML e-mail message, using the MIME type multipart/related.
+     * MHTML, short for MIME Encapsulation of Aggregate HTML Documents, is a web
+     * page archive format used to combine in a single document
+     * the HTML code and its companion resources that are otherwise represented by
+     * external links (such as images, Flash animations, Java applets,
+     * and audio files). The content of an MHTML file is encoded as if it were an
+     * HTML e-mail message, using the MIME type multipart/related.
      *
      * @param responseBody
      * @throws FileNotFoundException
      * @throws IOException
      * @throws MessagingException
      */
-    private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, String name, ZipOutputStream zipOutputStream,
+    private void extractDICOMZipFromMHTMLFile(final InputStream inputStream, String name,
+            ZipOutputStream zipOutputStream,
             boolean isMultipart, String subjectName)
             throws IOException, MessagingException {
-        try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
-            // Not multipart
-            if (!isMultipart) {
-                ZipEntry entry = new ZipEntry(name + DCM);
-                zipOutputStream.putNextEntry(entry);
-                if (subjectName != null && !subjectName.trim().isEmpty()) {
-                    modifyAndWriteDicomToStream(bIS, zipOutputStream, subjectName);
-                } else {
-                    bIS.transferTo(zipOutputStream);
-                }
-                zipOutputStream.closeEntry();
-                return;
+        // Not multipart
+        if (!isMultipart) {
+            ZipEntry entry = new ZipEntry(name + DCM);
+            zipOutputStream.putNextEntry(entry);
+            if (subjectName != null && !subjectName.trim().isEmpty()) {
+                modifyAndWriteDicomToStream(inputStream, zipOutputStream, subjectName);
+            } else {
+                inputStream.transferTo(zipOutputStream);
             }
-            ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
-            MimeMultipart multipart = new MimeMultipart(datasource);
-            int count = multipart.getCount();
-            // Multipart but with a single body part
-            if (count == 1) {
-                BodyPart bodyPart = multipart.getBodyPart(0);
-                if (isNotOnlyDicom(bodyPart)) {
-                    throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
-                }
-                ZipEntry entry = new ZipEntry(name + DCM);
-                addEntry(zipOutputStream, subjectName, bodyPart, entry);
-                return;
+            zipOutputStream.closeEntry();
+            return;
+        }
+
+        ByteArrayDataSource datasource = new ByteArrayDataSource(inputStream, CONTENT_TYPE_MULTIPART);
+        MimeMultipart multipart = new MimeMultipart(datasource);
+        int count = multipart.getCount();
+        // Multipart but with a single body part
+        if (count == 1) {
+            BodyPart bodyPart = multipart.getBodyPart(0);
+            if (isNotOnlyDicom(bodyPart)) {
+                throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
             }
-            // Multipart with multiple parts
-            for (int i = 0; i < count; i++) {
-                BodyPart bodyPart = multipart.getBodyPart(i);
-                if (isNotOnlyDicom(bodyPart)) {
-                    throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
-                }
-                ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
-                addEntry(zipOutputStream, subjectName, bodyPart, entry);
+            ZipEntry entry = new ZipEntry(name + DCM);
+            addEntry(zipOutputStream, subjectName, bodyPart, entry);
+            return;
+        }
+        // Multipart with multiple parts
+        for (int i = 0; i < count; i++) {
+            BodyPart bodyPart = multipart.getBodyPart(i);
+            if (isNotOnlyDicom(bodyPart)) {
+                throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
             }
+            ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
+            addEntry(zipOutputStream, subjectName, bodyPart, entry);
         }
     }
 
