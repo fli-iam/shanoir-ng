@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRightsProjection;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -74,5 +75,13 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             + "LEFT JOIN FETCH da.datasets "
             + "WHERE da.id = :id")
     Optional<DatasetAcquisition> findByIdWithDatasets(Long id);
+
+    /**
+     * Get the acquisitions having id greather than param
+     *
+     * @param idThreshold
+     * @return
+     */
+    List<DatasetAcquisition> findByIdGreaterThan(Long idThreshold);
 
 }
