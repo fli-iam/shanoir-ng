@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,7 +13,6 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
@@ -267,11 +265,13 @@ public class ImportFinishActionListener implements ActionListener {
                         QualityUtils.getQualityControlreportScrollPane(qualityControlResult),
                         ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"),
                         JOptionPane.ERROR_MESSAGE);
-                // set status FAILED
-                ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder,
+                // set status ERROR if all series were unselected from importJob due to Quality Control errors
+                if (importJob.getSelectedSeries().isEmpty()) {
+                    ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder,
                         UploadState.ERROR.toString());
-                logger.error("The upload for the patient {} failed due to quality control errors.",
-                        importJob.getSubject().getName());
+                logger.error("The upload for the patient {} and examination {} failed due to quality control errors.",
+                        importJob.getSubject().getName(), importJob.getExaminationComment());
+                }
             } else {
                 // If quality control condition is VALID we do not set a quality card result
                 // entry but we update the datasetAcquisition qualityTag
