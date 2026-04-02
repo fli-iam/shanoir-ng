@@ -44,7 +44,8 @@ import java.time.LocalDate;
                 @ColumnResult(name = "sliceThickness", type = Double.class), @ColumnResult(name = "pixelBandwidth", type = Double.class),
                 @ColumnResult(name = "magneticFieldStrength", type = Double.class),
                 @ColumnResult(name = "processed", type = Boolean.class), @ColumnResult(name = "importDate", type = LocalDate.class),
-                @ColumnResult(name = "username", type = String.class), @ColumnResult(name = "sortingIndex", type = Integer.class)
+                @ColumnResult(name = "username", type = String.class), @ColumnResult(name = "sortingIndex", type = Integer.class),
+                @ColumnResult(name = "dataReuseAgreement", type = Boolean.class)
         })
 })
 
@@ -95,6 +96,8 @@ public class ShanoirMetadata {
 
     private Integer sortingIndex;
 
+    private Boolean dataReuseAgreement;
+
     private boolean processed;
 
     @LocalDateAnnotations
@@ -107,7 +110,7 @@ public class ShanoirMetadata {
     public ShanoirMetadata(Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
                             LocalDate datasetCreationDate, Long examinationId, String examinationComment, LocalDate examinationDate, String acquisitionEquipmentName,
                             String subjectName, Integer subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
-                            Double pixelBandwidth, Double magneticFieldStrength, boolean processed, LocalDate importDate, String username, Integer sortingIndex) {
+                            Double pixelBandwidth, Double magneticFieldStrength, boolean processed, LocalDate importDate, String username, Integer sortingIndex, Boolean dataReuseAgreement) {
         this.datasetId = datasetId;
         this.datasetName = datasetName;
         this.datasetType = datasetType;
@@ -121,6 +124,7 @@ public class ShanoirMetadata {
         this.subjectType = subjectType;
         this.subjectId = subjectId;
         this.sortingIndex = sortingIndex;
+        this.dataReuseAgreement = dataReuseAgreement;
         this.studyName = studyName;
         this.studyId = studyId;
         this.centerName = centerName;
@@ -397,5 +401,13 @@ public class ShanoirMetadata {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public Boolean getDataReuseAgreement() {
+        return dataReuseAgreement;
+    }
+
+    public void setDataReuseAgreement(Boolean dataReuseAgreement) {
+        this.dataReuseAgreement = dataReuseAgreement;
     }
 }
