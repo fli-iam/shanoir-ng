@@ -194,6 +194,19 @@ public interface ExaminationApi {
             @Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
             @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
 
+    @Operation(summary = "", description = "Retrieves the DICOM StudyInstanceUID from the backup PACS for the given examination and updates it in the database")
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study instance UID synced from PACS and updated"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no examination found"),
+            @ApiResponse(responseCode = "422", description = "study instance UID not resolvable or not found in PACS"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PutMapping(value = "/{examinationId}/studyInstanceUID", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
+    ResponseEntity<Void> syncStudyInstanceUIDFromPacs(
+            @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
+            throws RestServiceException;
+
     @Operation(summary = "", description = "Download extra data from an examination", tags = {})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "examination updated"),

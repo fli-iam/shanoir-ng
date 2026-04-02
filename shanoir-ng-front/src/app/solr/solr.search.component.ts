@@ -45,7 +45,7 @@ import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { SolrService } from "./solr.service";
 
-const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed', 'dataReuseAgreement'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
     selector: 'solr-search',
@@ -91,19 +91,19 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     private subscriptions: Subscription[] = [];
 
     constructor(
-        private breadcrumbsService: BreadcrumbsService, 
+        private breadcrumbsService: BreadcrumbsService,
         private formBuilder: UntypedFormBuilder,
-        private solrService: SolrService, 
-        private router: Router, 
-        private datasetService: DatasetService, 
+        private solrService: SolrService,
+        private router: Router,
+        private datasetService: DatasetService,
         private datasetAcquisitionService: DatasetAcquisitionService,
-        private keycloakService: KeycloakService, 
+        private keycloakService: KeycloakService,
         private studyRightsService: StudyRightsService,
-        private downloadService: MassDownloadService, 
+        private downloadService: MassDownloadService,
         private clipboard: Clipboard,
-        private confirmDialogService: ConfirmDialogService, 
-        private consoleService: ConsoleService, 
-        private processingService: ExecutionDataService, 
+        private confirmDialogService: ConfirmDialogService,
+        private consoleService: ConsoleService,
+        private processingService: ExecutionDataService,
         private studyService: StudyService,
         private datasetCopyDialogService: DatasetCopyDialogService) {
 
@@ -516,6 +516,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 }
             },
             {headerName: "Exam Date", field:"examinationDate", type: "date"},
+            {headerName: "Data Reuse Agreement", type: "boolean", cellRenderer: row => row.data.dataReuseAgreement, awesome: "fa-solid fa-check", color: "dimgrey", disableSorting: true, tip: item => { return item.dataReuseAgreement ? "data reuse agreement" : "" }},
             {headerName: "Import Date", field:"importDate", type: "date"},
             {headerName: "Imported by", field:"username"},
             {headerName: "Slice Thickness", field: "sliceThickness"},

@@ -118,8 +118,8 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     @Query("SELECT new org.shanoir.ng.dataset.dto.DatasetLight( "
             + "ds.id, dm.name, TYPE(ds), "
-            + "s.id, s.name, "
-            + "sub.id, sub.name, "
+            + "COALESCE(s.id, s2.id), COALESCE(s.name, s2.name), "
+            + "COALESCE(sub.id, sub2.id), COALESCE(sub.name, sub2.name), "
             + "ds.creationDate, "
             + "(CASE WHEN EXISTS (SELECT 1 FROM DatasetProcessing p JOIN p.inputDatasets d WHERE d.id = ds.id) THEN true ELSE false END), "
             + "e.centerId) "
@@ -129,7 +129,9 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN da.examination e "
             + "LEFT JOIN e.study s "
             + "LEFT JOIN e.subject sub "
-            + "WHERE ds.id IN :ids")
+            + "LEFT JOIN Subject sub2 ON sub2.id = ds.subjectId "
+            + "LEFT JOIN sub2.study s2 "
+            + "WHERE ds.id IN :ids ")
     List<DatasetLight> findAllLightById(List<Long> ids);
 
     // select rd.study_id from related_datasets rd where dataset_id = ?1
