@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -28,7 +29,7 @@ public interface DatasetCopyService {
     DatasetCopyResult moveDataset(
             Long dsId,
             Long studyId,
-            Map<Long, Long> subjectMap,
+            Map<Long, IdName> subjectMap,
             Map<Long, Examination> examMap,
             Map<Long, DatasetAcquisition> acqMap,
             Long userId
@@ -39,21 +40,22 @@ public interface DatasetCopyService {
 
     public class DatasetCopyResult {
 
-        private final Long newDsId;
+        private Long newDsId;
         private int countProcessed;
         private int countSuccess;
         private int countCopy;
         private Long examinationId;
         private Long centerId;
         private Long subjectId;
+        private String subjectName;
 
-
-        public DatasetCopyResult(Long newDsId) {
-            this.newDsId = newDsId;
-        }
 
         public Long getNewDsId() {
             return newDsId;
+        }
+
+        public void setNewDsId(Long newDsId) {
+            this.newDsId = newDsId;
         }
 
         public int getCountProcessed() {
@@ -103,6 +105,15 @@ public interface DatasetCopyService {
         public void setSubjectId(Long subjectId) {
             this.subjectId = subjectId;
         }
+
+        public String getSubjectName() {
+            return subjectName;
+        }
+
+        public void setSubjectName(String subjectName) {
+            this.subjectName = subjectName;
+        }
+
     }
 
     public class NotFoundSubjectIdException extends ShanoirException {

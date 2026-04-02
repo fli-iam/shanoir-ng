@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -106,18 +107,18 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         }
         eventService.publishEvent(event);
         Study targetStudy = studyService.findById(copyData.getTargetStudyId());
-        Map<Long, Long> subjectMapping = createSubjectsInTargetStudy(copyData.getSubjects(), targetStudy, event);
+        Map<Long, IdName> subjectMapping = createSubjectsInTargetStudy(copyData.getSubjects(), targetStudy, event);
         addCentersInTargetStudy(copyData.getCenterIds(), targetStudy, event);
         copyDatasetsToStudy(copyData.getDatasetIds(), copyData.getTargetStudyId(), subjectMapping, event);
         return event.getId();
     }
 
-    private Map<Long, Long> createSubjectsInTargetStudy(List<CopyData.SubjectCopy> subjects, Study targetStudy, ShanoirEvent event) throws ShanoirException {
+    private Map<Long, IdName> createSubjectsInTargetStudy(List<CopyData.SubjectCopy> subjects, Study targetStudy, ShanoirEvent event) throws ShanoirException {
         LOG.info("Starting createSubjectsInTargetStudy");
         eventService.publishEvent(event, "Creating subjects in target study", 0f);
         long startTime = System.currentTimeMillis();
 
-        Map<Long, Long> subjectMapping = new HashMap<>();
+        Map<Long, IdName> subjectMapping = new HashMap<>();
         List<Subject> createdSubjects = new ArrayList<>();
         int i = 0;
         Map<Long, Subject> sourceSubjects = subjectRepository.findWithTagsByIdIn(subjects.stream().map(CopyData.SubjectCopy::getId).toList()).stream()
@@ -136,7 +137,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             if (targetSubject == null) {
                 Subject createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, subjectCopy.getNewName(), false);
                 existingByName.put(createdSubject.getName(), createdSubject);
-                subjectMapping.put(sourceSubject.getId(), createdSubject.getId());
+                subjectMapping.put(sourceSubject.getId(), new IdName(createdSubject.getId(), createdSubject.getName()));
                 createdSubjects.add(createdSubject);
                 if (++i % 200 == 0) {
                     entityManager.flush();
@@ -145,7 +146,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
             } else {
                 // subject with same name already exists in target study, whether it was created in this batch or already existed,
                 // we consider that it's the same subject and we map source subject to existing one in target study
-                subjectMapping.put(sourceSubject.getId(), targetSubject.getId());
+                subjectMapping.put(sourceSubject.getId(), new IdName(targetSubject.getId(), targetSubject.getName()));
             }
         }
         if (!createdSubjects.isEmpty()) {
@@ -230,7 +231,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         addCentersToStudy(targetStudy, centerIds);
     }
 
-    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Map<Long, Long> subjectMapping, ShanoirEvent event) throws ShanoirException {
+    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Map<Long, IdName> subjectMapping, ShanoirEvent event) throws ShanoirException {
         try {
             copyDatasetsToStudy(datasetIds, studyId, subjectMapping, event.getId());
         } catch (MicroServiceCommunicationException e) {
@@ -255,7 +256,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         study.setStudyCenterList(list);
     }
 
-    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Map<Long, Long> subjectMapping, Long eventId) throws MicroServiceCommunicationException {
+    private void copyDatasetsToStudy(List<Long> datasetIds, Long studyId, Map<Long, IdName> subjectMapping, Long eventId) throws MicroServiceCommunicationException {
         // datasetIds order is : selected datasets in solr from top of the table to bottom
         // reverse that order so that the first dataset to be treated is the last selected in solr
         Collections.sort(datasetIds);

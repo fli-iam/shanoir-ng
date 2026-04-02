@@ -23,9 +23,11 @@ import { TreeService } from './tree.service';
 @Component({
     selector: 'copy-from-csv',
     template: `
-        Copy from mapping file
-        <i class="fas fa-file-arrow-up"></i>
-        <input #input hidden type="file" (change)="copyDatasetsTo($event)" accept=".csv, .tsv"/>
+        <button class="right-icon" type="button">
+            Copy from mapping file
+            <i class="fas fa-file-arrow-up"></i>
+            <input #input hidden type="file" (change)="copyDatasetsTo($event)" accept=".csv, .tsv"/>
+        </button>
     `,
     standalone: false
 })
@@ -39,6 +41,7 @@ export class CopyFromCsvComponent {
     private confirmService = inject(ConfirmDialogService);
 
     @HostListener('click') onClick() {
+        console.log("CopyFromCsvComponent clicked");
         this.inputEl?.nativeElement.click();
     }
 
@@ -51,7 +54,7 @@ export class CopyFromCsvComponent {
         + '\t- centerId';
 
     protected copyDatasetsTo(event: Event) {
-        (event.target as HTMLInputElement).files[0].text().then(csv => {
+        (event.target as HTMLInputElement).files[0]?.text().then(csv => {
             const rawData: string[][] = this.parseCsvTsv(csv);
             let copyData: CopyData;
             try {

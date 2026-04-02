@@ -30,6 +30,7 @@ import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository
 import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -72,8 +73,8 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
     @Override
     @Transactional
-    public DatasetCopyService.DatasetCopyResult moveDataset(Long dsId, Long studyId, Map<Long, Long> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws DatasetCopyService.NotFoundSubjectIdException, DatasetCopyService.NotFoundDatasetIdException, JsonProcessingException {
-        DatasetCopyService.DatasetCopyResult result = new DatasetCopyService.DatasetCopyResult(dsId);
+    public DatasetCopyService.DatasetCopyResult moveDataset(Long dsId, Long studyId, Map<Long, IdName> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws DatasetCopyService.NotFoundSubjectIdException, DatasetCopyService.NotFoundDatasetIdException, JsonProcessingException {
+        DatasetCopyService.DatasetCopyResult result = new DatasetCopyService.DatasetCopyResult();
         try {
             Dataset ds = datasetRepository.findById(dsId).orElseThrow(() -> new DatasetCopyService.NotFoundDatasetIdException(dsId));
             if (ds.getSource() != null) {
@@ -82,12 +83,13 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 return result;
             }
             Long oldDsId = ds.getId();
-            Long targetSubjectId = subjectMap.get(ds.getSubjectId());
-            if (targetSubjectId == null) {
+            IdName targetSubject = subjectMap.get(ds.getSubjectId());
+            if (targetSubject == null) {
                 LOG.error("[CopyDatasets] No mapping found for subject with id = " + ds.getSubjectId() + ". Dataset with id = " + oldDsId + " cannot be copied.");
                 throw new DatasetCopyService.NotFoundSubjectIdException(ds.getSubjectId());
             }
-            Subject targetSubjectRef = subjectRepository.getReferenceById(targetSubjectId);
+            result.setSubjectName(targetSubject.getName());
+            Subject targetSubjectRef = subjectRepository.getReferenceById(targetSubject.getId());
             LOG.info("[CopyDatasets] moveDataset : " + oldDsId + " to study : " + studyId);
 
             // Creation of new dataset according to its type
@@ -127,6 +129,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 newDs.setSubjectId(newDs.getDatasetAcquisition().getExamination().getSubject().getId());
                 // Save dataset without files to get an id for the dataset expressions
                 datasetRepository.saveAndFlush(newDs);
+                result.setNewDsId(newDs.getId());
                 // Copy dataset files in a super fast single query for each dataset expression
                 for (DatasetExpression dexp : ds.getDatasetExpressions()) {
                     DatasetExpression newDexp = oldToNewDsExp.get(dexp.getId());
@@ -138,7 +141,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                     result.setExaminationId(newDsAcq.getExamination().getId());
                     result.setCenterId(newDsAcq.getExamination().getCenterId());
                 }
-                result.setSubjectId(targetSubjectId);
+                result.setSubjectId(targetSubject.getId());
         // userId,
         // newExamination.getCenterId()
         // (newExamination.getSubject() != null ? newExamination.getSubject().getId() : null),

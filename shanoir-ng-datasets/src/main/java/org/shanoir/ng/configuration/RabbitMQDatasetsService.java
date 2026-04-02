@@ -25,8 +25,10 @@ import java.util.Set;
 
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
+import org.shanoir.ng.dataset.model.CopyReport;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
+import org.shanoir.ng.dataset.service.CsvCopyService;
 import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -140,6 +142,9 @@ public class RabbitMQDatasetsService {
 
     @Autowired
     private DatasetSecurityService securityService;
+
+    @Autowired
+    private CsvCopyService csvCopyService;
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
@@ -497,6 +502,7 @@ public class RabbitMQDatasetsService {
                 }
             }
             StudyExaminationsDTO propagatedExams = new StudyExaminationsDTO(studyId);
+            List<CopyReport> cvsReports = new ArrayList<>();
             for (Long datasetParentId : datasetParentIds) {
                 progress += 1f / countTotal;
                 event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + countProgress++ + "/" + countTotal);
@@ -520,6 +526,11 @@ public class RabbitMQDatasetsService {
                         LOG.info("countProcessed : " + countProcessed);
                         if (newDsId != null) newDatasets.add(newDsId);
                         propagatedExams.addExam(result.getExaminationId(), result.getCenterId(), result.getSubjectId());
+                        CopyReport cvsReport = new CopyReport();
+                        cvsReport.setSourceDatasetId(datasetParentId);
+                        cvsReport.setTargetDatasetId(newDsId);
+                        cvsReport.setSubjectNewName(result.getSubjectName());
+                        cvsReports.add(cvsReport);
                     } catch (DatasetCopyService.NotFoundSubjectIdException e) {
                         LOG.error("[CopyDatasets] No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId);
                         errors.add("No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId
@@ -536,7 +547,9 @@ public class RabbitMQDatasetsService {
                     }
                 }
             }
-
+            if (!cvsReports.isEmpty()) {
+                csvCopyService.writeReportTsvFile(cvsReports, event.getId());
+            }
             propagateExaminations(propagatedExams);
 
             event.setMessage("Copy ended");
