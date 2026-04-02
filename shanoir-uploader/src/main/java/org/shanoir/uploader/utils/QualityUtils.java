@@ -16,14 +16,21 @@ package org.shanoir.uploader.utils;
 
 import java.awt.Dimension;
 import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.DatasetsCreatorService;
@@ -35,6 +42,7 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.importer.service.QualityService;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.QualityCard;
@@ -130,17 +138,29 @@ public class QualityUtils {
                         datasetsCreatorService.constructDicom(null, serie, true);
                         org.shanoir.ng.importer.dto.Serie serieDto = SerieMapper.INSTANCE.toDto(serie);
                         AcquisitionAttributes<String> dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serieDto);
-                        //DatasetAcquisition datasetAcquisition = importerService.createDatasetAcquisitionForSerie(serieDto, rank, null, convertImportJob(importJob), dicomAttributes); // Not useful ?
-                        qualityCardResult = qualityService.checkQuality(null, dicomAttributes, cardsToCheck);
+                        //DatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
+                        //datasetAcquisition.setId(serie.getSeriesInstanceUID());
+                        DatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
+                        datasetAcquisition.setId(seriesInstanceUIDToLong(serie.getSeriesInstanceUID()));
+
+                        QualityCardResult serieQualityCardResult = qualityService.checkQuality(datasetAcquisition, dicomAttributes, cardsToCheck);
+                        // We retrieve the worst quality tag among the quality card result entries for this serie
+                        QualityTag worstTagSet = serieQualityCardResult.stream()
+                                    .filter(entry -> entry.getTagSet() != null)
+                                    .max(Comparator.comparingInt(entry -> entry.getTagSet().getId()))
+                                    .map(QualityCardResultEntry::getTagSet)
+                                    .orElse(null);
                         // if quality card result contains an ERROR tag, we remove the serie from the selection
-                        if (!qualityCardResult.isEmpty() && qualityCardResult.hasError()) {
+                        if (!serieQualityCardResult.isEmpty() && serieQualityCardResult.hasError()) {
                             serie.setSelected(false);
-                            importJob.getSelectedSeries().remove(serie); // useless
+                            importJob.getSelectedSeries().remove(serie);
                             LOG.info("Quality Control At Import - Serie with SeriesInstanceUID " + serie.getSeriesInstanceUID() + " did not pass quality control and will not be imported.");
-                        } else if (!qualityCardResult.hasFailedValid()) {
-                            // Handle the case where the serie passes quality control
-                            serie.setQualityTag(qualityCardResult.findById(serie.getSeriesInstanceUID()).map(QualityCardResultEntry::getTagSet).orElse(null));
+                        // Handle the case where the serie passes quality control : we set the quality tag to the serie
+                        // Even if a rule with a VALID tag is fulfilled, if a failed valid is found we don't set the VALID tag
+                        } else if (!serieQualityCardResult.hasFailedValid() || QualityTag.WARNING.equals(worstTagSet)) {
+                            serie.setQualityTag(worstTagSet);
                         }
+                        qualityCardResult.merge(serieQualityCardResult);
                     } catch (SecurityException e) {
                         LOG.error(e.getMessage());
                     }
@@ -199,12 +219,21 @@ public class QualityUtils {
 
         if (!qualityCardResult.isEmpty()) {
             for (QualityCardResultEntry entry : qualityCardResult) {
-                //We set two return lines to separate the different quality card entries
+                // We set two return lines to separate the different quality card entries
                 qualityCardReport = qualityCardReport + entry.getMessage() + "\n" + "\n";
             }
         }
 
         return qualityCardReport;
+    }
+
+    public static Long seriesInstanceUIDToLong(String seriesInstanceUID) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(seriesInstanceUID.getBytes(StandardCharsets.UTF_8));
+    
+        // We take only the first 8 bytes of the hash to convert it to a long value
+        ByteBuffer buffer = ByteBuffer.wrap(hash, 0, 8);
+        return buffer.getLong();
     }
 
 }
