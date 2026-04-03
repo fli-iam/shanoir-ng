@@ -65,7 +65,7 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
 
     @Autowired
     @Lazy
-    private PlannedExecutionRunner plannedExecutionRunner;
+    private PlannedExecutionManager plannedExecutionManager;
     @Autowired
     private ObjectCodec objectCodec;
 
@@ -118,7 +118,6 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
         int attempt = 0;
         DatasetAcquisition acquisition = acquisitionRepository.findById(acquisitionIds.getFirst()).orElse(null);
         while (Objects.isNull(acquisition) && attempt < 5) {
-            LOG.error("Token 3a");
             try {
                 Thread.sleep(1000);
             } catch (Exception ignored) { }
@@ -131,8 +130,7 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
         } else {
             Long examinationId = acquisition.getExamination().getId();
             DatasetAcquisition finalAcquisition = acquisition;
-            LOG.error("Token 4a");
-            plannedExecutionRunner.addToExecutionsQueue(new ExecutionInQueue(template, examinationId, "examination", acquisitionIds));
+            plannedExecutionManager.addToExecutionsQueue(new ExecutionInQueue(template, examinationId, "examination", acquisitionIds));
         }
     }
 
@@ -140,12 +138,9 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
      * Create executions when it's one execution per newly acquisition
      */
     private void createExecutionsAtAcquisitionLevel(ExecutionTemplate template, List<Long> acquisitionIds) {
-        LOG.error("Token 3b");
-
         for (Long acquisitionId : acquisitionIds) {
-            LOG.error("Token 4b");
 
-            plannedExecutionRunner.addToExecutionsQueue(new ExecutionInQueue(template, acquisitionId, "acquisition", List.of(acquisitionId)));
+            plannedExecutionManager.addToExecutionsQueue(new ExecutionInQueue(template, acquisitionId, "acquisition", List.of(acquisitionId)));
             try {
                 Thread.sleep(1000); // Delay between submissions, VIP needs it
             } catch (InterruptedException e) {
@@ -160,7 +155,6 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
      */
     private void createExecutionsAtDatasetLevel(ExecutionTemplate template, List<Long> acquisitionIds) {
         int attempt = 0;
-        LOG.error("Token 3c");
         List<Long> datasetIds = datasetRepository.findFilteredIdsByDatasetAcquisitionIdIn(acquisitionIds, "%");
         while (datasetIds.isEmpty() && attempt < 5) {
             try {
@@ -169,7 +163,7 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
             attempt++;
             datasetIds = datasetRepository.findFilteredIdsByDatasetAcquisitionIdIn(acquisitionIds, "%");
         }
-        LOG.error("Token 4c");
+
         for (Long acquisitionId : acquisitionIds) {
             DatasetAcquisition acquisition = acquisitionRepository.findById(acquisitionId).orElse(null);
             while (Objects.isNull(acquisition) && attempt < 5) {
@@ -179,7 +173,6 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
                 attempt++;
                 acquisition = acquisitionRepository.findById(acquisitionIds.getFirst()).orElse(null);
             }
-            LOG.error("Token 4d");
 
             if (Objects.nonNull(acquisition)) {
                 List<Dataset> datasetList = acquisition.getDatasets();
@@ -193,8 +186,7 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
                     } else {
                         plannedExecutionToRemove = List.of(acquisitionId);
                     }
-                    LOG.error("Token 4e");
-                    plannedExecutionRunner.addToExecutionsQueue(new ExecutionInQueue(template, dataset.getId(), "dataset", plannedExecutionToRemove));
+                    plannedExecutionManager.addToExecutionsQueue(new ExecutionInQueue(template, dataset.getId(), "dataset", plannedExecutionToRemove));
                     try {
                         Thread.sleep(1000); // Delay between submissions, VIP needs it
                     } catch (InterruptedException e) {

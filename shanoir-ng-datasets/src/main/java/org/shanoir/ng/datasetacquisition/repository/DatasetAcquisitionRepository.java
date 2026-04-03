@@ -19,7 +19,6 @@ import java.util.Optional;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRightsProjection;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;

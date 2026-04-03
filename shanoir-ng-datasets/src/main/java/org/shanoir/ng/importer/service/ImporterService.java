@@ -16,7 +16,6 @@ package org.shanoir.ng.importer.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import org.dcm4che3.data.Tag;
@@ -47,7 +46,6 @@ import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
-import org.shanoir.ng.vip.executionTemplate.service.ExecutionTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

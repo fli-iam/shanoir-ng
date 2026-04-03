@@ -1,15 +1,26 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.vip.executionTemplate.service;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.model.MiscellaneousParameter;
 import org.shanoir.ng.shared.repository.MiscellaneousParameterRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
-import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringResumptionRunner;
 import org.shanoir.ng.vip.executionTemplate.model.PlannedExecution;
 import org.shanoir.ng.vip.executionTemplate.repository.PlannedExecutionRepository;
 import org.slf4j.Logger;
@@ -19,10 +30,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -67,12 +75,15 @@ public class ExecutionTemplateRunner implements ApplicationRunner {
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
             //Get counter for exec to import
-            MiscellaneousParameter importExecParam = miscelleneousParamRepository.findById("import_exec_count").get();
+            MiscellaneousParameter importExecParam = miscelleneousParamRepository.findById("import_exec_count").orElse(null);
+            if (Objects.isNull(importExecParam)) {
+                LOG.error("import_exec_count not present in MiscellaneousParameter table. Aborting execution template runner ...");
+            }
             long importExecCount = Long.parseLong(importExecParam.getValue());
 
             //Get new acquisitions
             List<DatasetAcquisition> newAcquisitions = acquisitionRepository.findByIdGreaterThan(importExecCount);
-            if(newAcquisitions.isEmpty()) {
+            if (newAcquisitions.isEmpty()) {
                 LOG.info("No acquisitions to check for executions following import.");
                 return;
             }
@@ -88,7 +99,7 @@ public class ExecutionTemplateRunner implements ApplicationRunner {
                     .forEach(group -> templateService.createExecutionsFromExecutionTemplates(group));
 
             LOG.info("New acquisitions checked for executions following import.");
-        } catch (Exception e){
+        } catch (Exception e) {
             LOG.error("Error while checking execution templates for new acquisitions", e);
             LOG.error(e.getMessage(), e);
         }
