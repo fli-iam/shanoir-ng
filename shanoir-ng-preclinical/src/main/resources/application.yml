@@ -107,7 +107,7 @@ logging:
     org.hibernate: ERROR
 
 storage:
-  type: ${SHANOIR_STORAGE_TYPE} # "file-system" or "s3"
+  type: ${SHANOIR_STORAGE_TYPE:file-system} # "file-system" or "s3"
   file-system:
     preclinical-data: /var/preclinical-data
     uploadBrukerFolder: /tmp/

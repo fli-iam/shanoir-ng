@@ -105,7 +105,7 @@ front.server:
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
 storage:
-  type: ${SHANOIR_STORAGE_TYPE} # "file-system" or "s3"
+  type: ${SHANOIR_STORAGE_TYPE:file-system} # "file-system" or "s3"
   file-system:
     studies-data: /var/studies-data
     # file-system only (by design, e.g. validator) and temporary data: no S3

@@ -110,7 +110,7 @@ front.server:
 solr.host: http://${SHANOIR_SOLR_HOST:${SHANOIR_PREFIX}solr}:8983/solr/shanoir
 
 storage:
-  type: ${SHANOIR_STORAGE_TYPE} # "file-system" or "s3"
+  type: ${SHANOIR_STORAGE_TYPE:file-system} # "file-system" or "s3"
   file-system:
     datasets-data: /var/datasets-data
     # file-system only (by design, e.g. validator) and temporary data: no S3
