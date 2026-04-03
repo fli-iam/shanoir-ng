@@ -40,7 +40,7 @@ import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
-import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
+import org.shanoir.ng.studycard.model.rule.QualityCardRule;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +118,7 @@ public class CardsProcessingService {
         AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
 
         // We apply each rule of the quality card on the acquisition
-        for (QualityExaminationRule rule : qualityCard.getRules()) {
+        for (QualityCardRule rule : qualityCard.getRules()) {
             rule.apply(acquisition, dicomAttributes, result, downloader);
         }
 
@@ -181,8 +181,8 @@ public class CardsProcessingService {
             eventService.publishEvent(event);
 
             // We only load the DatasetAcquisitions from one examination at a time
-            List<DatasetAcquisition> datasetAcquisitions = datasetAcquisitionService
-                    .findByExamination(examination.getId());
+            List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
+            //datasetAcquisitionService.findByExamination(examination.getId());
 
             if (updateTags) {
                 resetDatasetAcquisitions(datasetAcquisitions);
@@ -192,7 +192,7 @@ public class CardsProcessingService {
             // examination only
             List<DatasetAcquisition> updatedAcquisitions = new ArrayList<>();
             try {
-                datasetAcquisitions.parallelStream().forEach(datasetAcquisition -> {
+                datasetAcquisitions.stream().forEach(datasetAcquisition -> {
                     event.setStatus(2);
                     event.setMessage("Checking quality for acquisition " + datasetAcquisition.getId()
                             + " in examination " + examination.getComment());
@@ -235,12 +235,12 @@ public class CardsProcessingService {
         return result;
     }
 
-    private void loadRulesLazyCollections(List<QualityExaminationRule> rules, ShanoirEvent event) {
+    private void loadRulesLazyCollections(List<QualityCardRule> rules, ShanoirEvent event) {
         event.setMessage("Loading rules");
         event.setProgress(0.5f);
         eventService.publishEvent(event);
         if (rules != null) {
-            for (QualityExaminationRule rule : rules) {
+            for (QualityCardRule rule : rules) {
                 if (rule.getConditions() != null) {
                     for (StudyCardCondition condition : rule.getConditions()) {
                         Hibernate.initialize(condition.getValues());

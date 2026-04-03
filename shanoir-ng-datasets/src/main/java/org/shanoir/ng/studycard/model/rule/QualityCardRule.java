@@ -22,7 +22,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
@@ -45,7 +44,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-public class QualityExaminationRule extends AbstractEntity {
+public class QualityCardRule extends AbstractEntity {
 
     private Integer tag;
 
@@ -104,6 +103,8 @@ public class QualityExaminationRule extends AbstractEntity {
 
     public void apply(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> acquisitionDicomAttributes,
             QualityCardResult result, WADODownloaderService downloader) throws PacsException {
+        // if applied from ShUp, datasetAcquisition is null for performance reason and we use seriesInstanceUID.
+        //Long datasetAcquisitionId = datasetAcquisition != null ? datasetAcquisition.getId() : null;
         // if applied at import and not from ShUp then acquisitionDicomAttributes should
         // not be null, otherwise we fetch DICOM acquisition attributes.
         if (acquisitionDicomAttributes == null) {
@@ -116,14 +117,12 @@ public class QualityExaminationRule extends AbstractEntity {
             resultEntry.setMessage(
                     "Tag " + getQualityTag().name() + " was set by the quality card rule without any condition.");
             result.add(resultEntry);
-            result.addUpdatedDatasetAcquisition(
-                    setTagToDatasetAcquisition(datasetAcquisition.getId()));
+            result.addUpdatedDatasetAcquisition(setTagToDatasetAcquisition(datasetAcquisition));
         } else {
             ConditionResult conditionResult = conditionsfulfilled(acquisitionDicomAttributes, datasetAcquisition,
                     result);
             if (conditionResult.isFulfilled()) {
-                result.addUpdatedDatasetAcquisition(
-                        setTagToDatasetAcquisition(datasetAcquisition.getId()));
+                result.addUpdatedDatasetAcquisition(setTagToDatasetAcquisition(datasetAcquisition));
             }
             // if conditions not fulfilled for a VALID tag
             // or if conditions fulfilled for a ERROR or WARNING tag
@@ -152,11 +151,12 @@ public class QualityExaminationRule extends AbstractEntity {
      * @param datasetAcquisitionId
      * @return an updated dataset acquisition
      */
-    private DatasetAcquisition setTagToDatasetAcquisition(Long datasetAcquisitionId) {
-        DatasetAcquisition datasetAcquisitionCopy = new GenericDatasetAcquisition();
-        datasetAcquisitionCopy.setId(datasetAcquisitionId);
-        datasetAcquisitionCopy.setQualityTag(getQualityTag());
-        return datasetAcquisitionCopy;
+    private DatasetAcquisition setTagToDatasetAcquisition(DatasetAcquisition datasetAcquisition) {
+        //DatasetAcquisition datasetAcquisitionCopy = new GenericDatasetAcquisition();
+        //datasetAcquisitionCopy.setId(datasetAcquisitionId);
+        //datasetAcquisitionCopy.setQualityTag(getQualityTag());
+        datasetAcquisition.setQualityTag(getQualityTag());
+        return datasetAcquisition;
     }
 
     /**

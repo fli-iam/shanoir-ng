@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.importer.service;
 
-
 import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -22,6 +21,7 @@ import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,24 +36,17 @@ public class QualityService {
     @Autowired
     private WADODownloaderService downloader;
 
-    public QualityCardResult checkQuality(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> acquisitionAttributes, List<QualityCard> qualityCards) throws ShanoirException {
+    public QualityCardResult checkQuality(DatasetAcquisition datasetAcquisition,
+            AcquisitionAttributes<?> acquisitionAttributes, List<QualityCard> qualityCards) throws ShanoirException {
         QualityCardResult qualityResult = new QualityCardResult();
         for (QualityCard qualityCard : qualityCards) {
-            // In case multiple quality cards are used with different roles, we check them all
+            // In case multiple quality cards are used with different roles, we check them
+            // all
             qualityResult.merge(qualityCard.apply(datasetAcquisition, acquisitionAttributes, downloader));
+            LOG.info("Quality Card {} applied on dataset acquisition {} with result: {}.", qualityCard.getName(),
+                    datasetAcquisition.getId(), qualityResult.findById(datasetAcquisition.getId())
+                            .map(QualityCardResultEntry::getTagSet).orElse(null));
         }
         return qualityResult;
     }
-
-    // public QualityCardResult retrieveQualityCardResult(List<Serie> selectedSeries) {
-    //     if (importJob.getQualityTag() == null) {
-    //         return new QualityCardResult();
-    //     }
-    //     QualityCardResult qualityCardResult = new QualityCardResult();
-    //     QualityCardResultEntry qualityCardResultEntry = new QualityCardResultEntry();
-    //     qualityCardResultEntry.setTagSet(importJob.getQualityTag());
-    //     qualityCardResultEntry.setMessage("Tag " + importJob.getQualityTag() + " was applied to examination " + importJob.getExaminationId() + " during quality check at import from Shanoir Uploader.");
-    //     qualityCardResult.add(qualityCardResultEntry);
-    //     return qualityCardResult;
-    // }
 }

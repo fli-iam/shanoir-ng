@@ -15,6 +15,7 @@
 package org.shanoir.ng.studycard.dto;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -53,12 +54,22 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
         this.updatedDatasetAcquisitions = updatedDatasetAcquisitions;
     }
 
+    /***
+     * Add a dataset acquisition to the list of updated dataset acquisitions,
+     * if it is not already in the list or if it is in the list but with a better quality tag.
+     * @param datasetAcquisition
+     */
     public void addUpdatedDatasetAcquisition(DatasetAcquisition datasetAcquisition) {
-        if (getUpdatedDatasetAcquisitions() == null) setUpdatedDatasetAcquisitions(new ArrayList<>());
         if (datasetAcquisition == null || datasetAcquisition.getId() == null) return;
-        for (DatasetAcquisition presentDatasetAcq : getUpdatedDatasetAcquisitions()) {
-            if (datasetAcquisition.getId().equals(presentDatasetAcq.getId())
-                    && presentDatasetAcq.getQualityTag().getId() >= datasetAcquisition.getQualityTag().getId()) {
+        if (getUpdatedDatasetAcquisitions() == null) setUpdatedDatasetAcquisitions(new ArrayList<>());
+
+        for (int i = 0; i < getUpdatedDatasetAcquisitions().size(); i++) {
+            DatasetAcquisition presentDatasetAcq = getUpdatedDatasetAcquisitions().get(i);
+            if (datasetAcquisition.getId().equals(presentDatasetAcq.getId())) {
+                // if a same id is found, we replace if the new quality tag is worst than the previous one
+                if (datasetAcquisition.getQualityTag().getId() > presentDatasetAcq.getQualityTag().getId()) {
+                    getUpdatedDatasetAcquisitions().set(i, datasetAcquisition);
+                }
                 return;
             }
         }
@@ -87,6 +98,15 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
                 this.addUpdatedDatasetAcquisition(datasetAcquisition);
             }
         }
+    }
+
+    public boolean isValid() {
+        for (QualityCardResultEntry entry : this) {
+            if (QualityTag.VALID.equals(entry.getTagSet()) && !entry.isFailedValid()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean hasError() {
@@ -127,10 +147,15 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
         }
     }
 
-    public Optional<QualityCardResultEntry> findById(String id) {
+    /*
+     * Find the quality card result entry with the worst quality tag by its dataset acquisition ID.
+     * @param id the dataset acquisition ID
+     * @return the quality card result entry if found, empty optional otherwise
+     */
+    public Optional<QualityCardResultEntry> findById(Long id) {
         return stream()
-                .filter(entry -> Objects.equals(entry.getDatasetAcquisitionId(), id))
-                .findFirst();
+            .filter(entry -> Objects.equals(entry.getDatasetAcquisitionId(), id))
+            .max(Comparator.comparingInt(entry -> entry.getTagSet().getId()));
     }
 
 }
