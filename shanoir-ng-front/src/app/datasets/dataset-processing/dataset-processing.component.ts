@@ -245,6 +245,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         ds.subject.name = dsLight.subject.name;
         ds.subject.id = dsLight.subject.id;
         ds.creationDate = dsLight.creationDate;
+        ds.name = dsLight.name;
     }
 
     buildForm(): UntypedFormGroup {

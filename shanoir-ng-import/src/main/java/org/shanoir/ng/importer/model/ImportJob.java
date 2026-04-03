@@ -102,6 +102,8 @@ public class ImportJob implements Serializable {
 
     private String examinationComment;
 
+    private Boolean examinationDataReuseAgreement;
+
     private String anonymisationProfileToUse;
 
     private String archive;
@@ -416,4 +418,11 @@ public class ImportJob implements Serializable {
         this.studyInstanceUID = studyInstanceUID;
     }
 
+    public Boolean getExaminationDataReuseAgreement() {
+        return examinationDataReuseAgreement;
+    }
+
+    public void setExaminationDataReuseAgreement(Boolean examinationDataReuseAgreement) {
+        this.examinationDataReuseAgreement = examinationDataReuseAgreement;
+    }
 }

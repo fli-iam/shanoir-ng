@@ -72,7 +72,7 @@ public class ZipFileImportTest extends AbstractTest {
         Date studyDateDate = Date.from(studyDateInstant);
         String examinationComment = dicomStudy.getStudyDescription();
         Examination examination = ImportUtils.createExamination(study, subject, studyDateDate,
-            examinationComment, study.getStudyCards().get(0).getCenterId());
+            examinationComment, study.getStudyCards().get(0).getCenterId(), false);
         return examination.getId();
     }
 

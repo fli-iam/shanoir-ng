@@ -137,6 +137,9 @@ public class UploadFromTableActionListener implements ActionListener {
         Cell examComment = row.getCell(16);
         value = handleCell(examComment);
         importJob.setExaminationComment(value);
+        Cell examDataReuseAgreement = row.getCell(17);
+        value = handleCell(examDataReuseAgreement);
+        importJob.setExaminationDataReuseAgreement("true".equalsIgnoreCase(value) || "1".equals(value));
     }
 
     private void readDicomQuery(Row row, ImportJob importJob) {
