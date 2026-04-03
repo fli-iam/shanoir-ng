@@ -26,7 +26,7 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
-import org.shanoir.ng.studycard.model.rule.ConditionResult;
+import org.shanoir.ng.studycard.model.rule.QualityCardRule;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -65,7 +65,7 @@ public class QualityCard extends HalEntity implements Card {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "quality_card_id")
-    private List<ConditionResult> rules;
+    private List<QualityCardRule> rules;
 
     /**
      * Init HATEOAS links
@@ -91,11 +91,11 @@ public class QualityCard extends HalEntity implements Card {
         this.studyId = studyId;
     }
 
-    public List<ConditionResult> getRules() {
+    public List<QualityCardRule> getRules() {
         return rules;
     }
 
-    public void setRules(List<ConditionResult> rules) {
+    public void setRules(List<QualityCardRule> rules) {
         this.rules = rules;
     }
 
@@ -108,7 +108,7 @@ public class QualityCard extends HalEntity implements Card {
     public QualityCardResult apply(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> dicomAttributes, WADODownloaderService downloader) throws PacsException {
         QualityCardResult result = new QualityCardResult();
         if (this.getRules() != null) {
-            for (ConditionResult rule : this.getRules()) {
+            for (QualityCardRule rule : this.getRules()) {
                 rule.apply(datasetAcquisition, dicomAttributes, result, downloader);
             }
         }
@@ -125,7 +125,7 @@ public class QualityCard extends HalEntity implements Card {
 
     public boolean hasDicomConditions() {
         if (getRules() != null) {
-            for (ConditionResult rule : getRules()) {
+            for (QualityCardRule rule : getRules()) {
                 if (rule.hasDicomConditions()) {
                     return true;
                 }
