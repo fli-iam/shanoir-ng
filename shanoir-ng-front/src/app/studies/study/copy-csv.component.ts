@@ -50,7 +50,7 @@ export class CopyFromCsvComponent {
         + 'Columns needed :\n'
         + '\t- serieId (dataset id)\n'
         + '\t- subjectId\n'
-        + '\t- subjectName (new name for the subject of the copied dataset)\n'
+        + '\t- subjectName (new name for the copied subject, OPTIONAL)\n'
         + '\t- centerId';
 
     protected copyDatasetsTo(event: Event) {
@@ -92,8 +92,8 @@ export class CopyFromCsvComponent {
         const subjectIdIndex = rawData[0].indexOf("subjectId");
         const newSubjectNameIndex = rawData[0].indexOf("subjectName");
         const centerIdIndex = rawData[0].indexOf("centerId");
-        if (datasetIdIndex < 0 || subjectIdIndex < 0 || centerIdIndex < 0 || newSubjectNameIndex < 0) {
-            throw new MissingColumnsError("The CSV/TSV file must contain the following columns: serieId, subjectId, centerId, subjectName");
+        if (datasetIdIndex < 0 || subjectIdIndex < 0 || centerIdIndex < 0) {
+            throw new MissingColumnsError("The CSV/TSV file must contain the following columns: serieId, subjectId, centerId");
         }
         const copyData: CopyData = {
             datasets: [],
@@ -108,11 +108,11 @@ export class CopyFromCsvComponent {
                     subjectId: +line[subjectIdIndex]
                 });
             }
-            if (newSubjectNameIndex >= 0) {
+            if (subjectIdIndex >= 0) {
                 if (copyData.subjects.find(s => s.id === +line[subjectIdIndex]) == null) {
                     copyData.subjects.push({
                         id: +line[subjectIdIndex],
-                        newName: line[newSubjectNameIndex]
+                        newName: newSubjectNameIndex >= 0 ? line[newSubjectNameIndex] : undefined
                     });
                 }
             }
