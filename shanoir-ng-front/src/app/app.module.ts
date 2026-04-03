@@ -280,6 +280,14 @@ import { PipelinesComponent } from './vip/pipelines/pipelines.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { SubjectPathologiesListComponent } from './preclinical/pathologies/subjectPathology/list/subject-pathology-list.component';
 import { DatasetCopyDialogService } from './shared/components/dataset-copy-dialog/dataset-copy-dialog.service';
+import {ExecutionTemplateListComponent} from "./vip/execution-template/execution-template-list.component";
+import {ExecutionTemplateFilterComponent} from "./vip/execution-template/filter/execution-template-filter.component";
+import {
+    ExecutionTemplateFilterListComponent
+} from "./vip/execution-template/filter/execution-template-filter-list.component";
+import {ExecutionTemplateComponent} from "./vip/execution-template/execution-template.component";
+import {ExecutionTemplateService} from "./vip/execution-template/execution-template.service";
+import {ExecutionTemplateFilterService} from "./vip/execution-template/filter/execution-template-filter.service";
 
 @NgModule({
     declarations: [
@@ -464,7 +472,11 @@ import { DatasetCopyDialogService } from './shared/components/dataset-copy-dialo
         DoubleAwesomeComponent,
         MetadataNodeComponent,
         SizePipe,
-        DUAAssistantComponent
+        DUAAssistantComponent,
+        ExecutionTemplateListComponent,
+        ExecutionTemplateComponent,
+        ExecutionTemplateFilterListComponent,
+        ExecutionTemplateFilterComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -479,6 +491,10 @@ import { DatasetCopyDialogService } from './shared/components/dataset-copy-dialo
         RouterModule,
         ClipboardModule,
         LocalDateFormatPipe
+    ],
+    exports: [
+        TableComponent,
+        FormFooterComponent
     ],
     providers: [
         AcquisitionEquipmentService,
@@ -566,6 +582,8 @@ import { DatasetCopyDialogService } from './shared/components/dataset-copy-dialo
         SessionService,
         ShanoirEventService,
         TreeService,
+        ExecutionTemplateService,
+        ExecutionTemplateFilterService,
         DuaService,
         DatasetCopyDialogService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },

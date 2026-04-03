@@ -194,4 +194,24 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             @Param("acquisitionIds") List<Long> acquisitionIds,
             @Param("examinationIds") List<Long> examinationIds);
 
+
+
+    @Query(value = "SELECT ds.id FROM dataset ds "
+            + "JOIN dataset_metadata AS meta ON ds.updated_metadata_id = meta.id "
+            + "WHERE ds.dataset_acquisition_id IN (?1) "
+            + "AND (?2 = '' OR meta.name LIKE ?2)", nativeQuery = true)
+    List<Long> findFilteredIdsByDatasetAcquisitionIdIn(List<Long> acquisitionIds, String filter);
+
+    @Query(value = "SELECT ds.id FROM dataset ds "
+            + "JOIN dataset_metadata AS meta ON ds.updated_metadata_id = meta.id "
+            + "WHERE ds.dataset_acquisition_id = ?1 "
+            + "AND (?2 = '' OR meta.name LIKE ?2)", nativeQuery = true)
+    List<Long> findFilteredIdsByDatasetAcquisitionId(Long acquisitionId, String filter);
+
+    List<Dataset> findByIdIn(List<Long> ids);
+
+    @Query(value = "SELECT dataset.id FROM dataset "
+            + "JOIN dataset_acquisition acq ON acq.id = dataset.dataset_acquisition_id "
+            + "WHERE acq.examination_id = ?1", nativeQuery = true)
+    List<Long> findIdsByExaminationId(Long examinationId);
 }

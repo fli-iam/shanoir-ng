@@ -46,6 +46,10 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
 
     DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
 
+    @Query(value = "SELECT id FROM dataset_acquisition acq "
+            + "WHERE acq.examination_id = ?1", nativeQuery = true)
+    List<Long> findIdsByExaminationId(Long examinationId);
+
     @Query("""
         SELECT DISTINCT
             da.id              AS id,
@@ -70,5 +74,13 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             + "LEFT JOIN FETCH da.datasets "
             + "WHERE da.id = :id")
     Optional<DatasetAcquisition> findByIdWithDatasets(Long id);
+
+    /**
+     * Get the acquisitions having id greather than param
+     *
+     * @param idThreshold
+     * @return
+     */
+    List<DatasetAcquisition> findByIdGreaterThan(Long idThreshold);
 
 }
