@@ -23,7 +23,7 @@ spring:
   cloud:
     aws:
       s3:
-        endpoint: ${S3_ENDPOINT}
+        endpoint: ${S3_ENDPOINT:http://ninja:9000}
         path-style-access-enabled: true
         region: ${S3_REGION:eu-west-1}
       credentials:
