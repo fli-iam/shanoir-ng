@@ -79,7 +79,7 @@ public class QualityUtils {
             throw e;
         }
 
-        // If no quality cards are found or none of them are to be checked at importfor the study we skip the quality control
+        // If no quality cards are found or none of them are to be checked at import for the study we skip the quality control
         if (qualityCards == null || qualityCards.isEmpty() || qualityCards.stream().noneMatch(QualityCard::isToCheckAtImport)) {
             LOG.info("Quality Control At Import - No quality cards found or none to be checked at import for study " + importJob.getStudyId());
             return qualityCardResult;

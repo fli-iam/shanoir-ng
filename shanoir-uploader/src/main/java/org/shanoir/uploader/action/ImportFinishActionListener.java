@@ -254,6 +254,7 @@ public class ImportFinishActionListener implements ActionListener {
                 (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem(), equipment);
 
         // Quality Check if the Study selected has Quality Cards to be checked at import
+        boolean qualityChecked = true;
         try {
             QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob,
                     mainWindow.isFromPACS);
@@ -267,10 +268,12 @@ public class ImportFinishActionListener implements ActionListener {
                         JOptionPane.ERROR_MESSAGE);
                 // set status ERROR if all series were unselected from importJob due to Quality Control errors
                 if (importJob.getSelectedSeries().isEmpty()) {
+                    qualityChecked = false;
                     ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder,
                         UploadState.ERROR.toString());
-                logger.error("The upload for the patient {} and examination {} failed due to quality control errors.",
-                        importJob.getSubject().getName(), importJob.getExaminationComment());
+                        // TODO : delete the examination created on server ?
+                    logger.error("The upload for the patient {} and examination {} failed because none of the series passed the quality control.",
+                        importJob.getSubject().getName(), importJob.getExaminationComment()); // check why no subjectName() and examinationComment() in importJob
                 }
             } else {
                 // If quality control condition is VALID we do not set a quality card result
@@ -286,11 +289,8 @@ public class ImportFinishActionListener implements ActionListener {
                                         .getString("shanoir.uploader.import.quality.check.window.title"),
                                 JOptionPane.WARNING_MESSAGE);
                     }
-                    // If Failed Valid No updated dataset acquisitions exist in the
-                    // qualityControlResult
-                    // For Now if Failed Valid then the quality tag of the dataset acquisition on
-                    // server side is not updated with an empty value
                 }
+                
             }
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
@@ -301,14 +301,17 @@ public class ImportFinishActionListener implements ActionListener {
                     JOptionPane.ERROR_MESSAGE);
         }
 
-        Runnable runnable = new ImportFinishRunnable(uploadFolder, importJob, subjectREST.getName());
-        Thread thread = new Thread(runnable);
-        thread.start();
+        // Import starts only if the quality check did not result in errors for all selected series
+        if (qualityChecked) {
+                Runnable runnable = new ImportFinishRunnable(uploadFolder, importJob, subjectREST.getName());
+                Thread thread = new Thread(runnable);
+                thread.start();
 
-        JOptionPane.showMessageDialog(mainWindow.frame,
-                ShUpConfig.resourceBundle.getString("shanoir.uploader.import.start.auto.import.message"),
-                "Import", JOptionPane.INFORMATION_MESSAGE);
-
+                JOptionPane.showMessageDialog(mainWindow.frame,
+                        ShUpConfig.resourceBundle.getString("shanoir.uploader.import.start.auto.import.message"),
+                        "Import", JOptionPane.INFORMATION_MESSAGE);
+        }
+        
         mainWindow.importDialog.setVisible(false);
         mainWindow.importDialog.mrExaminationExamExecutiveLabel.setVisible(true);
         mainWindow.importDialog.mrExaminationExamExecutiveCB.setVisible(true);
