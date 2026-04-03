@@ -115,7 +115,7 @@ public class QualityUtils {
                         if (!serieQualityCardResult.isEmpty() && serieQualityCardResult.hasError()) {
                             serie.setSelected(false);
                             importJob.getSelectedSeries().remove(serie);
-                            LOG.info("Quality Control At Import - Serie with SeriesInstanceUID " + serie.getSeriesInstanceUID() + " did not pass quality control and will not be imported.");
+                            LOG.info("Quality Control At Import - Serie with description " + serie.getSeriesDescription() + " did not pass quality control and will not be imported.");
                         // Handle the case where the serie passes quality control : we set the quality tag to the serie
                         // Even if a rule with a VALID tag is fulfilled, if a failed valid is found we don't set the VALID tag
                         } else if (!serieQualityCardResult.hasFailedValid() || QualityTag.WARNING.equals(worstTagSet)) {
