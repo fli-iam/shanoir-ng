@@ -23,12 +23,12 @@ spring:
   cloud:
     aws:
       s3:
-        endpoint: http://${SHANOIR_PREFIX}ninja:9000
+        endpoint: ${S3_ENDPOINT}
         path-style-access-enabled: true
-        region: eu-west-1
+        region: ${S3_REGION:eu-west-1}
       credentials:
-        access-key: ${AWS_ACCESS_KEY_ID}
-        secret-key: ${AWS_SECRET_ACCESS_KEY}
+        access-key: ${S3_ACCESS_KEY_ID}
+        secret-key: ${S3_SECRET_ACCESS_KEY}
   config:
     import: "classpath:/shanoir-shared.yml"
   datasource:
@@ -110,7 +110,7 @@ front.server:
 solr.host: http://${SHANOIR_SOLR_HOST:${SHANOIR_PREFIX}solr}:8983/solr/shanoir
 
 storage:
-  type: file-system # "file-system" or "s3"
+  type: ${SHANOIR_STORAGE_TYPE} # "file-system" or "s3"
   file-system:
     datasets-data: /var/datasets-data
     # file-system only (by design, e.g. validator) and temporary data: no S3
@@ -119,7 +119,7 @@ storage:
     vip-data: /var/vip-data
   s3:
     datasets:
-      bucket: datasets
+      bucket: ${S3_BUCKET_DATASETS:datasets}
       prefix: datasets/
 
 # logging configuration

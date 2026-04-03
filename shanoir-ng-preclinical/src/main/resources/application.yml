@@ -23,12 +23,12 @@ spring:
   cloud:
     aws:
       s3:
-        endpoint: http://${SHANOIR_PREFIX}ninja:9000
+        endpoint: ${S3_ENDPOINT}
         path-style-access-enabled: true
-        region: eu-west-1
+        region: ${S3_REGION:eu-west-1}
       credentials:
-        access-key: ${AWS_ACCESS_KEY_ID}
-        secret-key: ${AWS_SECRET_ACCESS_KEY}
+        access-key: ${S3_ACCESS_KEY_ID}
+        secret-key: ${S3_SECRET_ACCESS_KEY}
   datasource:
     url: jdbc:mysql://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:preclinical}?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: preclinical
@@ -107,14 +107,14 @@ logging:
     org.hibernate: ERROR
 
 storage:
-  type: file-system # "file-system" or "s3"
+  type: ${SHANOIR_STORAGE_TYPE} # "file-system" or "s3"
   file-system:
     preclinical-data: /var/preclinical-data
     uploadBrukerFolder: /tmp/
     separator: /
   s3:
     preclinical:
-      bucket: preclinical
+      bucket: ${S3_BUCKET_PRECLINICAL:preclinical}
       prefix: preclinical/
 
 ######################################
