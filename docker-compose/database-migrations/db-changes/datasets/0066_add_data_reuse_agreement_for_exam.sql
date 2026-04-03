@@ -12,3 +12,5 @@
 
 ALTER TABLE examination ADD COLUMN data_reuse_agreement bool DEFAULT false NOT NULL;
 UPDATE examination SET data_reuse_agreement = false WHERE true;
+
+ALTER TABLE shanoir_metadata ADD COLUMN data_reuse_agreement bool;
