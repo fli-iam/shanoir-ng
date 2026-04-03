@@ -16,4 +16,4 @@ CREATE TABLE `miscellaneous_parameter` (
                               PRIMARY KEY (`name`)
 );
 
-INSERT INTO miscellaneous_parameter VALUES ('import_exec_count', (SELECT id FROM dataset_acquisition ORDER BY -id LIMIT 1;));
+INSERT INTO miscellaneous_parameter VALUES ('import_exec_count', (SELECT id FROM dataset_acquisition ORDER BY -id LIMIT 1));

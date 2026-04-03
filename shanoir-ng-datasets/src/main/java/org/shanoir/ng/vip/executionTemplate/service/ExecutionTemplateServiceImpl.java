@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -43,7 +42,6 @@ public class ExecutionTemplateServiceImpl implements ExecutionTemplateService {
     @Lazy
     private PlannedExecutionService plannedExecutionService;
 
-    @Async
     public void createExecutionsFromExecutionTemplates(List<DatasetAcquisition> createdAcquisitions) {
         if (Objects.isNull(createdAcquisitions) || createdAcquisitions.isEmpty()) {
             return;
@@ -65,7 +63,6 @@ public class ExecutionTemplateServiceImpl implements ExecutionTemplateService {
         }
         if (!createdAcquisitionsPerTemplatesId.isEmpty()) {
             plannedExecutionService.savePlannedExecution(createdAcquisitionsPerTemplatesId);
-            plannedExecutionService.applyExecution(createdAcquisitionsPerTemplatesId);
         }
     }
 

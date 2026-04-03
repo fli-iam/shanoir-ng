@@ -478,7 +478,7 @@ import { CopyDataService } from './studies/shared/copy-data.service';
         ExecutionTemplateListComponent,
         ExecutionTemplateComponent,
         ExecutionTemplateFilterListComponent,
-        ExecutionTemplateFilterComponent
+        ExecutionTemplateFilterComponent,
         DUAAssistantComponent,
         CopyFromCsvComponent
     ],
