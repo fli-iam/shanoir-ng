@@ -119,6 +119,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
+                    <li>
+                        <label i18n="Examination detail|Data reuse agreement label@@examinationDetailDataReuseAgreement">Data reuse agreement</label>
+                        <span class="right-col">
+                            <input type="checkbox" id="dataReuseAgreement" formControlName="dataReuseAgreement"/>
+						</span>
+                    </li>
 					<li *ngIf="!inImport" >
 						<label i18n="Examination detail|Note label@@examinationDetailNote">Note</label>
 						<span class="right-col" [ngSwitch]="mode">

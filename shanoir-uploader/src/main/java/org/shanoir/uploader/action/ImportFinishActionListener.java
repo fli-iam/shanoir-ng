@@ -211,7 +211,8 @@ public class ImportFinishActionListener implements ActionListener {
         if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
             Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
             String examinationComment = mainWindow.importDialog.mrExaminationCommentTF.getText();
-            examination = ImportUtils.createExamination(study, subjectREST, examinationDate, examinationComment, centerId);
+            boolean agreeWithDataReuse = mainWindow.importDialog.mrExaminationDataReuseAgreementCB.isSelected();
+            examination = ImportUtils.createExamination(study, subjectREST, examinationDate, examinationComment, centerId, agreeWithDataReuse);
             if (examination == null) {
                 JOptionPane.showMessageDialog(mainWindow.frame,
                         mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination"),
