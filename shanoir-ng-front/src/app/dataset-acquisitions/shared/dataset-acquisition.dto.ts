@@ -35,6 +35,7 @@ import { XaProtocol } from '../modality/xa/xa-protocol.model';
 
 import { DatasetAcquisition } from './dataset-acquisition.model';
 import { DatasetAcquisitionUtils } from './dataset-acquisition.utils';
+import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
 
 @Injectable()
 export class DatasetAcquisitionDTOService {
@@ -205,6 +206,7 @@ export class ExaminationDatasetAcquisitionDTO {
     name: string;
     type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS';
     datasets: any;
+    qualityTag: QualityTag;
 }
 
 export class DatasetAcquisitionDatasetsDTO extends DatasetAcquisitionDTO {
