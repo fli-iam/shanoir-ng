@@ -271,7 +271,14 @@ public class ImportFinishActionListener implements ActionListener {
                     qualityChecked = false;
                     ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder,
                         UploadState.ERROR.toString());
-                        // TODO : delete the examination created on server ?
+                        // if an exam was created for the import, we delete it
+                        if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
+                            try {
+                                ImportUtils.deleteExamination(examination.getId());
+                            } catch (Exception e) {
+                                logger.error("Error while deleting examination with id " + examination.getId() + " after quality control failure: " + e.getMessage(), e);
+                            }
+                        }
                     logger.error("The upload for the patient {} and examination {} failed because none of the series passed the quality control.",
                         importJob.getSubject().getName(), importJob.getExaminationComment()); // check why no subjectName() and examinationComment() in importJob
                 }

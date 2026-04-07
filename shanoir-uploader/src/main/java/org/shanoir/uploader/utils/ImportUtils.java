@@ -418,6 +418,11 @@ public class ImportUtils {
         }
     }
 
+    public static void deleteExamination(Long examinationId) throws Exception {
+        ShUpOnloadConfig.getShanoirUploaderServiceClient().deleteExamination(examinationId);
+        logger.info("Examination deleted on server with ID: " + examinationId);
+    }
+
     /**
      * This method adjusts patient values, coming from the DICOM,
      * with external values entered by better knowing users. Either

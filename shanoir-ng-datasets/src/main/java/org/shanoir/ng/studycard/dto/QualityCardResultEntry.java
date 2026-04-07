@@ -24,6 +24,8 @@ import org.shanoir.ng.shared.quality.QualityTag;
  */
 public class QualityCardResultEntry {
 
+    private String subjectName;
+
     private Long datasetAcquisitionId;
 
     @LocalDateAnnotations
@@ -36,6 +38,14 @@ public class QualityCardResultEntry {
     private QualityTag tagSet;
 
     private boolean failedValid = false; // if tag VALID was to put but conditions failed
+
+    public String getSubjectName() {
+        return subjectName;
+    }
+
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
+    }
 
     public Long getDatasetAcquisitionId() {
         return datasetAcquisitionId;

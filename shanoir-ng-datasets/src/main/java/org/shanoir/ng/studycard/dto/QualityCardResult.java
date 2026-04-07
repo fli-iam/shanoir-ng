@@ -76,21 +76,6 @@ public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEnt
         getUpdatedDatasetAcquisitions().add(datasetAcquisition);
     }
 
-    // /***
-    //  * Remove unchanged subject-studies
-    //  * @param study the study containing the original subject-studies
-    //  */
-    // public void removeUnchanged(Study study) {
-    //     if (getUpdatedSubjects() == null) return;
-    //     for (Subject original : study.getSubjectList()) {
-    //         getUpdatedSubjects().removeIf(updated ->
-    //                 updated.getId().equals(original.getId())
-    //                 && updated.getQualityTag() != null
-    //                 && updated.getQualityTag().equals(original.getQualityTag())
-    //         );
-    //     }
-    // }
-
     public void merge(QualityCardResult result) {
         this.addAll(result);
         if (result.getUpdatedDatasetAcquisitions() != null) {
