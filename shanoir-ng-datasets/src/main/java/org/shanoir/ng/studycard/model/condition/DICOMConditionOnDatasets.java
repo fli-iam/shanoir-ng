@@ -197,6 +197,30 @@ public abstract class DICOMConditionOnDatasets extends CardCondition {
         return false;
     }
 
+    private Attributes downloadAttributes(Dataset dataset, WADODownloaderService downloader, StringBuffer errorMsg) {
+        try {
+            Attributes attributes = downloader.getDicomAttributesForDataset(dataset);
+            return attributes;
+        } catch (PacsException e) {
+            if (errorMsg != null) errorMsg.append("\nThe condition [" + toString()
+                    + "] was ignored on dataset " + dataset.getId() + " because no dicom data could be found on pacs");
+            LOG.warn("The condition [" + toString()
+                    + "] was ignored on dataset " + dataset.getId() + " because no dicom data could be found on pacs, reason : " + e.getMessage());
+            return null;
+        }
+    }
+
+    private void writeConditionsReport(StringBuffer errorMsg, boolean complies, int nbOk, int nbUnknown, int total) {
+        if (!complies) {
+            switch (getCardinality()) {
+                case -1 -> errorMsg.append("\nThis condition failed because only " + nbOk + " out of all (" + total + ") dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                case 0 -> errorMsg.append("\nThis condition failed because " + nbOk + " dataset(s) complied where 0 was required" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                default -> errorMsg.append("\nThis condition failed because only " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+            }
+        } else {
+            errorMsg.append("\nThis condition succeeds because " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+        }
+    }
 
     @Override
     public String toString() {

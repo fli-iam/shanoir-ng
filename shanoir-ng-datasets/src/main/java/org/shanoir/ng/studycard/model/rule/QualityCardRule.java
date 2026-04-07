@@ -45,11 +45,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-<<<<<<<< HEAD:shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/model/rule/ConditionResult.java
-public class ConditionResult extends AbstractEntity {
-========
 public class QualityCardRule extends AbstractEntity {
->>>>>>>> bcd730b9c (simplifying quality control behavior):shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/model/rule/QualityCardRule.java
 
     private Integer tag;
 
@@ -62,7 +58,7 @@ public class QualityCardRule extends AbstractEntity {
     // because it could refer to a study card or quality card rule
     @JoinTable(name = "quality_card_condition_join", joinColumns = {
             @JoinColumn(name = "quality_card_rule_id") }, inverseJoinColumns = { @JoinColumn(name = "condition_id") })
-    private List<StudyCardCondition> conditions;
+    private List<CardCondition> conditions;
 
     public QualityTag getQualityTag() {
         return QualityTag.get(tag);
@@ -107,8 +103,6 @@ public class QualityCardRule extends AbstractEntity {
      */
     public void apply(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> acquisitionDicomAttributes,
             QualityCardResult result, WADODownloaderService downloader) throws PacsException {
-        // if applied from ShUp, datasetAcquisition is null for performance reason and we use seriesInstanceUID.
-        //Long datasetAcquisitionId = datasetAcquisition != null ? datasetAcquisition.getId() : null;
         // if applied at import and not from ShUp then acquisitionDicomAttributes should
         // not be null, otherwise we fetch DICOM acquisition attributes.
         if (acquisitionDicomAttributes == null) {
