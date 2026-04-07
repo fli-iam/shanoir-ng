@@ -189,7 +189,7 @@ public class S3StorageService implements StorageService {
 
     @Override
     public String storeBIDSData(Long studyId, String subjectName, Long examinationId, String fileName,
-            String dataTypeBIDS, Path path, String contentType, long size)
+            String dataTypeBIDS, InputStream inputStream, String contentType, long size)
             throws StorageException {
         if (datasetsBucket.equals(UNUSED)) {
             throw new StorageException("Missing datasets bucket configuration.", null);
@@ -201,12 +201,12 @@ public class S3StorageService implements StorageService {
                 + SLASH + dataTypeBIDS;
         String key = directory + SLASH + fileName;
         try {
-            s3Client.putObject(
-                    r -> r.bucket(datasetsBucket)
-                            .key(key)
-                            .contentType(contentType)
-                            .contentLength(size),
-                    path);
+            if (size > MULTIPART_THRESHOLD) {
+                uploadMultipart(datasetsBucket, key, inputStream, contentType, size);
+            } else {
+                s3Template.upload(datasetsBucket, key, inputStream,
+                        ObjectMetadata.builder().contentType(contentType).build());
+            }
             LOG.info("Stored BIDS data file to S3: s3://{}/{}", datasetsBucket, key);
             return getPublicLocationDatasets(directory, fileName);
         } catch (Exception e) {

@@ -44,7 +44,7 @@ public interface StorageService {
             throws StorageException;
 
     String storeBIDSData(Long studyId, String subjectName, Long examinationId, String fileName,
-            String dataTypeBIDS, Path filePath, String contentType, long size)
+            String dataTypeBIDS, InputStream inputStream, String contentType, long size)
             throws StorageException;
 
     public String storePreclinicalExtraData(Long examinationId, String fileName,

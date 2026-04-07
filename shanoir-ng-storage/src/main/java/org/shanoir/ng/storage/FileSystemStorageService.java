@@ -70,23 +70,14 @@ public class FileSystemStorageService implements StorageService {
 
     @Override
     public String storeBIDSData(Long studyId, String subjectName, Long examinationId, String fileName,
-            String dataTypeBIDS, Path path, String contentType, long size)
+            String dataTypeBIDS, InputStream inputStream, String contentType, long size)
             throws StorageException {
         if (baseDirDatasets.equals(UNUSED)) {
             throw new StorageException("Missing datasets directory configuration.", null);
         }
         String directory = STUDY + studyId
                 + SLASH + SUBJECT + subjectName + SLASH + SESSION + examinationId + SLASH + dataTypeBIDS;
-        try {
-            Path dirPath = Paths.get(baseDirDatasets, directory);
-            Files.createDirectories(dirPath);
-            Path destPath = dirPath.resolve(fileName);
-            LOG.info("Storing file at: {}", destPath);
-            Files.copy(path, destPath, StandardCopyOption.REPLACE_EXISTING);
-            return destPath.toString();
-        } catch (IOException e) {
-            throw new StorageException("Failed to store file " + fileName, e);
-        }
+        return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
     }
 
     @Override
