@@ -12,16 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
-import {Component, HostListener, ViewChild} from '@angular/core';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
+import {Component, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+
+import { TaskState } from 'src/app/async-tasks/task.model';
+
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { Subscription } from 'rxjs';
-import { OnDestroy } from '@angular/core';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Center } from '../../centers/shared/center.model';
@@ -29,8 +30,6 @@ import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { Option } from '../../shared/select/select.component';
 import { ImportJob } from '../shared/dicom-data.model';
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { StudyLight } from 'src/app/studies/shared/study.dto';
 import {CenterService} from "../../centers/shared/center.service";
 import {AcquisitionEquipment} from "../../acquisition-equipments/shared/acquisition-equipment.model";
 import {AcquisitionEquipmentPipe} from "../../acquisition-equipments/shared/acquisition-equipment.pipe";
@@ -83,8 +82,8 @@ export class DicomUploadComponent implements OnDestroy {
         });
 
         this.studyService.getAll().then(allStudies => {
-            for (let study of allStudies) {
-                    let studyOption: Option<Study> = new Option(study, study.name);
+            for (const study of allStudies) {
+                    const studyOption: Option<Study> = new Option(study, study.name);
                     this.studyOptions.push(studyOption);
                 }
         });
@@ -106,7 +105,7 @@ export class DicomUploadComponent implements OnDestroy {
         this.extensionError = file[0].name.substring(file[0].name.lastIndexOf("."), file[0].name.length) != '.zip';
 
         this.modality = null;
-        let formData: FormData = new FormData();
+        const formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         if (!this.multipleExamImport) {
             this.subscriptions.push(
@@ -118,7 +117,7 @@ export class DicomUploadComponent implements OnDestroy {
                     } else if (event.type === HttpEventType.UploadProgress) {
                         this.uploadState.progress = (event.loaded / (event.total + 0.05));
                     } else if (event instanceof HttpResponse) {
-                        let patientDicomList =  event.body;
+                        const patientDicomList =  event.body;
                         this.modality = patientDicomList.patients[0]?.studies[0]?.series[0]?.modality?.toString();
                         this.importDataService.patientList = patientDicomList;
                         this.setArchiveStatus('uploaded');
@@ -135,7 +134,7 @@ export class DicomUploadComponent implements OnDestroy {
             );
         } else {
             // Send to multiple
-            let job = new ImportJob();
+            const job = new ImportJob();
             job.acquisitionEquipmentId = this.useStudyCard ? this.studyCard.acquisitionEquipment.id : this.acquisitionEquipment.id;
             job.studyId = this.study.id;
             job.studyName = this.study.name;
@@ -185,7 +184,7 @@ export class DicomUploadComponent implements OnDestroy {
             this.studyCardService.getAllForStudy(this.study.id).then(studycards => {
                 if (!studycards) studycards = [];
                 this.studycardOptions = studycards.map(sc => {
-                    let opt = new Option(sc, sc.name);
+                    const opt = new Option(sc, sc.name);
                     return opt;
                 });
             });
@@ -202,7 +201,7 @@ export class DicomUploadComponent implements OnDestroy {
         if (study && study.id && study.studyCenterList) {
             return this.centerService.getCentersByStudyId(study.id).then(centers => {
                 return centers.map(center => {
-                    let centerOption = new Option<Center>(center, center.name);
+                    const centerOption = new Option<Center>(center, center.name);
                     return centerOption;
                 });
             });
@@ -212,7 +211,7 @@ export class DicomUploadComponent implements OnDestroy {
     }
 
     private selectDefaultCenter(options: Option<Center>[]): Promise<void> {
-        let founded = options?.find(option => option.compatible)?.value;
+        const founded = options?.find(option => option.compatible)?.value;
         if (founded) {
             this.center = founded;
             return this.onSelectCenter();
@@ -230,13 +229,13 @@ export class DicomUploadComponent implements OnDestroy {
 
     private getEquipmentOptions(center: Center): Option<AcquisitionEquipment>[] {
         return center?.acquisitionEquipments?.map(acqEq => {
-            let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
-            option.compatible = this.acqEqCompatible(acqEq);
+            const option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
+            option.compatible = this.acqEqCompatible();
             return option;
         });
     }
 
-    acqEqCompatible(acquisitionEquipment: AcquisitionEquipment): boolean | undefined {
+    acqEqCompatible(): boolean | undefined {
         return undefined;
     }
 
@@ -249,7 +248,7 @@ export class DicomUploadComponent implements OnDestroy {
     }
 
     ngOnDestroy() {
-        for(let subscription of this.subscriptions) {
+        for(const subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
     }

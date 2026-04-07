@@ -14,16 +14,15 @@
 
 import {Component,ViewChild} from '@angular/core';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { PathologyModel } from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
-import { ServiceLocator } from '../../../../utils/locator.service';
 import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
-import { ConsoleService } from '../../../../shared/console/console.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 @Component({
@@ -51,7 +50,7 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             {headerName: "Name", field: "name"},
             {headerName: "Pathology", field: "pathology.name"},
             {headerName: "Comment", field: "comment"},
@@ -88,10 +87,7 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     
     openInformationDialog = (model:PathologyModel) => {
         this.confirmDialogService
-            .confirm('Download Specifications', 'No specifications have been found for '+model.name)
-            .then(res => {
-                
-            })
+            .inform('Download Specifications', 'No specifications have been found for ' + model.name);
     }
     
     

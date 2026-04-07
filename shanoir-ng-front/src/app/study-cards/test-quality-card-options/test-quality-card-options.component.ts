@@ -11,10 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { Interval } from '../shared/quality-card.service';
+import { Component, DestroyRef, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { GlobalService } from 'src/app/shared/services/global.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { Interval } from '../shared/quality-card.service';
+import { GlobalService } from '../../shared/services/global.service';
+
 
 
 @Component({
@@ -27,12 +30,14 @@ export class TestQualityCardOptionsComponent implements OnInit {
 
     @Input() nbExaminations: number;
     @Output() test: EventEmitter<Interval> = new EventEmitter();
-    @Output() close: EventEmitter<void> = new EventEmitter();
+    @Output() closeModal: EventEmitter<void> = new EventEmitter();
     form: UntypedFormGroup
     @ViewChild('window') window: ElementRef;
 
-    constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService) {
-        globalService.onNavigate.subscribe(() => {
+    constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService, private destroyRef: DestroyRef) {
+        globalService.onNavigate
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => {
             this.cancel();
         });
     }
@@ -42,7 +47,7 @@ export class TestQualityCardOptionsComponent implements OnInit {
     }
     
     private buildForm(): UntypedFormGroup {
-        let formGroup = this.formBuilder.group({
+        const formGroup = this.formBuilder.group({
             'from': [1],
             'to': [this.nbExaminations > 20 ? 20 : this.nbExaminations],
         });
@@ -70,7 +75,7 @@ export class TestQualityCardOptionsComponent implements OnInit {
     }
 
     cancel() {
-        this.close.emit();
+        this.closeModal.emit();
     }
 
     @HostListener('click', ['$event'])

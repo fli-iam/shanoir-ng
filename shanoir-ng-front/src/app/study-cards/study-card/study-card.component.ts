@@ -11,10 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { FormArray, FormGroup, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
+import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
@@ -36,8 +39,6 @@ import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.component';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
 
 @Component({
     selector: 'study-card',
@@ -46,7 +47,7 @@ import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
     animations: [slideDown],
     standalone: false
 })
-export class StudyCardComponent extends EntityComponent<StudyCard> {
+export class StudyCardComponent extends EntityComponent<StudyCard> implements OnDestroy {
 
     centers: IdName[] = [];
     public studies: IdName[] = [];
@@ -71,19 +72,20 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             keycloakService: KeycloakService,
             private centerService: CenterService,
             coilService: CoilService) {
-        super(route, 'study-card');
-        this.mode = this.activatedRoute.snapshot.data['mode'];
-        this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
-        this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
+        super(route);
         coilService.getAll().then(coils => this.allCoils = coils);
         this.subscriptions.push(this.onSave.subscribe(() => {
-            let studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
+            const studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
             if (studyIdforDUA) {
                 this.breadcrumbsService.currentStep.data.goDUA = undefined;
                 DUAAssistantComponent.openCreateDialog(studyIdforDUA, this.confirmDialogService, this.router);
             }
         }));
-     }
+    }
+
+    protected getRoutingName(): string {
+        return 'study-card';
+    }
 
     getService(): EntityService<StudyCard> {
         return this.studyCardService;
@@ -97,6 +99,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     set studyCard(coil: StudyCard) { this.entity = coil; }
 
     initView(): Promise<void> {
+        this.selectMode = this.route.snapshot.data['select'] === true;
         this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy();
         return Promise.resolve();
     }
@@ -104,6 +107,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     initEdit(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies();
+        this.fetchAcqEq(this.studyCard.study.id).then(() => {
+            this.centerService.getCentersNamesByStudyId(this.studyCard.study.id).then(centers => {
+                this.centers = centers;
+            });
+        });
         return Promise.resolve();
     }
 
@@ -114,6 +122,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             if (studyId) {
                 this.lockStudy = true;
                 this.studyCard.study = this.studies.find(st => st.id == studyId) as unknown as Study;
+                this.onStudyChange(this.studyCard.study as IdName, this.form);
             }
         });
         this.studyCard = new StudyCard();
@@ -121,7 +130,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     ngOnDestroy(): void {
-        let studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
+        const studyIdforDUA: number = this.breadcrumbsService.currentStep.data.goDUA;
         if (studyIdforDUA) {
             this.breadcrumbsService.currentStep.data.goDUA = undefined;
             DUAAssistantComponent.openCreateDialog(studyIdforDUA, this.confirmDialogService, this.router);
@@ -130,7 +139,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     buildForm(): UntypedFormGroup {
-        let form: UntypedFormGroup = this.formBuilder.group({
+        const form: UntypedFormGroup = this.formBuilder.group({
             'name': [this.studyCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.studyCard.study, [Validators.required]],
             'acquisitionEquipment': [this.studyCard.acquisitionEquipment, [Validators.required]],
@@ -140,6 +149,10 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         this.subscriptions.push(
             form.get('study').valueChanges.subscribe(study => this.onStudyChange(study, form))
         );
+        if (this.breadcrumbsService.currentStep.data.rulesImported) {
+            this.breadcrumbsService.currentStep.data.rulesImported = false;
+            form.get('rules').markAsDirty();
+        }
         return form;
     }
 
@@ -170,8 +183,8 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         return this.acqEqService.getAllByStudy(studyId)
             .then(acqEqs => {
                 this.acquisitionEquipments = [];
-                for (let acqEq of acqEqs) {
-                    let option: Option<AcquisitionEquipment> = new Option(acqEq, this.acqEqptLabelPipe.transform(acqEq));
+                for (const acqEq of acqEqs) {
+                    const option: Option<AcquisitionEquipment> = new Option(acqEq, this.acqEqptLabelPipe.transform(acqEq));
                     this.acquisitionEquipments.push(option);
                 }
             });
@@ -181,7 +194,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         if (study) {
             this.fetchAcqEq(study.id).then(() => {
                 if (this.studyCard.acquisitionEquipment) {
-                    let found = this.acquisitionEquipments.find(acqOpt => acqOpt.value.id == this.studyCard.acquisitionEquipment.id);
+                    const found = this.acquisitionEquipments.find(acqOpt => acqOpt.value.id == this.studyCard.acquisitionEquipment.id);
                     if (!found) this.studyCard.acquisitionEquipment = null;
                 }
             }).catch(err => {
@@ -190,7 +203,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             form.get('acquisitionEquipment').enable();
             this.centerService.getCentersNamesByStudyId(study.id).then(centers => {
                 this.centers = centers;
-                this.breadcrumbsService.currentStep.addPrefilled("center", this.centers);
             });
         } else {
             form.get('acquisitionEquipment').disable();
@@ -225,16 +237,17 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     importRules() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/study-card/select-rule/list/' + this.entity.id]).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/study-card/select-rule/list/' + this.entity.id]).then(() => {
             this.breadcrumbsService.currentStep.label = 'Select study-card';
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe((rules: StudyCardRule[]) => {
                     rules.forEach(rule => {
                         this.studyCard.rules.push(rule);
-                        let lastIndex: number = this.studyCard.rules.length - 1;
+                        const lastIndex: number = this.studyCard.rules.length - 1;
                         currentStep.data.rulesToAnimate.add(lastIndex);
                     });
+                    currentStep.data.rulesImported = true;
                 })
             );
         });
@@ -263,18 +276,14 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     }
 
     createAcqEq() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/acquisition-equipment/create']).then(success => {
-            this.breadcrumbsService.currentStep.addPrefilled("sc_center", this.centers);
-            if (this.centers.length == 1) {
-                this.breadcrumbsService.currentStep.addPrefilled('center', this.centers[0]);
+        const options: {propName: string, value: any}[] = [];
+        if (this.centers?.length > 0) {
+            options.push({propName: 'centers', value: this.centers});
+            if (this.centers?.length > 0) {
+                options.push({propName: 'center', value: this.centers[0]});
             }
-            this.subscriptions.push(
-                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    this.entity.acquisitionEquipment = entity as AcquisitionEquipment;
-                })
-            );
-        });
+        }
+        this.navigateToAttributeCreateStep('/acquisition-equipment/create', 'acquisitionEquipment', options);
     }
 
 }

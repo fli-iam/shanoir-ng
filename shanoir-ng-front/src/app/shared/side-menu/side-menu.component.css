@@ -53,7 +53,8 @@ a:hover, a:active { color: inherit; }
     text-align: center;
     font-size: 10px;
     vertical-align: middle;
-    padding: 1px 1px 0 0px;
+    padding: 0;
+    line-height: 15px;
 }
 
 .admin-tag { color: orange; }
@@ -69,9 +70,9 @@ a:hover, a:active { color: inherit; }
     .instance-name::after { content: var(--instance-name); }
 
 progress-bar { background-color: var(--color-b-light); height: 14px; border: 1px solid var(--color-b-light2); vertical-align: -2px; width: 160px; font-size: 10px; }
-progress-bar >>> .text, progress-bar >>> .left-text { line-height: 14px; }
+progress-bar ::ng-deep .text, progress-bar ::ng-deep .left-text { line-height: 14px; }
 .sub-menu progress-bar { width: 100px; height: 12px; font-size: 10px; }
-.sub-menu progress-bar >>> .text, .sub-menu progress-bar >>> .left-text { line-height: 13px; }
+.sub-menu progress-bar ::ng-deep .text, .sub-menu progress-bar ::ng-deep .left-text { line-height: 13px; }
 
 .jobs i { margin-right: 6px; width: auto !important; }
 

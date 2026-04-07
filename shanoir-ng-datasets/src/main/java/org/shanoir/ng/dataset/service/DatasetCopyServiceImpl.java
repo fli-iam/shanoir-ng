@@ -1,6 +1,22 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dataset.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -14,7 +30,8 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.model.*;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.slf4j.Logger;
@@ -22,11 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.shanoir.ng.dataset.model.DatasetType;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 
 @Service
@@ -34,40 +47,43 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
     @Autowired
     private StudyService studyService;
+
     @Autowired
     private DatasetAcquisitionRepository datasetAcquisitionRepository;
+
     @Autowired
     private ExaminationRepository examinationRepository;
+
     @Autowired
     private DatasetRepository datasetRepository;
+
     @Autowired
     private SubjectRepository subjectRepository;
+
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetCopyServiceImpl.class);
 
     @Override
-    public Object[] moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws JsonProcessingException {
+    public Object[] moveDataset(Dataset ds, Long studyId, Map<Long, Long> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws JsonProcessingException {
         try {
             int countProcessed = 0;
             int countSuccess = 0;
             Long oldDsId = ds.getId();
+            Subject sourceSubject = subjectRepository.findById(ds.getSubjectId()).orElseThrow();
+            Long targetSubjectId = subjectMap.get(sourceSubject.getId());
+            Subject targetSubject = subjectRepository.findById(targetSubjectId).orElseThrow();
             LOG.info("[CopyDatasets] moveDataset : " + oldDsId + " to study : " + studyId);
 
             // Creation of new dataset according to its type
-            DatasetType dsType = ds.getType();
             Dataset newDs = null;
             if (ds.getDatasetAcquisition() != null &&  ds.getDatasetAcquisition().getId() != null) {
-                if (DatasetType.Mr.equals(dsType)) {
-                    newDs = new MrDataset(ds);
-                } else {
-                    newDs = DatasetUtils.copyDatasetFromDataset(ds);
-                }
+                newDs = DatasetUtils.copyDatasetFromDataset(ds);
                 ds.getCopies().add(newDs);
                 newDs.setSource(ds);
                 newDs.setCopies(new ArrayList<>());
-                newDs.setSubjectId(ds.getSubjectId());
+                newDs.setSubjectId(targetSubject.getId());
 
                 // Handling of DatasetAcquisition and Examination
                 DatasetAcquisition newDsAcq = null;
@@ -80,7 +96,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                         newDsAcq = datasetAcquisitionRepository.findBySourceIdAndExaminationStudy_Id(oldAcqId, studyId);
                     }
                     if (newDsAcq == null) {
-                        newDsAcq = moveAcquisition(ds.getDatasetAcquisition(), newDs, studyId, examMap, userId);
+                        newDsAcq = moveAcquisition(ds.getDatasetAcquisition(), newDs, studyId, targetSubject, examMap, userId);
                     }
                 }
                 // Create the DatasetExpression for the new Dataset
@@ -90,12 +106,9 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                     dexpList.add(new DatasetExpression(dexp, newDs));
                 }
                 newDs.setDatasetExpressions(dexpList);
-
-
                 datasetRepository.save(newDs);
                 acqMap.put(oldAcqId, newDsAcq);
                 countSuccess++;
-
             } else if (ds.getDatasetProcessing() != null) {
                 LOG.error("[CopyDatasets] Dataset selected is a processed dataset, it can't be copied.");
                 countProcessed++;
@@ -108,7 +121,8 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         }
     }
 
-    public DatasetAcquisition moveAcquisition(DatasetAcquisition oldAcq, Dataset newDs, Long studyId, Map<Long, Examination> examMap, Long userId) {
+    public DatasetAcquisition moveAcquisition(DatasetAcquisition oldAcq, Dataset newDs, Long studyId,
+            Subject targetSubject, Map<Long, Examination> examMap, Long userId) {
         Examination newExam = null;
         // Get existing examination...
         if (oldAcq.getExamination() != null &&  oldAcq.getExamination().getId() != null) {
@@ -118,7 +132,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 newExam = examinationRepository.findBySourceIdAndStudy_Id(oldAcq.getExamination().getId(), studyId);
             }
             if (newExam == null) {
-                newExam = moveExamination(oldAcq, studyId, userId);
+                newExam = moveExamination(oldAcq, studyId, targetSubject, userId);
             }
         }
         // Create new DatasetAcquisition according to its type
@@ -140,17 +154,13 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         return newDsAcq;
     }
 
-    public Examination moveExamination(DatasetAcquisition acq, Long studyId, Long userId) {
+    public Examination moveExamination(DatasetAcquisition acq, Long studyId, Subject targetSubject, Long userId) {
         Examination oldExam = acq.getExamination();
         Study newStudy = studyService.findById(studyId);
-        Subject subject = subjectRepository.findById(oldExam.getSubject().getId()).orElse(null);
-
-        Examination newExamination = new Examination(oldExam, newStudy, subject);
-
+        Examination newExamination = new Examination(oldExam, newStudy, targetSubject);
         oldExam.getCopies().add(newExamination);
         newExamination.setSource(oldExam);
         newExamination.setCopies(new ArrayList<>());
-
         examinationRepository.save(newExamination);
         eventService.publishEvent(
                 new ShanoirEvent(
@@ -160,8 +170,8 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                         "centerId:" + newExamination.getCenterId() + ";subjectId:" + (newExamination.getSubject() != null ? newExamination.getSubject().getId() : null),
                         ShanoirEvent.SUCCESS,
                         newExamination.getStudyId()));
-
         LOG.info("[CopyDatasets] New examination created with id = " + newExamination.getId());
         return newExamination;
     }
+
 }

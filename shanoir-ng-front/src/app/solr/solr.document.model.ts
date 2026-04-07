@@ -68,7 +68,7 @@ export class SolrRequest {
     sliceThickness: Range = new Range(null, null);
     pixelBandwidth: Range = new Range(null, null);
     magneticFieldStrength: Range = new Range(null, null);
-    facetPaging: Map<String, FacetPageable>;
+    facetPaging: Map<string, FacetPageable>;
  }
 
 export class FacetField {

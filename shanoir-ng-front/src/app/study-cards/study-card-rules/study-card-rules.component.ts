@@ -37,14 +37,15 @@ import { ConfirmDialogService } from '../../shared/components/confirm-dialog/con
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
 import { MetadataFieldScope, StudyCardRule } from '../shared/study-card.model';
-import { ShanoirMetadataField } from './action/action.component';
-import { StudyCardRuleComponent } from './study-card-rule.component';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { MrDatasetNature } from '../../datasets/dataset/mr/dataset.mr.model';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { BidsDataType } from '../../enum/bids-data-type.enum';
 import { SuperPromise } from '../../utils/super-promise';
 import { QualityCardRule } from '../shared/quality-card.model';
+
+import { StudyCardRuleComponent } from './study-card-rule.component';
+import { ShanoirMetadataField } from './action/action.component';
 import { QualityCardRuleComponent } from './quality-card-rule.component';
 
 @Component({
@@ -66,8 +67,8 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     @Input() cardType: 'studycard' | 'qualitycard';
     rules: (StudyCardRule | QualityCardRule)[];
     @ViewChildren('studyCardRule,qualityCardRule') ruleElements: QueryList<StudyCardRuleComponent | QualityCardRuleComponent>;
-    private onTouchedCallback = () => {};
-    onChangeCallback = (_: any) => {};
+    private onTouchedCallback = () => { return; };
+    onChangeCallback: (any) => void = () => { return; };
     @Input() manufModelId: number;
     @Input() allCoils: Coil[];
     @Input() studyId: number;
@@ -120,7 +121,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.manufModelId && this.manufModelId) {
             this.allCoilsPromise.then(allCoils => {
-                let optionArr: Option<Coil>[] = [];
+                const optionArr: Option<Coil>[] = [];
                 allCoils
                     .filter(coil => coil.manufacturerModel.id == this.manufModelId)
                     .forEach(coil => optionArr.push(new Option<Coil>(coil, coil.name)));
@@ -129,7 +130,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         } 
         if(changes.studyId && this.studyId) {
             this.allCoilsPromise.then(allCoils => {
-                let optionArr: Option<Coil>[] = [];
+                const optionArr: Option<Coil>[] = [];
                 allCoils
                     .filter(coil => coil.center?.studyCenterList?.find(sc => sc.study.id == this.studyId))
                     .forEach(coil => optionArr.push(new Option<Coil>(coil, coil.name)));
@@ -146,7 +147,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     }
 
     addNewRule(scope: MetadataFieldScope) {
-        let rule: StudyCardRule = new StudyCardRule(scope);
+        const rule: StudyCardRule = new StudyCardRule(scope);
         rule.conditions = [];
         rule.assignments = []; 
         this.rules.push(rule);
@@ -155,7 +156,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     }
 
     addNewExamRule() {
-        let rule: QualityCardRule = new QualityCardRule();
+        const rule: QualityCardRule = new QualityCardRule();
         rule.conditions = [];
         this.rules.push(rule);
         this.animateRule(this.rules.length - 1);
@@ -174,10 +175,6 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
 
     registerOnTouched(fn: any): void {
         this.onTouchedCallback = fn;
-    }
-
-    setDisabledState?(isDisabled: boolean): void {
-        
     }
 
     @HostListener('focusout', ['$event']) 
@@ -201,10 +198,10 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         this.rulesToAnimate.delete(index);
         this.rulesToAnimate.delete(index + 1);
         const delay: number = 0.2;
-        let a = this.ruleElements.toArray()[index].elementRef.nativeElement;
-        let b = this.ruleElements.toArray()[index + 1].elementRef.nativeElement;
-        let aHeight = a.getBoundingClientRect().height;
-        let bHeight = b.getBoundingClientRect().height;
+        const a = this.ruleElements.toArray()[index].elementRef.nativeElement;
+        const b = this.ruleElements.toArray()[index + 1].elementRef.nativeElement;
+        const aHeight = a.getBoundingClientRect().height;
+        const bHeight = b.getBoundingClientRect().height;
         a.style.transition = 'all ' + delay + 's ease';
         b.style.transition = 'all ' + delay + 's ease';
         a.style.transform = 'translateY(' + bHeight + 'px)';
@@ -221,7 +218,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
 
     private array_move(arr, old_index, new_index) {
         if (new_index >= arr.length) {
-            var k = new_index - arr.length + 1;
+            let k = new_index - arr.length + 1;
             while (k--) {
                 arr.push(undefined);
             }
@@ -231,7 +228,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     };
 
     copy(index: number) {
-        let original: StudyCardRule | QualityCardRule = this.rules.slice(index, index + 1)[0];
+        const original: StudyCardRule | QualityCardRule = this.rules.slice(index, index + 1)[0];
         let copy;
         if (original instanceof StudyCardRule) {
             copy = StudyCardRule.copy(original);
@@ -252,7 +249,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
 
     public static validator = (control: AbstractControl): ValidationErrors | null => {
         const rules: (StudyCardRule | QualityCardRule)[] = control.value; 
-        let errors: any = {};
+        const errors: any = {};
         if (rules) {
             rules.forEach(rule => {
                 if (rule.conditions?.find(cond => cond.scope == null)) {
@@ -295,7 +292,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         if (this.mode == 'select') {
             if (this.selectedRules.has(i)) this.selectedRules.delete(i);
             else (this.selectedRules.set(i, this.rules[i]));
-            let rulesArr: (StudyCardRule | QualityCardRule)[] = [];
+            const rulesArr: (StudyCardRule | QualityCardRule)[] = [];
             this.selectedRules.forEach(rule => rulesArr.push(rule));
             this.selectedRulesChange.emit(rulesArr);
         }

@@ -12,22 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component,ViewChild, ViewContainerRef} from '@angular/core'
-import { Router } from '@angular/router'; 
+import {Component,ViewChild} from '@angular/core'
 
-import { ConfirmDialogService } from "../../../../shared/components/confirm-dialog/confirm-dialog.service";
-import { KeycloakService } from "../../../../shared/keycloak/keycloak.service";
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { Pathology } from '../shared/pathology.model';
 import { PathologyService } from '../shared/pathology.service';
-
-import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
-import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
-import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'pathology-list',
@@ -64,7 +58,7 @@ export class PathologiesListComponent extends BrowserPaginEntityListComponent<Pa
         function castToString(id: number) {
             return String(id);
         };
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             {headerName: "ID", field: "id", type: "number", cellRenderer: function (params: any) {
                 return castToString(params.data.id);
             }},

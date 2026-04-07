@@ -14,17 +14,19 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { IdName } from 'src/app/shared/models/id-name.model';
 
+import { IdName } from 'src/app/shared/models/id-name.model';
 import { KeycloakService } from 'src/app/shared/keycloak/keycloak.service';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
+
 import { AccessRequest } from './access-request.model';
 
 @Injectable()
 export class AccessRequestService extends EntityService<AccessRequest> implements OnDestroy {
 
-    getEntityInstance(entity?: AccessRequest): AccessRequest {
+    getEntityInstance(): AccessRequest {
         return new AccessRequest();
     }
 
@@ -63,7 +65,7 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
     }
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscribtions) {
+        for(const subscribtion of this.subscribtions) {
             subscribtion.unsubscribe();
         }
     }

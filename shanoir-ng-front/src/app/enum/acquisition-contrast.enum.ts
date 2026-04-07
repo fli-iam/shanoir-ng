@@ -24,7 +24,7 @@ export enum AcquisitionContrast {
 
 } export namespace AcquisitionContrast {
     
-    export function all(): Array<AcquisitionContrast> {
+    export function all(): AcquisitionContrast[] {
         return allOfEnum<AcquisitionContrast>(AcquisitionContrast);
     }
 
@@ -32,5 +32,5 @@ export enum AcquisitionContrast {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export var options: Option<AcquisitionContrast>[] = all().map(prop => new Option<AcquisitionContrast>(prop, getLabel(prop)));
+    export const options: Option<AcquisitionContrast>[] = all().map(prop => new Option<AcquisitionContrast>(prop, getLabel(prop)));
 }

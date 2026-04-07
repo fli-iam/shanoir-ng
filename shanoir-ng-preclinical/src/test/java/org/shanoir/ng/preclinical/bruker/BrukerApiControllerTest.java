@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -39,7 +39,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
  * Unit test for Bruker Api Controller
- * 
+ *
  * @author mbodin
  *
  */
@@ -50,44 +50,44 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @ActiveProfiles("test")
 public class BrukerApiControllerTest {
 
-	private static final String REQUEST_PATH = "/bruker";
-	private static final String REQUEST_PATH_UPLOAD_BRUKER = REQUEST_PATH + "/upload";
+    private static final String REQUEST_PATH = "/bruker";
+    private static final String REQUEST_PATH_UPLOAD_BRUKER = REQUEST_PATH + "/upload";
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	RabbitTemplate rabbitTemplate;
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
 
-	@TempDir
-	public File tempFolder;
-	
-	public static String tempFolderPath;
-	
-	@BeforeEach
-	public void beforeClass() {
-		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-	    System.setProperty("preclinical.uploadBrukerFolder", tempFolderPath);
-	}
+    @TempDir
+    private File tempFolder;
 
-	@Test
-	@WithMockUser
-	public void uploadBrukerFileTest() throws Exception {
-		String r = "test";
-		given(rabbitTemplate.convertSendAndReceive(Mockito.eq(RabbitMQConfiguration.BRUKER_CONVERSION_QUEUE), Mockito.anyString())).willReturn(true);
+    private static String tempFolderPath;
 
-		MockMultipartFile firstFile = new MockMultipartFile("files", "2dseq", "text/plain", "some xml".getBytes());
-		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
-				.andExpect(status().isOk());
-	}
+    @BeforeEach
+    public void beforeClass() {
+        tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
+        System.setProperty("preclinical.uploadBrukerFolder", tempFolderPath);
+    }
 
-	@Test
-	@WithMockUser
-	public void uploadBrukerFileNotValidTest() throws Exception {
-		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain",
-				"some xml".getBytes());
-		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
-				.andExpect(status().isNotAcceptable());
-	}
+    @Test
+    @WithMockUser
+    public void uploadBrukerFileTest() throws Exception {
+        String r = "test";
+        given(rabbitTemplate.convertSendAndReceive(Mockito.eq(RabbitMQConfiguration.BRUKER_CONVERSION_QUEUE), Mockito.anyString())).willReturn(true);
+
+        MockMultipartFile firstFile = new MockMultipartFile("files", "2dseq", "text/plain", "some xml".getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    public void uploadBrukerFileNotValidTest() throws Exception {
+        MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain",
+                "some xml".getBytes());
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
+                .andExpect(status().isNotAcceptable());
+    }
 
 }

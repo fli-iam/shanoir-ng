@@ -1,1 +1,0 @@
-ALTER TABLE study CHANGE public_description description text;

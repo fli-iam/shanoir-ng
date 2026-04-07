@@ -12,11 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ContentChildren, ElementRef, forwardRef, HostBinding, Input, Output, QueryList, ViewChild, EventEmitter, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, ContentChildren, ElementRef, forwardRef, HostBinding, Input, Output, QueryList, ViewChild, EventEmitter, OnChanges, SimpleChanges, OnDestroy, AfterViewInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { menuAnimDur, menuSlideRight } from '../../animations/animations';
 import { GlobalService } from '../../services/global.service';
+
 import { MenuItemComponent } from './menu-item/menu-item.component';
 
 // @dynamic
@@ -27,7 +28,7 @@ import { MenuItemComponent } from './menu-item/menu-item.component';
     animations: [menuSlideRight],
     standalone: false
 })
-export class DropdownMenuComponent implements OnChanges, OnDestroy {
+export class DropdownMenuComponent implements OnChanges, OnDestroy, AfterViewInit {
 
     @Input() label: string;
     @Input() awesome: string;
@@ -65,7 +66,7 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy {
                 this.openAction();
             }
             else if (!this.openInput && this.opened) {
-                this.close(() => {});
+                this.close(() => { return; });
             }
         }
     }
@@ -77,7 +78,7 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy {
         });
     }
 
-    public open(event: Event) {
+    public open() {
         this.openAction();
     }
 
@@ -87,7 +88,7 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy {
         setTimeout(() => this.overflow = false, menuAnimDur);
     }
 
-    public close(callback: () => void = () => { }) {
+    public close(callback: () => void = () => { return; }) {
         if (this.hasChildren && this.opened) {
             this.closeChildren(() => {
                 this.overflow = true;
@@ -100,9 +101,9 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy {
         }
     }
 
-    public closeChildren(callback: () => void = () => { }) {
+    public closeChildren(callback: () => void = () => { return; }) {
         if (!this.itemMenus) return;
-        let menusToClose: MenuItemComponent[] = [];
+        const menusToClose: MenuItemComponent[] = [];
         this.itemMenus.forEach((itemMenu, index) => {
             if (index != 0 && itemMenu.hasChildren && itemMenu.opened) // REMOVE index != 0 WHEN BUG FIXED
                 menusToClose.push(itemMenu);
@@ -112,7 +113,7 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy {
             callback();
             return;
         } else {
-            for (let itemMenu of menusToClose) {
+            for (const itemMenu of menusToClose) {
                 itemMenu.close(() => {
                     subMenusRemaining--;
                     if (subMenusRemaining == 0) {

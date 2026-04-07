@@ -48,7 +48,7 @@ export class DUASigningComponent implements OnChanges {
             if (this.dua && this.dua.studyId) {
                 this.studyService.downloadDuaBlob(this.dua.path, this.dua.studyId).then(response => {
                     this.duaBlob = response;
-                    let url: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(this.duaBlob));
+                    const url: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(this.duaBlob));
                     this.pdfUrl = url as string;
                 });
             } else {
@@ -64,14 +64,8 @@ export class DUASigningComponent implements OnChanges {
     }
 
     refuse() {
-        let confirmMsg: string = 'Do you really want to refuse the Data User Agreement for the study xxxx ? You will be removed from this study and won\'t be asked again.';
-        this.confirmService.confirm('Warning !', confirmMsg).then(response => {
-            if (response) {
-
-            } else {
-
-            }
-        });
+        const confirmMsg: string = 'Do you really want to refuse the Data User Agreement for the study xxxx ? You will be removed from this study and won\'t be asked again.';
+        this.confirmService.confirm('Warning !', confirmMsg);
     }
 
     dlDua() {

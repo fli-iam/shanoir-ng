@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(save)="save()"
 				(edit)="goToEdit()"
                 (delete) = "delete()"
-				(cancel)="goToView()"
+				(dismiss)="goToView()"
 				(back)="goBack()">
 			</form-footer>
 			<tr><td colspan="2">
@@ -43,7 +43,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label *ngIf="!isAnestheticUnique" class="form-validation-alert" i18n="Edit anesthetic|AnestheticUniqueError label">This anesthetic already exists!</label>
 						<li class="required">
 							<label i18n="Edit anesthetic|Name label" >Name</label>
-							<!-- <input type="text" id="name" formControlName="name" [(ngModel)]="anesthetic.name"/> -->
 							<label class="label_light" *ngIf="anesthetic.name == undefined || anesthetic.name == ''">Name is automatically generated</label>
 							<label id="name" *ngIf="anesthetic.name">{{anesthetic.name}}</label>
 						</li>
@@ -54,7 +53,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{AnestheticType.getLabel(anesthetic.anestheticType)}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-                                    <select-box [formControl]="form.controls['anestheticType']" [(ngModel)]="anesthetic.anestheticType" (userChange)="onChangeType()" [options]="AnestheticType.options">
+                                    <select-box formControlName="anestheticType" (userChange)="onChangeType()" [options]="AnestheticType.options">
                                     </select-box>
 									<label *ngIf="hasError('anestheticType', ['required'])" [@slideDown]="hasError('anestheticType', ['required'])" class="form-validation-alert" i18n="Edit anestheticType|Type required error@@anestheticDetailTypeRequiredError">Type is required!</label>
 								</ng-template>
@@ -67,7 +66,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{anesthetic?.comment}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<textarea rows="4"  id="comment" formControlName="comment" [(ngModel)]="anesthetic.comment"></textarea>
+									<textarea rows="4"  id="comment" formControlName="comment"></textarea>
 								</ng-template>
 							</span>
 						</li>
@@ -90,7 +89,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</div>
 							<div>
 								<anesthetic-ingredient-form [anesthetic]="anesthetic" [createAIMode]="createAIMode"
-											[toggleForm]="toggleFormAI" [ingredientSelected]="ingredientSelected" (onEvent)="refreshDisplay($event)"></anesthetic-ingredient-form>
+											[toggleForm]="toggleFormAI" [ingredientSelected]="ingredientSelected" (event)="refreshDisplay($event)"></anesthetic-ingredient-form>
 							</div>
 							<shanoir-table #ingredientsTable
 								[getPage]="getPage.bind(this)"

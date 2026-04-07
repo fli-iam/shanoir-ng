@@ -19,13 +19,14 @@ import { ConsoleService } from 'src/app/shared/console/console.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import {
     ClinicalSubjectNode,
     ExaminationNode,
-    PreclinicalSubjectNode,
+    AnimalSubjectNode,
     ShanoirNode,
     SubjectNode,
     UNLOADED
@@ -63,7 +64,7 @@ export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode>
             if (this.input instanceof SubjectNode) {
                 this.node = this.input;
             } else if (this.input.subject.preclinical) {
-                this.node = new PreclinicalSubjectNode(
+                this.node = new AnimalSubjectNode(
                     this.node,
                     this.input.subject.id,
                     this.input.subject.name,
@@ -99,7 +100,7 @@ export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode>
                 .then(examinations => {
                     this.node.examinations = [];
                     if (examinations) {
-                        let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                        const sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
                             return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
                         })
                         if (sortedExaminations) {
@@ -133,9 +134,6 @@ export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode>
 
     showSubjectDetails() {
         this.router.navigate(['/' + this.node.title + '/details/' + this.node.id]);
-    }
-
-    collapseAll() {
     }
 
     onExaminationDelete(index: number) {

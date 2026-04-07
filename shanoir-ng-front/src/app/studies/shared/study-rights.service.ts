@@ -13,9 +13,11 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+
 import * as AppUtils from '../../utils/app.utils';
-import { StudyUserRight } from './study-user-right.enum';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+
+import { StudyUserRight } from './study-user-right.enum';
 
 
 @Injectable()

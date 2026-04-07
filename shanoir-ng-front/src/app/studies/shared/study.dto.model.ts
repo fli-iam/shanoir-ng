@@ -13,6 +13,7 @@
  */
 
 import { Tag } from "../../tags/tag.model";
+
 import { SimpleStudy, Study } from "./study.model";
 
 

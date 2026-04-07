@@ -31,7 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li class="required">
 						    <label i18n="uploadExtraData|research study label@@uploadExtraDataResearchStudy" class="required-label">Select an existing research study 
 								</label>
-								<select-box formControlName="studyId" [(ngModel)]="examinationStudyId" [options]="studyOptions">
+								<select-box formControlName="studyId" [options]="studyOptions">
 								</select-box> 
 					</li>
 					<li class="required">
@@ -41,7 +41,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li class="required">
 						    <label i18n="uploadExtraData|examination label@@uploadExtraDataExamination" class="required-label">Select an examination
 								</label> 
-							<input type="text" id="examination" formControlName="examination" [(ngModel)]="examination.id" />
+							<input type="text" id="examination" formControlName="examination"/>
 					</li>
 				</ol>
 			</fieldset>
@@ -49,7 +49,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<span [ngSwitch]="mode">
 					<button i18n="uploadExtraData detail|Back button label@@backButton" class="Button" (click)="back()">Back</button>	
 					<button i18n="uploadExtraData detail|Cancel button label@@cancelButton" class="Button" (click)="back()">Cancel</button>
-					<button i18n="uploadExtraData detail|Cancel button label@@cancelButton" class="Button" (click)="add()">Add</button>
+					<!-- <button i18n="uploadExtraData detail|Cancel button label@@cancelButton" class="Button" (click)="add()">Add</button>
 					<ng-template [ngSwitchCase]="'view'" *ngIf="canModify"> 
 						<button type="submit" i18n="uploadExtraData detail|Edit button label@@editButton" (click)="edit()" class="Button">Edit</button>
 					</ng-template>
@@ -58,7 +58,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</ng-template>
 					<ng-template [ngSwitchCase]="'create'" *ngIf="canModify"> 
 						<button type="submit" i18n="uploadExtraData detail|Create button label@@createButton" (click)="create()" class="Button" [disabled]="!uploadExtraDataForm.valid">Save<i class="far fa-save"></i></button>
-					</ng-template>
+					</ng-template> -->
 				</span>
 			</div>
         </div>

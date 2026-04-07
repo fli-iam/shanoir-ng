@@ -14,13 +14,13 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
-import { TaskState } from "../../async-tasks/task.model";
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
 import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 
 
 @Component({
@@ -34,7 +34,7 @@ export class SimpleDatasetNodeComponent extends TreeNodeAbstractComponent<Datase
     @Input() input: DatasetNode | Dataset;
     @Input() related: boolean = false;
     detailsPath: string = '/dataset/details/';
-    @Output() onSimpleDatasetDelete: EventEmitter<void> = new EventEmitter();
+    @Output() simpleDatasetDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
             private router: Router,
@@ -82,7 +82,7 @@ export class SimpleDatasetNodeComponent extends TreeNodeAbstractComponent<Datase
         this.datasetService.get(this.node.id).then(entity => {
             this.datasetService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onSimpleDatasetDelete.emit();
+                    this.simpleDatasetDelete.emit();
                 }
             });
         })

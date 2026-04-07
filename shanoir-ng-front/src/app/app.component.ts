@@ -2,19 +2,19 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, HostBinding, HostListener, ViewChild, ViewContainerRef } from '@angular/core';
-
+import { Component, ElementRef, HostBinding, HostListener, ViewChild, ViewContainerRef, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+
 import { parent, slideMarginLeft, slideRight } from './shared/animations/animations';
 import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
 import { ConsoleComponent } from './shared/console/console.component';
@@ -26,7 +26,6 @@ import { StudyService } from './studies/shared/study.service';
 import { TreeService } from './studies/study/tree.service';
 import { UserService } from './users/shared/user.service';
 import { ServiceLocator } from './utils/locator.service';
-import { Observable } from 'rxjs';
 import { NotificationsService } from './shared/notifications/notifications.service';
 
 @Component({
@@ -37,7 +36,7 @@ import { NotificationsService } from './shared/notifications/notifications.servi
     standalone: false
 })
 
-export class AppComponent {
+export class AppComponent implements OnInit {
 
     @HostBinding('@parent') public menuOpen: boolean = true;
     @ViewChild('console') consoleComponenent: ConsoleComponent;
@@ -47,6 +46,7 @@ export class AppComponent {
             private globalService: GlobalService,
             private windowService: WindowService,
             private element: ElementRef,
+            private keycloakService: KeycloakService,
             private keycloakSessionService: KeycloakSessionService,
             private confirmService: ConfirmDialogService,
             protected router: Router,
@@ -54,16 +54,19 @@ export class AppComponent {
             private userService: UserService,
             public treeService: TreeService,
             private notificationsService: NotificationsService) {
-        
+
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
     }
 
     ngOnInit() {
         this.globalService.registerGlobalClick(this.element);
         this.windowService.width = window.innerWidth;
-        if(this.keycloakSessionService.isAuthenticated()) {
+        if (this.keycloakSessionService.isAuthenticated()) {
             this.userService.getAccessRequestsForAdmin();
             this.duaAlert();
+
+            if (this.keycloakService.isUserAdmin())
+                this.draftStudiesAlert();
         }
     }
 
@@ -92,7 +95,7 @@ export class AppComponent {
 
     private duaAlert() {
         this.studyService.getMyDUA().then(dua => {
-            let hasDUA: boolean = dua && dua.length > 0;
+            const hasDUA: boolean = dua && dua.length > 0;
             if (hasDUA && !this.keycloakSessionService.hasBeenAskedDUA) {
                 this.keycloakSessionService.hasBeenAskedDUA = true;
                 if (this.router.url != '/dua' && this.router.url != '/home') {
@@ -100,6 +103,10 @@ export class AppComponent {
                 }
             }
         });
+    }
+
+    private draftStudiesAlert() {
+        this.studyService.findDraftStudies();
     }
 
     private askForDuaSigning() {

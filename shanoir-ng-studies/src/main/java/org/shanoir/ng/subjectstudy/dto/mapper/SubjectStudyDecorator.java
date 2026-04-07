@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -25,38 +25,38 @@ import org.springframework.util.StringUtils;
 
 /**
  * Decorator for link between a subject and a study.
- * 
+ *
  * @author msimon
  *
  */
 public class SubjectStudyDecorator implements SubjectStudyMapper {
 
-	@Autowired
-	private SubjectStudyMapper delegate;
-	
-	@Autowired
-	private TagMapper tagMapper;
+    @Autowired
+    private SubjectStudyMapper delegate;
 
-	@Override
-	public List<SubjectStudyDTO> subjectStudyListToSubjectStudyDTOList(List<SubjectStudy> subjectStudies) {
-		final List<SubjectStudyDTO> subjectStudyDTOs = new ArrayList<>();
-		if (subjectStudies != null) {
-			for (SubjectStudy subjectStudy : subjectStudies) {
-				subjectStudyDTOs.add(subjectStudyToSubjectStudyDTO(subjectStudy));
-			}
-		}
-		return subjectStudyDTOs;
-	}
+    @Autowired
+    private TagMapper tagMapper;
 
-	@Override
-	public SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy) {
-		final SubjectStudyDTO subjectStudyDTO = delegate.subjectStudyToSubjectStudyDTO(subjectStudy);
-		if (!StringUtils.isEmpty(subjectStudy.getSubjectStudyIdentifier())) {
-			subjectStudyDTO.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
-		}
-		subjectStudyDTO.setTags(tagMapper.tagListToTagDTOList(subjectStudy.getTags()));
-		subjectStudyDTO.getStudy().setTags(tagMapper.tagListToTagDTOList(subjectStudy.getStudy().getTags()));
-		return subjectStudyDTO;
-	}
+    @Override
+    public List<SubjectStudyDTO> subjectStudyListToSubjectStudyDTOList(List<SubjectStudy> subjectStudies) {
+        final List<SubjectStudyDTO> subjectStudyDTOs = new ArrayList<>();
+        if (subjectStudies != null) {
+            for (SubjectStudy subjectStudy : subjectStudies) {
+                subjectStudyDTOs.add(subjectStudyToSubjectStudyDTO(subjectStudy));
+            }
+        }
+        return subjectStudyDTOs;
+    }
+
+    @Override
+    public SubjectStudyDTO subjectStudyToSubjectStudyDTO(SubjectStudy subjectStudy) {
+        final SubjectStudyDTO subjectStudyDTO = delegate.subjectStudyToSubjectStudyDTO(subjectStudy);
+        if (!StringUtils.isEmpty(subjectStudy.getSubjectStudyIdentifier())) {
+            subjectStudyDTO.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
+        }
+        subjectStudyDTO.setTags(tagMapper.tagListToTagDTOList(subjectStudy.getTags()));
+        subjectStudyDTO.getStudy().setTags(tagMapper.tagListToTagDTOList(subjectStudy.getStudy().getTags()));
+        return subjectStudyDTO;
+    }
 
 }

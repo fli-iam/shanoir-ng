@@ -11,102 +11,102 @@ import org.shanoir.uploader.ShUpConfig;
  */
 public class Study implements Comparable<Study> {
 
-	private static final Integer SC_MANDATORY = Integer.valueOf(1);
+    public static final String SC_MANDATORY = "MANDATORY";
 
-	private static final Integer SC_DISABLED = Integer.valueOf(2);
+    public static final String SC_DISABLED = "DISABLED";
 
-	private Long id;
+    private Long id;
 
-	private String name;
+    private String name;
 
-	private String studyStatus;
-	
-	private List<StudyCard> studyCards;
+    private String studyStatus;
 
-	private List<StudyCenter> studyCenterList;
+    private List<StudyCard> studyCards;
 
-	private Boolean compatible;
+    private List<StudyCenter> studyCenterList;
 
-	private Integer studyCardPolicy;
+    private Boolean compatible;
 
-	public Long getId() {
-		return id;
-	}
+    private String studyCardPolicy;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getStudyStatus() {
-		return studyStatus;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setStudyStatus(String studyStatus) {
-		this.studyStatus = studyStatus;
-	}
+    public String getStudyStatus() {
+        return studyStatus;
+    }
 
-	public List<StudyCard> getStudyCards() {
-		return studyCards;
-	}
+    public void setStudyStatus(String studyStatus) {
+        this.studyStatus = studyStatus;
+    }
 
-	public void setStudyCards(List<StudyCard> studyCards) {
-		this.studyCards = studyCards;
-	}
+    public List<StudyCard> getStudyCards() {
+        return studyCards;
+    }
 
-	public List<StudyCenter> getStudyCenterList() {
-		return studyCenterList;
-	}
+    public void setStudyCards(List<StudyCard> studyCards) {
+        this.studyCards = studyCards;
+    }
 
-	public void setStudyCenterList(List<StudyCenter> studyCenterList) {
-		this.studyCenterList = studyCenterList;
-	}
+    public List<StudyCenter> getStudyCenterList() {
+        return studyCenterList;
+    }
 
-	public Boolean getCompatible() {
-		return compatible;
-	}
+    public void setStudyCenterList(List<StudyCenter> studyCenterList) {
+        this.studyCenterList = studyCenterList;
+    }
 
-	public void setCompatible(Boolean compatible) {
-		this.compatible = compatible;
-	}
+    public Boolean getCompatible() {
+        return compatible;
+    }
 
-	public Integer getStudyCardPolicy() {
-		return studyCardPolicy;
-	}
+    public void setCompatible(Boolean compatible) {
+        this.compatible = compatible;
+    }
 
-	public void setStudyCardPolicy(Integer studyCardPolicy) {
-		this.studyCardPolicy = studyCardPolicy;
-	}
+    public String getStudyCardPolicy() {
+        return studyCardPolicy;
+    }
 
-	public String toString() {
-		if (this.getStudyCards() != null && !this.getStudyCards().isEmpty()) {
-			if (compatible) {
-				return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + " " + this.getName();
-			} else {
-				return this.getName();			
-			}
-		} else {
-			return this.getName() + ", 0 study card.";
-		}
-	}
+    public void setStudyCardPolicy(String studyCardPolicy) {
+        this.studyCardPolicy = studyCardPolicy;
+    }
 
-	public int compareTo(Study o) {
-		return Long.compare(this.getId(), o.getId());
-	}
+    public String toString() {
+        if (this.getStudyCards() != null && !this.getStudyCards().isEmpty()) {
+            if (compatible) {
+                return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + " " + this.getName();
+            } else {
+                return this.getName();
+            }
+        } else {
+            return this.getName() + ", 0 study card.";
+        }
+    }
 
-	public boolean isWithStudyCards() {
-		if(SC_MANDATORY.equals(studyCardPolicy)) {
-			return true;
-		} else if(SC_DISABLED.equals(studyCardPolicy)) {
-			return false;
-		} else { return true; }
-	}
+    public int compareTo(Study o) {
+        return Long.compare(this.getId(), o.getId());
+    }
+
+    public boolean isWithStudyCards() {
+        if(SC_MANDATORY.equals(studyCardPolicy)) {
+            return true;
+        } else if(SC_DISABLED.equals(studyCardPolicy)) {
+            return false;
+        } else { return true; }
+    }
 
 }

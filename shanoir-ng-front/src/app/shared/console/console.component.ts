@@ -14,7 +14,9 @@
 
 import { ApplicationRef, Component, HostBinding, Injector, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
+
 import { slideDown } from '../animations/animations';
+
 import { ConsoleService, Message } from './console.service';
 
 @Component({
@@ -31,7 +33,7 @@ export class ConsoleComponent implements OnDestroy {
     contentOpen: boolean = this._open;
     messages: Message[] = [];
     private closeTimeout: any;
-    private appRef: Promise<ApplicationRef> = new Promise((resolve, reject) => {});
+    private appRef: Promise<ApplicationRef> = new Promise(() => { return});
     private subscription: Subscription;
 
     constructor(public consoleService: ConsoleService, private injector: Injector) {

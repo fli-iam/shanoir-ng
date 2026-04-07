@@ -1,12 +1,29 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
+
 import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
 import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
 import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
 import { TableComponent } from 'src/app/shared/components/table/table.component';
+
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { ExecutionMonitoring } from '../models/execution-monitoring.model';
+
 import { ExecutionMonitoringService } from './execution-monitoring.service';
 
 @Component({

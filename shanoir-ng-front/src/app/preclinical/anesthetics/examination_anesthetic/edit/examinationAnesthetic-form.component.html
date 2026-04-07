@@ -21,7 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(edit)="goToEdit()"
 				(back)="goBack()">
 			</form-footer>
-		</div> 
+		</div>
 		<span *ngIf="isStandalone"  [ngSwitch]="mode">
 			<ng-template [ngSwitchCase]="'view'">
 				<h2 class="header command-zone"i18n="View examAnesthetic|Title@@examinationDetailViewTitle">Details on examination anesthetic</h2>
@@ -33,7 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<h2 class="header command-zone"i18n="Create examAnesthetic|Title@@examinationDetailCreateTitle">Create examination anesthetic</h2>
 			</ng-template>
 		</span>
-		
+
 
 		<fieldset>
 			<legend *ngIf="!isStandalone">Examination anesthetic</legend>
@@ -41,13 +41,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li >
 					<label i18n="Edit examAnesthetic|Anesthetic label" >Anesthetic</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
+						<ng-template [ngSwitchCase]="'view'">
 								{{examinationAnesthetic?.anesthetic?.name}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="anesthetic"  formControlName="anesthetic" [(ngModel)]="examinationAnesthetic.anesthetic" (ngModelChange)="eaChange()">
-								<option *ngFor="let anesthetic of anesthetics" [ngValue]="anesthetic">{{anesthetic.name}}</option>
-							</select>
+							<select-box id="anesthetic" formControlName="anesthetic" [optionArr]="anesthetics"></select-box>
 							<button i18n="Edit examAnesthetic|Add a new anesthetic" (click)="goToAddAnesthetic()">
 								<i class="fas fa-plus-square"></i>
 								new anesthetic
@@ -58,12 +56,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li >
 					<label i18n="Edit examAnesthetic|InjectionInterval label">Injection interval</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{enumUtils.getEnumValue(intervals,examinationAnesthetic?.injection_interval)}}
+						<ng-template [ngSwitchCase]="'view'">
+								{{examinationAnesthetic?.injectionInterval | camel}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="injectionInterval" formControlName="injectionInterval" [(ngModel)]="examinationAnesthetic.injection_interval" (ngModelChange)="eaChange()">
-								<option *ngFor="let interval of intervals" [value]="interval.key">{{interval.value}}</option>
+							<select id="injectionInterval" formControlName="injectionInterval">
+								<option *ngFor="let interval of intervals" [value]="interval">{{interval | camel}}</option>
 							</select>
 						</ng-template>
 					</span>
@@ -71,25 +69,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li >
 					<label i18n="Edit examAnesthetic|InjectionSite label">Injection site</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{enumUtils.getEnumValue(sites,examinationAnesthetic?.injection_site)}}
+						<ng-template [ngSwitchCase]="'view'">
+								{{examinationAnesthetic?.injectionSite | camel}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="injectionSite" formControlName="injectionSite" [(ngModel)]="examinationAnesthetic.injection_site" (ngModelChange)="eaChange()">
-								<option *ngFor="let site of sites" [value]="site.key">{{site.value}}</option>
+							<select id="injectionSite" formControlName="injectionSite">
+								<option *ngFor="let site of sites" [value]="site">{{site | camel}}</option>
 							</select>
 						</ng-template>
 					</span>
 				</li>
 				<li>
-					<label i18n="Edit examAnesthetic|InjectionType label">Injection type</label> 
+					<label i18n="Edit examAnesthetic|InjectionType label">Injection type</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
-								{{enumUtils.getEnumValue(injtypes,examinationAnesthetic?.injection_type)}}
+								{{examinationAnesthetic?.injectionType | camel}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="injectionType" formControlName="injectionType" [(ngModel)]="examinationAnesthetic.injection_type" (ngModelChange)="eaChange()">
-								<option *ngFor="let injtype of injtypes" [value]="injtype.key">{{injtype.value}}</option>
+							<select id="injectionType" formControlName="injectionType">
+								<option *ngFor="let injtype of injtypes" [value]="injtype">{{injtype | camel}}</option>
 							</select>
 						</ng-template>
 					</span>
@@ -97,58 +95,28 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li>
 					<label i18n="Edit examAnesthetic|Dose label">Dose</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
+						<ng-template [ngSwitchCase]="'view'">
 								{{examinationAnesthetic?.dose}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" id="dose" formControlName="dose" [(ngModel)]="examinationAnesthetic.dose" (ngModelChange)="eaChange()"/>
+							<input type="text" id="dose" formControlName="dose"/>
 						</ng-template>
-					</span> 
+					</span>
 				</li>
 				<li>
 					<label i18n="Edit examAnesthetic|DoseUnit label">Dose Unit</label>
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{examinationAnesthetic?.dose_unit?.value}}
+						<ng-template [ngSwitchCase]="'view'">
+								{{examinationAnesthetic?.doseUnit?.value}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<select id="dose_unit" formControlName="dose_unit" [(ngModel)]="examinationAnesthetic.dose_unit" (ngModelChange)="eaChange()">
+							<select id="doseUnit" formControlName="doseUnit">
 								<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
 							</select>
 						</ng-template>
-					</span> 							
-				</li>
-				<!-- 
-				<li>
-					<label i18n="Edit examAnesthetic|startDate label">Start date</label> 
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{examinationAnesthetic?.startDate}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<my-date-picker id="startDate" [options]="myDatePickerOptions" formControlName="startDate" [(ngModel)]="examinationAnesthetic.startDate" (ngModelChange)="eaChange()" 
-								(dateChanged)="onDateChanged($event,'start')" (inputFieldChanged)="onInputFieldChanged($event,'start')" [selDate]="selectedStartDate">
-							</my-date-picker>
-						</ng-template>
-						<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|DateValidError label">Date should be valid! Date format: yyyy-mm-dd</label>
 					</span>
 				</li>
-				<li>
-					<label i18n="Edit examAnesthetic|endDate label">End date</label> 
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
-								{{examinationAnesthetic?.endDate}}
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<my-date-picker id="endDate" [options]="myDatePickerOptions" formControlName="endDate" [(ngModel)]="examinationAnesthetic.endDate"  (ngModelChange)="eaChange()"
-								(dateChanged)="onDateChanged($event,'end')" (inputFieldChanged)="onInputFieldChanged($event,'end')" [selDate]="selectedEndDate">
-							</my-date-picker>
-						</ng-template>
-						<label *ngIf="isDateValid==false" class="form-validation-alert" i18n="Edit user|DateValidError label">Date should be valid! Date format: yyyy-mm-dd</label>
-					</span>
-				</li>
-					-->
 			</ol>
 		</fieldset>
-	</form>   
+	</form>
 </div>

@@ -13,11 +13,13 @@
  */
 import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
-import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
+
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
+
+import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { TaskState } from "../../async-tasks/task.model";
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
@@ -70,7 +72,7 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
         if (!changes['input']) {
             return;
         }
-        let id: number = this.input instanceof ReverseStudyNode ? this.input.id : this.input.study.id;
+        const id: number = this.input instanceof ReverseStudyNode ? this.input.id : this.input.study.id;
         this.idPromise.resolve(id);
         if (this.input instanceof ReverseStudyNode) {
             this.node = this.input;
@@ -92,13 +94,13 @@ export class ReverseStudyNodeComponent extends TreeNodeAbstractComponent<Reverse
                 this.loading = true;
                 this.examinationService.findExaminationsBySubjectAndStudy(this.subjectId, this.node.id)
                 .then(examinations => {
-                    let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                    const sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
                         return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
                     })
                     this.node.examinations = [];
                     if (sortedExaminations) {
                         sortedExaminations.forEach(exam => {
-                            let examNode = ExaminationNode.fromExam(exam, this.node, this.canAdmin, this.canDownload);
+                            const examNode = ExaminationNode.fromExam(exam, this.node, this.canAdmin, this.canDownload);
                             (this.node.examinations as ExaminationNode[]).push(examNode);
                         });
                     }

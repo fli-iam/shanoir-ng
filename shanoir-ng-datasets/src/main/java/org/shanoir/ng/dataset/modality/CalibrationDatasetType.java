@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -16,57 +16,57 @@ package org.shanoir.ng.dataset.modality;
 
 /**
  * Calibration dataset type.
- * 
+ *
  * @author msimon
  *
  */
 public enum CalibrationDatasetType {
 
-	// Field Map Dataset
-	FIELD_MAP_DATASET(1),
+    // Field Map Dataset
+    FIELD_MAP_DATASET(1),
 
-	// Voxel Displacement Map Dataset
-	VOXEL_DISPLACEMENT_MAP_DATASET(2),
+    // Voxel Displacement Map Dataset
+    VOXEL_DISPLACEMENT_MAP_DATASET(2),
 
-	// Bias Field Dataset
-	BIAS_FIELD_DATASET(3);
+    // Bias Field Dataset
+    BIAS_FIELD_DATASET(3);
 
-	private int id;
+    private int id;
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param id
-	 *            id
-	 */
-	private CalibrationDatasetType(final int id) {
-		this.id = id;
-	}
+    /**
+     * Constructor.
+     *
+     * @param id
+     *            id
+     */
+    private CalibrationDatasetType(final int id) {
+        this.id = id;
+    }
 
-	/**
-	 * Get a calibration dataset type by its id.
-	 * 
-	 * @param id
-	 *            type id.
-	 * @return calibration dataset type.
-	 */
-	public static CalibrationDatasetType getType(final Integer id) {
-		if (id == null) {
-			return null;
-		}
-		for (CalibrationDatasetType type : CalibrationDatasetType.values()) {
-			if (id.equals(type.getId())) {
-				return type;
-			}
-		}
-		throw new IllegalArgumentException("No matching calibration dataset type for id " + id);
-	}
+    /**
+     * Get a calibration dataset type by its id.
+     *
+     * @param id
+     *            type id.
+     * @return calibration dataset type.
+     */
+    public static CalibrationDatasetType getType(final Integer id) {
+        if (id == null) {
+            return null;
+        }
+        for (CalibrationDatasetType type : CalibrationDatasetType.values()) {
+            if (id.equals(type.getId())) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("No matching calibration dataset type for id " + id);
+    }
 
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
 
 }

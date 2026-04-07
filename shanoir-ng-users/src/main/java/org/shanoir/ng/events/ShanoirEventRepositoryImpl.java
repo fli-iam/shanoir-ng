@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.events;
 
 import jakarta.persistence.EntityManager;
@@ -13,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 @Component
 public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom {
@@ -30,7 +45,7 @@ public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom 
     }
 
     private Pair<List<ShanoirEvent>, Long> find(Long studyId, Pageable pageable, String searchStr, String searchField) {
-        
+
         String queryEndStr = "from ShanoirEvent as e ";
         int nbPreParams = 1;
         int searchStrIndex = -1;
@@ -85,7 +100,7 @@ public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom 
                     queryStr += "e." + order.getProperty();
                 }
                 queryStr += " " + order.getDirection() + " ";
-                isort ++;
+                isort++;
             }
             queryStr += ", e.creationDate desc";
         }
@@ -114,6 +129,13 @@ public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom 
         }
 
         return Pair.of(query.getResultList(), total);
+    }
+
+    public Long countByLastUpdateAfter(Date expiryDate) {
+        String queryStr = "select count(e) from ShanoirEvent as e where e.lastUpdate > ?1";
+        Query query = entityManager.createQuery(queryStr);
+        query.setParameter(1, expiryDate);
+        return (Long) query.getSingleResult();
     }
 
 }

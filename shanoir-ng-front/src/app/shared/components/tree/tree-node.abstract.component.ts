@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { AfterContentInit, Directive, ElementRef, EventEmitter, Input, Output } from '@angular/core';
+import { AfterContentInit, Directive, ElementRef, EventEmitter, Input, Output, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -19,11 +19,11 @@ import { ShanoirNode } from 'src/app/tree/tree.model';
 import { SuperPromise } from 'src/app/utils/super-promise';
 
 @Directive()
-export class TreeNodeAbstractComponent<T extends ShanoirNode> implements AfterContentInit {
+export class TreeNodeAbstractComponent<T extends ShanoirNode> implements AfterContentInit, OnDestroy {
 
     @Output() nodeInit: EventEmitter<T> = new EventEmitter();
     @Output() selectedChange: EventEmitter<T> = new EventEmitter();
-    @Output() onNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() nodeSelect: EventEmitter<number> = new EventEmitter();
     protected node: T;
     loading: boolean = false;
     menuOpened: boolean = false;
@@ -45,7 +45,7 @@ export class TreeNodeAbstractComponent<T extends ShanoirNode> implements AfterCo
     }
 
     ngOnDestroy() {
-        for (let subscribtion of this.subscriptions) {
+        for (const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

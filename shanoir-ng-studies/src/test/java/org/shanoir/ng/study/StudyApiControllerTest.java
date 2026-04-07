@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -76,156 +76,154 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @ActiveProfiles("test")
 public class StudyApiControllerTest {
 
-	private static final String REQUEST_PATH = "/studies";
-	private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-	private static final String REQUEST_PATH_FOR_MEMBERS = REQUEST_PATH_WITH_ID + "/members";
-	private static final String REQUEST_PATH_FOR_MEMBER_WITH_ID = REQUEST_PATH_FOR_MEMBERS + "/1";
+    private static final String REQUEST_PATH = "/studies";
+    private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH_FOR_MEMBERS = REQUEST_PATH_WITH_ID + "/members";
+    private static final String REQUEST_PATH_FOR_MEMBER_WITH_ID = REQUEST_PATH_FOR_MEMBERS + "/1";
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private StudyMapper studyMapperMock;
+    @MockBean
+    private StudyMapper studyMapperMock;
 
-	@MockBean
-	private StudyTagMapper studyTagMapperMock;
+    @MockBean
+    private StudyTagMapper studyTagMapperMock;
 
-	@MockBean
-	private StudyService studyServiceMock;
+    @MockBean
+    private StudyService studyServiceMock;
 
-	@MockBean
-	private StudyUserService studyUserServiceMock;
-	
-	@MockBean
-	private DataUserAgreementService dataUserAgreementServiceMock;
+    @MockBean
+    private StudyUserService studyUserServiceMock;
 
-	@MockBean
-	private StudyFieldEditionSecurityManager fieldEditionSecurityManager;
+    @MockBean
+    private DataUserAgreementService dataUserAgreementServiceMock;
 
-	@MockBean
-	private StudyUniqueConstraintManager uniqueConstraintManager;
+    @MockBean
+    private StudyFieldEditionSecurityManager fieldEditionSecurityManager;
 
-	@MockBean(name = "studySecurityService")
-	private StudySecurityService studySecurityService;
+    @MockBean
+    private StudyUniqueConstraintManager uniqueConstraintManager;
 
-	@MockBean
-	private ShanoirEventService eventService;
+    @MockBean(name = "studySecurityService")
+    private StudySecurityService studySecurityService;
 
-	@MockBean
-	private RelatedDatasetService relatedDatasetService;
+    @MockBean
+    private ShanoirEventService eventService;
 
-	@TempDir
-	public static File tempFolder;
-	
-	public static String tempFolderPath;
-	
-	@BeforeAll
-	public static void beforeAll() {
-		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-	    System.setProperty("studies-data", tempFolderPath);
-	}
-	
-	@BeforeEach
-	public void setup() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException {
-		given(studyMapperMock.studiesToStudyDTOs(Mockito.anyList()))
-		.willReturn(Arrays.asList(new StudyDTO()));
-		given(studyMapperMock.studyToStudyDTO(Mockito.any(Study.class))).willReturn(new StudyDTO());
-		doNothing().when(studyServiceMock).deleteById(1L);
-		given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
-		given(studyServiceMock.findAllNames()).willReturn(Arrays.asList(new IdName()));
-		given(studyServiceMock.create(Mockito.mock(Study.class))).willReturn(new Study());
-		given(fieldEditionSecurityManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
-		given(uniqueConstraintManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
-		given(studySecurityService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-	}
+    @MockBean
+    private RelatedDatasetService relatedDatasetService;
 
-	// TODO: manage keycloak token
-	// @Test
-	public void addMember() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_FOR_MEMBERS).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createStudyUser())))
-		.andExpect(status().isNoContent());
-	}
+    @TempDir
+    private static File tempFolder;
 
-	// TODO: manage keycloak token
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void deleteStudyTest() throws Exception {
-		Mockito.when(studyServiceMock.findById(Mockito.any(Long.class))).thenReturn(null);
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isNotFound());
-	}
+    private static String tempFolderPath;
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void findStudiesTest() throws Exception {
+    @BeforeAll
+    public static void beforeAll() {
+        tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
+        System.setProperty("studies-data", tempFolderPath);
+    }
 
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk());
-	}
+    @BeforeEach
+    public void setup() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException {
+        given(studyMapperMock.studiesToStudyDTOs(Mockito.anyList()))
+                .willReturn(Arrays.asList(new StudyDTO()));
+        given(studyMapperMock.studyToStudyDTO(Mockito.any(Study.class))).willReturn(new StudyDTO());
+        doNothing().when(studyServiceMock).deleteById(1L);
+        given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
+        given(studyServiceMock.findAllNames()).willReturn(Arrays.asList(new IdName()));
+        given(studyServiceMock.create(Mockito.mock(Study.class))).willReturn(new Study());
+        given(fieldEditionSecurityManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
+        given(uniqueConstraintManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
+        given(studySecurityService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
+    }
 
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void findStudiesNamesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES).accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk());
-	}
+    // @Test
+    public void addMember() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_FOR_MEMBERS).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createStudyUser())))
+                .andExpect(status().isNoContent());
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void testUploadProtocolFile() throws IOException {
-		Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn(tempFolderPath + "study-1/test-import-extra-data.pdf");
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void deleteStudyTest() throws Exception {
+        Mockito.when(studyServiceMock.findById(Mockito.any(Long.class))).thenReturn(null);
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 
-		File importZip = new File(tempFolderPath + "/test-import-extra-data.zip");
-		File saved = new File(tempFolderPath + "study-1/test-import-extra-data.pdf");
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void findStudiesTest() throws Exception {
 
-		if (saved.exists()) {
-			saved.delete();
-		}
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-		try {
-			new File(tempFolderPath).mkdirs();
-			importZip.createNewFile();
-			MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.pdf", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void findStudiesNamesTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_FOR_NAMES).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-			// WHEN The file is added to the examination
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testUploadProtocolFile() throws IOException {
+        Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn(tempFolderPath + "study-1/test-import-extra-data.pdf");
 
-			mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/protocol-file-upload/1").file(file))
-			.andExpect(status().isOk());
+        File importZip = new File(tempFolderPath + "/test-import-extra-data.zip");
+        File saved = new File(tempFolderPath + "study-1/test-import-extra-data.pdf");
 
-			// THEN the file is saved
-			assertTrue(saved.exists());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
+        if (saved.exists()) {
+            saved.delete();
+        }
 
-	@Test
-	@WithMockUser
-	public void testDownloadProtocolFile() throws IOException {
-		Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn(tempFolderPath + "study-1/file.pdf");
+        try {
+            new File(tempFolderPath).mkdirs();
+            importZip.createNewFile();
+            MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.pdf", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
 
-		// GIVEN an study with protocol file
-		File todow = new File(tempFolderPath + "study-1/file.pdf");
-		todow.getParentFile().mkdirs();
+            // WHEN The file is added to the examination
 
-		// WHEN we download protocolFile
-		try {
-			todow.createNewFile();
-			FileUtils.write(todow, "test");
-			MvcResult result = mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/protocol-file-download/1/file.pdf/"))
-					.andExpect(status().isOk())
-					.andReturn();
+            mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/protocol-file-upload/1").file(file))
+                    .andExpect(status().isOk());
 
-			// THEN the file is downloaded
-			assertNotNull(result.getResponse().getContentAsString());
-			System.out.println(result.getResponse().getContentAsString());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
+            // THEN the file is saved
+            assertTrue(saved.exists());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    @WithMockUser
+    public void testDownloadProtocolFile() throws IOException {
+        Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn(tempFolderPath + "study-1/file.pdf");
+
+        // GIVEN an study with protocol file
+        File todow = new File(tempFolderPath + "study-1/file.pdf");
+        todow.getParentFile().mkdirs();
+
+        // WHEN we download protocolFile
+        try {
+            todow.createNewFile();
+            FileUtils.write(todow, "test");
+            MvcResult result = mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/protocol-file-download/1/file.pdf/"))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            // THEN the file is downloaded
+            assertNotNull(result.getResponse().getContentAsString());
+            System.out.println(result.getResponse().getContentAsString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
 
 }

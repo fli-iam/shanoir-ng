@@ -14,9 +14,9 @@
 
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
-import { ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.model';
@@ -64,8 +64,8 @@ export class ImportProcessedDatasetComponent {
         let header = files[1];
 
         // Extract extensions of selected files to check if they are valid
-        let extensions = [];
-        for(let file of files) {
+        const extensions = [];
+        for(const file of files) {
             let extension = file.name.substring(file.name.lastIndexOf("."), file.name.length);
             if(extension == '.gz' && file.name.endsWith('.nii.gz')) {
                 extension = '.nii.gz'
@@ -90,7 +90,7 @@ export class ImportProcessedDatasetComponent {
             return;
         }
 
-        let formData: FormData = new FormData();
+        const formData: FormData = new FormData();
         
         formData.append('image', image, image.name);
         if(header != null) {
@@ -98,7 +98,7 @@ export class ImportProcessedDatasetComponent {
         }
         this.importService.uploadProcessedDataset(formData)
             .then((filePath: string) => {
-                let importJob = new ProcessedDatasetImportJob()
+                const importJob = new ProcessedDatasetImportJob()
                 importJob.processedDatasetFilePath = filePath;
                 this.importDataService.processedDatasetImportJob = importJob;
                 this.setArchiveStatus('uploaded');

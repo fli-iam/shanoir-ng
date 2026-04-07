@@ -12,16 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { Field } from '../../../shared/reflect/field.decorator';
 import { Entity } from "../../../shared/components/entity/entity.abstract";
 
 export class Reference extends Entity{
-  id: number;
-  category: string;
-  reftype: string;
-  value: string;
+    @Field() id: number;
+    @Field() category: string;
+    @Field() reftype: string;
+    @Field() value: string;
 
-  get label(): string {
-    return this.value;
-  }
+    get label(): string {
+        return this.value;
+    }
 }
 

@@ -40,10 +40,10 @@ export class BrowserPaging<T> {
             this.lastSort = pageable.sort;
             this.items = this.sortItems(this.items, pageable); // SORT
         }
-        let filtered: T[] = this.filter(this.items, pageable.filter); // FILTER
-        let result: T[] = this.slice(filtered, pageable); // SLICE
+        const filtered: T[] = this.filter(this.items, pageable.filter); // FILTER
+        const result: T[] = this.slice(filtered, pageable); // SLICE
 
-        let page: Page<T> = new Page();
+        const page: Page<T> = new Page();
         page.content = result;
         page.number = pageable.pageNumber;
         page.size = pageable.pageSize;
@@ -55,14 +55,14 @@ export class BrowserPaging<T> {
 
     private slice(items: T[], pageable: Pageable): T[] {
         if (items.length == 0) return items;
-        let start: number = (pageable.pageNumber-1) * pageable.pageSize;
-        let end: number = +start + +pageable.pageSize;
+        const start: number = (pageable.pageNumber-1) * pageable.pageSize;
+        const end: number = +start + +pageable.pageSize;
         return items.slice(start, end);
     }
 
     private sortItems(items: T[], pageable: Pageable) {
         let col: any;
-        for (let column of this.columnDefs) {
+        for (const column of this.columnDefs) {
             if (column.field == pageable.sort.orders[0].property) {
                 col = column;
                 break;
@@ -146,16 +146,16 @@ export class BrowserPaging<T> {
     private filter(items: T[], filter: Filter): T[] {
         if(!filter) return items;
         let searchStr: string = filter.searchStr;
-        let searchField: string = filter.searchField;
+        const searchField: string = filter.searchField;
         if (!searchStr) return items;
         if (typeof searchStr != 'string') searchStr = searchStr + "";
         searchStr = searchStr.toLowerCase().trim();
         if (searchStr.length == 0) return items;
         // Inspect every field and save the item if one field matches
-        let result = [];
-        for (let item of items) {
-            for (let col of this.columnDefs) {
-                let value: any = TableComponent.getCellValue(item, col);
+        const result = [];
+        for (const item of items) {
+            for (const col of this.columnDefs) {
+                const value: any = TableComponent.getCellValue(item, col);
                 if (value && typeof value != 'boolean' && col["type"] != "button") {
                     let valueStr: string = TableComponent.getCellValue(item, col);
                     if (!searchField || searchField == "" || col.field == searchField) {

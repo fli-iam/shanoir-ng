@@ -345,5 +345,5 @@ https://docs.docker.com/storage/volumes/
 
 ## Migrations
 
-TODO
+[db-changes](https://github.com/fli-iam/shanoir-ng/tree/develop/docker-compose/database/db-changes)
 

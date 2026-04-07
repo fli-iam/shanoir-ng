@@ -13,14 +13,16 @@
  */
 
 import { Injectable, OnDestroy } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Subject } from 'rxjs';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ExtensionRequestInfo } from '../extension-request/extension-request-info.model';
-import { User } from './user.model';
-import { HttpClient } from '@angular/common/http';
 import { AccessRequest } from '../../users/access-request/access-request.model'
-import { Subject } from 'rxjs';
-import { BACKEND_API_STUDY_DELETE_USER } from "../../utils/app.utils";
+
+import { User } from './user.model';
+
 
 
 @Injectable()
@@ -88,6 +90,21 @@ export class UserService extends EntityService<User> implements OnDestroy {
                 this._accessRequests = typeResult?.length;
                 this.accessRequets.next(typeResult?.length);
                 return typeResult;
+            });
+    }
+
+    countAllUsers(): Promise<number> {
+        return this.http.get<number>(AppUtils.BACKEND_API_USER_PUBLIC_COUNT)
+            .toPromise().then((count: number) => {
+                return count;
+            });
+    }
+
+    countLastMonthEvents(): Promise<number> {
+        const param = new HttpParams().set('days', AppUtils.BACKEND_API_EVENTS_COUNT_DAYS_PARAM);
+        return this.http.get<number>(AppUtils.BACKEND_API_USER_PUBLIC_COUNT_LAST_MONTH_EVENTS, { params: param })
+            .toPromise().then((count: number) => {
+                return count;
             });
     }
 }

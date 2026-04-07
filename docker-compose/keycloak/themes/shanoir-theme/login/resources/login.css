@@ -1,0 +1,71 @@
+.kc-password-policy-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #E0C000;
+}
+
+
+.kc-login-tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 16px;
+  height: 16px;
+}
+
+.kc-tooltip-icon {
+  position: relative;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #555;
+  color: #555;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 16px;
+  text-align: center;
+  cursor: help;
+}
+
+/* Le point du i */
+.kc-tooltip-icon::before {
+  content: "i";
+}
+
+/* Option hover visuel */
+.kc-login-tooltip:hover .kc-tooltip-icon {
+  border-color: #0066cc;
+  color: #0066cc;
+}
+
+
+.kc-tooltip-text {
+  display: none;
+  position: absolute;
+  top: 120%;
+  left: 0;
+  z-index: 1000;
+  min-width: 200px;
+  background-color: #151515;
+  color: #fff;
+  white-space: pre-line;
+  padding-left: 25px;
+  padding-bottom: 12px;
+  border-radius: 4px;
+  max-width: 320px;
+  white-space: pre-line;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-align:left;
+}
+
+
+.kc-login-tooltip:hover .kc-tooltip-text,
+.kc-login-tooltip:focus-within .kc-tooltip-text {
+  display: block;
+}
+
+.kc-login-tooltip i {
+  cursor: pointer;
+}

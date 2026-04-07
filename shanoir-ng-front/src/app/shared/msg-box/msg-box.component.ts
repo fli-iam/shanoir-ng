@@ -13,7 +13,9 @@
  */
 
 import { Component } from '@angular/core';
+
 import { slideLeft} from '../animations/animations';
+
 import { MsgBoxService } from './msg-box.service';
 
 @Component({

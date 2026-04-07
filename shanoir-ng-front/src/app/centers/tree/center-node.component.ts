@@ -12,12 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
+
 
 import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
 import { CoilService } from 'src/app/coils/shared/coil.service';
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
+
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { AcquisitionEquipmentNode, CenterNode, CoilNode, UNLOADED } from '../../tree/tree.model';
 import { Center } from '../shared/center.model';
@@ -33,7 +35,7 @@ import { CenterService } from '../shared/center.service';
 export class CenterNodeComponent extends TreeNodeAbstractComponent<CenterNode> implements OnChanges {
 
     @Input() input: CenterNode | Center;
-    @Output() onEquipementNodeSelect: EventEmitter<number> = new EventEmitter();
+    @Output() equipementNodeSelect: EventEmitter<number> = new EventEmitter();
     detailsPath: string = '/center/details/';
 
     constructor(
@@ -80,7 +82,7 @@ export class CenterNodeComponent extends TreeNodeAbstractComponent<CenterNode> i
                         this.node.open();
                     });
                 }
-            }).catch((e) => {
+            }).catch(() => {
                 this.loading = false;
             });
     }

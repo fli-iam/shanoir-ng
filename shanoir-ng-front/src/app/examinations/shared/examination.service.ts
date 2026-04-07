@@ -17,10 +17,12 @@ import { Observable } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
+
 import { ExaminationDTO, ExaminationDTOService } from './examination.dto';
 import { Examination } from './examination.model';
 import { SubjectExamination } from './subject-examination.model';
@@ -39,7 +41,7 @@ export class ExaminationService extends EntityService<Examination> {
     getEntityInstance() { return new Examination(); }
 
     findExaminationsBySubjectAndStudy(subjectId: number, studyId: number): Promise<SubjectExamination[]> {
-        let url = AppUtils.BACKEND_API_EXAMINATION_URL
+        const url = AppUtils.BACKEND_API_EXAMINATION_URL
             + '/subject/' + subjectId
             + '/study/' + studyId;
         return this.http.get<SubjectExamination[]>(url)
@@ -47,14 +49,14 @@ export class ExaminationService extends EntityService<Examination> {
     }
 
     findExaminationIdsByStudy(studyId: number): Promise<number[]> {
-        let url = AppUtils.BACKEND_API_EXAMINATION_URL
+        const url = AppUtils.BACKEND_API_EXAMINATION_URL
             + '/study/' + studyId;
         return this.http.get<number[]>(url)
             .toPromise();
     }
 
     getPage(pageable: Pageable, preclinical: boolean = false, searchStr : string, searchField : string): Promise<Page<Examination>> {
-        let params = { 'params': pageable.toParams() };
+        const params = { 'params': pageable.toParams() };
         params['params']['searchStr'] = searchStr;
         params['params']['searchField'] = searchField;
         return this.http.get<Page<Examination>>(
@@ -65,11 +67,11 @@ export class ExaminationService extends EntityService<Examination> {
         .then(this.mapPage);
     }
 
-    protected mapEntity = (entity: ExaminationDTO, result?: Examination): Promise<Examination> => {
+    protected mapEntity = (entity: ExaminationDTO): Promise<Examination> => {
         return this.examinationDtoService.toEntity(entity);
     }
 
-    protected mapEntityList = (entities: any[], result?: Examination[]): Promise<Examination[]> => {
+    protected mapEntityList = (entities: any[]): Promise<Examination[]> => {
         if (!entities) entities = [];
         return this.examinationDtoService.toEntityList(entities);
     }
@@ -87,9 +89,7 @@ export class ExaminationService extends EntityService<Examination> {
     }
 
     public stringify(entity: Examination) {
-        let dto = new ExaminationDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        const dto = new ExaminationDTO(entity);
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

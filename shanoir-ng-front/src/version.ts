@@ -1,7 +1,11 @@
-const { gitDescribeSync } = require('git-describe');
-const { version } = require('../package.json');
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { resolve, relative } = require('path');
+
+const { gitDescribeSync } = require('git-describe');
 const { writeFileSync } = require('fs-extra');
+
+const { version } = require('../package.json');
+
 
 const gitInfo = gitDescribeSync({
     match: 'NG_v[0-9]*',

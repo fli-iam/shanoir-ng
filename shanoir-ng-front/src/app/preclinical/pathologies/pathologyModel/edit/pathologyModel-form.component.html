@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(save)="save()"
                 (delete) = "delete()"
 				(edit)="goToEdit()"
-				(cancel)="goToView()"
+				(dismiss)="goToView()"
 				(back)="goBack()">
 		</form-footer>
 		<table class="layout">
@@ -48,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{model?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<input type="text" id="name" formControlName="name" [(ngModel)]="model.name"/>
+									<input type="text" id="name" formControlName="name"/>
 									<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit pathologyModelName|Name required error@@pathologyModelDetailNameRequiredError">Name is required!</label>
         							<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert" i18n="Edit pathologyModelName|Name unique error@@pathologyModelNameUniqueError">Name should be unique!</label>
 								</ng-template>
@@ -61,7 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{model?.pathology?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-                                    <select-box [formControl]="form.controls['pathology']" [(ngModel)]="model.pathology" [optionArr]="pathologies">
+                                    <select-box formControlName="pathology" [optionArr]="pathologies">
                                     </select-box>
 									<button *ngIf="keycloakService.isUserAdmin() || keycloakService.isUserExpert()" i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
 										<i class="fas fa-plus-square"></i>
@@ -78,7 +78,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 										{{model?.comment}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
-									<textarea rows="4" id="comment" formControlName="comment" [(ngModel)]="model.comment"></textarea>
+									<textarea rows="4" id="comment" formControlName="comment"></textarea>
 								</ng-template>
 							</span>
 						</li>
@@ -89,11 +89,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 									{{model?.filename}}
 								</ng-template>
 								<ng-template  [ngSwitchCase]="'create'">
-									<input type="file" id="pathologyFile" name="pathologyFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+									<input type="file" id="pathologyFile" name="pathologyFile" formControlName="filename" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
 								</ng-template>
 								<ng-template  [ngSwitchCase]="'edit'">
 									{{model?.filename}}
-									<input type="file" id="pathologyFile" name="pathologyFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+									<input type="file" id="pathologyFile" name="pathologyFile" formControlName="filename" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
 								</ng-template>
 							</span>
 

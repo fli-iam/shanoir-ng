@@ -16,6 +16,7 @@ import { Component } from '@angular/core';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyService } from '../studies/shared/study.service';
+
 import { DataUserAgreement } from './shared/dua.model';
 
 @Component({

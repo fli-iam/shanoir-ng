@@ -13,13 +13,15 @@
  */
 import { Component, ElementRef, Input, OnChanges, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
 import { Router } from '@angular/router';
-import { StudyCardService } from '../../study-cards/shared/study-card.service';
+
 
 import { Entity } from 'src/app/shared/components/entity/entity.abstract';
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { QualityCardService } from 'src/app/study-cards/shared/quality-card.service';
 import { isDarkColor } from 'src/app/utils/app.utils';
 import { SuperPromise } from 'src/app/utils/super-promise';
+
+import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import {
     MemberNode,
@@ -86,7 +88,7 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            let id: number = this.input instanceof StudyNode ? this.input.id : this.input.study.id;
+            const id: number = this.input instanceof StudyNode ? this.input.id : this.input.study.id;
             this.idPromise.resolve(id);
             if (this.input instanceof StudyNode) {
                 this.node = this.input;

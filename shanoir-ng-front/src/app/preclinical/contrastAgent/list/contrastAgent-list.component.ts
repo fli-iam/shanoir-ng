@@ -13,6 +13,9 @@
  */
 
 import {Component, Input, ViewChild} from '@angular/core'
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { ContrastAgent } from '../shared/contrastAgent.model';
 import { ContrastAgentService } from '../shared/contrastAgent.service';
 import { InjectionInterval } from "../../shared/enum/injectionInterval";
@@ -21,7 +24,6 @@ import { InjectionType } from "../../shared/enum/injectionType";
 import { TableComponent } from '../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'contrast-agent-list',
@@ -51,19 +53,19 @@ export class ContrastAgentsListComponent extends BrowserPaginEntityListComponent
     getColumnDefs(): ColumnDefinition[] {
         return [
             {headerName: "Name", field: "name.value"},
-            {headerName: "Manufactured Name", field: "manufactured_name", type: "string"},
+            {headerName: "Manufactured Name", field: "manufacturedName", type: "string"},
             {headerName: "Concentration", field: "concentration", type: "number"},
-            {headerName: "Concentration Unit", field: "concentration_unit.value"},
+            {headerName: "Concentration Unit", field: "concentrationUnit.value"},
             {headerName: "Dose", field: "dose", type: "number"},
-            {headerName: "Dose Unit", field: "dose_unit.value"},
-            {headerName: "Injection interval", field: "injection_interval", type: "string", cellRenderer: function (params: any) {
-                return InjectionInterval[params.data.injection_interval];
+            {headerName: "Dose Unit", field: "doseUnit.value"},
+            {headerName: "Injection interval", field: "injectionInterval", type: "string", cellRenderer: function (params: any) {
+                return InjectionInterval[params.data.injectionInterval];
             }},
-            {headerName: "Injection site", field: "injection_site", type: "string", cellRenderer: function (params: any) {
-                return InjectionSite[params.data.injection_site];
+            {headerName: "Injection site", field: "injectionSite", type: "string", cellRenderer: function (params: any) {
+                return InjectionSite[params.data.injectionSite];
             }},
-            {headerName: "Injection type", field: "injection_type", type: "string", cellRenderer: function (params: any) {
-                return InjectionType[params.data.injection_type];
+            {headerName: "Injection type", field: "injectionType", type: "string", cellRenderer: function (params: any) {
+                return InjectionType[params.data.injectionType];
             }}  
         ];   
     }

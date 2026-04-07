@@ -14,6 +14,8 @@
 
 import { Component, ViewChild } from '@angular/core';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
@@ -25,7 +27,6 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'dataset-list',

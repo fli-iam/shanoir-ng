@@ -14,17 +14,18 @@
 
 import { Reference } from '../../reference/shared/reference.model';
 import { Entity } from "../../../shared/components/entity/entity.abstract";
+import { Field } from '../../../shared/reflect/field.decorator';
 
 export class ContrastAgent extends Entity{
-  id: number;
-  name: Reference;
-  manufactured_name: string;
-  concentration: number;
-  concentration_unit: Reference;
-  dose: number;
-  dose_unit: Reference;
-  injection_interval: Reference;
-  injection_site: Reference;
-  injection_type: Reference;
+    @Field() id: number;
+    @Field() name: Reference;
+    @Field() manufacturedName: string;
+    @Field() concentration: number;
+    @Field() concentrationUnit: Reference;
+    @Field() dose: number;
+    @Field() doseUnit: Reference;
+    @Field() injectionInterval: Reference;
+    @Field() injectionSite: Reference;
+    @Field() injectionType: Reference;
 }
 

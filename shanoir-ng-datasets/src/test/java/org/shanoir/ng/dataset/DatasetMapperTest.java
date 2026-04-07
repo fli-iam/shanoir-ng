@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -35,66 +35,66 @@ import java.util.List;
 
 /**
  * Dataset mapper test.
- * 
+ *
  * @author msimon
- * 
+ *
  */
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class DatasetMapperTest {
 
-	private static final String DATE_STR = "2018-01-01";
+    private static final String DATE_STR = "2018-01-01";
 
-	private static final Long DATASET_ID = 1L;
-	private static final String DATASET_NAME = "test";
-	private static final String DATASET_GENERATED_NAME = "1 " + DATE_STR + " MR";
+    private static final Long DATASET_ID = 1L;
+    private static final String DATASET_NAME = "test";
+    private static final String DATASET_GENERATED_NAME = "1 " + DATE_STR + " MR";
 
-	@Autowired
-	private DatasetMapper datasetMapper;
+    @Autowired
+    private DatasetMapper datasetMapper;
 
-	@Test
-	public void datasetsToIdNameDTOsTest() throws ParseException {
-		final List<IdName> datasetDTOs = datasetMapper.datasetsToIdNameDTOs(Arrays.asList(createDataset()));
-		Assertions.assertNotNull(datasetDTOs);
-		Assertions.assertTrue(datasetDTOs.size() == 1);
-		Assertions.assertTrue(DATASET_ID.equals(datasetDTOs.get(0).getId()));
-	}
+    @Test
+    public void datasetsToIdNameDTOsTest() throws ParseException {
+        final List<IdName> datasetDTOs = datasetMapper.datasetsToIdNameDTOs(Arrays.asList(createDataset()));
+        Assertions.assertNotNull(datasetDTOs);
+        Assertions.assertTrue(datasetDTOs.size() == 1);
+        Assertions.assertTrue(DATASET_ID.equals(datasetDTOs.get(0).getId()));
+    }
 
-	@Test
-	public void datasetToDatasetDTODTOTest() throws ParseException {
-		final DatasetDTO datasetDTO = datasetMapper.datasetToDatasetDTO(createDataset());
-		Assertions.assertNotNull(datasetDTO);
-		Assertions.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
-		Assertions.assertTrue(DATASET_NAME.equals(datasetDTO.getOriginMetadata().getName()));
-	}
+    @Test
+    public void datasetToDatasetDTODTOTest() throws ParseException {
+        final DatasetDTO datasetDTO = datasetMapper.datasetToDatasetDTO(createDataset());
+        Assertions.assertNotNull(datasetDTO);
+        Assertions.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
+        Assertions.assertTrue(DATASET_NAME.equals(datasetDTO.getOriginMetadata().getName()));
+    }
 
-	@Test
-	public void datasetToIdNameDTOTest() throws ParseException {
-		final IdName datasetDTO = datasetMapper.datasetToIdNameDTO(createDataset());
-		Assertions.assertNotNull(datasetDTO);
-		Assertions.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
-		Assertions.assertTrue(DATASET_NAME.equals(datasetDTO.getName()));
-	}
+    @Test
+    public void datasetToIdNameDTOTest() throws ParseException {
+        final IdName datasetDTO = datasetMapper.datasetToIdNameDTO(createDataset());
+        Assertions.assertNotNull(datasetDTO);
+        Assertions.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
+        Assertions.assertTrue(DATASET_NAME.equals(datasetDTO.getName()));
+    }
 
-	@Test
-	public void datasetWithoutNameToIdNameDTOTest() throws ParseException {
-		final Dataset dataset = createDataset();
-		dataset.getOriginMetadata().setName(null);
-		final IdName datasetDTO = datasetMapper.datasetToIdNameDTO(dataset);
-		Assertions.assertNotNull(datasetDTO);
-		Assertions.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
-		Assertions.assertTrue(DATASET_GENERATED_NAME.equals(datasetDTO.getName()));
-	}
+    @Test
+    public void datasetWithoutNameToIdNameDTOTest() throws ParseException {
+        final Dataset dataset = createDataset();
+        dataset.getOriginMetadata().setName(null);
+        final IdName datasetDTO = datasetMapper.datasetToIdNameDTO(dataset);
+        Assertions.assertNotNull(datasetDTO);
+        Assertions.assertTrue(DATASET_ID.equals(datasetDTO.getId()));
+        Assertions.assertTrue(DATASET_GENERATED_NAME.equals(datasetDTO.getName()));
+    }
 
-	private Dataset createDataset() throws ParseException {
-		final Dataset dataset = new MrDataset();
-		dataset.setCreationDate(LocalDate.parse(DATE_STR));
-		dataset.setOriginMetadata(new DatasetMetadata());
-		dataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.MR_DATASET);
-		dataset.setId(DATASET_ID);
-		dataset.getOriginMetadata().setName(DATASET_NAME);
-		return dataset;
-	}
+    private Dataset createDataset() throws ParseException {
+        final Dataset dataset = new MrDataset();
+        dataset.setCreationDate(LocalDate.parse(DATE_STR));
+        dataset.setOriginMetadata(new DatasetMetadata());
+        dataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.MR_DATASET);
+        dataset.setId(DATASET_ID);
+        dataset.getOriginMetadata().setName(DATASET_NAME);
+        return dataset;
+    }
 
 }

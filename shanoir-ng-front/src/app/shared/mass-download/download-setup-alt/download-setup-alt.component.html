@@ -26,7 +26,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
         <fieldset class="body" [disabled]="loading">            <ol>
                 <li *ngIf="hasDicom">
-                    <label>Dataset files format</label>
+                    <label>Dataset files format (for native DICOM files)</label>
                     <span class="right-col">
                         <select-box formControlName="format" [options]="formatOptions"></select-box>
                     </span>

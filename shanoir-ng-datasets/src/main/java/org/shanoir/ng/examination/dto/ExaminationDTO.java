@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -24,189 +24,200 @@ import org.shanoir.ng.shared.model.SubjectDTO;
 
 /**
  * Examination DTO with necessary information for front
- * 
+ *
  * @author ifakhfak
  *
  */
 public class ExaminationDTO {
 
-	private Long id;
+    private Long id;
 
-	private Long centerId;
+    private Long centerId;
 
-	private String comment;
+    private String comment;
 
-	@LocalDateAnnotations
-	private LocalDate examinationDate;
+    @LocalDateAnnotations
+    private LocalDate examinationDate;
 
-	private String note;
+    private String note;
 
-	private Long studyId;
+    private Long studyId;
 
-	private SubjectDTO subject;
+    private SubjectDTO subject;
 
-	private Double subjectWeight;
+    private Double subjectWeight;
 
-	private UnitOfMeasure weightUnitOfMeasure;
-	
-	private boolean preclinical;
+    private UnitOfMeasure weightUnitOfMeasure;
 
-	private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
+    private boolean preclinical;
 
-	private List<String> extraDataFilePathList;
+    private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
 
-	private Long source;
+    private List<String> extraDataFilePathList;
 
-	private List<Long> copies;
+    private Long source;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    private List<Long> copies;
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(final Long id) {
-		this.id = id;
-	}
+    private String studyInstanceUID;
 
-	/**
-	 * @return the comment
-	 */
-	public String getComment() {
-		return comment;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param comment
-	 *            the comment to set
-	 */
-	public void setComment(final String comment) {
-		this.comment = comment;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(final Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @return the examinationDate
-	 */
-	public LocalDate getExaminationDate() {
-		return examinationDate;
-	}
+    /**
+     * @return the comment
+     */
+    public String getComment() {
+        return comment;
+    }
 
-	/**
-	 * @param examinationDate
-	 *            the examinationDate to set
-	 */
-	public void setExaminationDate(final LocalDate examinationDate) {
-		this.examinationDate = examinationDate;
-	}
+    /**
+     * @param comment
+     *            the comment to set
+     */
+    public void setComment(final String comment) {
+        this.comment = comment;
+    }
 
-	/**
-	 * @return the note
-	 */
-	public String getNote() {
-		return note;
-	}
+    /**
+     * @return the examinationDate
+     */
+    public LocalDate getExaminationDate() {
+        return examinationDate;
+    }
 
-	/**
-	 * @param note
-	 *            the note to set
-	 */
-	public void setNote(final String note) {
-		this.note = note;
-	}
+    /**
+     * @param examinationDate
+     *            the examinationDate to set
+     */
+    public void setExaminationDate(final LocalDate examinationDate) {
+        this.examinationDate = examinationDate;
+    }
 
-	/**
-	 * @return the subjectWeight
-	 */
-	public Double getSubjectWeight() {
-		return subjectWeight;
-	}
+    /**
+     * @return the note
+     */
+    public String getNote() {
+        return note;
+    }
 
-	/**
-	 * @param subjectWeight
-	 *            the subjectWeight to set
-	 */
-	public void setSubjectWeight(final Double subjectWeight) {
-		this.subjectWeight = subjectWeight;
-	}
-	
-	public boolean isPreclinical() {
-		return preclinical;
-	}
+    /**
+     * @param note
+     *            the note to set
+     */
+    public void setNote(final String note) {
+        this.note = note;
+    }
 
-	public void setPreclinical(final boolean preclinical) {
-		this.preclinical = preclinical;
-	}
+    /**
+     * @return the subjectWeight
+     */
+    public Double getSubjectWeight() {
+        return subjectWeight;
+    }
 
-	public Long getCenterId() {
-		return centerId;
-	}
+    /**
+     * @param subjectWeight
+     *            the subjectWeight to set
+     */
+    public void setSubjectWeight(final Double subjectWeight) {
+        this.subjectWeight = subjectWeight;
+    }
 
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
+    public boolean isPreclinical() {
+        return preclinical;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public void setPreclinical(final boolean preclinical) {
+        this.preclinical = preclinical;
+    }
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
-	
-	public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
-		return instrumentBasedAssessmentList;
-	}
+    public Long getCenterId() {
+        return centerId;
+    }
 
-	public void setInstrumentBasedAssessmentList(List<InstrumentBasedAssessment> instrumentBasedAssessmentList) {
-		this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
-	}
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
 
-	public List<String> getExtraDataFilePathList() {
-		return extraDataFilePathList;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
-		this.extraDataFilePathList = extraDataFilePathList;
-	}
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public SubjectDTO getSubject() {
-		return subject;
-	}
+    public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
+        return instrumentBasedAssessmentList;
+    }
 
-	public void setSubject(SubjectDTO subject) {
-		this.subject = subject;
-	}
+    public void setInstrumentBasedAssessmentList(List<InstrumentBasedAssessment> instrumentBasedAssessmentList) {
+        this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
+    }
 
-	public void setSubjectId(Long subjectId) {
-		this.subject = new SubjectDTO(subjectId, "");
-	}
+    public List<String> getExtraDataFilePathList() {
+        return extraDataFilePathList;
+    }
 
-	public UnitOfMeasure getWeightUnitOfMeasure() {
-		return weightUnitOfMeasure;
-	}
+    public void setExtraDataFilePathList(final List<String> extraDataFilePathList) {
+        this.extraDataFilePathList = extraDataFilePathList;
+    }
 
-	public void setWeightUnitOfMeasure(UnitOfMeasure weightUnitOfMeasure) {
-		this.weightUnitOfMeasure = weightUnitOfMeasure;
-	}
+    public SubjectDTO getSubject() {
+        return subject;
+    }
 
-	public Long getSource() {
-		return source;
-	}
+    public void setSubject(SubjectDTO subject) {
+        this.subject = subject;
+    }
 
-	public void setSource(Long source) {
-		this.source = source;
-	}
+    public void setSubjectId(Long subjectId) {
+        this.subject = new SubjectDTO(subjectId, "");
+    }
 
-	public List<Long> getCopies() {
-		return copies;
-	}
+    public UnitOfMeasure getWeightUnitOfMeasure() {
+        return weightUnitOfMeasure;
+    }
 
-	public void setCopies(List<Long> copies) {
-		this.copies = copies;
-	}
+    public void setWeightUnitOfMeasure(UnitOfMeasure weightUnitOfMeasure) {
+        this.weightUnitOfMeasure = weightUnitOfMeasure;
+    }
+
+    public Long getSource() {
+        return source;
+    }
+
+    public void setSource(Long source) {
+        this.source = source;
+    }
+
+    public List<Long> getCopies() {
+        return copies;
+    }
+
+    public void setCopies(List<Long> copies) {
+        this.copies = copies;
+    }
+
+    public String getStudyInstanceUID() {
+        return studyInstanceUID;
+    }
+
+    public void setStudyInstanceUID(String studyInstanceUID) {
+        this.studyInstanceUID = studyInstanceUID;
+    }
+
 }

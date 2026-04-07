@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dataset.service;
 
 import java.io.BufferedWriter;
@@ -13,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.utils.DatasetFileUtils;
@@ -30,8 +45,13 @@ import jakarta.persistence.StoredProcedureQuery;
 
 @Service
 public class CreateStatisticsService {
+
     @Autowired
-    ShanoirEventService eventService;
+    private ShanoirEventService eventService;
+
+    @Autowired
+    private DatasetRepository datasetRepository;
+
     @PersistenceContext
     private EntityManager entityManager;
     private static final String ZIP = ".zip";
@@ -40,7 +60,7 @@ public class CreateStatisticsService {
 
     private File recreateFile(final String fileName) throws IOException {
         File file = new File(fileName);
-        if(file.exists()) {
+        if (file.exists()) {
             file.delete();
         }
         file.createNewFile();
@@ -188,5 +208,22 @@ public class CreateStatisticsService {
             }
             zos.closeEntry();
         }
+    }
+
+    /**
+     * Compute overall statistics by calling the corresponding stored procedure.
+     * Used to insert daily stats into the overall_statistics table.
+     *
+     * @throws Exception
+     */
+    public void computeOverallStatistics() throws Exception {
+        // Call the stored procedure to compute Studies, subjects and dataset_acquisition counts
+        datasetRepository.computeOverallStatistics();
+
+        //calculate total storage volume by summing volumes by format for each study
+        Long totalStorageVolume = datasetRepository.findDatasetsExpressionSizesSum();
+
+        //update overall_statistics table with total storage volume for current date
+        datasetRepository.addTotalStorageVolume(totalStorageVolume);
     }
 }

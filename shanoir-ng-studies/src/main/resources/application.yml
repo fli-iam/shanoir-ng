@@ -1,12 +1,12 @@
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -21,7 +21,7 @@ server:
 ##### Database #####
 spring:
   datasource:
-    url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:studies}?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: studies
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -95,15 +95,10 @@ front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
-# microservices url
-ms.url:
-  shanoir-ng-users: http://${SHANOIR_PREFIX}users:9901/users
-  shanoir-ng-import: http://${SHANOIR_PREFIX}import:9903/niftiConverter
-  shanoir-ng-studycards: http://${SHANOIR_PREFIX}datasets:9904/studycards
-  shanoir-ng-examinations: http://${SHANOIR_PREFIX}datasets:9904/examinations
-  shanoir-ng-bids: http://${SHANOIR_PREFIX}datasets:9904/bids
 # data paths
 studies-data: /var/studies-data
+# Data folder configuration
+bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
   pattern:
@@ -111,7 +106,7 @@ logging:
   file:
     name: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
   level:
-    org.shanoir: WARN
+    org.shanoir: INFO
     org.springframework.web: ERROR
     org.hibernate: ERROR
 
@@ -150,14 +145,10 @@ front.server:
   url: https://shanoir-ng-nginx
 keycloak:
   auth-server-url: https://shanoir-ng-nginx/auth
-ms.url:
-  shanoir-ng-users: http://localhost:9901/users
-  shanoir-ng-import: http://localhost:9903/niftiConverter
-  shanoir-ng-studycards: http://localhost:9904/studycards
-  shanoir-ng-examinations: http://localhost:9904/examinations
-  shanoir-ng-bids: http://localhost:9904/bids
 # data paths
 studies-data: /tmp
+# Data folder configuration
+bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
   file:
@@ -167,8 +158,8 @@ logging:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
     org.springframework.amqp: OFF
-    
-    
+
+
 ---
 spring:
   config.activate.on-profile: test
@@ -191,7 +182,7 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
-  sql: 
+  sql:
     init:
       data-locations: classpath:/scripts/test-data-h2.sql
       mode: always

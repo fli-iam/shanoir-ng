@@ -31,7 +31,7 @@ export class DuaDocument {
             thanks: string,
             papers: string) {
 
-        let instance: DuaDocument = new DuaDocument();
+        const instance: DuaDocument = new DuaDocument();
         instance.studyId = studyId;
         instance.studyName = studyName;
         instance.url = url;

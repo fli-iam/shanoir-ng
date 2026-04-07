@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="expert-mode">
     <div>
-        <toggle-switch [(ngModel)]="expertMode" (ngModelChange)="onExpertModeChange()" (onChange)="onExpertModeUserChange()" mode="on-off"></toggle-switch>
+        <toggle-switch [(ngModel)]="expertMode" (ngModelChange)="onExpertModeChange()" (userChange)="onExpertModeUserChange()" mode="on-off"></toggle-switch>
         <span [class.enabled]="expertMode" class="right-icon">
             Expert mode
             <span class="info right-icon clickable" (click)="showInfo = !showInfo">( info<i *ngIf="!showInfo" class="fas fa-caret-down"></i><i *ngIf="showInfo" class="fas fa-caret-up"></i> )</span>

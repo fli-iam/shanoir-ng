@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -16,7 +16,7 @@ package org.shanoir.ng.shared.dataset;
 
 /**
  * Dataset modality type.
- * 
+ *
  * @author msimon
  *
  */
@@ -62,13 +62,13 @@ public enum DatasetModalityType {
      */
     XA_DATASET(8);
 
-    private static final String _DATASET = "_DATASET";
+    private static final String DATASET = "_DATASET";
 
     private int id;
 
     /**
      * Constructor.
-     * 
+     *
      * @param id
      *           id
      */
@@ -78,7 +78,7 @@ public enum DatasetModalityType {
 
     /**
      * Get a dataset modality type by its id.
-     * 
+     *
      * @param id
      *           type id.
      * @return dataset modality type.
@@ -102,7 +102,7 @@ public enum DatasetModalityType {
         String cleanedModalityName = modalityName.trim().toUpperCase();
         // Find the matching DatasetModalityType
         for (DatasetModalityType type : DatasetModalityType.values()) {
-            String nameWithoutDataset = type.name().replace(_DATASET, "");
+            String nameWithoutDataset = type.name().replace(DATASET, "");
             if (cleanedModalityName.equals(nameWithoutDataset)) {
                 return type.getId();
             }

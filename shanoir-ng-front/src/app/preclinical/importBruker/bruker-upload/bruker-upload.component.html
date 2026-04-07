@@ -52,7 +52,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </p>
 </fieldset>
 <div>
-    <checkbox [disabled]="uploadProgress < 5" (onChange)="storeArchiveChanged($event)"></checkbox>
+    <checkbox [disabled]="uploadProgress < 5" (userChange)="storeArchiveChanged($event)"></checkbox>
     <label i18n="Store bruker archive|Store bruker archive label@@StoreBrukerArchive"> Store bruker archive </label>
 </div>
 <button class="next" [disabled]="!valid" (click)="next()">Next</button>

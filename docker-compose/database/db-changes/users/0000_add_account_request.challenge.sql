@@ -1,1 +1,0 @@
-ALTER TABLE account_request_info ADD COLUMN challenge bigint(20) DEFAULT NULL;

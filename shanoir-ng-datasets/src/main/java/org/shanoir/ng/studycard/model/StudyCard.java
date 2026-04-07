@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -66,11 +66,11 @@ public class StudyCard extends HalEntity implements Card {
 
     /** The study for which is defined the study card. */
     private Long studyId;
-    
+
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name="study_card_id")
+    @JoinColumn(name = "study_card_id")
     private List<StudyCardRule<?>> rules;
-    
+
     private Long lastEditTimestamp;
 
     /**
@@ -136,7 +136,7 @@ public class StudyCard extends HalEntity implements Card {
     public void setLastEditTimestamp(Long lastEditTimestamp) {
         this.lastEditTimestamp = lastEditTimestamp;
     }
-    
+
     /**
     * Application during import, when dicoms are present in tmp directory.
     * @param acquisition
@@ -156,13 +156,13 @@ public class StudyCard extends HalEntity implements Card {
                         Attributes attributes;
                         if (String.class.equals(dicomAttributes.getParametrizedType())) {
                             // @SuppressWarnings("unchecked") doesn't work ...
-                            attributes = ((AcquisitionAttributes<String>)dicomAttributes).getDatasetAttributes(dataset.getSOPInstanceUID());
+                            attributes = ((AcquisitionAttributes<String>) dicomAttributes).getDatasetAttributes(dataset.getSOPInstanceUID());
                         } else if (Long.class.equals(dicomAttributes.getParametrizedType())) {
-                            attributes = ((AcquisitionAttributes<Long>)dicomAttributes).getDatasetAttributes(dataset.getId());
+                            attributes = ((AcquisitionAttributes<Long>) dicomAttributes).getDatasetAttributes(dataset.getId());
                         } else {
                             throw new IllegalStateException("the parametrized type of AcquisitionAttributes is not implemented, use String or Long");
                         }
-                        ((DatasetRule) rule).apply(dataset, attributes);                       
+                        ((DatasetRule) rule).apply(dataset, attributes);
                     }
                 } else {
                     throw new IllegalStateException("unknown type of rule");
@@ -173,5 +173,5 @@ public class StudyCard extends HalEntity implements Card {
         acquisition.setStudyCardTimestamp(this.getLastEditTimestamp());
         return changeInAtLeastOneAcquisition;
     }
-   
+
 }

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -29,7 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Tests for repository 'SubjectStudy'.
- * 
+ *
  * @author msimon
  *
  */
@@ -38,18 +38,18 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class SubjectStudyRepositoryTest {
 
-	private static final Long STUDY_TEST_1_ID = 1L;
+    private static final Long STUDY_TEST_1_ID = 1L;
 
-	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
+    @Autowired
+    private SubjectStudyRepository subjectStudyRepository;
 
-	@Test
-	public void findByStudyTest() throws Exception {
-		final Study study = new Study();
-		study.setId(STUDY_TEST_1_ID);
-		List<SubjectStudy> subjectDb = subjectStudyRepository.findByStudyId(study.getId());
-		assertNotNull(subjectDb);
-		assertThat(subjectDb.size()).isEqualTo(2);
-	}
+    @Test
+    public void findByStudyTest() throws Exception {
+        final Study study = new Study();
+        study.setId(STUDY_TEST_1_ID);
+        List<SubjectStudy> subjectDb = subjectStudyRepository.findByStudyId(study.getId());
+        assertNotNull(subjectDb);
+        assertThat(subjectDb.size()).isEqualTo(2);
+    }
 
 }

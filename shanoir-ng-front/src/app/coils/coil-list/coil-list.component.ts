@@ -14,12 +14,13 @@
 
 import { Component, ViewChild } from '@angular/core';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'coil-list',
@@ -55,7 +56,7 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Name", field: "name" },
 
             { headerName: "Center Equipment Model", field: "manufacturerModel.name",

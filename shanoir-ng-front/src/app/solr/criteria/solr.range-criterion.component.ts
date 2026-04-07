@@ -12,6 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+
 import { slideDown } from '../../shared/animations/animations';
 import { Range } from '../../shared/models/range.model';
 
@@ -29,7 +30,7 @@ export class SolrRangeCriterionComponent {
     @Input() range: Range = new Range(null, null);
     @Input() label: string = "";
     @Input() awesome: string;
-    @Output() onChange: EventEmitter<Range> = new EventEmitter();
+    @Output() userChange: EventEmitter<Range> = new EventEmitter();
 
     private tiemout: number;
     private changing: boolean = false;
@@ -42,12 +43,12 @@ export class SolrRangeCriterionComponent {
         } else {
             this.changing = true;
             this.tiemout = delay;
-            let interval = setInterval(() => {
+            const interval = setInterval(() => {
                 this.tiemout = this.tiemout - 0.4;
                 if (this.tiemout < 0) {
                     clearInterval(interval);
                     this.changing = false;
-                    this.onChange.emit(this.range);
+                    this.userChange.emit(this.range);
                 }
             }, 400);
         }

@@ -32,6 +32,7 @@ import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.m
 import { PetProtocol } from '../modality/pet/pet-protocol.model';
 import { XaDatasetAcquisition } from '../modality/xa/xa-dataset-acquisition.model';
 import { XaProtocol } from '../modality/xa/xa-protocol.model';
+
 import { DatasetAcquisition } from './dataset-acquisition.model';
 import { DatasetAcquisitionUtils } from './dataset-acquisition.utils';
 
@@ -51,14 +52,14 @@ export class DatasetAcquisitionDTOService {
     public toDatasetAcquisition(dto: DatasetAcquisitionDTO, result?: DatasetAcquisition): Promise<DatasetAcquisition> {
         if (!result) result = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
         DatasetAcquisitionDTOService.mapSyncFields(dto, result);
-        let promises = [];
+        const promises = [];
         if(dto.acquisitionEquipmentId > 0){
             promises.push(this.acqEqService.get(dto.acquisitionEquipmentId).then(acqEq => result.acquisitionEquipment = acqEq));
         }else{
             result.acquisitionEquipment = new AcquisitionEquipment();
         }
         promises.push( this.studyService.get(dto.examination.studyId).then(study => result.examination.study = study));
-        return Promise.all(promises).then(([]) => {
+        return Promise.all(promises).then(() => {
             return result;
         });
     }
@@ -69,12 +70,12 @@ export class DatasetAcquisitionDTOService {
      */
     public toDatasetAcquisitions(dtos: DatasetAcquisitionDTO[], result?: DatasetAcquisition[]): Promise<DatasetAcquisition[]>{
         if (!result) result = [];
-        for (let dto of dtos ? dtos : []) {
-            let entity = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
+        for (const dto of dtos ? dtos : []) {
+            const entity = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
             DatasetAcquisitionDTOService.mapSyncFields(dto, entity);
             if ((dto as DatasetAcquisitionDatasetsDTO).datasets) {
                 entity.datasets = (dto as DatasetAcquisitionDatasetsDTO).datasets.map(dsdto => {
-                    let simpleDataset: Dataset = DatasetUtils.getDatasetInstance(dsdto.type);
+                    const simpleDataset: Dataset = DatasetUtils.getDatasetInstance(dsdto.type);
                     DatasetDTOService.mapSyncFields(dsdto, simpleDataset);
                     return simpleDataset;
                 });
@@ -85,7 +86,7 @@ export class DatasetAcquisitionDTOService {
             this.acqEqService.getAll(),
             this.studyService.getStudiesNames()
         ]).then(([acqs, studies]) => {
-            for (let entity of result) {
+            for (const entity of result) {
                 if (entity.acquisitionEquipment) entity.acquisitionEquipment = acqs.find(acq => acq.id == entity.acquisitionEquipment.id);
                 if (entity.examination && entity.examination.study) entity.examination.study = studies.find(study => study.id == entity.examination.study.id);
             }

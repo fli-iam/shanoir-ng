@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.processing.resulthandler.output;
 
 import org.dcm4che3.data.Attributes;
@@ -23,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 public class OFSEPSeqIdProcessingTest {
-    
+
     @InjectMocks
     private OFSEPSeqIdHandler outputProcessing;
 
@@ -56,12 +70,12 @@ public class OFSEPSeqIdProcessingTest {
         attr.setDouble(Tag.ImageOrientationPatient, VR.DS, this.getDsOrientation());
 
         JSONObject vol1 = new JSONObject()
-            .put("orientation", this.getMatchingVolumeOrientation())
-            .put("id", "volume_1");
+                .put("orientation", this.getMatchingVolumeOrientation())
+                .put("id", "volume_1");
 
         JSONObject vol2 = new JSONObject()
-            .put("orientation", this.getMatchingVolumeOrientation())
-            .put("id", "volume_2");
+                .put("orientation", this.getMatchingVolumeOrientation())
+                .put("id", "volume_2");
 
         JSONObject serie = new JSONObject()
                 .put("id", 1L)
@@ -72,8 +86,8 @@ public class OFSEPSeqIdProcessingTest {
         assertEquals("volume_1", volume.get("id"));
     }
 
-    private double[] getDsOrientation(){
-        return new double[]{1.0,0.0,6.12303176911e-17,6.12303176911e-17,0.0,-1.0};
+    private double[] getDsOrientation() {
+        return new double[]{1.0, 0.0, 6.12303176911e-17, 6.12303176911e-17, 0.0, -1.0};
     }
 
     private JSONArray getMatchingVolumeOrientation() throws JSONException {

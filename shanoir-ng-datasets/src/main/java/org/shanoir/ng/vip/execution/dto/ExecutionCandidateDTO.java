@@ -1,5 +1,4 @@
 /**
-
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
@@ -39,6 +38,7 @@ public class ExecutionCandidateDTO {
     @NotNull(message = "Client must be provided")
     private String client;
     private Long converterId;
+    private String sorting;
 
     public String getName() {
         return name;
@@ -113,12 +113,19 @@ public class ExecutionCandidateDTO {
         this.inputParameters = inputParameters;
     }
 
-
     public Long getConverterId() {
         return converterId;
     }
 
     public void setConverterId(Long converterId) {
         this.converterId = converterId;
+    }
+
+    public String getSorting() {
+        return sorting;
+    }
+
+    public void setSorting(String sorting) {
+        this.sorting = sorting;
     }
 }

@@ -17,7 +17,6 @@ import java.util.Objects;
 
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,22 +27,18 @@ import jakarta.validation.constraints.NotNull;
  * Examination Extra Data
  */
 @Entity
-@JsonPropertyOrder({"_links", "examinationId", "filename", "has_heart_rate", "has_respiratory_rate", "has_sao2", "has_temperature"})
+@JsonPropertyOrder({"_links", "examinationId", "filename", "hasHeartRate", "hasRespiratoryRate", "hasSao2", "hasTemperature"})
 public class PhysiologicalData extends ExaminationExtraData {
 
-    @JsonProperty("has_heart_rate")
     @NotNull
     private boolean hasHeartRate = false;
 
-    @JsonProperty("has_respiratory_rate")
     @NotNull
     private boolean hasRespiratoryRate = false;
 
-    @JsonProperty("has_sao2")
     @NotNull
     private boolean hasSao2 = false;
 
-    @JsonProperty("has_temperature")
     @NotNull
     private boolean hasTemperature = false;
 
@@ -140,10 +135,10 @@ public class PhysiologicalData extends ExaminationExtraData {
         sb.append("    examinationId: ").append(toIndentedString(getExaminationId())).append("\n");
         sb.append("    filename: ").append(toIndentedString(getFilename())).append("\n");
         sb.append("    filepath: ").append(toIndentedString(getFilepath())).append("\n");
-        sb.append("    has_heart_rate: ").append(toIndentedString(hasHeartRate)).append("\n");
-        sb.append("    has_respiratory_rate: ").append(toIndentedString(hasRespiratoryRate)).append("\n");
-        sb.append("    has_sao2: ").append(toIndentedString(hasSao2)).append("\n");
-        sb.append("    has_temperature: ").append(toIndentedString(hasTemperature)).append("\n");
+        sb.append("    hasHeartRate: ").append(toIndentedString(hasHeartRate)).append("\n");
+        sb.append("    hasRespiratoryRate: ").append(toIndentedString(hasRespiratoryRate)).append("\n");
+        sb.append("    hasSao2: ").append(toIndentedString(hasSao2)).append("\n");
+        sb.append("    hasTemperature: ").append(toIndentedString(hasTemperature)).append("\n");
         return sb.toString();
     }
 
