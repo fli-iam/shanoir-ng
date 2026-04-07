@@ -17,6 +17,7 @@ package org.shanoir.ng.importer.service;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -261,7 +262,7 @@ public class BidsImporterService {
                     .replaceFirst("sub-[^_]+_", "sub-" + importJob.getSubjectName() + "_")
                     .replaceFirst("ses-[^_]+_", "ses-" + Long.toString(importJob.getExaminationId()) + "_");
 
-            try {
+            try (InputStream is = Files.newInputStream(importedFile.toPath())) {
                 String contentType = Files.probeContentType(importedFile.toPath());
                 if (contentType == null) {
                     contentType = URLConnection.guessContentTypeFromName(importedFile.getName());
@@ -272,7 +273,7 @@ public class BidsImporterService {
                 String path = storageService.storeBIDSData(
                         importJob.getStudyId(), importJob.getSubjectName(), importJob.getExaminationId(),
                         fileName, bidsDataType.getFolderName(),
-                        importedFile.toPath(), contentType, importedFile.length());
+                        is, contentType, importedFile.length());
                 DatasetFile dsFile = new DatasetFile();
                 dsFile.setDatasetExpression(expression);
                 dsFile.setPacs(false);
