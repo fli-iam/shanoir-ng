@@ -74,6 +74,9 @@ public class S3StorageService implements StorageService {
     @Autowired
     private final S3Client s3Client;
 
+    @Value("${spring.cloud.aws.s3.endpoint}")
+    private String s3Endpoint;
+
     @Value("${storage.s3.studies.bucket:UNUSED}")
     private String studiesBucket;
 
@@ -363,20 +366,18 @@ public class S3StorageService implements StorageService {
     @Override
     public String getPublicLocationDatasets(String directory, String fileName) throws StorageException {
         try {
-            return s3Template.createSignedGetURL(datasetsBucket, directory + SLASH + fileName,
-                    Duration.ofHours(1)).toString();
+            return s3Endpoint + SLASH + datasetsBucket + SLASH + directory + SLASH + fileName;
         } catch (Exception e) {
-            throw new StorageException("S3 pre-sign failed for: " + fileName, e);
+            throw new StorageException("S3 URL build failed for: " + fileName, e);
         }
     }
 
     @Override
     public String getPublicLocationPreclinical(String directory, String fileName) throws StorageException {
         try {
-            return s3Template.createSignedGetURL(preclinicalBucket, directory + SLASH + fileName,
-                    Duration.ofHours(1)).toString();
+            return s3Endpoint + SLASH + preclinicalBucket + SLASH + directory + SLASH + fileName;
         } catch (Exception e) {
-            throw new StorageException("S3 pre-sign failed for: " + fileName, e);
+            throw new StorageException("S3 URL build failed for: " + fileName, e);
         }
     }
 
@@ -471,10 +472,9 @@ public class S3StorageService implements StorageService {
     @Override
     public String getPublicLocationStudies(String directory, String fileName) throws StorageException {
         try {
-            return s3Template.createSignedGetURL(studiesBucket, directory + SLASH + fileName,
-                    Duration.ofHours(1)).toString();
+            return s3Endpoint + SLASH + studiesBucket + SLASH + directory + SLASH + fileName;
         } catch (Exception e) {
-            throw new StorageException("S3 pre-sign failed for: " + fileName, e);
+            throw new StorageException("S3 URL build failed for: " + fileName, e);
         }
     }
 
