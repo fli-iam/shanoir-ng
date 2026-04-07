@@ -214,7 +214,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
                         Operation.DOES_NOT_START_WITH,
                         Operation.NOT_EQUALS).contains(getOperation())) {
                     if (errorMsg != null) errorMsg.append("\nThe condition [" + toString()
-                        + "] succeed on dataset " + dicomAttributes.getString(Tag.SeriesDescription) + " with DICOM seriesNumber " + dicomAttributes.getString(Tag.SeriesNumber)
+                        + "] succeeds on dataset " + dicomAttributes.getString(Tag.SeriesDescription) + " with DICOM seriesNumber " + dicomAttributes.getString(Tag.SeriesNumber)
                         + " because no value found in the dicom for the tag : " + getDicomTagCodeAndLabel(this.getDicomTag()));
                     return true;
                 } else {
@@ -235,7 +235,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
                             + "] failed because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
                         return false;
                     } else if (textualCompare(this.getOperation(), stringValue, value)) {
-                        if (errorMsg != null) errorMsg.append("\nThe condition [" + toString() + "] succeed on acquisition ");
+                        if (errorMsg != null) errorMsg.append("\nThe condition [" + toString() + "] succeeds on acquisition " + dicomAttributes.getString(Tag.SeriesDescription));
                         return true; // as condition values are combined by OR: return if one is true
                     } // else continue to check other values
 
@@ -300,7 +300,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
                         throw new IllegalStateException("tagType for tag " + dicomTag + " is not implemented, tagType : " + tagType);
                     }
                     if (comparison != null && numericalCompare(this.getOperation(), comparison)) {
-                        if (errorMsg != null) errorMsg.append("\nThe condition [" + toString() + "] succeed on dataset " + dicomAttributes.getString(Tag.SeriesDescription)
+                        if (errorMsg != null) errorMsg.append("\nThe condition [" + toString() + "] succeeds on dataset " + dicomAttributes.getString(Tag.SeriesDescription)
                         + " with DICOM seriesNumber " + dicomAttributes.getString(Tag.SeriesNumber) + ", value found : " + dicomAttributes.getString(this.getDicomTag()));
                         return true; // as condition values are combined by OR: return if one is true
                     } // else continue to check other values
@@ -330,12 +330,12 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
     private void writeConditionsReport(StringBuffer errorMsg, boolean complies, int nbOk, int nbUnknown, int total) {
         if (!complies) {
             switch (getCardinality()) {
-                case -1 -> errorMsg.append("\nThe condition [" + toString() + "] failed because only " + nbOk + " out of all (" + total + ") dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
-                case 0 -> errorMsg.append("\nThe condition [" + toString() + "] failed because " + nbOk + " dataset(s) complied where 0 was required" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
-                default -> errorMsg.append("\nThe condition [" + toString() + "] failed because only " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                case -1 -> errorMsg.append("\nThis condition failed because only " + nbOk + " out of all (" + total + ") dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                case 0 -> errorMsg.append("\nThis condition failed because " + nbOk + " dataset(s) complied where 0 was required" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                default -> errorMsg.append("\nThis condition failed because only " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
             }
         } else {
-            errorMsg.append("\nThe condition [" + toString() + "] succeed because " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+            errorMsg.append("\nThis condition succeeds because " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
         }
     }
 

@@ -103,8 +103,6 @@ public class QualityCardRule extends AbstractEntity {
 
     public void apply(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> acquisitionDicomAttributes,
             QualityCardResult result, WADODownloaderService downloader) throws PacsException {
-        // if applied from ShUp, datasetAcquisition is null for performance reason and we use seriesInstanceUID.
-        //Long datasetAcquisitionId = datasetAcquisition != null ? datasetAcquisition.getId() : null;
         // if applied at import and not from ShUp then acquisitionDicomAttributes should
         // not be null, otherwise we fetch DICOM acquisition attributes.
         if (acquisitionDicomAttributes == null) {
@@ -184,7 +182,7 @@ public class QualityCardRule extends AbstractEntity {
             StringBuffer msg = new StringBuffer();
             boolean fulfilled = true;
             if (condition instanceof StudyCardDICOMConditionOnDatasets) {
-                fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes);
+                fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
             } else if (condition instanceof ExamMetadataCondOnAcq) {
                 fulfilled = ((ExamMetadataCondOnAcq) condition).fulfilled(acquisitionList, msg);
             } else if (condition instanceof ExamMetadataCondOnDatasets) {

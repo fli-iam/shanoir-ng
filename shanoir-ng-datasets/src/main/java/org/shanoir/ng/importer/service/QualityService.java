@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.service;
 
 import java.util.List;
 
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
@@ -44,7 +45,7 @@ public class QualityService {
             // all
             qualityResult.merge(qualityCard.apply(datasetAcquisition, acquisitionAttributes, downloader));
             LOG.info("Quality Card {} applied on dataset acquisition {} with result: {}.", qualityCard.getName(),
-                    datasetAcquisition.getId(), qualityResult.findById(datasetAcquisition.getId())
+                    acquisitionAttributes.getFirstDatasetAttributes().getString(Tag.SeriesDescription), qualityResult.findById(datasetAcquisition.getId())
                             .map(QualityCardResultEntry::getTagSet).orElse(null));
         }
         return qualityResult;
