@@ -26,7 +26,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         @if (["AcqDICOMConditionOnDatasets", "AcqMetadataCondOnDatasets"].includes(condition.scope)) {
             <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the DICOM serie/dataset acquisition, </span>
         } @else if (["ExamDICOMConditionOnDatasets", "ExamMetadataCondOnDatasets"].includes(condition.scope)) {
-            <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
+            <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the DICOM serie/dataset acquisition, </span>
         } @else if ("ExamMetadataCondOnAcq" == condition.scope) {
             <span>acquisition<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
         } 
