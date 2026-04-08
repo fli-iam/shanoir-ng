@@ -37,7 +37,7 @@ public class FileSystemStorageService implements StorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemStorageService.class);
 
-    private static final String FILE = "file:///";
+    private static final String FILE = "file://";
 
     @Value("${storage.file-system.studies-data:UNUSED}")
     private String baseDirStudies;
