@@ -342,6 +342,9 @@ public class S3StorageService implements StorageService {
     @Override
     public Resource loadDatasetsData(String path) throws StorageException {
         try {
+            if (path.startsWith(datasetsBucket)) {
+                path = path.substring(datasetsBucket.length());
+            }
             return s3Template.download(datasetsBucket, path);
         } catch (Exception e) {
             throw new StorageException("S3 download failed for: " + path, e);
