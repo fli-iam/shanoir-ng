@@ -37,6 +37,8 @@ public class FileSystemStorageService implements StorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileSystemStorageService.class);
 
+    private static final String FILE = "file:///";
+
     @Value("${storage.file-system.studies-data:UNUSED}")
     private String baseDirStudies;
 
@@ -111,7 +113,7 @@ public class FileSystemStorageService implements StorageService {
             Path filePath = dirPath.resolve(fileName);
             LOG.info("Storing file at: {}", filePath);
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-            return filePath.toString();
+            return FILE + filePath.toString();
         } catch (IOException e) {
             throw new StorageException("Failed to store file " + fileName, e);
         }
