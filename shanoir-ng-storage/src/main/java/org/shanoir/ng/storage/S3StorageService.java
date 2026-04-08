@@ -68,7 +68,7 @@ public class S3StorageService implements StorageService {
 
     private static final long PART_SIZE = 8 * 1024 * 1024L; // 8 MB
 
-    private static final String S3 = "s3://";
+    private static final String S3 = "s3:///"; // empty host name
 
     @Autowired
     private final S3Template s3Template;
