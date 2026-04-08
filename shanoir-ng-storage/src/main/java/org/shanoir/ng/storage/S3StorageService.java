@@ -64,9 +64,11 @@ public class S3StorageService implements StorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3StorageService.class);
 
-    private static final long MULTIPART_THRESHOLD = 20 * 1024 * 1024L; // 20 MB
+    private static final long MULTIPART_THRESHOLD = 100 * 1024 * 1024L; // 100 MB
 
     private static final long PART_SIZE = 8 * 1024 * 1024L; // 8 MB
+
+    private static final String S3 = "s3://";
 
     @Autowired
     private final S3Template s3Template;
@@ -363,10 +365,14 @@ public class S3StorageService implements StorageService {
         }
     }
 
+    /**
+     * The getPublicLocationXXX methods can easily be extended with
+     * s3Template.createSignedGetURL calls for storing fully functional, signed URLs.
+     */
     @Override
     public String getPublicLocationDatasets(String directory, String fileName) throws StorageException {
         try {
-            return s3Endpoint + SLASH + datasetsBucket + SLASH + directory + SLASH + fileName;
+            return S3 + datasetsBucket + SLASH + directory + SLASH + fileName;
         } catch (Exception e) {
             throw new StorageException("S3 URL build failed for: " + fileName, e);
         }
@@ -375,7 +381,7 @@ public class S3StorageService implements StorageService {
     @Override
     public String getPublicLocationPreclinical(String directory, String fileName) throws StorageException {
         try {
-            return s3Endpoint + SLASH + preclinicalBucket + SLASH + directory + SLASH + fileName;
+            return S3 + preclinicalBucket + SLASH + directory + SLASH + fileName;
         } catch (Exception e) {
             throw new StorageException("S3 URL build failed for: " + fileName, e);
         }
@@ -472,7 +478,7 @@ public class S3StorageService implements StorageService {
     @Override
     public String getPublicLocationStudies(String directory, String fileName) throws StorageException {
         try {
-            return s3Endpoint + SLASH + studiesBucket + SLASH + directory + SLASH + fileName;
+            return S3 + studiesBucket + SLASH + directory + SLASH + fileName;
         } catch (Exception e) {
             throw new StorageException("S3 URL build failed for: " + fileName, e);
         }
