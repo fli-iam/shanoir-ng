@@ -210,6 +210,7 @@ public class ImporterService {
         boolean hasQualityCards = qualityCards != null && !qualityCards.isEmpty();
         boolean isFromShanoirUploader = importJob.isFromShanoirUploader();
         Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
+        QualityCardResult qualityResult = null;
         int rank = 0;
 
         // We use flatMap to get all selected series from all patients and studies in
@@ -251,10 +252,9 @@ public class ImporterService {
 
                 // apply quality card if needed
                 if (hasQualityCards && !isFromShanoirUploader) {
-                    QualityCardResult qualityResult = applyQualityCheck(acquisition, dicomAttributes, qualityCards,
-                            importJob);
-
-                    applyQualityResult(acquisition, serie, qualityResult, event);
+                    QualityCardResult serieQualityResult = applyQualityCheck(acquisition, dicomAttributes, qualityCards, importJob);
+                    applyQualityResult(acquisition, serie, serieQualityResult, event);
+                    qualityResult.merge(serieQualityResult);
                 }
 
                 // if quality tag is ERROR, we do not add the acquisition to the list of
@@ -275,6 +275,14 @@ public class ImporterService {
                 event.setProgress(0.5f + (0.25f * rank / totalSeries));
                 eventService.publishEvent(event);
             }
+        }
+        // If all series to be imported are in error we consider that the whole import failed
+        if (generatedAcquisitions.isEmpty()) {
+            if (examination.getDatasetAcquisitions() == null || examination.getDatasetAcquisitions().isEmpty()) {
+                LOG.warn("All series to be imported for the new examination {} have control quality tag ERROR, the examination will be deleted.", examination.getComment());
+                examinationRepository.deleteById(examination.getId());
+            }
+            throw new QualityException(qualityResult);
         }
         return generatedAcquisitions;
     }
@@ -361,13 +369,11 @@ public class ImporterService {
      */
     private void applyQualityResult(DatasetAcquisition acquisition, Serie serie,
             QualityCardResult qualityResult, ShanoirEvent event) {
-        if (qualityResult == null)
+        if (qualityResult.isEmpty())
             return;
 
         if (qualityResult.hasError()) {
             serie.setSelected(false);
-        } else if (qualityResult.hasWarning() || qualityResult.hasFailedValid()) {
-            event.setReport(qualityResult.toString());
         }
 
         acquisition.setQualityTag(

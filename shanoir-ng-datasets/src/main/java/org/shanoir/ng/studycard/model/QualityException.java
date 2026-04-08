@@ -28,9 +28,8 @@ public class QualityException extends Exception {
     private QualityCardResult qualityResult;
 
 
-    public QualityException(DatasetAcquisition datasetAcquisition, QualityCardResult qualityResult) {
+    public QualityException(QualityCardResult qualityResult) {
         super();
-        this.datasetAcquisition = datasetAcquisition;
         this.qualityResult = qualityResult;
     }
 
