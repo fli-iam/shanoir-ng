@@ -132,6 +132,11 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public Resource loadDatasetsData(String path) throws StorageException {
+        return load(baseDirDatasets, path);
+    }
+
+    @Override
     public Resource loadPreclinicalExtraData(Long examinationId, String fileName) throws StorageException {
         String directory = EXAMINATION + examinationId;
         return load(baseDirPreclinical, directory, fileName);
@@ -145,6 +150,15 @@ public class FileSystemStorageService implements StorageService {
 
     private Resource load(String baseDir, String directory, String fileName) throws StorageException {
         Path filePath = Paths.get(baseDir, directory, fileName);
+        Resource resource = new FileSystemResource(filePath);
+        if (!resource.exists()) {
+            throw new StorageException("File not found: " + filePath, null);
+        }
+        return resource;
+    }
+
+    private Resource load(String baseDir, String path) throws StorageException {
+        Path filePath = Paths.get(baseDir, path);
         Resource resource = new FileSystemResource(filePath);
         if (!resource.exists()) {
             throw new StorageException("File not found: " + filePath, null);

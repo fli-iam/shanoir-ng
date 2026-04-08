@@ -59,6 +59,8 @@ public interface StorageService {
 
     Resource loadExtraData(Long examinationId, String fileName) throws StorageException;
 
+    Resource loadDatasetsData(String path) throws StorageException;
+
     Resource loadPreclinicalExtraData(Long examinationId, String fileName) throws StorageException;
 
     Resource loadPathologyModelData(Long pathologyModelId, String fileName) throws StorageException;
