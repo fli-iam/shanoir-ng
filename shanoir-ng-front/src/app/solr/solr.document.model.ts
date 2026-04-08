@@ -32,7 +32,7 @@ export class SolrDocument {
     subjectType: string;
     acquisitionEquipmentName: string;
     subjectId: string;
-
+    dataReuseAgreement: boolean;
     sortingIndex: number;
     studyName: string;
     studyId: string;
@@ -47,6 +47,7 @@ export class SolrRequest {
     subjectName: string[];
     subjectId: string[];
     sortingIndex: number[];
+    dataReuseAgreement: boolean[];
     subjectType: string[];
     acquisitionEquipmentName: string[];
     examinationId: string[];
