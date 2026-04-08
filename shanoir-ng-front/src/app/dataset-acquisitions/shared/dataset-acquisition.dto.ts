@@ -35,6 +35,7 @@ import { XaProtocol } from '../modality/xa/xa-protocol.model';
 
 import { DatasetAcquisition } from './dataset-acquisition.model';
 import { DatasetAcquisitionUtils } from './dataset-acquisition.utils';
+
 import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
 
 @Injectable()
