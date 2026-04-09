@@ -216,8 +216,8 @@ public class ImporterServiceTest {
             //when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(qualityResult);
 
             // WHEN we treat this importjob
-            assertNotNull(qualityResult);
             service.createAllDatasetAcquisition(importJob, 1L);
+            assertNotNull(qualityResult);
 
             ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
             Mockito.verify(taskService, Mockito.times(4)).publishEvent(argument.capture());
