@@ -50,22 +50,35 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </div>
                 </span>
             </li>
-            @if (task.route) {
+            <li *ngIf="task.route">
+                <label>Link</label>
+                <span class="right-col left-icon">
+                    @if (['downloadStatistics.event', 'copyDataset.event'].includes(task._eventType)) {
+                        <a (click)="downloadStats($event)" href="#">
+                            <i class="fa-solid fa-link"></i>
+                            {{task.route}}
+                        </a>
+                    } @else if (task._eventType == 'massiveOutputsDownload.event') {
+                        <a (click)="downloadProcessingOutputs($event)" href="#">
+                            <i class="fa-solid fa-link"></i>
+                            {{task.route}}
+                        </a>
+                    } @else {
+                        <a [routerLink]="task.route">
+                            <i class="fa-solid fa-link"></i>
+                            {{task.route}}
+                        </a>
+                    }
+                </span>
+            </li>
+            @if (['copyDataset.event'].includes(task._eventType)) {
                 <li>
-                    <label>Link</label>
+                    <label>Target study</label>
                     <span class="right-col left-icon">
-                        @if (task._eventType != "downloadStatistics.event") {
-                            <a [routerLink]="task.route">
-                                <i class="fa-solid fa-link"></i>
-                                {{ task.route }}
-                            </a>
-                        }
-                        @if (task._eventType == "downloadStatistics.event") {
-                            <a (click)="downloadStats($event)" href="#">
-                                <i class="fa-solid fa-link"></i>
-                                {{ task.route }}
-                            </a>
-                        }
+                        <a [routerLink]="'/study/details/' + task.studyId">
+                            <i class="fa-regular fa-folder-open"></i>
+                            Study n°{{task.studyId}}
+                        </a>
                     </span>
                 </li>
             }

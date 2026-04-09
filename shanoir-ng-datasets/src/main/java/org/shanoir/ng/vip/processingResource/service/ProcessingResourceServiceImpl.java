@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.vip.processingResource.service;
 
 import org.shanoir.ng.dataset.model.Dataset;
@@ -19,15 +33,15 @@ import java.util.*;
 public class ProcessingResourceServiceImpl implements ProcessingResourceService {
 
     @Autowired
-    public ProcessingResourceRepository repository;
+    private ProcessingResourceRepository repository;
 
     @Autowired
-    public DatasetService datasetService;
+    private DatasetService datasetService;
 
     public String create(ExecutionMonitoring processing, List<Dataset> datasets) {
         List<ProcessingResource> processingResources = new ArrayList<>();
         String resourceId = UUID.randomUUID().toString();
-        for(Dataset dataset : datasets){
+        for (Dataset dataset : datasets) {
             processingResources.add(new ProcessingResource(processing, dataset, resourceId));
         }
         repository.saveAll(processingResources);
@@ -36,7 +50,7 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
 
     public List<ParameterResourceDTO> createProcessingResources(ExecutionMonitoring processing, List<DatasetParameterDTO> datasetParameters) throws EntityNotFoundException {
 
-        if(datasetParameters ==  null || datasetParameters.isEmpty()){
+        if (datasetParameters ==  null || datasetParameters.isEmpty()) {
             return new ArrayList<>();
         }
 
@@ -79,17 +93,15 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
                     case DATASET:
                         entityId = ds.getId();
                         break;
-                }
-
-                if (entityId == null) {
-                    throw new EntityNotFoundException("Cannot find [" + dto.getGroupBy() + "] entity for dataset [" + ds.getId() + "]");
+                    default:
+                        throw new EntityNotFoundException("Cannot find [" + dto.getGroupBy() + "] entity for dataset [" + ds.getId() + "]");
                 }
 
                 datasetsByEntityId.putIfAbsent(entityId, new ArrayList<>());
                 datasetsByEntityId.get(entityId).add(ds);
             }
 
-            for(Map.Entry<Long, List<Dataset>> entry : datasetsByEntityId.entrySet()) {
+            for (Map.Entry<Long, List<Dataset>> entry : datasetsByEntityId.entrySet()) {
                 String resourceId = create(processing, entry.getValue());
                 resourceDTO.getResourceIds().add(resourceId);
             }

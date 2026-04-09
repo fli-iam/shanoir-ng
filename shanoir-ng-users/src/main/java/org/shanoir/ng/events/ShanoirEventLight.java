@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.events;
 
 import java.sql.Types;
@@ -20,198 +34,198 @@ import jakarta.persistence.Transient;
 @MappedSuperclass
 public class ShanoirEventLight {
 
-	/** ID of the event, normally generated BEFORE arriving here **/
-	@Id
-	protected Long id;
-	
-	/** See EventType **/
-	protected String eventType;
-	
-	/** ID of the concerned object **/
-	protected String objectId;
+    /** ID of the event, normally generated BEFORE arriving here **/
+    @Id
+    private Long id;
 
-	/** user ID creating the event **/
-	protected Long userId;
+    /** See EventType **/
+    private String eventType;
 
-	/** Message of the event, can be informative, or display an error **/
-	@JdbcTypeCode(Types.LONGVARCHAR)
-	protected String message;
+    /** ID of the concerned object **/
+    private String objectId;
 
-	/** Creation date, automatically generated **/
-	@CreationTimestamp
-	@Column(updatable=false)
-	protected Date creationDate;
+    /** user ID creating the event **/
+    private Long userId;
 
-	/** Last update date, automatically generated **/
-	@UpdateTimestamp
-	protected Date lastUpdate;
-	
-	/** Status, can be either 0 (created), 1 (success) or -1 (in error) **/
-	protected int status;
+    /** Message of the event, can be informative, or display an error **/
+    @JdbcTypeCode(Types.LONGVARCHAR)
+    private String message;
 
-	/** The progress of the event. */
-	protected Float progress;
+    /** Creation date, automatically generated **/
+    @CreationTimestamp
+    @Column(updatable = false)
+    private Date creationDate;
 
-	/** The study ID of the event */
-	protected Long studyId;
+    /** Last update date, automatically generated **/
+    @UpdateTimestamp
+    private Date lastUpdate;
 
-	@Transient
-	private Boolean hasReport;
+    /** Status, can be either 0 (created), 1 (success) or -1 (in error) **/
+    private int status;
 
-	public ShanoirEventLight() {
-		// Default empty constructor for json deserializer.
-	}
+    /** The progress of the event. */
+    private Float progress;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /** The study ID of the event */
+    private Long studyId;
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @Transient
+    private Boolean hasReport;
 
-	/**
-	 * @return the eventType
-	 */
-	public String getEventType() {
-		return eventType;
-	}
+    public ShanoirEventLight() {
+        // Default empty constructor for json deserializer.
+    }
 
-	/**
-	 * @param eventType the eventType to set
-	 */
-	public void setEventType(String eventType) {
-		this.eventType = eventType;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @return the objectId
-	 */
-	public String getObjectId() {
-		return objectId;
-	}
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @param objectId the objectId to set
-	 */
-	public void setObjectId(String objectId) {
-		this.objectId = objectId;
-	}
+    /**
+     * @return the eventType
+     */
+    public String getEventType() {
+        return eventType;
+    }
 
-	/**
-	 * @return the userId
-	 */
-	public Long getUserId() {
-		return userId;
-	}
+    /**
+     * @param eventType the eventType to set
+     */
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
 
-	/**
-	 * @param userId the userId to set
-	 */
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    /**
+     * @return the objectId
+     */
+    public String getObjectId() {
+        return objectId;
+    }
 
-	/**
-	 * @return the message
-	 */
-	public String getMessage() {
-		return message;
-	}
+    /**
+     * @param objectId the objectId to set
+     */
+    public void setObjectId(String objectId) {
+        this.objectId = objectId;
+    }
 
-	/**
-	 * @param message the message to set
-	 */
-	public void setMessage(String message) {
-		this.message = message;
-	}
+    /**
+     * @return the userId
+     */
+    public Long getUserId() {
+        return userId;
+    }
 
-	/**
-	 * @return the creationDate
-	 */
-	public Date getCreationDate() {
-		return creationDate;
-	}
+    /**
+     * @param userId the userId to set
+     */
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	/**
-	 * @param creationDate the creationDate to set
-	 */
-	public void setCreationDate(Date creationDate) {
-		this.creationDate = creationDate;
-	}
+    /**
+     * @return the message
+     */
+    public String getMessage() {
+        return message;
+    }
 
-	/**
-	 * @return the lastUpdate
-	 */
-	public Date getLastUpdate() {
-		return lastUpdate;
-	}
+    /**
+     * @param message the message to set
+     */
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-	/**
-	 * @param lastUpdate the lastUpdate to set
-	 */
-	public void setLastUpdate(Date lastUpdate) {
-		this.lastUpdate = lastUpdate;
-	}
+    /**
+     * @return the creationDate
+     */
+    public Date getCreationDate() {
+        return creationDate;
+    }
 
-	/**
-	 * @return the status
-	 */
-	public int getStatus() {
-		return status;
-	}
+    /**
+     * @param creationDate the creationDate to set
+     */
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
 
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(int status) {
-		this.status = status;
-	}
+    /**
+     * @return the lastUpdate
+     */
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
 
-	/**
-	 * @return the progress
-	 */
-	public Float getProgress() {
-		return progress;
-	}
+    /**
+     * @param lastUpdate the lastUpdate to set
+     */
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
 
-	/**
-	 * @param progress the progress to set
-	 */
-	public void setProgress(Float progress) {
-		this.progress = progress;
-	}
+    /**
+     * @return the status
+     */
+    public int getStatus() {
+        return status;
+    }
 
-	/**
-	 * @return the studyId
-	 */
-	public Long getStudyId() {
-		return studyId;
-	}
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(int status) {
+        this.status = status;
+    }
 
-	/**
-	 * @param studyId the studyId to set
-	 */
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    /**
+     * @return the progress
+     */
+    public Float getProgress() {
+        return progress;
+    }
 
-	public Boolean getHasReport() {
-		return hasReport;
-	}
+    /**
+     * @param progress the progress to set
+     */
+    public void setProgress(Float progress) {
+        this.progress = progress;
+    }
 
-	public void setHasReport(Boolean hasReport) {
-		this.hasReport = hasReport;
-	}
+    /**
+     * @return the studyId
+     */
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public String getIdAsString() {
-		return id == null ? null : id.toString();
-	}
+    /**
+     * @param studyId the studyId to set
+     */
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
+
+    public Boolean getHasReport() {
+        return hasReport;
+    }
+
+    public void setHasReport(Boolean hasReport) {
+        this.hasReport = hasReport;
+    }
+
+    public String getIdAsString() {
+        return id == null ? null : id.toString();
+    }
 
 }

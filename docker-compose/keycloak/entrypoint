@@ -7,25 +7,37 @@ set -e
 require  SHANOIR_ADMIN_EMAIL
 require  SHANOIR_ADMIN_NAME
 optional SHANOIR_PREFIX
+optional SHANOIR_USERS_HOST
 require  SHANOIR_SMTP_HOST
+require  SHANOIR_SMTP_PORT
+require  SHANOIR_SMTP_AUTH
+require  SHANOIR_SMTP_USERNAME
+require  SHANOIR_SMTP_PASSWORD
+require  SHANOIR_SMTP_STARTTLS_ENABLE
+require  SHANOIR_SMTP_FROM
 require  SHANOIR_URL_SCHEME
 require  SHANOIR_URL_HOST
 require  SHANOIR_VIEWER_OHIF_URL_SCHEME
 require  SHANOIR_VIEWER_OHIF_URL_HOST
 
+: ${SHANOIR_USERS_HOST:=${SHANOIR_PREFIX}users}
+
 mkdir -p /tmp/import
 sed "	s/SHANOIR_ADMIN_NAME/$SHANOIR_ADMIN_NAME/g
 		s/SHANOIR_ADMIN_EMAIL/$SHANOIR_ADMIN_EMAIL/g
 		s/SHANOIR_SMTP_HOST/$SHANOIR_SMTP_HOST/g
+		s/SHANOIR_SMTP_PORT/$SHANOIR_SMTP_PORT/g
+		s/SHANOIR_SMTP_AUTH/$SHANOIR_SMTP_AUTH/g
+		s/SHANOIR_SMTP_USERNAME/$SHANOIR_SMTP_USERNAME/g
+		s/SHANOIR_SMTP_PASSWORD/$SHANOIR_SMTP_PASSWORD/g
+		s/SHANOIR_SMTP_STARTTLS_ENABLE/$SHANOIR_SMTP_STARTTLS_ENABLE/g
+		s/SHANOIR_SMTP_FROM/$SHANOIR_SMTP_FROM/g
 		s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g
 		s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
 		s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g
 		s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
 		s/VIP_CLIENT_SECRET/$VIP_CLIENT_SECRET/g
 "		/opt/keycloak/shanoir-ng-realm.json > /tmp/import/shanoir-ng-realm.json
-
-sed -i -E "s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl 
-sed -i -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl 
 
 #
 # keycloak options
@@ -46,8 +58,7 @@ export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
 export KC_HOSTNAME_STRICT=false
 export KC_HOSTNAME_STRICT_BACKCHANNEL=false
 
-
-export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"${DB_PORT:-3306}"/"${DB_DATABASE:-keycloak}"
+export KC_DB_URL=jdbc:mysql://"${KC_DB_URL_HOST:-${SHANOIR_PREFIX}keycloak-database}":"${KC_DB_URL_PORT:-3306}"/"${KC_DB_URL_DATABASE:-keycloak}"
 export KC_DB_USERNAME="${DB_USER:-keycloak}"
 export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
 
@@ -57,7 +68,7 @@ export KC_BOOTSTRAP_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
 
 require  SHANOIR_MIGRATION
 STARTED_PATTERN=' \[io.quarkus\] \(main\) Keycloak .* started in [0-9.]+*s'
-extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
+extra=("-Dms.users.url=http://${SHANOIR_USERS_HOST}:9901"
        "-Dallowed.admin.ips=${SHANOIR_ALLOWED_ADMIN_IPS}")
 
 case "$SHANOIR_MIGRATION" in

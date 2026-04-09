@@ -48,7 +48,11 @@ export class SubjectPathologyComponent extends EntityComponent<SubjectPathology>
             private modelService: PathologyModelService,
             private referenceService: ReferenceService,
             private pathologyService: PathologyService) {
-        super(route, 'subject-pathology');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'subject-pathology';
     }
 
     get subjectPathology(): SubjectPathology { return this.entity; }
@@ -87,12 +91,12 @@ export class SubjectPathologyComponent extends EntityComponent<SubjectPathology>
     }
 
     save(): Promise<SubjectPathology> {
-        // Instead of saving the entity, we will emit it to the previous step
-        if (this.breadcrumbsService.previousStep != null) {
-            this.breadcrumbsService.previousStep.addPrefilled('newSubjectPathology', this.subjectPathology);
-            this.goBack();
-            return Promise.resolve(this.subjectPathology);
-        }
+        // Instead of saving the entity just emit it
+        this.mapFormToEntity();
+        this.onSave.next(this.subjectPathology);
+        this.breadcrumbsService.currentStep.notifySave(this.subjectPathology);
+        this.goBack();
+        return Promise.resolve(this.subjectPathology);
     }
 
     public async hasEditRight(): Promise<boolean> {

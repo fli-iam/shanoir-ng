@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.action.init;
 
 import java.awt.Dimension;
@@ -35,124 +49,124 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReadyState implements State {
 
-	private static final Logger logger = LoggerFactory.getLogger(ReadyState.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReadyState.class);
 
-	@Autowired
-	private CurrentNominativeDataController currentNominativeDataController;
+    @Autowired
+    private CurrentNominativeDataController currentNominativeDataController;
 
-	@Autowired
-	private DicomPushServiceJob dicomPushServiceJob;
-	
-	public void load(StartupStateContext context) throws IOException {
-		ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
-		shUpStartupDialog.setVisible(false);
-		shUpStartupDialog.dispose();
-		if (ShUpConfig.isModePseudonymus()) {
-			File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
-			try {
-				String pseudonymusKey = ShUpOnloadConfig.getShanoirUploaderServiceClient().findValueByKey(ShUpConfig.MODE_PSEUDONYMUS_KEY);
-				Pseudonymizer pseudonymizer = new Pseudonymizer(pseudonymusKey, pseudonymusFolder.getAbsolutePath());
-				ShUpOnloadConfig.setPseudonymizer(pseudonymizer);
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-				logger.error("Mode pseudonymus requires Pseudonymizer.");
-				System.exit(0);
-			}	
-		}
-		MainWindow frame = initJFrame();
-		// Init check on server
-		String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
-		if (value == null) { // migration case: start with false, add to basic.properties, display in GUI
-			String filePath = ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.BASIC_PROPERTIES;
-			PropertiesUtil.storePropertyToFile(filePath, ShUpConfig.basicProperties, ShUpConfig.CHECK_ON_SERVER, Boolean.FALSE.toString());
-			frame.checkOnServerMenuItem.setSelected(Boolean.FALSE);
-		} else { // display accordingly to basic.properties
-			boolean checkOnServer = Boolean.parseBoolean(value);
-			frame.checkOnServerMenuItem.setSelected(checkOnServer);
-		}
-		CurrentUploadsWindowTable cuw = CurrentUploadsWindowTable.getInstance(frame);
-		currentNominativeDataController.configure(ShUpOnloadConfig.getWorkFolder(), cuw);
-		ShUpOnloadConfig.setCurrentNominativeDataController(currentNominativeDataController);
-		initNominativeDataFilesBeforeLaunchingJobs();
-		dicomPushServiceJob.setDownloadOrCopyActionListener(frame);
-	}
+    @Autowired
+    private DicomPushServiceJob dicomPushServiceJob;
 
-	/**
-	 * Set the frame size and location, and make it visible.
-	 * 
-	 * @param frame
-	 */
-	private MainWindow initJFrame() {
-		MainWindow frame = new MainWindow(ShUpOnloadConfig.getDicomServerClient(), ShUpConfig.shanoirUploaderFolder,
-				ShUpOnloadConfig.getUrlConfig(), ShUpConfig.resourceBundle);
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.addWindowListener(new WindowAdapter() {
-			public void windowOpened(WindowEvent e) {
-			}
-			public void windowClosing(WindowEvent e) {
-				if (UploadServiceJob.LOCK.isLocked()) {
-					String message = "ShanoirUploader is still uploading DICOM files. Are you sure to want to close?";
-					UIManager.put("OptionPane.cancelButtonText", "Cancel");
-					UIManager.put("OptionPane.noButtonText", "No");
-					UIManager.put("OptionPane.okButtonText", "Ok");
-					UIManager.put("OptionPane.yesButtonText", "Yes");
-					if (JOptionPane.showConfirmDialog(null, message, "Confirmation", 1) == JOptionPane.YES_OPTION) {
-						System.exit(0);
-					}
-				} else {
-					System.exit(0);
-				}
-			}
-		});
-		frame.setPreferredSize(new Dimension(920, 910));
-		frame.pack();
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
-		logger.info("JFrame successfully initialized.");
-		return frame;
-	}
-	
-	/**
-	 * Walk trough all folders within the work folder and update the upload
-	 * percentage upload percentage < 100 % must be 0%
-	 */
-	private void initNominativeDataFilesBeforeLaunchingJobs() {
-		final List<File> folders = Util.listFolders(ShUpOnloadConfig.getWorkFolder());
-		logger.debug("Update Nominative DataFiles Before Closing " + folders.size() + " folders in work folder.");
-		for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
-			NominativeDataImportJobManager dataJobManager = null;
-			final File folder = (File) foldersIt.next();
-			// initDataJobManager
-			final Collection<File> files = Util.listFiles(folder, null, false);
-			for (Iterator<File> filesIt = files.iterator(); filesIt.hasNext();) {
-				final File file = (File) filesIt.next();
-				if (file.getName().equals(ShUpConfig.IMPORT_JOB_JSON)) {
-					logger.debug(" Initializing data job manager before launching Jobs");
-					dataJobManager = new NominativeDataImportJobManager(file);
-					break;
-				}
-			}
-			if (dataJobManager != null) {
-				final ImportJob importJob = dataJobManager.readImportJob();
-				// in case of previous importJobs (without uploadPercentage)
-				// we look for uploadPercentage value from nominative-data-job.xml file
-				if (importJob.getUploadPercentage() == null) {
-					String percentage = ImportUtils.getUploadPercentageFromNominativeDataJob(importJob.getWorkFolder());
-					importJob.setUploadPercentage(percentage);
-				}
-				String uploadPercentage = importJob.getUploadPercentage();
-				logger.debug(" upload percentage before launching Jobs "
-						+ uploadPercentage);
-				if (!uploadPercentage.equals("100 %"))
-					uploadPercentage = "0 %";
-				logger.debug(" upload percentage initialized to "
-						+ uploadPercentage);
-						importJob.setUploadPercentage(uploadPercentage);
-				dataJobManager.writeImportJob(importJob);
-			} else {
-				logger.warn("Folder '{}' found in workFolder without import-job.json.", folder.getAbsolutePath());
-			}
-		}
-	}
-	
+    public void load(StartupStateContext context) throws IOException {
+        ShUpStartupDialog shUpStartupDialog = context.getShUpStartupDialog();
+        shUpStartupDialog.setVisible(false);
+        shUpStartupDialog.dispose();
+        if (ShUpConfig.isModePseudonymus()) {
+            File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
+            try {
+                String pseudonymusKey = ShUpOnloadConfig.getShanoirUploaderServiceClient().findValueByKey(ShUpConfig.MODE_PSEUDONYMUS_KEY);
+                Pseudonymizer pseudonymizer = new Pseudonymizer(pseudonymusKey, pseudonymusFolder.getAbsolutePath());
+                ShUpOnloadConfig.setPseudonymizer(pseudonymizer);
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+                LOG.error("Mode pseudonymus requires Pseudonymizer.");
+                System.exit(0);
+            }
+        }
+        MainWindow frame = initJFrame();
+        // Init check on server
+        String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
+        if (value == null) { // migration case: start with false, add to basic.properties, display in GUI
+            String filePath = ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.BASIC_PROPERTIES;
+            PropertiesUtil.storePropertyToFile(filePath, ShUpConfig.basicProperties, ShUpConfig.CHECK_ON_SERVER, Boolean.FALSE.toString());
+            frame.checkOnServerMenuItem.setSelected(Boolean.FALSE);
+        } else { // display accordingly to basic.properties
+            boolean checkOnServer = Boolean.parseBoolean(value);
+            frame.checkOnServerMenuItem.setSelected(checkOnServer);
+        }
+        CurrentUploadsWindowTable cuw = CurrentUploadsWindowTable.getInstance(frame);
+        currentNominativeDataController.configure(ShUpOnloadConfig.getWorkFolder(), cuw);
+        ShUpOnloadConfig.setCurrentNominativeDataController(currentNominativeDataController);
+        initNominativeDataFilesBeforeLaunchingJobs();
+        dicomPushServiceJob.setDownloadOrCopyActionListener(frame);
+    }
+
+    /**
+     * Set the frame size and location, and make it visible.
+     *
+     * @param frame
+     */
+    private MainWindow initJFrame() {
+        MainWindow frame = new MainWindow(ShUpOnloadConfig.getDicomServerClient(), ShUpConfig.shanoirUploaderFolder,
+                ShUpOnloadConfig.getUrlConfig(), ShUpConfig.resourceBundle);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.addWindowListener(new WindowAdapter() {
+            public void windowOpened(WindowEvent e) {
+            }
+            public void windowClosing(WindowEvent e) {
+                if (UploadServiceJob.LOCK.isLocked()) {
+                    String message = "ShanoirUploader is still uploading DICOM files. Are you sure to want to close?";
+                    UIManager.put("OptionPane.cancelButtonText", "Cancel");
+                    UIManager.put("OptionPane.noButtonText", "No");
+                    UIManager.put("OptionPane.okButtonText", "Ok");
+                    UIManager.put("OptionPane.yesButtonText", "Yes");
+                    if (JOptionPane.showConfirmDialog(null, message, "Confirmation", 1) == JOptionPane.YES_OPTION) {
+                        System.exit(0);
+                    }
+                } else {
+                    System.exit(0);
+                }
+            }
+        });
+        frame.setPreferredSize(new Dimension(920, 910));
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+        LOG.info("JFrame successfully initialized.");
+        return frame;
+    }
+
+    /**
+     * Walk trough all folders within the work folder and update the upload
+     * percentage upload percentage < 100 % must be 0%
+     */
+    private void initNominativeDataFilesBeforeLaunchingJobs() {
+        final List<File> folders = Util.listFolders(ShUpOnloadConfig.getWorkFolder());
+        LOG.debug("Update Nominative DataFiles Before Closing " + folders.size() + " folders in work folder.");
+        for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
+            NominativeDataImportJobManager dataJobManager = null;
+            final File folder = (File) foldersIt.next();
+            // initDataJobManager
+            final Collection<File> files = Util.listFiles(folder, null, false);
+            for (Iterator<File> filesIt = files.iterator(); filesIt.hasNext();) {
+                final File file = (File) filesIt.next();
+                if (file.getName().equals(ShUpConfig.IMPORT_JOB_JSON)) {
+                    LOG.debug(" Initializing data job manager before launching Jobs");
+                    dataJobManager = new NominativeDataImportJobManager(file);
+                    break;
+                }
+            }
+            if (dataJobManager != null) {
+                final ImportJob importJob = dataJobManager.readImportJob();
+                // in case of previous importJobs (without uploadPercentage)
+                // we look for uploadPercentage value from nominative-data-job.xml file
+                if (importJob.getUploadPercentage() == null) {
+                    String percentage = ImportUtils.getUploadPercentageFromNominativeDataJob(importJob.getWorkFolder());
+                    importJob.setUploadPercentage(percentage);
+                }
+                String uploadPercentage = importJob.getUploadPercentage();
+                LOG.debug(" upload percentage before launching Jobs "
+                        + uploadPercentage);
+                if (!uploadPercentage.equals("100 %"))
+                    uploadPercentage = "0 %";
+                LOG.debug(" upload percentage initialized to "
+                        + uploadPercentage);
+                importJob.setUploadPercentage(uploadPercentage);
+                dataJobManager.writeImportJob(importJob);
+            } else {
+                LOG.warn("Folder '{}' found in workFolder without import-job.json.", folder.getAbsolutePath());
+            }
+        }
+    }
+
 }

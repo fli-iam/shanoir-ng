@@ -19,7 +19,6 @@ import { QualityTag } from "../../study-cards/shared/quality-card.model";
 import { SimpleStudy, Study } from "../../studies/shared/study.model";
 
 import { ImagedObjectCategory } from './imaged-object-category.enum';
-import { SubjectStudy } from './subject-study.model';
 import { Sex, SubjectType } from './subject.types';
 
 
@@ -36,13 +35,14 @@ export class Subject extends Entity {
     @Field() imagedObjectCategory: ImagedObjectCategory;
     @Field() sex: Sex;
     @Field() selected: boolean = false;
-    @Field() subjectStudyList: SubjectStudy[] = [];
+    @Field() studyIdentifier: string;
     @Field() isAlreadyAnonymized: boolean = false;
     @Field() subjectType: SubjectType;
     @Field() physicallyInvolved: boolean;
     @Field() tags: Tag[];
     @Field() qualityTag: QualityTag;
     @Field() study: Study;
+    @Field() studyId: number;
 
     public static makeSubject(id: number, name: string, identifier: string, study: SimpleStudy): Subject {
         const subject = new Subject();
@@ -59,14 +59,12 @@ export class SimpleSubject {
     id: number;
     name: string;
     identifier: string;
-    subjectStudyList: SubjectStudy[];
     study: SimpleStudy;
 
     constructor(subject: Subject) {
         this.id = subject.id ? subject.id : null;
         this.name = subject.name;
         this.identifier = subject.identifier;
-        this.subjectStudyList = null;
         this.study = subject.study;
     }
 }

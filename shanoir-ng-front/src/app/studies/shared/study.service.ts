@@ -25,8 +25,8 @@ import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from '../../shared/models/profile.model';
 import * as AppUtils from '../../utils/app.utils';
-import {SubjectDTO} from "../../subjects/shared/subject.dto";
-import {Subject} from "../../subjects/shared/subject.model";
+import { SubjectDTO } from "../../subjects/shared/subject.dto";
+import { Subject } from "../../subjects/shared/subject.model";
 
 import { StudyUserRight } from './study-user-right.enum';
 import { StudyUser } from "./study-user.model";
@@ -44,6 +44,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     API_URL = AppUtils.BACKEND_API_STUDY_URL;
     private _duasToSign: number = 0;
+    private _draftStudies: number = 0;
     subscriptions: Subscription[] = [];
     fileUploads: Map<number, Promise<void>> = new Map(); // current uploads
     private studyVolumesCache: Map<number, StudyStorageVolumeDTO> = new Map();
@@ -124,6 +125,27 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .then(this.mapSubjectList);
     }
 
+    private findStudiesICanImport(): Promise<Study[]> {
+        if (this.keycloakService.isUserAdmin()) {
+            return this.getAll();
+        } else {
+            return this.getAll().then(studies => {
+                const myId: number = KeycloakService.auth.userId;
+                return studies?.filter(study => {
+                    return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_IMPORT)).length > 0;
+                });
+            });
+        }
+    }
+
+    findStudyIdsCanImport(): Promise<number[]> {
+        return this.findStudiesICanImport().then(studies => studies?.map(study => study.id));
+    }
+
+    findStudyIdNamesCanImport(): Promise<IdName[]> {
+        return this.findStudiesICanImport().then(studies => studies?.map(study => new IdName(study.id, study.name)));
+    }
+
     private findStudiesIcanAdmin(): Promise<Study[]> {
         if (this.keycloakService.isUserAdmin()) {
             return this.getAll();
@@ -143,6 +165,23 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     findStudyIdNamesIcanAdmin(): Promise<IdName[]> {
         return this.findStudiesIcanAdmin().then(studies => studies?.map(study => new IdName(study.id, study.name)));
+    }
+
+    findDraftStudies(): Promise<Study[]> {
+        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL + '/draft')
+            .toPromise()
+            .then((studies) => {
+                this._draftStudies = studies ? studies.length : 0;
+                return studies;
+            })
+    }
+
+    get draftStudies(): number {
+        return this._draftStudies;
+    }
+
+    decreaseDraftStudies() {
+        this._draftStudies --;
     }
 
     uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'dua'): Promise<any> {
@@ -227,15 +266,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         });
     }
 
-    protected getIgnoreList(): string[] {
+    protected static getIgnoreList(): string[] {
         return super.getIgnoreList().concat(['completeMembers']);
     }
 
     public stringify(entity: Study) {
         const dto = new StudyDTO(entity);
-        const test = JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        const test = JSON.stringify(dto, this.customReplacer);
         return test;
     }
 
@@ -312,5 +349,29 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     getStudiesByRight(right: StudyUserRight): Promise<number[]> {
         return firstValueFrom(this.http.get<any[]>(AppUtils.BACKEND_API_STUDY_URL + '/studyUser/right/' + right));
+    }
+
+    async approveStudyById(id: number): Promise<boolean> {
+        const confirmed = await this.confirmDialogService.confirm(
+            'Approve Study',
+            'Are you sure you want to approve this study?\n\n'
+            + 'Once approved, the study will be available to its members according to their permissions.\n\n'
+            + 'This means:\n'
+            + '• Editing the start date will be disabled\n'
+            + '• Dataset importation will be enabled\n'
+            + '• Members will be able to create and manage related entities (e.g., subjects, examinations, datasets) based on their assigned rights.'
+        );
+
+        if (!confirmed) {
+            return false;
+        }
+
+        await this.http
+            .put<any>(AppUtils.BACKEND_API_STUDY_URL + '/approveDraftStudy/' + id, null)
+            .toPromise();
+
+        this.findDraftStudies();
+
+        return true;
     }
 }

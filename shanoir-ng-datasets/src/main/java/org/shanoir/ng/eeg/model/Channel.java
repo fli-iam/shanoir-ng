@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.eeg.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -18,254 +32,254 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 @Entity
 public class Channel extends HalEntity {
 
-	public enum ChannelType {
-		AUDI("Audio signal"),
-		EEG("Electroencephalogram channel"),
-		EOG("Generic electrooculogram (eye), different from HEOG and VEOG "),
-		ECG("Electrocardiogram (heart)"),
-		EMG("Electromyogram (muscle)"),
-		EYEGAZE("Eye tracker gaze"),
-		GSR("Galvanic skin response"),
-		HEOG("Horizontal EOG (eye)"),
-		MISC("Miscellaneous"),
-		PUPIL("Eye tracker pupil diameter"),
-		REF("Reference channel"),
-		RESP("Respiration"),
-		SYSCLOCK("System time showing elapsed time since trial started"),
-		TEMP("Temperature"),
-		TRIG("System triggers"),
-		VEOG("Vertical EOG (eye)");
+    public enum ChannelType {
+        AUDI("Audio signal"),
+        EEG("Electroencephalogram channel"),
+        EOG("Generic electrooculogram (eye), different from HEOG and VEOG "),
+        ECG("Electrocardiogram (heart)"),
+        EMG("Electromyogram (muscle)"),
+        EYEGAZE("Eye tracker gaze"),
+        GSR("Galvanic skin response"),
+        HEOG("Horizontal EOG (eye)"),
+        MISC("Miscellaneous"),
+        PUPIL("Eye tracker pupil diameter"),
+        REF("Reference channel"),
+        RESP("Respiration"),
+        SYSCLOCK("System time showing elapsed time since trial started"),
+        TEMP("Temperature"),
+        TRIG("System triggers"),
+        VEOG("Vertical EOG (eye)");
 
-		private String name;
+        private String name;
 
-		ChannelType(String name) {
-			this.name = name;
-		}
+        ChannelType(String name) {
+            this.name = name;
+        }
 
-		@Override
-		public String toString(){
-			return name;
-		}
-	}
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
 
-	/** Serial Version ID. */
-	private static final long serialVersionUID = 1L;
+    /** Serial Version ID. */
+    private static final long serialVersionUID = 1L;
 
-	/** Name of the channel. */
-	@JsonProperty("name")
-	private String name;
+    /** Name of the channel. */
+    @JsonProperty("name")
+    private String name;
 
-	/** Resolution of the channel. */
-	@JsonProperty("resolution")
-	private float resolution;
+    /** Resolution of the channel. */
+    @JsonProperty("resolution")
+    private float resolution;
 
-	/** Physical unit of the data values recorded by this channel in SI units. */
-	@JsonProperty("referenceUnits")
-	private String referenceUnits;
+    /** Physical unit of the data values recorded by this channel in SI units. */
+    @JsonProperty("referenceUnits")
+    private String referenceUnits;
 
-	/** Type of channel. */
-	@JsonProperty("referenceType")
-	private ChannelType referenceType;
-	
-	/** Low cutoff filter value. */
-	@JsonProperty("lowCutoff")
-	private int lowCutoff;
-	
-	/** High cutoff filter value. */
-	@JsonProperty("highCutoff")
-	private int highCutoff;
-	
-	/** Notch filter value. */
-	@JsonProperty("notch")
-	private float notch;
-	
-	/** X position in space. */
-	@JsonProperty("x")
-	private int x;
-	
-	/** Y position in space. */
-	@JsonProperty("y")
-	private int y;
-	
-	/** Z position in space. */
-	@JsonProperty("z")
-	private int z;
+    /** Type of channel. */
+    @JsonProperty("referenceType")
+    private ChannelType referenceType;
 
-	/** Associated dataset. */
+    /** Low cutoff filter value. */
+    @JsonProperty("lowCutoff")
+    private int lowCutoff;
+
+    /** High cutoff filter value. */
+    @JsonProperty("highCutoff")
+    private int highCutoff;
+
+    /** Notch filter value. */
+    @JsonProperty("notch")
+    private float notch;
+
+    /** X position in space. */
+    @JsonProperty("x")
+    private int x;
+
+    /** Y position in space. */
+    @JsonProperty("y")
+    private int y;
+
+    /** Z position in space. */
+    @JsonProperty("z")
+    private int z;
+
+    /** Associated dataset. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dataset_id")
     @JsonIgnore
-	private EegDataset dataset;
+    private EegDataset dataset;
 
-	public Channel() {
+    public Channel() {
 
-	}
+    }
 
-	public Channel(Channel other, EegDataset d) {
-		this.name = other.getName();
-		this.resolution = other.getResolution();
-		this.referenceUnits = other.getReferenceUnits();
-		this.referenceType = other.getReferenceType();
-		this.lowCutoff = other.getLowCutoff();
-		this.highCutoff = other.getHighCutoff();
-		this.notch = other.getNotch();
-		this.x = other.getX();
-		this.y = other.getY();
-		this.z = other.getZ();
-		this.dataset = d;
-	}
+    public Channel(Channel other, EegDataset d) {
+        this.name = other.getName();
+        this.resolution = other.getResolution();
+        this.referenceUnits = other.getReferenceUnits();
+        this.referenceType = other.getReferenceType();
+        this.lowCutoff = other.getLowCutoff();
+        this.highCutoff = other.getHighCutoff();
+        this.notch = other.getNotch();
+        this.x = other.getX();
+        this.y = other.getY();
+        this.z = other.getZ();
+        this.dataset = d;
+    }
 
-	/**
-	 * @return the lowCutOff
-	 */
-	public int getLowCutoff() {
-		return lowCutoff;
-	}
+    /**
+     * @return the lowCutOff
+     */
+    public int getLowCutoff() {
+        return lowCutoff;
+    }
 
-	/**
-	 * @param lowCutOff the lowCutOff to set
-	 */
-	public void setLowCutoff(int lowCutOff) {
-		this.lowCutoff = lowCutOff;
-	}
+    /**
+     * @param lowCutOff the lowCutOff to set
+     */
+    public void setLowCutoff(int lowCutOff) {
+        this.lowCutoff = lowCutOff;
+    }
 
-	/**
-	 * @return the highCutOff
-	 */
-	public int getHighCutoff() {
-		return highCutoff;
-	}
+    /**
+     * @return the highCutOff
+     */
+    public int getHighCutoff() {
+        return highCutoff;
+    }
 
-	/**
-	 * @param highCutOff the highCutOff to set
-	 */
-	public void setHighCutoff(int highCutOff) {
-		this.highCutoff = highCutOff;
-	}
+    /**
+     * @param highCutOff the highCutOff to set
+     */
+    public void setHighCutoff(int highCutOff) {
+        this.highCutoff = highCutOff;
+    }
 
-	/**
-	 * @return the notch
-	 */
-	public float getNotch() {
-		return notch;
-	}
+    /**
+     * @return the notch
+     */
+    public float getNotch() {
+        return notch;
+    }
 
-	/**
-	 * @param notch the notch to set
-	 */
-	public void setNotch(float notch) {
-		this.notch = notch;
-	}
+    /**
+     * @param notch the notch to set
+     */
+    public void setNotch(float notch) {
+        this.notch = notch;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @return the resolution
-	 */
-	public float getResolution() {
-		return resolution;
-	}
+    /**
+     * @return the resolution
+     */
+    public float getResolution() {
+        return resolution;
+    }
 
-	/**
-	 * @param resolution the resolution to set
-	 */
-	public void setResolution(float resolution) {
-		this.resolution = resolution;
-	}
+    /**
+     * @param resolution the resolution to set
+     */
+    public void setResolution(float resolution) {
+        this.resolution = resolution;
+    }
 
-	/**
-	 * @return the referenceUnits
-	 */
-	public String getReferenceUnits() {
-		return referenceUnits;
-	}
+    /**
+     * @return the referenceUnits
+     */
+    public String getReferenceUnits() {
+        return referenceUnits;
+    }
 
-	/**
-	 * @param referenceUnits the referenceUnits to set
-	 */
-	public void setReferenceUnits(String referenceUnits) {
-		this.referenceUnits = referenceUnits;
-	}
+    /**
+     * @param referenceUnits the referenceUnits to set
+     */
+    public void setReferenceUnits(String referenceUnits) {
+        this.referenceUnits = referenceUnits;
+    }
 
-	/**
-	 * @return the referenceType
-	 */
-	public ChannelType getReferenceType() {
-		return referenceType;
-	}
+    /**
+     * @return the referenceType
+     */
+    public ChannelType getReferenceType() {
+        return referenceType;
+    }
 
-	/**
-	 * @param referenceType the referenceType to set
-	 */
-	public void setReferenceType(ChannelType referenceType) {
-		this.referenceType = referenceType;
-	}
+    /**
+     * @param referenceType the referenceType to set
+     */
+    public void setReferenceType(ChannelType referenceType) {
+        this.referenceType = referenceType;
+    }
 
-	/**
-	 * @return the x
-	 */
-	public int getX() {
-		return x;
-	}
+    /**
+     * @return the x
+     */
+    public int getX() {
+        return x;
+    }
 
-	/**
-	 * @param x the x to set
-	 */
-	public void setX(int x) {
-		this.x = x;
-	}
+    /**
+     * @param x the x to set
+     */
+    public void setX(int x) {
+        this.x = x;
+    }
 
-	/**
-	 * @return the y
-	 */
-	public int getY() {
-		return y;
-	}
+    /**
+     * @return the y
+     */
+    public int getY() {
+        return y;
+    }
 
-	/**
-	 * @param y the y to set
-	 */
-	public void setY(int y) {
-		this.y = y;
-	}
+    /**
+     * @param y the y to set
+     */
+    public void setY(int y) {
+        this.y = y;
+    }
 
-	/**
-	 * @return the z
-	 */
-	public int getZ() {
-		return z;
-	}
+    /**
+     * @return the z
+     */
+    public int getZ() {
+        return z;
+    }
 
-	/**
-	 * @param z the z to set
-	 */
-	public void setZ(int z) {
-		this.z = z;
-	}
+    /**
+     * @param z the z to set
+     */
+    public void setZ(int z) {
+        this.z = z;
+    }
 
-	/**
-	 * @return the dataset
-	 */
-	public EegDataset getDataset() {
-		return dataset;
-	}
+    /**
+     * @return the dataset
+     */
+    public EegDataset getDataset() {
+        return dataset;
+    }
 
-	/**
-	 * @param dataset the dataset to set
-	 */
-	public void setDataset(EegDataset dataset) {
-		this.dataset = dataset;
-	}
+    /**
+     * @param dataset the dataset to set
+     */
+    public void setDataset(EegDataset dataset) {
+        this.dataset = dataset;
+    }
 }

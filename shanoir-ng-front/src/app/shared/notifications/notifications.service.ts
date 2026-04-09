@@ -100,7 +100,10 @@ export class NotificationsService {
         const tmpTasksInProgress = [];
         const tmpTasksInWait = [];
         for (const task of this.allTasks) {
-            if (task.eventType.startsWith("downloadDataset") && (task.status == 2 || task.status == 4 || task.status == 5)) {
+            if (
+                    ["downloadDataset", "exportTable"].some(evt => task.eventType.startsWith(evt))
+                    && (task.status == 2 || task.status == 4 || task.status == 5)
+            ) {
                 if (!this.sessionService.isActive(task.sessionId)) {
                     task.status = -1;
                     task.message = 'interrupted';

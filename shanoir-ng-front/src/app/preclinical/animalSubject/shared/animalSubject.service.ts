@@ -20,12 +20,11 @@ import { Subject } from '../../../subjects/shared/subject.model';
 import * as AppUtils from '../../../utils/app.utils';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 
-import { AnimalSubject } from './animalSubject.model';
-import { PreclinicalSubject, PreclinicalSubjectDTO } from './preclinicalSubject.model';
+import { AnimalSubject, AnimalSubjectDTO } from './animalSubject.model';
 
 
 @Injectable()
-export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
+export class AnimalSubjectService extends EntityService<AnimalSubject>{
 
     API_URL = PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL;
 
@@ -33,7 +32,7 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
         super(http)
     }
 
-    getEntityInstance() { return new PreclinicalSubject(); }
+    getEntityInstance() { return new AnimalSubject(); }
 
     getAnimalSubjects(ids: IterableIterator<any>): Promise<AnimalSubject[]>{
         const formData: FormData = new FormData();
@@ -46,23 +45,18 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
     }
 
     updateAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
-      const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/`+animalSubject.id;
-      return firstValueFrom(this.http
-        .put<AnimalSubject>(url, JSON.stringify(animalSubject)));
-    }
-
-    createPreclinicalSubject(preclinicalSubject: PreclinicalSubject): Promise<PreclinicalSubject> {
-        return firstValueFrom(this.http.post<PreclinicalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, this.stringify(preclinicalSubject)));
+        const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/`+animalSubject.id;
+        return this.http
+            .put<AnimalSubject>(url, this.stringify(animalSubject))
+            .toPromise();
     }
 
     findSubjectByIdentifier(identifier: string): Promise<Subject> {
         return firstValueFrom(this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier));
     }
 
-    public stringify(entity: PreclinicalSubject) {
-        const dto = new PreclinicalSubjectDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+    public stringify(entity: AnimalSubject) {
+        const dto = new AnimalSubjectDTO(entity);
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

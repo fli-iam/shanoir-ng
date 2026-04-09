@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.action.init;
 
 import org.shanoir.uploader.ShUpOnloadConfig;
@@ -18,24 +32,24 @@ import org.springframework.stereotype.Component;
  *
  * @author atouboul
  * @author mkain
- * 
+ *
  */
 @Component
 public class AuthenticationConfigurationState implements State {
 
-	@Autowired
-	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+    @Autowired
+    private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
-	@Autowired
-	private AuthenticationManualConfigurationState authenticationManualConfigurationState;
+    @Autowired
+    private AuthenticationManualConfigurationState authenticationManualConfigurationState;
 
-	public void load(StartupStateContext context) {
-		shanoirUploaderServiceClient.configure();
-		ShUpOnloadConfig.setShanoirUploaderServiceClient(shanoirUploaderServiceClient);
-		// https://github.com/fli-iam/shanoir-ng/issues/615, KeycloakInstalled removed here as not working in CHUs
-		context.setState(authenticationManualConfigurationState);
-		context.nextState();
-		return;
-	}
+    public void load(StartupStateContext context) {
+        shanoirUploaderServiceClient.configure();
+        ShUpOnloadConfig.setShanoirUploaderServiceClient(shanoirUploaderServiceClient);
+        // https://github.com/fli-iam/shanoir-ng/issues/615, KeycloakInstalled removed here as not working in CHUs
+        context.setState(authenticationManualConfigurationState);
+        context.nextState();
+        return;
+    }
 
 }

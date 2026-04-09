@@ -50,6 +50,7 @@ export class Task extends Entity {
     _eventType: string;
     @Field() eventLabel: string;
     @Field() objectId: number;
+    @Field() studyId: number;
     @Field() route: string;
     @Field() hasReport: boolean;
     @Field() sessionId: string;
@@ -115,10 +116,10 @@ export class Task extends Entity {
             return '/dataset-processing/details/' + this.objectId
         } else if (this.eventType === 'solrIndexAll.event' && this.status != -1) {
             return '/solr-search';
-        } else if (this.eventType === 'copyDataset.event' && this.status != -1 && this.message.lastIndexOf('study [') != -1) {
-            return '/study/details/' + this.message.slice(this.message.lastIndexOf("[") + 1, this.message.lastIndexOf("]"));
-        } else if (this.eventType === 'downloadStatistics.event' && this.status != -1 && this.status != 2) {
+        } else if (['downloadStatistics.event', 'copyDataset.event'].includes(this.eventType) && this.status != -1 && this.status != 2) {
             return '/datasets/download/event/' + this.idAsString;
+        } else if (this.eventType === 'massiveOutputsDownload.event' && this.status != -1 && this.status != 2) {
+            return '/datasets/massiveProcessingOutputsDownload';
         }
         return null;
     }
@@ -153,6 +154,7 @@ export class Task extends Entity {
         if (task.eventLabel) this.eventLabel = task.eventLabel;
         if (task.debugTs) this.debugTs = task.debugTs;
         if (task.objectId) this.objectId = task.objectId;
+        if (task.studyId) this.studyId = task.studyId;
         if (task.route) this.route = task.route;
         if (task.hasReport != undefined) this.hasReport = task.hasReport;
         return this;

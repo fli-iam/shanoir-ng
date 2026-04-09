@@ -51,8 +51,12 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
             public userService: UserService,
             public studyService: StudyService,
             public accessRequestService: AccessRequestService) {
-                super(activatedRoute, 'access-request');
+                super(activatedRoute);
             }
+
+    protected getRoutingName(): string {
+        return 'access-request';
+    }
 
     public changeStudy(studyId: number) {
         this.accessRequest.studyName = this.studies[this.studies.findIndex(study => study.id == studyId)].name;

@@ -15,8 +15,8 @@
 import { allOfEnum } from "src/app/utils/app.utils";
 
 export enum InjectionSite {
-    CAUDAL_VEIN = "Caudal Vein",
-    INTRACEREBRAL = "Intracerebral"
+    CAUDAL_VEIN = "CAUDAL_VEIN",
+    INTRACEREBRAL = "INTRACEREBRAL"
 }
 export namespace InjectionSite {
     export function all(): InjectionSite[] {

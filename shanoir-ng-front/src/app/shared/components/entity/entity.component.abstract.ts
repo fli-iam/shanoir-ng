@@ -65,10 +65,11 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     idPromise: SuperPromise<number> = new SuperPromise();
     entityPromise: SuperPromise<T> = new SuperPromise();
     static ActivateTreeOnThisPage: boolean = true;
-    getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
+    getOnDeleteConfirmMessage?(entity: Entity): string;
     protected destroy$: Subject<void> = new Subject<void>();
     private form$: SuperPromise<void> = new SuperPromise<void>();
     protected showTreeByDefault: boolean = true;
+    protected abstract getRoutingName(): string;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -110,7 +111,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             const userId: number = +this.activatedRoute.snapshot.paramMap.get('id');
             if (!this.showTreeByDefault
                 && this.treeService.treeOpened
-                && (!this.treeService.memberStudyOpenedAndTreeActive(userId)) 
+                && (!this.treeService.memberStudyOpenedAndTreeActive(userId))
             ) {
                 this.treeService.closeTemporarily();
             }
@@ -325,12 +326,12 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             const control = formGroup.get(key);
             if (control instanceof FormGroup) {
                 this.subscribeEntityPropsUpdatesFromForm(control, entity ? entity[key] : null);
-            } else { 
+            } else {
                 const sub: Subscription = control.valueChanges.subscribe(value => {
                     const declaredFields: string[] = getDeclaredFields(entity);
                     if (entity
                             && declaredFields.indexOf(key) >= 0
-                            && entity[key] !== value 
+                            && entity[key] !== value
                             && !Entity.equals(entity?.[key], value)) {
                         entity[key] = value;
                     }
@@ -343,9 +344,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private addBCStep() {
         if (!this.embedded) {
             let label: string;
-            if (this.mode == "create") label = 'New ' + this.ROUTING_NAME;
-            else if (this.mode == 'edit') label = 'Edit ' + this.ROUTING_NAME;
-            else if (this.mode == 'view') label = 'View ' + this.ROUTING_NAME;
+            if (this.mode == "create") label = 'New ' + this.getRoutingName();
+            else if (this.mode == 'edit') label = 'Edit ' + this.getRoutingName();
+            else if (this.mode == 'view') label = 'View ' + this.getRoutingName();
             this.breadcrumbsService.nameStep(label);
         }
     }
@@ -381,7 +382,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 }
             }
         });
-    }    
+    }
 
     private clearRequiredStyles() {
         if (this.formContainerElement) {
@@ -436,6 +437,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         return false;
     }
 
+    hasFormError(error: string) {
+        return this.form.errors?.[error] && (this.form.dirty || this.form.touched);
+    }
+
     private modeSpecificSave(afterSave?: () => Promise<void>): Promise<T> {
         if (this.mode == 'create') {
             return this.getService().create(this.entity).then((entity) => {
@@ -444,9 +449,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 return (afterSave ? afterSave() : Promise.resolve()).then(() => {
                     this.chooseRouteAfterSave(entity);
                     if (entity['name']) {
-                        this.consoleService.log('info', this.ROUTING_NAME[0].toUpperCase() + this.ROUTING_NAME.slice(1) + ' ' + entity['name'] + ' has been successfully saved under the id ' + entity.id);
+                        this.consoleService.log('info', this.getRoutingName()[0].toUpperCase() + this.getRoutingName().slice(1) + ' ' + entity['name'] + ' has been successfully saved under the id ' + entity.id);
                     } else {
-                        this.consoleService.log('info', 'New ' + this.ROUTING_NAME + ' successfully saved with n° ' + entity.id);
+                        this.consoleService.log('info', 'New ' + this.getRoutingName() + ' successfully saved with n° ' + entity.id);
                     }
                     this._entity.id = entity.id;
                     return entity;
@@ -457,7 +462,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 this.onSave.next(this.entity);
                 return (afterSave ? afterSave() : Promise.resolve()).then(() => {
                     this.chooseRouteAfterSave(this.entity);
-                    this.consoleService.log('info', this.ROUTING_NAME + ' n°' + this.entity.id + ' successfully updated');
+                    this.consoleService.log('info', this.getRoutingName() + ' n°' + this.entity.id + ' successfully updated');
                     return this.entity;
                 });
             });
@@ -500,6 +505,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         });
     };
 
+    protected mapFormToEntity() {
+        EntityComponent.mapFormToEntity(this._entity, this.form);
+    }
+
     /**
      * Maps the current entity properties to the form values.
      * Used to sync the form when the entity is updated outside of the form.
@@ -532,13 +541,11 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     /** Maps an entity to the current entity. Used when restoring an entity from a back navigation. */
     protected mapEntityToEntity(entity: T) {
-        if (this.entity && entity) {
-            const declaredFields: string[] = getDeclaredFields(this.entity);
+        if (this.entity && entity && this.entity.constructor.name === entity.constructor.name) {
+            const declaredFields: string[] = getDeclaredFields(entity);
             declaredFields.forEach((key) => {
                 if (entity[key] !== undefined) {
                     this.entity[key] = entity[key];
-                } else {
-                    this.entity[key] = null;
                 }
             });
         }
@@ -595,7 +602,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
     }
 
-    /** 
+    /**
      * Navigate to a create step for an attribute of the current entity.
      * This method will wait for the step to be saved and return the created entity.
      */
@@ -605,7 +612,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             prefills.forEach(readOnlyProp => {
                 this.breadcrumbsService.addNextStepPrefilled('entity.' + readOnlyProp.propName, readOnlyProp.value, true);
             });
-        } 
+        }
         const currentStep: Step = this.breadcrumbsService.currentStep;
         return this.router.navigate([route], extras).then(() => {
             return firstValueFrom(currentStep.waitFor(this.breadcrumbsService.currentStep)).then(savedDependency => {
@@ -615,7 +622,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 // see @this.prefillProperties() method
             });
         });
-        
+
     }
 
     /**
@@ -629,15 +636,18 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                     if (res?.value === undefined || res?.value === null) return;
                     const propKeyParts: string[] = propKey.split('.');
                     let currentObj = this.entity;
-                    let currentFormObj: FormGroup = this.form; 
+                    let currentFormObj: FormGroup = this.form;
                     const lastPart = propKeyParts.pop();
                     propKeyParts.forEach(part => {
                         currentObj = currentObj[part];
                         currentFormObj = currentFormObj.get(part) as FormGroup;
                     });
-                    currentObj[lastPart] = res.value;
-                    currentFormObj.get(lastPart)?.setValue(res.value, {emitEvent: false});
-                    if (res.readonly) currentFormObj.get(lastPart)?.disable({emitEvent: false});
+                    const declaredFields: string[] = getDeclaredFields(this.entity);
+                    if (currentObj && declaredFields.includes(lastPart)) {
+                        currentObj[lastPart] = res.value;
+                        currentFormObj.get(lastPart)?.setValue(res.value, {emitEvent: false});
+                        if (res.readonly) currentFormObj?.get(lastPart)?.disable({emitEvent: false});
+                    }
                 });
             }
         });
@@ -648,22 +658,16 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {
-        let promise: Promise<string>;
-        if (this.getOnDeleteConfirmMessage) {
-            promise = this.getOnDeleteConfirmMessage(entity);
-        } else {
-            promise = Promise.resolve('');
-        }
-        promise.then(studyListStr => {
-            this.getService().deleteWithConfirmDialog(this.ROUTING_NAME, entity, studyListStr).then(deleted => {
-                if (deleted) {
-                    if (this.treeService.treeOpened && this.treeService.treeAvailable) {
-                        this.goToParent();
-                    } else {
-                        this.goBack();
-                    }
+        const msg = this.getOnDeleteConfirmMessage ? this.getOnDeleteConfirmMessage(entity) : null;
+        this.getService().deleteWithConfirmDialog(this.getRoutingName(), entity, msg).then(deleted => {
+            if (deleted) {
+                if (this.treeService.treeOpened && this.treeService.treeAvailable) {
+                    this.treeService.removeCurrentNode();
+                    this.goToParent();
+                } else {
+                    this.goBack();
                 }
-            });
+            }
         });
     }
 
@@ -750,7 +754,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
         if (event.key == '²') {
             console.log('entity', this.entity);
-            console.log('form controls:', this.mapFormControls(this.form), 
+            console.log('form controls:', this.mapFormControls(this.form),
                 this.form.status, this.form.dirty, this.form.touched);
             console.log('footer state', this.footerState);
         }

@@ -24,7 +24,7 @@ import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
 import { Option, SelectBoxComponent } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
-import { DownloadInputIds, DownloadSetup } from '../mass-download.service';
+import { DownloadInputIds, DownloadSetup, MassDownloadService } from '../mass-download.service';
 import { TooltipComponent } from '../../components/tooltip/tooltip.component';
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { TreeNodeComponent } from '../../components/tree/tree-node.component';
@@ -72,8 +72,9 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
             private formBuilder: UntypedFormBuilder,
             globalService: GlobalService,
             deviceInformationService: AngularDeviceInformationService,
+            private massDownloadService: MassDownloadService,
             private datasetService: DatasetService) {
-        
+
         this.subscriptions.push(
             globalService.onNavigate.subscribe(() => {
                 this.cancel();
@@ -119,7 +120,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     private buildForm(): UntypedFormGroup {
         const formGroup = this.formBuilder.group({
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
-            'converter': [{value: this.converter}],
+            'converter': [null, [this.massDownloadService.requiredIfTypeIsNii()]],
             'nbQueues': [4, [Validators.required, Validators.min(1), Validators.max(1024)]],
             'unzip': [false],
             'subjectFolders': [true],
@@ -132,6 +133,10 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
         }
         this.subscriptions.push(formGroup.get('unzip').valueChanges.subscribe(val => {
             formGroup.get('datasetFolders').setValue(val);
+        }));
+
+        this.subscriptions.push(formGroup.get('format').valueChanges.subscribe(() => {
+            formGroup.get('converter').updateValueAndValidity();
         }));
         return formGroup;
     }
@@ -160,6 +165,7 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
             this.cancel();
         }
     }
+
     // This method checks if the list of given datasets has dicom or not.
     private hasDicomInDatasets(datasets: {type: DatasetType, hasProcessings: boolean}[]) {
         for (const dataset of datasets) {
@@ -176,4 +182,21 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
         }
     }
 
+    hasError(fieldName: string, errors: string[]) {
+        const formError = this.formErrors(fieldName);
+        if (formError) {
+            for (const errorName of errors) {
+                if (formError[errorName]) return true;
+            }
+        }
+        return false;
+    }
+
+    formErrors(field: string): any {
+        if (!this.form) return;
+        const control = this.form.get(field);
+        if (control && !control.valid) {
+            return control.errors;
+        }
+    }
 }

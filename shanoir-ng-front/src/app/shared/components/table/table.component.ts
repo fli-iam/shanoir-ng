@@ -18,14 +18,17 @@ import shajs from 'sha.js';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { VarDirective } from 'src/app/utils/ng-var.directive';
+
+import { Task, TaskStatus } from '../../../async-tasks/task.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import * as AppUtils from '../../../utils/app.utils';
 import { isDarkColor } from "../../../utils/app.utils";
 import { KeycloakService } from '../../keycloak/keycloak.service';
+import { NotificationsService } from '../../notifications/notifications.service';
 import { GlobalService } from '../../services/global.service';
+import { SessionService } from '../../services/session.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
-import {TaskService} from "../../../async-tasks/task.service";
-import { VarDirective } from '../../../utils/ng-var.directive';
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { MultiSelectComponent } from '../../multi-select/multi-select.component';
 import { LoadingBarComponent } from '../loading-bar/loading-bar.component';
@@ -60,10 +63,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Output() rowEdit: EventEmitter<object> = new EventEmitter<object>();
     @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
+    @Input() greyedCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
     @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
-    @Output() downloadStatsEvent: EventEmitter<any> = new EventEmitter();
     page: Page<object>;
     isLoading: boolean = false;
     maxResultsField: number;
@@ -92,7 +95,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             private globalClickService: GlobalService,
             protected router: Router,
             private dialogService: ConfirmDialogService,
-            private taskService: TaskService) {
+            private notificationService: NotificationsService,
+            private sessionService: SessionService) {
         this.maxResultsField = this.maxResults;
     }
 
@@ -194,10 +198,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     onRowClick(item: any) {
         if (this.rowClick.observed && !this.rowDisabled(item)) this.rowClick.emit(item);
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
-    }
-
-    downloadStats(item) {
-        this.downloadStatsEvent.emit(item);
     }
 
     public static getCellValue(item: any, col: ColumnDefinition): any {
@@ -586,6 +586,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         return this.disableCondition && this.disableCondition(item);
     }
 
+    rowGreyedOut(item): boolean {
+        return this.rowDisabled(item) || (this.greyedCondition && this.greyedCondition(item));
+    }
+
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
         if (event.key == '²') {
             console.log('table items', this.items);
@@ -652,23 +656,35 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             this.dialogService.error('Too Many Rows', 'You are trying to export ' + this.page.totalElements
                 + ' rows, the current max is at ' + MAX_ROWS + ', sorry.');
         } else {
+            let task: Task;
             let csvStr: string = '';
-            csvStr += this.columnDefs.map(col => col.headerName).join(','); // headers
+            const exportedColumns: ColumnDefinition[] = this.columnDefs.filter(col => !col.hidden && !['button', 'progress'].includes(col.type));
+            csvStr += exportedColumns.map(col => col.headerName).join(','); // headers
             let completion: Promise<void> = Promise.resolve();
+            const startTs: number = performance.now();
             for (let i = 0; i < this.page.totalPages; i++) { // here we could use a fixed page size
                 const pageable: Pageable = this.getPageable();
                 pageable.pageNumber = i + 1;
-                const getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, true, true)
                 completion = completion.then(() => { // load pages sequentially
+                    const getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, false, true)
+                    if (!task 
+                            && (performance.now() - startTs > 5000) 
+                            && (i / this.page.totalPages < 0.8)) {
+                        task = this.startNofification(i / this.page.totalPages);
+                    } else if (task) {
+                        task.progress = i / this.page.totalPages;
+                        task.lastUpdate = new Date();
+                        this.notificationService.pushLocalTask(task);
+                    }
                     if (getPage instanceof Promise) {
                         return getPage.then(page => {
                             for (const entry of page.content) {
-                                csvStr += '\n' + this.columnDefs.map(col => '"' + (TableComponent.getCellValue(entry, col) || '') + '"').join(',');
+                                csvStr += '\n' + exportedColumns.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
                             }
                         });
                     } else if (getPage instanceof Page) {
                         for (const entry of getPage.content) {
-                            csvStr += '\n' + this.columnDefs.map(col => '"' + (TableComponent.getCellValue(entry, col) || '') + '"').join(',');
+                            csvStr += '\n' + exportedColumns.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
                         }
                         return Promise.resolve();
                     }
@@ -679,8 +695,48 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                     type: 'text/csv'
                 });
                 AppUtils.browserDownloadFile(csvBlob, 'tableExport_' + new Date().toLocaleString('fr-FR'));
+                if (task) {
+                    task.progress = 1;
+                    task.status = TaskStatus.DONE;
+                    task.lastUpdate = new Date();
+                    this.notificationService.pushLocalTask(task);
+                }
+            }).catch(() => {
+                if (task) {
+                    task.status = TaskStatus.ERROR;
+                    task.lastUpdate = new Date();
+                    this.notificationService.pushLocalTask(task);
+                }
             });
         }
+    }
+
+    private startNofification(progress: number): Task {
+        const task: Task = new Task();
+        task.id = Date.now();
+        task.creationDate = new Date();
+        task.lastUpdate = task.creationDate;
+        task.message = "Exporting table";
+        task.progress = progress;
+        task.status = TaskStatus.IN_PROGRESS;
+        task.eventType = 'exportTable.event';
+        task.sessionId = this.sessionService.sessionId;
+        this.notificationService.pushLocalTask(task);
+        return task;
+    }
+
+    /** Deal with the dates */
+    private exportCsvCell(entry: any, col: ColumnDefinition): string {
+        const value = TableComponent.getCellValue(entry, col);
+        if (value == null) return '';
+        if (value instanceof Date) {
+            if (col.type == 'date') {
+                return value.toISOString().substring(0, 10);
+            } else if (col.type == 'dateTime') {
+                return value.toISOString();
+            }
+        }
+        return value.toString();
     }
 
     deploy(i: number) {

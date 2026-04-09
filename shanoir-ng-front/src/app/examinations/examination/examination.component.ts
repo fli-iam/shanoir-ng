@@ -75,16 +75,20 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     private studyFirstChange: boolean = true;
 
     constructor(
-            private route: ActivatedRoute,
-            private examinationService: ExaminationService,
-            private centerService: CenterService,
-            private studyService: StudyService,
-            private studyRightsService: StudyRightsService,
-            public breadcrumbsService: BreadcrumbsService,
-            private downloadService: MassDownloadService) {
-
-        super(route, 'examination');
+        private route: ActivatedRoute,
+        protected examinationService: ExaminationService,
+        protected centerService: CenterService,
+        protected studyService: StudyService,
+        protected studyRightsService: StudyRightsService,
+        public breadcrumbsService: BreadcrumbsService,
+        protected downloadService: MassDownloadService
+    ) {
+        super(route);
         this.inImport = this.breadcrumbsService.isImporting();
+    }
+
+    protected getRoutingName(): string {
+        return 'examination';
     }
 
     public setFile() {
@@ -147,6 +151,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             'center': [{value: this.examination.center, disabled: this.inImport || !this.examination.study}, Validators.required],
             'examinationDate': [{value: this.examination.examinationDate, disabled: this.inImport && this.examination.examinationDate}, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],
+            'dataReuseAgreement': [{value: this.examination.dataReuseAgreement, disabled: this.mode == 'view'}],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight],
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
@@ -182,19 +187,14 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         return form;
     }
 
-    private fillSubjectsAndCentersWithPrefilled() {
-        if (!(this.subjects?.length > 0) && this.entity?.subject) {
-            if (this.entity.subject instanceof Subject) {
-                this.subjects = [this.entity.subject];
-            } else {
-                const sub = new Subject();
-                sub.id = this.entity.subject.id;
-                sub.name = this.entity.subject.name;
-                this.subjects = [sub];
+    private async fillSubjectsAndCentersWithPrefilled() {
+        const prefilledExam = await this.breadcrumbsService.currentStep.getPrefilledValue("entity");
+        if (this.entity?.subject && this.entity?.center) {
+            this.examination = prefilledExam;
+            if (this.examination.study?.id) {
+                await this.getSubjects(this.examination.study.id);
+                await this.getCenters(this.examination.study.id);
             }
-        }
-        if (!(this.centers?.length > 0) && this.entity?.center) {
-            this.centers = [{id: this.entity.center.id, name: this.entity.center.name} as IdName];
         }
     }
 
@@ -290,7 +290,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
     getUnit(key: string) {
         return UnitOfMeasure.getLabelByKey(key);
     }
-    
+
     downloadFile(file) {
         this.examinationService.downloadFile(file, this.examination.id, this.downloadState);
     }

@@ -16,9 +16,6 @@ package org.shanoir.ng.studycard.controler;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.dcm4che3.data.StandardElementDictionary;
-import org.dcm4che3.data.Tag;
-import org.dcm4che3.data.VR;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -27,10 +24,8 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.DicomTag;
-import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
-import org.shanoir.ng.studycard.model.VM;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
@@ -45,7 +40,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,13 +61,13 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Autowired
     private CardsProcessingService cardProcessingService;
-    
+
     @Autowired
     private SolrService solrService;
 
     @Override
     public ResponseEntity<Void> deleteStudyCard(
-		    @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
+            @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
         try {
             if (datasetAcquisitionService.existsByStudyCardId(studyCardId)) {
                 throw new RestServiceException(
@@ -90,11 +84,11 @@ public class StudyCardApiController implements StudyCardApi {
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }    
-    
+    }
+
     @Override
     public ResponseEntity<StudyCard> findStudyCardById(
-			@Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
+            @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
         final StudyCard studyCard = studyCardService.findById(studyCardId);
         if (studyCard == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -104,7 +98,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
-			@Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
         final List<StudyCard> studyCards = studyCardService.findByStudy(studyId);
         if (studyCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -114,7 +108,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<List<StudyCard>> findStudyCardByAcqEqId(
-			@Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acqEqId") Long acqEqId) {
+            @Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acqEqId") Long acqEqId) {
         final List<StudyCard> studyCards = studyCardService.findStudyCardsByAcqEq(acqEqId);
         if (studyCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -133,8 +127,8 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<StudyCard> saveNewStudyCard(
-			@Parameter(description = "study Card to create", required = true) @RequestBody StudyCard studyCard,
-			final BindingResult result) throws RestServiceException {
+            @Parameter(description = "study Card to create", required = true) @RequestBody StudyCard studyCard,
+            final BindingResult result) throws RestServiceException {
         validate(studyCard, result);
         StudyCard createdStudyCard;
         try {
@@ -149,7 +143,7 @@ public class StudyCardApiController implements StudyCardApi {
     // Attention: used by ShanoirUploader!
     @Override
     public ResponseEntity<List<StudyCard>> searchStudyCards(
-			@Parameter(description = "study ids", required = true) @RequestBody final IdList studyIds) {
+            @Parameter(description = "study ids", required = true) @RequestBody final IdList studyIds) {
         final List<StudyCard> studyCards = studyCardService.search(studyIds.getIdList());
         if (studyCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -159,8 +153,8 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> updateStudyCard(
-			@Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
-			@Parameter(description = "study card to update", required = true) @RequestBody StudyCard studyCard,
+            @Parameter(description = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
+            @Parameter(description = "study card to update", required = true) @RequestBody StudyCard studyCard,
             final BindingResult result) throws RestServiceException {
         validate(studyCard, result);
         try {
@@ -176,39 +170,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<List<DicomTag>> findDicomTags() throws RestServiceException {
-        Field[] declaredFields = Tag.class.getDeclaredFields();
-        List<DicomTag> dicomTags = new ArrayList<DicomTag>();
-        try {
-            for (Field field : declaredFields) {
-                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
-                    if (field.getType().getName() == "int") {
-                        int tagCode = field.getInt(null);
-                        VR tagVr = StandardElementDictionary.INSTANCE.vrOf(tagCode);
-                        VM tagVm = VM.of(tagCode);
-                        DicomTagType tagType = DicomTagType.valueOf(tagVr, tagVm);
-                        dicomTags.add(new DicomTag(tagCode, field.getName(), tagType, tagVm));
-                    }
-                    // longs actually code a date and a time, see Tag.class
-                    else if (field.getType().getName() == "long") {
-                        String name = field.getName().replace("DateAndTime", "");
-                        String hexStr = String.format("%016X", field.getLong(null));
-                        String dateStr = hexStr.substring(0, 8);
-                        String timeStr = hexStr.substring(8);
-                        int dateTagCode = Integer.parseInt(dateStr, 16);
-                        int timeTagCode = Integer.parseInt(timeStr, 16);
-                        VM dateVm = VM.of(dateTagCode);
-                        VM timeVm = VM.of(timeTagCode);
-                        DicomTagType dateTagType = DicomTagType.valueOf(StandardElementDictionary.INSTANCE.vrOf(dateTagCode), dateVm);
-                        DicomTagType timeTagType = DicomTagType.valueOf(StandardElementDictionary.INSTANCE.vrOf(timeTagCode), timeVm);
-                        dicomTags.add(new DicomTag(dateTagCode, name + "Date", dateTagType, dateVm));
-                        dicomTags.add(new DicomTag(timeTagCode, name + "Time", timeTagType, timeVm));
-                    }
-                }
-            }
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Cannot parse the dcm4che lib Tag class static fields", e));
-        }
-        return new ResponseEntity<>(dicomTags, HttpStatus.OK);
+        return new ResponseEntity<>(studyCardService.findDicomTags(), HttpStatus.OK);
     }
 
     /**
@@ -230,7 +192,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> applyStudyCard(
-			@Parameter(description = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException, SolrServerException, IOException {
+            @Parameter(description = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException, SolrServerException, IOException {
         if (studyCardApplyObject == null
                 || studyCardApplyObject.getDatasetAcquisitionIds() == null
                 || studyCardApplyObject.getDatasetAcquisitionIds().isEmpty()
@@ -241,19 +203,19 @@ public class StudyCardApiController implements StudyCardApi {
         LOG.debug("re-apply studycard n° " + studyCard.getId());
         List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
         cardProcessingService.applyStudyCard(studyCard, acquisitions);
-        
+
         // Get all updated dataset ids
         List<Long> datasetIds = new ArrayList<Long>();
         for (DatasetAcquisition acquisition : acquisitions) {
-        	for (Dataset ds : acquisition.getDatasets()) {
-        		datasetIds.add(ds.getId());
-        	}
+            for (Dataset ds : acquisition.getDatasets()) {
+                datasetIds.add(ds.getId());
+            }
         }
-        
+
         // Update solr metadata
         try {
             solrService.updateDatasetsAsync(datasetIds);
-        }catch (Exception e){
+        } catch (Exception e) {
             LOG.error("Solr update failed for datasets {}", datasetIds, e);
         }
 

@@ -281,7 +281,7 @@ export class Step {
         return Object.entries(this.resolvedPrefilledValues).map(([key,]) => key);
     }
 
-    getPrefilledValue(field: string): Promise<any> {
+    async getPrefilledValue(field: string): Promise<any> {
         return this.getPrefilled(field).then(res => res?.value);
     }
 

@@ -42,7 +42,11 @@ export class ReferenceFormComponent extends EntityComponent<Reference>{
             private route: ActivatedRoute,
             private referenceService: ReferenceService) {
 
-        super(route, 'preclinical-reference');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'preclinical-reference';
     }
 
     get reference(): Reference { return this.entity; }

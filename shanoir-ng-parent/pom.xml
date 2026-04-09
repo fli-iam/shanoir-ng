@@ -80,7 +80,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<goal>report</goal>
 						</goals>
 					</execution>
-					<!-- <execution> <id>post-unit-test</id> <phase>test</phase> <goals> 
+					<!-- <execution> <id>post-unit-test</id> <phase>test</phase> <goals>
 						<goal>report</goal> </goals> </execution> -->
 				</executions>
 			</plugin>

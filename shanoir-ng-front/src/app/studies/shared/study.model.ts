@@ -15,10 +15,10 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from '../../shared/models/profile.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Tag } from '../../tags/tag.model';
 import { User } from '../../users/shared/user.model';
 import { Field } from '../../shared/reflect/field.decorator';
+import { Subject } from "../../subjects/shared/subject.model";
 
 import { StudyCenter } from './study-center.model';
 import { StudyType } from './study-type.enum';
@@ -45,7 +45,7 @@ export class Study extends Entity {
     @Field() detailedSizes: Map<string, number> = null;
     totalSize: number;
     @Field() studyType: StudyType;
-    @Field() subjectStudyList: SubjectStudy[] = [];
+    @Field() subjects: Subject[] = [];
     @Field() studyUserList: StudyUser[] = [];
     @Field() timepoints: Timepoint[];
     @Field() visibleByDefault: boolean = false;
@@ -56,6 +56,16 @@ export class Study extends Entity {
     @Field() studyTags: Tag[];
     @Field() description: string;
     @Field() license: string;
+    @Field() isDraft: boolean = false;
+    @Field() expectedNbOfSubjects: number = null;
+    @Field() averageExaminationSize: number = null;
+    @Field() estimatedTotalVolume: number = null;
+    @Field() expectedNbOfCenters: number = null;
+    @Field() inclusionRate: number = null;
+    @Field() inclusionRateUnit: null | 'PER_DAY' | 'PER_WEEK' | 'PER_MONTH' | 'PER_YEAR' = null;
+    @Field() sponsor: string = null;
+    @Field() principalInvestigator: string = null;
+    @Field() scientificAdvisor: string = null;
     accessRequestedByCurrentUser: boolean = false;
     locked: boolean = false; // current user has no access
 

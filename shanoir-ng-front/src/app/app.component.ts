@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -53,6 +53,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             private globalService: GlobalService,
             private windowService: WindowService,
             private element: ElementRef,
+            private keycloakService: KeycloakService,
             private keycloakSessionService: KeycloakSessionService,
             private confirmService: ConfirmDialogService,
             protected router: Router,
@@ -60,7 +61,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             private userService: UserService,
             public treeService: TreeService,
             private notificationsService: NotificationsService) {
-        
+
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
     }
 
@@ -72,9 +73,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     ngOnInit() {
         this.globalService.registerGlobalClick(this.element);
         this.windowService.width = window.innerWidth;
-        if(this.keycloakSessionService.isAuthenticated()) {
+        if (this.keycloakSessionService.isAuthenticated()) {
             this.userService.getAccessRequestsForAdmin();
             this.duaAlert();
+
+            if (this.keycloakService.isUserAdmin())
+                this.draftStudiesAlert();
         }
     }
 
@@ -128,6 +132,10 @@ export class AppComponent implements OnInit, AfterViewInit {
                 }
             }
         });
+    }
+
+    private draftStudiesAlert() {
+        this.studyService.findDraftStudies();
     }
 
     private askForDuaSigning() {

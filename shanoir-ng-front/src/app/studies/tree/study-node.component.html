@@ -105,7 +105,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <div class="fake-node" #fakeSubject [id]="asNode(subject).id">
                                         <i class="fas fa-angle-right chevron" (click)="clickFakeOpen(asNode(subject))"></i>
                                         <a
-                                            [routerLink]="['/subject/details/', asNode(subject).id]"
+                                            [routerLink]="[asNode(subject).route]"
                                             class="inner"
                                             (click)="clickFakeNode(asNode(subject))"
                                             [title]="asNode(subject).title + ' n°' + asNode(subject).id">
@@ -160,7 +160,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         @if (node.open) {
             <node
                 class="studycards"
-                label="Study Cards"
+                label="Study cards"
                 awesome="fa-solid fa-shuffle"
                 (firstOpen)="loadStudyCards()"
                 [(opened)]="node.studyCardsNode.opened"
@@ -184,7 +184,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         @if (node.open) {
             <node
                 class="studycards"
-                label="Quality Cards"
+                label="Quality cards"
                 awesome="fa-solid fa-shuffle"
                 (firstOpen)="loadQualityCards()"
                 [(opened)]="node.qualityCardsNode.opened"

@@ -31,60 +31,62 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface AcquisitionEquipmentService {
 
-	/**
-	 * Find entity by its id.
-	 *
-	 * @param id id
-	 * @return an entity or null.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	Optional<AcquisitionEquipment> findById(Long id);
+    /**
+     * Find entity by its id.
+     *
+     * @param id id
+     * @return an entity or null.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    Optional<AcquisitionEquipment> findById(Long id);
 
-	/**
-	 * Get all entities.
-	 *
-	 * @return a list of manufacturers.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<AcquisitionEquipment> findAll();
+    /**
+     * Get all entities.
+     *
+     * @return a list of manufacturers.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    List<AcquisitionEquipment> findAll();
 
-	/**
-	 * Save an entity.
-	 *
-	 * @param entity the entity to create.
-	 * @return created entity.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #entity.getId() == null")
-	AcquisitionEquipment create(AcquisitionEquipment entity);
+    /**
+     * Save an entity.
+     *
+     * @param entity the entity to create.
+     * @return created entity.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #entity.getId() == null")
+    AcquisitionEquipment create(AcquisitionEquipment entity);
 
-	/**
-	 * Update an entity.
-	 *
-	 * @param entity the entity to update.
-	 * @return updated entity.
-	 * @throws EntityNotFoundException
-	 * @throws MicroServiceCommunicationException
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	AcquisitionEquipment update(AcquisitionEquipment entity) throws EntityNotFoundException;
+    public AcquisitionEquipment saveNewAcquisitionEquipment(Long centerId, EquipmentDicom equipmentDicom, boolean withAMQP);
 
-	/**
-	 * Delete an entity.
-	 *
-	 * @param id the entity id to be deleted.
-	 * @throws EntityNotFoundException if the entity cannot be found.
-	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	void deleteById(Long id) throws EntityNotFoundException;
+    /**
+     * Update an entity.
+     *
+     * @param entity the entity to update.
+     * @return updated entity.
+     * @throws EntityNotFoundException
+     * @throws MicroServiceCommunicationException
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    AcquisitionEquipment update(AcquisitionEquipment entity) throws EntityNotFoundException;
 
-	List<AcquisitionEquipment> findAllByCenterId(Long centerId);
+    /**
+     * Delete an entity.
+     *
+     * @param id the entity id to be deleted.
+     * @throws EntityNotFoundException if the entity cannot be found.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    void deleteById(Long id) throws EntityNotFoundException;
 
-	List<AcquisitionEquipment> findAllByStudyId(Long studyId);
+    List<AcquisitionEquipment> findAllByCenterId(Long centerId);
 
-	public List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber);
+    List<AcquisitionEquipment> findAllByStudyId(Long studyId);
 
-	public List<AcquisitionEquipment> findAllBySerialNumberContaining(String serialNumber);
+    public List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber);
 
-	List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateByEquipmentDicom(Long centerId, EquipmentDicom equipmentDicom);
+    public List<AcquisitionEquipment> findAllBySerialNumberContaining(String serialNumber);
+
+    List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateByEquipmentDicom(Long centerId, EquipmentDicom equipmentDicom);
 
 }

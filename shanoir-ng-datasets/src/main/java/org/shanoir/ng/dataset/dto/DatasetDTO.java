@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -23,199 +23,199 @@ import org.shanoir.ng.tag.model.StudyTagDTOLight;
 
 /**
  * DTO for dataset.
- * 
+ *
  * @author msimon
  *
  */
 public class DatasetDTO {
 
-	@LocalDateAnnotations
-	private LocalDate creationDate;
+    @LocalDateAnnotations
+    private LocalDate creationDate;
 
-	private Long groupOfSubjectsId;
+    private Long groupOfSubjectsId;
 
-	private Long id;
+    private Long id;
 
-	private DatasetMetadataDTO originMetadata;
+    private DatasetMetadataDTO originMetadata;
 
-	private Long studyId;
+    private Long studyId;
 
-	private Long subjectId;
-	
-	private Long centerId;
+    private Long subjectId;
 
-	private DatasetMetadataDTO updatedMetadata;
-	
-	private String name;
-	
-	private String type;
+    private Long centerId;
 
-	private boolean inPacs;
-	
-	private List<StudyTagDTOLight> tags;
+    private DatasetMetadataDTO updatedMetadata;
 
-	private Long source;
+    private String name;
 
-	private List<Long> copies;
+    private String type;
 
-	/**
-	 * @return the creationDate
-	 */
-	public LocalDate getCreationDate() {
-		return creationDate;
-	}
+    private boolean inPacs;
 
-	/**
-	 * @param creationDate
-	 *            the creationDate to set
-	 */
-	public void setCreationDate(LocalDate creationDate) {
-		this.creationDate = creationDate;
-	}
+    private List<StudyTagDTOLight> tags;
 
-	/**
-	 * @return the groupOfSubjectsId
-	 */
-	public Long getGroupOfSubjectsId() {
-		return groupOfSubjectsId;
-	}
+    private Long source;
 
-	/**
-	 * @param groupOfSubjectsId
-	 *            the groupOfSubjectsId to set
-	 */
-	public void setGroupOfSubjectsId(Long groupOfSubjectsId) {
-		this.groupOfSubjectsId = groupOfSubjectsId;
-	}
+    private List<Long> copies;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the creationDate
+     */
+    public LocalDate getCreationDate() {
+        return creationDate;
+    }
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @param creationDate
+     *            the creationDate to set
+     */
+    public void setCreationDate(LocalDate creationDate) {
+        this.creationDate = creationDate;
+    }
 
-	/**
-	 * @return the originMetadata
-	 */
-	public DatasetMetadataDTO getOriginMetadata() {
-		return originMetadata;
-	}
+    /**
+     * @return the groupOfSubjectsId
+     */
+    public Long getGroupOfSubjectsId() {
+        return groupOfSubjectsId;
+    }
 
-	/**
-	 * @param originMetadata
-	 *            the originMetadata to set
-	 */
-	public void setOriginMetadata(DatasetMetadataDTO originMetadata) {
-		this.originMetadata = originMetadata;
-	}
+    /**
+     * @param groupOfSubjectsId
+     *            the groupOfSubjectsId to set
+     */
+    public void setGroupOfSubjectsId(Long groupOfSubjectsId) {
+        this.groupOfSubjectsId = groupOfSubjectsId;
+    }
 
-	/**
-	 * @return the studyId
-	 */
-	public Long getStudyId() {
-		return studyId;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param studyId
-	 *            the studyId to set
-	 */
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @return the subjectId
-	 */
-	public Long getSubjectId() {
-		return subjectId;
-	}
+    /**
+     * @return the originMetadata
+     */
+    public DatasetMetadataDTO getOriginMetadata() {
+        return originMetadata;
+    }
 
-	/**
-	 * @param subjectId
-	 *            the subjectId to set
-	 */
-	public void setSubjectId(Long subjectId) {
-		this.subjectId = subjectId;
-	}
+    /**
+     * @param originMetadata
+     *            the originMetadata to set
+     */
+    public void setOriginMetadata(DatasetMetadataDTO originMetadata) {
+        this.originMetadata = originMetadata;
+    }
 
-	/**
-	 * @return the updatedMetadata
-	 */
-	public DatasetMetadataDTO getUpdatedMetadata() {
-		return updatedMetadata;
-	}
+    /**
+     * @return the studyId
+     */
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	/**
-	 * @param updatedMetadata
-	 *            the updatedMetadata to set
-	 */
-	public void setUpdatedMetadata(DatasetMetadataDTO updatedMetadata) {
-		this.updatedMetadata = updatedMetadata;
-	}
+    /**
+     * @param studyId
+     *            the studyId to set
+     */
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the subjectId
+     */
+    public Long getSubjectId() {
+        return subjectId;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param subjectId
+     *            the subjectId to set
+     */
+    public void setSubjectId(Long subjectId) {
+        this.subjectId = subjectId;
+    }
 
-	public String getType() {
-		return type;
-	}
+    /**
+     * @return the updatedMetadata
+     */
+    public DatasetMetadataDTO getUpdatedMetadata() {
+        return updatedMetadata;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    /**
+     * @param updatedMetadata
+     *            the updatedMetadata to set
+     */
+    public void setUpdatedMetadata(DatasetMetadataDTO updatedMetadata) {
+        this.updatedMetadata = updatedMetadata;
+    }
 
-	public Long getCenterId() {
-		return centerId;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public boolean isInPacs() {
-		return inPacs;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public void setInPacs(boolean inPacs) {
-		this.inPacs = inPacs;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	public List<StudyTagDTOLight> getTags() {
-		return tags;
-	}
+    public Long getCenterId() {
+        return centerId;
+    }
 
-	public void setTags(List<StudyTagDTOLight> tags) {
-		this.tags = tags;
-	}
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
 
-	public Long getSource() {
-		return source;
-	}
+    public boolean isInPacs() {
+        return inPacs;
+    }
 
-	public void setSource(Long source) {
-		this.source = source;
-	}
+    public void setInPacs(boolean inPacs) {
+        this.inPacs = inPacs;
+    }
 
-	public List<Long> getCopies() {
-		return copies;
-	}
+    public List<StudyTagDTOLight> getTags() {
+        return tags;
+    }
 
-	public void setCopies(List<Long> copies) {
-		this.copies = copies;
-	}
+    public void setTags(List<StudyTagDTOLight> tags) {
+        this.tags = tags;
+    }
+
+    public Long getSource() {
+        return source;
+    }
+
+    public void setSource(Long source) {
+        this.source = source;
+    }
+
+    public List<Long> getCopies() {
+        return copies;
+    }
+
+    public void setCopies(List<Long> copies) {
+        this.copies = copies;
+    }
 }

@@ -36,3 +36,9 @@ export class ShanoirError {
         }
     }
 }
+
+export class RightsError extends Error {
+    constructor() {
+        super('You don\'t have the required rights to perform this action.');
+    }
+}

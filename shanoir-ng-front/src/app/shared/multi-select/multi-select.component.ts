@@ -114,8 +114,10 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
         this.selectedOptions = [];
         this.modelArray.forEach(modelValue => {
             const selected: Option<any> = this.options.find(option => objectsEqual(option.value, modelValue));
-            selected.disabled = true;
-            if (selected) this.selectedOptions.push(selected);
+            if (selected) {
+                selected.disabled = true;
+                this.selectedOptions.push(selected);
+            }
         });
     }
 

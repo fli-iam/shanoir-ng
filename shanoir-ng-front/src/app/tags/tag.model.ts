@@ -12,7 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Entity } from '../shared/components/entity/entity.abstract';
-import { Id } from '../shared/models/id.model';
 import { Field } from '../shared/reflect/field.decorator';
 
 export class Tag extends Entity {
@@ -44,21 +43,4 @@ export class Tag extends Entity {
         t.color = this.color;
         t.name = this.name;
     }
-}
-
-
-export class SubjectStudyTagDTO {
-
-    constructor(
-        public subjectStudy: Id,
-        public tag: Tag
-    ) {}
-}
-
-export class StudyTagDTO {
-
-  constructor(
-    public subjectStudy: Id,
-    public tag: Tag
-  ) {}
 }

@@ -71,6 +71,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             <i class="{{ vars.cellGraphics.awesome }}"></i>
                                         }
                                         {{ vars.render.text ? vars.render.text : vars.render }}
+                                        @if (col.download) {
+                                            <!-- download -->
+                                            <span (click)="col.download(item)" class="download-link">
+                                                <i class="fas fa-download"></i>
+                                            </span>
+                                        }
                                     </span>
                                 </a>
                             }
@@ -80,11 +86,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     [routerLink]="vars.rowRoute"
                                     class="cell-new-tab"
                                     title="{{ vars.render.text ? vars.render.text : vars.render }}">
-                                    <a
-                                        class="link"
-                                        [routerLink]="item.eventType != 'downloadStatistics.event' ? vars.route : null"
-                                        routerLinkActive="active"
-                                        (click)="downloadStats(item)">
+                                    <a class="link" 
+                                            [routerLink]="vars.route" 
+                                            routerLinkActive="active">
                                         {{ vars.render.text ? vars.render.text : vars.render }}
                                         @if (!col.awesome) {
                                             <i class="fas fa-external-link-alt"></i>
@@ -330,7 +334,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <tr
                 [class.odd]="i % 2 != 0"
                 [class.even]="i % 2 == 0"
-                [class.disabled]="rowDisabled(item)"
+                [class.disabled]="rowGreyedOut(item)"
                 [class.edit]="editMode"
                 [class.selected]="(selectionAllowed && isSelected(item)) || (!!item.id && selectedId == item.id)"
                 [class.opened]="subRowsDefs && subRowOpen[i]">

@@ -24,19 +24,19 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
  */
 public class EntityLinkedException extends ShanoirException {
 
-	public EntityLinkedException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public EntityLinkedException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	public EntityLinkedException(Class<? extends AbstractEntity> clazz, Long id) {
-		super(getMessage(clazz, id));
-	}
+    public EntityLinkedException(Class<? extends AbstractEntity> clazz, Long id) {
+        super(getMessage(clazz, id));
+    }
 
-	private static String getMessage(Class<? extends AbstractEntity> clazz, Long id) {
-		return "This entity is linked to other entities: "
-				+ clazz.getSimpleName()
-				+ " with id "
-				+ id;
-	}
+    private static String getMessage(Class<? extends AbstractEntity> clazz, Long id) {
+        return "This entity is linked to other entities: "
+                + clazz.getSimpleName()
+                + " with id "
+                + id;
+    }
 
 }

@@ -28,17 +28,17 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface AcquisitionEquipmentRepository extends CrudRepository<AcquisitionEquipment, Long> {
 
-	List<AcquisitionEquipment> findByCenterId(Long centerId);
+    List<AcquisitionEquipment> findByCenterId(Long centerId);
 
-	List<AcquisitionEquipment> findByCenterStudyCenterListStudyId(Long studyId);
+    List<AcquisitionEquipment> findByCenterStudyCenterListStudyId(Long studyId);
 
-	List<AcquisitionEquipment> findBySerialNumberContaining(String serialNumber);
+    List<AcquisitionEquipment> findBySerialNumberContaining(String serialNumber);
 
-	List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber);
+    List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber);
 
-	List<AcquisitionEquipment> findByManufacturerModelId(Long manufacturerModelId);
+    List<AcquisitionEquipment> findByManufacturerModelId(Long manufacturerModelId);
 
-	@Modifying
-	@Query("DELETE FROM AcquisitionEquipment ae WHERE ae.id = :id")
-	public void deleteById(Long id);
+    @Modifying
+    @Query("DELETE FROM AcquisitionEquipment ae WHERE ae.id = :id")
+    public void deleteById(Long id);
 }

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -43,193 +43,206 @@ import jakarta.validation.constraints.NotNull;
 @JsonPropertyOrder({ "_links", "therapy", "startDate", "endDate", "dose", "frequency", "animalSubject", "molecule" })
 public class SubjectTherapy extends HalEntity {
 
-	@JsonProperty("animalSubject")
-	@ManyToOne
-	@NotNull
-	@JsonIgnore
-	@JsonManagedReference
-	private AnimalSubject animalSubject = null;
+    @JsonProperty("animalSubject")
+    @ManyToOne
+    @NotNull
+    @JsonIgnore
+    @JsonManagedReference
+    private AnimalSubject animalSubject = null;
 
-	@ManyToOne
-	@NotNull
-	private Therapy therapy = null;
+    @ManyToOne
+    @NotNull
+    private Therapy therapy = null;
 
-	private Date startDate = null;
+    private Date startDate = null;
 
-	private Date endDate = null;
+    private Date endDate = null;
 
-	private Double dose;
+    private Double dose;
 
-	// @RefValueExists
-	@ManyToOne
-	private Reference doseUnit = null;
+    // @RefValueExists
+    @ManyToOne
+    private Reference doseUnit = null;
 
-	private String frequency;
+    private String frequency;
 
-	private String molecule;
+    private String molecule;
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "subject/" + getAnimalSubject().getId() + "/therapy/" + getId());
-	}
 
-	public SubjectTherapy subject(final AnimalSubject animalSubject) {
-		this.animalSubject = animalSubject;
-		return this;
-	}
+    public SubjectTherapy() { }
 
-	@Schema(name = "none")
-	public AnimalSubject getAnimalSubject() {
-		return animalSubject;
-	}
+    public SubjectTherapy(SubjectTherapy source) {
+        this.therapy = source.getTherapy();
+        this.startDate = source.getStartDate();
+        this.endDate = source.getEndDate();
+        this.dose = source.getDose();
+        this.doseUnit = source.getDoseUnit();
+        this.frequency = source.getFrequency();
+        this.molecule = source.getMolecule();
+    }
 
-	public void setAnimalSubject(final AnimalSubject animalSubject) {
-		this.animalSubject = animalSubject;
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "subject/" + getAnimalSubject().getId() + "/therapy/" + getId());
+    }
 
-	public SubjectTherapy therapy(final Therapy therapy) {
-		this.therapy = therapy;
-		return this;
-	}
+    public SubjectTherapy subject(final AnimalSubject animalSubject) {
+        this.animalSubject = animalSubject;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public Therapy getTherapy() {
-		return therapy;
-	}
+    @Schema(name = "none")
+    public AnimalSubject getAnimalSubject() {
+        return animalSubject;
+    }
 
-	public void setTherapy(final Therapy therapy) {
-		this.therapy = therapy;
-	}
+    public void setAnimalSubject(final AnimalSubject animalSubject) {
+        this.animalSubject = animalSubject;
+    }
 
-	public SubjectTherapy startDate(final Date startDate) {
-		this.startDate = startDate;
-		return this;
-	}
+    public SubjectTherapy therapy(final Therapy therapy) {
+        this.therapy = therapy;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public Date getStartDate() {
-		return startDate;
-	}
+    @Schema(name = "none")
+    public Therapy getTherapy() {
+        return therapy;
+    }
 
-	public void setStartDate(final Date startDate) {
-		this.startDate = startDate;
-	}
+    public void setTherapy(final Therapy therapy) {
+        this.therapy = therapy;
+    }
 
-	public SubjectTherapy endDate(final Date endDate) {
-		this.endDate = endDate;
-		return this;
-	}
+    public SubjectTherapy startDate(final Date startDate) {
+        this.startDate = startDate;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public Date getEndDate() {
-		return endDate;
-	}
+    @Schema(name = "none")
+    public Date getStartDate() {
+        return startDate;
+    }
 
-	public void setEndDate(final Date endDate) {
-		this.endDate = endDate;
-	}
+    public void setStartDate(final Date startDate) {
+        this.startDate = startDate;
+    }
 
-	public SubjectTherapy dose(final Double dose) {
-		this.dose = dose;
-		return this;
-	}
+    public SubjectTherapy endDate(final Date endDate) {
+        this.endDate = endDate;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public Double getDose() {
-		return dose;
-	}
+    @Schema(name = "none")
+    public Date getEndDate() {
+        return endDate;
+    }
 
-	public void setDose(final Double dose) {
-		this.dose = dose;
-	}
+    public void setEndDate(final Date endDate) {
+        this.endDate = endDate;
+    }
 
-	public SubjectTherapy doseUnit(final Reference unit) {
-		this.doseUnit = unit;
-		return this;
-	}
+    public SubjectTherapy dose(final Double dose) {
+        this.dose = dose;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public Reference getDoseUnit() {
-		return doseUnit;
-	}
+    @Schema(name = "none")
+    public Double getDose() {
+        return dose;
+    }
 
-	public void setDoseUnit(final Reference unit) {
-		this.doseUnit = unit;
-	}
+    public void setDose(final Double dose) {
+        this.dose = dose;
+    }
 
-	public SubjectTherapy frequency(final String frequency) {
-		this.frequency = frequency;
-		return this;
-	}
+    public SubjectTherapy doseUnit(final Reference unit) {
+        this.doseUnit = unit;
+        return this;
+    }
 
-	@Schema(name = "none")
-	public String getFrequency() {
-		return frequency;
-	}
+    @Schema(name = "none")
+    public Reference getDoseUnit() {
+        return doseUnit;
+    }
 
-	public void setFrequency(final String frequency) {
-		this.frequency = frequency;
-	}
+    public void setDoseUnit(final Reference unit) {
+        this.doseUnit = unit;
+    }
 
-	/**
-	 * @return the molecule
-	 */
-	@Schema(name = "none")
-	public String getMolecule() {
-		return molecule;
-	}
+    public SubjectTherapy frequency(final String frequency) {
+        this.frequency = frequency;
+        return this;
+    }
 
-	/**
-	 * @param molecule the molecule to set
-	 */
-	public void setMolecule(final String molecule) {
-		this.molecule = molecule;
-	}
+    @Schema(name = "none")
+    public String getFrequency() {
+        return frequency;
+    }
 
-	@Override
-	public boolean equals(final java.lang.Object o) {
-		if (this == o) {
-			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		SubjectTherapy subjectTherapy = (SubjectTherapy) o;
-		return Objects.equals(this.therapy, subjectTherapy.therapy);
-	}
+    public void setFrequency(final String frequency) {
+        this.frequency = frequency;
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(therapy);
-	}
+    /**
+     * @return the molecule
+     */
+    @Schema(name = "none")
+    public String getMolecule() {
+        return molecule;
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("class SubjectTherapies {\n");
+    /**
+     * @param molecule the molecule to set
+     */
+    public void setMolecule(final String molecule) {
+        this.molecule = molecule;
+    }
 
-		sb.append("    therapy: ").append(toIndentedString(therapy)).append("\n");
-		sb.append("    dose: ").append(toIndentedString(dose)).append("\n");
-		sb.append("    unit: ").append(toIndentedString(doseUnit)).append("\n");
-		sb.append("    frequency: ").append(toIndentedString(frequency)).append("\n");
-		sb.append("    startDate: ").append(toIndentedString(startDate)).append("\n");
-		sb.append("    endDate: ").append(toIndentedString(endDate)).append("\n");
-		sb.append("    molecule: ").append(toIndentedString(molecule)).append("\n");
-		sb.append("}");
-		return sb.toString();
-	}
+    @Override
+    public boolean equals(final java.lang.Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SubjectTherapy subjectTherapy = (SubjectTherapy) o;
+        return Objects.equals(this.therapy, subjectTherapy.therapy);
+    }
 
-	/**
-	 * Convert the given object to string with each line indented by 4 spaces
-	 * (except the first line).
-	 */
-	private String toIndentedString(final java.lang.Object o) {
-		if (o == null) {
-			return "null";
-		}
-		return o.toString().replace("\n", "\n    ");
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(therapy);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class SubjectTherapies {\n");
+
+        sb.append("    therapy: ").append(toIndentedString(therapy)).append("\n");
+        sb.append("    dose: ").append(toIndentedString(dose)).append("\n");
+        sb.append("    unit: ").append(toIndentedString(doseUnit)).append("\n");
+        sb.append("    frequency: ").append(toIndentedString(frequency)).append("\n");
+        sb.append("    startDate: ").append(toIndentedString(startDate)).append("\n");
+        sb.append("    endDate: ").append(toIndentedString(endDate)).append("\n");
+        sb.append("    molecule: ").append(toIndentedString(molecule)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(final java.lang.Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
 }

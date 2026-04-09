@@ -1,3 +1,17 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <div class="cell">
     <form #window class="window" [formGroup]="form">
         <h2 class="header">Download Datasets</h2>
@@ -16,37 +30,28 @@
         }
         <fieldset class="body" [disabled]="loading">
             <ol>
-                @if (hasDicom) {
-                    <li>
-                        <label>Dataset files format</label>
-                        <span class="right-col">
-                            <select-box formControlName="format" [options]="formatOptions"></select-box>
-                        </span>
-                    </li>
-                }
-                @if (hasDicom && form.get("format")?.value == "nii") {
-                    <li>
-                        <label>Nifti converter</label>
-                        <span class="right-col">
-                            <select-box formControlName="converter" [options]="niftiConverters"></select-box>
-                        </span>
-                    </li>
-                }
-                @if (winOs) {
-                    <li>
-                        <label>
-                            Short paths
-                            <tool-tip>
-                                Windows cannot unzip files to a path longer than 260 characters. If you encounter this
-                                problem while trying to download and/or unzip files, you may try this option (and / or
-                                choose a target directory with a shorter path).
-                            </tool-tip>
-                        </label>
-                        <span class="right-col">
-                            <checkbox formControlName="shortPath"></checkbox>
-                        </span>
-                    </li>
-                }
+                <li *ngIf="hasDicom">
+                    <label>Dataset files format</label>
+                    <span class="right-col">
+                        <select-box formControlName="format" [options]="formatOptions"></select-box>
+                    </span>
+                </li>
+                <li *ngIf="hasDicom && form.get('format')?.value == 'nii'">
+                    <label>Nifti converter</label>
+                    <span class="right-col">
+                        <select-box formControlName="converter" [options]="niftiConverters"></select-box>
+                        <label *ngIf="hasError('converter', ['requiredIfTypeIsNii'])" class="form-validation-alert">Converter required</label>
+                    </span>
+                </li>
+                <li *ngIf="winOs">
+                    <label>
+                        Short paths
+                        <tool-tip>Windows cannot unzip files to a path longer than 260 characters. If you encounter this problem while trying to download and/or unzip files, you may try this option (and / or choose a target directory with a shorter path).</tool-tip>
+                    </label>
+                    <span class="right-col">
+                        <checkbox formControlName="shortPath"></checkbox>
+                    </span>
+                </li>
                 <li>
                     <label>Unzip datasets (slower)</label>
                     <span class="right-col">
@@ -63,58 +68,56 @@
         </fieldset>
         <fieldset class="body" disabled="loading">
             <div class="format-preview">
-                <node label="download_folder" awesome="fas fa-folder" [deploy]="true" [clickable]="false">
+                <node
+                        label="download_folder"
+                        awesome="fas fa-folder"
+                        [deploy]="true"
+                        [clickable]="false">
                     <ng-template #datasetFileNode>
-                        @if (!form.get("unzip")?.value) {
-                            <node
+                        <node *ngIf="!form.get('unzip')?.value"
                                 label="dataset"
                                 awesome="fas fa-file-zipper"
                                 [deploy]="true"
-                                [clickable]="false"></node>
-                        }
-                        @if (form.get("unzip")?.value) {
-                            <node label="ds123.dcm" awesome="fas fa-file" [deploy]="true" [clickable]="false"></node>
-                        }
+                                [clickable]="false">
+                        </node>
+                        <node *ngIf="form.get('unzip')?.value"
+                                label="ds123.dcm"
+                                awesome="fas fa-file"
+                                [deploy]="true"
+                                [clickable]="false">
+                        </node>
                     </ng-template>
                     <ng-template #datasetNode>
-                        @if (form.get("datasetFolders")?.value) {
-                            <node label="dataset" awesome="fas fa-folder" [deploy]="true" [clickable]="false">
-                                <ng-template [ngTemplateOutlet]="datasetFileNode"></ng-template>
-                            </node>
-                        }
-                        @if (!form.get("datasetFolders")?.value) {
+                        <node *ngIf="form.get('datasetFolders')?.value"
+                                label="dataset"
+                                awesome="fas fa-folder"
+                                [deploy]="true"
+                                [clickable]="false">
                             <ng-template [ngTemplateOutlet]="datasetFileNode"></ng-template>
-                        }
                     </ng-template>
                     <ng-template #acquisitionNode>
-                        @if (form.get("acquisitionFolders")?.value) {
-                            <node label="acquisition" awesome="fas fa-folder" [deploy]="true" [clickable]="false">
-                                <ng-template [ngTemplateOutlet]="datasetNode"></ng-template>
-                            </node>
-                        }
-                        @if (!form.get("acquisitionFolders")?.value) {
+                        <node *ngIf="form.get('acquisitionFolders')?.value"
+                                label="acquisition"
+                                awesome="fas fa-folder"
+                                [deploy]="true"
+                                [clickable]="false">
                             <ng-template [ngTemplateOutlet]="datasetNode"></ng-template>
-                        }
                     </ng-template>
                     <ng-template #examinationNode>
-                        @if (form.get("examinationFolders")?.value) {
-                            <node label="examination" awesome="fas fa-folder" [deploy]="true" [clickable]="false">
-                                <ng-template [ngTemplateOutlet]="acquisitionNode"></ng-template>
-                            </node>
-                        }
-                        @if (!form.get("examinationFolders")?.value) {
+                        <node *ngIf="form.get('examinationFolders')?.value"
+                                label="examination"
+                                awesome="fas fa-folder"
+                                [deploy]="true"
+                                [clickable]="false">
                             <ng-template [ngTemplateOutlet]="acquisitionNode"></ng-template>
-                        }
                     </ng-template>
                     <ng-template #subjectNode>
-                        @if (form.get("subjectFolders")?.value) {
-                            <node label="subject" awesome="fas fa-folder" [deploy]="true" [clickable]="false">
-                                <ng-template [ngTemplateOutlet]="examinationNode"></ng-template>
-                            </node>
-                        }
-                        @if (!form.get("subjectFolders")?.value) {
+                        <node *ngIf="form.get('subjectFolders')?.value"
+                                label="subject"
+                                awesome="fas fa-folder"
+                                [deploy]="true"
+                                [clickable]="false">
                             <ng-template [ngTemplateOutlet]="examinationNode"></ng-template>
-                        }
                     </ng-template>
 
                     <ng-template [ngTemplateOutlet]="subjectNode"></ng-template>

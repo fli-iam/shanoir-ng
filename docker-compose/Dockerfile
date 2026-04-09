@@ -72,10 +72,10 @@ ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/urandom", 
 FROM alpine AS datasets-download
 
 # Installation of dcm4che into /opt/dcm4che to manage the store-scu into the
-# PACS dcm4che3, used last version 5.21.0 as available on the 2020-02-14
+# PACS dcm4che-arc light, use version 5.31.1 to comply with entire library usage
 # https://sourceforge.net/projects/dcm4che/files/dcm4che3/
 RUN wget -qO dcm4che-bin.zip \
-        https://downloads.sourceforge.net/project/dcm4che/dcm4che3/5.21.0/dcm4che-5.21.0-bin.zip \
+        https://downloads.sourceforge.net/project/dcm4che/dcm4che3/5.31.1/dcm4che-5.31.1-bin.zip \
     && mkdir -p /target/opt && cd /target/opt \
     && unzip /dcm4che-bin.zip && mv dcm4che-* dcm4che \
     && rm    /dcm4che-bin.zip
@@ -295,7 +295,7 @@ RUN /opt/keycloak/bin/kc.sh build
 #
 # Create actual image, based on builder before
 #
-FROM keycloak-base as keycloak
+FROM keycloak-base AS keycloak
 
 COPY --from=keycloak-builder /opt/keycloak/ /opt/keycloak/
 COPY --chown=keycloak keycloak/themes/. /opt/keycloak/themes
@@ -312,7 +312,7 @@ CMD []
 
 ################ nginx #####################################################
 
-FROM ohif/app:v3.9.0-beta.76 AS nginx-viewer
+FROM ohif/app:v3.11.0 AS nginx-viewer
 
 FROM nginx AS nginx
 
@@ -355,18 +355,25 @@ RUN npm install -g @angular/cli@20.3.7
 
 FROM mysql/mysql-server:5.7 AS database
 
-COPY --link --chmod=0755 database/shanoir-entrypoint.sh /
-ENTRYPOINT ["/shanoir-entrypoint.sh"]
-CMD ["mysqld"]
-
 COPY --link --chmod=0755 \
     database/1_create_databases.sh \
     database/2_add_users.sql \
-    database/3_add_statistics_procedure.sql \
-    database/4_add_studyStatistics_procedure.sql \
     /docker-entrypoint-initdb.d/
 
-COPY --link database/db-changes /opt/db-changes
+CMD ["mysqld"]
+
+
+
+################ database-migrations #######################################
+
+FROM mysql:5.7 AS database-migrations
+
+COPY --link --chmod=0755 database-migrations/shanoir-entrypoint.sh /
+COPY --link database-migrations/db-changes /opt/db-changes
+COPY --link database-migrations/db-init-procedures /opt/db-init-procedures
+
+ENTRYPOINT ["/shanoir-entrypoint.sh"]
+CMD []
 
 
 

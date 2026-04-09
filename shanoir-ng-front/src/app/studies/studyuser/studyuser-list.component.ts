@@ -147,13 +147,16 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             { headerName: 'Can import', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true,
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_IMPORT, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
+            { headerName: 'Can execute', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true,
+                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_EXECUTE, su, value),
+                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_EXECUTE)},
             { headerName: 'Can admin', type: 'boolean',  disableSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px',
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
             // { headerName: 'Receive Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
             // { headerName: 'Receive Member Mail', type: 'boolean', field: 'receiveStudyUserReport', editable: true, width: '54px' },
         ];
-        if (deleteButton) {
+        if (deleteButton && !this.study?.isDraft) {
             this.columnDefs.push({ headerName: '', type: 'button', awesome: 'fa-regular fa-trash-can', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)});
         }
     }
@@ -223,7 +226,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         this.onTouchedCallback();
     }
 
-    studyStatusStr(studyStatus: string) {
+    enumStrToStr(studyStatus: string) {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 

@@ -26,7 +26,6 @@ import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from 
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 import { SelectBoxComponent } from '../../shared/select/select.component';
 
-
 @Component({
     selector: 'clinical-context',
     templateUrl: '../clinical-context/clinical-context.component.html',
@@ -103,18 +102,20 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.subjectStudyList = null;
+        if (newSubject.isAlreadyAnonymized) {
+            newSubject.name = this.subjectNamePrefix + this.patient.patientName;
+        } else {
+            newSubject.name =this.subjectNamePrefix
+        }
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.study = this.study;
+        newSubject.physicallyInvolved = false;
         this.breadcrumbsService.addNextStepPrefilled('entity', newSubject);
         this.breadcrumbsService.addNextStepPrefilled('firstName', this.computeNameFromDicomTag(this.patient.patientName)[1]);
         this.breadcrumbsService.addNextStepPrefilled('lastName', this.computeNameFromDicomTag(this.patient.patientName)[2]);
         this.breadcrumbsService.addNextStepPrefilled('patientName', this.patient.patientName);
-        this.breadcrumbsService.addNextStepPrefilled('forceStudy', this.study);
+        this.breadcrumbsService.addNextStepPrefilled('entity.study', this.study, true);
         this.breadcrumbsService.addNextStepPrefilled('subjectNamePrefix', this.subjectNamePrefix);
-        this.breadcrumbsService.addNextStepPrefilled('birthDate', newSubject.birthDate);
-        this.breadcrumbsService.addNextStepPrefilled('subjectStudyList', newSubject.subjectStudyList);
-        this.breadcrumbsService.addNextStepPrefilled('isAlreadyAnonymized', newSubject.isAlreadyAnonymized);
     }
 
     protected getPrefilledExamination(): Examination {

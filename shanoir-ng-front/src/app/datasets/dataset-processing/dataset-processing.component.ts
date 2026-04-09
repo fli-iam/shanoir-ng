@@ -14,20 +14,26 @@
 
 import { formatDate } from "@angular/common";
 import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { distinctUntilChanged, takeUntil, firstValueFrom } from 'rxjs';
+import { distinctUntilChanged, takeUntil } from 'rxjs';
 
 import { Selection } from 'src/app/studies/study/tree.service';
 import { ExecutionMonitoringService } from 'src/app/vip/execution-monitorings/execution-monitoring.service';
 import { ExecutionMonitoring } from 'src/app/vip/models/execution-monitoring.model';
+import { Study } from "src/app/studies/shared/study.model";
 
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { FormFooterComponent } from "../../shared/components/form-footer/form-footer.component";
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { TooltipComponent } from "../../shared/components/tooltip/tooltip.component";
+import { DatepickerComponent } from "../../shared/date-picker/date-picker.component";
 import { dateDisplay } from "../../shared/localLanguage/localDate.abstract";
+import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.pipe";
+import { MultiSelectTableComponent } from "../../shared/multi-select-table/multi-select-table.component";
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
@@ -35,12 +41,7 @@ import * as AppUtils from "../../utils/app.utils";
 import { ExecutionService } from "../../vip/execution/execution.service";
 import { DatasetProcessingService } from '../shared/dataset-processing.service';
 import { Dataset } from '../shared/dataset.model';
-import { DatasetService } from '../shared/dataset.service';
-import { FormFooterComponent } from "../../shared/components/form-footer/form-footer.component";
-import { DatepickerComponent } from "../../shared/date-picker/date-picker.component";
-import { TooltipComponent } from "../../shared/components/tooltip/tooltip.component";
-import { MultiSelectTableComponent } from "../../shared/multi-select-table/multi-select-table.component";
-import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.pipe";
+import { DatasetLight, DatasetService } from '../shared/dataset.service';
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -56,9 +57,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     protected studyOptions: Option<number>[] = [];
     protected subjectOptions: Option<Subject>[] = [];
     protected inputDatasetOptions: Option<Dataset>[] = [];
-    protected outputDatasetOptions: Option<Dataset>[] = [];
     protected inputDatasetsColumnDefs: ColumnDefinition[];
-    protected outputDatasetsColumnDefs: ColumnDefinition[];
     protected isExecutionMonitoring: boolean = false;
     protected executionMonitoring: ExecutionMonitoring;
 
@@ -72,13 +71,17 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             private vipClientService: ExecutionService
             ) {
 
-        super(route, 'dataset-processing');
+        super(route);
         this.createColumnDefs();
     }
 
+    protected getRoutingName(): string {
+        return 'dataset-processing';
+    }
+
     get subject(): Subject { return this._subject; }
-    
-    set subject(subject: Subject) { 
+
+    set subject(subject: Subject) {
         this._subject = subject;
         this.form.get('subject').setValue(subject);
     }
@@ -98,6 +101,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.studyService.get(this.datasetProcessing.studyId, "lazy").then(study => {
             this.studyOptions = [new Option<number>(study.id, study.name)];
         });
+        this.completeDatasetsDetails();
         // checking if the datasetProcessing is not execution monitoring
         this.subscriptions.push(
             this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe({
@@ -124,7 +128,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
                         const subjectId = dataset.subject?.id;
                         this.fetchDatasets();
                         this.subject = this.subjectOptions?.find(opt => opt.value.id == subjectId)?.value;
-                    }   
+                    }
                 });
 
             }
@@ -151,7 +155,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.datasetProcessing.inputDatasets = [];
         this.datasetProcessing.outputDatasets = [];
         this.inputDatasetOptions = [];
-        this.outputDatasetOptions = [];
         if (newValue) {
             this.fetchDatasets();
         }
@@ -217,9 +220,37 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         return this.datasetService.getByStudyIdAndSubjectId(this.datasetProcessing.studyId, this.subject.id).then(datasets => {
             for (const dataset of datasets) {
                 this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
-                this.outputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
             }
         });
+    }
+
+    completeDatasetsDetails(): Promise<void> {
+        return this.datasetService.getByIds(new Set<number>([
+            ...this.datasetProcessing.inputDatasets?.map(ds => ds.id) || [],
+            ...this.datasetProcessing.outputDatasets?.map(ds => ds.id) || []
+        ])).then(datasets => {
+            const datasetsMap: Map<number, DatasetLight> = new Map<number, DatasetLight>();
+            for (const dataset of datasets) {
+                datasetsMap.set(dataset.id, dataset);
+            }
+            this.datasetProcessing.inputDatasets?.forEach(ds => {
+                this.completeDatasetWith(ds, datasetsMap.get(ds.id));
+            });
+            this.datasetProcessing.outputDatasets?.forEach(ds => {
+                this.completeDatasetWith(ds, datasetsMap.get(ds.id));
+            });
+        });
+    }
+
+    private completeDatasetWith(ds: Dataset, dsLight: DatasetLight) {
+        ds.study = new Study();
+        ds.study.name = dsLight.study.name;
+        ds.study.id = dsLight.study.id;
+        ds.subject = new Subject();
+        ds.subject.name = dsLight.subject.name;
+        ds.subject.id = dsLight.subject.id;
+        ds.creationDate = dsLight.creationDate;
+        ds.name = dsLight.name;
     }
 
     buildForm(): UntypedFormGroup {
@@ -284,31 +315,24 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             {headerName: "Subject", field: "subject.name"},
             {headerName: "Creation date", field: "creationDate", type: "date"}
         ];
-        this.outputDatasetsColumnDefs = [...this.inputDatasetsColumnDefs];
     }
 
     public downloadStdout() {
-
         if(!this.executionMonitoring){
             return;
         }
-
         const filename = this.executionMonitoring.name + ".stdout.log";
-
-        firstValueFrom(this.vipClientService.getStdout(this.executionMonitoring.identifier)).then(response => {
+        this.vipClientService.getStdout(this.executionMonitoring.identifier).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
         });
     }
 
     public downloadStderr() {
-
         if(!this.executionMonitoring){
             return;
         }
-
         const filename = this.executionMonitoring.name + ".stderr.log";
-
-        firstValueFrom(this.vipClientService.getStderr(this.executionMonitoring.identifier)).then(response => {
+        this.vipClientService.getStderr(this.executionMonitoring.identifier).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
         });
     }
@@ -321,29 +345,23 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     public formatDate(millis: number) : string {
-        return millis ? formatDate(new Date(millis), 'dd/MM/YYYY HH:mm:ss', 'en-US') : "";
+        return millis ? formatDate(new Date(millis), 'dd/MM/yyyy HH:mm:ss', 'en-US') : "";
     }
 
     public getDuration(){
-
         const start = this.executionMonitoring?.startDate;
         const end = this.executionMonitoring?.endDate;
-
         if(!start || !end){
             return "";
         }
-
         const duration = end - start;
-
         if(duration <= 0){
             return "";
         }
-
         const milliseconds = Math.floor((duration % 1000));
         const seconds = Math.floor((duration / 1000) % 60);
         const minutes = Math.floor((duration / (1000 * 60)) % 60);
         const hours = Math.floor((duration / (1000 * 60 * 60)));
-
         return String(hours).padStart(2, "0") + ":" +
             String(minutes).padStart(2, "0") + ":" +
             String(seconds).padStart(2, "0") + "." +

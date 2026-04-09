@@ -69,13 +69,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i class="fas fa-home"></i>
         Home
     </li>
-    @if (duasToSign() + accessRequestsToValidate > 0) {
+    @if ((duasToSign() + (isUserAdmin() ? studiesToApprove() : 0) + accessRequestsToValidate) > 0) {
         <li (click)="state.notifOpened = !state.notifOpened; saveState()">
             <i class="far fa-flag"></i>
             Notifications
-            <span class="counter">{{ duasToSign() + accessRequestsToValidate }}</span>
+            <span class="counter">{{ duasToSign() + (isUserAdmin() ? studiesToApprove() : 0) + accessRequestsToValidate }}</span>
             <span class="chevron"><i class="fas fa-chevron-down"></i></span>
         </li>
+    }
+    @if (state.notifOpened && studiesToApprove() > 0 && isUserAdmin()) {
+        <div class="sub-menu" animate.enter="slide-down-menu" animate.leave="slide-up" animate.enter="slide-down-menu" animate.leave="slide-up">
+            <li routerLink="/draft" routerLinkActive="active">
+                <i class="fas fa-file"></i>
+                Draft Studies
+                <span class="counter">{{studiesToApprove()}}</span>
+            </li>
+        </div>
     }
     @if (state.notifOpened && duasToSign() > 0) {
         <div class="sub-menu" animate.enter="slide-down-menu" animate.leave="slide-up" animate.enter="slide-down-menu" animate.leave="slide-up">
@@ -366,7 +375,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             {{ VERSION.raw }}
         </a>
     </div>
-    <div>Copyright (C) 2009-2025 Inria</div>
+    <div>Copyright (C) 2009-2026 Inria</div>
     <div><a href="https://www.inria.fr/" target="_blank">https://www.inria.fr/</a></div>
 </div>
 

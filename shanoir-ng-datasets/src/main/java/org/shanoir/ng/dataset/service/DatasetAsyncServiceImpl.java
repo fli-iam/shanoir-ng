@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dataset.service;
 
 import org.apache.commons.io.FileUtils;
@@ -8,8 +22,6 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -29,8 +41,6 @@ public class DatasetAsyncServiceImpl implements DatasetAsyncService {
     @Autowired
     private ShanoirEventService eventService;
 
-    private static final Logger LOG = LoggerFactory.getLogger(DatasetAsyncService.class);
-
     public void deleteDatasetFilesFromDiskAndPacs(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId) throws ShanoirException {
         deleteDatasetFilesFromDiskAndPacsAsync(datasetFiles, isDicom, datasetId);
     }
@@ -38,6 +48,7 @@ public class DatasetAsyncServiceImpl implements DatasetAsyncService {
     @Override
     @Async
     public void deleteDatasetFilesFromDiskAndPacsAsync(List<DatasetFile> datasetFiles, boolean isDicom, Long datasetId) throws ShanoirException {
+
         ShanoirEvent event = null;
         event = new ShanoirEvent(
                 ShanoirEventType.DELETE_DATASET_EVENT,

@@ -1,23 +1,17 @@
-/*
- * (The MIT license)
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
  *
- * Copyright (c) 2012 - 2015 Wolfgang Halbeisen (halbeisen.wolfgang@gmail.com) and Codemart (beniamin.oniga@codemart.ro, lia.domide@codemart.ro)
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
- * and associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies
- * or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+
 package org.shanoir.ng.importer.eeg.edf;
 
 import java.io.IOException;
@@ -31,7 +25,9 @@ import java.text.DecimalFormatSymbols;
  * This class is capable of writing EDF+ data structures. Changed for fixing
  * issue #3 from Github: https://github.com/MIOB/EDF4J/issues/3
  */
-public class EDFWriter {
+public final class EDFWriter {
+
+    private EDFWriter() { }
 
     public static final String SHORT_DECIMAL_FORMAT = "#0.0";
     public static final String LONG_DECIMAL_FORMAT = "#0.0####";
@@ -50,28 +46,28 @@ public class EDFWriter {
         DecimalFormat shortFormatter = new DecimalFormat(SHORT_DECIMAL_FORMAT, dfs);
         DecimalFormat longFormatter = new DecimalFormat(LONG_DECIMAL_FORMAT, dfs);
 
-        ByteBuffer bb = ByteBuffer.allocate(header.bytesInHeader);
-        putIntoBuffer(bb, EDFConstants.IDENTIFICATION_CODE_SIZE, header.idCode);
-        putIntoBuffer(bb, EDFConstants.LOCAL_SUBJECT_IDENTIFICATION_SIZE, header.subjectID);
-        putIntoBuffer(bb, EDFConstants.LOCAL_REOCRDING_IDENTIFICATION_SIZE, header.recordingID);
-        putIntoBuffer(bb, EDFConstants.START_DATE_SIZE, header.startDate);
-        putIntoBuffer(bb, EDFConstants.START_TIME_SIZE, header.startTime);
-        putIntoBuffer(bb, EDFConstants.HEADER_SIZE, header.bytesInHeader);
-        putIntoBuffer(bb, EDFConstants.DATA_FORMAT_VERSION_SIZE, header.formatVersion);
-        putIntoBuffer(bb, EDFConstants.NUMBER_OF_DATA_RECORDS_SIZE, header.numberOfRecords);
-        putIntoBuffer(bb, EDFConstants.DURATION_DATA_RECORDS_SIZE, header.durationOfRecords, longFormatter);
-        putIntoBuffer(bb, EDFConstants.NUMBER_OF_CHANELS_SIZE, header.numberOfChannels);
+        ByteBuffer bb = ByteBuffer.allocate(header.getBytesInHeader());
+        putIntoBuffer(bb, EDFConstants.IDENTIFICATION_CODE_SIZE, header.getIdCode());
+        putIntoBuffer(bb, EDFConstants.LOCAL_SUBJECT_IDENTIFICATION_SIZE, header.getSubjectID());
+        putIntoBuffer(bb, EDFConstants.LOCAL_REOCRDING_IDENTIFICATION_SIZE, header.getRecordingID());
+        putIntoBuffer(bb, EDFConstants.START_DATE_SIZE, header.getStartDate());
+        putIntoBuffer(bb, EDFConstants.START_TIME_SIZE, header.getStartTime());
+        putIntoBuffer(bb, EDFConstants.HEADER_SIZE, header.getBytesInHeader());
+        putIntoBuffer(bb, EDFConstants.DATA_FORMAT_VERSION_SIZE, header.getFormatVersion());
+        putIntoBuffer(bb, EDFConstants.NUMBER_OF_DATA_RECORDS_SIZE, header.getNumberOfRecords());
+        putIntoBuffer(bb, EDFConstants.DURATION_DATA_RECORDS_SIZE, header.getDurationOfRecords(), longFormatter);
+        putIntoBuffer(bb, EDFConstants.NUMBER_OF_CHANELS_SIZE, header.getNumberOfChannels());
 
-        putIntoBuffer(bb, EDFConstants.LABEL_OF_CHANNEL_SIZE, header.channelLabels);
-        putIntoBuffer(bb, EDFConstants.TRANSDUCER_TYPE_SIZE, header.transducerTypes);
-        putIntoBuffer(bb, EDFConstants.PHYSICAL_DIMENSION_OF_CHANNEL_SIZE, header.dimensions);
-        putIntoBuffer(bb, EDFConstants.PHYSICAL_MIN_IN_UNITS_SIZE, header.minInUnits, shortFormatter);
-        putIntoBuffer(bb, EDFConstants.PHYSICAL_MAX_IN_UNITS_SIZE, header.maxInUnits, shortFormatter);
-        putIntoBuffer(bb, EDFConstants.DIGITAL_MIN_SIZE, header.digitalMin);
-        putIntoBuffer(bb, EDFConstants.DIGITAL_MAX_SIZE, header.digitalMax);
-        putIntoBuffer(bb, EDFConstants.PREFILTERING_SIZE, header.prefilterings);
-        putIntoBuffer(bb, EDFConstants.NUMBER_OF_SAMPLES_SIZE, header.numberOfSamples);
-        putIntoBuffer(bb, header.reserveds);
+        putIntoBuffer(bb, EDFConstants.LABEL_OF_CHANNEL_SIZE, header.getChannelLabels());
+        putIntoBuffer(bb, EDFConstants.TRANSDUCER_TYPE_SIZE, header.getTransducerTypes());
+        putIntoBuffer(bb, EDFConstants.PHYSICAL_DIMENSION_OF_CHANNEL_SIZE, header.getDimensions());
+        putIntoBuffer(bb, EDFConstants.PHYSICAL_MIN_IN_UNITS_SIZE, header.getMinInUnits(), shortFormatter);
+        putIntoBuffer(bb, EDFConstants.PHYSICAL_MAX_IN_UNITS_SIZE, header.getMaxInUnits(), shortFormatter);
+        putIntoBuffer(bb, EDFConstants.DIGITAL_MIN_SIZE, header.getDigitalMin());
+        putIntoBuffer(bb, EDFConstants.DIGITAL_MAX_SIZE, header.getDigitalMax());
+        putIntoBuffer(bb, EDFConstants.PREFILTERING_SIZE, header.getPrefilterings());
+        putIntoBuffer(bb, EDFConstants.NUMBER_OF_SAMPLES_SIZE, header.getNumberOfSamples());
+        putIntoBuffer(bb, header.getReserveds());
 
         outputStream.write(bb.array());
     }
@@ -110,8 +106,8 @@ public class EDFWriter {
     }
 
     /**
-     * Convert data signals from two dimensions format ( {channels} {time,
-     * samples} ) to one dimension format ( channels {samples for each channel}
+     * Convert data signals from two dimensions format ({channels} {time,
+     * samples} ) to one dimension format (channels {samples for each channel}
      * grouped by time )
      *
      * @param digitalValues The signals data in two dimensions format

@@ -1,3 +1,15 @@
+# Shanoir NG - Import, manage and share neuroimaging data
+# Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+# Contact us on https://project.inria.fr/shanoir/
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
 name: ShanoirUploader Build & Release
 
 concurrency:
@@ -67,12 +79,16 @@ jobs:
         run: |
           jlink \
             --module-path $JAVA_HOME/jmods \
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets \
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.crypto.ec,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets \
             --output shanoir-uploader/target/custom-runtime \
             --compress zip-6 \
             --strip-debug \
             --no-header-files \
             --no-man-pages
+
+      - name: Copy default Java truststore into custom runtime
+        run: |
+          cp $JAVA_HOME/lib/security/cacerts shanoir-uploader/target/custom-runtime/lib/security/cacerts
 
       - name: Package .deb
         run: |
@@ -132,12 +148,17 @@ jobs:
         run: |
           jlink `
             --module-path $Env:JAVA_HOME\jmods `
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets `
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.crypto.ec,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets `
             --output shanoir-uploader/target/custom-runtime `
             --compress zip-6 `
             --strip-debug `
             --no-header-files `
             --no-man-pages
+
+      - name: Copy default Java truststore into custom runtime
+        run: |
+          cp $Env:JAVA_HOME\lib\security\cacerts shanoir-uploader/target/custom-runtime/lib/security/cacerts
+
 
       - name: Package .exe
         run: |
@@ -196,12 +217,16 @@ jobs:
         run: |
           jlink \
             --module-path $JAVA_HOME/jmods \
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets \
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.crypto.ec,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets \
             --output shanoir-uploader/target/custom-runtime \
             --compress zip-6 \
             --strip-debug \
             --no-header-files \
             --no-man-pages
+
+      - name: Copy default Java truststore into custom runtime
+        run: |
+          cp $JAVA_HOME/lib/security/cacerts shanoir-uploader/target/custom-runtime/lib/security/cacerts
 
       - name: Package .dmg
         run: |

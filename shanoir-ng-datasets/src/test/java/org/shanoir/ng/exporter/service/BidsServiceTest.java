@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.exporter.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -32,6 +46,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
@@ -49,108 +64,111 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 public class BidsServiceTest {
 
-	@Mock
-	private ExaminationService examService;
+    @Mock
+    private ExaminationService examService;
 
-	@Mock
-	private SubjectRepository subjectRepository;
+    @Mock
+    private SubjectRepository subjectRepository;
 
-	@Mock
-	DatasetSecurityService datasetSecurityService;
+    @Mock
+    private DatasetSecurityService datasetSecurityService;
 
-	@InjectMocks
-	@Spy
-	private BIDSServiceImpl service = new BIDSServiceImpl();
-	
-	@Mock
-	private ObjectMapper objectMapper;
-	
-	String studyName = "STUDY";
+    @InjectMocks
+    @Spy
+    private BIDSServiceImpl service = new BIDSServiceImpl();
 
-	Examination exam = ModelsUtil.createExamination();
-	Subject subject = new Subject();
-	
-	public static String tempFolderPath;
+    @Mock
+    private ObjectMapper objectMapper;
 
-	@BeforeEach
-	public void setUp() throws IOException {
+    @Mock
+    private RabbitTemplate rabbitTemplate;
+
+    private String studyName = "STUDY";
+
+    private Examination exam = ModelsUtil.createExamination();
+
+    private Subject subject = new Subject();
+
+    private static String tempFolderPath;
+
+    @BeforeEach
+    public void setUp() throws IOException {
         String property = "java.io.tmpdir";
         tempFolderPath = System.getProperty(property) + "/tmpTest/";
         File tempFile = new File(tempFolderPath);
         tempFile.mkdirs();
 
         File file = new File(tempFolderPath);
-		file.mkdirs();
-	    System.setProperty("bidsStorageDir", tempFolderPath);
-		ReflectionTestUtils.setField(service, "bidsStorageDir", tempFolderPath);
+        file.mkdirs();
+        System.setProperty("bidsStorageDir", tempFolderPath);
+        ReflectionTestUtils.setField(service, "bidsStorageDir", tempFolderPath);
 
-		exam.setId(Long.valueOf("13851681"));
-		// Create a full study with some data and everything
-		subject.setId(Long.valueOf("123"));
-		subject.setName("name");
+        exam.setId(Long.valueOf("13851681"));
+        // Create a full study with some data and everything
+        subject.setId(Long.valueOf("123"));
+        subject.setName("name");
 
-		Dataset ds = new MrDataset();
-		ds.setId(Long.valueOf("1684"));
+        Dataset ds = new MrDataset();
+        ds.setId(Long.valueOf("1684"));
 
-		DatasetAcquisition dsa = new MrDatasetAcquisition();
-		dsa.setExamination(exam);
-		dsa.setDatasets(Collections.singletonList(ds));
+        DatasetAcquisition dsa = new MrDatasetAcquisition();
+        dsa.setExamination(exam);
+        dsa.setDatasets(Collections.singletonList(ds));
 
-		ds.setDatasetAcquisition(dsa);
+        ds.setDatasetAcquisition(dsa);
 
-		exam.setDatasetAcquisitions(Collections.singletonList(dsa));
-		
-		// Create some dataFile and register it to be copied
-		File dataFile = new File(tempFolderPath + "test.test");
-		dataFile.createNewFile();
+        exam.setDatasetAcquisitions(Collections.singletonList(dsa));
 
-		DatasetExpression dsExpr = new DatasetExpression();
-		DatasetFile dsFile = new DatasetFile();
-		dsFile.setDatasetExpression(dsExpr);
-		dsFile.setPacs(false);
-		dsFile.setPath("file://" + dataFile.getAbsolutePath());
-		dsExpr.setDatasetFiles(Collections.singletonList(dsFile));
+        // Create some dataFile and register it to be copied
+        File dataFile = new File(tempFolderPath + "test.test");
+        dataFile.createNewFile();
 
-		ds.setDatasetExpressions(Collections.singletonList(dsExpr));
-	}
+        DatasetExpression dsExpr = new DatasetExpression();
+        DatasetFile dsFile = new DatasetFile();
+        dsFile.setDatasetExpression(dsExpr);
+        dsFile.setPacs(false);
+        dsFile.setPath("file://" + dataFile.getAbsolutePath());
+        dsExpr.setDatasetFiles(Collections.singletonList(dsFile));
 
-	@Test
-	@WithMockKeycloakUser(id = 1, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testExportAsBids() throws IOException, InterruptedException {
-		//GIVEN a study full of data
+        ds.setDatasetExpressions(Collections.singletonList(dsExpr));
+    }
 
-		// Mock on rest template to get the list of subjects
-		List<Subject> subjects = new ArrayList<>();
-		Study study = new Study();
-		this.subject.setStudy(study);
-		subjects.add(this.subject);
-		given(subjectRepository.findByStudy_Id(exam.getStudyId())).willReturn(subjects);
-		
-		// Mock on examination service to get the list of subject
-		given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
+    @Test
+    @WithMockKeycloakUser(id = 1, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testExportAsBids() throws IOException, InterruptedException {
+        //GIVEN a study full of data
 
-		// WHEN we export the data
-		service.exportAsBids(exam.getStudyId(), studyName);
-		
-		// THEN the bids folder is generated with study - subject - exam - data
-		File studyFile = new File(tempFolderPath + "stud-" + exam.getStudyId() + "" + studyName);
-		assertTrue(studyFile.exists());
+        // Mock on rest template to get the list of subjects
+        List<Subject> subjects = new ArrayList<>();
+        Study study = new Study();
+        this.subject.setStudy(study);
+        subjects.add(this.subject);
+        given(subjectRepository.findByStudy_Id(exam.getStudyId())).willReturn(subjects);
 
-		File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-1" + subject.getName());
-		assertTrue(subjectFile.exists());
+        // Mock on examination service to get the list of subject
+        given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
 
-		File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam.getId());
-		// No exam files as there is only one datasetAcquisition
-		assertFalse(examFile.exists());
-	}
+        // WHEN we export the data
+        service.exportAsBids(exam.getStudyId(), studyName);
 
-	@AfterEach
-	public void tearDown() {
-		// delete files
+        // THEN the bids folder is generated with study - subject - exam - data
+        File studyFile = new File(tempFolderPath + "stud-" + exam.getStudyId() + "" + studyName);
+        assertTrue(studyFile.exists());
+
+        File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-1" + subject.getName());
+        assertTrue(subjectFile.exists());
+
+        File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam.getId());
+        // No exam files as there is only one datasetAcquisition
+        assertFalse(examFile.exists());
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // delete files
         File tempFile = new File(tempFolderPath);
         if (tempFile.exists()) {
-        	FileUtils.deleteQuietly(tempFile);
+            FileUtils.deleteQuietly(tempFile);
         }
-	}
+    }
 }
-

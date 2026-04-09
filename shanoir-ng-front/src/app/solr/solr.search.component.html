@@ -90,6 +90,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </div>
             @if (dateOpen) {
                 <div class="date-content">
+                    <div class="left-title" style="margin-bottom: 8px;">Both date included*</div>
                     <div class="date-from">
                         <span class="left-title">from :</span>
                         @if (viewChecked) {
@@ -133,6 +134,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </div>
             @if (importDateOpen) {
                 <div class="date-content">
+                    <div class="left-title" style="margin-bottom: 8px;">Both date included*</div>
                     <div class="date-from">
                         <span class="left-title">from :</span>
                         @if (viewChecked) {
@@ -233,6 +235,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             awesome="fa-solid fa-magnet"
             label="Mag. Field Strength"
             (userChange)="updateSelections(); refreshTable()"></solr-range-criterion>
+
+        <solr-paging-criterion
+            label="Data reuse agreement"
+            awesome="fa-solid fa-file"
+            facetName="dataReuseAgreement"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.dataReuseAgreement"
+            [ngModelOptions]="{standalone: true}"
+            (userChange)="updateSelections(); refreshTable('dataReuseAgreement')">
+        </solr-paging-criterion>
     </div>
     <div class="right">
         <solr-text-search

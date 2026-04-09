@@ -1,12 +1,12 @@
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -20,8 +20,10 @@ server:
       enabled: false
 ##### Database #####
 spring:
+  config:
+    import: "classpath:/shanoir-shared.yml"
   datasource:
-    url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/import?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mysql://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:import}?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: import
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -92,14 +94,6 @@ front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
-# microservices url
-ms.url:
-  shanoir-ng-datasets: http://${SHANOIR_PREFIX}datasets:9904/datasetacquisition
-  shanoir-ng-datasets-eeg: http://${SHANOIR_PREFIX}datasets:9904/datasetacquisition_eeg
-  shanoir-ng-studies-name: http://${SHANOIR_PREFIX}studies:9902/studies/names
-  shanoir-ng-studies-subjects-names: http://${SHANOIR_PREFIX}studies:9902/subjects/names
-  shanoir-ng-create-examination: http://${SHANOIR_PREFIX}datasets:9904/examinations
-  shanoir-ng-studies-commons: http://${SHANOIR_PREFIX}studies:9902/common
 # logging configuration
 logging:
   pattern:
@@ -134,11 +128,6 @@ shanoir:
           #host: ${SHANOIR_PREFIX}import
           port: 44105
         folder: /tmp/shanoir-dcmrcv
-    # In a dicom file. Format "tag==value;" If it is not needed to separate image files into separated folders for a dicom serie.
-    series:
-      # this long name has been kept, as Elise and Isabelle know it like this; to find it for further adaptions in later time
-      # Also during the nifti conversion, it will be reconstructed as 4D volumes.
-      seriesProperties: seriesDescription==*ASL*;seriesDescription==*asl*;protocolName==*ASL*;seriesDescription==*VIBE*DYN*;seriesDescription==*MoCoSeries*;seriesDescription==*DIFF*;seriesDescription==*Diff*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*;seriesDescription==*BOLD*;seriesDescription==*Bold*;seriesDescription==*bold*;seriesDescription==*intermediate t-Map*;protocolName==*DYN*;protocolName==*Dyn*;protocolName==*dyn*;seriesDescription==*QSM*;seriesDescription==*qsm*;seriesDescription==*RELAXO*;seriesDescription==*relaxo*;seriesDescription==*Relaxo*;seriesDescription==IRMF;protocolName==IRMF;seriesDescription==*mc*gse*;protocolName==*mc*gse*;seriesDescription==*MULTIGRE*;protocolName==*MULTIGRE*;seriesDescription==*multigre*;protocolName==*multigre*;seriesDescription==*Multigre*;protocolName==*Multigre*;
 
 ---
 
@@ -173,13 +162,6 @@ spring:
 front.server:
   address: https://shanoir-ng-nginx/shanoir-ng/
   url: https://shanoir-ng-nginx
-ms.url:
-  shanoir-ng-datasets: http://localhost:9904/datasetacquisition
-  shanoir-ng-datasets-eeg: http://localhost:9904/datasetacquisition_eeg
-  shanoir-ng-studies-name: http://localhost:9902/studies/names
-  shanoir-ng-studies-subjects-names: http://localhost:9902/subjects/names
-  shanoir-ng-create-examination: http://localhost:9904/examinations
-  shanoir-ng-studies-commons: http://localhost:9902/common
 # logging configuration
 logging:
   file:

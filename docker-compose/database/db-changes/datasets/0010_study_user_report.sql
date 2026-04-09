@@ -1,1 +1,0 @@
-ALTER TABLE study_user CHANGE receive_anonymization_report receive_study_user_report bit(1);

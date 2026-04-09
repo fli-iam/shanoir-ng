@@ -89,11 +89,11 @@ public interface ImporterApi {
             consumes = {"multipart/form-data"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<ImportJob> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
-    		@Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
-    		@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
-    		@Parameter(name = "studyCardId") @PathVariable("studyCardId") Long studyCardId,
-    		@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
-    		@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException;
+            @Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
+            @Parameter(name = "studyCardId") @PathVariable("studyCardId") Long studyCardId,
+            @Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
+            @Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException;
 
     @Operation(summary = "Upload one EEG file", description = "Upload channel and metadata from EEG file")
     @ApiResponses(value = {
@@ -121,7 +121,7 @@ public interface ImporterApi {
             throws RestServiceException;
 
     @Operation(summary = "Import one DICOM .zip file", description = "Import DICOM .zip file already uploaded", tags = {
-        "Import one DICOM .zip file",})
+        "Import one DICOM .zip file"})
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "success returns file path"),
         @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
@@ -138,7 +138,10 @@ public interface ImporterApi {
         @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
     @PostMapping(value = "/start_import_job/", consumes = {"application/json"}, produces = {"application/json"})
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
+    @PreAuthorize("!@importSecurityService.isDraftStudy(#importJob.getStudyId()) and "
+              + "(hasRole('ADMIN') or "
+              + "(hasAnyRole('EXPERT', 'USER') and "
+              + "@importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT')))")
     ResponseEntity<Void> startImportJob(@Parameter(name = "ImportJob", required = true) @RequestBody ImportJob importJob) throws RestServiceException;
 
     @Operation(summary = "Start analysis of EEG job", description = "Start analysis eeg job")
@@ -160,7 +163,10 @@ public interface ImporterApi {
     @PostMapping(value = "/start_import_eeg_job/",
             produces = {"application/json"},
             consumes = {"application/json"})
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
+    @PreAuthorize("!@importSecurityService.isDraftStudy(#importJob.getStudyId()) and "
+              + "(hasRole('ADMIN') or "
+              + "(hasAnyRole('EXPERT', 'USER') and "
+              + "@importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT')))")
     ResponseEntity<Void> startImportEEGJob(@Parameter(name = "EegImportJob", required = true) @RequestBody EegImportJob importJob) throws RestServiceException;
 
     @Operation(summary = "ImportFromPACS: Query PACS", description = "ImportFromPACS: Query PACS")

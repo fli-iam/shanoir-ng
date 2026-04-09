@@ -29,6 +29,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-ms-common</name>
-	<description>Shanoir-NG Microservices Common Project</description>
+	<description>Shanoir microservices common project</description>
+
+	<distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/fli-iam/shanoir-ng</url>
+        </repository>
+    </distributionManagement>
 
 </project>

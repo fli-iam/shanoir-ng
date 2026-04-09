@@ -80,13 +80,13 @@ export class DatasetDTOService {
                 this.studyService.getStudiesNames().then(studies => {
                     for (const entity of result) {
                         if (entity.study)
-                            entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
+                            entity.study.name = studies?.find(study => study.id == entity.study.id)?.name;
                     }
                 }),
                 this.subjectService.getSubjectsNames(subjectIds).then(subjects => {
                     for (const entity of result) {
                         if (entity.subject)
-                            entity.subject.name = subjects.find(subject => subject.id == entity.subject.id)?.name;
+                            entity.subject.name = subjects?.find(subject => subject.id == entity.subject.id)?.name;
                     }
                 })
             ];
@@ -213,7 +213,7 @@ export class DatasetDTO {
             this.source = dataset.source;
             this.copies = dataset.copies;
             this.name = dataset.name;
-            this.datasetProcessing = (new DatasetProcessingOutDTO(dataset.datasetProcessing));
+            this.datasetProcessing = dataset.datasetProcessing ? (new DatasetProcessingOutDTO(dataset.datasetProcessing)) : null;
             this.type = dataset.type;
             this.processings = dataset.processings.map( (p: DatasetProcessing) => { return new DatasetProcessingOutDTO(p)} );
             if(dataset.datasetAcquisition) {

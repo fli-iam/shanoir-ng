@@ -42,9 +42,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <span class="label empty">Empty list</span>
                 }
                 <span class="commands">
-                    @if (inputText && clear) {
-                        <span class="clear button" (click)="onClear()"><i class="fas fa-times"></i></span>
-                    }
+                    <span class="clear button" [class.hidden]="!(inputText && clear)" (click)="onClear()"><i class="fas fa-times"></i></span>
                     <span class="open button" (click)="isOpen() ? close() : open()">
                         <i class="fas fa-chevron-down"></i>
                     </span>

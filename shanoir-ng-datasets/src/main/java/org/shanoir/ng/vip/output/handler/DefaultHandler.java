@@ -1,7 +1,25 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.vip.output.handler;
 
 import jakarta.ws.rs.NotFoundException;
 import org.apache.commons.io.IOUtils;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.data.UID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -66,7 +84,7 @@ public class DefaultHandler extends OutputHandler {
     private ProcessingResourceRepository processingResourceRepository;
 
     @Autowired
-	private ProcessedDatasetImporterService processedDatasetImporterService;
+    private ProcessedDatasetImporterService processedDatasetImporterService;
 
     @Override
     public boolean canProcess(ExecutionMonitoring processing) {
@@ -78,7 +96,7 @@ public class DefaultHandler extends OutputHandler {
         try {
             List<File> outputFiles = new ArrayList<>();
             File resultJson = null;
-            for(File file : resultFiles){
+            for (File file : resultFiles) {
                 if (file.getAbsolutePath().endsWith("/" + resultFileName)) {
                     resultJson = file;
                 } else {
@@ -90,10 +108,10 @@ public class DefaultHandler extends OutputHandler {
 
             List<Dataset> inputDatasets = new ArrayList<>(monitoring.getInputDatasets());
 
-            if(inputDatasets.isEmpty()) {
+            if (inputDatasets.isEmpty()) {
                 throw new ResultHandlerException("No input datasets found.", null);
             }
-            if(outputFiles.isEmpty()){
+            if (outputFiles.isEmpty()) {
                 throw new ResultHandlerException("No processable file found in Tar result.", null);
             }
             DatasetProcessing newProcessing = createProcessedDatasets(outputFiles, monitoring, inputDatasets);
@@ -150,7 +168,7 @@ public class DefaultHandler extends OutputHandler {
     /**
      * Creates a list of processed dataset and a dataset processing associated to the list of files given in entry.
      */
-    private List<Dataset> getDatasetFromFilename(String name){
+    private List<Dataset> getDatasetFromFilename(String name) {
         Matcher matcher = Pattern.compile("resource_id\\+(.+)\\+.*").matcher(name);
         if (matcher.matches()) {
             return processingResourceRepository.findDatasetsByResourceId(matcher.group(1));
@@ -179,7 +197,7 @@ public class DefaultHandler extends OutputHandler {
             }
             processedDataset.setProcessedDatasetName(datasetName);
 
-            if(!inputDatasets.isEmpty()) {
+            if (!inputDatasets.isEmpty()) {
                 Long studyId = datasetService.getStudyId(inputDatasets.get(0));
                 Study study = studyRepository.findById(studyId)
                         .orElseThrow(() -> new NotFoundException("Study [" + studyId + "] not found."));
@@ -197,7 +215,9 @@ public class DefaultHandler extends OutputHandler {
                 }
             }
 
-            processedDataset.setDatasetType(DatasetType.Generic.name());
+            // Determine dataset type: DICOM → infer from modality/SOP class, otherwise GENERIC
+            String datasetType = determineDatasetType(file);
+            processedDataset.setDatasetType(datasetType);
             processedDatasetImporterService.createProcessedDataset(processedDataset);
 
             LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), file.getAbsolutePath());
@@ -220,4 +240,124 @@ public class DefaultHandler extends OutputHandler {
         return processing;
     }
 
+    /**
+     * Determines the dataset type based on file content.
+     * If DICOM: extracts modality/SOP class and maps to appropriate type
+     * If not DICOM: returns GENERIC
+     */
+    private String determineDatasetType(File file) {
+        try {
+            Attributes attributes = readDicomAttributes(file);
+            if (attributes != null) {
+                return mapDicomToDatasetType(attributes);
+            }
+        } catch (Exception e) {
+            LOG.debug("Could not read DICOM attributes from file [{}]: {}", file.getAbsolutePath(), e.getMessage());
+        }
+        return DatasetType.Names.GENERIC;
+    }
+
+    private Attributes readDicomAttributes(File file) {
+        if (file.exists()) {
+            try (DicomInputStream dIS = new DicomInputStream(file)) {
+                return dIS.readDataset();
+            } catch (IOException e) {
+                // Not a DICOM file or error reading
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private String mapDicomToDatasetType(Attributes attributes) {
+        String sopClassUID = attributes.getString(Tag.SOPClassUID);
+
+        if (sopClassUID == null || sopClassUID.isEmpty()) return DatasetType.Names.GENERIC;
+        if (isMr(sopClassUID)) return DatasetType.Names.MR;
+        if (isCt(sopClassUID)) return DatasetType.Names.CT;
+        if (isXa(sopClassUID)) return DatasetType.Names.XA;
+        if (isPet(sopClassUID)) return DatasetType.Names.PET;
+        if (isSpect(sopClassUID)) return DatasetType.Names.SPECT;
+        if (isSegmentation(sopClassUID)) return DatasetType.Names.SEGMENTATION;
+        if (isRegistration(sopClassUID)) return DatasetType.Names.REGISTRATION;
+        if (isSr(sopClassUID)) return DatasetType.Names.SR;
+        if (isMesh(sopClassUID)) return DatasetType.Names.MESH;
+
+        return DatasetType.Names.GENERIC;
+
+    }
+
+    private boolean isMr(String uid) {
+        return Set.of(
+                UID.MRImageStorage,
+                UID.EnhancedMRImageStorage,
+                UID.MRSpectroscopyStorage,
+                UID.EnhancedMRColorImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isCt(String uid) {
+        return Set.of(
+                UID.CTImageStorage,
+                UID.EnhancedCTImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isXa(String uid) {
+        return Set.of(
+                UID.XRayAngiographicImageStorage,
+                UID.EnhancedXAImageStorage,
+                UID.XRayRadiofluoroscopicImageStorage,
+                UID.EnhancedXRFImageStorage,
+                UID.XRay3DAngiographicImageStorage,
+                UID.XRay3DCraniofacialImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isPet(String uid) {
+        return Set.of(
+                UID.PositronEmissionTomographyImageStorage,
+                UID.EnhancedPETImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isSpect(String uid) {
+        return Set.of(
+                UID.NuclearMedicineImageStorage
+        ).contains(uid);
+    }
+
+    private boolean isSegmentation(String uid) {
+        return Set.of(
+                UID.SegmentationStorage
+        ).contains(uid);
+    }
+
+    private boolean isRegistration(String uid) {
+        return Set.of(
+                UID.SpatialRegistrationStorage,
+                UID.DeformableSpatialRegistrationStorage
+        ).contains(uid);
+    }
+
+    private boolean isSr(String uid) {
+        return Set.of(
+                UID.BasicTextSRStorage,
+                UID.EnhancedSRStorage,
+                UID.ComprehensiveSRStorage,
+                UID.MammographyCADSRStorage,
+                UID.ChestCADSRStorage,
+                UID.XRayRadiationDoseSRStorage,
+                UID.ColonCADSRStorage,
+                UID.ImplantationPlanSRStorage
+        ).contains(uid);
+    }
+
+    private boolean isMesh(String uid) {
+        return Set.of(
+                UID.SurfaceScanMeshStorage,
+                UID.SurfaceScanPointCloudStorage,
+                UID.SurfaceSegmentationStorage
+        ).contains(uid);
+    }
 }
