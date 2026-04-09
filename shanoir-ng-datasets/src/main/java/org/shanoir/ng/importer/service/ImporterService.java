@@ -16,7 +16,6 @@ package org.shanoir.ng.importer.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -193,18 +192,8 @@ public class ImporterService {
                     return;
                 }
                 MultipartFile multipartFile = new MockMultipartFile(archiveFile.getName(), archiveFile.getName(), "application/zip", new FileInputStream(archiveFile));
-
                 // Add bruker archive as extra data
-                String fileName = this.examinationService.addExtraData(importJob.getExaminationId(), multipartFile);
-                if (fileName != null) {
-                    List<String> archives = examination.getExtraDataFilePathList();
-                    if (archives == null) {
-                        archives = new ArrayList<>();
-                    }
-                    archives.add(archiveFile.getName());
-                    examination.setExtraDataFilePathList(archives);
-                    examinationRepository.save(examination);
-                }
+                examinationService.addExtraData(importJob.getExaminationId(), multipartFile);
             }
 
             // Send success mail

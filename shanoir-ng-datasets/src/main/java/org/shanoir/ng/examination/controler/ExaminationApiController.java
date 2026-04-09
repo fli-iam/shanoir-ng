@@ -17,7 +17,6 @@ package org.shanoir.ng.examination.controler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -277,24 +276,20 @@ public class ExaminationApiController implements ExaminationApi {
         examination.setSubject(subject);
         examination.setStudy(subject.getStudy());
         examination.setExaminationDate(LocalDate.now());
-        List<String> pathList = new ArrayList<>();
-        pathList.add(file.getOriginalFilename());
-        examination.setExtraDataFilePathList(pathList);
         generateStudyInstanceUID(examination);
         try {
-            Examination dbExamination = examinationService.save(examination);
-            String path = examinationService.addExtraData(dbExamination.getId(), file);
+            Examination examinationDb = examinationService.save(examination);
+            String path = examinationService.addExtraData(examinationDb.getId(), file);
             LOG.info("New examination created: " + examination.toString());
             if (path != null) {
                 return new ResponseEntity<>(HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-        } catch (EntityNotFoundException e) {
-            throw new RestServiceException(
-                    e,
+        } catch (Exception e) {
+            throw new RestServiceException(e,
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                        "Couldn't create examination"
+                        "Couldn't create examination."
                     )
             );
         }
