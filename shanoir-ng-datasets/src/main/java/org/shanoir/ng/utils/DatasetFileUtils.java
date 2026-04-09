@@ -46,6 +46,7 @@ import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.storage.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
@@ -59,6 +60,8 @@ import jakarta.mail.MessagingException;
 
 public final class DatasetFileUtils {
 
+    protected static final Logger LOG = LoggerFactory.getLogger(DatasetFileUtils.class);
+
     private DatasetFileUtils() {
     }
 
@@ -66,7 +69,7 @@ public final class DatasetFileUtils {
 
     public static final String INPUT = "input.json";
 
-    protected static final Logger LOG = LoggerFactory.getLogger(DatasetFileUtils.class);
+    private static final String S3 = "s3";
 
     public static File getUserImportDir(String importDir) {
         final Long userId = KeycloakUtil.getTokenUserId();
@@ -136,7 +139,7 @@ public final class DatasetFileUtils {
         int slashIdx = withoutScheme.indexOf('/');
         String host = slashIdx > 0 ? withoutScheme.substring(0, slashIdx) : "";
         String file = slashIdx >= 0 ? withoutScheme.substring(slashIdx) : "/";
-        return new URL("s3", host, -1, file, S3_HANDLER);
+        return new URL(S3, host, -1, file, S3_HANDLER);
     }
 
     public static Optional<URL> getFirstDatasetFilePathURL(
@@ -192,10 +195,13 @@ public final class DatasetFileUtils {
 
         for (URL url : urls) {
             String decodedPath = UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name());
-            Resource resource = storageService.loadDatasetsData(decodedPath);
-
+            Resource resource;
+            if (url.getProtocol().equals(S3)) {
+                resource = storageService.loadDatasetsData(decodedPath);
+            } else {
+                resource = new FileSystemResource(new File(decodedPath));
+            }
             String srcFileName = StringUtils.getFilename(decodedPath);
-
             // Generate the target file name
             String fileName = getFileName(keepName, srcFileName, subjectName, dataset, index);
             fileName = fileName.replace(File.separator, UNDERSCORE); // avoid nested folders
