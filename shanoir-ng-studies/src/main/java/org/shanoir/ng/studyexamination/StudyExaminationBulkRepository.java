@@ -11,27 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-package org.shanoir.ng.shared.repository;
+
+package org.shanoir.ng.studyexamination;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
-import org.springframework.data.jpa.repository.JpaRepository;
-
+import org.shanoir.ng.shared.dto.StudyExaminationsDTO.StudyExaminationDTO;
 
 /**
- * @author yyao
- *
+ * Repository for bulk operations on relations between a study and a center.
  */
-public interface SubjectRepository extends JpaRepository<Subject, Long> {
+public interface StudyExaminationBulkRepository {
 
-    Subject findByName(String name);
-
-    Subject findByNameAndStudy_Id(String name, Long studyId);
-
-    List<Subject> findByStudy(Study study);
-
-    List<Subject> findByStudy_Id(Long studyId);
+    void insertInBatches(List<StudyExaminationDTO> total, Long studyId);
 
 }
