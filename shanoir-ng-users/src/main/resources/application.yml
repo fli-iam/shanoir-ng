@@ -97,7 +97,7 @@ front:
     url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 ##### Keycloak admin client, that ms users can directly communicate with keycloak #####
 kc.admin.client:
-  server.url: http://${SHANOIR_PREFIX}keycloak:8080/auth
+  server.url: ${SHANOIR_KEYCLOAK_INTERNAL_URL}
   realm: master
   client.id: admin-cli
   realm.users: shanoir-ng
