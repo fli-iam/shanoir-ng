@@ -347,18 +347,12 @@ public class ExaminationServiceImpl implements ExaminationService {
     public String addExtraData(final Long examinationId, final MultipartFile file) {
         try {
             LOG.info("Saving file {} for examination: {}", file.getOriginalFilename(), examinationId);
-            final Examination examinationDb = examinationRepository.findById(examinationId).orElse(null);
-            if (examinationDb == null) {
-                throw new EntityNotFoundException(Examination.class, examinationId);
-            }
-            String path = storageService.storeExtraData(
+            return storageService.storeExtraData(
                     examinationId,
                     file.getOriginalFilename(),
                     file.getInputStream(),
                     file.getContentType(),
                     file.getSize());
-            updateExtraDataFilePathList(examinationDb, path);
-            return path;
         } catch (Exception e) {
             LOG.error("Error while uploading file {} for examination: {}. File not uploaded. {}",
                     file.getOriginalFilename(), examinationId, e);
@@ -366,33 +360,14 @@ public class ExaminationServiceImpl implements ExaminationService {
         }
     }
 
-    private void updateExtraDataFilePathList(final Examination examinationDb, String path) {
-        if (path != null) {
-            List<String> pathListDb = examinationDb.getExtraDataFilePathList();
-            if (pathListDb == null) {
-                pathListDb = new ArrayList<>();
-            }
-            pathListDb.add(path);
-            examinationDb.setExtraDataFilePathList(pathListDb);
-            examinationRepository.save(examinationDb);
-        }
-    }
-
     @Override
     public String addExtraDataFromFile(final Long examinationId, final File file) {
         try {
             LOG.info("Saving file {} for examination: {}", file.getName(), examinationId);
-            final Examination examinationDb = examinationRepository.findById(examinationId).orElse(null);
-            if (examinationDb == null) {
-                throw new EntityNotFoundException(Examination.class, examinationId);
-            }
-            LOG.info("Saving file {} for examination: {}", file.getName(), examinationId);
             try (InputStream inputStream = new FileInputStream(file)) {
-                String path = storageService.storeExtraData(examinationId, file.getName(), inputStream,
+                return storageService.storeExtraData(examinationId, file.getName(), inputStream,
                         Files.probeContentType(file.toPath()), // detect MIME type from file
                         file.length());
-                updateExtraDataFilePathList(examinationDb, path);
-                return path;
             }
         } catch (Exception e) {
             LOG.error("Error while uploading file {} for examination: {}. File not uploaded. {}",
