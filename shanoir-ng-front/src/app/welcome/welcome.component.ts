@@ -101,8 +101,7 @@ export class WelcomeComponent implements OnInit {
     })
 
     // schema.org DataCatalog + Datasets
-    script.text = `
-        {
+    script.text = `{
   "@context": {
     "schema": "https://schema.org/",
     "dcat": "http://www.w3.org/ns/dcat#",
@@ -116,6 +115,42 @@ export class WelcomeComponent implements OnInit {
     "ex": "http://example.org/"
   },
   "@graph": [
+    {
+      "@id": "` + shanoirUrl + `",
+      "@type": ["schema:DataCatalog", "dcat:Catalog"],
+      "dct:conformsTo": "https://bioschemas.org/profiles/DataCatalog/0.3-RELEASE-2019_07_01",
+      "schema:name": "Shanoir - Sharing in vivo imaging resources",
+      "schema:description": "Shanoir-NG (SHAring NeurOImaging Resources, Next Generation) is a web platform (open-source) for clinical and preclinical research, designed to import, share, archive, search and visualize all kind of medical imaging data (BIDS, MR, CT, PT, EEG, Bruker). Its origin goes back to neuroimaging, but its usage is now open for all kind of organs. It provides a user-friendly, secure web access and offers an intuitive workflow to facilitate the collecting and retrieving of imaging data from multiple sources and a wizzard to make the completion of metadata easy. Shanoir-NG comes along with many features such as pseudonymization of data for all imports, automatic NIfTI conversion and support for multi-centres clinical studies.",
+      "schema:url": "` + shanoirUrl + `",
+      "schema:keywords": [
+        "Medical Imaging", "Neuroimaging", "Neuroinformatics",
+        "MRI", "Research", "DICOM", "BIDS", "Data Sharing"
+      ],
+      "schema:license": "https://www.gnu.org/licenses/gpl-3.0.en.html",
+      "dct:language": { "@id": "http://id.loc.gov/vocabulary/iso639-1/en" },
+      "dcterms:title": [
+        { "@value": "Shanoir - Sharing in vivo imaging resources", "@language": "en" },
+        { "@value": "Shanoir - Base de données de recherche en imagerie in vivo", "@language": "fr" }
+      ],
+      "rdfs:label": [
+        { "@value": "Shanoir - Sharing in vivo imaging resources", "@language": "en" },
+        { "@value": "Shanoir - Base de données de recherche en imagerie in vivo", "@language": "fr" }
+      ],
+      "schema:provider": [
+        { "@id": "https://www.francelifeimaging.fr" },
+        { "@id": "https://inria.fr" }
+      ],
+      "dct:creator": [{ "@id": "https://www.francelifeimaging.fr" }],
+      "dct:publisher": [{ "@id": "https://inria.fr" }],
+      "schema:dataset": [` + datasetStr + `],
+      "dcat:dataset": [` + datasetStr + `],
+      "dqv:hasQualityMeasurement": [
+        { "@id": "` + shanoirUrl + `/shanoir-ng/users/users/count" },
+        { "@id": "` + shanoirUrl + `/shanoir-ng/users/events/count" },
+        { "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics" },
+        { "@id": "` + shanoirUrl + `/shanoir-ng/studies/studies/public/data" }
+      ]
+    },
     {
       "@id": "https://www.francelifeimaging.fr",
       "@type": "schema:Organization",
@@ -137,209 +172,60 @@ export class WelcomeComponent implements OnInit {
       "schema:url": "https://inria.fr"
     },
     {
-      "@id": "https://shanoir.irisa.fr",
-      "@type": [
-        "schema:DataCatalog",
-        "dcat:Catalog"
-      ],
-      "dct:conformsTo": "https://bioschemas.org/profiles/DataCatalog/0.3-RELEASE-2019_07_01",
-      "schema:name": "Shanoir - Sharing in vivo imaging resources",
-      "schema:description": "Shanoir-NG (SHAring NeurOImaging Resources, Next Generation) is a web platform (open-source) for clinical and preclinical research, designed to import, share, archive, search and visualize all kind of medical imaging data (BIDS, MR, CT, PT, EEG, Bruker). Its origin goes back to neuroimaging, but its usage is now open for all kind of organs. It provides a user-friendly, secure web access and offers an intuitive workflow to facilitate the collecting and retrieving of imaging data from multiple sources and a wizzard to make the completion of metadata easy. Shanoir-NG comes along with many features such as pseudonymization of data for all imports, automatic NIfTI conversion and support for multi-centres clinical studies.",
-      "schema:url": "https://shanoir.irisa.fr",
-      "schema:keywords": [
-        "Medical Imaging",
-        "Neuroimaging",
-        "Neuroinformatics",
-        "MRI",
-        "Research",
-        "DICOM",
-        "BIDS",
-        "Data Sharing"
-      ],
-      "schema:license": "https://www.gnu.org/licenses/gpl-3.0.en.html",
-      "dct:language": {
-        "@id": "http://id.loc.gov/vocabulary/iso639-1/en"
-      },
-      "dcterms:title": [
-        {
-          "@value": "Shanoir - Sharing in vivo imaging resources",
-          "@language": "en"
-        },
-        {
-          "@value": "Shanoir - Base de données de recherche en imagerie in vivo",
-          "@language": "fr"
-        }
-      ],
-      "rdfs:label": [
-        {
-          "@value": "Shanoir - Sharing in vivo imaging resources",
-          "@language": "en"
-        },
-        {
-          "@value": "Shanoir - Base de données de recherche en imagerie in vivo",
-          "@language": "fr"
-        }
-      ],
-      "schema:provider": [
-        { "@id": "https://www.francelifeimaging.fr" },
-        { "@id": "https://inria.fr" }
-      ],
-      "dct:creator": [
-        { "@id": "https://www.francelifeimaging.fr" }
-      ],
-      "dct:publisher": [
-        { "@id": "https://inria.fr" }
-      ],
-      "schema:dataset": [
-        { "@id": "Sharing_SynesthesiaStructuralData" },
-        { "@id": "CGen-KG-ICA" },
-        { "@id": "ReVis-MD" },
-        { "@id": "Sharing_SynesthesiaFunctionalData" },
-        { "@id": "MSSEG-2" },
-        { "@id": "MSSEG 2016" },
-        { "@id": "MS-Multi-Spine" }
-      ],
-      "dcat:dataset": [
-        { "@id": "Sharing_SynesthesiaStructuralData" },
-        { "@id": "CGen-KG-ICA" },
-        { "@id": "ReVis-MD" },
-        { "@id": "Sharing_SynesthesiaFunctionalData" },
-        { "@id": "MSSEG-2" },
-        { "@id": "MSSEG 2016" },
-        { "@id": "MS-Multi-Spine" }
-      ],
-      "dqv:hasQualityMeasurement": [
-        { "@id": "https://shanoir.irisa.fr/shanoir-ng/users/users/count" },
-        { "@id": "https://shanoir.irisa.fr/shanoir-ng/users/events/count" },
-        { "@id": "https://shanoir.irisa.fr/shanoir-ng/datasets/datasets/overallStatistics/datasets" },
-        { "@id": "https://shanoir.irisa.fr/shanoir-ng/studies/studies/public/data" },
-        { "@id": "https://shanoir.irisa.fr/shanoir-ng/datasets/datasets/overallStatistics/subjects" },
-        { "@id": "https://shanoir.irisa.fr/shanoir-ng/datasets/datasets/overallStatistics/images" },
-        { "@id": "https://shanoir.irisa.fr/shanoir-ng/datasets/datasets/overallStatistics/storage" }
-      ]
-    },
-    {
-      "@id": "Sharing_SynesthesiaStructuralData",
-      "@type": ["schema:Dataset", "dcat:Dataset"],
-      "dct:conformsTo": "https://bioschemas.org/profiles/Dataset/0.3-RELEASE-2019_06_14",
-      "schema:url": "https://shanoir.irisa.fr/shanoir-ng/study/details/134",
-      "dct:identifier": "https://shanoir.irisa.fr/shanoir-ng/study/details/134",
-      "schema:name": "Sharing_SynesthesiaStructuralData",
-      "schema:keywords": []
-    },
-    {
-      "@id": "CGen-KG-ICA",
-      "@type": ["schema:Dataset", "dcat:Dataset"],
-      "dct:conformsTo": "https://bioschemas.org/profiles/Dataset/0.3-RELEASE-2019_06_14",
-      "schema:url": "https://shanoir.irisa.fr/shanoir-ng/study/details/278",
-      "dct:identifier": "https://shanoir.irisa.fr/shanoir-ng/study/details/278",
-      "schema:name": "CGen-KG-ICA",
-      "schema:description": "Collection of simulated imaging data of intracranial berry aneurysms.",
-      "schema:keywords": ["Simulated Data", "Interoperability", "Intracranial Aneurysm"]
-    },
-    {
-      "@id": "ReVis-MD",
-      "@type": ["schema:Dataset", "dcat:Dataset"],
-      "dct:conformsTo": "https://bioschemas.org/profiles/Dataset/0.3-RELEASE-2019_06_14",
-      "schema:url": "https://shanoir.irisa.fr/shanoir-ng/study/details/269",
-      "dct:identifier": "https://shanoir.irisa.fr/shanoir-ng/study/details/269",
-      "schema:name": "ReVis-MD",
-      "schema:keywords": []
-    },
-    {
-      "@id": "Sharing_SynesthesiaFunctionalData",
-      "@type": ["schema:Dataset", "dcat:Dataset"],
-      "dct:conformsTo": "https://bioschemas.org/profiles/Dataset/0.3-RELEASE-2019_06_14",
-      "schema:url": "https://shanoir.irisa.fr/shanoir-ng/study/details/140",
-      "dct:identifier": "https://shanoir.irisa.fr/shanoir-ng/study/details/140",
-      "schema:name": "Sharing_SynesthesiaFunctionalData",
-      "schema:keywords": []
-    },
-    {
-      "@id": "MSSEG-2",
-      "@type": ["schema:Dataset", "dcat:Dataset"],
-      "dct:conformsTo": "https://bioschemas.org/profiles/Dataset/0.3-RELEASE-2019_06_14",
-      "schema:url": "https://shanoir.irisa.fr/shanoir-ng/study/details/208",
-      "dct:identifier": "https://shanoir.irisa.fr/shanoir-ng/study/details/208",
-      "schema:name": "MSSEG-2",
-      "schema:description": "MS new lesions segmentation challenge of MICCAI 2021",
-      "schema:keywords": ["100 subjects", "MRI brain images", "NIfTI", "Multiple sclerosis"]
-    },
-    {
-      "@id": "MSSEG 2016",
-      "@type": ["schema:Dataset", "dcat:Dataset"],
-      "dct:conformsTo": "https://bioschemas.org/profiles/Dataset/0.3-RELEASE-2019_06_14",
-      "schema:url": "https://shanoir.irisa.fr/shanoir-ng/study/details/209",
-      "dct:identifier": "https://shanoir.irisa.fr/shanoir-ng/study/details/209",
-      "schema:name": "MSSEG 2016",
-      "schema:description": "MS lesions segmentation challenge of MICCAI 2016",
-      "schema:keywords": ["60 subjects", "MRI brain images", "NIfTI", "Multiple sclerosis"]
-    },
-    {
-      "@id": "MS-Multi-Spine",
-      "@type": ["schema:Dataset", "dcat:Dataset"],
-      "dct:conformsTo": "https://bioschemas.org/profiles/Dataset/0.3-RELEASE-2019_06_14",
-      "schema:url": "https://shanoir.irisa.fr/shanoir-ng/study/details/259",
-      "dct:identifier": "https://shanoir.irisa.fr/shanoir-ng/study/details/259",
-      "schema:name": "MS-Multi-Spine",
-      "schema:description": "MS lesion segmentation challenge on spinal cord",
-      "schema:keywords": ["Spinal cord", "Multiple sclerosis (MS)", "Lesion segmentation", "200 subjects"]
-    },
-    {
-      "@id": "https://shanoir.irisa.fr/shanoir-ng/users/users/count",
+      "@id": "` + shanoirUrl + `/shanoir-ng/users/users/count",
       "@type": "dqv:QualityMeasurement",
-      "dqv:computedOn": { "@id": "https://shanoir.irisa.fr" },
+      "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
       "dqv:isMeasurementOf": { "@id": "Users" },
       "dqv:inMetric": { "@id": "Users Count" },
-      "dqv:value": { "@value": "0", "@type": "xsd:integer" }
+      "dqv:value": { "@value": "` + this.usersCount + `", "@type": "xsd:integer" }
     },
     {
-      "@id": "https://shanoir.irisa.fr/shanoir-ng/users/events/count",
+      "@id": "` + shanoirUrl + `/shanoir-ng/users/events/count",
       "@type": "dqv:QualityMeasurement",
-      "dqv:computedOn": { "@id": "https://shanoir.irisa.fr" },
+      "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
       "dqv:isMeasurementOf": { "@id": "Events" },
       "dqv:inMetric": { "@id": "Events Count" },
-      "dqv:value": { "@value": "0", "@type": "xsd:integer" }
+      "dqv:value": { "@value": "` + this.eventsCount + `", "@type": "xsd:integer" }
     },
     {
-      "@id": "https://shanoir.irisa.fr/shanoir-ng/datasets/datasets/overallStatistics/datasets",
+      "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics",
       "@type": "dqv:QualityMeasurement",
-      "dqv:computedOn": { "@id": "https://shanoir.irisa.fr" },
+      "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
       "dqv:isMeasurementOf": { "@id": "Datasets" },
       "dqv:inMetric": { "@id": "Datasets Count" },
-      "dqv:value": { "@value": "278", "@type": "xsd:integer" }
+      "dqv:value": { "@value": "` + this.studiesCount + `", "@type": "xsd:integer" }
     },
     {
-      "@id": "https://shanoir.irisa.fr/shanoir-ng/studies/studies/public/data",
+      "@id": "` + shanoirUrl + `/shanoir-ng/studies/studies/public/data",
       "@type": "dqv:QualityMeasurement",
-      "dqv:computedOn": { "@id": "https://shanoir.irisa.fr" },
+      "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
       "dqv:isMeasurementOf": { "@id": "Public Datasets" },
       "dqv:inMetric": { "@id": "Public Datasets Count" },
-      "dqv:value": { "@value": "7", "@type": "xsd:integer" }
+      "dqv:value": { "@value": "` + this.publicStudies.length + `", "@type": "xsd:integer" }
     },
     {
-      "@id": "https://shanoir.irisa.fr/shanoir-ng/datasets/datasets/overallStatistics/subjects",
+      "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics",
       "@type": "dqv:QualityMeasurement",
-      "dqv:computedOn": { "@id": "https://shanoir.irisa.fr" },
+      "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
       "dqv:isMeasurementOf": { "@id": "Subjects" },
       "dqv:inMetric": { "@id": "Subjects Count" },
-      "dqv:value": { "@value": "25449", "@type": "xsd:integer" }
+      "dqv:value": { "@value": "` + this.subjectsCount + `", "@type": "xsd:integer" }
     },
     {
-      "@id": "https://shanoir.irisa.fr/shanoir-ng/datasets/datasets/overallStatistics/images",
+      "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics",
       "@type": "dqv:QualityMeasurement",
-      "dqv:computedOn": { "@id": "https://shanoir.irisa.fr" },
+      "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
       "dqv:isMeasurementOf": { "@id": "Images" },
       "dqv:inMetric": { "@id": "Images Count" },
-      "dqv:value": { "@value": "350322", "@type": "xsd:integer" }
+      "dqv:value": { "@value": "` + this.datasetAcquisitionsCount + `", "@type": "xsd:integer" }
     },
     {
-      "@id": "https://shanoir.irisa.fr/shanoir-ng/datasets/datasets/overallStatistics/storage",
+      "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics",
       "@type": "schema:QuantitativeValue",
       "skos:prefLabel": "Total data storage volume",
-      "dqv:computedOn": { "@id": "https://shanoir.irisa.fr" },
+      "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
       "dqv:isMeasurementOf": { "@id": "Storage Volume" },
-      "schema:value": { "@value": "18609", "@type": "xsd:decimal" },
+      "schema:value": { "@value": "` + this.storageSize + `", "@type": "xsd:decimal" },
       "schema:unitCode": "E34",
       "schema:unitText": "Gigabyte"
     },
@@ -411,21 +297,21 @@ export class WelcomeComponent implements OnInit {
       "@type": "dqv:Metric",
       "dqv:inDimension": { "@id": "Public Datasets" },
       "skos:prefLabel": "Count of all public datasets",
-      "skos:definition": "Count all the publicly accessible datasets among all the datasets hosted on the platform."
+      "skos:definition": "Count all the publicly accessible datasets among all the datasets hosted on the platform under the Shanoir term Studies."
     },
     {
       "@id": "Subjects Count",
       "@type": "dqv:Metric",
       "dqv:inDimension": { "@id": "Subjects" },
       "skos:prefLabel": "Count of all subjects",
-      "skos:definition": "Count all subjects belonging to datasets and hosted on the platform."
+      "skos:definition": "Count all subjects belonging to datasets and hosted on the platform under the Shanoir term Subjects."
     },
     {
       "@id": "Images Count",
       "@type": "dqv:Metric",
       "dqv:inDimension": { "@id": "Images" },
       "skos:prefLabel": "Count of all images",
-      "skos:definition": "Count all DICOM series belonging to subjects and hosted on the platform."
+      "skos:definition": "Count all DICOM series belonging to subjects and hosted on the platform under the Shanoir term Dataset Acquisition."
     },
     {
       "@id": "Storage Volume Metric",

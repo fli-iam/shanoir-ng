@@ -13,6 +13,8 @@
  */
 import { Injectable } from '@angular/core';
 
+import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
 import { DatasetDTO, DatasetDTOService } from '../../datasets/shared/dataset.dto';
@@ -35,8 +37,6 @@ import { XaProtocol } from '../modality/xa/xa-protocol.model';
 
 import { DatasetAcquisition } from './dataset-acquisition.model';
 import { DatasetAcquisitionUtils } from './dataset-acquisition.utils';
-
-import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
 
 @Injectable()
 export class DatasetAcquisitionDTOService {
