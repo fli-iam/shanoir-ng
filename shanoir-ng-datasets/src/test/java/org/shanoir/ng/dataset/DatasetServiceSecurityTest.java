@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.dataset.dto.DatasetForRights;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetRightsDTO;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetAsyncService;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -116,6 +117,7 @@ public class DatasetServiceSecurityTest {
         su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
         su1.setCenterIds(Arrays.asList(new Long[]{1L}));
         given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
+        given(datasetRepository.findRelatedStudyIds(Mockito.anyLong())).willReturn(Set.of());
     }
 
     @Test
@@ -232,7 +234,8 @@ public class DatasetServiceSecurityTest {
             assertAccessAuthorized(service::update, mockDataset(1L, 1L, 1L, 1L, 1L));
             Dataset ds = mockDataset(100L, 1L, 1L, 2L, 1L);
             given(datasetRepository.findById(ds.getId())).willReturn(Optional.of(ds));
-
+            DatasetRightsDTO drv = mockDatasetRightsDTO(100L, 2L, 1L);
+            given(datasetRepository.findRightsDtoBaseById(ds.getId())).willReturn(drv);
             assertAccessDenied(service::update, ds);
         }
         assertAccessDenied(service::update, mockDataset(2L, 2L, 2L, 2L, 2L));
@@ -287,6 +290,18 @@ public class DatasetServiceSecurityTest {
         ds.setStudyId(studyId);
         ds.setDatasetAcquisition(mockDsAcq(dsAcqId, examId, centerId, studyId));
         return ds;
+    }
+
+    private DatasetRightsDTO mockDatasetRightsDTO(Long id, Long centerId, Long studyId) {
+
+        DatasetRightsDTO view = new DatasetRightsDTO(
+                id,
+                centerId,
+                studyId,
+                studyId,
+                Set.of(new DatasetRightsDTO.StudyIdDTO(studyId))
+        );
+        return view;
     }
 
     private DatasetAcquisition mockDsAcq(Long id, Long examId, Long centerId, Long studyId) {
@@ -424,21 +439,29 @@ public class DatasetServiceSecurityTest {
         // dataset 1
         Dataset dataset1 = mockDataset(1L, 1L, 1L, 1L, 1L);
         given(datasetRepository.findById(1L)).willReturn(Optional.of(dataset1));
+        DatasetRightsDTO drv1 = mockDatasetRightsDTO(1L, 1L, 1L);
+        given(datasetRepository.findRightsDtoBaseById(dataset1.getId())).willReturn(drv1);
         exam1.setDatasetAcquisitions(Utils.toList(dsAcq1));
         dsAcq1.setDatasets(Arrays.asList(new Dataset[]{dataset1}));
         // dataset 2
         Dataset dataset2 = mockDataset(2L, 2L, 2L, 2L, 3L);
         given(datasetRepository.findById(2L)).willReturn(Optional.of(dataset2));
+        DatasetRightsDTO drv2 = mockDatasetRightsDTO(2L, 2L, 3L);
+        given(datasetRepository.findRightsDtoBaseById(dataset2.getId())).willReturn(drv2);
         exam2.setDatasetAcquisitions(Utils.toList(dsAcq2));
         dsAcq2.setDatasets(Arrays.asList(new Dataset[]{dataset2}));
         // dataset 3
         Dataset dataset3 = mockDataset(3L, 3L, 3L, 3L, 1L);
         given(datasetRepository.findById(3L)).willReturn(Optional.of(dataset3));
+        DatasetRightsDTO drv3 = mockDatasetRightsDTO(3L, 3L, 1L);
+        given(datasetRepository.findRightsDtoBaseById(dataset3.getId())).willReturn(drv3);
         exam3.setDatasetAcquisitions(Utils.toList(dsAcq3));
         dsAcq3.setDatasets(Arrays.asList(new Dataset[]{dataset3}));
         // dataset 4
         Dataset dataset4 = mockDataset(4L, 4L, 4L, 4L, 4L);
         given(datasetRepository.findById(4L)).willReturn(Optional.of(dataset4));
+        DatasetRightsDTO drv4 = mockDatasetRightsDTO(4L, 4L, 4L);
+        given(datasetRepository.findRightsDtoBaseById(dataset4.getId())).willReturn(drv4);
         exam4.setDatasetAcquisitions(Utils.toList(dsAcq4));
         dsAcq4.setDatasets(Arrays.asList(new Dataset[]{dataset4}));
 

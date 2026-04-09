@@ -146,15 +146,16 @@ public class ShanoirEventsService {
                 }
                 try {
                     emitter.send(notification, MediaType.APPLICATION_JSON);
-                } catch (IOException e2) {
-                    emitter.complete();
+                } catch (IOException e) {
+                    sseEmitterListToRemove.add(emitter);
+                    if (e.getMessage() != null && e.getMessage().contains("Broken pipe")) {
+                        LOG.info("User " + emitter.getUserId() + " connection reset, removing emitter. (broken pipe)");
+                    } else {
+                        LOG.error("Error while send task to UI ", e);
+                    }
+                } catch (Exception e2) {
                     sseEmitterListToRemove.add(emitter);
                     LOG.error("Error while send task to UI ", e2);
-                } catch (Exception e) {
-                    emitter.complete();
-                    sseEmitterListToRemove.add(emitter);
-                    LOG.error("Error while send task to UI ", e);
-                    throw e;
                 }
             }
         });

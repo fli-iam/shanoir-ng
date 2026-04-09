@@ -71,7 +71,8 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
     getColumnDefs(): ColumnDefinition[] {
         return [
             {
-               headerName: 'Message', field: 'message', width: '100%', type:'link', route: (task: Task) => task.route
+               headerName: 'Message', field: 'message', width: '100%', type:'link',
+               download: item => this.downloadStats(item),
             }, {
                headerName: 'Progress', field: 'progress', width: '110px', type: 'progress',
                cellRenderer: params => { return {progress: params.data?.progress, status: params.data?.status}; }
@@ -88,7 +89,10 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
     }
 
     downloadStats(item: any) {
-        if (item instanceof Task && item.eventType == "downloadStatistics.event" && item.progress == 1) {
+        if (item instanceof Task 
+                && ["downloadStatistics.event", "copyDataset.event"].includes(item.eventType) 
+                && item.progress == 1) {
+            console.log('Calling taskService.downloadStats with item:', item);
             this.taskService.downloadStats(item);
         }
     }
