@@ -23,9 +23,9 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
         type = SecuritySchemeType.OAUTH2,
         name = "OAuth2Auth",
         flows = @OAuthFlows(password = @OAuthFlow(
-                authorizationUrl = "${SHANOIR_KEYCLOAK_INTERNAL_URL}/auth/realms/shanoir-ng/protocol/openid-connect/auth/",
-                tokenUrl = "${SHANOIR_KEYCLOAK_INTERNAL_URL}/auth/realms/shanoir-ng/protocol/openid-connect/token",
-                refreshUrl = "${SHANOIR_KEYCLOAK_INTERNAL_URL}/auth/realms/shanoir-ng/protocol/openid-connect/token"
+                authorizationUrl = "${SHANOIR_KEYCLOAK_INTERNAL_URL}/realms/shanoir-ng/protocol/openid-connect/auth/",
+                tokenUrl = "${SHANOIR_KEYCLOAK_INTERNAL_URL}/realms/shanoir-ng/protocol/openid-connect/token",
+                refreshUrl = "${SHANOIR_KEYCLOAK_INTERNAL_URL}/realms/shanoir-ng/protocol/openid-connect/token"
         )))
 public class OAuth2Auth {
 }
