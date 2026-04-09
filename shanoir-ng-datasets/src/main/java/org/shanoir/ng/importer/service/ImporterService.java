@@ -210,7 +210,7 @@ public class ImporterService {
         boolean hasQualityCards = qualityCards != null && !qualityCards.isEmpty();
         boolean isFromShanoirUploader = importJob.isFromShanoirUploader();
         Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
-        QualityCardResult qualityResult = null;
+        QualityCardResult qualityResult = new QualityCardResult();
         int rank = 0;
 
         // We use flatMap to get all selected series from all patients and studies in
