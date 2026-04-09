@@ -25,8 +25,10 @@ import java.util.Set;
 
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
-import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.CopyReport;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
+import org.shanoir.ng.dataset.service.CsvCopyService;
 import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -36,9 +38,11 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
+import org.shanoir.ng.shared.dto.StudyExaminationsDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
@@ -56,6 +60,8 @@ import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,6 +140,12 @@ public class RabbitMQDatasetsService {
 
     @Autowired
     private StudyService studyService;
+
+    @Autowired
+    private DatasetSecurityService securityService;
+
+    @Autowired
+    private CsvCopyService csvCopyService;
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
@@ -338,7 +350,15 @@ public class RabbitMQDatasetsService {
             }
 
             // Delete subject from datasets database
-            subjectRepository.deleteById(subjectId);
+            Subject subject = subjectRepository.findById(subjectId).orElse(null);
+            if (subject != null) {
+                for (Tag tag : subject.getTags()) {
+                    tag.getSubjects().remove(subject);
+                }
+                subject.getTags().clear();
+                subjectRepository.save(subject);
+                subjectRepository.delete(subject);
+            }
 
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
@@ -428,7 +448,6 @@ public class RabbitMQDatasetsService {
      */
     @RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    @Transactional
     @Async
     public void copyDatasetsToStudy(final String data) {
         Map<Long, Examination> examMap = new HashMap<>();
@@ -441,63 +460,109 @@ public class RabbitMQDatasetsService {
         int countCopy = 0;
         int countSuccess = 0;
         int countTotal = 0;
+        List<String> errors = new ArrayList<>();
         float progress = 0f;
         ShanoirEvent event = null;
+
         try {
             RelatedDataset dto = objectMapper.readValue(data, RelatedDataset.class);
-            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             Long userId = dto.getUserId();
+            KeycloakUtil.UserRole role = dto.getUserRole();
             Long studyId = dto.getStudyId();
             datasetParentIds = dto.getDatasetIds();
             countTotal = datasetParentIds.size();
-
             event = new ShanoirEvent(
-                    ShanoirEventType.COPY_DATASET_EVENT,
-                    null,
-                    userId,
-                    "Copy of dataset " + countProgress++ + "/" + countTotal + " to study [" + studyId + "].",
-                    ShanoirEvent.IN_PROGRESS,
-                    Float.valueOf(countProgress / countTotal),
-                    studyId
+                ShanoirEventType.COPY_DATASET_EVENT,
+                null,
+                userId,
+                "Copy of dataset " + countProgress++ + "/" + countTotal + " to study [" + studyId + "].",
+                ShanoirEvent.IN_PROGRESS,
+                Float.valueOf(countProgress / countTotal),
+                studyId
             );
+            event.setId(dto.getEventId());
             event.setReport("");
 
+            /** Check rights */
+            if (!securityService.checkDatasetRelatedDatasets(dto.getDatasetIds(), userId, role)) {
+                LOG.error("User {} is not allowed to copy datasets {}, copy aborted.", userId, dto.getDatasetIds());
+                event.setMessage("User don't have the rights to copy these datasets, copy aborted.");
+                event.setStatus(ShanoirEvent.ERROR);
+                event.setProgress(-1f);
+                eventService.publishEvent(event);
+                return;
+            }
+            /* */
+            switch (role) {
+                case ADMIN -> SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN", userId);
+                case EXPERT -> SecurityContextUtil.initAuthenticationContext("ROLE_EXPERT", userId);
+                case USER -> SecurityContextUtil.initAuthenticationContext("ROLE_USER", userId);
+                default -> {
+                    LOG.error("User {} has an unauthorized role {}, copy aborted.", userId, role);
+                    event.setMessage("User has an unauthorized role, copy aborted.");
+                    event.setStatus(ShanoirEvent.ERROR);
+                    event.setProgress(-1f);
+                    eventService.publishEvent(event);
+                    return;
+                }
+            }
+            StudyExaminationsDTO propagatedExams = new StudyExaminationsDTO(studyId);
+            List<CopyReport> cvsReports = new ArrayList<>();
             for (Long datasetParentId : datasetParentIds) {
                 progress += 1f / countTotal;
                 event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + countProgress++ + "/" + countTotal);
                 event.setProgress(progress);
+                event.setReport(buildReport(datasetParentIds, countProcessed, countAlreadyExist, countCopy, countSuccess, errors));
                 eventService.publishEvent(event);
 
                 LOG.info("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
                 Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
-                Dataset datasetParent = datasetService.findById(datasetParentId);
 
-                if (datasetParent.getSource() != null) {
-                    LOG.info("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
-                    countCopy++;
-                } else if (dsCount != 0) {
+                if (dsCount != 0) {
                     LOG.info("[CopyDatasets] Dataset already exists in this study, copy aborted.");
                     countAlreadyExist++;
-
                 } else {
-                    Object[] result = datasetCopyService.moveDataset(datasetParent, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
-                    Long newDsId = (Long) result[0];
-                    countProcessed += (int) result[1];
-                    countSuccess += (int) result[2];
-                    LOG.info("countProcessed : " + countProcessed);
-                    if (newDsId != null)
-                        newDatasets.add(newDsId);
+                    try {
+                        DatasetCopyService.DatasetCopyResult result = datasetCopyService.moveDataset(datasetParentId, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
+                        Long newDsId = result.getNewDsId();
+                        countProcessed += result.getCountProcessed();
+                        countSuccess += result.getCountSuccess();
+                        countCopy += result.getCountCopy();
+                        LOG.info("countProcessed : " + countProcessed);
+                        if (newDsId != null) newDatasets.add(newDsId);
+                        propagatedExams.addExam(result.getExaminationId(), result.getCenterId(), result.getSubjectId());
+                        CopyReport cvsReport = new CopyReport();
+                        cvsReport.setSourceDatasetId(datasetParentId);
+                        cvsReport.setTargetDatasetId(newDsId);
+                        cvsReport.setSubjectNewName(result.getSubjectName());
+                        cvsReports.add(cvsReport);
+                    } catch (DatasetCopyService.NotFoundSubjectIdException e) {
+                        LOG.error("[CopyDatasets] No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId);
+                        errors.add("No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId
+                                + ". The csv input might be associating the wrong subject id to the dataset.");
+                    } catch (DatasetCopyService.NotFoundDatasetIdException e) {
+                        LOG.error("[CopyDatasets] No dataset found with id = " + e.getDatasetId() + ", copy aborted for dataset " + datasetParentId);
+                        errors.add("No dataset found with id = " + e.getDatasetId() + ", copy aborted for dataset " + datasetParentId);
+                    } catch (JsonProcessingException e) {
+                        LOG.error("[CopyDatasets] Error processing json during the copy of dataset " + datasetParentId, e);
+                        errors.add("Error processing json during the copy of dataset " + datasetParentId + ": " + e.getMessage());
+                    } catch (Exception e) {
+                        LOG.error("[CopyDatasets] Unexpected error during the copy of dataset " + datasetParentId, e);
+                        errors.add("Unexpected error during the copy of dataset " + datasetParentId + ": " + e.getMessage());
+                    }
                 }
             }
+            if (!cvsReports.isEmpty()) {
+                csvCopyService.writeReportTsvFile(cvsReports, event.getId());
+            }
+            propagateExaminations(propagatedExams);
 
-            event.setMessage("Copy successful for " + countSuccess + "/" + countTotal + " datasets to study [" + studyId + "].\n"
-                    + countCopy + " were already copied datasets.\n"
-                    + countAlreadyExist + " already existed in destination study.\n"
-                    + countProcessed + " are processed datasets and cannot be copied.");
+            event.setMessage("Copy ended");
             event.setStatus(ShanoirEvent.SUCCESS);
             event.setProgress(1.0f);
+            event.setReport(buildReport(datasetParentIds, countProcessed, countAlreadyExist, countCopy, countSuccess, errors));
             eventService.publishEvent(event);
-            if (newDatasets.size() > 0)
+            if (!newDatasets.isEmpty())
                 solrService.indexDatasets(newDatasets);
 
         } catch (Exception e) {
@@ -505,11 +570,37 @@ public class RabbitMQDatasetsService {
                 event.setMessage("[CopyDatasets] Error during the copy of dataset.");
                 event.setStatus(ShanoirEvent.ERROR);
                 event.setProgress(-1f);
+                event.setReport(e.getMessage());
                 eventService.publishEvent(event);
             }
             LOG.error("Something went wrong during the copy. {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
         }
+    }
+
+    private void propagateExaminations(StudyExaminationsDTO propagatedExams) throws ShanoirException {
+        Long userId = KeycloakUtil.getTokenUserId();
+        try {
+            eventService.publishEvent(
+                    new ShanoirEvent(
+                            ShanoirEventType.CREATE_EXAMINATIONS_EVENT,
+                            null,
+                            userId,
+                            objectMapper.writeValueAsString(propagatedExams),
+                            ShanoirEvent.SUCCESS,
+                            propagatedExams.getStudyId()));
+        } catch (JsonProcessingException e) {
+            throw new ShanoirException("Error processing json during the propagation of examinations after dataset copy.", e);
+        }
+    }
+
+    private String buildReport(List<Long> datasetParentIds, int countProcessed, int countAlreadyExist,
+            int countCopy, int countSuccess, List<String> errors) {
+        return "Copy successful for " + countSuccess + "/" + datasetParentIds.size() + " datasets.\n"
+                + countCopy + " were already copied datasets.\n"
+                + countAlreadyExist + " already existed in destination study.\n"
+                + countProcessed + " are processed datasets and cannot be copied.\n"
+                + (!errors.isEmpty() ? "Errors: " + String.join("\n", errors) : "");
     }
 
 }

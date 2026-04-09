@@ -34,6 +34,7 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dto.StudyExaminationsDTO.StudyExaminationDTO;
 import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -60,6 +61,7 @@ import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
+import org.shanoir.ng.studyexamination.StudyExaminationBulkRepository;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
@@ -112,6 +114,9 @@ public class StudyServiceImpl implements StudyService {
 
     @Autowired
     private SubjectRepository subjectRepository;
+
+    @Autowired
+    private StudyExaminationBulkRepository studyExaminationBulkRepository;
 
     @Autowired
     private StudyUserUpdateBroadcastService studyUserCom;
@@ -948,6 +953,12 @@ public class StudyServiceImpl implements StudyService {
             exams.add(studyExam);
             this.studyRepository.save(study);
         }
+    }
+
+    @Override
+    @Transactional
+    public void addExaminationsToStudy(List<StudyExaminationDTO> studyExaminationDTOList, Long studyId) {
+        studyExaminationBulkRepository.insertInBatches(studyExaminationDTOList, studyId);
     }
 
     @Override

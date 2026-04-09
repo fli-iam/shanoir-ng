@@ -10,7 +10,12 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-ALTER TABLE examination ADD COLUMN data_reuse_agreement bool DEFAULT false NOT NULL;
-UPDATE examination SET data_reuse_agreement = false WHERE true;
-
-ALTER TABLE shanoir_metadata ADD COLUMN data_reuse_agreement bool;
+-- This script synchronizes the subject_id field of dataset table with the acquisition > examination > subject_id
+UPDATE dataset d
+JOIN dataset_acquisition da
+    ON da.id = d.dataset_acquisition_id
+JOIN examination e
+    ON e.id = da.examination_id
+SET d.subject_id = e.subject_id
+WHERE d.subject_id IS NULL
+   OR d.subject_id <> e.subject_id;

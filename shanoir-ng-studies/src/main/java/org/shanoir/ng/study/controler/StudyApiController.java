@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +36,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
+import org.shanoir.ng.study.dto.CopyData;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
@@ -261,35 +261,19 @@ public class StudyApiController implements StudyApi {
     }
 
     @Override
-    public ResponseEntity<String> copyDatasetsToStudy(
-            List<Long> datasetIds,
-            String studyIdAsStr,
-            String subjectName,
-            List<Long> centerIds,
-            List<String> subjectIds) {
-        String res;
-        try {
-            Study study = studyService.findById(Long.valueOf(studyIdAsStr));
-            if (study.getIsDraft()) {
-                String errorMsg = "Copy dataset(s): The study " + studyIdAsStr + " is draft. An administrator must approve the study before it's use.";
-                LOG.error(errorMsg);
-                return new ResponseEntity<>(errorMsg, HttpStatus.FORBIDDEN);
-            }
+    public ResponseEntity<Long> copyDatasetsToStudy(
+            @Parameter(description = "Data to copy", required = true) CopyData copyData) throws RestServiceException {
 
-            Map<Long, Long> subjectMapping = new HashMap<>();
-            relatedDatasetService.createSubjectsInTargetStudy(subjectIds, study, subjectMapping, subjectName);
-            res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, study, centerIds, subjectMapping);
-        } catch (SecurityException e) {
-            String errorMsg = "Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : " + e;
-            LOG.error(errorMsg);
-            return new ResponseEntity<>(errorMsg, HttpStatus.FORBIDDEN);
+        try {
+            Long taskId = relatedDatasetService.copyData(copyData);
+            return new ResponseEntity<>(taskId, HttpStatus.OK);
         } catch (ShanoirException e) {
-            String errorMsg = "Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : " + e;
-            LOG.error(errorMsg);
-            return new ResponseEntity<>(errorMsg, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "Error while copying study datasets.", e));
         }
-        return new ResponseEntity<>(res, HttpStatus.OK);
     }
+
 
     @Override
     public ResponseEntity<StudyStorageVolumeDTO> getDetailedStorageVolume(@PathVariable("studyId") final Long studyId)

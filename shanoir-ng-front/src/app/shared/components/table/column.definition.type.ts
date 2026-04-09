@@ -91,4 +91,7 @@ export type ColumnDefinition = {
 
     /** enable text wrapping for this column */
     wrap?: boolean;
+
+    /** adds a download button in the cell */
+    download?: (item: any) => void;
 }

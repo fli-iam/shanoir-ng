@@ -464,8 +464,13 @@ export class AnimalSubjectFormComponent extends EntityComponent<AnimalSubject> {
 
     deleteBySubject(subject: Subject) {
         this.subjectService.deleteWithConfirmDialog("preclinical-subject", subject).then(deleted => {
-            if(deleted){
-                this.goToList();
+            if (deleted) {
+                if (this.treeService.treeOpened && this.treeService.treeAvailable) {
+                    this.treeService.removeCurrentNode();
+                    this.goToParent();
+                } else {
+                    this.goBack();
+                }
             }
         });
     }
