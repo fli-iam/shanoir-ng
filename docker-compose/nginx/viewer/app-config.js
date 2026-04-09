@@ -44,7 +44,7 @@ window.config = {
   	  {
     	// ~ REQUIRED
     	// Authorization Server URL
-    	authority: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/auth/realms/shanoir-ng',
+    	authority: 'SHANOIR_KEYCLOAK_URL/realms/shanoir-ng',
     	client_id: 'ohif-viewer',
     	redirect_uri: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/callback', // `OHIFStandaloneViewer.js`
     	// "Authorization Code Flow"

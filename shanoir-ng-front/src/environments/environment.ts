@@ -18,6 +18,7 @@
 
 export const environment = {
   production: false,
+  keycloakUrl: window["env"]["keycloakUrl"] || "https://shanoir-ng-nginx/auth",
   viewerUrl: window["env"]["viewerUrl"] || "https://viewer",
   vipUrl: window["env"]["vipUrl"] || "https://vip.creatis.insa-lyon.fr"
 };
