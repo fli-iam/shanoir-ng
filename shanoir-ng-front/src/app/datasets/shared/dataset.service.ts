@@ -196,7 +196,6 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     getOverallStatistics(): Promise<OverallStatistics> {
-        return this.http.get<OverallStatistics>(AppUtils.BACKEND_API_OVERALL_STATISTICS_URL)
-            .toPromise();
+        return firstValueFrom(this.http.get<OverallStatistics>(AppUtils.BACKEND_API_OVERALL_STATISTICS_URL));
     }
 }

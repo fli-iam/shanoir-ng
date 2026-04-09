@@ -168,8 +168,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     findDraftStudies(): Promise<Study[]> {
-        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL + '/draft')
-            .toPromise()
+        return firstValueFrom(this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL + '/draft'))
             .then((studies) => {
                 this._draftStudies = studies ? studies.length : 0;
                 return studies;
@@ -366,9 +365,8 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             return false;
         }
 
-        await this.http
-            .put<any>(AppUtils.BACKEND_API_STUDY_URL + '/approveDraftStudy/' + id, null)
-            .toPromise();
+        await firstValueFrom(this.http
+            .put<any>(AppUtils.BACKEND_API_STUDY_URL + '/approveDraftStudy/' + id, null));
 
         this.findDraftStudies();
 

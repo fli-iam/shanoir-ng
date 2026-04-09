@@ -46,9 +46,8 @@ export class AnimalSubjectService extends EntityService<AnimalSubject>{
 
     updateAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/`+animalSubject.id;
-        return this.http
-            .put<AnimalSubject>(url, this.stringify(animalSubject))
-            .toPromise();
+        return firstValueFrom(this.http
+            .put<AnimalSubject>(url, this.stringify(animalSubject)));
     }
 
     findSubjectByIdentifier(identifier: string): Promise<Subject> {
