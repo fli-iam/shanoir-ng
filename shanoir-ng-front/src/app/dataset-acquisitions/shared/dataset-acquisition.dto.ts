@@ -111,6 +111,7 @@ export class DatasetAcquisitionDTOService {
         entity.copies = dto.copies;
         entity.importDate = dto.importDate;
         entity.username = dto.username;
+        entity.qualityTag = dto.qualityTag;
         if (dto.acquisitionEquipmentId) {
             entity.acquisitionEquipment = new AcquisitionEquipment();
             entity.acquisitionEquipment.id = dto.acquisitionEquipmentId;
@@ -165,6 +166,7 @@ export class DatasetAcquisitionDTO {
         this.username = dsAcq.username;
         this.source = dsAcq.source;
         this.copies = dsAcq.copies;
+        this.qualityTag = dsAcq.qualityTag;
     }
 
     id: number;
@@ -180,6 +182,7 @@ export class DatasetAcquisitionDTO {
     username: string;
     copies: number[];
     source: number;
+    qualityTag: QualityTag;
 }
 
 export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
