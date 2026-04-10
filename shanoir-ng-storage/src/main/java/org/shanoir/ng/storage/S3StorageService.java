@@ -220,6 +220,33 @@ public class S3StorageService implements StorageService {
         }
     }
 
+    @Override
+    public String storeProcessedData(Long subjectId, String timeStamp, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        if (datasetsBucket.equals(UNUSED)) {
+            throw new StorageException("Missing datasets bucket configuration.", null);
+        }
+        String directory = datasetsPrefix
+                + SLASH + PROCESSED_DATASET
+                + SLASH + SUBJECT + subjectId
+                + SLASH + timeStamp;
+        String key = directory + SLASH + fileName;
+        try {
+            if (size > MULTIPART_THRESHOLD) {
+                uploadMultipart(datasetsBucket, key, inputStream, contentType, size);
+            } else {
+                s3Template.upload(datasetsBucket, key, inputStream,
+                        ObjectMetadata.builder().contentType(contentType).build());
+            }
+            LOG.info("Stored processed data file to S3: s3://{}/{}", datasetsBucket, key);
+            return getPublicLocationDatasets(directory, fileName);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw new StorageException("S3 upload failed for: " + fileName, e);
+        }
+    }
+
     private void uploadMultipart(String bucket, String key, InputStream inputStream,
             String contentType, long size) throws StorageException {
         CreateMultipartUploadResponse initResponse = s3Client.createMultipartUpload(r -> r

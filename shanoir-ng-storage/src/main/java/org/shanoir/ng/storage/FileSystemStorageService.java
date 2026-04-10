@@ -83,6 +83,19 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public String storeProcessedData(Long subjectId, String timeStamp, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        if (baseDirDatasets.equals(UNUSED)) {
+            throw new StorageException("Missing datasets directory configuration.", null);
+        }
+        String directory = SLASH + PROCESSED_DATASET
+                + SLASH + SUBJECT + subjectId
+                + SLASH + timeStamp;
+        return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
+    }
+
+    @Override
     public String storePreclinicalExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {

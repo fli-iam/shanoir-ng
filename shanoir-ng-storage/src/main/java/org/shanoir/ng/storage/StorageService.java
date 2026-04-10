@@ -31,6 +31,8 @@ public interface StorageService {
 
     public static final String PATHOLOGY_MODEL = "pathology-model-";
 
+    public static final String PROCESSED_DATASET = "processed-dataset";
+
     public static final String UNUSED = "UNUSED";
 
     public static final String SLASH = "/";
@@ -45,6 +47,10 @@ public interface StorageService {
 
     String storeBIDSData(Long studyId, String subjectName, Long examinationId, String fileName,
             String dataTypeBIDS, InputStream inputStream, String contentType, long size)
+            throws StorageException;
+
+    String storeProcessedData(Long subjectId, String timeStamp, String fileName,
+            InputStream inputStream, String contentType, long size)
             throws StorageException;
 
     public String storePreclinicalExtraData(Long examinationId, String fileName,
