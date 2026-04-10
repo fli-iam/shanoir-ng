@@ -17,19 +17,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         @if (!presetStudyId) {
             <li>
                 @if (editMode) {
-                    <label i18n="Edit user|Study label@@editUserStudy" [class.required-label]="editMode">
-                        List of available studies
-                    </label>
+                    <label i18n="Edit user|Study label@@editUserStudy" [class.required-label]="editMode">List of available studies</label>
                 }
                 <span class="right-col">
                     @if (editMode) {
-                        <select-box
-                            formControlName="studyId"
-                            [options]="studyOptions"
-                            (change)="onStudyChange($event)"></select-box>
-                        @if (hasError("studyId", ["required"])) {
+                        <select-box formControlName="studyId" [options]="studyOptions" (change)="onStudyChange($event)"></select-box>
+                        @if (hasError('studyId', ['required'])) {
                             <label
-                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                animate.enter="slide-down-error"
+                                animate.leave="slide-up-error"
                                 class="form-validation-alert"
                                 i18n="Edit user|Study required error@@editUserStudyRequiredError">
                                 Study is required!
@@ -50,26 +46,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </li>
         }
         <li>
-            <label i18n="Edit user|Institution label@@editUserInstitution" [class.required-label]="editMode">
-                Institution / Employer
-            </label>
+            <label i18n="Edit user|Institution label@@editUserInstitution" [class.required-label]="editMode">Institution / Employer</label>
             <span class="right-col">
                 @if (editMode) {
-                    <input
-                        type="text"
-                        formControlName="institution"
-                        (change)="onInstitutionChange($event.target.value)" />
-                    @if (hasError("institution", ["required"])) {
+                    <input type="text" formControlName="institution" (change)="onInstitutionChange($event.target.value)" />
+                    @if (hasError('institution', ['required'])) {
                         <label
-                            animate.enter="slide-down-error" animate.leave="slide-up-error"
+                            animate.enter="slide-down-error"
+                            animate.leave="slide-up-error"
                             class="form-validation-alert"
                             i18n="Edit user|Institution required error@@editUserInstitutionRequiredError">
                             Institution is required!
                         </label>
                     }
-                    @if (hasError("institution", ["length"])) {
+                    @if (hasError('institution', ['length'])) {
                         <label
-                            animate.enter="slide-down-error" animate.leave="slide-up-error"
+                            animate.enter="slide-down-error"
+                            animate.leave="slide-up-error"
                             class="form-validation-alert"
                             i18n="Edit user|Institution length error@@editUserInstitutionLengthError">
                             Institution length must be less than 200!
@@ -83,9 +76,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
         @if (!editMode && info.function) {
             <li>
-                <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">
-                    Function in the study
-                </label>
+                <label i18n="Edit user|Function label@@editUserFunction" [class.required-label]="editMode">Function in the study</label>
                 <span class="right-col">
                     <span>{{ info.function }}</span>
                 </span>

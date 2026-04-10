@@ -18,9 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (isOpen)="(true)"
             [hasChildren]="varAssess.scoreList && varAssess.scoreList.length > 0">
             @for (score of varAssess.scoreList; track score) {
-                <node
-                    [label]="score.id"
-                    [hasChildren]="false"></node>
+                <node [label]="score.id" [hasChildren]="false"></node>
             }
         </node>
     }

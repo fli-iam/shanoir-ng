@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     @if (hasChildren == true && !isOpen) {
         <span><i class="fas fa-angle-right"></i></span>
     }
-    @if (hasChildren == "unknown" && !isOpen && !dataLoading) {
+    @if (hasChildren == 'unknown' && !isOpen && !dataLoading) {
         <span><i class="fas fa-angle-right"></i></span>
     }
 </span>
@@ -30,22 +30,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </span>
     }
     @if (!dataLoading && pictoUrl) {
-        <a
-            [routerLink]="route"
-            (click)="labelClick.emit()"
-            (dblclick)="toggle()"
-            class="picto"
-            [class.clickable]="isClickable()">
+        <a [routerLink]="route" (click)="labelClick.emit()" (dblclick)="toggle()" class="picto" [class.clickable]="isClickable()">
             <img class="picto" src="{{ pictoUrl }}" alt="node pictogram" />
         </a>
     }
     @if (!dataLoading && awesome) {
-        <a
-            [routerLink]="route"
-            (click)="labelClick.emit()"
-            (dblclick)="toggle()"
-            class="picto"
-            [class.clickable]="isClickable()">
+        <a [routerLink]="route" (click)="labelClick.emit()" (dblclick)="toggle()" class="picto" [class.clickable]="isClickable()">
             <i class="{{ awesome }}"></i>
         </a>
     }
@@ -55,13 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </a>
     }
     @if (hasBox) {
-        <input
-            #box
-            class="box"
-            type="checkbox"
-            [(ngModel)]="value"
-            (change)="chkbxChange.emit(value)"
-            class="clickable" />
+        <input #box class="box" type="checkbox" [(ngModel)]="value" (change)="chkbxChange.emit(value)" class="clickable" />
     }
     @if (editable) {
         <input #editableLabel type="text" [(ngModel)]="label" (change)="labelChange.emit(label)" />
@@ -90,9 +74,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <ng-content select="dropdown-menu"></ng-content>
     </span>
     @if (qualityTag) {
-        <span
-            class="tag label dark"
-            [style.background]="qualityTag == 'ERROR' ? 'red' : qualityTag == 'WARNING' ? 'orange' : 'green'">
+        <span class="tag label dark" [style.background]="qualityTag == 'ERROR' ? 'red' : qualityTag == 'WARNING' ? 'orange' : 'green'">
             {{ qualityTag }}
         </span>
     }

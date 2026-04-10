@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </a>
             </dropdown-menu>
         }
-        @if (node.open && node.acquisitionEquipments && node.acquisitionEquipments != $any("UNLOADED")) {
+        @if (node.open && node.acquisitionEquipments && node.acquisitionEquipments != $any('UNLOADED')) {
             @for (acquisitionEquipment of node.acquisitionEquipments; track acquisitionEquipment; let i = $index) {
                 <equipment-node
                     node
@@ -40,7 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [withMenu]="withMenu"></equipment-node>
             }
         }
-        @if (node.open && node.coils && node.coils != $any("UNLOADED")) {
+        @if (node.open && node.coils && node.coils != $any('UNLOADED')) {
             @for (coil of node.coils; track coil; let i = $index) {
                 <coil-node node [input]="coil"></coil-node>
             }

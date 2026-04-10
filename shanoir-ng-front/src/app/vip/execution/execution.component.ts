@@ -34,8 +34,6 @@ import { ExecutionService } from 'src/app/vip/execution/execution.service';
 import { Execution } from 'src/app/vip/models/execution';
 import { ParameterType } from 'src/app/vip/models/parameterType';
 import { Pipeline } from 'src/app/vip/models/pipeline';
-import { TooltipComponent } from 'src/app/shared/components/tooltip/tooltip.component';
-import { CheckboxComponent } from 'src/app/shared/checkbox/checkbox.component';
 
 import { ConsoleService } from "../../shared/console/console.service";
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
@@ -49,7 +47,7 @@ import { PipelineParameter } from "../models/pipelineParameter";
     selector: 'app-execution',
     templateUrl: './execution.component.html',
     styleUrls: ['./execution.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, TooltipComponent, CheckboxComponent, SelectBoxComponent]
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent]
 })
 export class ExecutionComponent implements OnInit {
 

@@ -92,10 +92,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected fetchEntity: () => Promise<any>; // optional
 
     constructor(
-        protected activatedRoute: ActivatedRoute,
-        private readonly ROUTING_NAME: string) {
+        protected activatedRoute: ActivatedRoute) {
         this.confirmDialogService = inject(ConfirmDialogService);
-        this.entityRoutes = new EntityRoutes(ROUTING_NAME);
+        this.entityRoutes = new EntityRoutes(this.getRoutingName());
         this.router = inject(Router);
         this.location = inject(Location);
         this.keycloakService = inject(KeycloakService);

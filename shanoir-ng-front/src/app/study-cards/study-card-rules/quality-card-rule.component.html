@@ -36,7 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         </div>
     }
-    @if (mode != "view") {
+    @if (mode != 'view') {
         <div>
             <span class="and-or">
                 And
@@ -52,14 +52,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 
 <div class="separator">
-    @if (mode != "view") {
+    @if (mode != 'view') {
         <span class="rule-controls top">
             <span (click)="copyRule.emit()"><i class="far fa-copy"></i></span>
             <span (click)="moveUp.emit()"><i class="fas fa-long-arrow-alt-up"></i></span>
         </span>
     }
     <span class="sep-symbol"><i class="fas fa-angle-double-right"></i></span>
-    @if (mode != "view") {
+    @if (mode != 'view') {
         <span class="rule-controls bottom">
             <span (click)="delete.emit()" class="rule-delete"><i class="far fa-times-circle"></i></span>
             <span (click)="moveDown.emit()"><i class="fas fa-long-arrow-alt-down"></i></span>

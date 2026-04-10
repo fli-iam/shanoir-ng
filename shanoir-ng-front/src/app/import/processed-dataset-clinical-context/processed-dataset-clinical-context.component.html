@@ -18,8 +18,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <legend>
             Research study
             <tool-tip>
-                A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of
-                mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...
+                A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on
+                MRI and clinical criteria...
             </tool-tip>
         </legend>
         <li>
@@ -39,10 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <ol>
         <legend>
             Subject
-            <tool-tip>
-                It is the study subject for the current import process. He is the patient of the examination. The
-                subject is anonymous.
-            </tool-tip>
+            <tool-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</tool-tip>
         </legend>
         <li class="required">
             <label class="required-label">Select a subject</label>
@@ -62,11 +59,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label class="required-label">Dataset Type</label>
             <span class="right-col">
-                <select-box
-                    [(ngModel)]="datasetType"
-                    (userChange)="onContextChange()"
-                    [newDisabled]="true"
-                    [options]="DatasetType.options"></select-box>
+                <select-box [(ngModel)]="datasetType" (userChange)="onContextChange()" [newDisabled]="true" [options]="DatasetType.options"></select-box>
             </span>
         </li>
         <li>
@@ -81,20 +74,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
         <li>
             <label class="required-label">Name</label>
-            <input
-                required
-                type="text"
-                id="processedDatasetName"
-                [(ngModel)]="processedDatasetName"
-                (change)="onContextChange()" />
+            <input required type="text" id="processedDatasetName" [(ngModel)]="processedDatasetName" (change)="onContextChange()" />
         </li>
         <li>
             <label>Comment</label>
-            <input
-                type="text"
-                id="processedDatasetComment"
-                [(ngModel)]="processedDatasetComment"
-                (change)="onContextChange()" />
+            <input type="text" id="processedDatasetComment" [(ngModel)]="processedDatasetComment" (change)="onContextChange()" />
         </li>
     </ol>
     @if (subject) {
@@ -108,11 +92,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span>
                     @if (datasetProcessing) {
                         <span>
-                            {{
-                                datasetProcessing.comment
-                                    ? datasetProcessing.comment
-                                    : datasetProcessing.datasetProcessingType
-                            }}
+                            {{ datasetProcessing.comment ? datasetProcessing.comment : datasetProcessing.datasetProcessingType }}
                             ({{ datasetProcessing.id }})
                         </span>
                     }

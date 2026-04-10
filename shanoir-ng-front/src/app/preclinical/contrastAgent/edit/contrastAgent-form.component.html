@@ -19,31 +19,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <table class="layout">
                 @if (isStandalone) {
                     <div>
-                        <form-footer
-                            [state]="footerState"
-                            (save)="save()"
-                            (edit)="goToEdit()"
-                            (back)="goBack()"></form-footer>
+                        <form-footer [state]="footerState" (save)="save()" (edit)="goToEdit()" (back)="goBack()"></form-footer>
                     </div>
                 }
                 <tr>
                     <td colspan="2">
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
-                                    <div class="header command-zone" i18n="View contrastagent|Title">
-                                        View contrast agent
-                                    </div>
+                                @case ('view') {
+                                    <div class="header command-zone" i18n="View contrastagent|Title">View contrast agent</div>
                                 }
-                                @case ("edit") {
-                                    <div class="header command-zone" i18n="Edit contrastagent|Title">
-                                        Edit contrast agent
-                                    </div>
+                                @case ('edit') {
+                                    <div class="header command-zone" i18n="Edit contrastagent|Title">Edit contrast agent</div>
                                 }
-                                @case ("create") {
-                                    <div class="header command-zone" i18n="Create contrastagent|Title">
-                                        Add contrast agent
-                                    </div>
+                                @case ('create') {
+                                    <div class="header command-zone" i18n="Create contrastagent|Title">Add contrast agent</div>
                                 }
                             }
                         </span>
@@ -57,7 +47,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit contrastagent|Name label">Name</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ agent?.name?.value }}
                                             }
                                             @default {
@@ -66,19 +56,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                         <option [ngValue]="name">{{ name?.value }}</option>
                                                     }
                                                 </select>
-                                                <button
-                                                    i18n="Edit contrastagent|Add a new contrast agent name"
-                                                    (click)="goToAddContrastAgent()">
+                                                <button i18n="Edit contrastagent|Add a new contrast agent name" (click)="goToAddContrastAgent()">
                                                     <i class="fas fa-plus-square"></i>
                                                     new contrast agent name
                                                 </button>
-                                                @if (hasError("name", ["required"])) {
+                                                @if (hasError('name', ['required'])) {
                                                     <label
-                                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                        animate.enter="slide-down-error"
+                                                        animate.leave="slide-up-error"
                                                         class="form-validation-alert"
-                                                        i18n="
-                                                            Edit ContrastAgent|Name required
-                                                            error@@constrastAgentDetailNameRequiredError">
+                                                        i18n="Edit ContrastAgent|Name required error@@constrastAgentDetailNameRequiredError">
                                                         Name is required!
                                                     </label>
                                                 }
@@ -90,14 +77,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit contrastagent|ManufacturedName label">Manufactured Name</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ agent?.manufacturedName }}
                                             }
                                             @default {
-                                                <input
-                                                    type="text"
-                                                    id="manufacturedName"
-                                                    formControlName="manufacturedName" />
+                                                <input type="text" id="manufacturedName" formControlName="manufacturedName" />
                                             }
                                         }
                                     </span>
@@ -106,7 +90,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit contrastagent|Dose label">Dose</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ agent?.dose }}
                                             }
                                             @default {
@@ -119,7 +103,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit contrastagent|DoseUnit label">Dose Unit</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ agent?.doseUnit?.value }}
                                             }
                                             @default {
@@ -136,7 +120,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit contrastagent|Concentration label">Concentration</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ agent?.concentration }}
                                             }
                                             @default {
@@ -149,7 +133,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit contrastagent|ConcentrationUnit label">Concentration Unit</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ agent?.concentrationUnit?.value }}
                                             }
                                             @default {
@@ -166,7 +150,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit contrastagent|InjectionInterval label">Injection interval</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ agent.injectionInterval.value }}
                                             }
                                             @default {
@@ -183,7 +167,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit contrastagent|InjectionSite label">Injection site</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ agent.injectionSite.value }}
                                             }
                                             @default {
@@ -200,7 +184,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit contrastagent|InjectionType label">Injection type</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ agent.injectionType.value }}
                                             }
                                             @default {

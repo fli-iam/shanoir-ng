@@ -37,8 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <br />
         The examination will be automatically created based on examination comment.
         <br />
-        Examination date will be gathered from sessions.tsv or scans.tsv files. If not existing, from the session folder
-        creation date.
+        Examination date will be gathered from sessions.tsv or scans.tsv files. If not existing, from the session folder creation date.
     </p>
     <p>
         <u>3) Data type:</u>
@@ -60,8 +59,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <legend>
             Research study
             <tool-tip>
-                A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of
-                mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...
+                A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on
+                MRI and clinical criteria...
             </tool-tip>
         </legend>
         <li>
@@ -95,13 +94,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [loading]="archiveStatus == 'uploading'"
     [error]="archiveStatus == 'error'"></upload-file>
 
-@if (archiveStatus == "uploaded") {
+@if (archiveStatus == 'uploaded') {
     <label>Data successfully imported.</label>
 }
 @if (errorMessage) {
-    <label class="form-validation-alert" 
-        animate.enter="slide-down-error" animate.leave="slide-up-error" 
-        i18n="Import|ExtensionError label">
+    <label class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error" i18n="Import|ExtensionError label">
         {{ errorMessage }}
     </label>
 }

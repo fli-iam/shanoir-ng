@@ -36,11 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
                     }
                 </a>
-                <menu-item
-                    [disabled]="loading"
-                    label="Download"
-                    awesome="fas fa-download"
-                    (click)="download()"></menu-item>
+                <menu-item [disabled]="loading" label="Download" awesome="fas fa-download" (click)="download()"></menu-item>
                 @if (node.canDelete) {
                     <menu-item label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteDataset()"></menu-item>
                 }
@@ -49,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         @if (node.open && node.inPacs) {
             <metadata-node [input]="node.metadata"></metadata-node>
         }
-        @if (node.open && node.processings && node.processings != $any("UNLOADED")) {
+        @if (node.open && node.processings && node.processings != $any('UNLOADED')) {
             @for (processing of node.processings; track processing; let i = $index) {
                 <processing-node
                     node

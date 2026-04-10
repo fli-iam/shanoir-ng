@@ -12,22 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, forwardRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
-import { NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
-import { combineLatest, Subscription , Subject as RxjsSubject} from 'rxjs';
+import { FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LowerCasePipe } from '@angular/common';
+import { combineLatest, Subject as RxjsSubject, Subscription } from 'rxjs';
 
 import { Study } from '../../../studies/shared/study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { isDarkColor } from '../../../utils/app.utils';
 import { AbstractInput } from '../../form/input.abstract';
-import { Option, SelectBoxComponent } from '../../select/select.component';
+import { Option } from '../../select/select.component';
+import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Mode } from '../entity/entity.component.abstract';
 import { BrowserPaging } from '../table/browser-paging.model';
+import { ColumnDefinition } from '../table/column.definition.type';
 import { FilterablePageable, Page } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
-import { ColumnDefinition } from '../table/column.definition.type';
-import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { TooltipComponent } from '../tooltip/tooltip.component';
 
 
@@ -42,7 +41,7 @@ import { TooltipComponent } from '../tooltip/tooltip.component';
             multi: true
         }
     ],
-    imports: [TooltipComponent, SelectBoxComponent, FormsModule, TableComponent, LowerCasePipe]
+    imports: [TooltipComponent, FormsModule, TableComponent]
 })
 
 export class SubjectStudyListComponent extends AbstractInput<Subject[]> implements OnChanges, OnDestroy {

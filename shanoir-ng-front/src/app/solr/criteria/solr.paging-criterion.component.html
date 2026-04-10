@@ -71,11 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         }
         <div>
             <div class="filter-frame">
-                <input
-                    [(ngModel)]="filterText"
-                    (ngModelChange)="onFilterChange()"
-                    class="filter"
-                    placeholder="filter..." />
+                <input [(ngModel)]="filterText" (ngModelChange)="onFilterChange()" class="filter" placeholder="filter..." />
                 <span class="left-icon clickable clear" (click)="clearFilter()">
                     <i class="fas fa-times"></i>
                     clear

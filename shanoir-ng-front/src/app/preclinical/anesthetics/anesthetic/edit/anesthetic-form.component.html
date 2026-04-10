@@ -27,13 +27,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <td colspan="2">
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
+                                @case ('view') {
                                     <div class="header command-zone" i18n="View anesthetic|Title">View anesthetic</div>
                                 }
-                                @case ("edit") {
+                                @case ('edit') {
                                     <div class="header command-zone" i18n="Edit anesthetic|Title">Edit anesthetic</div>
                                 }
-                                @case ("create") {
+                                @case ('create') {
                                     <div class="header command-zone" i18n="Create anesthetic|Title">Add anesthetic</div>
                                 }
                             }
@@ -46,7 +46,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <ol>
                                 @if (!isAnestheticUnique) {
                                     <label
-                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                        animate.enter="slide-down-error"
+                                        animate.leave="slide-up-error"
                                         class="form-validation-alert"
                                         i18n="Edit anesthetic|AnestheticUniqueError label">
                                         This anesthetic already exists!
@@ -54,7 +55,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 }
                                 <li class="required">
                                     <label i18n="Edit anesthetic|Name label">Name</label>
-                                    @if (anesthetic.name == undefined || anesthetic.name == "") {
+                                    @if (anesthetic.name == undefined || anesthetic.name == '') {
                                         <label class="label_light">Name is automatically generated</label>
                                     }
                                     @if (anesthetic.name) {
@@ -65,7 +66,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit anesthetic|AnestheticType label">Type</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ AnestheticType.getLabel(anesthetic.anestheticType) }}
                                             }
                                             @default {
@@ -73,13 +74,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                     formControlName="anestheticType"
                                                     (userChange)="onChangeType()"
                                                     [options]="AnestheticType.options"></select-box>
-                                                @if (hasError("anestheticType", ["required"])) {
+                                                @if (hasError('anestheticType', ['required'])) {
                                                     <label
-                                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                        animate.enter="slide-down-error"
+                                                        animate.leave="slide-up-error"
                                                         class="form-validation-alert"
-                                                        i18n="
-                                                            Edit anestheticType|Type required
-                                                            error@@anestheticDetailTypeRequiredError">
+                                                        i18n="Edit anestheticType|Type required error@@anestheticDetailTypeRequiredError">
                                                         Type is required!
                                                     </label>
                                                 }
@@ -91,7 +91,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit anesthetic|Comment label">Comment</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ anesthetic?.comment }}
                                             }
                                             @default {
@@ -101,26 +101,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     </span>
                                 </li>
                                 <li>
-                                    <legend i18n="AnestheticDetail|Ingredients label@@anestheticDetailIngredients">
-                                        Ingredients
-                                    </legend>
+                                    <legend i18n="AnestheticDetail|Ingredients label@@anestheticDetailIngredients">Ingredients</legend>
                                     <div>
                                         @switch (mode) {
-                                            @case ("edit") {
+                                            @case ('edit') {
                                                 @if (keycloakService.isUserAdmin() || keycloakService.isUserExpert()) {
-                                                    <button
-                                                        i18n="Edit model|Add a new ingredient"
-                                                        (click)="goToAddIngredient()">
+                                                    <button i18n="Edit model|Add a new ingredient" (click)="goToAddIngredient()">
                                                         <i class="fas fa-plus-square"></i>
                                                         new ingredient
                                                     </button>
                                                 }
                                             }
-                                            @case ("create") {
+                                            @case ('create') {
                                                 @if (keycloakService.isUserAdmin() || keycloakService.isUserExpert()) {
-                                                    <button
-                                                        i18n="Edit model|Add a new ingredient"
-                                                        (click)="goToAddIngredient()">
+                                                    <button i18n="Edit model|Add a new ingredient" (click)="goToAddIngredient()">
                                                         <i class="fas fa-plus-square"></i>
                                                         new ingredient
                                                     </button>
@@ -136,10 +130,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             [ingredientSelected]="ingredientSelected"
                                             (event)="refreshDisplay($event)"></anesthetic-ingredient-form>
                                     </div>
-                                    <shanoir-table
-                                        #ingredientsTable
-                                        [getPage]="getPage.bind(this)"
-                                        [columnDefs]="columnDefs"></shanoir-table>
+                                    <shanoir-table #ingredientsTable [getPage]="getPage.bind(this)" [columnDefs]="columnDefs"></shanoir-table>
                                 </li>
                             </ol>
                         </fieldset>

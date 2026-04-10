@@ -17,9 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <legend>Mr Dataset Data</legend>
         <ol>
             <li>
-                <label i18n="Mr Dataset detail|Mr Dataset echo time@@mrDatasetEchoTime">
-                    Echo Time ({{ getUnit("MS") }})
-                </label>
+                <label i18n="Mr Dataset detail|Mr Dataset echo time@@mrDatasetEchoTime">Echo Time ({{ getUnit('MS') }})</label>
                 <span class="right-col">
                     @for (echoTime of dataset.echoTime; track echoTime) {
                         <span class="multi">{{ echoTime.echoTimeValue }}</span>
@@ -27,9 +25,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </li>
             <li>
-                <label i18n="Mr Dataset detail|Mr Dataset flip angle@@mrDatasetFlipAngle">
-                    Flip Angle ({{ getUnit("DEGREES") }})
-                </label>
+                <label i18n="Mr Dataset detail|Mr Dataset flip angle@@mrDatasetFlipAngle">Flip Angle ({{ getUnit('DEGREES') }})</label>
                 <span class="right-col">
                     @for (flipAngle of dataset.flipAngle; track flipAngle) {
                         <span class="multi">{{ flipAngle.flipAngleValue }}</span>
@@ -37,9 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </li>
             <li>
-                <label i18n="Mr Dataset detail|Mr Dataset inversion time@@mrDatasetInversionTime">
-                    Inversion Time ({{ getUnit("MS") }})
-                </label>
+                <label i18n="Mr Dataset detail|Mr Dataset inversion time@@mrDatasetInversionTime">Inversion Time ({{ getUnit('MS') }})</label>
                 <span class="right-col">
                     @for (inversionTime of dataset.inversionTime; track inversionTime) {
                         <span class="multi">{{ inversionTime.inversionTimeValue }}</span>
@@ -47,9 +41,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </li>
             <li>
-                <label i18n="Mr Dataset detail|Mr Dataset repetition time id@@mrDatasetRepetitionTimeId">
-                    Repetition Time ({{ getUnit("MS") }})
-                </label>
+                <label i18n="Mr Dataset detail|Mr Dataset repetition time id@@mrDatasetRepetitionTimeId">Repetition Time ({{ getUnit('MS') }})</label>
                 <span class="right-col">
                     @for (repetitionTime of dataset.repetitionTime; track repetitionTime) {
                         <span class="multi">{{ repetitionTime.repetitionTimeValue }}</span>
@@ -57,9 +49,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </li>
             <li>
-                <label i18n="Mr Dataset detail|Mr Dataset quality procedure type@@mrDatasetQualityProcedureType">
-                    Quality Procedure Type
-                </label>
+                <label i18n="Mr Dataset detail|Mr Dataset quality procedure type@@mrDatasetQualityProcedureType">Quality Procedure Type</label>
                 <span class="right-col">
                     {{ dataset.mrQualityProcedureType }}
                     <!-- TODO : 'enum' -->
@@ -76,7 +66,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label i18n="Mr Dataset detail|Mr Dataset nature@@mrDatasetNature">Mr Dataset Nature</label>
                 <span>
                     @switch (mode) {
-                        @case ("view") {
+                        @case ('view') {
                             {{ natureLabel }}
                         }
                         @default {

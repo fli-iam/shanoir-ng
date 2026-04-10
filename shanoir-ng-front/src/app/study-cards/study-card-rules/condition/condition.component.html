@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <span>if,&nbsp;</span>
-@if (mode == "view") {
+@if (mode == 'view') {
     <span class="view">
         @if (condition.cardinality == -1) {
             <span class="cardinality-type">for every</span>
@@ -34,32 +34,32 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             }
             in the exam,
         </span>
-        @if (condition.scope == "StudyCardDICOMConditionOnDatasets") {
+        @if (condition.scope == 'StudyCardDICOMConditionOnDatasets') {
             <span class="var" title="{{ condition.dicomTag | dicomTagLabel }}">
                 {{ condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag?.code | dicomTagLabel) }}
             </span>
         }
-        @if (condition.scope != "StudyCardDICOMConditionOnDatasets") {
+        @if (condition.scope != 'StudyCardDICOMConditionOnDatasets') {
             <span class="var">{{ fieldLabel }}</span>
         }
         <span class="method">
-            @if (condition.operation == "EQUALS") {
+            @if (condition.operation == 'EQUALS') {
                 <i class="fa-solid fa-equals"></i>
             }
-            @if (condition.operation == "NOT_EQUALS") {
+            @if (condition.operation == 'NOT_EQUALS') {
                 <i class="fa-solid fa-not-equal"></i>
             }
-            @if (condition.operation == "SMALLER_THAN") {
+            @if (condition.operation == 'SMALLER_THAN') {
                 <i class="fa-solid fa-less-than"></i>
             }
-            @if (condition.operation == "BIGGER_THAN") {
+            @if (condition.operation == 'BIGGER_THAN') {
                 <i class="fa-solid fa-greater-than"></i>
             }
-            @if (!["EQUALS", "NOT_EQUALS", "SMALLER_THAN", "BIGGER_THAN"].includes(condition.operation)) {
+            @if (!['EQUALS', 'NOT_EQUALS', 'SMALLER_THAN', 'BIGGER_THAN'].includes(condition.operation)) {
                 {{ condition.operation }}
             }
         </span>
-        @if (condition.type == "string") {
+        @if (condition.type == 'string') {
             <span class="multi-value">
                 @for (value of condition.values; track value; let i = $index) {
                     <div class="value">
@@ -71,7 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
             </span>
         }
-        @if (condition.type == "Coil") {
+        @if (condition.type == 'Coil') {
             <span class="multi-value">
                 @for (coil of condition.values; track coil; let i = $index) {
                     <div class="value">
@@ -85,7 +85,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         }
     </span>
 }
-@if (mode != "view" && init) {
+@if (mode != 'view' && init) {
     <select-box
         class="cardinality-type auto-width"
         [(ngModel)]="cardinalityType"
@@ -98,7 +98,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             { label: 'for every', value: 'ALL' },
             { label: 'for at least', value: 'AT_LEAST' },
         ]"></select-box>
-    @if (cardinalityType == "AT_LEAST") {
+    @if (cardinalityType == 'AT_LEAST') {
         <input
             type="number"
             class="cardinality auto-width"
@@ -121,7 +121,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [options]="conditionTypeOptions"
         placeholder="select conditition type"
         [clear]="false"></select-box>
-    @if (condition.scope == "StudyCardDICOMConditionOnDatasets") {
+    @if (condition.scope == 'StudyCardDICOMConditionOnDatasets') {
         <select-box
             class="var auto-width"
             [class.error]="tagError"
@@ -132,7 +132,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (focusout)="tagTouched = true"
             [clear]="false"></select-box>
     }
-    @if (condition.scope != "StudyCardDICOMConditionOnDatasets") {
+    @if (condition.scope != 'StudyCardDICOMConditionOnDatasets') {
         <select-box
             class="var auto-width"
             [class.error]="shanoirFieldError"
@@ -153,9 +153,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         placeholder="select operation"
         (focusout)="operationTouched = true"
         [clear]="false"></select-box>
-    @if (condition?.operation != "PRESENT" && condition?.operation != "ABSENT") {
+    @if (condition?.operation != 'PRESENT' && condition?.operation != 'ABSENT') {
         <form [formGroup]="form">
-            @if (condition.scope == "StudyCardDICOMConditionOnDatasets" || !(shanoirFieldOptions?.length > 0)) {
+            @if (condition.scope == 'StudyCardDICOMConditionOnDatasets' || !(shanoirFieldOptions?.length > 0)) {
                 <span formArrayName="values" class="multi-value edit">
                     @for (value of condition.values; track trackByFn(i); let i = $index) {
                         <span class="one-value">
@@ -183,7 +183,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     }
                 </span>
             }
-            @if (condition.scope != "StudyCardDICOMConditionOnDatasets" && shanoirFieldOptions?.length > 0) {
+            @if (condition.scope != 'StudyCardDICOMConditionOnDatasets' && shanoirFieldOptions?.length > 0) {
                 <span formArrayName="values" class="multi-value edit">
                     @for (value of condition.values; track value; let i = $index) {
                         <select-box
@@ -197,10 +197,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             placeholder="select value"
                             (focusout)="valueTouched = true"></select-box>
                     }
-                    @if (
-                        condition.values[condition.values.length - 1] &&
-                        condition.values.length < shanoirFieldOptions.length
-                    ) {
+                    @if (condition.values[condition.values.length - 1] && condition.values.length < shanoirFieldOptions.length) {
                         <div class="add-cond-value-frame">
                             <span class="add-cond-value" (click)="condition.values?.push(null)">
                                 <i class="fa-solid fa-plus"></i>
@@ -213,6 +210,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </form>
     }
 }
-@if (mode != "view") {
+@if (mode != 'view') {
     <span class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>
 }

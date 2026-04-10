@@ -13,10 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 @for (option of selectedOptions; track option; let i = $index) {
-    <span
-        class="left-icon block"
-        [class.dark]="getFontColor(option.backgroundColor)"
-        [style.background-color]="option.backgroundColor">
+    <span class="left-icon block" [class.dark]="getFontColor(option.backgroundColor)" [style.background-color]="option.backgroundColor">
         <i class="fa-solid fa-xmark remove" (click)="onRemoveOption(option, i)"></i>
         <span class="label">{{ option.label }}</span>
     </span>

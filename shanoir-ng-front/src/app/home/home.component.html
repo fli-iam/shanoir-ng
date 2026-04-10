@@ -20,8 +20,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div>
             <h1>Welcome to Shanoir, challenger!</h1>
             <p>
-                Here you will be able to download the datasets for the {{ challengeDua.studyName }} Challenge. But
-                before that that, we ask you to accept the following Data User Agreement :
+                Here you will be able to download the datasets for the {{ challengeDua.studyName }} Challenge. But before that that, we ask you to accept the
+                following Data User Agreement :
             </p>
             <dua-signing (sign)="onSign()" [dua]="challengeDua"></dua-signing>
         </div>
@@ -69,9 +69,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         </tr>
                                     }
                                     @for (notif of accessRequests; track notif) {
-                                        <tr
-                                            [routerLink]="'/access-request/details/' + notif.id"
-                                            class="notification-list link">
+                                        <tr [routerLink]="'/access-request/details/' + notif.id" class="notification-list link">
                                             <th>Access request</th>
                                             <td>{{ notif.user.username }} - {{ getStudyName(notif.studyId) }}</td>
                                         </tr>
@@ -97,8 +95,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     @for (job of jobs; track job) {
                                         <tr>
                                             <td>{{ job.eventType | eventType }}</td>
-                                            <td>{{ job.creationDate | date: "dd/MM" }}</td>
-                                            <td>{{ job.progress * 100 | number: "1.0-0" }}%</td>
+                                            <td>{{ job.creationDate | date: 'dd/MM' }}</td>
+                                            <td>{{ job.progress * 100 | number: '1.0-0' }}%</td>
                                         </tr>
                                     }
                                 </table>
@@ -170,9 +168,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <td>
                         <ul class="pannel">
                             <li>
-                                <a
-                                    href="https://docs.google.com/document/d/1kfsYJXxm3Ts0_qxCxDIPeSdwZnvjh2qhzb9jQbpobt4/edit?ts=5f745be6#"
-                                    target="_blank">
+                                <a href="https://docs.google.com/document/d/1kfsYJXxm3Ts0_qxCxDIPeSdwZnvjh2qhzb9jQbpobt4/edit?ts=5f745be6#" target="_blank">
                                     <i class="fas fa-graduation-cap"></i>
                                     Tutoriel Shanoir
                                 </a>
@@ -190,33 +186,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </a>
                             </li>
                             <li>
-                                <a
-                                    href="https://shanoir.irisa.fr/shanoir-ng/studies/swagger-ui/index.html"
-                                    target="_blank">
+                                <a href="https://shanoir.irisa.fr/shanoir-ng/studies/swagger-ui/index.html" target="_blank">
                                     <i class="fas fa-cog"></i>
                                     Studies MS REST API
                                 </a>
                             </li>
                             <li>
-                                <a
-                                    href="https://shanoir.irisa.fr/shanoir-ng/import/swagger-ui/index.html"
-                                    target="_blank">
+                                <a href="https://shanoir.irisa.fr/shanoir-ng/import/swagger-ui/index.html" target="_blank">
                                     <i class="fas fa-cog"></i>
                                     Import MS REST API
                                 </a>
                             </li>
                             <li>
-                                <a
-                                    href="https://shanoir.irisa.fr/shanoir-ng/datasets/swagger-ui/index.html"
-                                    target="_blank">
+                                <a href="https://shanoir.irisa.fr/shanoir-ng/datasets/swagger-ui/index.html" target="_blank">
                                     <i class="fas fa-cog"></i>
                                     Datasets MS REST API
                                 </a>
                             </li>
                             <li>
-                                <a
-                                    href="https://shanoir.irisa.fr/shanoir-ng/preclinical/swagger-ui/index.html"
-                                    target="_blank">
+                                <a href="https://shanoir.irisa.fr/shanoir-ng/preclinical/swagger-ui/index.html" target="_blank">
                                     <i class="fas fa-cog"></i>
                                     Preclinical MS REST API
                                 </a>

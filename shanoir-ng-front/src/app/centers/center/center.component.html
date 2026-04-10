@@ -15,29 +15,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component detail">
     @if (form) {
         <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
-            <form-footer
-                [state]="footerState"
-                (save)="save()"
-                (edit)="goToEdit()"
-                (delete)="delete()"
-                (dismiss)="goToView()"
-                (back)="goBack()"></form-footer>
+            <form-footer [state]="footerState" (save)="save()" (edit)="goToEdit()" (delete)="delete()" (dismiss)="goToView()" (back)="goBack()"></form-footer>
             <span>
                 @switch (mode) {
-                    @case ("view") {
-                        <h2 class="header command-zone" i18n="View acquisition center|Title@@centerDetailViewTitle">
-                            Details on acquisition center
-                        </h2>
+                    @case ('view') {
+                        <h2 class="header command-zone" i18n="View acquisition center|Title@@centerDetailViewTitle">Details on acquisition center</h2>
                     }
-                    @case ("edit") {
-                        <h2 class="header command-zone" i18n="Edit acquisition center|Title@@centerDetailEditTitle">
-                            Edit acquisition center
-                        </h2>
+                    @case ('edit') {
+                        <h2 class="header command-zone" i18n="Edit acquisition center|Title@@centerDetailEditTitle">Edit acquisition center</h2>
                     }
-                    @case ("create") {
-                        <h2 class="header command-zone" i18n="Create acquisition center|Title@@centerDetailCreateTitle">
-                            Create acquisition center
-                        </h2>
+                    @case ('create') {
+                        <h2 class="header command-zone" i18n="Create acquisition center|Title@@centerDetailCreateTitle">Create acquisition center</h2>
                     }
                 }
             </span>
@@ -48,34 +36,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Center detail|Name label@@centerDetailName">Name</label>
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
+                                @case ('view') {
                                     {{ center.name }}
                                 }
                                 @default {
-                                    <input
-                                        type="text"
-                                        id="name"
-                                        formControlName="name"
-                                        (change)="isNameUniqueError = false" />
-                                    @if (hasError("name", ["required"])) {
+                                    <input type="text" id="name" formControlName="name" (change)="isNameUniqueError = false" />
+                                    @if (hasError('name', ['required'])) {
                                         <label
-                                            animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                            animate.enter="slide-down-error"
+                                            animate.leave="slide-up-error"
                                             class="form-validation-alert"
                                             i18n="Edit center|Name required error@@centerDetailNameRequiredError">
                                             Name is required!
                                         </label>
                                     }
-                                    @if (hasError("name", ["minlength", "maxlength"])) {
+                                    @if (hasError('name', ['minlength', 'maxlength'])) {
                                         <label
-                                            animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                            animate.enter="slide-down-error"
+                                            animate.leave="slide-up-error"
                                             class="form-validation-alert"
                                             i18n="Edit center|Name length error@@centerDetailNameLengthError">
                                             Name length must be between 2 and 200!
                                         </label>
                                     }
-                                    @if (hasError("name", ["unique"])) {
+                                    @if (hasError('name', ['unique'])) {
                                         <label
-                                            animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                            animate.enter="slide-down-error"
+                                            animate.leave="slide-up-error"
                                             class="form-validation-alert"
                                             i18n="Edit center|Name unique error@@centerDetailNameUniqueError">
                                             Name should be unique!
@@ -89,7 +76,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Center detail|Street label@@centerDetailStreet">Street</label>
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
+                                @case ('view') {
                                     {{ center.street }}
                                 }
                                 @default {
@@ -102,7 +89,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Center detail|Post code label@@centerDetailPostCode">Post code</label>
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
+                                @case ('view') {
                                     {{ center.postalCode }}
                                 }
                                 @default {
@@ -115,7 +102,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Center detail|Town label@@centerDetailTown">Town</label>
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
+                                @case ('view') {
                                     {{ center.city }}
                                 }
                                 @default {
@@ -128,7 +115,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Center detail|Country label@@centerDetailCountry">Country</label>
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
+                                @case ('view') {
                                     {{ center.country }}
                                 }
                                 @default {
@@ -141,14 +128,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Center detail|Phone label@@centerDetailPhone">Phone number</label>
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
+                                @case ('view') {
                                     {{ center.phoneNumber }}
                                 }
                                 @default {
                                     <input type="text" id="phoneNumber" formControlName="phoneNumber" />
-                                    @if (hasError("phoneNumber", ["invalidPhoneNumber"])) {
+                                    @if (hasError('phoneNumber', ['invalidPhoneNumber'])) {
                                         <label
-                                            animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                            animate.enter="slide-down-error"
+                                            animate.leave="slide-up-error"
                                             class="form-validation-alert"
                                             i18n="Edit center|PhoneNumberPatternError label">
                                             Invalid phone number!
@@ -162,7 +150,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Center detail|Website label@@centerDetailWebsite">Website</label>
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
+                                @case ('view') {
                                     <a href="{{ center.website }}" target="_blank">{{ center.website }}</a>
                                 }
                                 @default {
@@ -173,7 +161,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </li>
                 </ol>
             </fieldset>
-            @if (mode == "view" && center.acquisitionEquipments?.length > 0) {
+            @if (mode == 'view' && center.acquisitionEquipments?.length > 0) {
                 <fieldset class="list">
                     <legend (click)="openAcqEq = !openAcqEq">
                         @if (openAcqEq) {

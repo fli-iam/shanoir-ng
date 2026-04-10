@@ -46,14 +46,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     awesome="fas fa-download"
                     (click)="download()"></menu-item>
                 @if (node.canDelete) {
-                    <menu-item
-                        label="Delete"
-                        awesome="fa-regular fa-trash-can"
-                        (click)="deleteAcquisition()"></menu-item>
+                    <menu-item label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteAcquisition()"></menu-item>
                 }
             </dropdown-menu>
         }
-        @if (node.open && node.datasets && node.datasets != $any("UNLOADED")) {
+        @if (node.open && node.datasets && node.datasets != $any('UNLOADED')) {
             @for (dsNode of node.datasets; track dsNode; let i = $index) {
                 <dataset-node
                     node

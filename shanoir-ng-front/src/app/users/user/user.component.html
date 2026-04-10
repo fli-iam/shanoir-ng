@@ -14,23 +14,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div #formContainer class="content-component">
     @if (form) {
-        <form
-            [formGroup]="form"
-            class="max-content"
-            novalidate
-            [class.disabled]="denyLoading || acceptLoading || footerState.loading">
-            <form-footer
-                [state]="footerState"
-                (save)="save()"
-                (edit)="goToEdit()"
-                (dismiss)="goToView()"
-                (back)="goBack()">
-                @if (mode != "create" && user.accountRequestDemand) {
-                    <button
-                        type="submit"
-                        (click)="deny()"
-                        i18n="Edit user|Deny account request button label@@editUserDenyAccountRequestButton"
-                        class="Button">
+        <form [formGroup]="form" class="max-content" novalidate [class.disabled]="denyLoading || acceptLoading || footerState.loading">
+            <form-footer [state]="footerState" (save)="save()" (edit)="goToEdit()" (dismiss)="goToView()" (back)="goBack()">
+                @if (mode != 'create' && user.accountRequestDemand) {
+                    <button type="submit" (click)="deny()" i18n="Edit user|Deny account request button label@@editUserDenyAccountRequestButton" class="Button">
                         Deny creation
                         @if (!denyLoading) {
                             <span>
@@ -44,7 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         }
                     </button>
                 }
-                @if (mode != "create" && user.extensionRequestDemand) {
+                @if (mode != 'create' && user.extensionRequestDemand) {
                     <button
                         type="submit"
                         (click)="deny()"
@@ -63,7 +50,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         }
                     </button>
                 }
-                @if (mode != "create" && (user.accountRequestDemand || user.extensionRequestDemand)) {
+                @if (mode != 'create' && (user.accountRequestDemand || user.extensionRequestDemand)) {
                     <button
                         type="submit"
                         (click)="accept()"
@@ -82,19 +69,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         }
                     </button>
                 }
-                @if (mode == "view" && user.id == keycloakService.getUserId()) {
-                    <button
-                        type="submit"
-                        (click)="changePassword()"
-                        i18n="Edit user|Accept account request button label@@editUserAcceptAccountRequestButton">
+                @if (mode == 'view' && user.id == keycloakService.getUserId()) {
+                    <button type="submit" (click)="changePassword()" i18n="Edit user|Accept account request button label@@editUserAcceptAccountRequestButton">
                         Change password
                     </button>
                 }
             </form-footer>
-            @if (mode == "create") {
+            @if (mode == 'create') {
                 <h2 class="header command-zone" i18n="Create user|Title@@createUserTitle">Create user</h2>
             }
-            @if (mode != "create") {
+            @if (mode != 'create') {
                 <h2 class="header command-zone" i18n="Edit user|Title@@editUserTitle">Edit user</h2>
             }
             <fieldset>
@@ -103,24 +87,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Edit user|First name label@@editUserFirstName">First Name</label>
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
+                                @case ('view') {
                                     {{ user.firstName }}
                                 }
                                 @default {
                                     <input type="text" id="firstName" formControlName="firstName" />
                                 }
                             }
-                            @if (hasError("firstName", ["required"])) {
+                            @if (hasError('firstName', ['required'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|First name required error@@editUserFirstNameRequiredError">
                                     First Name is required!
                                 </label>
                             }
-                            @if (hasError("firstName", ["length"])) {
+                            @if (hasError('firstName', ['length'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|First name length error@@editUserFirstNameLengthError">
                                     First Name length must be between 2 and 50!
@@ -132,24 +118,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Edit user|Last name label@@editUserLastName">Last Name</label>
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
+                                @case ('view') {
                                     {{ user.lastName }}
                                 }
                                 @default {
                                     <input type="text" id="lastName" formControlName="lastName" />
                                 }
                             }
-                            @if (hasError("lastName", ["required"])) {
+                            @if (hasError('lastName', ['required'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Last name required error@@editUserLastNameRequiredError">
                                     Last Name is required!
                                 </label>
                             }
-                            @if (hasError("lastName", ["length"])) {
+                            @if (hasError('lastName', ['length'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Last name length error@@editUserLastNameLengthError">
                                     Last Name length must be between 2 and 50!
@@ -157,7 +145,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             }
                         </span>
                     </li>
-                    @if (mode != "create") {
+                    @if (mode != 'create') {
                         <li>
                             <label i18n="Edit user|Username label@@editUserUsername">Username</label>
                             <span class="right-col">
@@ -169,32 +157,35 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Edit user|Email label@@editUserEmail">Email</label>
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
+                                @case ('view') {
                                     {{ user.email }}
                                 }
                                 @default {
                                     <input type="email" id="email" formControlName="email" />
                                 }
                             }
-                            @if (hasError("email", ["required"])) {
+                            @if (hasError('email', ['required'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Email required error@@editUserEmailRequiredError">
                                     Email is required!
                                 </label>
                             }
-                            @if (hasError("email", ["pattern"])) {
+                            @if (hasError('email', ['pattern'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Email pattern error@@editUserEmailPatternError">
                                     Email should be valid!
                                 </label>
                             }
-                            @if (hasError("email", ["unique"])) {
+                            @if (hasError('email', ['unique'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Email unique error@@editUserEmailUniqueError">
                                     Email should be unique!
@@ -209,22 +200,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <li>
                         <label i18n="Edit user|Expiration date label@@editUserExpirationDate">Expiration Date</label>
                         <span class="right-col">
-                            @if (mode == "view" || !isUserAdmin()) {
+                            @if (mode == 'view' || !isUserAdmin()) {
                                 {{ user.expirationDate | localDateFormatPipe }}
                             }
-                            @if (mode != "view" && isUserAdmin()) {
+                            @if (mode != 'view' && isUserAdmin()) {
                                 <datepicker formControlName="expirationDate"></datepicker>
-                                @if (hasError("expirationDate", ["format"])) {
+                                @if (hasError('expirationDate', ['format'])) {
                                     <label
-                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                        animate.enter="slide-down-error"
+                                        animate.leave="slide-up-error"
                                         class="form-validation-alert"
                                         i18n="Edit user|Date valid error@@editUserDateValidError">
                                         Date should be valid! Date format: {{ dateDisplay }}
                                     </label>
                                 }
-                                @if (hasError("expirationDate", ["future"])) {
+                                @if (hasError('expirationDate', ['future'])) {
                                     <label
-                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                        animate.enter="slide-down-error"
+                                        animate.leave="slide-up-error"
                                         class="form-validation-alert"
                                         i18n="Edit user|Date valid error@@editUserDateFutureError">
                                         This date should be in the future!
@@ -236,18 +229,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <li class="required">
                         <label i18n="Edit user|Role label@@editUserRole">Role of the user</label>
                         <span class="right-col">
-                            @if (mode == "view" || !isUserAdmin()) {
+                            @if (mode == 'view' || !isUserAdmin()) {
                                 {{ user.role.displayName }}
                             }
-                            @if (mode != "view" && isUserAdmin()) {
+                            @if (mode != 'view' && isUserAdmin()) {
                                 <select id="role" formControlName="role">
                                     @for (role of roles; track role) {
                                         <option [ngValue]="role">{{ role.displayName }}</option>
                                     }
                                 </select>
-                                @if (hasError("role", ["required"])) {
+                                @if (hasError('role', ['required'])) {
                                     <label
-                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                        animate.enter="slide-down-error"
+                                        animate.leave="slide-up-error"
                                         class="form-validation-alert"
                                         i18n="Edit user|Role required error@@editUserRoleRequiredError">
                                         Role is required!
@@ -257,12 +251,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
                     </li>
                     <li>
-                        <label
-                            i18n="Edit user|CanAccess to Dicom association label@@editUserCanAccessToDicomAssociation">
-                            Can import from PACS
-                        </label>
+                        <label i18n="Edit user|CanAccess to Dicom association label@@editUserCanAccessToDicomAssociation">Can import from PACS</label>
                         <span class="right-col">
-                            @if (mode == "view" || !isUserAdmin()) {
+                            @if (mode == 'view' || !isUserAdmin()) {
                                 @if (user.canAccessToDicomAssociation) {
                                     <span class="bool-true"><i class="fas fa-check"></i></span>
                                 }
@@ -270,7 +261,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <span class="bool-false"><i class="fas fa-times"></i></span>
                                 }
                             }
-                            @if (mode != "view" && isUserAdmin()) {
+                            @if (mode != 'view' && isUserAdmin()) {
                                 <checkbox formControlName="canAccessToDicomAssociation"></checkbox>
                             }
                         </span>
@@ -284,14 +275,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <ol>
                             @for (study of studies; track study; let index = $index) {
                                 <li class="userStudies">
-                                    <span class="studyName">{{ study?.name + " (" + study?.id + ")" }}</span>
-                                    @if (mode == "edit") {
+                                    <span class="studyName">{{ study?.name + ' (' + study?.id + ')' }}</span>
+                                    @if (mode == 'edit') {
                                         <span>
                                             <span class="right-col">
-                                                <button
-                                                    type="button"
-                                                    class="deleteButton"
-                                                    (click)="removeStudyFromUser(study, index)">
+                                                <button type="button" class="deleteButton" (click)="removeStudyFromUser(study, index)">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </span>
@@ -317,9 +305,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <fieldset>
                     <ol>
                         <li>
-                            <label i18n="Extension comment |Extension comment label@@editUserExtensionComment">
-                                Extension comment
-                            </label>
+                            <label i18n="Extension comment |Extension comment label@@editUserExtensionComment">Extension comment</label>
                             <span class="right-col">
                                 <textarea autosize formControlName="extensionMotivation" readonly></textarea>
                             </span>

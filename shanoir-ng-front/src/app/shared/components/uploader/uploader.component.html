@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     @if (loading) {
         <i class="fas fa-cog fa-spin"></i>
     }
-    {{ label || "Choose file" }}
+    {{ label || 'Choose file' }}
 </button>
 @if (!loading && filename && !noFilename) {
     <div class="filename" [class.error]="error">

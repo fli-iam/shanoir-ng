@@ -16,19 +16,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     @if (form) {
         <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
             <div class="layout">
-                <form-footer
-                    [state]="footerState"
-                    (save)="save()"
-                    (edit)="goToEdit()"
-                    (delete)="delete()"
-                    (dismiss)="goToView()"
-                    (back)="goBack()">
-                    @if (mode == "view" && hasDownloadRight && !noDatasets) {
-                        <button
-                            class="right-icon dl-button"
-                            type="button"
-                            (click)="downloadAll()"
-                            [disabled]="downloadState?.isActive()">
+                <form-footer [state]="footerState" (save)="save()" (edit)="goToEdit()" (delete)="delete()" (dismiss)="goToView()" (back)="goBack()">
+                    @if (mode == 'view' && hasDownloadRight && !noDatasets) {
+                        <button class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">
                             Download
                             <i class="fas fa-download"></i>
                         </button>
@@ -36,20 +26,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </form-footer>
                 <span>
                     @switch (mode) {
-                        @case ("view") {
+                        @case ('view') {
                             <h2 class="header command-zone">Details on dataset acquisition</h2>
                         }
-                        @case ("edit") {
+                        @case ('edit') {
                             <h2 class="header command-zone">Edit dataset acquisition</h2>
                         }
-                        @case ("create") {
+                        @case ('create') {
                             <h2 class="header command-zone">Create dataset acquisition</h2>
                         }
                     }
                 </span>
                 <fieldset>
                     <ol>
-                        @if (mode != "create") {
+                        @if (mode != 'create') {
                             <li>
                                 <label>Id</label>
                                 <span class="right-col">
@@ -61,13 +51,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Type</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         {{ datasetAcquisition.type }}
                                     }
                                     @default {
-                                        <select-box
-                                            formControlName="type"
-                                            [optionArr]="['Mr', 'Pet', 'Ct']"></select-box>
+                                        <select-box formControlName="type" [optionArr]="['Mr', 'Pet', 'Ct']"></select-box>
                                     }
                                 }
                             </span>
@@ -76,12 +64,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Study</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
-                                        <a
-                                            [routerLink]="[
-                                                '/study/details/',
-                                                datasetAcquisition.examination?.study?.id,
-                                            ]">
+                                    @case ('view') {
+                                        <a [routerLink]="['/study/details/', datasetAcquisition.examination?.study?.id]">
                                             {{ datasetAcquisition.examination?.study?.name }}
                                         </a>
                                     }
@@ -92,13 +76,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Examination</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         <a [routerLink]="['/examination/details/', datasetAcquisition.examination?.id]">
                                             {{
                                                 datasetAcquisition?.examination?.comment
                                                     ? datasetAcquisition?.examination?.comment
-                                                    : (datasetAcquisition?.examination?.examinationDate
-                                                      | localDateFormatPipe)
+                                                    : (datasetAcquisition?.examination?.examinationDate | localDateFormatPipe)
                                             }}
                                         </a>
                                     }
@@ -109,7 +92,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Study card</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         <a [routerLink]="['/study-card/details/', datasetAcquisition.studyCard?.id]">
                                             {{ datasetAcquisition.studyCard?.name }}
                                         </a>
@@ -122,7 +105,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </li>
                         <li>
                             <label>Import date</label>
-                            @if (mode == "view") {
+                            @if (mode == 'view') {
                                 <span class="right-col">
                                     {{ datasetAcquisition.importDate }}
                                 </span>
@@ -130,7 +113,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </li>
                         <li>
                             <label>Imported by user</label>
-                            @if (mode == "view") {
+                            @if (mode == 'view') {
                                 <span class="right-col">
                                     {{ datasetAcquisition.username }}
                                 </span>
@@ -140,22 +123,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Center equipment</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         @if (datasetAcquisition.acquisitionEquipment?.id) {
-                                            <a
-                                                [routerLink]="[
-                                                    '/acquisition-equipment/details/',
-                                                    datasetAcquisition.acquisitionEquipment.id,
-                                                ]">
+                                            <a [routerLink]="['/acquisition-equipment/details/', datasetAcquisition.acquisitionEquipment.id]">
                                                 {{ datasetAcquisition.acquisitionEquipment | acqEqptLabel }}
                                             </a>
                                         }
                                     }
                                     @default {
-                                        <select-box
-                                            formControlName="acquisitionEquipment"
-                                            [optionArr]="acquisitionEquipments"
-                                            [pipe]="acqEqPipe"></select-box>
+                                        <select-box formControlName="acquisitionEquipment" [optionArr]="acquisitionEquipments" [pipe]="acqEqPipe"></select-box>
                                     }
                                 }
                             </span>
@@ -164,7 +140,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Rank</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         {{ datasetAcquisition.rank }}
                                     }
                                     @default {
@@ -177,7 +153,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Acquisition start time</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         {{ datasetAcquisition.acquisitionStartTime | localDateFormatPipe: true }}
                                     }
                                     @default {
@@ -190,7 +166,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Software release</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         {{ datasetAcquisition.softwareRelease }}
                                     }
                                     @default {
@@ -203,7 +179,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Sorting index</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         {{ datasetAcquisition.sortingIndex }}
                                     }
                                     @default {
@@ -212,51 +188,44 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 }
                             </span>
                         </li>
-                        @if (mode != "create" && datasetAcquisition.copies?.length > 0) {
+                        @if (mode != 'create' && datasetAcquisition.copies?.length > 0) {
                             <li>
                                 <label>This acquisition has been copied :</label>
                                 <span class="right-col">
                                     @for (entityId of datasetAcquisition.copies; track entityId) {
                                         <div>
-                                            <a [routerLink]="['/dataset-acquisition/details/', entityId]">
-                                                [ {{ entityId }} ]
-                                            </a>
+                                            <a [routerLink]="['/dataset-acquisition/details/', entityId]">[ {{ entityId }} ]</a>
                                         </div>
                                     }
                                 </span>
                             </li>
                         }
-                        @if (mode != "create" && datasetAcquisition.source != null) {
+                        @if (mode != 'create' && datasetAcquisition.source != null) {
                             <li>
                                 <label>This acquisition is the copy of :</label>
                                 <span class="right-col">
-                                    <a [routerLink]="['/dataset-acquisition/details/', datasetAcquisition.source]">
-                                        [ {{ datasetAcquisition.source }} ]
-                                    </a>
+                                    <a [routerLink]="['/dataset-acquisition/details/', datasetAcquisition.source]">[ {{ datasetAcquisition.source }} ]</a>
                                 </span>
                             </li>
                         }
                     </ol>
                 </fieldset>
                 @if (datasetAcquisition.protocol) {
-                    @if (datasetAcquisition.type == "Mr") {
+                    @if (datasetAcquisition.type == 'Mr') {
                         <mr-protocol formControlName="protocol"></mr-protocol>
                     }
-                    @if (datasetAcquisition.type == "Ct") {
+                    @if (datasetAcquisition.type == 'Ct') {
                         <ct-protocol formControlName="protocol"></ct-protocol>
                     }
-                    @if (datasetAcquisition.type == "Pet") {
+                    @if (datasetAcquisition.type == 'Pet') {
                         <pet-protocol formControlName="protocol"></pet-protocol>
                     }
-                    @if (datasetAcquisition.type == "Xa") {
+                    @if (datasetAcquisition.type == 'Xa') {
                         <xa-protocol formControlName="protocol"></xa-protocol>
                     }
                 }
                 @if (downloadState.status > 1) {
-                    <progress-bar
-                        [progress]="downloadState?.progress"
-                        [text]="'Preparing download'"
-                        [unknownDownload]="true"></progress-bar>
+                    <progress-bar [progress]="downloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                 }
             </div>
         </form>

@@ -12,8 +12,10 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="pipeline" *ngIf="pipeline">
-    <div class="icon">
-        <img [src]="ImagesUrlUtil.PIPELINE_IMAGE_ICON_PATH" alt="">
+@if (pipeline) {
+    <div class="pipeline">
+        <div class="icon">
+            <img [src]="ImagesUrlUtil.PIPELINE_IMAGE_ICON_PATH" alt="" />
+        </div>
     </div>
-</div>
+}

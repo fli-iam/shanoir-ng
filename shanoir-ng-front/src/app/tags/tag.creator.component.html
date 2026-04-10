@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div class="tags">
         @for (dtag of displayedTags; track dtag) {
             <span class="tag" [class.dark]="dtag.darkFont" [style.background]="dtag.tag.color">
-                @if (mode != "view") {
+                @if (mode != 'view') {
                     <span class="clickable" (click)="deleteTag(dtag)" [class.used]="tagUsed(dtag.tag)">
                         <i class="fas fa-times"></i>
                     </span>
@@ -26,7 +26,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 {{ dtag.tag.name }}
             </span>
         }
-        @if (!addTagVisible && mode != "view") {
+        @if (!addTagVisible && mode != 'view') {
             <span (click)="addTagVisible = true; focus()" class="clickable new">
                 <i class="fas fa-plus"></i>
             </span>
@@ -40,12 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <i class="fa-solid fa-palette"></i>
                     <input type="color" [(ngModel)]="selectedColor" (ngModelChange)="onColorChange()" />
                 </span>
-                <input
-                    #input
-                    type="text"
-                    [(ngModel)]="text"
-                    (keyup.enter)="addTag()"
-                    placeholder="enter tag label..." />
+                <input #input type="text" [(ngModel)]="text" (keyup.enter)="addTag()" placeholder="enter tag label..." />
                 <span (click)="addTag()" class="save" [class.disabled]="text == null || selectedColor == null">
                     <i class="fas fa-save"></i>
                 </span>

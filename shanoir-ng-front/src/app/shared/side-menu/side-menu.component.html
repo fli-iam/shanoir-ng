@@ -69,7 +69,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i class="fas fa-home"></i>
         Home
     </li>
-    @if ((duasToSign() + (isUserAdmin() ? studiesToApprove() : 0) + accessRequestsToValidate) > 0) {
+    @if (duasToSign() + (isUserAdmin() ? studiesToApprove() : 0) + accessRequestsToValidate > 0) {
         <li (click)="state.notifOpened = !state.notifOpened; saveState()">
             <i class="far fa-flag"></i>
             Notifications
@@ -82,7 +82,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li routerLink="/draft" routerLinkActive="active">
                 <i class="fas fa-file"></i>
                 Draft Studies
-                <span class="counter">{{studiesToApprove()}}</span>
+                <span class="counter">{{ studiesToApprove() }}</span>
             </li>
         </div>
     }
@@ -140,9 +140,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <!-- *ngIf="state.jobsOpened" -->
     <div class="sub-menu jobs">
         @for (
-            task of notificationsService.freshCompletedTasks
-                .concat(notificationsService.tasksInProgress)
-                .concat(notificationsService.tasksInWait);
+            task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress).concat(notificationsService.tasksInWait);
             track task
         ) {
             <li>
@@ -152,10 +150,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </span>
                 }
                 <a routerLink="/task" routerLinkActive="active">
-                    <progress-bar
-                        [progress]="task.progress"
-                        [width]="50"
-                        [warning]="task.status == 5 || task.status == 3"></progress-bar>
+                    <progress-bar [progress]="task.progress" [width]="50" [warning]="task.status == 5 || task.status == 3"></progress-bar>
                     @if (task.status == 4) {
                         <i class="fa-solid fa-hourglass-half status-icon"></i>
                     }
@@ -168,36 +163,36 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     @if (task.status == -1 || task.status == 5) {
                         <i class="fa-solid fa-triangle-exclamation status-icon"></i>
                     }
-                    {{ task.creationDate | date: "HH:mm:ss" }}
+                    {{ task.creationDate | date: 'HH:mm:ss' }}
                     @switch (task.eventType) {
-                        @case ("downloadDataset.event") {
+                        @case ('downloadDataset.event') {
                             <i class="fa-solid fa-download"></i>
                         }
-                        @case ("downloadFile.event") {
+                        @case ('downloadFile.event') {
                             <i class="fa-solid fa-download"></i>
                         }
-                        @case ("importDataset.event") {
+                        @case ('importDataset.event') {
                             <i class="fa-solid fa-upload"></i>
                         }
-                        @case ("executionMonitoring.event") {
+                        @case ('executionMonitoring.event') {
                             <i class="fa-solid fa-gears"></i>
                         }
-                        @case ("solrIndexAll.event") {
+                        @case ('solrIndexAll.event') {
                             <i class="fa-solid fa-sun"></i>
                         }
-                        @case ("copyDataset.event") {
+                        @case ('copyDataset.event') {
                             <i class="fa-solid fa-copy"></i>
                         }
-                        @case ("checkQuality.event") {
+                        @case ('checkQuality.event') {
                             <i class="fa-solid fa-star"></i>
                         }
-                        @case ("downloadStatistics.event") {
+                        @case ('downloadStatistics.event') {
                             <i class="fa-solid fa-download"></i>
                         }
-                        @case ("deleteExamination.event") {
+                        @case ('deleteExamination.event') {
                             <i class="fa-solid fa-trash"></i>
                         }
-                        @case ("deleteDataset.event") {
+                        @case ('deleteDataset.event') {
                             <i class="fa-solid fa-trash"></i>
                         }
                         @default {
@@ -368,10 +363,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="bottom-info">
     <div>
-        <a
-            href="https://github.com/fli-iam/shanoir-ng/commit/{{ VERSION.hash?.substring(1) }}"
-            target="_blank"
-            [style.text-decoration]="'none'">
+        <a href="https://github.com/fli-iam/shanoir-ng/commit/{{ VERSION.hash?.substring(1) }}" target="_blank" [style.text-decoration]="'none'">
             {{ VERSION.raw }}
         </a>
     </div>

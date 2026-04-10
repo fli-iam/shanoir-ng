@@ -20,14 +20,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <tr>
                         <td colspan="2">
                             @if (createAIMode) {
-                                <div class="header command-zone" i18n="Create anestheticingredient|Title">
-                                    Add ingredient
-                                </div>
+                                <div class="header command-zone" i18n="Create anestheticingredient|Title">Add ingredient</div>
                             }
                             @if (!createAIMode) {
-                                <div class="header command-zone" i18n="Edit anestheticingredient|Title">
-                                    Edit ingredient
-                                </div>
+                                <div class="header command-zone" i18n="Edit anestheticingredient|Title">Edit ingredient</div>
                             }
                         </td>
                     </tr>
@@ -39,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <label i18n="Edit anestheticingredient|Name label">Name</label>
                                         <span class="right-col">
                                             @switch (mode) {
-                                                @case ("view") {
+                                                @case ('view') {
                                                     {{ ingredient?.name?.value }}
                                                 }
                                                 @default {
@@ -56,9 +52,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                             new ingredient name
                                                         </button>
                                                     }
-                                                    @if (hasError("name", ["required"])) {
+                                                    @if (hasError('name', ['required'])) {
                                                         <label
-                                                            animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                            animate.enter="slide-down-error"
+                                                            animate.leave="slide-up-error"
                                                             class="form-validation-alert"
                                                             i18n="Edit anestheticIngredient|NameRequiredError label">
                                                             Name is required!
@@ -69,47 +66,34 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         </span>
                                     </li>
                                     <li class="required">
-                                        <label i18n="Edit anestheticingredient|Concentration label">
-                                            Concentration
-                                        </label>
+                                        <label i18n="Edit anestheticingredient|Concentration label">Concentration</label>
                                         <span class="right-col">
                                             @switch (mode) {
-                                                @case ("view") {
+                                                @case ('view') {
                                                     {{ ingredient?.concentration }}
                                                 }
                                                 @default {
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        id="concentration"
-                                                        formControlName="concentration" />
+                                                    <input type="number" min="0" id="concentration" formControlName="concentration" />
                                                 }
                                             }
                                         </span>
                                     </li>
                                     <li class="required">
-                                        <label i18n="Edit anestheticingredient|ConcentrationUnit label">
-                                            Concentration Unit
-                                        </label>
+                                        <label i18n="Edit anestheticingredient|ConcentrationUnit label">Concentration Unit</label>
                                         <span class="right-col">
                                             @switch (mode) {
-                                                @case ("view") {
+                                                @case ('view') {
                                                     {{ ingredient?.concentrationUnit?.value }}
                                                 }
                                                 @default {
-                                                    <select
-                                                        id="concentrationUnit"
-                                                        required
-                                                        formControlName="concentrationUnit">
+                                                    <select id="concentrationUnit" required formControlName="concentrationUnit">
                                                         @for (unit of units; track unit) {
                                                             <option [ngValue]="unit">{{ unit.value }}</option>
                                                         }
                                                     </select>
                                                     @if (keycloakService.isUserAdmin()) {
                                                         <button
-                                                            i18n="
-                                                                Edit anestheticingredient|Add a new concentration unit
-                                                            "
+                                                            i18n="Edit anestheticingredient|Add a new concentration unit"
                                                             (click)="goToRefPage('unit', 'concentration')">
                                                             <i class="fas fa-plus-square"></i>
                                                             new concentration unit
@@ -125,11 +109,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </tr>
                 </table>
                 <div class="footer command-zone">
-                    <button
-                        type="button"
-                        i18n="Edit anestheticingredient|CancelButton label"
-                        class="Button right-icon"
-                        (click)="cancelIngredient()">
+                    <button type="button" i18n="Edit anestheticingredient|CancelButton label" class="Button right-icon" (click)="cancelIngredient()">
                         Cancel
                         <i class="fas fa-angle-left"></i>
                     </button>

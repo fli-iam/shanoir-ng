@@ -25,8 +25,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <legend>
                 Research study
                 <tool-tip>
-                    A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of
-                    mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...
+                    A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based
+                    on MRI and clinical criteria...
                 </tool-tip>
             </legend>
             <li>
@@ -66,8 +66,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     }
                     @if (!useStudyCard) {
                         <br />
-                        If the center you need is not in the above list, you can create a new center from this data by
-                        clicking on the 'add' button.
+                        If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
                     }
                 </li>
             }
@@ -98,18 +97,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <code>{{ importedEquipmentDataStr }}</code>
                     }
                     <br />
-                    If the center equipment you need is not in the above list, you can create a new center equipment
-                    from this data by clicking on the 'add' button.
+                    If the center equipment you need is not in the above list, you can create a new center equipment from this data by clicking on the 'add'
+                    button.
                 </li>
             }
         </ol>
         <ol>
             <legend>
                 Subject
-                <tool-tip>
-                    It is the study subject for the current import process. He is the patient of the examination. The
-                    subject is anonymous.
-                </tool-tip>
+                <tool-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</tool-tip>
             </legend>
             <li class="required">
                 <label class="required-label">Select a subject</label>
@@ -121,10 +117,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [viewRoute]="'/subject/details/' + subject?.id"
                         [viewDisabled]="!subject"
                         [optionArr]="subjects"></select-box>
-                    <button
-                        class="new-subject"
-                        (click)="openCreateSubject()"
-                        [disabled]="!study || !acquisitionEquipment">
+                    <button class="new-subject" (click)="openCreateSubject()" [disabled]="!study || !acquisitionEquipment">
                         <i class="fa-solid fa-user"></i>
                         <i class="fa-solid fa-plus secondary"></i>
                         New subject
@@ -136,8 +129,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <legend>
                 Examination
                 <tool-tip>
-                    A MR examination defines when, where and by whom the data have been processed. The details on the
-                    MRI machine are associated to a subsequent entity: MR Dataset acquisition.
+                    A MR examination defines when, where and by whom the data have been processed. The details on the MRI machine are associated to a subsequent
+                    entity: MR Dataset acquisition.
                 </tool-tip>
             </legend>
             <li>

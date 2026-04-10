@@ -17,12 +17,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 @if (canModify) {
     <div>
         @switch (mode) {
-            @case ("edit") {
+            @case ('edit') {
                 @if (toggleFormAI == false) {
                     <button (click)="toggleIngredientForm()">Add an ingredient</button>
                 }
             }
-            @case ("create") {
+            @case ('create') {
                 @if (toggleFormAI == false) {
                     <button (click)="toggleIngredientForm()">Add an ingredient</button>
                 }

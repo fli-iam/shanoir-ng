@@ -20,9 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <table class="layout">
                     <tr>
                         <td colspan="1">
-                            <h2 class="header command-zone" i18n="Extension request|Title@@ExtensionRequestTitle">
-                                Extension request
-                            </h2>
+                            <h2 class="header command-zone" i18n="Extension request|Title@@ExtensionRequestTitle">Extension request</h2>
                         </td>
                     </tr>
                     <tr>
@@ -30,9 +28,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <fieldset>
                                 <ol>
                                     <li class="required">
-                                        <label
-                                            i18n="Extension request|Email label@@ExtensionRequestMotivation"
-                                            class="required-label">
+                                        <label i18n="Extension request|Email label@@ExtensionRequestMotivation" class="required-label">
                                             Email adress associated to the account.
                                         </label>
                                         <span class="right-col">
@@ -40,10 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         </span>
                                     </li>
                                     <li class="required">
-                                        <label
-                                            i18n="
-                                                Extension request|Expiration date label@@ExtensionRequestExpirationDate"
-                                            class="required-label">
+                                        <label i18n="Extension request|Expiration date label@@ExtensionRequestExpirationDate" class="required-label">
                                             New expiration Date
                                         </label>
                                         <span class="right-col">
@@ -51,16 +44,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         </span>
                                     </li>
                                     <li class="required">
-                                        <label
-                                            i18n="Extension request|Motivation label@@ExtensionRequestMotivation"
-                                            class="required-label">
+                                        <label i18n="Extension request|Motivation label@@ExtensionRequestMotivation" class="required-label">
                                             Why do you want to extend your account?
                                         </label>
                                         <span class="right-col">
-                                            <textarea
-                                                autosize
-                                                id="extensionMotivation"
-                                                formControlName="extensionMotivation"></textarea>
+                                            <textarea autosize id="extensionMotivation" formControlName="extensionMotivation"></textarea>
                                         </span>
                                     </li>
                                 </ol>
@@ -71,12 +59,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <td colspan="2">
                             @if (!requestSent) {
                                 <div class="footer command-zone">
-                                    <button
-                                        i18n="Edit user|Cancel button label@@cancelButton"
-                                        class="Button"
-                                        (click)="cancelExtensionRequest()">
-                                        Cancel
-                                    </button>
+                                    <button i18n="Edit user|Cancel button label@@cancelButton" class="Button" (click)="cancelExtensionRequest()">Cancel</button>
                                     <button
                                         type="submit"
                                         i18n="Extension request|Request button label@@ExtensionRequestButton"
@@ -107,12 +90,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </fieldset>
             @if (requestSent) {
                 <div class="footer command-zone">
-                    <button
-                        i18n="Account request|Ok button label@@okButton"
-                        class="Button"
-                        (click)="cancelExtensionRequest()">
-                        OK
-                    </button>
+                    <button i18n="Account request|Ok button label@@okButton" class="Button" (click)="cancelExtensionRequest()">OK</button>
                 </div>
             }
         </form>

@@ -25,18 +25,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     (back)="goBack()"></form-footer>
                 <span>
                     @switch (mode) {
-                        @case ("view") {
-                            <h2 class="header command-zone" i18n="View coil|Title@@coilDetailViewTitle">
-                                Details on coil
-                            </h2>
+                        @case ('view') {
+                            <h2 class="header command-zone" i18n="View coil|Title@@coilDetailViewTitle">Details on coil</h2>
                         }
-                        @case ("edit") {
+                        @case ('edit') {
                             <h2 class="header command-zone" i18n="Edit coil|Title@@coilDetailEditTitle">Edit coil</h2>
                         }
-                        @case ("create") {
-                            <h2 class="header command-zone" i18n="Create coil|Title@@coilDetailCreateTitle">
-                                Create coil
-                            </h2>
+                        @case ('create') {
+                            <h2 class="header command-zone" i18n="Create coil|Title@@coilDetailCreateTitle">Create coil</h2>
                         }
                     }
                 </span>
@@ -46,7 +42,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label i18n="Coil detail|Coil name label@@examinationDetailName">Name</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         {{ coil.name }}
                                     }
                                     @default {
@@ -59,7 +55,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label i18n="Coil detail|Serial Number label@@coilDetailSerialNumber">Serial Number</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         {{ coil.serialNumber }}
                                     }
                                     @default {
@@ -72,7 +68,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label i18n="Coil detail|Coil Type label@@CoilDetailCoilType">Coil Type</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         {{ coil.coilType }}
                                     }
                                     @default {
@@ -85,16 +81,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label i18n="Coil detail|Coil date label@@CoilDetailNbChannels">Number of channels</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         {{ coil.numberOfChannels }}
                                     }
                                     @default {
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            step="1"
-                                            id="nbChannel"
-                                            formControlName="numberOfChannels" />
+                                        <input type="number" min="0" step="1" id="nbChannel" formControlName="numberOfChannels" />
                                     }
                                 }
                             </span>
@@ -103,19 +94,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label i18n="Coil detail|Center label@@coilDetailCenter">Acquisition Center</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         <a [routerLink]="['/center/details/', coil.center?.id]">
                                             {{ coil.center?.name }}
                                         </a>
                                     }
                                     @default {
-                                        <select-box
-                                            (newClick)="openNewCenter()"
-                                            formControlName="center"
-                                            [optionArr]="centers"></select-box>
-                                        @if (hasError("center", ["required"])) {
+                                        <select-box (newClick)="openNewCenter()" formControlName="center" [optionArr]="centers"></select-box>
+                                        @if (hasError('center', ['required'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Coil detail|Center required error@@coilDetailCenterRequiredError">
                                                 Center is required!
@@ -126,15 +115,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </span>
                         </li>
                         <li>
-                            <label
-                                i18n="
-                                    Coil detail|Coil acquisition Equipment Model
-                                    label@@examinationDetailCoilAcquisitionEquipmentModel">
+                            <label i18n="Coil detail|Coil acquisition Equipment Model label@@examinationDetailCoilAcquisitionEquipmentModel">
                                 Center Equipment Model
                             </label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         <a [routerLink]="['/manufacturer-model/details/', coil.manufacturerModel?.id]">
                                             {{ coil.manufacturerModel | manufModelLabel }}
                                         </a>
@@ -145,13 +131,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             (newClick)="openNewManufModel()"
                                             [optionArr]="manufModels"
                                             [pipe]="manufModelPipe"></select-box>
-                                        @if (hasError("manufacturerModel", ["required"])) {
+                                        @if (hasError('manufacturerModel', ['required'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
-                                                i18n="
-                                                    Coil detail|Manufacturer model required
-                                                    error@@coilDetailManufModelRequiredError">
+                                                i18n="Coil detail|Manufacturer model required error@@coilDetailManufModelRequiredError">
                                                 Center Equipment model is required!
                                             </label>
                                         }

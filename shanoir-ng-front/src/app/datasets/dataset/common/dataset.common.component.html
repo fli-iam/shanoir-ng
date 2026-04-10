@@ -15,7 +15,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 @if (parentFormGroup) {
     <fieldset [formGroup]="parentFormGroup">
         <ol>
-            @if (mode == "view" && dataset && dataset.datasetProcessing) {
+            @if (mode == 'view' && dataset && dataset.datasetProcessing) {
                 <li>
                     <legend>Processed dataset</legend>
                     <label>Processing</label>
@@ -30,10 +30,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label i18n="Dataset detail|Dataset id@@datasetId">Id</label>
                 <span class="right-col">
                     @switch (mode) {
-                        @case ("create") {
-                            <span i18n="Dataset detail|Dataset id generated@@datasetIdGenerated">
-                                Automatically generated
-                            </span>
+                        @case ('create') {
+                            <span i18n="Dataset detail|Dataset id generated@@datasetIdGenerated">Automatically generated</span>
                         }
                         @default {
                             {{ dataset.id }}
@@ -41,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     }
                 </span>
             </li>
-            @if (mode == "view" && dataset && dataset.datasetAcquisition) {
+            @if (mode == 'view' && dataset && dataset.datasetAcquisition) {
                 <li>
                     <label>Dataset Acquisition</label>
                     <span class="right-col">
@@ -51,7 +49,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </span>
                 </li>
             }
-            @if (mode == "view" && dataset && dataset.datasetAcquisition && dataset.datasetAcquisition.examination) {
+            @if (mode == 'view' && dataset && dataset.datasetAcquisition && dataset.datasetAcquisition.examination) {
                 <li>
                     <label>Examination</label>
                     <span class="right-col">
@@ -85,7 +83,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label i18n="Dataset detail|Dataset creation date@@datasetDetailCreation">Creation date</label>
                 <span class="right-col">
                     @switch (mode) {
-                        @case ("view") {
+                        @case ('view') {
                             {{ dataset.creationDate | localDateFormatPipe }}
                         }
                         @default {
@@ -100,7 +98,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     {{ dataset.type }}
                 </span>
             </li>
-            @if (mode != "create" && dataset.copies?.length > 0) {
+            @if (mode != 'create' && dataset.copies?.length > 0) {
                 <li>
                     <label>This dataset has been copied :</label>
                     <span class="right-col">
@@ -112,7 +110,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </span>
                 </li>
             }
-            @if (mode != "create" && dataset.source != null) {
+            @if (mode != 'create' && dataset.source != null) {
                 <li>
                     <label>This dataset is the copy of :</label>
                     <span class="right-col">
@@ -131,17 +129,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label i18n="Dataset detail|Dataset name label@@datasetDetailCreation">Name</label>
             <span class="right-col">
                 @switch (mode) {
-                    @case ("view") {
+                    @case ('view') {
                         {{ dataset.name }}
                     }
                     @default {
                         <input
                             type="text"
-                            [ngModel]="
-                                dataset.updatedMetadata.name
-                                    ? dataset.updatedMetadata.name
-                                    : dataset.originMetadata.name
-                            "
+                            [ngModel]="dataset.updatedMetadata.name ? dataset.updatedMetadata.name : dataset.originMetadata.name"
                             (ngModelChange)="dataset.updatedMetadata.name = $event"
                             (change)="updateForm()"
                             [ngModelOptions]="{ standalone: true }" />
@@ -153,21 +147,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label i18n="Dataset detail|Dataset comments@@datasetComments">Comment</label>
             <span class="right-col">
                 @switch (mode) {
-                    @case ("view") {
-                        {{
-                            dataset.updatedMetadata.comment
-                                ? dataset.updatedMetadata.comment
-                                : dataset.originMetadata.comment
-                        }}
+                    @case ('view') {
+                        {{ dataset.updatedMetadata.comment ? dataset.updatedMetadata.comment : dataset.originMetadata.comment }}
                     }
                     @default {
                         <input
                             type="text"
-                            [ngModel]="
-                                dataset.updatedMetadata.comment
-                                    ? dataset.updatedMetadata.comment
-                                    : dataset.originMetadata.comment
-                            "
+                            [ngModel]="dataset.updatedMetadata.comment ? dataset.updatedMetadata.comment : dataset.originMetadata.comment"
                             (ngModelChange)="dataset.updatedMetadata.comment = $event"
                             (change)="updateForm()"
                             [ngModelOptions]="{ standalone: true }" />
@@ -179,22 +165,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label i18n="Dataset detail|Dataset explored entity type@@datasetExploredEntity">Explored entity</label>
             <span class="right-col">
                 @switch (mode) {
-                    @case ("view") {
+                    @case ('view') {
                         {{
                             ExploredEntity.getLabel(
-                                dataset.updatedMetadata.exploredEntity
-                                    ? dataset.updatedMetadata.exploredEntity
-                                    : dataset.originMetadata.exploredEntity
+                                dataset.updatedMetadata.exploredEntity ? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity
                             )
                         }}
                     }
                     @default {
                         <select-box
-                            [ngModel]="
-                                dataset.updatedMetadata.exploredEntity
-                                    ? dataset.updatedMetadata.exploredEntity
-                                    : dataset.originMetadata.exploredEntity
-                            "
+                            [ngModel]="dataset.updatedMetadata.exploredEntity ? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity"
                             (ngModelChange)="dataset.updatedMetadata.exploredEntity = $event"
                             (userChange)="updateForm()"
                             [ngModelOptions]="{ standalone: true }"
@@ -204,12 +184,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         </li>
         <li>
-            <label i18n="Dataset detail|Dataset cardinality of related subjects@@datasetCardinalityOfRelatedSubjects">
-                Cardinality of related subjects
-            </label>
+            <label i18n="Dataset detail|Dataset cardinality of related subjects@@datasetCardinalityOfRelatedSubjects">Cardinality of related subjects</label>
             <span class="right-col">
                 @switch (mode) {
-                    @case ("view") {
+                    @case ('view') {
                         {{
                             CardinalityOfRelatedSubjects.getLabel(
                                 dataset.updatedMetadata.cardinalityOfRelatedSubjects
@@ -255,7 +233,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label i18n="Dataset detail|Dataset processed type subjects@@datasetProcessedType">Processed Type</label>
             <span class="right-col">
                 @switch (mode) {
-                    @case ("view") {
+                    @case ('view') {
                         {{
                             ProcessedDatasetType.getLabel(
                                 dataset.updatedMetadata.processedDatasetType

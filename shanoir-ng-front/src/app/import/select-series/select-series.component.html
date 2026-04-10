@@ -48,9 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [hasChildren]="study.series.length > 0">
                         @for (serie of study.series; track serie) {
                             <node
-                                label="{{
-                                    serie.seriesDescription ? serie.seriesDescription : 'serie n°' + serie.seriesNumber
-                                }}
+                                label="{{ serie.seriesDescription ? serie.seriesDescription : 'serie n°' + serie.seriesNumber }}
                             	{{ serie.seriesDate }}
                             	{{ serie.modality }}
                             	{{ serie.isEnhanced ? 'E' : '' }}
@@ -93,7 +91,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </tr>
                 <tr class="item">
                     <td class="label">Identity removed</td>
-                    <td class="value">{{ $any(detailedPatient)?.patientIdentityRemoved ? "Yes" : "No" }}</td>
+                    <td class="value">{{ $any(detailedPatient)?.patientIdentityRemoved ? 'Yes' : 'No' }}</td>
                 </tr>
                 <tr class="item">
                     <td class="label">Deidentification method</td>
@@ -126,7 +124,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     @if (detailedSerie) {
         <div class="data-preview">
             <h3>Serie</h3>
-            @if (detailedSerie.modality != "Ct" && !detailedSerie.isSpectroscopy) {
+            @if (detailedSerie.modality != 'Ct' && !detailedSerie.isSpectroscopy) {
                 <div>
                     <papaya [loadingCallback]="papayaLoadingCallback"></papaya>
                 </div>
@@ -138,7 +136,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </tr>
                 <tr class="item">
                     <td class="label">Enhanced</td>
-                    <td class="value">{{ $any(detailedSerie)?.isEnhanced ? "Yes" : "No" }}</td>
+                    <td class="value">{{ $any(detailedSerie)?.isEnhanced ? 'Yes' : 'No' }}</td>
                 </tr>
                 <tr class="item">
                     <td class="label">Description</td>

@@ -11,11 +11,7 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<li
-    class="menu-item"
-    [class.opened]="init && opened"
-    [class.closed]="!opened"
-    [class.disabled]="disabled">
+<li class="menu-item" [class.opened]="init && opened" [class.closed]="!opened" [class.disabled]="disabled">
     <!-- [class.disabled]="!hasChildren && boolVar == undefined && (!link || link=='')" -->
     @if (hasChildren) {
         <span class="label" (click)="toggle()">

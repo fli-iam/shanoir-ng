@@ -30,9 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             } as vars">
             @if (!col.hidden) {
                 <td
-                    class="cell cell-{{ $any(col).field != undefined ? $any(col).field : 'nofield' }} {{
-                        getCellTypeStr(col)
-                    }}"
+                    class="cell cell-{{ $any(col).field != undefined ? $any(col).field : 'nofield' }} {{ getCellTypeStr(col) }}"
                     [class.bool]="vars.boolean"
                     [class.progress]="col.type == 'progress'"
                     [class.multi]="editMode && col.multi"
@@ -40,7 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [style.color]="vars.render?.color"
                     [style.background-color]="vars.cellGraphics?.tag ? null : vars.cellGraphics?.backgroundColor"
                     #refTd>
-                    @if (col.type != "button") {
+                    @if (col.type != 'button') {
                         <div
                             class="cell-container"
                             (click)="col.type == 'button' ? null : onRowClick(item)"
@@ -49,23 +47,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             [class.multiselect]="!!col.possibleValues && col.multi"
                             [class.wrap]="col.wrap">
                             <!-- default display -->
-                            @if (
-                                !(editMode && vars.editable) &&
-                                !vars.route &&
-                                !vars.boolean &&
-                                col.type != "progress" &&
-                                !col.multi &&
-                                col.type != "button"
-                            ) {
+                            @if (!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi && col.type != 'button') {
                                 <a class="cell-new-tab" [routerLink]="vars.rowRoute">
                                     <span
                                         class="default-data-parent"
                                         title="{{ vars.render.text ? vars.render.text : vars.render }}"
                                         [style.color]="vars.cellGraphics?.color"
                                         [style.border-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.color : null"
-                                        [style.background-color]="
-                                            vars.cellGraphics?.tag ? vars.cellGraphics?.backgroundColor : null
-                                        "
+                                        [style.background-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.backgroundColor : null"
                                         [class.block]="vars.cellGraphics?.tag">
                                         @if (vars.cellGraphics?.awesome) {
                                             <i class="{{ vars.cellGraphics.awesome }}"></i>
@@ -82,13 +71,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             }
                             <!-- link -->
                             @if (!(editMode && vars.editable) && vars.route && !col.multi) {
-                                <a
-                                    [routerLink]="vars.rowRoute"
-                                    class="cell-new-tab"
-                                    title="{{ vars.render.text ? vars.render.text : vars.render }}">
-                                    <a class="link" 
-                                            [routerLink]="vars.route" 
-                                            routerLinkActive="active">
+                                <a [routerLink]="vars.rowRoute" class="cell-new-tab" title="{{ vars.render.text ? vars.render.text : vars.render }}">
+                                    <a class="link" [routerLink]="vars.route" routerLinkActive="active">
                                         {{ vars.render.text ? vars.render.text : vars.render }}
                                         @if (!col.awesome) {
                                             <i class="fas fa-external-link-alt"></i>
@@ -106,7 +90,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <!-- multi -->
                             @if (!editMode && col.multi) {
                                 <a [routerLink]="vars.rowRoute" class="cell-new-tab">
-                                    @for (oneVal of getFieldRawValue(item, col["field"]); track oneVal) {
+                                    @for (oneVal of getFieldRawValue(item, col['field']); track oneVal) {
                                         <span
                                             class="block"
                                             [style.color]="oneVal.backgroundColor"
@@ -144,28 +128,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     }
                     <!-- editable boolean -->
                     @if (vars.boolean && editMode && vars.editable) {
-                        <checkbox
-                            [ngModel]="vars.cellValue"
-                            (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox>
+                        <checkbox [ngModel]="vars.cellValue" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox>
                     }
                     <!-- editable text / number -->
-                    @if (
-                        editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !vars.possibleValues
-                    ) {
-                        <input
-                            type="text"
-                            [ngModel]="getFieldRawValue(item, col['field'])"
-                            (ngModelChange)="onFieldEdit(item, col, $event)" />
+                    @if (editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !vars.possibleValues) {
+                        <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
                     }
                     <!-- editable with dropdown -->
-                    @if (
-                        editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && vars.possibleValues
-                    ) {
+                    @if (editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && vars.possibleValues) {
                         <!-- single -->
                         @if (!col.multi) {
-                            <select
-                                [ngModel]="getFieldRawValue(item, col['field'])"
-                                (ngModelChange)="onFieldEdit(item, col, $event)">
+                            <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
                                 @for (possibleValue of vars.possibleValues; track possibleValue) {
                                     <option [value]="possibleValue.value">{{ possibleValue.label }}</option>
                                 }
@@ -180,12 +153,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         }
                     }
                     <!-- display a button -->
-                    @if (
-                        col.type == "button" &&
-                        !rowDisabled(item) &&
-                        col.action &&
-                        (!col.condition || col.condition(item))
-                    ) {
+                    @if (col.type == 'button' && !rowDisabled(item) && col.action && (!col.condition || col.condition(item))) {
                         <span class="button" (click)="col.action(item)">
                             @if (col.img) {
                                 <img src="{{ col.img }}" alt="image {{ col.title }}" />
@@ -196,17 +164,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
                     }
                     <!-- display a progress bar -->
-                    @if (col.type == "progress") {
+                    @if (col.type == 'progress') {
                         <progress-bar
                             [progress]="vars.render?.progress != undefined ? vars.render?.progress : vars.render"
                             width="100"
                             [warning]="vars.render?.status == 5 || vars.render?.status == 3"></progress-bar>
                     }
                     @if (colIndex < columnDefs.length - 1) {
-                        <div
-                            class="resizer"
-                            (mousedown)="startDrag(colIndex, refTd, $event, columnDefs)"
-                            (mouseup)="stopDrag()"></div>
+                        <div class="resizer" (mousedown)="startDrag(colIndex, refTd, $event, columnDefs)" (mouseup)="stopDrag()"></div>
                     }
                 </td>
             }
@@ -224,7 +189,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [style.width]="col.width"
             [class.sub-header]="sub"
             #refTh>
-            @if (!sub && $any(lastSortedCol)?.field == $any(col).field && !col.disableSorting && col.type != "button") {
+            @if (!sub && $any(lastSortedCol)?.field == $any(col).field && !col.disableSorting && col.type != 'button') {
                 <span class="triangle" [class.down]="lastSortedAsc" [class.up]="!lastSortedAsc">
                     <svg viewBox="0 0 100 100" preserveAspectRatio="none">
                         @if (lastSortedAsc) {
@@ -259,11 +224,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <!-- Text search -->
             @if (browserSearch) {
                 <span class="text-search">
-                    <shanoir-table-search
-                        #search
-                        [columnDefs]="columnDefs"
-                        [(filter)]="filter"
-                        (filterChange)="onSearchChange($event)"></shanoir-table-search>
+                    <shanoir-table-search #search [columnDefs]="columnDefs" [(filter)]="filter" (filterChange)="onSearchChange($event)"></shanoir-table-search>
                 </span>
             }
             <!-- User defined buttons -->
@@ -275,10 +236,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             [routerLink]="command.target"
                             [queryParams]="command.getParams != undefined ? command.getParams() : null"
                             routerLinkActive="active"
-                            [disabled]="
-                                (command.disabledIfNoSelected && selection.size == 0) ||
-                                (command.disabledIfNoResult && items?.length == 0)
-                            ">
+                            [disabled]="(command.disabledIfNoSelected && selection.size == 0) || (command.disabledIfNoResult && items?.length == 0)">
                             @if (command.img) {
                                 <img src="{{ command.img }}" alt="image {{ command.title }}" />
                             }
@@ -292,10 +250,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <button
                             type="button"
                             (click)="command.action()"
-                            [disabled]="
-                                (command.disabledIfNoSelected && selection.size == 0) ||
-                                (command.disabledIfNoResult && items?.length == 0)
-                            ">
+                            [disabled]="(command.disabledIfNoSelected && selection.size == 0) || (command.disabledIfNoResult && items?.length == 0)">
                             {{ command.hasCopyRight }}
                             @if (command.img) {
                                 <img src="{{ command.img }}" alt="image {{ command.title }}" />
@@ -321,16 +276,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <th class="checkbox-col"></th>
         }
         @for (col of columnDefs; track col; let i = $index) {
-            <ng-template
-                [ngTemplateOutlet]="th"
-                [ngTemplateOutletContext]="{ column: col, index: i, columnDefinitions: columnDefs }"></ng-template>
+            <ng-template [ngTemplateOutlet]="th" [ngTemplateOutletContext]="{ column: col, index: i, columnDefinitions: columnDefs }"></ng-template>
         }
     </tr>
 </thead>
 <!-- Table content -->
 @if (items?.length > 0) {
     <tbody (mousemove)="moveDrag($event)">
-        @for (item of items; track (item.id ?? $index); let i = $index) {
+        @for (item of items; track item.id ?? $index; let i = $index) {
             <tr
                 [class.odd]="i % 2 != 0"
                 [class.even]="i % 2 == 0"
@@ -350,14 +303,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
                 @if (selectionAllowed) {
                     <td class="checkbox-cell">
-                        <checkbox
-                            (ngModelChange)="onSelectChange(item, $event)"
-                            [ngModel]="isSelected(item)"></checkbox>
+                        <checkbox (ngModelChange)="onSelectChange(item, $event)" [ngModel]="isSelected(item)"></checkbox>
                     </td>
                 }
-                <ng-template
-                    [ngTemplateOutlet]="tableRow"
-                    [ngTemplateOutletContext]="{ rowItem: item, i: i, columnDefinitions: columnDefs }"></ng-template>
+                <ng-template [ngTemplateOutlet]="tableRow" [ngTemplateOutletContext]="{ rowItem: item, i: i, columnDefinitions: columnDefs }"></ng-template>
             </tr>
             @if (subRowsDefs && subRowOpen[i]) {
                 <tr class="sub-container-tr">
@@ -398,10 +347,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         @if (items?.length > 0 && page?.totalPages > 1) {
             <tr class="full-row">
                 <th class="pager" [attr.colspan]="nbColumns">
-                    <shanoir-pager
-                        [currentPage]="currentPage"
-                        [nbPages]="page ? page.totalPages : 0"
-                        (pageChange)="goToPage($event)"></shanoir-pager>
+                    <shanoir-pager [currentPage]="currentPage" [nbPages]="page ? page.totalPages : 0" (pageChange)="goToPage($event)"></shanoir-pager>
                 </th>
             </tr>
         }
@@ -433,11 +379,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         }
                         <span>
                             Page size :
-                            <input
-                                class="max-results"
-                                [(ngModel)]="maxResultsField"
-                                (change)="updateMaxResults()"
-                                type="text" />
+                            <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text" />
                         </span>
                         <span>
                             Go to :
@@ -525,10 +467,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <tr>
                                 <td>{{ col.headerName }}</td>
                                 <td>
-                                    <checkbox
-                                        [(ngModel)]="col.hidden"
-                                        [inverse]="true"
-                                        (ngModelChange)="saveSettings()"></checkbox>
+                                    <checkbox [(ngModel)]="col.hidden" [inverse]="true" (ngModelChange)="saveSettings()"></checkbox>
                                 </td>
                                 <td><input type="text" [(ngModel)]="col.width" (change)="saveSettings()" /></td>
                             </tr>

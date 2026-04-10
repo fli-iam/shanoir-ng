@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 @for (rule of rules; track rule; let i = $index) {
-    @if (cardType == "studycard") {
+    @if (cardType == 'studycard') {
         <study-card-rule
             #studyCardRule
             [class.appear]="canAnimateEnter(i)"
@@ -31,7 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (click)="clickRule(i)"
             [addSubForm]="addSubForm"></study-card-rule>
     }
-    @if (cardType == "qualitycard") {
+    @if (cardType == 'qualitycard') {
         <quality-card-rule
             #qualityCardRule
             [class.appear]="canAnimateEnter(i)"
@@ -50,9 +50,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [addSubForm]="addSubForm"></quality-card-rule>
     }
 }
-@if (mode == "edit" || mode == "create") {
+@if (mode == 'edit' || mode == 'create') {
     <div class="add-container">
-        @if (cardType == "studycard") {
+        @if (cardType == 'studycard') {
             <span (click)="addNewRule('DatasetAcquisition')" class="acquisition">
                 <i class="fa-solid fa-bed-pulse"></i>
                 <div>
@@ -61,7 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </div>
             </span>
         }
-        @if (cardType == "studycard") {
+        @if (cardType == 'studycard') {
             <span (click)="addNewRule('Dataset')" class="dataset">
                 <i class="fa-solid fa-brain"></i>
                 <div>
@@ -70,13 +70,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </div>
             </span>
         }
-        @if (cardType == "qualitycard") {
+        @if (cardType == 'qualitycard') {
             <span (click)="addNewExamRule()" class="dataset">
                 <i class="fas fa-plus"></i>
                 <div>Add a rule</div>
             </span>
         }
-        @if (cardType == "studycard") {
+        @if (cardType == 'studycard') {
             <span (click)="importRules.emit()">
                 <i class="fas fa-file-import"></i>
                 <div>Import a rule</div>

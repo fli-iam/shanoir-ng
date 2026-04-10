@@ -19,13 +19,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <form-footer [state]="footerState" (save)="save()" (back)="goBack()"></form-footer>
                 <span>
                     @switch (mode) {
-                        @case ("view") {
+                        @case ('view') {
                             <h2 class="header command-zone">Details on subject pathology</h2>
                         }
-                        @case ("edit") {
+                        @case ('edit') {
                             <h2 class="header command-zone">Edit subject pathology</h2>
                         }
-                        @case ("create") {
+                        @case ('create') {
                             <h2 class="header command-zone">Create a pathology record for a subject</h2>
                         }
                     }
@@ -35,10 +35,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <li>
                             <label>Pathology</label>
                             <span class="right-col">
-                                @if (mode != "view") {
-                                    <select-box
-                                        [optionArr]="pathologies"
-                                        (userChange)="refreshModelsByPathology($event)"></select-box>
+                                @if (mode != 'view') {
+                                    <select-box [optionArr]="pathologies" (userChange)="refreshModelsByPathology($event)"></select-box>
                                 }
                             </span>
                         </li>
@@ -46,7 +44,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Model</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         {{ subjectPathology?.pathologyModel?.name }}
                                     }
                                     @default {
@@ -54,10 +52,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             formControlName="pathologyModel"
                                             [optionArr]="displayedModels"
                                             (newOption)="isUserAdmin() ? goToAddPathologyModel() : null"></select-box>
-                                        @if (hasError("pathologyModel", ["required"])) {
-                                            <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
-                                                class="form-validation-alert">
+                                        @if (hasError('pathologyModel', ['required'])) {
+                                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                                 Pathology model is required!
                                             </label>
                                         }
@@ -69,7 +65,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Location</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         {{ subjectPathology?.location?.value }}
                                     }
                                     @default {
@@ -77,10 +73,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             formControlName="location"
                                             [optionArr]="locations"
                                             (newOption)="isUserAdmin() ? goToAddLocation() : null"></select-box>
-                                        @if (hasError("location", ["required"])) {
-                                            <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
-                                                class="form-validation-alert">
+                                        @if (hasError('location', ['required'])) {
+                                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                                 Location is required!
                                             </label>
                                         }
@@ -92,15 +86,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Start Date</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
-                                        {{ subjectPathology?.startDate | date: "shortDate" }}
+                                    @case ('view') {
+                                        {{ subjectPathology?.startDate | date: 'shortDate' }}
                                     }
                                     @default {
                                         <datepicker formControlName="startDate"></datepicker>
-                                        @if (hasError("startDate", ["date-format"])) {
-                                            <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
-                                                class="form-validation-alert">
+                                        @if (hasError('startDate', ['date-format'])) {
+                                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                                 Start date is required!
                                             </label>
                                         }
@@ -112,15 +104,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>End Date</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
-                                        {{ subjectPathology?.endDate | date: "shortDate" }}
+                                    @case ('view') {
+                                        {{ subjectPathology?.endDate | date: 'shortDate' }}
                                     }
                                     @default {
                                         <datepicker formControlName="endDate"></datepicker>
-                                        @if (hasError("endDate", ["date-format"])) {
-                                            <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
-                                                class="form-validation-alert">
+                                        @if (hasError('endDate', ['date-format'])) {
+                                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                                 End date is required!
                                             </label>
                                         }

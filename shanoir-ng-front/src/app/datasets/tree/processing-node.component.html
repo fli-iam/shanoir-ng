@@ -28,20 +28,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <dropdown-menu [(openInput)]="menuOpened">
                 <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showProcessingDetails()"></menu-item>
                 @if (node.canDelete) {
-                    <menu-item
-                        label="Delete"
-                        awesome="fa-regular fa-trash-can"
-                        (click)="deleteProcessing()"></menu-item>
+                    <menu-item label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteProcessing()"></menu-item>
                 }
             </dropdown-menu>
         }
-        @if (node.open && node.datasets && node.datasets != $any("UNLOADED")) {
+        @if (node.open && node.datasets && node.datasets != $any('UNLOADED')) {
             @for (dataset of node.datasets; track dataset; let i = $index) {
-                <simple-dataset-node
-                    node
-                    [input]="dataset"
-                    (simpleDatasetDelete)="onSimpleDatasetDelete(i)"
-                    [withMenu]="withMenu"></simple-dataset-node>
+                <simple-dataset-node node [input]="dataset" (simpleDatasetDelete)="onSimpleDatasetDelete(i)" [withMenu]="withMenu"></simple-dataset-node>
             }
         }
     </node>

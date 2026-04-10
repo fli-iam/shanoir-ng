@@ -31,10 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     }
     @if (multipleExamImport) {
         <div>
-            <p>
-                Multi-examination allows a more simple and automatic import, with multiple possible examinations (DICOM
-                studies).
-            </p>
+            <p>Multi-examination allows a more simple and automatic import, with multiple possible examinations (DICOM studies).</p>
             <p>Select a subject folder with one or multiple examination sub-folders and zip it.</p>
             <p>The files should be organized like this:</p>
             <p>
@@ -51,8 +48,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </p>
             <u>1) Subject:</u>
             <br />
-            The subject will be automatically created, based on the subject name, and information found in the DICOM.
-            Please note that there should be only ONE subject.
+            The subject will be automatically created, based on the subject name, and information found in the DICOM. Please note that there should be only ONE
+            subject.
             <p>
                 <u>2) Examination:</u>
                 <br />
@@ -61,34 +58,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 Examination date and other information will be gathered from information found in the DICOM.
             </p>
             <p>
-                Please select a study in which the data will be imported, and a study card (if study card policy is set
-                to "mandatory") or select a center and an equipment.
+                Please select a study in which the data will be imported, and a study card (if study card policy is set to "mandatory") or select a center and
+                an equipment.
             </p>
             <ol>
                 <li>
                     <label class="required-label">Select a research study</label>
                     <span class="right-col">
-                        <select-box
-                            [(ngModel)]="study"
-                            (userChange)="onSelectStudy()"
-                            [viewDisabled]="!study"
-                            [options]="studyOptions"></select-box>
+                        <select-box [(ngModel)]="study" (userChange)="onSelectStudy()" [viewDisabled]="!study" [options]="studyOptions"></select-box>
                     </span>
                 </li>
                 @if (useStudyCard) {
                     <li>
                         <label class="required-label">Default study card</label>
                         <span class="right-col">
-                            <select-box
-                                [(ngModel)]="studyCard"
-                                (userChange)="onSelectStudyCard()"
-                                [options]="studycardOptions"></select-box>
+                            <select-box [(ngModel)]="studyCard" (userChange)="onSelectStudyCard()" [options]="studycardOptions"></select-box>
                         </span>
                     </li>
                 }
                 @if (!useStudyCard) {
                     <li>
-                        @if (modality != "MR") {
+                        @if (modality != 'MR') {
                             <label [class.required-label]="!useStudyCard">Select an acquisition center</label>
                         }
                         <span class="right-col">
@@ -107,7 +97,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
                 @if (!useStudyCard) {
                     <li>
-                        @if (modality != "MR") {
+                        @if (modality != 'MR') {
                             <label [class.required-label]="!useStudyCard">Select a center equipment</label>
                         }
                         <span class="right-col">
@@ -128,10 +118,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
     }
     <upload-file
-        [disabled]="
-            multipleExamImport &&
-            ((!studyCard && useStudyCard) || (!useStudyCard && (!center || !acquisitionEquipment)))
-        "
+        [disabled]="multipleExamImport && ((!studyCard && useStudyCard) || (!useStudyCard && (!center || !acquisitionEquipment)))"
         (fileChange)="uploadArchive($event)"
         [loading]="archiveStatus == 'uploading'"
         [error]="archiveStatus == 'error'"></upload-file>
@@ -139,34 +126,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <progress-bar [progress]="uploadState?.progress" [text]="'Preparing upload'"></progress-bar>
     </div>
     @if (extensionError == true) {
-        <label
-            animate.enter="slide-down-error" animate.leave="slide-up-error" 
-            class="form-validation-alert" 
-            i18n="Import|ExtensionError label">
+        <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert" i18n="Import|ExtensionError label">
             A DICOM zip archive is required!
         </label>
     }
     @if (dicomDirMissingError == true) {
-        <label
-            animate.enter="slide-down-error" animate.leave="slide-up-error" 
-            class="form-validation-alert" 
-            i18n="Import|DicomDirMissingError label">
+        <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert" i18n="Import|DicomDirMissingError label">
             DICOMDIR is missing in .zip file!
         </label>
     }
     @if (fileTooBigError) {
-        <label 
-            animate.enter="slide-down-error" animate.leave="slide-up-error" 
-            class="form-validation-alert" 
-            i18n="Import|fileTooBigError label">
+        <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert" i18n="Import|fileTooBigError label">
             The uploaded file is too big, it should be less then 5Gb.
         </label>
     }
     @if (otherErrorMessage) {
-        <label 
-            animate.enter="slide-down-error" animate.leave="slide-up-error" 
-            class="form-validation-alert" 
-            i18n="Import label">
+        <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert" i18n="Import label">
             {{ otherErrorMessage }}
         </label>
     }
@@ -174,7 +149,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     @if (modality && !multipleExamImport) {
         <p class="modality">The modality of the dataset(s) that you are importing is {{ modality }}</p>
     }
-    @if (multipleExamImport && archiveStatus == "uploaded") {
+    @if (multipleExamImport && archiveStatus == 'uploaded') {
         <p class="modality">The import successfully started. Please check "Jobs" tab to follow its progress.</p>
     }
 </fieldset>

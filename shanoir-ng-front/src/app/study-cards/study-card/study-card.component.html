@@ -15,38 +15,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     @if (form) {
         <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
             <div class="layout">
-                <form-footer
-                    [state]="footerState"
-                    (save)="save()"
-                    (delete)="delete()"
-                    (edit)="goToEdit()"
-                    (dismiss)="goToView()"
-                    (back)="goBack()">
-                    @if (mode != "view") {
+                <form-footer [state]="footerState" (save)="save()" (delete)="delete()" (edit)="goToEdit()" (dismiss)="goToView()" (back)="goBack()">
+                    @if (mode != 'view') {
                         <button
                             type="button"
                             class="Button right-icon show-errors"
                             (click)="onShowErrors()"
-                            [disabled]="
-                                !footerState.dirty ||
-                                footerState.valid ||
-                                showRulesErrors ||
-                                studyCard.rules?.length == 0
-                            ">
+                            [disabled]="!footerState.dirty || footerState.valid || showRulesErrors || studyCard.rules?.length == 0">
                             Show all errors
                             <i class="fas fa-bug"></i>
                         </button>
                     }
                     @if (selectMode) {
-                        <button
-                            class="Button right-icon"
-                            (click)="clickImportRules()"
-                            [disabled]="selectedRules.length <= 0">
+                        <button class="Button right-icon" (click)="clickImportRules()" [disabled]="selectedRules.length <= 0">
                             Import selected rules
                             <i class="fas fa-file-import"></i>
                         </button>
                     }
-                    @if (mode == "view" && isAdminOrExpert) {
+                    @if (mode == 'view' && isAdminOrExpert) {
                         <button type="button" class="Button right-icon" (click)="goToApply()">
                             Reapply study card
                             <i class="fas fa-cogs"></i>
@@ -55,13 +41,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </form-footer>
                 <span>
                     @switch (mode) {
-                        @case ("view") {
+                        @case ('view') {
                             <h2 class="header command-zone">Details on study card</h2>
                         }
-                        @case ("edit") {
+                        @case ('edit') {
                             <h2 class="header command-zone">Edit study card</h2>
                         }
-                        @case ("create") {
+                        @case ('create') {
                             <h2 class="header command-zone">Create study card</h2>
                         }
                     }
@@ -72,29 +58,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Name</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         {{ studyCard.name }}
                                     }
                                     @default {
                                         <input type="text" formControlName="name" />
-                                        @if (hasError("name", ["required"])) {
-                                            <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
-                                                class="form-validation-alert">
+                                        @if (hasError('name', ['required'])) {
+                                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                                 Name is required!
                                             </label>
                                         }
-                                        @if (hasError("name", ["minlength", "maxlength"])) {
-                                            <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
-                                                class="form-validation-alert">
+                                        @if (hasError('name', ['minlength', 'maxlength'])) {
+                                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                                 Too short!
                                             </label>
                                         }
-                                        @if (hasError("name", ["unique"])) {
-                                            <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
-                                                class="form-validation-alert">
+                                        @if (hasError('name', ['unique'])) {
+                                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                                 Name should be unique!
                                             </label>
                                         }
@@ -106,16 +86,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Study</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
+                                    @case ('view') {
                                         <a [routerLink]="['/study/details/', studyCard.study?.id]">
                                             {{ studyCard.study.name }}
                                         </a>
                                     }
                                     @default {
-                                        <select-box
-                                            formControlName="study"
-                                            [optionArr]="studies"
-                                            [disabled]="lockStudy"></select-box>
+                                        <select-box formControlName="study" [optionArr]="studies" [disabled]="lockStudy"></select-box>
                                     }
                                 }
                             </span>
@@ -125,7 +102,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             @if (studyCard.study) {
                                 <span class="right-col">
                                     @switch (mode) {
-                                        @case ("view") {
+                                        @case ('view') {
                                             {{ studyCard.acquisitionEquipment?.center?.name }}
                                         }
                                         @default {
@@ -143,12 +120,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label>Center equipment</label>
                             <span class="right-col">
                                 @switch (mode) {
-                                    @case ("view") {
-                                        <a
-                                            [routerLink]="[
-                                                '/acquisition-equipment/details/',
-                                                studyCard.acquisitionEquipment?.id,
-                                            ]">
+                                    @case ('view') {
+                                        <a [routerLink]="['/acquisition-equipment/details/', studyCard.acquisitionEquipment?.id]">
                                             {{ studyCard.acquisitionEquipment | acqEqptLabel }}
                                         </a>
                                     }
@@ -172,14 +145,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <ul>
                                 <li>
                                     <span class="bold">Rules that apply to every dataset of the acquisition :</span>
-                                    each dataset is checked regarding the conditions of that one rule and updated
-                                    regarding the assignments of that one rule.
+                                    each dataset is checked regarding the conditions of that one rule and updated regarding the assignments of that one rule.
                                 </li>
                                 <li>
                                     <span class="bold">Rules that apply to the acquisition :</span>
-                                    conditions on the acquisition's metadata can be set as well as the minimal number of
-                                    datasets that fullfil one given condition, then an assignment is applied to that
-                                    acquisition.
+                                    conditions on the acquisition's metadata can be set as well as the minimal number of datasets that fullfil one given
+                                    condition, then an assignment is applied to that acquisition.
                                 </li>
                             </ul>
                         </tool-tip>

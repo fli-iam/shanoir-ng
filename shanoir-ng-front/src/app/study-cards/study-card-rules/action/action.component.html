@@ -12,21 +12,21 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-@if (mode == "view") {
+@if (mode == 'view') {
     set
     <span class="var">{{ fieldLabel ? fieldLabel : assignment?.field }}</span>
     =
     <span class="value">
-        @if (assignment?.type == "string" && valueIsString == true) {
+        @if (assignment?.type == 'string' && valueIsString == true) {
             <span>"</span>
         }
         {{ valueLabel ? valueLabel : assignment?.label }}
-        @if (assignment?.type == "string" && valueIsString == true) {
+        @if (assignment?.type == 'string' && valueIsString == true) {
             <span>"</span>
         }
     </span>
 }
-@if (mode != "view") {
+@if (mode != 'view') {
     set
     <select-box
         class="var auto-width"
@@ -62,7 +62,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [clear]="false"></select-box>
     }
 }
-@if (mode != "view") {
+@if (mode != 'view') {
     <span class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>
 }
 @if (badValueRef) {
@@ -71,13 +71,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         Bad reference for this action, please update the value field.
         <br />
         Given value : "
-        @if (assignment && assignment.value && assignment.value["id"]) {
-            <span class="hint">Object with id = {{ assignment.value["id"] }}</span>
+        @if (assignment && assignment.value && assignment.value['id']) {
+            <span class="hint">Object with id = {{ assignment.value['id'] }}</span>
         }
-        @if (assignment && assignment.value && assignment.value["name"]) {
-            <span class="hint">and name = {{ assignment.value["name"] }}</span>
+        @if (assignment && assignment.value && assignment.value['name']) {
+            <span class="hint">and name = {{ assignment.value['name'] }}</span>
         }
-        @if (assignment && assignment.value && !assignment.value["id"]) {
+        @if (assignment && assignment.value && !assignment.value['id']) {
             <span class="hint">{{ assignment.value }}</span>
         }
         "

@@ -32,29 +32,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <li>
                         <label>To</label>
                         <span class="right-col">
-                            <input
-                                formControlName="to"
-                                type="number"
-                                (change)="updateValidity()"
-                                [min]="1"
-                                [max]="nbExaminations" />
+                            <input formControlName="to" type="number" (change)="updateValidity()" [min]="1" [max]="nbExaminations" />
                         </span>
                     </li>
                     <li>
                         <label>Sample size</label>
-                        <span class="right-col">
-                            {{ form.get("to").value - form.get("from").value + 1 }} examinations
-                        </span>
+                        <span class="right-col">{{ form.get('to').value - form.get('from').value + 1 }} examinations</span>
                     </li>
                 </ol>
             </fieldset>
             <div class="footer">
-                <button
-                    type="button"
-                    type="button"
-                    class="alt left-icon"
-                    [disabled]="!form.valid"
-                    (click)="testOnInterval()">
+                <button type="button" type="button" class="alt left-icon" [disabled]="!form.valid" (click)="testOnInterval()">
                     <i class="fas fa-play"></i>
                     Test on sample
                 </button>

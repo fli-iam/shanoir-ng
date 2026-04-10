@@ -27,7 +27,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </li>
         }
         @for (step of displayedSteps; track step; let i = $index) {
-            @if (!step.disabled && step.label && step.label != "Home") {
+            @if (!step.disabled && step.label && step.label != 'Home') {
                 <li [class.waiting]="step.isWaiting && step.displayWaitStatus">
                     <a (click)="clickStep(step)">
                         {{ step.label }}

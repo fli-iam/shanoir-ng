@@ -12,10 +12,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <p>
-    Caution: Shanoir offers a web-based configuration possibility to auto-generate a BIDS-compliant tree, based on the
-    meta-data available, see BIDS data type. Very often a special, study-specific mapping configuration is necessary to
-    generate a fully-compliant BIDS tree (see undefined folders). This configuration needs to be done by a study expert
-    on using the study cards, that are applied during the import or afterwards to complete this mapping.
+    Caution: Shanoir offers a web-based configuration possibility to auto-generate a BIDS-compliant tree, based on the meta-data available, see BIDS data type.
+    Very often a special, study-specific mapping configuration is necessary to generate a fully-compliant BIDS tree (see undefined folders). This configuration
+    needs to be done by a study expert on using the study cards, that are applied during the import or afterwards to complete this mapping.
 </p>
 <ng-template #recursiveList let-datas let-id="id">
     @for (item of datas; track item; let i = $index) {
@@ -29,8 +28,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (openClick)="getDetail($event)"
             [hasChildren]="item.elements && item.elements.length > 0"
             [class.selected]="selectedIndex == id + i">
-            <ng-container
-                *ngTemplateOutlet="recursiveList; context: { $implicit: item.elements, id: id + i }"></ng-container>
+            <ng-container *ngTemplateOutlet="recursiveList; context: { $implicit: item.elements, id: id + i }"></ng-container>
         </node>
     }
 </ng-template>

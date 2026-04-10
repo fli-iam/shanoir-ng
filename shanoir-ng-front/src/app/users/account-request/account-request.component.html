@@ -25,54 +25,41 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span [class.selected]="language == 'english'" (click)="language = 'english'">english</span>
             <span [class.selected]="language == 'french'" (click)="language = 'french'">français</span>
         </div>
-        @if (language == "english") {
+        @if (language == 'english') {
             <div class="mention">
+                <p>Inria is committed to protecting personal data in accordance with the General Data Protection Regulation (GDPR).</p>
+                <p>Inria uses this software in order to import, manage and share medical imaging data, on the legal basis of consent.</p>
                 <p>
-                    Inria is committed to protecting personal data in accordance with the General Data Protection
-                    Regulation (GDPR).
+                    The recipients of this data are the system administrators. This data will be kept for 10 years and will not be transferred outside the
+                    European Union. This data collection is voluntary and does not involve automated decision-making.
                 </p>
                 <p>
-                    Inria uses this software in order to import, manage and share medical imaging data, on the legal
-                    basis of consent.
-                </p>
-                <p>
-                    The recipients of this data are the system administrators. This data will be kept for 10 years and
-                    will not be transferred outside the European Union. This data collection is voluntary and does not
-                    involve automated decision-making.
-                </p>
-                <p>
-                    You can access your data, request their deletion, exercise your rights of opposition, rectification
-                    and limitation of data processing. To exercise these rights or for any questions about the
-                    processing of your data, you can contact the DPO via
+                    You can access your data, request their deletion, exercise your rights of opposition, rectification and limitation of data processing. To
+                    exercise these rights or for any questions about the processing of your data, you can contact the DPO via
                     <a href="mailto:dpo@inria.fr">dpo&#64;inria.fr</a>
-                    . However, if you believe that your rights are not respected or that the processing of your data is
-                    not compliant, you can submit a complaint to the CNIL
+                    . However, if you believe that your rights are not respected or that the processing of your data is not compliant, you can submit a
+                    complaint to the CNIL
                 </p>
             </div>
         }
-        @if (language == "french") {
+        @if (language == 'french') {
             <div class="mention">
                 <p>
-                    Inria est engagé dans une démarche de protection des données personnelles en accord avec le
-                    Règlement Général sur la Protection des Données (RGPD).
+                    Inria est engagé dans une démarche de protection des données personnelles en accord avec le Règlement Général sur la Protection des Données
+                    (RGPD).
+                </p>
+                <p>Inria utilise ce logiciel afin d'importer, gérer et partager des images médicales et leurs données, sur la base légale du consentement.</p>
+                <p>
+                    Les destinataires de ces données sont les administrateurs de la plateforme. Ces données seront conservées pendant10 ans et ne seront pas
+                    transférées hors de l’Union Européenne [à adapter] . Cette collecte de données s’effectue sur la base du volontariat et n’engendre pas de
+                    prise de décision automatisée.
                 </p>
                 <p>
-                    Inria utilise ce logiciel afin d'importer, gérer et partager des images médicales et leurs données,
-                    sur la base légale du consentement.
-                </p>
-                <p>
-                    Les destinataires de ces données sont les administrateurs de la plateforme. Ces données seront
-                    conservées pendant10 ans et ne seront pas transférées hors de l’Union Européenne [à adapter] . Cette
-                    collecte de données s’effectue sur la base du volontariat et n’engendre pas de prise de décision
-                    automatisée.
-                </p>
-                <p>
-                    Vous pouvez accéder à vos données, demander leur effacement, exercer vos droits d’opposition, de
-                    rectification et à la limitation du traitement de vos données. Pour exercer ces droits ou pour toute
-                    question sur le traitement de vos données, vous pouvez contacter la DPO via
+                    Vous pouvez accéder à vos données, demander leur effacement, exercer vos droits d’opposition, de rectification et à la limitation du
+                    traitement de vos données. Pour exercer ces droits ou pour toute question sur le traitement de vos données, vous pouvez contacter la DPO via
                     <a href="mailto:dpo@inria.fr">dpo&#64;inria.fr</a>
-                    . Toutefois, si vous estimez que vos droits ne sont pas respectés ou que le traitement de vos
-                    données n’est pas conforme, vous pouvez adresser une réclamation à la CNIL.
+                    . Toutefois, si vous estimez que vos droits ne sont pas respectés ou que le traitement de vos données n’est pas conforme, vous pouvez
+                    adresser une réclamation à la CNIL.
                 </p>
             </div>
         }
@@ -82,22 +69,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <fieldset class="main-fieldset">
                 <ol>
                     <li>
-                        <label i18n="Edit user|First name label@@editUserFirstName" class="required-label">
-                            First Name
-                        </label>
+                        <label i18n="Edit user|First name label@@editUserFirstName" class="required-label">First Name</label>
                         <span class="right-col">
                             <input type="text" id="firstName" formControlName="firstName" />
-                            @if (hasError("firstName", ["required"])) {
+                            @if (hasError('firstName', ['required'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|First name required error@@editUserFirstNameRequiredError">
                                     First Name is required!
                                 </label>
                             }
-                            @if (hasError("firstName", ["length"])) {
+                            @if (hasError('firstName', ['length'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|First name length error@@editUserFirstNameLengthError">
                                     First Name length must be between 2 and 50!
@@ -106,22 +93,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
                     </li>
                     <li>
-                        <label i18n="Edit user|Last name label@@editUserLastName" class="required-label">
-                            Last Name
-                        </label>
+                        <label i18n="Edit user|Last name label@@editUserLastName" class="required-label">Last Name</label>
                         <span class="right-col">
                             <input type="text" id="lastName" formControlName="lastName" />
-                            @if (hasError("lastName", ["required"])) {
+                            @if (hasError('lastName', ['required'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Last name required error@@editUserLastNameRequiredError">
                                     Last Name is required!
                                 </label>
                             }
-                            @if (hasError("lastName", ["length"])) {
+                            @if (hasError('lastName', ['length'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Last name length error@@editUserLastNameLengthError">
                                     Last Name length must be between 2 and 50!
@@ -133,25 +120,28 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label i18n="Edit user|Email label@@editUserEmail" class="required-label">Email</label>
                         <span class="right-col">
                             <input type="email" id="email" formControlName="email" />
-                            @if (hasError("email", ["required"])) {
+                            @if (hasError('email', ['required'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Email required error@@editUserEmailRequiredError">
                                     Email is required!
                                 </label>
                             }
-                            @if (hasError("email", ["pattern"])) {
+                            @if (hasError('email', ['pattern'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Email pattern error@@editUserEmailPatternError">
                                     Email should be valid!
                                 </label>
                             }
-                            @if (hasError("email", ["unique"])) {
+                            @if (hasError('email', ['unique'])) {
                                 <label
-                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                    animate.enter="slide-down-error"
+                                    animate.leave="slide-up-error"
                                     class="form-validation-alert"
                                     i18n="Edit user|Email unique error@@editUserEmailUniqueError">
                                     Email should be unique!
@@ -161,24 +151,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </li>
                     <li class="info">
                         <i class="fas fa-exclamation-triangle"></i>
-                        Please use your professional or institutional email address here. For legal compliance reasons
-                        we will not accepted other addresses.
+                        Please use your professional or institutional email address here. For legal compliance reasons we will not accepted other addresses.
                     </li>
                 </ol>
             </fieldset>
             <fieldset>
-                <account-request-info
-                    formControlName="accountRequestInfo"
-                    [editMode]="true"
-                    (valid)="onInfoValidityUpdate($event)"></account-request-info>
+                <account-request-info formControlName="accountRequestInfo" [editMode]="true" (valid)="onInfoValidityUpdate($event)"></account-request-info>
             </fieldset>
             <div class="footer command-zone">
-                <button
-                    i18n="Edit user|Cancel button label@@cancelButton"
-                    class="Button"
-                    (click)="cancelAccountRequest()">
-                    Cancel
-                </button>
+                <button i18n="Edit user|Cancel button label@@cancelButton" class="Button" (click)="cancelAccountRequest()">Cancel</button>
                 <button
                     type="submit"
                     i18n="Edit user|Request account button label@@requestAccountButton"

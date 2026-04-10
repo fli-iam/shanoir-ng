@@ -12,12 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span
-    class="clickable"
-    [class.disabled]="currentPage == 1"
-    (click)="currentPage > 1 ? goToPage(currentPage - 1) : null">
-    &#9664;
-</span>
+<span class="clickable" [class.disabled]="currentPage == 1" (click)="currentPage > 1 ? goToPage(currentPage - 1) : null">&#9664;</span>
 @for (p of pagerList; track p) {
     <span class="wrapper">
         @if (p == null) {
@@ -28,9 +23,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         }
     </span>
 }
-<span
-    class="clickable"
-    [class.disabled]="!nbPages || currentPage == nbPages"
-    (click)="currentPage < nbPages ? goToPage(currentPage + 1) : null">
-    &#9654;
-</span>
+<span class="clickable" [class.disabled]="!nbPages || currentPage == nbPages" (click)="currentPage < nbPages ? goToPage(currentPage + 1) : null">&#9654;</span>

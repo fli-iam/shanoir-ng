@@ -17,15 +17,14 @@ import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { DatepickerComponent } from 'src/app/shared/date-picker/date-picker.component';
 import { ExaminationComponent } from 'src/app/examinations/examination/examination.component';
+import { DatepickerComponent } from 'src/app/shared/date-picker/date-picker.component';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../../centers/shared/center.service';
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
-import { ExaminationNodeComponent } from '../../../examinations/tree/examination-node.component';
 import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 import { LocalDateFormatPipe } from '../../../shared/localLanguage/localDateFormat.pipe';
 import { SelectBoxComponent } from '../../../shared/select/select.component';
@@ -49,7 +48,7 @@ import { AnimalExaminationService } from '../shared/animal-examination.service';
     selector: 'examination-preclinical-form',
     templateUrl: 'animal-examination-form.component.html',
     styleUrls: ['animal-examination.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, ExaminationAnestheticFormComponent, PhysiologicalDataFormComponent, BloodGasDataFormComponent, ExaminationNodeComponent, LocalDateFormatPipe]
+    imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, ExaminationAnestheticFormComponent, PhysiologicalDataFormComponent, BloodGasDataFormComponent, LocalDateFormatPipe]
 })
 export class AnimalExaminationFormComponent extends ExaminationComponent {
 

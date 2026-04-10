@@ -18,6 +18,7 @@ import {  ActivatedRoute } from '@angular/router';
 
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { UploaderComponent } from 'src/app/shared/components/uploader/uploader.component';
 
 import { PhysiologicalDataFile }    from '../shared/physiologicalDataFile.model';
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
@@ -29,7 +30,7 @@ import { FormFooterComponent } from '../../../../shared/components/form-footer/f
 @Component({
     selector: 'physiological-data-upload-form',
     templateUrl: 'physiologicalData-form.component.html',
-    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, UploaderComponent]
 })
 export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalDataFile> {
 

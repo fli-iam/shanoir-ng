@@ -21,17 +21,7 @@ class="left-icon block"
 </span> -->
 
 @if (!readOnly) {
-    <select-box
-        [options]="options"
-        [pipe]="pipe"
-        [disabled]="disabled"
-        [placeholder]="placeholder"
-        (addClick)="onSelectOption($event?.id)"></select-box>
+    <select-box [options]="options" [pipe]="pipe" [disabled]="disabled" [placeholder]="placeholder" (addClick)="onSelectOption($event?.id)"></select-box>
 }
 
-<shanoir-table
-    #table
-    [getPage]="getPage.bind(this)"
-    [columnDefs]="columnDefs"
-    [browserSearch]="false"
-    [editMode]="!readOnly"></shanoir-table>
+<shanoir-table #table [getPage]="getPage.bind(this)" [columnDefs]="columnDefs" [browserSearch]="false" [editMode]="!readOnly"></shanoir-table>

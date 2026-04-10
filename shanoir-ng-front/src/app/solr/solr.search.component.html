@@ -21,10 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 type="button"
                 (click)="removeAllFacets(); refreshTable()"
                 class="left-icon"
-                [disabled]="
-                    (!selections || selections.length == 0) &&
-                    (!solrRequest.searchText || solrRequest.searchText.trim().length == 0)
-                ">
+                [disabled]="(!selections || selections.length == 0) && (!solrRequest.searchText || solrRequest.searchText.trim().length == 0)">
                 <i class="fas fa-snowplow"></i>
                 Reset
             </button>
@@ -90,13 +87,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </div>
             @if (dateOpen) {
                 <div class="date-content">
-                    <div class="left-title" style="margin-bottom: 8px;">Both date included*</div>
+                    <div class="left-title" style="margin-bottom: 8px">Both date included*</div>
                     <div class="date-from">
                         <span class="left-title">from :</span>
                         @if (viewChecked) {
                             <datepicker formControlName="startDate"></datepicker>
                         }
-                        @if (hasError("startDate", ["format"])) {
+                        @if (hasError('startDate', ['format'])) {
                             <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                 Date should be valid! Date format: {{ dateDisplay }}
                             </label>
@@ -107,13 +104,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         @if (viewChecked) {
                             <datepicker formControlName="endDate"></datepicker>
                         }
-                        @if (hasError("endDate", ["format"])) {
+                        @if (hasError('endDate', ['format'])) {
                             <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                 Date should be valid! Date format: {{ dateDisplay }}
                             </label>
                         }
-                        @if (hasError("endDate", ["order"])) {
-                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">End date must be subsequent to start date</label>
+                        @if (hasError('endDate', ['order'])) {
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
+                                End date must be subsequent to start date
+                            </label>
                         }
                     </div>
                 </div>
@@ -134,13 +133,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </div>
             @if (importDateOpen) {
                 <div class="date-content">
-                    <div class="left-title" style="margin-bottom: 8px;">Both date included*</div>
+                    <div class="left-title" style="margin-bottom: 8px">Both date included*</div>
                     <div class="date-from">
                         <span class="left-title">from :</span>
                         @if (viewChecked) {
                             <datepicker formControlName="importStartDate"></datepicker>
                         }
-                        @if (hasError("importStartDate", ["format"])) {
+                        @if (hasError('importStartDate', ['format'])) {
                             <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                 Date should be valid! Date format: {{ dateDisplay }}
                             </label>
@@ -151,13 +150,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         @if (viewChecked) {
                             <datepicker formControlName="importEndDate"></datepicker>
                         }
-                        @if (hasError("importEndDate", ["format"])) {
+                        @if (hasError('importEndDate', ['format'])) {
                             <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
                                 Date should be valid! Date format: {{ dateDisplay }}
                             </label>
                         }
-                        @if (hasError("importEndDate", ["order"])) {
-                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">End date must be subsequent to start date</label>
+                        @if (hasError('importEndDate', ['order'])) {
+                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
+                                End date must be subsequent to start date
+                            </label>
                         }
                     </div>
                 </div>
@@ -242,9 +243,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             facetName="dataReuseAgreement"
             [getPage]="getFacetFieldPage.bind(this)"
             [(ngModel)]="solrRequest.dataReuseAgreement"
-            [ngModelOptions]="{standalone: true}"
-            (userChange)="updateSelections(); refreshTable('dataReuseAgreement')">
-        </solr-paging-criterion>
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('dataReuseAgreement')"></solr-paging-criterion>
     </div>
     <div class="right">
         <solr-text-search
@@ -275,10 +275,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         }
 
         <div [hidden]="!progressState?.progress">
-            <progress-bar
-                [progress]="progressState.progress"
-                [text]="'Preparing download'"
-                [unknownDownload]="true"></progress-bar>
+            <progress-bar [progress]="progressState.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
         </div>
 
         <div class="tabs">

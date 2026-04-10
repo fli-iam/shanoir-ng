@@ -18,12 +18,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <fieldset>
                 <ol>
                     <li class="required">
-                        <label
-                            i18n="uploadExtraData| Explication label@@uploadExtraDataExplication"
-                            class="required-label">
-                            You can attach extra data to existing examinations. To do this, you can upload as many files
-                            as you wish of any type, and select in the next step the examination to which they are
-                            associated.
+                        <label i18n="uploadExtraData| Explication label@@uploadExtraDataExplication" class="required-label">
+                            You can attach extra data to existing examinations. To do this, you can upload as many files as you wish of any type, and select in
+                            the next step the examination to which they are associated.
                         </label>
                         <div class="form-group">
                             <label for="file">Choose File</label>
@@ -31,39 +28,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </div>
                     </li>
                     <li class="required">
-                        <label
-                            i18n="uploadExtraData|research study label@@uploadExtraDataResearchStudy"
-                            class="required-label">
+                        <label i18n="uploadExtraData|research study label@@uploadExtraDataResearchStudy" class="required-label">
                             Select an existing research study
                         </label>
                         <select-box formControlName="studyId" [options]="studyOptions"></select-box>
                     </li>
                     <li class="required">
-                        <label i18n="uploadExtraData|subject label@@uploadExtraDataSubject" class="required-label">
-                            Select a subject
-                        </label>
+                        <label i18n="uploadExtraData|subject label@@uploadExtraDataSubject" class="required-label">Select a subject</label>
                     </li>
                     <li class="required">
-                        <label
-                            i18n="uploadExtraData|examination label@@uploadExtraDataExamination"
-                            class="required-label">
-                            Select an examination
-                        </label>
+                        <label i18n="uploadExtraData|examination label@@uploadExtraDataExamination" class="required-label">Select an examination</label>
                         <input type="text" id="examination" formControlName="examination" />
                     </li>
                 </ol>
             </fieldset>
             <div class="footer command-zone">
                 <span>
-                    <button i18n="uploadExtraData detail|Back button label@@backButton" class="Button" (click)="back()">
-                        Back
-                    </button>
-                    <button
-                        i18n="uploadExtraData detail|Cancel button label@@cancelButton"
-                        class="Button"
-                        (click)="back()">
-                        Cancel
-                    </button>
+                    <button i18n="uploadExtraData detail|Back button label@@backButton" class="Button" (click)="back()">Back</button>
+                    <button i18n="uploadExtraData detail|Cancel button label@@cancelButton" class="Button" (click)="back()">Cancel</button>
                 </span>
             </div>
         </div>

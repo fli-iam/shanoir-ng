@@ -62,12 +62,14 @@ import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.
 import { SizePipe } from "../../shared/utils/size.pipe";
 
 import { Selection } from './tree.service';
+import { CopyFromCsvComponent } from "./copy-csv.component";
 
 @Component({
     selector: 'study-detail',
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
-    imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent, BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe]
+    imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent, 
+        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe, CopyFromCsvComponent]
 })
 
 export class StudyComponent extends EntityComponent<Study> {

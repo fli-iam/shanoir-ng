@@ -20,6 +20,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { InjectionInterval } from 'src/app/preclinical/shared/enum/injectionInterval';
 import { InjectionSite } from 'src/app/preclinical/shared/enum/injectionSite';
 import { InjectionType } from 'src/app/preclinical/shared/enum/injectionType';
+import { SelectBoxComponent } from 'src/app/shared/select/select.component';
 
 import { ExaminationAnesthetic }    from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
@@ -35,7 +36,7 @@ import { CamelPipe } from '../../../../utils/app.utils';
 @Component({
     selector: 'examination-anesthetic-form',
     templateUrl: 'examinationAnesthetic-form.component.html',
-    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, CamelPipe]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, CamelPipe, SelectBoxComponent]
 })
 export class ExaminationAnestheticFormComponent extends EntityComponent<ExaminationAnesthetic> {
     @Input() isStandalone: boolean = false;

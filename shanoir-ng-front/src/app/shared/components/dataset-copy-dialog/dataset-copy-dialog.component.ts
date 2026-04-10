@@ -14,16 +14,17 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Component, inject } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
-import { StudyService } from 'src/app/studies/shared/study.service';
 import { CopyData, CopyDataService } from 'src/app/studies/shared/copy-data.service';
+import { StudyService } from 'src/app/studies/shared/study.service';
 
 import { StudyRightsService } from "../../../studies/shared/study-rights.service";
 import { StudyUserRight } from "../../../studies/shared/study-user-right.enum";
 import { ConsoleService } from "../../console/console.service";
 import { KeycloakService } from "../../keycloak/keycloak.service";
 import { IdName } from '../../models/id-name.model';
+import { SelectBoxComponent } from '../../select/select.component';
 
 
 export type InputDataset = {
@@ -37,7 +38,7 @@ export type InputDataset = {
     selector: 'user-action-dialog',
     templateUrl: 'dataset-copy-dialog.component.html',
     styleUrls: ['dataset-copy-dialog.component.css'],
-    imports: [NgClass]
+    imports: [SelectBoxComponent, FormsModule]
 })
 export class DatasetCopyDialogComponent {
 

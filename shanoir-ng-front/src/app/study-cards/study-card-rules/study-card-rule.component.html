@@ -12,10 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div
-    class="conditions"
-    [class.dataset]="rule.scope == 'Dataset'"
-    [class.acquisition]="rule.scope == 'DatasetAcquisition'">
+<div class="conditions" [class.dataset]="rule.scope == 'Dataset'" [class.acquisition]="rule.scope == 'DatasetAcquisition'">
     @for (condition of rule.conditions; track condition; let i = $index) {
         <div class="condition">
             <condition
@@ -40,7 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
     }
     <div>
-        @if (mode != "view") {
+        @if (mode != 'view') {
             <span class="add" (click)="addNewCondition()">
                 <i class="fas fa-plus"></i>
                 Add a condition
@@ -50,14 +47,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 
 <div class="separator">
-    @if (mode != "view") {
+    @if (mode != 'view') {
         <span class="rule-controls top">
             <span (click)="copyRule.emit()"><i class="far fa-copy"></i></span>
             <span (click)="moveUp.emit()"><i class="fas fa-long-arrow-alt-up"></i></span>
         </span>
     }
     <span class="sep-symbol"><i class="fas fa-angle-double-right"></i></span>
-    @if (mode != "view") {
+    @if (mode != 'view') {
         <span class="rule-controls bottom">
             <span (click)="delete.emit()" class="rule-delete"><i class="far fa-times-circle"></i></span>
             <span (click)="moveDown.emit()"><i class="fas fa-long-arrow-alt-down"></i></span>
@@ -79,12 +76,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [showErrors]="showErrors"></action>
         </div>
     }
-    @if (mode != "view") {
+    @if (mode != 'view') {
         <div>
-            <span
-                class="add"
-                (click)="addNewAction()"
-                [class.error]="rule.assignments?.length == 0 && (showErrors || touched)">
+            <span class="add" (click)="addNewAction()" [class.error]="rule.assignments?.length == 0 && (showErrors || touched)">
                 <i class="fas fa-plus"></i>
                 Add an action
             </span>

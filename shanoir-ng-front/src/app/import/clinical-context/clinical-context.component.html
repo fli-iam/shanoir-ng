@@ -25,8 +25,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <legend>
                 Research study
                 <tool-tip>
-                    A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of
-                    mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...
+                    A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based
+                    on MRI and clinical criteria...
                 </tool-tip>
             </legend>
             <li>
@@ -41,16 +41,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [disabled]="loading"></select-box>
                 </span>
             </li>
-            @if (study && useStudyCard && studycardOptions && studycardOptions.length == 0 && modality == "MR") {
+            @if (study && useStudyCard && studycardOptions && studycardOptions.length == 0 && modality == 'MR') {
                 <li class="info">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <strong>
-                        No study cards are configured on this study, please create one before trying to import MR data.
-                    </strong>
+                    <strong>No study cards are configured on this study, please create one before trying to import MR data.</strong>
                     @if (!isAdminOfStudy[study.id]) {
                         <br />
-                        You may want to contact an administrator for the study {{ study.name }} and ask him/her to
-                        create a studycard.
+                        You may want to contact an administrator for the study {{ study.name }} and ask him/her to create a studycard.
                     }
                     @if (isAdminOfStudy[study.id]) {
                         <br />
@@ -58,7 +55,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     }
                 </li>
             }
-            @if (useStudyCard && (modality == "MR" || modality == "bruker")) {
+            @if (useStudyCard && (modality == 'MR' || modality == 'bruker')) {
                 <li>
                     <label class="required-label">Select a study card</label>
                     <span class="right-col">
@@ -78,12 +75,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <i class="fas fa-exclamation-triangle"></i>
                     <strong>That study card contains coil references that need to be precised.</strong>
                     <br />
-                    If you use this studycard now, the coil references in the updated metadata of your new datasets will
-                    be left blank.
+                    If you use this studycard now, the coil references in the updated metadata of your new datasets will be left blank.
                     @if (!isAdminOfStudy[study.id]) {
                         <br />
-                        You may want to contact an administrator for the study {{ study.name }} and ask him/her to
-                        update the studycard {{ studycard?.name }}.
+                        You may want to contact an administrator for the study {{ study.name }} and ask him/her to update the studycard {{ studycard?.name }}.
                     }
                     @if (isAdminOfStudy[study.id]) {
                         <br />
@@ -103,8 +98,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     in the imported metadata.
                     @if (!isAdminOfStudy[study.id]) {
                         <br />
-                        You may want to contact an administrator for the study {{ study.name }} and ask him/her to
-                        update the studycard {{ studycard?.name }}.
+                        You may want to contact an administrator for the study {{ study.name }} and ask him/her to update the studycard {{ studycard?.name }}.
                     }
                     @if (isAdminOfStudy[study.id]) {
                         <br />
@@ -113,14 +107,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </li>
             }
             <li>
-                @if (useStudyCard && (modality == "MR" || modality == "bruker")) {
+                @if (useStudyCard && (modality == 'MR' || modality == 'bruker')) {
                     <label [class.required-label]="useStudyCard">Acquisition center</label>
                 }
-                @if (!useStudyCard || (modality != "MR" && modality != "bruker")) {
+                @if (!useStudyCard || (modality != 'MR' && modality != 'bruker')) {
                     <label [class.required-label]="!useStudyCard">Select an acquisition center</label>
                 }
                 <span class="right-col">
-                    @if ((modality == "MR" && !useStudyCard) || modality != "MR" || center) {
+                    @if ((modality == 'MR' && !useStudyCard) || modality != 'MR' || center) {
                         <select-box
                             [disabled]="(!useStudyCard && (!study || !centerOptions)) || loading"
                             [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
@@ -145,20 +139,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     }
                     @if (!useStudyCard) {
                         <br />
-                        If the center you need is not in the above list, you can create a new center from this data by
-                        clicking on the 'add' button.
+                        If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
                     }
                 </li>
             }
             <li>
-                @if (useStudyCard && (modality == "MR" || modality == "bruker")) {
+                @if (useStudyCard && (modality == 'MR' || modality == 'bruker')) {
                     <label [class.required-label]="useStudyCard">Center equipment</label>
                 }
-                @if (!useStudyCard || (modality != "MR" && modality != "bruker")) {
+                @if (!useStudyCard || (modality != 'MR' && modality != 'bruker')) {
                     <label [class.required-label]="!useStudyCard">Select a center equipment</label>
                 }
                 <span class="right-col">
-                    @if ((modality == "MR" && !useStudyCard) || modality != "MR" || acquisitionEquipment) {
+                    @if ((modality == 'MR' && !useStudyCard) || modality != 'MR' || acquisitionEquipment) {
                         <select-box
                             [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions)) || loading"
                             [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
@@ -184,18 +177,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <code>{{ importedEquipmentDataStr }}</code>
                     }
                     <br />
-                    If the center equipment you need is not in the above list, you can create a new center equipment
-                    from this data by clicking on the 'add' button.
+                    If the center equipment you need is not in the above list, you can create a new center equipment from this data by clicking on the 'add'
+                    button.
                 </li>
             }
         </ol>
         <ol>
             <legend>
                 Subject
-                <tool-tip>
-                    It is the study subject for the current import process. He is the patient of the examination. The
-                    subject is anonymous.
-                </tool-tip>
+                <tool-tip>It is the study subject for the current import process. He is the patient of the examination. The subject is anonymous.</tool-tip>
             </legend>
             <li class="required">
                 <label class="required-label">Select a subject</label>
@@ -208,10 +198,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [viewRoute]="'/subject/details/' + this.subject?.id"
                         [viewDisabled]="!subject"
                         [optionArr]="subjects"></select-box>
-                    <button
-                        class="new-subject"
-                        (click)="openCreateSubject()"
-                        [disabled]="!study || !acquisitionEquipment">
+                    <button class="new-subject" (click)="openCreateSubject()" [disabled]="!study || !acquisitionEquipment">
                         <i class="fa-solid fa-user"></i>
                         <i class="fa-solid fa-plus secondary"></i>
                         New subject
@@ -223,8 +210,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <legend>
                 Examination
                 <tool-tip>
-                    A MR examination defines when, where and by whom the data have been processed. The details on the
-                    MRI machine are associated to a subsequent entity: MR Dataset acquisition.
+                    A MR examination defines when, where and by whom the data have been processed. The details on the MRI machine are associated to a subsequent
+                    entity: MR Dataset acquisition.
                 </tool-tip>
             </legend>
             <li>

@@ -24,18 +24,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </span>
                 </div>
                 <p class="challenge-name">{{ challengeStudy.name }}</p>
-                <p class="msg">
-                    Here you can now download all the ressources you need for the challenge and explore its data using
-                    Shanoir
-                </p>
+                <p class="msg">Here you can now download all the ressources you need for the challenge and explore its data using Shanoir</p>
             </td>
             <td>
                 <ul class="challenge-files">
                     <div [hidden]="!downloadState?.progress">
-                        <progress-bar
-                            [progress]="downloadState?.progress"
-                            [text]="'Preparing download'"
-                            [unknownDownload]="true"></progress-bar>
+                        <progress-bar [progress]="downloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                     </div>
                     @for (filePath of challengeStudy.protocolFilePaths; track filePath) {
                         <li>

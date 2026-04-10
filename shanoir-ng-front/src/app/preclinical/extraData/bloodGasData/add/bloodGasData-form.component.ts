@@ -17,6 +17,7 @@ import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/for
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { UploaderComponent } from 'src/app/shared/components/uploader/uploader.component';
 
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
 import { BloodGasDataFile } from '../shared/bloodGasDataFile.model';
@@ -29,7 +30,7 @@ import { FormFooterComponent } from '../../../../shared/components/form-footer/f
 @Component({
     selector: 'bloodgas-data-upload-form',
     templateUrl: 'bloodGasData-form.component.html',
-    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, UploaderComponent]
 })
 export class BloodGasDataFormComponent extends EntityComponent<BloodGasDataFile> {
 

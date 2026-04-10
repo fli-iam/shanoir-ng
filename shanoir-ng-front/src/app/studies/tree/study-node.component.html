@@ -43,35 +43,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (labelClick)="subjectsMenuOpened = !subjectsMenuOpened"
                 [hasChildren]="hasDependency(node.subjectsNode.subjects)">
                 <div class="overmenu">
-                    @if (!(subjectsOrder.field == "name" && subjectsOrder.way == "asc")) {
-                        <span
-                            class="filter"
-                            (click)="sortSubjects({ field: 'name', way: 'asc' })"
-                            title="sort by name ascending">
+                    @if (!(subjectsOrder.field == 'name' && subjectsOrder.way == 'asc')) {
+                        <span class="filter" (click)="sortSubjects({ field: 'name', way: 'asc' })" title="sort by name ascending">
                             <i class="fa-solid fa-arrow-down-a-z"></i>
                         </span>
                     }
-                    @if (subjectsOrder.field == "name" && subjectsOrder.way == "asc") {
-                        <span
-                            class="filter"
-                            (click)="sortSubjects({ field: 'name', way: 'desc' })"
-                            title="sort by name descending">
+                    @if (subjectsOrder.field == 'name' && subjectsOrder.way == 'asc') {
+                        <span class="filter" (click)="sortSubjects({ field: 'name', way: 'desc' })" title="sort by name descending">
                             <i class="fa-solid fa-arrow-down-z-a"></i>
                         </span>
                     }
-                    @if (!(subjectsOrder.field == "id" && subjectsOrder.way == "desc")) {
-                        <span
-                            class="filter"
-                            (click)="sortSubjects({ field: 'id', way: 'desc' })"
-                            title="sort by id ascending">
+                    @if (!(subjectsOrder.field == 'id' && subjectsOrder.way == 'desc')) {
+                        <span class="filter" (click)="sortSubjects({ field: 'id', way: 'desc' })" title="sort by id ascending">
                             <i class="fa-solid fa-arrow-down-1-9"></i>
                         </span>
                     }
-                    @if (subjectsOrder.field == "id" && subjectsOrder.way == "desc") {
-                        <span
-                            class="filter"
-                            (click)="sortSubjects({ field: 'id', way: 'asc' })"
-                            title="sort by id descending">
+                    @if (subjectsOrder.field == 'id' && subjectsOrder.way == 'desc') {
+                        <span class="filter" (click)="sortSubjects({ field: 'id', way: 'asc' })" title="sort by id descending">
                             <i class="fa-solid fa-arrow-down-9-1"></i>
                         </span>
                     }
@@ -81,17 +69,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span (click)="resetFilter()">&nbsp;x&nbsp;</span>
                     </span>
                 </div>
-                @if (
-                    node.subjectsNode.opened &&
-                    node.subjectsNode.subjects &&
-                    node.subjectsNode.subjects != $any("UNLOADED")
-                ) {
+                @if (node.subjectsNode.opened && node.subjectsNode.subjects && node.subjectsNode.subjects != $any('UNLOADED')) {
                     <div>
-                        @for (
-                            subject of filteredNodes || node.subjectsNode.subjects;
-                            track trackByFn(i, asNode(subject));
-                            let i = $index
-                        ) {
+                        @for (subject of filteredNodes || node.subjectsNode.subjects; track trackByFn(i, asNode(subject)); let i = $index) {
                             <div>
                                 @if (!asNode(subject).fake) {
                                     <subject-node
@@ -113,10 +93,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             {{ asNode(subject).label }}
                                         </a>
                                         @for (tag of asNode(subject).tags; track tag) {
-                                            <span
-                                                class="tag label"
-                                                [class.dark]="getFontColor(tag.color)"
-                                                [style.background]="tag.color">
+                                            <span class="tag label" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color">
                                                 {{ tag.name }}
                                             </span>
                                         }
@@ -124,11 +101,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             <span
                                                 class="tag label dark"
                                                 [style.background]="
-                                                    asNode(subject).qualityTag == 'ERROR'
-                                                        ? 'red'
-                                                        : asNode(subject).qualityTag == 'WARNING'
-                                                          ? 'orange'
-                                                          : 'green'
+                                                    asNode(subject).qualityTag == 'ERROR' ? 'red' : asNode(subject).qualityTag == 'WARNING' ? 'orange' : 'green'
                                                 ">
                                                 {{ asNode(subject).qualityTag }}
                                             </span>
@@ -148,9 +121,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 awesome="fa-regular fa-hospital"
                 [(opened)]="node.centersNode.opened"
                 [hasChildren]="hasDependency(node.centersNode.centers)">
-                @if (
-                    node.centersNode.opened && node.centersNode.centers && node.centersNode.centers != $any("UNLOADED")
-                ) {
+                @if (node.centersNode.opened && node.centersNode.centers && node.centersNode.centers != $any('UNLOADED')) {
                     @for (center of node.centersNode.centers; track center) {
                         <center-node [input]="center" [withMenu]="withMenu"></center-node>
                     }
@@ -166,17 +137,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [(opened)]="node.studyCardsNode.opened"
                 [hasChildren]="hasDependency(node.studyCardsNode.cards)"
                 [dataLoading]="studyCardsLoading">
-                @if (
-                    node.studyCardsNode.opened &&
-                    node.studyCardsNode.cards &&
-                    node.studyCardsNode.cards != $any("UNLOADED")
-                ) {
+                @if (node.studyCardsNode.opened && node.studyCardsNode.cards && node.studyCardsNode.cards != $any('UNLOADED')) {
                     @for (studycard of node.studyCardsNode.cards; track studycard; let i = $index) {
-                        <card-node
-                            [input]="studycard"
-                            (cardDelete)="onStudyCardDelete(i)"
-                            [withMenu]="withMenu"
-                            detailsPath="study-card/details"></card-node>
+                        <card-node [input]="studycard" (cardDelete)="onStudyCardDelete(i)" [withMenu]="withMenu" detailsPath="study-card/details"></card-node>
                     }
                 }
             </node>
@@ -190,11 +153,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [(opened)]="node.qualityCardsNode.opened"
                 [hasChildren]="hasDependency(node.qualityCardsNode.cards)"
                 [dataLoading]="qualityCardsLoading">
-                @if (
-                    node.qualityCardsNode.opened &&
-                    node.qualityCardsNode.cards &&
-                    node.qualityCardsNode.cards != $any("UNLOADED")
-                ) {
+                @if (node.qualityCardsNode.opened && node.qualityCardsNode.cards && node.qualityCardsNode.cards != $any('UNLOADED')) {
                     @for (qualitycard of node.qualityCardsNode.cards; track qualitycard; let i = $index) {
                         <card-node
                             [input]="qualitycard"
@@ -212,9 +171,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 awesome="far fa-user"
                 [(opened)]="node.membersNode.opened"
                 [hasChildren]="hasDependency(node.membersNode.members)">
-                @if (
-                    node.membersNode.opened && node.membersNode.members && node.membersNode.members != $any("UNLOADED")
-                ) {
+                @if (node.membersNode.opened && node.membersNode.members && node.membersNode.members != $any('UNLOADED')) {
                     @for (member of node.membersNode.members; track trackByFn(i, asNode(member)); let i = $index) {
                         <div>
                             @if (!asNode(member).fake) {

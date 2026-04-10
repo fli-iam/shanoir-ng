@@ -15,10 +15,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="overlay">
     <div class="main" [class.error]="mode == 'error'">
         <div class="header">
-            @if (mode == "error") {
+            @if (mode == 'error') {
                 <i class="fas fa-exclamation-circle"></i>
             }
-            @if (mode == "confirm") {
+            @if (mode == 'confirm') {
                 <i class="fas fa-question-circle"></i>
             }
             {{ title }}
@@ -32,18 +32,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </div>
         }
         <div class="footer">
-            @if (mode != "choose") {
-                <button type="button" (click)="close(true)">{{ buttons && buttons.yes ? buttons.yes : "OK" }}</button>
+            @if (mode != 'choose') {
+                <button type="button" (click)="close(true)">{{ buttons && buttons.yes ? buttons.yes : 'OK' }}</button>
             }
-            @if (mode == "choose") {
-                <button type="button" (click)="close('yes')">{{ buttons?.yes || "Yes" }}</button>
+            @if (mode == 'choose') {
+                <button type="button" (click)="close('yes')">{{ buttons?.yes || 'Yes' }}</button>
             }
-            @if (mode == "choose") {
-                <button type="button" (click)="close('no')">{{ buttons?.no || "No" }}</button>
+            @if (mode == 'choose') {
+                <button type="button" (click)="close('no')">{{ buttons?.no || 'No' }}</button>
             }
-            @if (mode == "confirm" || (mode == "choose" && buttons?.cancel)) {
+            @if (mode == 'confirm' || (mode == 'choose' && buttons?.cancel)) {
                 <button type="button" (click)="close(false)">
-                    {{ buttons && buttons.cancel ? buttons.cancel : "Cancel" }}
+                    {{ buttons && buttons.cancel ? buttons.cancel : 'Cancel' }}
                 </button>
             }
         </div>

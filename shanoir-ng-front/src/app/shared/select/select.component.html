@@ -21,7 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span (click)="isOpen() ? close() : open()"><i class="{{ selectedOption?.awesome }}"></i></span>
                     }
                     <span class="fake-input">
-                        {{ inputText ? inputText : placeholder ? placeholder : "Select an option..." }}
+                        {{ inputText ? inputText : placeholder ? placeholder : 'Select an option...' }}
                     </span>
                     @if (options?.length > 0) {
                         <input
@@ -47,11 +47,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <i class="fas fa-chevron-down"></i>
                     </span>
                     @if (viewRoute) {
-                        <a
-                            [routerLink]="viewRoute"
-                            (click)="clickView()"
-                            [class.disabled]="viewDisabled || !selectedOption"
-                            class="button">
+                        <a [routerLink]="viewRoute" (click)="clickView()" [class.disabled]="viewDisabled || !selectedOption" class="button">
                             <i class="fa-regular fa-eye"></i>
                         </a>
                     }
@@ -118,25 +114,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
                 @if (scrollable) {
                     <div class="scrollbar">
-                        <div
-                            class="top-scroll-button"
-                            (mousedown)="scrollButtonOn('up')"
-                            (mouseup)="scrollButtonOff()"
-                            (mouseleave)="scrollButtonOff()">
+                        <div class="top-scroll-button" (mousedown)="scrollButtonOn('up')" (mouseup)="scrollButtonOff()" (mouseleave)="scrollButtonOff()">
                             <i class="fas fa-chevron-up"></i>
                         </div>
                         <div class="scrollzone" (click)="onScrollZoneClick($event)">
-                            <div
-                                class="lift"
-                                [style.top.px]="liftHeight"
-                                draggable="true"
-                                (dragstart)="onDragStart($event)"></div>
+                            <div class="lift" [style.top.px]="liftHeight" draggable="true" (dragstart)="onDragStart($event)"></div>
                         </div>
-                        <div
-                            class="bottom-scroll-button"
-                            (mousedown)="scrollButtonOn('down')"
-                            (mouseup)="scrollButtonOff()"
-                            (mouseleave)="scrollButtonOff()">
+                        <div class="bottom-scroll-button" (mousedown)="scrollButtonOn('down')" (mouseup)="scrollButtonOff()" (mouseleave)="scrollButtonOff()">
                             <i class="fas fa-chevron-down"></i>
                         </div>
                     </div>

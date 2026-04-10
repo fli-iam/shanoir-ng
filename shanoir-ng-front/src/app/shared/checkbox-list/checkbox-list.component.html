@@ -20,10 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 @if (items && items.content) {
     <div class="items">
         <input type="text" [(ngModel)]="searchBarContent" (input)="search()" />
-        @for (
-            item of items.content | slice: itemsPersPage * currentPage : itemsPersPage * (currentPage + 1);
-            track item
-        ) {
+        @for (item of items.content | slice: itemsPersPage * currentPage : itemsPersPage * (currentPage + 1); track item) {
             <label>
                 <input type="checkbox" [(ngModel)]="item.checked" (change)="onToggle()" [disabled]="!item.valueCount" />
                 {{ item.value }} - {{ item.valueCount }}

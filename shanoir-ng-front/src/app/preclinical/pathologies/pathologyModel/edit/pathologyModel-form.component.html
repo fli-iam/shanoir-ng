@@ -15,25 +15,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div class="PathologyModelFormComponent content-component">
     @if (form) {
         <form [formGroup]="form" class="max-content" novalidate>
-            <form-footer
-                [state]="footerState"
-                (save)="save()"
-                (delete)="delete()"
-                (edit)="goToEdit()"
-                (dismiss)="goToView()"
-                (back)="goBack()"></form-footer>
+            <form-footer [state]="footerState" (save)="save()" (delete)="delete()" (edit)="goToEdit()" (dismiss)="goToView()" (back)="goBack()"></form-footer>
             <table class="layout">
                 <tr>
                     <td colspan="2">
                         <span class="right-col">
                             @switch (mode) {
-                                @case ("view") {
+                                @case ('view') {
                                     <div class="header command-zone" i18n="View model|Title">View pathology model</div>
                                 }
-                                @case ("edit") {
+                                @case ('edit') {
                                     <div class="header command-zone" i18n="Edit model|Title">Edit pathology model</div>
                                 }
-                                @case ("create") {
+                                @case ('create') {
                                     <div class="header command-zone" i18n="Create model|Title">Add pathology model</div>
                                 }
                             }
@@ -46,7 +40,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <ol>
                                 @if (isModelUnique == false) {
                                     <label
-                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                        animate.enter="slide-down-error"
+                                        animate.leave="slide-up-error"
                                         class="form-validation-alert"
                                         i18n="Edit model|PathologyModelUniqueError label">
                                         This pathology model already exists!
@@ -56,28 +51,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit model|Name label">Name</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ model?.name }}
                                             }
                                             @default {
                                                 <input type="text" id="name" formControlName="name" />
-                                                @if (hasError("name", ["required"])) {
+                                                @if (hasError('name', ['required'])) {
                                                     <label
-                                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                        animate.enter="slide-down-error"
+                                                        animate.leave="slide-up-error"
                                                         class="form-validation-alert"
-                                                        i18n="
-                                                            Edit pathologyModelName|Name required
-                                                            error@@pathologyModelDetailNameRequiredError">
+                                                        i18n="Edit pathologyModelName|Name required error@@pathologyModelDetailNameRequiredError">
                                                         Name is required!
                                                     </label>
                                                 }
-                                                @if (hasError("name", ["unique"])) {
+                                                @if (hasError('name', ['unique'])) {
                                                     <label
-                                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                        animate.enter="slide-down-error"
+                                                        animate.leave="slide-up-error"
                                                         class="form-validation-alert"
-                                                        i18n="
-                                                            Edit pathologyModelName|Name unique
-                                                            error@@pathologyModelNameUniqueError">
+                                                        i18n="Edit pathologyModelName|Name unique error@@pathologyModelNameUniqueError">
                                                         Name should be unique!
                                                     </label>
                                                 }
@@ -89,28 +82,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit model|Pathology label">Pathology</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ model?.pathology?.name }}
                                             }
                                             @default {
-                                                <select-box
-                                                    formControlName="pathology"
-                                                    [optionArr]="pathologies"></select-box>
+                                                <select-box formControlName="pathology" [optionArr]="pathologies"></select-box>
                                                 @if (keycloakService.isUserAdmin() || keycloakService.isUserExpert()) {
-                                                    <button
-                                                        i18n="Edit model|Add a new pathology"
-                                                        (click)="goToAddPathology()">
+                                                    <button i18n="Edit model|Add a new pathology" (click)="goToAddPathology()">
                                                         <i class="fas fa-plus-square"></i>
                                                         new pathology
                                                     </button>
                                                 }
-                                                @if (hasError("pathology", ["required"])) {
+                                                @if (hasError('pathology', ['required'])) {
                                                     <label
-                                                        animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                        animate.enter="slide-down-error"
+                                                        animate.leave="slide-up-error"
                                                         class="form-validation-alert"
                                                         i18n="
-                                                            Edit pathologyModelPathology|Pathology required
-                                                            error@@pathologyModelDetailPathologyRequiredError">
+                                                            Edit pathologyModelPathology|Pathology required error@@pathologyModelDetailPathologyRequiredError">
                                                         Pathology is required!
                                                     </label>
                                                 }
@@ -122,7 +111,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit model|Comments label">Comment</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ model?.comment }}
                                             }
                                             @default {
@@ -135,10 +124,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label i18n="Edit model|Specifications label">Specifications</label>
                                     <span class="right-col">
                                         @switch (mode) {
-                                            @case ("view") {
+                                            @case ('view') {
                                                 {{ model?.filename }}
                                             }
-                                            @case ("create") {
+                                            @case ('create') {
                                                 <input
                                                     type="file"
                                                     id="pathologyFile"
@@ -147,7 +136,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                     (change)="fileChangeEvent($event.target.files)"
                                                     placeholder="Upload file..." />
                                             }
-                                            @case ("edit") {
+                                            @case ('edit') {
                                                 {{ model?.filename }}
                                                 <input
                                                     type="file"
