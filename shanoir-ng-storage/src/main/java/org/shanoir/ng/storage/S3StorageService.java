@@ -228,7 +228,7 @@ public class S3StorageService implements StorageService {
             throw new StorageException("Missing datasets bucket configuration.", null);
         }
         String directory = datasetsPrefix
-                + SLASH + PROCESSED_DATASET
+                + PROCESSED_DATASET
                 + SLASH + SUBJECT + subjectId
                 + SLASH + timeStamp;
         String key = directory + SLASH + fileName;

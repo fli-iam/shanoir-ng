@@ -89,7 +89,7 @@ public class FileSystemStorageService implements StorageService {
         if (baseDirDatasets.equals(UNUSED)) {
             throw new StorageException("Missing datasets directory configuration.", null);
         }
-        String directory = SLASH + PROCESSED_DATASET
+        String directory = PROCESSED_DATASET
                 + SLASH + SUBJECT + subjectId
                 + SLASH + timeStamp;
         return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
