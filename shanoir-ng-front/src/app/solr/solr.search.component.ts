@@ -54,7 +54,8 @@ export type TextualFacet = typeof TextualFacetNames[number];
     selector: 'solr-search',
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, SolrPagingCriterionComponent, DatepickerComponent, SolrRangeCriterionComponent, SolrTextSearchComponent, SolrTextSearchModeComponent, LoadingBarComponent, TableComponent]
+    imports: [FormsModule, ReactiveFormsModule, SolrPagingCriterionComponent, DatepickerComponent, SolrRangeCriterionComponent, SolrTextSearchComponent, 
+        SolrTextSearchModeComponent, LoadingBarComponent, TableComponent]
 })
 
 export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {

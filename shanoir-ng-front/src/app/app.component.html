@@ -12,12 +12,6 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<!-- <header></header>
-<navbar *ngIf="isAuthenticated()"></navbar>
-<breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
-<div class="main-content">
-  <router-outlet></router-outlet>
-</div> -->
 @if (isAuthenticated()) {
     @if (menuOpen) {
         <div class="side-menu" animate.enter="slide-right" animate.leave="slide-left">
