@@ -1,0 +1,105 @@
+# Shanoir NG - Import, manage and share neuroimaging data
+# Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+# Contact us on https://project.inria.fr/shanoir/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
+# Test that the Shanoir NG docker-compose deployment starts correctly.
+#
+# This workflow uses the pre-built images from GHCR (docker-compose.yml) and
+# follows the same initialization sequence as bootstrap.sh (without building
+# from source). dcm4chee is skipped to keep resource usage within the limits
+# of GitHub-hosted runners.
+
+name: Deployment smoke test
+
+on:
+  pull_request:
+    branches: [develop, master]
+  workflow_dispatch:
+
+concurrency:
+  group: deployment-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deployment-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      packages: read
+      contents: read
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Configure /etc/hosts
+        run: |
+          sudo sh -c 'echo "127.0.0.1 shanoir-ng-nginx viewer" >> /etc/hosts'
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Start databases
+        run: |
+          docker compose up -d database keycloak-database
+          .github/scripts/deployment-test-helpers.sh wait_for_healthy database 120
+
+      - name: Initialize and start Keycloak
+        run: |
+          .github/scripts/deployment-test-helpers.sh wait_for_log keycloak-database "ready for connections" 90
+          docker compose run --rm -e SHANOIR_MIGRATION=init keycloak
+          docker compose up -d keycloak
+          .github/scripts/deployment-test-helpers.sh wait_for_http keycloak 8080 /auth/ 180
+
+      - name: Start infrastructure services
+        run: |
+          docker compose up -d rabbitmq solr
+
+      - name: Initialize and start microservices
+        run: |
+          for ms in users studies datasets import preclinical nifti-conversion; do
+            echo "======== init: $ms ========"
+            docker compose run --rm -e SHANOIR_MIGRATION=init "$ms"
+            echo "======== start: $ms ========"
+            docker compose up -d "$ms"
+          done
+
+      - name: Start nginx
+        run: |
+          docker compose up -d nginx
+          .github/scripts/deployment-test-helpers.sh wait_for_port shanoir-ng-nginx 443 120
+
+      - name: Run smoke tests
+        run: .github/scripts/deployment-test-helpers.sh smoke_tests
+
+      - name: Dump logs on failure
+        if: failure()
+        run: |
+          mkdir -p /tmp/shanoir-logs
+          docker compose logs --no-color > /tmp/shanoir-logs/compose.log 2>&1
+          docker compose ps --all > /tmp/shanoir-logs/ps.log 2>&1
+
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-logs
+          path: /tmp/shanoir-logs/
+          retention-days: 7
+
+      - name: Teardown
+        if: always()
+        run: docker compose down -v
