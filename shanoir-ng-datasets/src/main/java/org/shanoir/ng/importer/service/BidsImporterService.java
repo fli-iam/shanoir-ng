@@ -273,7 +273,7 @@ public class BidsImporterService {
                 }
                 String path = storageService.storeDatasetsData(
                         importJob.getStudyId(), subjectId, importJob.getExaminationId(),
-                        fileName, bidsDataType.getFolderName(),
+                        bidsDataType.getFolderName(), fileName,
                         is, contentType, importedFile.length());
                 DatasetFile dsFile = new DatasetFile();
                 dsFile.setDatasetExpression(expression);
