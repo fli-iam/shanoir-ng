@@ -193,17 +193,18 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public String storeBIDSData(Long studyId, String subjectName, Long examinationId, String fileName,
-            String dataTypeBIDS, InputStream inputStream, String contentType, long size)
+    public String storeDatasetsData(Long studyId, Long subjectId, Long examinationId,
+            String dataType, String fileName,
+            InputStream inputStream, String contentType, long size)
             throws StorageException {
         if (datasetsBucket.equals(UNUSED)) {
             throw new StorageException("Missing datasets bucket configuration.", null);
         }
         String directory = datasetsPrefix
                 + STUDY + studyId
-                + SLASH + SUBJECT + subjectName
+                + SLASH + SUBJECT + subjectId
                 + SLASH + SESSION + examinationId
-                + SLASH + dataTypeBIDS;
+                + SLASH + dataType;
         String key = directory + SLASH + fileName;
         try {
             if (size > MULTIPART_THRESHOLD) {
@@ -221,14 +222,15 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
-    public String storeProcessedData(Long subjectId, String timeStamp, String fileName,
+    public String storeProcessedData(Long studyId, Long subjectId, String timeStamp, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
         if (datasetsBucket.equals(UNUSED)) {
             throw new StorageException("Missing datasets bucket configuration.", null);
         }
         String directory = datasetsPrefix
-                + PROCESSED_DATASET
+                + STUDY + studyId
+                + SLASH + DERIVATIVES
                 + SLASH + SUBJECT + subjectId
                 + SLASH + timeStamp;
         String key = directory + SLASH + fileName;

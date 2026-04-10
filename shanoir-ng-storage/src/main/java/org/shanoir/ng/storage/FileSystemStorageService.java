@@ -71,25 +71,27 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public String storeBIDSData(Long studyId, String subjectName, Long examinationId, String fileName,
-            String dataTypeBIDS, InputStream inputStream, String contentType, long size)
-            throws StorageException {
-        if (baseDirDatasets.equals(UNUSED)) {
-            throw new StorageException("Missing datasets directory configuration.", null);
-        }
-        String directory = STUDY + studyId
-                + SLASH + SUBJECT + subjectName + SLASH + SESSION + examinationId + SLASH + dataTypeBIDS;
-        return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
-    }
-
-    @Override
-    public String storeProcessedData(Long subjectId, String timeStamp, String fileName,
+    public String storeDatasetsData(Long studyId, Long subjectId, Long examinationId,
+            String dataType, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
         if (baseDirDatasets.equals(UNUSED)) {
             throw new StorageException("Missing datasets directory configuration.", null);
         }
-        String directory = PROCESSED_DATASET
+        String directory = STUDY + studyId
+                + SLASH + SUBJECT + subjectId + SLASH + SESSION + examinationId + SLASH + dataType;
+        return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
+    }
+
+    @Override
+    public String storeProcessedData(Long studyId, Long subjectId, String timeStamp, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        if (baseDirDatasets.equals(UNUSED)) {
+            throw new StorageException("Missing datasets directory configuration.", null);
+        }
+        String directory = STUDY + studyId
+                + SLASH + DERIVATIVES
                 + SLASH + SUBJECT + subjectId
                 + SLASH + timeStamp;
         return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);

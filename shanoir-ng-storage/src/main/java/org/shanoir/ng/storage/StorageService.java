@@ -25,13 +25,13 @@ public interface StorageService {
 
     public static final String SUBJECT = "sub-";
 
-    public static final String EXAMINATION = "examination-";
-
     public static final String SESSION = "ses-";
+
+    public static final String EXAMINATION = "examination-";
 
     public static final String PATHOLOGY_MODEL = "pathology-model-";
 
-    public static final String PROCESSED_DATASET = "processed-dataset";
+    public static final String DERIVATIVES = "derivatives";
 
     public static final String UNUSED = "UNUSED";
 
@@ -45,11 +45,13 @@ public interface StorageService {
             InputStream inputStream, String contentType, long size)
             throws StorageException;
 
-    String storeBIDSData(Long studyId, String subjectName, Long examinationId, String fileName,
-            String dataTypeBIDS, InputStream inputStream, String contentType, long size)
+    String storeDatasetsData(Long studyId, Long subjectId, Long examinationId,
+            String dataType, String fileName,
+            InputStream inputStream, String contentType, long size)
             throws StorageException;
 
-    String storeProcessedData(Long subjectId, String timeStamp, String fileName,
+    String storeProcessedData(Long studyId,
+            Long subjectId, String timeStamp, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException;
 
