@@ -122,7 +122,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.customActionDefs = this.getCustomActionsDefs();
         this.selectionCustomActionDefs = this.getSelectionCustomActionsDefs();
 
-        const input: string = this.router.lastSuccessfulNavigation?.extras && this.router.lastSuccessfulNavigation?.extras.state ? this.router.lastSuccessfulNavigation?.extras.state['input'] : null;
+        const input: string = this.router.lastSuccessfulNavigation()?.extras && this.router.lastSuccessfulNavigation()?.extras.state ? this.router.lastSuccessfulNavigation()?.extras.state['input'] : null;
         if (input) {
             // TODO
         }

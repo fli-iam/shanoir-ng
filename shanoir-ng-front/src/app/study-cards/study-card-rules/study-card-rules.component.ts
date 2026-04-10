@@ -179,7 +179,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     }
 
     @HostListener('focusout', ['$event']) 
-    private onFocusOut(event: FocusEvent) {
+    onFocusOut(event: FocusEvent) {
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
             this.onTouchedCallback();
         } 

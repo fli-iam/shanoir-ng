@@ -63,7 +63,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
         super(route);
 
-        this.fromImport = this.router.lastSuccessfulNavigation?.extras?.state?.fromImport;
+        this.fromImport = this.router.lastSuccessfulNavigation()?.extras?.state?.fromImport;
     }
 
     protected getRoutingName(): string {

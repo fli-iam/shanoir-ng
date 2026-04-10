@@ -55,8 +55,8 @@ export class AutoAdjustInputComponent implements ControlValueAccessor {
         this.disabled = isDisabled;
     }
     
-    @HostListener('focusout', ['$event']) 
-    private onFocusOut() {
+    @HostListener('focusout') 
+    onFocusOut() {
         this.onTouch();
     }
 }

@@ -2,7 +2,7 @@ import { CommonModule, registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import localeEs from '@angular/common/locales/es';
 import localeFr from '@angular/common/locales/fr';
-import { enableProdMode, ErrorHandler, importProvidersFrom } from '@angular/core';
+import { enableProdMode, ErrorHandler, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -205,12 +205,12 @@ if (window.location.href == window.origin + '/shanoir-ng/'
     || window.location.href.endsWith('/extension-request')
     || window.location.href.endsWith('/challenge-request')) {
     // Public URL
-    bootstrapApplication(AppComponent, options);
+    bootstrapApplication(AppComponent, {...options, providers: [provideZoneChangeDetection(), ...options.providers]});
 } else { // private 
     const optionalAuth: boolean = window.location.href.includes('/dua/edit')
             || window.location.href.includes('/dua/view');
     KeycloakService.init(optionalAuth)
         .then(() => {
-            bootstrapApplication(AppComponent, options);
+            bootstrapApplication(AppComponent, {...options, providers: [provideZoneChangeDetection(), ...options.providers]});
         });
 }
