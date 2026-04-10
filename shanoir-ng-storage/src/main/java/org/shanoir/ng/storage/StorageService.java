@@ -37,6 +37,8 @@ public interface StorageService {
 
     public static final String SLASH = "/";
 
+    public static final String UNDERSCORE = "_";
+
     String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException;

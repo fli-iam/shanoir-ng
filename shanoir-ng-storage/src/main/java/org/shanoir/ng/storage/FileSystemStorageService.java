@@ -80,7 +80,8 @@ public class FileSystemStorageService implements StorageService {
         }
         String directory = STUDY + studyId
                 + SLASH + SUBJECT + subjectId + SLASH + SESSION + examinationId + SLASH + dataType;
-        return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
+        return store(baseDirDatasets, directory,
+                SUBJECT + subjectId + UNDERSCORE + fileName, inputStream, contentType, size);
     }
 
     @Override
