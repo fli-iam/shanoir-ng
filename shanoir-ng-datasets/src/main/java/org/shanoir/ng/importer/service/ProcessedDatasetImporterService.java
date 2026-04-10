@@ -219,6 +219,7 @@ public class ProcessedDatasetImporterService {
         final long size = processedDatasetFile.length();
         try (InputStream inputStream = new FileInputStream(processedDatasetFile)) {
             return storageService.storeProcessedData(
+                    job.getStudyId(),
                     job.getSubjectId(),
                     timestamp,
                     fileName,

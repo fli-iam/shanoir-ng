@@ -199,6 +199,7 @@ public class BidsImporterService {
         // Get examination
         Examination examination = examinationRepository.findById(importJob.getExaminationId()).get();
         datasetAcquisition.setExamination(examination);
+        Long subjectId = examination.getSubject() != null ? examination.getSubject().getId() : null;
 
         Set<Dataset> datasets = new HashSet<>();
         float progress = 0f;
@@ -232,7 +233,7 @@ public class BidsImporterService {
             } else {
                 // Create the dataset with informations from job
                 datasetToCreate = new BidsDataset();
-                datasetToCreate.setSubjectId(examination.getSubject() != null ? examination.getSubject().getId() : null);
+                datasetToCreate.setSubjectId(subjectId);
                 datasetToCreate.setCreationDate(LocalDate.now());
                 datasetToCreate.setDatasetAcquisition(datasetAcquisition);
 
@@ -270,8 +271,8 @@ public class BidsImporterService {
                 if (contentType == null) {
                     contentType = "application/octet-stream";
                 }
-                String path = storageService.storeBIDSData(
-                        importJob.getStudyId(), importJob.getSubjectName(), importJob.getExaminationId(),
+                String path = storageService.storeDatasetsData(
+                        importJob.getStudyId(), subjectId, importJob.getExaminationId(),
                         fileName, bidsDataType.getFolderName(),
                         is, contentType, importedFile.length());
                 DatasetFile dsFile = new DatasetFile();
