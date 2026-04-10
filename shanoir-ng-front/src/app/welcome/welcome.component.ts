@@ -62,7 +62,8 @@ export class WelcomeComponent implements OnInit {
     const script = this._renderer2.createElement('script');
     script.type = `application/ld+json`;
 
-    let datasetStr: string = "";
+    let datasetFullStr = '';
+    let datasetRefStr = '';
     const shanoirUrl: string = window.location.protocol + "//" + window.location.hostname;
 
     this.publicStudies?.forEach(study => {
@@ -80,25 +81,31 @@ export class WelcomeComponent implements OnInit {
 
       // datasets handling
       if (study != null) {
-        datasetStr += `
+        datasetRefStr += `{ "@id": "` + study.name + `" }`;
+
+        datasetFullStr += `
                     {
                         "@id": "` + study.name + `",
-                        "@type": "Dataset",
+                        "@type": ["schema:Dataset", "dcat:Dataset"],
                         "dct:conformsTo": "https://bioschemas.org/profiles/Dataset/0.3-RELEASE-2019_06_14",
-                        "url": "` + shanoirUrl + `/shanoir-ng/study/details/` + study.id + `",
-                        "identifier": "` + shanoirUrl + `/shanoir-ng/study/details/` + study.id + `",
-                        "license": "` + study.license + `",
-                        "name": "` + study.name + `",
-                        "description": "` + study.description + `",
-                        "keywords": [
+                        "schema:url": "` + shanoirUrl + `/shanoir-ng/study/details/` + study.id + `",
+                        "dcat:accessURL": "` + shanoirUrl + `/shanoir-ng/study/details/` + study.id + `",
+                        "dct:identifier": "` + shanoirUrl + `/shanoir-ng/study/details/` + study.id + `",
+                        "schema:license": "` + study.license + `",
+                        "schema:name": "` + study.name + `",
+                        "schema:description": "` + study.description + `",
+                        "schema:keywords": [
                             ` + keywords + `
                         ]
                     }`
       }
       if (study != this.publicStudies[this.publicStudies.length - 1]) {
-        datasetStr += ",";
+        datasetFullStr += ",";
+        datasetRefStr += ",";
       }
     })
+    // in case no public studies exist
+    const graphDatasets = datasetFullStr.length > 0 ? datasetFullStr + ',' : '';
 
     // schema.org DataCatalog + Datasets
     script.text = `{
@@ -142,15 +149,15 @@ export class WelcomeComponent implements OnInit {
       ],
       "dct:creator": [{ "@id": "https://www.francelifeimaging.fr" }],
       "dct:publisher": [{ "@id": "https://inria.fr" }],
-      "schema:dataset": [` + datasetStr + `],
-      "dcat:dataset": [` + datasetStr + `],
+      "schema:dataset": [` + datasetRefStr + `],
+      "dcat:dataset": [` + datasetRefStr + `],
       "dqv:hasQualityMeasurement": [
         { "@id": "` + shanoirUrl + `/shanoir-ng/users/users/count" },
         { "@id": "` + shanoirUrl + `/shanoir-ng/users/events/count" },
         { "@id": "` + shanoirUrl + `/shanoir-ng/datasets/datasets/overallStatistics" },
         { "@id": "` + shanoirUrl + `/shanoir-ng/studies/studies/public/data" }
       ]
-    },
+    },` + graphDatasets + `
     {
       "@id": "https://www.francelifeimaging.fr",
       "@type": "schema:Organization",
