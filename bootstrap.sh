@@ -43,7 +43,7 @@ wait_tcp_ready()
 	local container="$1"
 	local tcp_port="$2"
 
-	docker compose exec -T "$container" bash -c "
+	docker compose -f "$compose_file" exec -T "$container" bash -c "
 	(	set -e
 		while true; do 
 			if true < '/dev/tcp/localhost/$tcp_port' ; then
@@ -90,6 +90,14 @@ while [ $# -ne 0 ] ; do
 	shift
 done
 
+# When building locally, use docker-compose-dev.yml (which has build: directives).
+# Otherwise use the default docker-compose.yml (which pulls pre-built GHCR images).
+if [ -n "$build" ] ; then
+	compose_file=docker-compose-dev.yml
+else
+	compose_file=docker-compose.yml
+fi
+
 if [ -z "$clean$force" ] && [ -n "$deploy" ] ; then
 	die "you must provide at least --clean, --force or --no-deploy"
 fi
@@ -111,7 +119,7 @@ if [ -n "$build" ] ; then
 		-w /src "$DEV_IMG" sh -c 'cd shanoir-ng-parent  && git config --global --add safe.directory /src && mvn clean install -DskipTests'
 
 	# 3. build the docker images
-	docker compose -f docker-compose-dev.yml build
+	docker compose -f "$compose_file" build
 fi
 
 if [ -n "$deploy" ] ; then
@@ -122,7 +130,7 @@ if [ -n "$deploy" ] ; then
 		# full clean (--clean)
 		# -> destroy all external volumes
 		step "clean"
-		docker compose -f docker-compose-dev.yml down -v
+		docker compose -f "$compose_file" down -v
 	else
 		# overwrite (--force)
 		# -> just remove all existing containers
@@ -133,7 +141,7 @@ if [ -n "$deploy" ] ; then
 		# - 'docker compose logs' may display old logs if the container
 		#   is not destroyed
 		step "stop shanoir"
-		docker compose -f docker-compose-dev.yml down
+		docker compose -f "$compose_file" down
 	fi
 
 	#
@@ -142,23 +150,23 @@ if [ -n "$deploy" ] ; then
 
 	# 1. database
 	step "init: database"
-	docker compose -f docker-compose-dev.yml up -d database
+	docker compose -f "$compose_file" up -d database
 	wait_tcp_ready database 3306
 
 	# 2. keycloak-database + keycloak
 	if [ -n "$keycloak" ] ; then
 		step "init: keycloak-database"
-		docker compose -f docker-compose-dev.yml up -d keycloak-database
+		docker compose -f "$compose_file" up -d keycloak-database
 		wait_tcp_ready keycloak-database 3306
 		
 		step "init: keycloak"
-		docker compose -f docker-compose-dev.yml run --rm -e SHANOIR_MIGRATION=init keycloak
+		docker compose -f "$compose_file" run --rm -e SHANOIR_MIGRATION=init keycloak
 
 		step "start: keycloak"
-		docker compose -f docker-compose-dev.yml up -d keycloak
+		docker compose -f "$compose_file" up -d keycloak
 		docker-compose/common/oneshot --pgrp '\| *'				\
 				' INFO  \[io.quarkus\] .* Keycloak .* started in [0-9]*'	\
-				-- docker compose logs --no-color --follow keycloak >/dev/null
+				-- docker compose -f "$compose_file" logs --no-color --follow keycloak >/dev/null
 
 	fi
 
@@ -168,7 +176,7 @@ if [ -n "$deploy" ] ; then
 		for infra_ms_dcm4chee in ldap dcm4chee-database dcm4chee-arc
 		do
 			step "start: $infra_ms_dcm4chee infrastructure microservices dcm4chee"
-			docker compose -f docker-compose-dev.yml up -d "$infra_ms_dcm4chee"
+			docker compose -f "$compose_file" up -d "$infra_ms_dcm4chee"
 		done
 	fi
 	
@@ -177,7 +185,7 @@ if [ -n "$deploy" ] ; then
 	for infra_ms in rabbitmq solr
 	do
 		step "start: $infra_ms infrastructure microservice"
-		docker compose -f docker-compose-dev.yml up -d "$infra_ms"
+		docker compose -f "$compose_file" up -d "$infra_ms"
 	done
 	
 	# 5. Shanoir-NG microservices
@@ -185,13 +193,13 @@ if [ -n "$deploy" ] ; then
 	for ms in users studies datasets import preclinical nifti-conversion
 	do
 		step "init: $ms microservice"
-		docker compose -f docker-compose-dev.yml run --rm -e SHANOIR_MIGRATION=init "$ms"
+		docker compose -f "$compose_file" run --rm -e SHANOIR_MIGRATION=init "$ms"
 		step "start: $ms microservice"
-		docker compose -f docker-compose-dev.yml up -d "$ms"
+		docker compose -f "$compose_file" up -d "$ms"
 	done
 
 	# 6. nginx
 	step "start: nginx"
-	docker compose -f docker-compose-dev.yml up -d nginx
+	docker compose -f "$compose_file" up -d nginx
 fi
 
