@@ -60,7 +60,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 21.0.10
 
       - name: Set ShUp version from incremented tag
         run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
@@ -129,7 +129,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 21.0.10
 
       - name: Set ShUp version from incremented tag
         run: cd shanoir-uploader && mvn versions:set "-DnewVersion=${{ needs.setup-version.outputs.version_part }}"
@@ -158,6 +158,27 @@ jobs:
       - name: Copy default Java truststore into custom runtime
         run: |
           cp $Env:JAVA_HOME\lib\security\cacerts shanoir-uploader/target/custom-runtime/lib/security/cacerts
+
+      - name: Merge Windows truststore into custom runtime
+        run: |
+          $tempDir = "$Env:RUNNER_TEMP\win-certs"
+          New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
+
+          $certs = Get-ChildItem -Path Cert:\LocalMachine\Root
+          foreach ($cert in $certs) {
+          $certPath = "$tempDir\$($cert.Thumbprint).cer"
+          Export-Certificate -Cert $cert -FilePath $certPath -Type CERT | Out-Null
+          }
+
+          Get-ChildItem "$tempDir\*.cer" | ForEach-Object {
+          $alias = $_.BaseName.ToLower()
+          & "$Env:JAVA_HOME\bin\keytool" -import -noprompt `
+            -alias $alias `
+            -file $_.FullName `
+            -keystore "shanoir-uploader/target/custom-runtime/lib/security/cacerts" `
+            -storepass changeit 2>$null
+          }
+          Write-Host "Windows root CAs merged into cacerts"
 
 
       - name: Package .exe
@@ -198,7 +219,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 21.0.10
 
       - name: Set ShUp version from incremented tag
         run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}

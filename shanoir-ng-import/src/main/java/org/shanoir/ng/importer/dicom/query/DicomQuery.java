@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.importer.dicom.query;
 
+import org.shanoir.ng.utils.Utils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotNull;
@@ -171,8 +173,8 @@ public class DicomQuery {
 
     @Override
     public String toString() {
-        return "DicomQuery [patientname = " + patientName + ", patientID=" + patientID + ", patientBirthDate="
-                + patientBirthDate + ", studyDescription=" + studyDescription + ", studyDate=" + studyDate
+        return "DicomQuery [patientname = " + Utils.sha256(patientName)+ ", patientID=" + Utils.sha256(patientID) + ", patientBirthDate="
+                + Utils.sha256(patientBirthDate) + ", studyDescription=" + studyDescription + ", studyDate=" + studyDate
                 + ", modality=" + modality + ", studyRootQuery=" + studyRootQuery + ", studyFilter=" + studyFilter
                 + ", minStudyDateFilter=" + minStudyDateFilter + ", serieFilter=" + serieFilter + "]";
     }
