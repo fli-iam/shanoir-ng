@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
@@ -154,7 +155,7 @@ public class EegImporterService {
                             }
                             String path = storageService.storeDatasetsData(
                                     importJob.getStudyId(), importJob.getSubjectId(), importJob.getExaminationId(),
-                                    "eeg", file.getName(),
+                                    BidsDataType.EEG.toString(), file.getName(),
                                     is, contentType, file.length());
                             // Create datasetExpression => Files
                             if (path != null) {
