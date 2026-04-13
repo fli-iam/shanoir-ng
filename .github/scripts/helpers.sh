@@ -92,7 +92,7 @@ wait_for_url() {
 	while [ "$elapsed" -lt "$timeout" ]; do
 		local code
 		code="$(curl -sk -o /dev/null -w '%{http_code}' --max-time 5 "$url" 2>/dev/null || echo "000")"
-		if [ "$code" -ge 200 ] 2>/dev/null && [ "$code" -lt 500 ] 2>/dev/null; then
+		if [ "$code" -ge 200 ] 2>/dev/null && [ "$code" -lt 400 ] 2>/dev/null; then
 			echo "URL $url is ready (status $code, after ${elapsed}s)"
 			return 0
 		fi
@@ -174,10 +174,10 @@ smoke_tests() {
 	local nginx_status
 	nginx_status="$(curl -sk -o /dev/null -w '%{http_code}' \
 		https://shanoir-ng-nginx/ 2>/dev/null || echo "000")"
-	if [ "$nginx_status" -ge 200 ] 2>/dev/null && [ "$nginx_status" -lt 500 ] 2>/dev/null; then
+	if [ "$nginx_status" = "200" ] || [ "$nginx_status" = "302" ]; then
 		echo "[PASS] Nginx is responding on HTTPS (HTTP $nginx_status)"
 	else
-		echo "[FAIL] Nginx HTTPS check returned HTTP $nginx_status"
+		echo "[FAIL] Nginx HTTPS check returned HTTP $nginx_status (expected 200 or 302)"
 		failures=$((failures + 1))
 	fi
 
@@ -198,10 +198,10 @@ smoke_tests() {
 	local users_proxy_status
 	users_proxy_status="$(curl -sk -o /dev/null -w '%{http_code}' \
 		https://shanoir-ng-nginx/shanoir-ng/users/swagger-ui/index.html 2>/dev/null || echo "000")"
-	if [ "$users_proxy_status" -ge 200 ] 2>/dev/null && [ "$users_proxy_status" -lt 500 ] 2>/dev/null; then
+	if [ "$users_proxy_status" = "200" ]; then
 		echo "[PASS] Users microservice accessible through nginx (HTTP $users_proxy_status)"
 	else
-		echo "[FAIL] Users microservice via nginx returned HTTP $users_proxy_status"
+		echo "[FAIL] Users microservice via nginx returned HTTP $users_proxy_status (expected 200)"
 		failures=$((failures + 1))
 	fi
 
