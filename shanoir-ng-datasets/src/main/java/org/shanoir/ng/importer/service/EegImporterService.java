@@ -155,7 +155,7 @@ public class EegImporterService {
                             }
                             String path = storageService.storeDatasetsData(
                                     importJob.getStudyId(), importJob.getSubjectId(), importJob.getExaminationId(),
-                                    BidsDataType.EEG.toString(), file.getName(),
+                                    BidsDataType.EEG.name().toString(), file.getName(),
                                     is, contentType, file.length());
                             // Create datasetExpression => Files
                             if (path != null) {
