@@ -6,6 +6,7 @@ set -e
 
 require  SHANOIR_ADMIN_EMAIL
 require  SHANOIR_ADMIN_NAME
+require  SHANOIR_KEYCLOAK_URL
 optional SHANOIR_PREFIX
 optional SHANOIR_USERS_HOST
 require  SHANOIR_SMTP_HOST
@@ -50,13 +51,8 @@ export KC_PROXY_HEADERS="${KC_PROXY_HEADERS:-xforwarded}"
 export KC_HTTP_ENABLED="${KC_HTTP_ENABLED:-true}"
 export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
 
-# we disable strict hostname checking by default because:
-# - the reverse proxy in production implements this check
-# - since the 'nginx' container does not expose the master realm to the
-#   outside, disabling strict checking allows us to reach the admin console
-#   at http://localhost:8080/auth/admin/
-export KC_HOSTNAME_STRICT=false
-export KC_HOSTNAME_STRICT_BACKCHANNEL=false
+export KC_HOSTNAME="$SHANOIR_KEYCLOAK_URL"
+export KC_HOSTNAME_BACKCHANNEL_DYNAMIC="${KC_HOSTNAME_BACKCHANNEL_DYNAMIC:-true}"
 
 export KC_DB_URL=jdbc:mysql://"${KC_DB_URL_HOST:-${SHANOIR_PREFIX}keycloak-database}":"${KC_DB_URL_PORT:-3306}"/"${KC_DB_URL_DATABASE:-keycloak}"
 export KC_DB_USERNAME="${DB_USER:-keycloak}"
