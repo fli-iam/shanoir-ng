@@ -85,7 +85,6 @@ public class BIDSServiceImpl implements BIDSService {
 
     private static final String README_FILE = "README";
 
-
     public ResponseEntity<ByteArrayResource> generateParticipantsTsv(final Long studyId) throws IOException {
         List<Subject> subjs = getSubjectsForStudy(studyId);
         StringBuilder data = participantsSerializer(subjs);
@@ -159,7 +158,6 @@ public class BIDSServiceImpl implements BIDSService {
     }
 
     public File getBidsFolderpath(final Long studyId, String studyName) {
-        studyName = this.formatLabel(studyName);
         String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId;
         return new File(tmpFilePath);
     }
