@@ -220,7 +220,19 @@ public class BidsImporterService {
             event.setProgress(progress);
             eventService.publishEvent(event);
 
-            String name = importedFile.getName().replaceAll("\\.", "_");
+            String name = importedFile.getName();
+            name = name
+                    .replaceAll("\\.", "_")
+                    .replaceFirst("sub-[^_]+", "sub-" + subjectId)
+                    .replaceFirst(
+                            "(sub-[^_]+_)ses-[^_]+_",
+                            "$1ses-" + examination.getId() + "_"
+                    );
+            if (!name.contains("ses-")) {
+                name = name.replaceFirst(
+                        "(sub-[^_]+_)",
+                        "$1ses-" + examination.getId() + "_");
+            }
 
             // Parse name to get acquisition / session / run / task
 
