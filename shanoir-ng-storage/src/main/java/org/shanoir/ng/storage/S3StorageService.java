@@ -205,7 +205,7 @@ public class S3StorageService implements StorageService {
                 + SLASH + SUBJECT + subjectId
                 + SLASH + SESSION + examinationId
                 + SLASH + dataType;
-        fileName = SUBJECT + subjectId + UNDERSCORE + fileName;
+        fileName = SUBJECT + subjectId + UNDERSCORE + SESSION + examinationId + UNDERSCORE + fileName;
         String key = directory + SLASH + fileName;
         try {
             if (size > MULTIPART_THRESHOLD) {

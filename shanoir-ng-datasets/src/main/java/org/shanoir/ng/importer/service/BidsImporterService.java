@@ -258,10 +258,10 @@ public class BidsImporterService {
 
             List<DatasetFile> files = expression.getDatasetFiles();
 
-            // remove old subject name (in case) and session name (in case) from file names
+            // remove old subject label and old session label from file name
             String fileName = importedFile.getName()
-                    .replaceFirst("sub-[^_]+_", "sub-" + importJob.getSubjectName() + "_")
-                    .replaceFirst("ses-[^_]+_", "ses-" + Long.toString(importJob.getExaminationId()) + "_");
+                    .replaceFirst("sub-[^_]+_", "")
+                    .replaceFirst("ses-[^_]+_", "");
 
             try (InputStream is = Files.newInputStream(importedFile.toPath())) {
                 String contentType = Files.probeContentType(importedFile.toPath());
