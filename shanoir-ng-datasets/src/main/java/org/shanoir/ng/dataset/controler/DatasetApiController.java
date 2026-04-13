@@ -20,7 +20,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -71,7 +70,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ByteArrayResource;
@@ -106,14 +104,7 @@ public class DatasetApiController implements DatasetApi {
 
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
-    private static final String SUB_PREFIX = "sub-";
-
-    private static final String SES_PREFIX = "ses-";
-
     private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
-
-    @Value("${storage.file-system.datasets-data}")
-    private String niftiStorageDir;
 
     @Autowired
     private DatasetMapper datasetMapper;
@@ -503,29 +494,6 @@ public class DatasetApiController implements DatasetApi {
             @Parameter(description = "Input arguments", required = true) @Valid @RequestBody DatasetDownloadDataInput input) {
         List<DatasetDownloadData> downloadDataList = datasetService.getDownloadDataByAcquisitionAndExaminationIds(input.getAcquisitionIds(), input.getExaminationIds());
         return new ResponseEntity<>(downloadDataList, HttpStatus.OK);
-    }
-
-
-    /**
-     * This method receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
-     * @param urls
-     * @param workFolder
-     * @throws IOException
-     * @throws MessagingException
-     */
-    public void copyFilesForBIDSExport(final List<URL> urls, final File workFolder, final String subjectName,
-            final String sesId, final String modalityLabel) throws IOException {
-        for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-            URL url =  iterator.next();
-            File srcFile = new File(url.getPath());
-            String destFilePath = srcFile.getPath().substring(niftiStorageDir.length() + 1, srcFile.getPath().lastIndexOf('/'));
-            File destFolder = new File(workFolder.getAbsolutePath() + File.separator + destFilePath);
-            destFolder.mkdirs();
-            String extensionType = srcFile.getPath().substring(srcFile.getPath().lastIndexOf(".") + 1);
-            String destFileNameBIDS = SUB_PREFIX + subjectName + "_" + SES_PREFIX + sesId + "_" + modalityLabel + "." + extensionType;
-            File destFile = new File(destFolder.getAbsolutePath() + File.separator + destFileNameBIDS);
-            Files.copy(srcFile.toPath(), destFile.toPath());
-        }
     }
 
     /**
