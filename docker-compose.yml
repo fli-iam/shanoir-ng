@@ -88,8 +88,9 @@ services:
     image: "ghcr.io/fli-iam/shanoir-ng/database:NG_v2.10.0"
     command: --max_allowed_packet 20000000
     environment:
-      - MARIADB_ROOT_PASSWORD=password
-      - MARIADB_AUTO_UPGRADE=1
+      - SHANOIR_MIGRATION
+    env_file:
+      - ./docker-compose/database/variables.env
     ulimits:
       nofile:
         soft: 262144
