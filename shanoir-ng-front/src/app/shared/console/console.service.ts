@@ -14,7 +14,7 @@
 
 import { formatDate } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { Observable, Observer } from 'rxjs';
+import { Observable, Observer, Subject } from 'rxjs';
 
 import { MsgBoxService } from '../msg-box/msg-box.service';
 
@@ -34,8 +34,8 @@ export class Message {
 export class ConsoleService {
 
     messages: Message[] = [];
-    messageObserver: Observer<Message>;
-    messageObservable: Observable<Message> = new Observable(observer => this.messageObserver = observer);
+    private messageSubject: Subject<Message> = new Subject<Message>();
+    messageObservable: Observable<Message> = this.messageSubject.asObservable();
     open: boolean = false;
     deployed: boolean = false;
     readonly MAX: number = 200;
@@ -46,7 +46,7 @@ export class ConsoleService {
         const dateStr: string = formatDate(new Date(), 'HH:mm', 'en');
         const message: Message = new Message(type, dateStr + ' - ' + txt, details); 
         this.messages.unshift(message);
-        this.messageObserver.next(message);
+        this.messageSubject.next(message);
         if (this.messages.length > this.MAX) {
             this.messages.splice(this.MAX);
         }
