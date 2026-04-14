@@ -37,6 +37,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.dto.CopyData;
+import org.shanoir.ng.study.dto.FileEntryDTO;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
@@ -602,4 +603,28 @@ public class StudyApiController implements StudyApi {
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
         }
     }
+
+    @Override
+    public ResponseEntity<List<FileEntryDTO>> getAllFiles() {
+        List<Study> studies = studyService.findAll();
+        List<FileEntryDTO> entries = new ArrayList<>();
+        for (Study study : studies) {
+            Long studyId = study.getId();
+            if (study.getProtocolFilePaths() != null) {
+                for (String path : study.getProtocolFilePaths()) {
+                    entries.add(new FileEntryDTO(studyId, path, "PROTOCOL"));
+                }
+            }
+            if (study.getDataUserAgreementPaths() != null) {
+                for (String path : study.getDataUserAgreementPaths()) {
+                    entries.add(new FileEntryDTO(studyId, path, "DUA"));
+                }
+            }
+        }
+        if (entries.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(entries, HttpStatus.OK);
+    }
+
 }
