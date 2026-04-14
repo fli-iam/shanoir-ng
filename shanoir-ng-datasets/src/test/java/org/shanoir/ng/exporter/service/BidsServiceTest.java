@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -43,6 +44,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -73,6 +75,9 @@ public class BidsServiceTest {
     @Mock
     private DatasetSecurityService datasetSecurityService;
 
+    @Mock
+    private StudyRepository studyRepository;
+
     @InjectMocks
     @Spy
     private BIDSServiceImpl service = new BIDSServiceImpl();
@@ -82,8 +87,6 @@ public class BidsServiceTest {
 
     @Mock
     private RabbitTemplate rabbitTemplate;
-
-    private String studyName = "STUDY";
 
     private Examination exam = ModelsUtil.createExamination();
 
@@ -147,15 +150,16 @@ public class BidsServiceTest {
 
         // Mock on examination service to get the list of subject
         given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
+        given(studyRepository.findById(exam.getStudyId())).willReturn(Optional.of(study));
 
         // WHEN we export the data
         service.exportAsBids(exam.getStudyId());
 
         // THEN the bids folder is generated with study - subject - exam - data
-        File studyFile = new File(tempFolderPath + "study-" + exam.getStudyId() + "" + studyName);
+        File studyFile = new File(tempFolderPath + "study-" + exam.getStudyId());
         assertTrue(studyFile.exists());
 
-        File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-1" + subject.getName());
+        File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-1");
         assertTrue(subjectFile.exists());
 
         File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam.getId());
@@ -171,4 +175,5 @@ public class BidsServiceTest {
             FileUtils.deleteQuietly(tempFile);
         }
     }
+
 }
