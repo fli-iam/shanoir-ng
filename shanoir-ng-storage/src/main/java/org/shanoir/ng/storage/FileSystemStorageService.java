@@ -60,6 +60,17 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public String getDirectoryStudyData(Long studyId)
+            throws StorageException {
+        if (baseDirStudies.equals(UNUSED)) {
+            throw new StorageException("Missing studies directory configuration.", null);
+        }
+        String directory = STUDY + studyId;
+        Path dirPath = Paths.get(baseDirStudies, directory);
+        return dirPath.toString() + SLASH;
+    }
+
+    @Override
     public String storeExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {

@@ -605,18 +605,21 @@ public class StudyApiController implements StudyApi {
     }
 
     @Override
-    public ResponseEntity<List<FileEntryDTO>> getAllFiles() {
+    public ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException {
         List<Study> studies = studyService.findAll();
         List<FileEntryDTO> entries = new ArrayList<>();
         for (Study study : studies) {
             Long studyId = study.getId();
+            String directory = storageService.getDirectoryStudyData(studyId);
             if (study.getProtocolFilePaths() != null) {
                 for (String path : study.getProtocolFilePaths()) {
+                    path = directory + path;
                     entries.add(new FileEntryDTO(studyId, path, "PROTOCOL"));
                 }
             }
             if (study.getDataUserAgreementPaths() != null) {
                 for (String path : study.getDataUserAgreementPaths()) {
+                    path = directory + path;
                     entries.add(new FileEntryDTO(studyId, path, "DUA"));
                 }
             }

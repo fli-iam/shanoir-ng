@@ -75,6 +75,8 @@ public interface StorageService {
 
     Resource loadPathologyModelData(Long pathologyModelId, String fileName) throws StorageException;
 
+    String getDirectoryStudyData(Long studyId) throws StorageException;
+
     long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException;
 
     String getPublicLocationStudies(String directory, String fileName) throws StorageException;

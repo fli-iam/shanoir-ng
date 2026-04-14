@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.study.dto.CopyData;
 import org.shanoir.ng.study.dto.FileEntryDTO;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
@@ -424,6 +425,6 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/files", produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<List<FileEntryDTO>> getAllFiles();
+    ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException;
 
 }

@@ -395,6 +395,16 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
+    public String getDirectoryStudyData(Long studyId)
+            throws StorageException {
+        if (studiesBucket.equals(UNUSED)) {
+            throw new StorageException("Missing studies bucket configuration.", null);
+        }
+        String directory = studiesPrefix + STUDY + studyId;
+        return directory + SLASH;
+    }
+
+    @Override
     public long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException {
         String key = datasetsPrefix + EXAMINATION + examinationId + SLASH + fileName;
         try {
