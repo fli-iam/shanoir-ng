@@ -39,6 +39,8 @@ public interface StorageService {
 
     public static final String UNDERSCORE = "_";
 
+    boolean existsStudyData(Long studyId, String fileName) throws StorageException;
+
     String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException;

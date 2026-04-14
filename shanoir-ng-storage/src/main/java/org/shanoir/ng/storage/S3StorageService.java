@@ -145,6 +145,16 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
+    public boolean existsStudyData(Long studyId, String fileName) throws StorageException {
+        String key = studiesPrefix + STUDY + studyId + SLASH + fileName;
+        try {
+            return s3Template.objectExists(studiesBucket, key);
+        } catch (Exception e) {
+            throw new StorageException("S3 existence check failed for: " + fileName, e);
+        }
+    }
+
+    @Override
     public String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {

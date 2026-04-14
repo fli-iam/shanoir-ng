@@ -17,13 +17,18 @@ package org.shanoir.ng.study.dto;
 public class FileEntryDTO {
 
     private Long studyId;
+
     private String fileName;
+
     private String fileType;
 
-    public FileEntryDTO(Long studyId, String fileName, String fileType) {
+    private final boolean exists;
+
+    public FileEntryDTO(Long studyId, String fileName, String fileType, boolean exists) {
         this.studyId = studyId;
         this.fileName = fileName;
         this.fileType = fileType;
+        this.exists = exists;
     }
 
     public Long getStudyId() {

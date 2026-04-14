@@ -613,14 +613,14 @@ public class StudyApiController implements StudyApi {
             String directory = storageService.getDirectoryStudyData(studyId);
             if (study.getProtocolFilePaths() != null) {
                 for (String path : study.getProtocolFilePaths()) {
-                    path = directory + path;
-                    entries.add(new FileEntryDTO(studyId, path, "PROTOCOL"));
+                    boolean exists = storageService.existsStudyData(studyId, path);
+                    entries.add(new FileEntryDTO(studyId, directory + path, "PROTOCOL", exists));
                 }
             }
             if (study.getDataUserAgreementPaths() != null) {
                 for (String path : study.getDataUserAgreementPaths()) {
-                    path = directory + path;
-                    entries.add(new FileEntryDTO(studyId, path, "DUA"));
+                    boolean exists = storageService.existsStudyData(studyId, path);
+                    entries.add(new FileEntryDTO(studyId, directory + path, "DUA", exists));
                 }
             }
         }

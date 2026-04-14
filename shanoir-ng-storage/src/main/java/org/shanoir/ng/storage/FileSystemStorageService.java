@@ -49,6 +49,13 @@ public class FileSystemStorageService implements StorageService {
     private String baseDirPreclinical;
 
     @Override
+    public boolean existsStudyData(Long studyId, String fileName) throws StorageException {
+        String directory = STUDY + studyId;
+        Path filePath = Paths.get(baseDirStudies, directory, fileName);
+        return Files.exists(filePath);
+    }
+
+    @Override
     public String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
