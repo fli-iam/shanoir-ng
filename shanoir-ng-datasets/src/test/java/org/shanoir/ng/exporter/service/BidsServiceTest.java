@@ -159,7 +159,7 @@ public class BidsServiceTest {
         File studyFile = new File(tempFolderPath + "study-" + exam.getStudyId());
         assertTrue(studyFile.exists());
 
-        File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId());
+        File subjectFile = new File(studyFile.getAbsolutePath() + "/sub-" + subject.getId() + subject.getName());
         assertTrue(subjectFile.exists());
 
         File examFile = new File(subjectFile.getAbsolutePath() + "/ses-" + exam.getId());
