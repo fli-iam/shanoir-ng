@@ -17,7 +17,7 @@ set -euo pipefail
 KC_BASE="${KC_BASE:-http://localhost:8080/auth}"
 REALM="shanoir-ng"
 NEW_USER="${SHANOIR_TEST_USER:-shanoir-admin}"
-NEW_PASS="${SHANOIR_TEST_PASSWORD:-&a1A&a1A}"
+NEW_PASS="${SHANOIR_TEST_PASSWORD:-Ch4ng3M3!@2025}"
 USER_ID_ATTR="${SHANOIR_TEST_USER_ID:-1}"
 
 # Read keycloak admin credentials from .env for any that are not already set.
@@ -31,6 +31,18 @@ KC_ADMIN_USER="${SHANOIR_KEYCLOAK_USER:?SHANOIR_KEYCLOAK_USER is required}"
 KC_ADMIN_PASS="${SHANOIR_KEYCLOAK_PASSWORD:?SHANOIR_KEYCLOAK_PASSWORD is required}"
 
 die() { echo "FATAL: $*" >&2; exit 1; }
+
+# curl_api URL [extra curl args...]
+# Makes a curl call, captures body in $RESP_BODY and HTTP code in $RESP_CODE.
+RESP_BODY="" RESP_CODE=""
+curl_api() {
+    local url="$1"; shift
+    local tmp; tmp=$(mktemp)
+    RESP_CODE=$(curl -sS -o "$tmp" -w "%{http_code}" "$url" "$@") || {
+        rm -f "$tmp"; die "curl failed for $url"
+    }
+    RESP_BODY=$(cat "$tmp"); rm -f "$tmp"
+}
 
 wait_keycloak_ready() {
     local timeout="${1:-120}"
@@ -65,6 +77,15 @@ wait_keycloak_ready
 echo "Obtaining admin token..."
 TOKEN=$(get_token)
 
+if [ "${CI:-}" = "true" ]; then
+    echo "Disabling SSL requirement for realm '${REALM}' (CI only)..."
+    curl -sf -X PUT \
+        "${KC_BASE}/admin/realms/${REALM}" \
+        -H "Authorization: Bearer ${TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d '{"sslRequired":"NONE"}' || die "failed to disable SSL requirement"
+fi
+
 echo "Creating user '${NEW_USER}' in realm '${REALM}'..."
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "${KC_BASE}/admin/realms/${REALM}/users" \
@@ -76,6 +97,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
         \"enabled\": true,
         \"firstName\": \"Shanoir\",
         \"lastName\": \"Admin\",
+        \"requiredActions\": [],
         \"attributes\": {
             \"userId\": [\"${USER_ID_ATTR}\"]
         }
@@ -95,14 +117,16 @@ USER_UUID=$(curl -sf "${KC_BASE}/admin/realms/${REALM}/users?username=${NEW_USER
 echo "  -> ${USER_UUID}"
 
 echo "Setting permanent password..."
-curl -sf -X PUT "${KC_BASE}/admin/realms/${REALM}/users/${USER_UUID}/reset-password" \
+PASS_BODY=$(jq -nc --arg pass "$NEW_PASS" '{"type":"password","value":$pass,"temporary":false}')
+curl_api "${KC_BASE}/admin/realms/${REALM}/users/${USER_UUID}/reset-password" \
+    -X PUT \
     -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" \
-    -d "{
-        \"type\": \"password\",
-        \"value\": \"${NEW_PASS}\",
-        \"temporary\": false
-    }" || die "failed to set password"
+    -d "$PASS_BODY"
+case "$RESP_CODE" in
+    204) echo "Password set." ;;
+    *)   die "failed to set password (HTTP ${RESP_CODE}): ${RESP_BODY}" ;;
+esac
 
 echo "Assigning ROLE_ADMIN..."
 ROLE_JSON=$(curl -sf "${KC_BASE}/admin/realms/${REALM}/roles/ROLE_ADMIN" \
@@ -118,12 +142,17 @@ curl -sf -X POST \
 echo "Keycloak user '${NEW_USER}' ready with ROLE_ADMIN."
 
 echo "Verifying login for '${NEW_USER}'..."
-USER_TOKEN=$(curl -sf -X POST "${KC_BASE}/realms/${REALM}/protocol/openid-connect/token" \
+curl_api "${KC_BASE}/realms/${REALM}/protocol/openid-connect/token" \
+    -X POST \
     --data-urlencode "client_id=shanoir-swagger" \
     --data-urlencode "username=${NEW_USER}" \
     --data-urlencode "password=${NEW_PASS}" \
-    --data-urlencode "grant_type=password" | jq -r '.access_token') \
-    || die "login verification failed for '${NEW_USER}'"
+    --data-urlencode "grant_type=password"
+case "$RESP_CODE" in
+    200) ;;
+    *)   die "login verification returned HTTP ${RESP_CODE}: ${RESP_BODY}" ;;
+esac
+USER_TOKEN=$(echo "$RESP_BODY" | jq -r '.access_token')
 [ "$USER_TOKEN" != "null" ] && [ -n "$USER_TOKEN" ] \
     || die "login returned null/empty token for '${NEW_USER}'"
 echo "Login verified."
