@@ -173,7 +173,7 @@ public class DicomQuery {
 
     @Override
     public String toString() {
-        return "DicomQuery [patientname = " + Utils.sha256(patientName)+ ", patientID=" + Utils.sha256(patientID) + ", patientBirthDate="
+        return "DicomQuery [patientname = " + Utils.sha256(patientName) + ", patientID=" + Utils.sha256(patientID) + ", patientBirthDate="
                 + Utils.sha256(patientBirthDate) + ", studyDescription=" + studyDescription + ", studyDate=" + studyDate
                 + ", modality=" + modality + ", studyRootQuery=" + studyRootQuery + ", studyFilter=" + studyFilter
                 + ", minStudyDateFilter=" + minStudyDateFilter + ", serieFilter=" + serieFilter + "]";
