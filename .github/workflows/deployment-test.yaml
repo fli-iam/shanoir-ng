@@ -36,6 +36,9 @@ jobs:
     permissions:
       contents: read
 
+    env:
+      COMPOSE_FILE: "docker-compose.yml:docker-compose.ci.yml"
+
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -45,9 +48,6 @@ jobs:
           sudo sh -c 'echo "127.0.0.1 shanoir-ng-nginx viewer" >> /etc/hosts'
 
       - name: Build database-migrations image
-        # This image is not published to GHCR but is required by all
-        # microservices. Build it from the Dockerfile and tag it with the
-        # name expected by docker-compose.yml.
         run: |
           docker build \
             -f docker-compose/Dockerfile \
@@ -56,18 +56,34 @@ jobs:
             docker-compose
 
       - name: Bootstrap installation
-        # VIP_URL_HOST override: the v2.9.3 images have a broken regex that
-        # rejects hyphens in hostnames. VIP is unused in CI so we use localhost.
-        env:
-          VIP_URL_HOST: localhost
+        run: bash ./bootstrap.sh --clean --no-build --no-dcm4chee
+
+      - name: Debug container state
+        if: failure()
         run: |
-          bash ./bootstrap.sh --clean --no-build --no-dcm4chee
+          echo "--- Container statuses ---"
+          docker compose ps --all
+          echo ""
+          echo "--- users container config (non-secret) ---"
+          docker exec users sh -c 'echo "SMTP_HOST=$SHANOIR_SMTP_HOST SMTP_PORT=$SHANOIR_SMTP_PORT MIGRATION=$SHANOIR_MIGRATION LOG_LEVEL=$SHANOIR_CONSOLE_LOG_LEVEL"' 2>/dev/null || echo "(exec failed)"
+          echo ""
+          echo "--- users container logs (last 50 lines) ---"
+          docker logs --tail=50 users 2>&1 || echo "(no logs)"
+          echo ""
+          echo "--- users container inspect (State) ---"
+          docker inspect --format='Status={{.State.Status}} Running={{.State.Running}} OOMKilled={{.State.OOMKilled}} ExitCode={{.State.ExitCode}} Pid={{.State.Pid}}' users 2>/dev/null || echo "(inspect failed)"
+          echo ""
+          echo "--- system memory ---"
+          free -h
+          echo ""
+          echo "--- docker stats (no-stream) ---"
+          docker stats --no-stream --format "table {{.Name}}\t{{.MemUsage}}\t{{.CPUPerc}}" 2>/dev/null | head -20
 
       - name: Wait for microservices
         run: |
-          bash .github/scripts/helpers.sh wait_for_log keycloak 'Keycloak .* started in' 180
+          bash .github/scripts/helpers.sh wait_for_log keycloak 'Keycloak .* started in' 300
           for ms in users studies datasets import preclinical; do
-            bash .github/scripts/helpers.sh wait_for_log "$ms" 'Started .* in' 180
+            bash .github/scripts/helpers.sh wait_for_log "$ms" 'Started .* in' 300
           done
           bash .github/scripts/helpers.sh wait_for_url https://shanoir-ng-nginx/ 120
 
@@ -86,6 +102,7 @@ jobs:
 
       - name: Upload logs on failure
         if: failure()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: deployment-logs
