@@ -149,7 +149,7 @@ public class BidsServiceTest {
         given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));
 
         // WHEN we export the data
-        service.exportAsBids(exam.getStudyId(), studyName);
+        service.exportAsBids(exam.getStudyId());
 
         // THEN the bids folder is generated with study - subject - exam - data
         File studyFile = new File(tempFolderPath + "study-" + exam.getStudyId() + "" + studyName);

@@ -180,6 +180,7 @@ public class BIDSServiceImpl implements BIDSService {
 
     private String ageCalculation(Subject subject) {
         java.time.LocalDate bd = subject.getBirthDate();
+        if (bd == null) return "unknown";
         LocalDate birthDate = new LocalDate(bd.getYear(), bd.getMonthValue(), bd.getDayOfMonth());
         LocalDate now = new LocalDate();
         Years age = Years.yearsBetween(birthDate, now);

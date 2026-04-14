@@ -164,7 +164,7 @@ public class RabbitMQDatasetsService {
         try {
 
             Study updated = objectMapper.readValue(studyAsString, Study.class);
-            bidsService.deleteBidsFolder(updated.getId(), null);
+            bidsService.deleteBidsFolder(updated.getId());
             Study current = this.receiveAndUpdateIdNameEntity(studyAsString, Study.class, studyRepository);
             List<String> errors = studyService.validate(updated, current);
             if (!errors.isEmpty()) {
@@ -216,7 +216,7 @@ public class RabbitMQDatasetsService {
             studyIds.add(exam.getStudyId());
         }
         for (Study stud : studyRepository.findAllById(studyIds)) {
-            bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+            bidsService.deleteBidsFolder(stud.getId());
         }
         // Update solr references
         List<Long> subjectIdList = new ArrayList<Long>();
@@ -255,7 +255,7 @@ public class RabbitMQDatasetsService {
         }
         // Update BIDS for all affected studies
         for (Study stud : studyRepository.findAllById(allStudyIds)) {
-            bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+            bidsService.deleteBidsFolder(stud.getId());
         }
         // Update Solr references in batch
         try {
@@ -346,7 +346,7 @@ public class RabbitMQDatasetsService {
 
             // Update BIDS folder
             for (Study stud : studyRepository.findAllById(studyIds)) {
-                bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+                bidsService.deleteBidsFolder(stud.getId());
             }
 
             // Delete subject from datasets database

@@ -83,14 +83,14 @@ public class BidsApiController implements BidsApi {
     public ResponseEntity<Void> generateBIDSByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws IOException {
-        bidsService.exportAsBids(studyId, studyName);
+        bidsService.exportAsBids(studyId);
         return ResponseEntity.ok().build();
     }
 
     public ResponseEntity<BidsElement> refreshBIDSByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
-        this.bidsService.deleteBidsFolder(studyId, studyName);
+        this.bidsService.deleteBidsFolder(studyId);
         return this.getBIDSStructureByStudyId(studyId);
     }
 
@@ -163,13 +163,11 @@ public class BidsApiController implements BidsApi {
     public ResponseEntity<BidsElement> getBIDSStructureByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException, IOException {
-
         BidsElement studyBidsElement = new BidsFolder("Error while retrieving the study bids structure, please reload the page");
         Study study = studyRepo.findById(studyId).orElse(null);
         if (study != null) {
-            studyBidsElement = bidsDeserializer.deserialize(bidsService.exportAsBids(studyId, study.getName()));
+            studyBidsElement = bidsDeserializer.deserialize(bidsService.exportAsBids(studyId));
         }
-
         return new ResponseEntity<>(studyBidsElement, HttpStatus.OK);
     }
 

@@ -28,7 +28,7 @@ import java.io.IOException;
  */
 public interface BIDSService {
 
-    File getBidsFolderpath(Long studyId, String studyName);
+    File getBidsFolderPath(Long studyId);
 
     /**
      * Creates a full BIDS folder with all the data
@@ -36,13 +36,13 @@ public interface BIDSService {
      * @param studyName the study name for which we create the BIDS folder
      * @return the folder File named [study_id]_[study_name]
      */
-    public File exportAsBids(Long studyId, String studyName) throws IOException;
+    public File exportAsBids(Long studyId) throws IOException;
 
     /**
      * Deletes the folder of a given study to update / delete
      * @param studyId the given study ID
      * @param studyName the given study name
      */
-    void deleteBidsFolder(Long studyId, String studyName);
+    void deleteBidsFolder(Long studyId);
 
 }

@@ -77,7 +77,7 @@ public class BidsApiControllerTest {
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_GENERATE)).andExpect(status().isOk());
 
         // THEN the service is called
-        Mockito.verify(bidsService).exportAsBids(1L, "Name");
+        Mockito.verify(bidsService).exportAsBids(1L);
     }
 
     @Test

@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -162,31 +161,25 @@ public class BIDSServiceImpl implements BIDSService {
     @RabbitListener(queues = RabbitMQConfiguration.RELOAD_BIDS)
     public void deleteBidsForStudy(String studyId) {
         Study studyDeleted = studyRepo.findById(Long.valueOf(studyId)).orElse(null);
-        this.deleteBidsFolder(studyDeleted.getId(), studyDeleted.getName());
+        this.deleteBidsFolder(studyDeleted.getId());
     }
 
     @Override
-    public void deleteBidsFolder(Long studyId, String studyName) {
+    public void deleteBidsFolder(Long studyId) {
         try {
-            if (studyName == null) {
-                Optional<Study> study = studyRepo.findById(studyId);
-                if (!study.isEmpty())
-                    studyName = study.get().getName();
-            }
             // Try to delete the BIDS folder recursively if possible
-            File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName);
+            File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId);
             if (bidsDir.exists()) {
                 FileUtils.deleteDirectory(bidsDir);
             }
         } catch (Exception e) {
-            LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}, {}", studyId, studyName, e);
+            LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", studyId, e);
         }
     }
 
     @Override
-    public File getBidsFolderpath(final Long studyId, String studyName) {
-        studyName = this.formatLabel(studyName);
-        String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName;
+    public File getBidsFolderPath(final Long studyId) {
+        String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId;
         return new File(tmpFilePath);
     }
 
@@ -198,14 +191,16 @@ public class BIDSServiceImpl implements BIDSService {
      * @throws IOException
      */
     @Override
-    public File exportAsBids(final Long studyId, String studyName) throws IOException {
+    public File exportAsBids(final Long studyId) throws IOException {
         // Get folder
-        File workFolder = getBidsFolderpath(studyId, studyName);
+        File workFolder = getBidsFolderPath(studyId);
         if (workFolder.exists()) {
             // If the file already exists, just return it
             return workFolder;
         }
 
+        Study study = studyRepo.findById(studyId).orElseThrow();
+        String studyName = study.getName();
         // Otherwise, create it from scratch
         File baseDir = createBaseBidsFolder(workFolder, studyName);
 
@@ -539,9 +534,6 @@ public class BIDSServiceImpl implements BIDSService {
     }
 
     private File createSpecificDataFolder(Dataset dataset, File workDir, File dataFolder, String subjectName, String studyName) throws IOException {
-
-
-
         // Create specific files (EEG, MS, MEG, etc..)
         if (dataset instanceof EegDataset) {
             dataFolder = createDataFolder("eeg", workDir);
