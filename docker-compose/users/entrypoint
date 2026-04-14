@@ -24,6 +24,9 @@ handle_microservice_migration
 case "$SHANOIR_MIGRATION" in
 dev|init)
 	sync="--syncAllUsersToKeycloak=true" #FIXME: why can't we use an env var here?
+	# mitigate a race condition (the syncAllUsersToKeycloak task may
+	# terminate just after the server startup)
+	init_wait 5
 	;;
 *)
 	sync="--syncAllUsersToKeycloak=false"

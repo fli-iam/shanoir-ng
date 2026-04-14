@@ -146,7 +146,7 @@ optional()
 #############################################################################
 
 env=()
-
+oneshot_args=()
 
 # Set the default value for an environment variable
 # 
@@ -167,6 +167,15 @@ env_setdefault()
 	else
 		echo "overriden var: $1='$override'  (default would be '$2')"
 	fi
+}
+
+# Wait extra seconds before sending the SIGTERM signal when running in the init mode.
+#
+# usage: init_wait SECONDS
+#
+init_wait()
+{
+	oneshot_args+=("--wait" "$1")
 }
 
 # Process the 'SHANOIR_MIGRATION' env var and adjust the spring config
@@ -217,7 +226,7 @@ run_microservice()
 	if [ -n "$_ms_oneshot" ] ; then
 		# 'oneshot' run
 		# (launch the server and kill it once it is started)
-		exec oneshot 'main.*Application.*Started [A-Za-z0-9]*Application in .* seconds' \
+		exec oneshot ${oneshot_args[@]} 'main.*Application.*Started [A-Za-z0-9]*Application in .* seconds' \
 			-- ${cmd[@]}
 	else
 		# 'normal' run
