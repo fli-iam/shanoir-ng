@@ -102,7 +102,7 @@ public class BIDSServiceImpl implements BIDSService {
     @Override
     public String generateParticipantsTsvFile(Long studyId) throws IOException {
         Study study = studyRepository.findById(studyId).orElse(null);
-        File workFolder = getBidsFolderpath(studyId, study.getName());
+        File workFolder = getBidsFolderPath(studyId);
         File baseDir = createBaseBidsFolder(workFolder, study.getName());
         File csvFile = new File(baseDir.getAbsolutePath() + File.separator + "participants.tsv");
 
@@ -157,7 +157,7 @@ public class BIDSServiceImpl implements BIDSService {
         return subjects;
     }
 
-    public File getBidsFolderpath(final Long studyId, String studyName) {
+    public File getBidsFolderPath(final Long studyId) {
         String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId;
         return new File(tmpFilePath);
     }

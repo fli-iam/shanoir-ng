@@ -166,9 +166,8 @@ services:
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
-      - "studies-data:/var/studies-data"
-      # This is related to participants.tsv file
-      - "datasets-data:/var/datasets-data"
+      - "studies-data:/var/studies-data" # persistent
+      - "bids-data:/var/bids-data" # temporary, participants.tsv
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
@@ -242,8 +241,9 @@ services:
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
+      - "datasets-data:/var/datasets-data" # persistent
+      - "bids-data:/var/bids-data" # temporary
       - "tmp:/tmp"
-      - "datasets-data:/var/datasets-data"
     networks:
       - shanoir_ng_network
     ports:
@@ -280,8 +280,8 @@ services:
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
+      - "preclinical-data:/var/preclinical-data" # persistent
       - "tmp:/tmp"
-      - "preclinical-data:/var/preclinical-data"
     networks:
       - shanoir_ng_network
     ports:
@@ -433,6 +433,7 @@ volumes:
   dcm4chee-database-data:
   dcm4chee-arc-wildfly-data:
   dcm4chee-arc-storage-data:
+  bids-data:
   solr-data:
   certificate-share-data:
   tmp:
