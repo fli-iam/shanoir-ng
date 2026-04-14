@@ -55,4 +55,8 @@ public class FileEntryDTO {
         this.fileType = fileType;
     }
 
+    public boolean isExists() {
+        return exists;
+    }
+
 }
