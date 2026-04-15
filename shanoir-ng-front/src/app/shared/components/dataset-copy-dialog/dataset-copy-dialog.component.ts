@@ -122,7 +122,10 @@ export class DatasetCopyDialogComponent {
                     this.canCopy = false;
                     if (reason.status == 403) {
                         this.statusMessage = "You must have IMPORT right.";
-                    } else throw Error(reason);
+                    } else {
+                        this.close();
+                        throw Error(reason);
+                    }
                 });
             }
         });
