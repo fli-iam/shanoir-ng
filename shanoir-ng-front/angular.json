@@ -13,7 +13,10 @@
                 "build": {
                     "builder": "@angular-devkit/build-angular:browser-esbuild",
                     "options": {
-                        "outputPath": "dist/browser",
+                        "outputPath": {
+                            "base": "dist",
+                            "browser": "browser"
+                        },
                         "index": "src/index.html",
                         "polyfills": ["src/polyfills.ts"],
                         "tsConfig": "tsconfig.app.json",
