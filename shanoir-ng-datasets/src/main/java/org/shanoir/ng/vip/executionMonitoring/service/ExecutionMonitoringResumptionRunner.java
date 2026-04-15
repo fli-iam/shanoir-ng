@@ -86,7 +86,7 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
                 for (ShanoirEvent event : events) {
                     try {
                         executionService.getExecutionAsServiceAccount(1, monitoring.getIdentifier()).block();
-                        executionMonitoringService.startMonitoringJob(monitoring, event);
+                        executionMonitoringService.startMonitoringJob(monitoring, event, null);
                         LOG.info("Monitoring of VIP execution [{}] resumed", monitoring.getName());
                     } catch (Exception e) {
                         LOG.error("Monitoring resumption of VIP execution [" + monitoring.getName() + "," + monitoring.getIdentifier() + "] failed.");

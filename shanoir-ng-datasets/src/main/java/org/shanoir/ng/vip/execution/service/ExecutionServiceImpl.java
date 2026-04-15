@@ -30,6 +30,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
+import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringServiceImpl;
 import org.shanoir.ng.vip.processingResource.service.ProcessingResourceServiceImpl;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
@@ -98,7 +99,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         //executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.VALID);
         VipExecutionDTO createdExecution = createVipExecution(candidates, executionMonitoring);
         //executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.SENT);
-        return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution);
+        return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution, candidates.size());
     }
 
     public List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters) {
@@ -155,10 +156,10 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
         }
 
-        String url = vipExecutionUri + "/" + identifier + "/summary";
+        String url = vipExecutionUri + "/" + identifier;
         HttpHeaders headers = getServiceAccountHttpHeaders();
 
-        return webClient.get()
+        Mono<LinkedHashMap> a = webClient.get()
                 .uri(url)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
@@ -169,22 +170,62 @@ public class ExecutionServiceImpl implements ExecutionService {
                     }
                     return Mono.error(new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", null));
                 })
-                .bodyToMono(VipExecutionDTO.class)
+                .bodyToMono(LinkedHashMap.class)
                 .onErrorResume(e -> {
                     ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] from VIP API", e.getMessage());
                     return Mono.error(new RestServiceException(e, model));
                 });
+
+        LinkedHashMap b = a.block();
+        VipExecutionDTO dto = new VipExecutionDTO();
+        dto.setIdentifier(b.get("identifier").toString());
+        dto.setName(b.get("name").toString());
+        dto.setPipelineIdentifier(b.get("pipelineIdentifier").toString());
+        dto.setTimeout(Integer.parseInt(b.get("timeout").toString()));
+        dto.setStatus(ExecutionStatus.fromRestLabel(b.get("status").toString()));
+        LinkedHashMap<String, String> c = (LinkedHashMap<String, String>) b.get("inputValues");
+        LinkedHashMap<String, List<String>> d = new LinkedHashMap<>();
+        d.put("dicom_archive", List.of(c.get("dicom_archive")));
+        dto.setInputValues(d);
+        dto.setReturnedFiles(null);
+        dto.setStudyIdentifier(null);
+        dto.setErrorCode(null);
+        dto.setStartDate((Long) b.get("startDate"));
+        dto.setEndDate(null);
+        dto.setResultsLocation(null);
+        dto.setJobs((LinkedHashMap<String, LinkedHashMap<String, String>>) b.get("jobs"));
+        return Mono.just(dto);
+
+//        String url = vipExecutionUri + "/" + identifier + "/summary";
+//        HttpHeaders headers = getServiceAccountHttpHeaders();
+//
+//        Mono<LinkedHashMap> a = webClient.get()
+//                .uri(url)
+//                .headers(httpHeaders -> httpHeaders.addAll(headers))
+//                .retrieve()
+//                .onStatus(HttpStatusCode::is4xxClientError, response -> {
+//                    if (response.statusCode().equals(HttpStatus.UNAUTHORIZED)) {
+//                        LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
+//                        return Mono.empty();
+//                    }
+//                    return Mono.error(new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", null));
+//                })
+//                .bodyToMono(VipExecutionDTO.class)
+//                .onErrorResume(e -> {
+//                    ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] from VIP API", e.getMessage());
+//                    return Mono.error(new RestServiceException(e, model));
+//                });
     }
 
     /**
      * Update monitoring with vip execution details and persist it in DB
      */
-    private IdName updateAndStartExecutionMonitoring(ExecutionMonitoring executionMonitoring, VipExecutionDTO execCreated) throws EntityNotFoundException, SecurityException {
+    private IdName updateAndStartExecutionMonitoring(ExecutionMonitoring executionMonitoring, VipExecutionDTO execCreated, Integer jobsNumber) throws EntityNotFoundException, SecurityException {
         executionMonitoring.setIdentifier(execCreated.getIdentifier());
         executionMonitoring.setStatus(execCreated.getStatus());
         executionMonitoring.setStartDate(execCreated.getStartDate());
         ExecutionMonitoring createdMonitoring = executionMonitoringService.update(executionMonitoring);
-        executionMonitoringService.startMonitoringJob(createdMonitoring, null);
+        executionMonitoringService.startMonitoringJob(createdMonitoring, null, jobsNumber);
         return new IdName(createdMonitoring.getId(), createdMonitoring.getName());
     }
 
