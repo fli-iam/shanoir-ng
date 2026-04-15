@@ -16,6 +16,7 @@ package org.shanoir.ng.vip.execution.dto;
 
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +36,7 @@ public class VipExecutionDTO {
     private Long endDate;
     private String resultsLocation;
     private String sorting;
+    private LinkedHashMap<String, LinkedHashMap<String, String>> jobs;
 
     public VipExecutionDTO() { }
 
@@ -145,5 +147,13 @@ public class VipExecutionDTO {
 
     public void setSorting(String sorting) {
         this.sorting = sorting;
+    }
+
+    public LinkedHashMap<String, LinkedHashMap<String, String>> getJobs() {
+        return jobs;
+    }
+
+    public void setJobs(LinkedHashMap<String, LinkedHashMap<String, String>> jobs) {
+        this.jobs = jobs;
     }
 }

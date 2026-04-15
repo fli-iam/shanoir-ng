@@ -78,7 +78,6 @@ public class OutputService {
                 File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
                 try {
                     List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
-
                     for (OutputHandler outputHandler : outputHandlers) {
                         if (outputHandler.canProcess(monitoring)) {
                             LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
