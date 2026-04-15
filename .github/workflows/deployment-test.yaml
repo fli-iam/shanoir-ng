@@ -93,6 +93,9 @@ jobs:
       - name: Smoke tests
         run: bash .github/scripts/helpers.sh smoke_tests
 
+      - name: Functional tests
+        run: bash .github/scripts/functional-tests.sh
+
       - name: Dump logs on failure
         if: failure()
         run: |
