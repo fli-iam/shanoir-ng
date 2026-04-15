@@ -15,6 +15,7 @@
 import { Component } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 
+import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyService } from '../studies/shared/study.service';
 
 @Component({
@@ -25,7 +26,13 @@ import { StudyService } from '../studies/shared/study.service';
 
 export class FilesComponent {
 
-    constructor(private studyService: StudyService) { }
+    constructor(private studyService: StudyService,
+                private breadcrumbsService: BreadcrumbsService) {
+        setTimeout(() => {
+            breadcrumbsService.currentStepAsMilestone();
+            breadcrumbsService.currentStep.label = 'Files';
+        });
+    }
 
     openFilesJson(): void {
         this.studyService.getStudiesFiles().then(json => {
