@@ -217,7 +217,6 @@ import { DUAAssistantComponent } from './dua/dua-assistant.component';
 import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
 import { DUAComponent } from './dua/dua.component';
 import { DuaService } from './dua/shared/dua.service';
-import { FilesComponent } from './files/files.component';
 import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
 import { AnimalSubjectFormComponent } from './preclinical/animalSubject/edit/animal-subject-form.component';
 import { ContrastAgentService } from './preclinical/contrastAgent/shared/contrastAgent.service';
