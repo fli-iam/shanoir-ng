@@ -27,6 +27,7 @@ public enum ExecutionStatus {
     RUNNING("Running"),
     FINISHED("Finished"),
     EXECUTION_FAILED("ExecutionFailed"),
+    QUEUED("Queued"),
     UNKNOWN("Unknown"),
     KILLED("Killed");
 
