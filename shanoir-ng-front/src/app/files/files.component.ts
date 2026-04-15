@@ -23,10 +23,18 @@ import { StudyService } from '../studies/shared/study.service';
     standalone: false
 })
 
-export class FilesComponent{
+export class FilesComponent {
 
-    constructor(private studyService: StudyService,
-            private formBuilder: UntypedFormBuilder) {
+    constructor(private studyService: StudyService) { }
+
+    openFilesJson(): void {
+        this.studyService.getStudiesFiles().then(json => {
+            const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const newTab = window.open(url, '_blank');
+            // Revoke the object URL after the tab has loaded to free memory
+            newTab?.addEventListener('load', () => URL.revokeObjectURL(url));
+        });
     }
 
 }
