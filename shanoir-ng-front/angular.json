@@ -11,7 +11,7 @@
             "prefix": "app",
             "architect": {
                 "build": {
-                    "builder": "@angular-devkit/build-angular:browser-esbuild",
+                    "builder": "@angular-devkit/build-angular:application",
                     "options": {
                         "outputPath": {
                             "base": "dist",
@@ -28,11 +28,14 @@
                         "sourceMap": true,
                         "optimization": false,
                         "namedChunks": true,
-                        "main": "src/main.ts"
+                        "browser": "src/main.ts"
                     },
                     "configurations": {
                         "production": {
-                            "outputPath": "dist/browser",
+                            "outputPath": {
+                              "base": "dist",
+                              "browser": "browser"
+                            },
                             "fileReplacements": [
                                 {
                                     "replace": "src/environments/environment.ts",
