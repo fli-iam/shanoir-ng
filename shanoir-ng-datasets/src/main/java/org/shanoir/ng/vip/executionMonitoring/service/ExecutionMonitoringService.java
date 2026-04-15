@@ -57,5 +57,5 @@ public interface ExecutionMonitoringService {
      * @param processing
      * @param event
      */
-    void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) throws EntityNotFoundException, SecurityException;
+    void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event, Integer jobsNumber) throws EntityNotFoundException, SecurityException;
 }

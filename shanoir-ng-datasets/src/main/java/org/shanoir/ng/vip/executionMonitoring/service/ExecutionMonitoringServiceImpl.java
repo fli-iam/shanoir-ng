@@ -123,11 +123,12 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     }
 
 
-    public void startMonitoringJob(ExecutionMonitoring createdMonitoring, ShanoirEvent event) {
+    public void startMonitoringJob(ExecutionMonitoring createdMonitoring, ShanoirEvent event, Integer jobsNumber) {
         Map<String, Object> monitoringMap = new HashMap<>();
         monitoringMap.put("monitoring", createdMonitoring);
         monitoringMap.put("event", event);
         monitoringMap.put("attempt", 1);
+        monitoringMap.put("jobsNumber", jobsNumber);
         monitoringQueue.add(monitoringMap);
 
         if (!isRunning) { //If we remove this line, each calling thread needs to wait the old ones to finish the synchronized block below before resuming the code execution. It's only for code performance.
@@ -149,12 +150,14 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
             for (Map<String, Object> emMap : monitoringQueue) {
                 ExecutionMonitoring monitoring = (ExecutionMonitoring) emMap.get("monitoring");
                 ShanoirEvent event = (ShanoirEvent) emMap.get("event");
-                int attempt = (Integer) emMap.get("attempt");
+                Integer attempt = (Integer) emMap.get("attempt");
+                Integer jobsNumber = (Integer) emMap.get("jobsNumber");
                 String execLabel = getExecLabel(monitoring);
 
 
                 if (Objects.isNull(event) || !Objects.equals(event.getStatus(), ShanoirEvent.IN_PROGRESS)) {
-                    emMap.put("event", initShanoirEvent(monitoring, event, execLabel));
+                    event = initShanoirEvent(monitoring, event, execLabel, jobsNumber);
+                    emMap.put("event", event);
                     LOG.info("Monitoring of execution id: " + monitoring.getId() + ", identifier: " + monitoring.getPipelineIdentifier() + ", name: " + monitoring.getName() + " started");
                 }
 
@@ -171,7 +174,12 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                         case FINISHED -> emProxyService.processFinishedJob(monitoring, event, dto.getEndDate());
                         case UNKNOWN, EXECUTION_FAILED, KILLED ->
                                 emProxyService.processKilledJob(monitoring, event, dto);
-                        default ->  { }
+                        default -> {
+                            if(!(Objects.isNull(dto.getJobs()) || Objects.equals(dto.getJobs().size(), 0))) {
+                                Integer doneJobs = dto.getJobs().values().stream().mapToInt(e -> (ExecutionStatus.RUNNING.getRestLabel().toUpperCase().equals(e.get("status")) || ExecutionStatus.QUEUED.getRestLabel().toUpperCase().equals(e.get("status"))) ? 0 : 1).sum();
+                                updateShanoirEvent(event, doneJobs, jobsNumber, execLabel);
+                            }
+                        }
                     }
                     if (!Objects.equals(dto.getStatus(), ExecutionStatus.RUNNING)) {
                         monitoringQueue.remove(emMap);
@@ -222,8 +230,8 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
     /**
      * Create or update Shanoir event relative to an execution monitoring
      */
-    private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel) {
-        String startMsg = execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel();
+    private ShanoirEvent initShanoirEvent(ExecutionMonitoring processing, ShanoirEvent event, String execLabel, Integer jobsNumber) {
+        String startMsg = execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel() + " (0/" + jobsNumber + " jobs done)";
 
         if (event == null) {
             event = new ShanoirEvent(
@@ -238,6 +246,15 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
             event.setStatus(ShanoirEvent.IN_PROGRESS);
             event.setProgress(DEFAULT_PROGRESS);
         }
+        eventService.publishEvent(event);
+        return event;
+    }
+
+    /**
+     * Update Shanoir event relative to an execution monitoring
+     */
+    private ShanoirEvent updateShanoirEvent(ShanoirEvent event, Integer doneJobs, Integer jobsNumber, String execLabel) {
+        event.setMessage(execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel() + " (" + doneJobs + "/" + jobsNumber + " jobs done)");
         eventService.publishEvent(event);
         return event;
     }
