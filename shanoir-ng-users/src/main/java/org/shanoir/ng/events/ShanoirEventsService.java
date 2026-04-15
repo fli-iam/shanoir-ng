@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.events;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -132,23 +133,29 @@ public class ShanoirEventsService {
      * @param notification the event to send
      */
     public void sendSseEventsToUI(ShanoirEvent notification) {
-        if (notification == null || notification.getUserId() == null) {
-            return;
-        }
-        if (notification.getLastUpdate() == null) {
-            notification.setLastUpdate(new Date());
-        }
-        for (UserSseEmitter emitter : AsyncTaskApiController.EMITTERS) {
-            if (!notification.getUserId().equals(emitter.getUserId())) {
-                continue;
+        List<UserSseEmitter> sseEmitterListToRemove = new ArrayList<>();
+        AsyncTaskApiController.EMITTERS.forEach((UserSseEmitter emitter) -> {
+            // ! IMPORTANT filter on user id
+            if (notification.getUserId() != null && notification.getUserId().equals(emitter.getUserId())) {
+                if (notification.getLastUpdate() == null) {
+                    notification.setLastUpdate(new Date());
+                }
+                try {
+                    emitter.send(notification, MediaType.APPLICATION_JSON);
+                } catch (IOException e) {
+                    sseEmitterListToRemove.add(emitter);
+                    if (e.getMessage() != null && e.getMessage().contains("Broken pipe")) {
+                        LOG.info("User " + emitter.getUserId() + " connection reset, removing emitter. (broken pipe)");
+                    } else {
+                        LOG.error("Error while send task to UI ", e);
+                    }
+                } catch (Exception e2) {
+                    sseEmitterListToRemove.add(emitter);
+                    LOG.error("Error while send task to UI ", e2);
+                }
             }
-            try {
-                emitter.send(notification, MediaType.APPLICATION_JSON);
-            } catch (Exception ex) {
-                AsyncTaskApiController.EMITTERS.remove(emitter);
-                LOG.debug("SSE send failed, removing emitter for userId={}", emitter.getUserId(), ex);
-            }
-        }
+        });
+        AsyncTaskApiController.EMITTERS.removeAll(sseEmitterListToRemove);
     }
 
     @Scheduled(fixedDelay = 30000)

@@ -129,7 +129,7 @@ export class StudyTreeComponent implements OnDestroy {
         }).catch(e => {
             if (e instanceof RightsError) {
                 this.dialogService.error('error', 'Sorry, you don\'t have the right to copy all the datasets you have selected.'
-                    + ' You must have ADMIN right on all the studies of the selected datasets to proceed with the copy.'
+                    + ' You must have IMPORT right on all the studies of the selected datasets to proceed with the copy.'
                 );
             }
         });

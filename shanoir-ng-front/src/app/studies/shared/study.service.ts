@@ -129,6 +129,27 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise().then(this.mapSubjectList);
     }
 
+    private findStudiesICanImport(): Promise<Study[]> {
+        if (this.keycloakService.isUserAdmin()) {
+            return this.getAll();
+        } else {
+            return this.getAll().then(studies => {
+                const myId: number = KeycloakService.auth.userId;
+                return studies?.filter(study => {
+                    return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_IMPORT)).length > 0;
+                });
+            });
+        }
+    }
+
+    findStudyIdsCanImport(): Promise<number[]> {
+        return this.findStudiesICanImport().then(studies => studies?.map(study => study.id));
+    }
+
+    findStudyIdNamesCanImport(): Promise<IdName[]> {
+        return this.findStudiesICanImport().then(studies => studies?.map(study => new IdName(study.id, study.name)));
+    }
+
     private findStudiesIcanAdmin(): Promise<Study[]> {
         if (this.keycloakService.isUserAdmin()) {
             return this.getAll();
