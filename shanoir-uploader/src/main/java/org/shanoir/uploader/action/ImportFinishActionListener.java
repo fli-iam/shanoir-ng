@@ -254,7 +254,7 @@ public class ImportFinishActionListener implements ActionListener {
                 (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem(), equipment);
 
         // Quality Check if the Study selected has Quality Cards to be checked at import
-        boolean qualityChecked = true;
+        boolean seriesToBeImported = true;
         try {
             QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob,
                     mainWindow.isFromPACS);
@@ -268,7 +268,7 @@ public class ImportFinishActionListener implements ActionListener {
                         JOptionPane.ERROR_MESSAGE);
                 // set status ERROR if all series were unselected from importJob due to Quality Control errors
                 if (importJob.getSelectedSeries().isEmpty()) {
-                    qualityChecked = false;
+                    seriesToBeImported = false;
                     ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder,
                         UploadState.ERROR.toString());
                         // if an exam was created for the import, we delete it
@@ -309,7 +309,7 @@ public class ImportFinishActionListener implements ActionListener {
         }
 
         // Import starts only if the quality check did not result in errors for all selected series
-        if (qualityChecked) {
+        if (seriesToBeImported) {
                 Runnable runnable = new ImportFinishRunnable(uploadFolder, importJob, subjectREST.getName());
                 Thread thread = new Thread(runnable);
                 thread.start();
