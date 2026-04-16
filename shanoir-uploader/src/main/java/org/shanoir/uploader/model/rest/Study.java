@@ -1,8 +1,11 @@
 package org.shanoir.uploader.model.rest;
 
+import java.util.Date;
 import java.util.List;
 
 import org.shanoir.uploader.ShUpConfig;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 /**
  * Light implementation of Study object from ms studies.
  * ShUp has no dependency to ms studies, what is wanted
@@ -27,7 +30,15 @@ public class Study implements Comparable<Study> {
 
     private Boolean compatible;
 
+    private Boolean isDraft;
+
     private String studyCardPolicy;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
+    private Date startDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
+    private Date endDate;
 
     public Long getId() {
         return id;
@@ -107,6 +118,30 @@ public class Study implements Comparable<Study> {
         } else if(SC_DISABLED.equals(studyCardPolicy)) {
             return false;
         } else { return true; }
+    }
+
+    public Boolean getIsDraft() {
+        return isDraft;
+    }
+
+    public void setIsDraft(Boolean isDraft) {
+        this.isDraft = isDraft;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
 }
