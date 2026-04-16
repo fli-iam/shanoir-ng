@@ -28,11 +28,6 @@ public class QualityException extends Exception {
     private QualityCardResult qualityResult;
 
 
-    public QualityException(QualityCardResult qualityResult) {
-        super();
-        this.qualityResult = qualityResult;
-    }
-
     public QualityException(DatasetAcquisition datasetAcquisition, QualityCardResult qualityResult, Throwable cause) {
         super(cause);
         this.datasetAcquisition = datasetAcquisition;
@@ -57,19 +52,23 @@ public class QualityException extends Exception {
 
     public String buildErrorMessage() { // TODO : improve error messages
         StringBuilder sb = new StringBuilder();
-        sb.append("Study : ")
-            .append(this.getDatasetAcquisition().getExamination().getStudy().getName())
-            .append(" (").append(this.getDatasetAcquisition().getExamination().getStudy().getId()).append(")");
-        sb.append("\n");
-        sb.append("Subject : ")
-            .append(this.getDatasetAcquisition().getExamination().getSubject().getName())
-            .append(" (").append(this.getDatasetAcquisition().getExamination().getSubject().getId()).append(")");
-        sb.append("\n");
-        sb.append("Examination : ")
-            .append(this.getDatasetAcquisition().getExamination().getComment())
-            .append(" (").append(this.getDatasetAcquisition().getExamination().getId()).append(")");
-        sb.append("\n");
-        sb.append("Dataset Acquisition : ");
+        if (this.getDatasetAcquisition() == null) {
+            sb.append("Quality check failed because none of the dataset acquisitions passed the quality check.\n");
+        } else {
+            sb.append("Study : ")
+                .append(this.getDatasetAcquisition().getExamination().getStudy().getName())
+                .append(" (").append(this.getDatasetAcquisition().getExamination().getStudy().getId()).append(")");
+            sb.append("\n");
+            sb.append("Subject : ")
+                .append(this.getDatasetAcquisition().getExamination().getSubject().getName())
+                .append(" (").append(this.getDatasetAcquisition().getExamination().getSubject().getId()).append(")");
+            sb.append("\n");
+            sb.append("Examination : ")
+                .append(this.getDatasetAcquisition().getExamination().getComment())
+                .append(" (").append(this.getDatasetAcquisition().getExamination().getId()).append(")");
+            sb.append("\n");
+            sb.append("Dataset Acquisition : ");
+        }
         for (QualityCardResultEntry qcResult : this.getQualityResult()) {
             sb.append("\n- ");
             sb.append(qcResult.getMessage());
