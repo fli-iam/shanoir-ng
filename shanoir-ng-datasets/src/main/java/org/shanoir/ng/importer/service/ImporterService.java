@@ -17,6 +17,7 @@ package org.shanoir.ng.importer.service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -206,9 +207,8 @@ public class ImporterService {
     private Set<DatasetAcquisition> generateAcquisitions(Examination examination, ImportJob importJob,
             ShanoirEvent event) throws Exception {
         StudyCard studyCard = getStudyCard(importJob);
-        List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());
+        List<QualityCard> qualityCards = importJob.isFromShanoirUploader() ? Collections.emptyList() : qualityCardService.findByStudy(examination.getStudyId());
         boolean hasQualityCards = qualityCards != null && !qualityCards.isEmpty();
-        boolean isFromShanoirUploader = importJob.isFromShanoirUploader();
         Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
         QualityCardResult qualityResult = new QualityCardResult();
         int rank = 0;
@@ -251,20 +251,24 @@ public class ImporterService {
                 }
 
                 // apply quality card if needed
-                if (hasQualityCards && !isFromShanoirUploader) {
-                    QualityCardResult serieQualityResult = applyQualityCheck(acquisition, dicomAttributes, qualityCards, importJob);
+                if (hasQualityCards && qualityCards.stream().anyMatch(QualityCard::isToCheckAtImport)) {
+                    // We filter only the quality cards to be applied at import
+                    List<QualityCard> cardsToCheckAtImport = qualityCards.stream()
+                        .filter(QualityCard::isToCheckAtImport)
+                        .toList();
+                    QualityCardResult serieQualityResult = applyQualityCheck(acquisition, dicomAttributes, cardsToCheckAtImport, importJob);
                     applyQualityResult(acquisition, serie, serieQualityResult, event);
                     qualityResult.merge(serieQualityResult);
-                }
 
-                // if quality tag is ERROR, we do not add the acquisition to the list of
-                // acquisitions to import into pacs
-                if (!QualityTag.ERROR.equals(acquisition.getQualityTag())) {
-                    generatedAcquisitions.add(acquisition);
-                } else {
-                    LOG.info(
+                    // if quality tag is ERROR, we do not add the acquisition to the list of
+                    // acquisitions to import into pacs
+                    if (!QualityTag.ERROR.equals(acquisition.getQualityTag())) {
+                        generatedAcquisitions.add(acquisition);
+                    } else {
+                        LOG.info(
                             "Dataset acquisition for serie instance UID {} has control quality tag ERROR and will not be imported.",
                             acquisition.getSeriesInstanceUID());
+                    }
                 }
 
             } finally {
@@ -276,13 +280,17 @@ public class ImporterService {
                 eventService.publishEvent(event);
             }
         }
+        LOG.warn(generatedAcquisitions.size() + " dataset acquisitions generated for examination {}.",
+                examination.getId());
         // If all series to be imported are in error we consider that the whole import failed
         if (generatedAcquisitions.isEmpty()) {
-            if (examination.getDatasetAcquisitions() == null || examination.getDatasetAcquisitions().isEmpty()) {
+            // if the examination was created for this import, we delete it as it will be empty
+            List<DatasetAcquisition> examinationDatasetAcquisitions = datasetAcquisitionService.findByExamination(examination.getId());
+            if (examinationDatasetAcquisitions == null || examinationDatasetAcquisitions.isEmpty()) {
                 LOG.warn("All series to be imported for the new examination {} have control quality tag ERROR, the examination will be deleted.", examination.getComment());
                 examinationRepository.deleteById(examination.getId());
             }
-            throw new QualityException(qualityResult);
+            throw new QualityException(null, qualityResult, null);
         }
         return generatedAcquisitions;
     }
