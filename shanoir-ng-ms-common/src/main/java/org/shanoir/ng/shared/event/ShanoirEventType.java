@@ -36,6 +36,7 @@ public final class ShanoirEventType {
 
     /** Examination **/
     public static final String CREATE_EXAMINATION_EVENT = "createExamination.event";
+    public static final String CREATE_EXAMINATIONS_EVENT = "createExaminations.event";
     public static final String UPDATE_EXAMINATION_EVENT = "updateExamination.event";
     public static final String DELETE_EXAMINATION_EVENT = "deleteExamination.event";
 

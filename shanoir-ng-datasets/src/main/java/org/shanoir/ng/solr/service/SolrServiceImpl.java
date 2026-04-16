@@ -277,6 +277,7 @@ public class SolrServiceImpl implements SolrService {
                     || order.getProperty().equals("datasetType") || order.getProperty().equals("examinationComment")
                     || order.getProperty().equals("tags") || order.getProperty().equals("subjectType") || order.getProperty().equals("acquisitionEquipmentName")
                     || order.getProperty().equals("processed") || order.getProperty().equals("sortingIndex")
+                    || order.getProperty().equals("dataReuseAgreement")
             ) {
                 pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
                         order.getDirection(), order.getProperty());
@@ -391,6 +392,6 @@ public class SolrServiceImpl implements SolrService {
                 shanoirMetadata.getSubjectName(), SubjectType.getType(shanoirMetadata.getSubjectType()) != null ? SubjectType.getType(shanoirMetadata.getSubjectType()).name() : null, shanoirMetadata.getSubjectId(),
                 shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
                 shanoirMetadata.getCenterId(), shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength(),
-                shanoirMetadata.isProcessed(), DateTimeUtils.localDateToDate(shanoirMetadata.getImportDate()), shanoirMetadata.getUsername(), shanoirMetadata.getSortingIndex());
+                shanoirMetadata.isProcessed(), DateTimeUtils.localDateToDate(shanoirMetadata.getImportDate()), shanoirMetadata.getUsername(), shanoirMetadata.getSortingIndex(), shanoirMetadata.getDataReuseAgreement());
     }
 }
