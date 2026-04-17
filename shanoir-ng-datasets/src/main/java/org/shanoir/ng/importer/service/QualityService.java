@@ -22,7 +22,6 @@ import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
-import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +44,7 @@ public class QualityService {
             // all
             qualityResult.merge(qualityCard.apply(datasetAcquisition, acquisitionAttributes, downloader));
             LOG.info("Quality Card {} applied on dataset acquisition {} with result: {}.", qualityCard.getName(),
-                    acquisitionAttributes.getFirstDatasetAttributes().getString(Tag.SeriesDescription), qualityResult.findById(datasetAcquisition.getId())
-                            .map(QualityCardResultEntry::getTagSet).orElse(null));
+                    acquisitionAttributes.getFirstDatasetAttributes().getString(Tag.SeriesDescription), datasetAcquisition.getQualityTag());
         }
         return qualityResult;
     }
