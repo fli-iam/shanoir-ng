@@ -60,8 +60,12 @@ public final class DatasetFileUtils {
     protected static final Logger LOG = LoggerFactory.getLogger(DatasetFileUtils.class);
 
     public static File getUserImportDir(String importDir) {
+        LOG.error("Token a");
         final Long userId = KeycloakUtil.getTokenUserId();
+        LOG.error("Token b : " +  userId);
         final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+        LOG.error("Token c : " + userImportDirFilePath);
+
         final File userImportDir = new File(userImportDirFilePath);
         if (!userImportDir.exists()) {
             userImportDir.mkdirs(); // create if not yet existing

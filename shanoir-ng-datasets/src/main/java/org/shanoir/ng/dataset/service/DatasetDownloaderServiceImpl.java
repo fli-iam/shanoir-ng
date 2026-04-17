@@ -204,6 +204,7 @@ public class DatasetDownloaderServiceImpl {
         for (Dataset dataset : datasets) {
             String path = "";
             Dataset relevantDataset = dataset;
+            LOG.error("Dataset id: " + relevantDataset.getId());
 
             if (Objects.nonNull(dataset.getDatasetProcessing())) {
                 relevantDataset = dataset.getFirstRealInput();
@@ -251,6 +252,7 @@ public class DatasetDownloaderServiceImpl {
             File tempDir = null;
             try {
                 Long converterToUse = (converterId != null) ? converterId : DEFAULT_NIFTI_CONVERTER_ID;
+                LOG.error("Token 0");
                 tempDir = convertToNifti(dataset, pathURLs, converterToUse, downloadResult, subjectName);
                 DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
             } finally {
@@ -266,23 +268,29 @@ public class DatasetDownloaderServiceImpl {
     }
 
     protected File convertToNifti(Dataset dataset, List<URL> pathURLs, Long converterId, DatasetDownloadError downloadResult, String subjectName) throws RestServiceException, IOException {
+        LOG.error("Token 0bis");
         File userDir = DatasetFileUtils.getUserImportDir("/tmp");
+        LOG.error("Token 1 : " + userDir.getAbsolutePath());
         String tmpFilePath = userDir + File.separator + dataset.getId() + "_nii";
+        LOG.error("Token 2 : " + tmpFilePath);
         File sourceFolder = new File(tmpFilePath + "-" + UUID.randomUUID());
+        LOG.error("Token 3 : " + sourceFolder.getAbsolutePath());
 
         // 1. Get DICOM URLs
         List<URL> dicomUrls = new ArrayList<>();
         DatasetFileUtils.getDatasetFilePathURLs(dataset, dicomUrls, DatasetExpressionFormat.DICOM, downloadResult);
-
+        LOG.error("Token 4 : " + dicomUrls.stream().map(URL::toString).collect(Collectors.joining(",")));
         // 2. Prepare working folder and download
         sourceFolder.mkdirs();
         downloader.downloadDicomFilesForURLs(dicomUrls, sourceFolder, subjectName, dataset, downloadResult);
+        LOG.info("Token 5");
 
         // 3. Convert via RabbitMQ
         boolean result = Boolean.TRUE.equals(rabbitTemplate.convertSendAndReceive(
                 RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE,
                 converterId + ";" + sourceFolder.getAbsolutePath()
         ));
+        LOG.error("Token 6 : " + result);
 
         if (!result)
             downloadResult.update("Conversion to NIfTI failed.", DatasetDownloadError.ERROR);
@@ -290,13 +298,14 @@ public class DatasetDownloaderServiceImpl {
         // 4. Collect converted files
         File resultFolder = new File(sourceFolder, "result");
         File[] files = resultFolder.listFiles();
+        LOG.error("Token 7 : " + files.length);
         if (files == null || files.length == 0)
             downloadResult.update("No NIfTI files found after conversion.", DatasetDownloadError.ERROR);
 
         for (File file : files)
             if (!file.isDirectory())
                 pathURLs.add(file.toURI().toURL());
-
+        LOG.error("Token 8 : " + pathURLs.size());
         return sourceFolder;
     }
 

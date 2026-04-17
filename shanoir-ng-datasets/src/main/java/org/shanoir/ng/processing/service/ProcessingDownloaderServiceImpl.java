@@ -111,6 +111,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         List<List<Long>> partitions = ListUtils.partition(extractedIds, 3000);
         int maxCount = partitions.size();
 
+        LOG.error("TEST");
         for (List<Long> partition : partitions) {
             ShanoirEvent newEvent = new ShanoirEvent(
                     ShanoirEventType.MASSIVE_OUTPUTS_DOWNLOAD,
@@ -279,6 +280,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         try {
             idList =  em.createNativeQuery(query).getResultList();
             if (!extraction.has("input") || !extraction.get("input").asBoolean()) {
+                LOG.info(idList.size() + " ids found for extraction.");
                 return idList;
             }
         } catch (Exception e) {
@@ -295,6 +297,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
         try {
             idList.addAll(em.createNativeQuery(inputQuery).getResultList());
+            LOG.info(idList.size() + " ids found for extraction.");
             return idList.stream().distinct().collect(Collectors.toList());
         } catch (Exception e) {
             LOG.error("There is an issue with the filters of the extraction " + extraction.get("extraction_identifier") + ". Please check that they are correct, otherwise take contact with the dev team.");

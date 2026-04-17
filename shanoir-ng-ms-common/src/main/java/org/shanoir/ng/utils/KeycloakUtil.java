@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.exception.TokenNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -37,6 +39,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
  *
  */
 public final class KeycloakUtil {
+
+    private static final Logger LOG = LoggerFactory.getLogger(KeycloakUtil.class);
 
     private KeycloakUtil() { }
 
@@ -111,11 +115,14 @@ public final class KeycloakUtil {
      * @throws ShanoirStudiesException
      */
     public static Long getTokenUserId() {
+        LOG.error("Token a1");
         final JwtAuthenticationToken jwt = getJwtAuthenticationToken();
+        LOG.error("Token a2");
         if (jwt == null) {
             throw new TokenNotFoundException("JwtAuthenticationToken not found.");
         }
         final Map<String, Object> claims = jwt.getToken().getClaims();
+        LOG.error("Token a3 : " +   claims.keySet());
         if (claims.containsKey(USER_ID_TOKEN_ATT)) {
             return Long.valueOf(claims.get(USER_ID_TOKEN_ATT).toString());
         }
