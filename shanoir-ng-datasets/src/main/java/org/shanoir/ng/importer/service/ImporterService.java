@@ -173,12 +173,7 @@ public class ImporterService {
             }
 
             // Send success mail
-            mailService.sendImportEmail(importJob, userId, examination, generatedAcquisitions); // TODO : add quality
-                                                                                                // result in mail or
-                                                                                                // link to qr in case of
-                                                                                                // da not imported
-                                                                                                // because of quality
-                                                                                                // check failure
+            mailService.sendImportEmail(importJob, userId, examination, generatedAcquisitions);
 
         } catch (QualityException e) {
             String msg = e.buildErrorMessage();
@@ -254,21 +249,21 @@ public class ImporterService {
                 if (hasQualityCards && qualityCards.stream().anyMatch(QualityCard::isToCheckAtImport)) {
                     // We filter only the quality cards to be applied at import
                     List<QualityCard> cardsToCheckAtImport = qualityCards.stream()
-                        .filter(QualityCard::isToCheckAtImport)
-                        .toList();
+                            .filter(QualityCard::isToCheckAtImport)
+                            .toList();
+                    LOG.warn("Applying quality cards {} at import for acquisition {}.", cardsToCheckAtImport.stream().map(QualityCard::getName).toList(), acquisition.getId());
                     QualityCardResult serieQualityResult = applyQualityCheck(acquisition, dicomAttributes, cardsToCheckAtImport, importJob);
                     applyQualityResult(acquisition, serie, serieQualityResult, event);
                     qualityResult.merge(serieQualityResult);
-
-                    // if quality tag is ERROR, we do not add the acquisition to the list of
-                    // acquisitions to import into pacs
-                    if (!QualityTag.ERROR.equals(acquisition.getQualityTag())) {
-                        generatedAcquisitions.add(acquisition);
-                    } else {
-                        LOG.info(
+                }
+                // if quality tag is not in ERROR, we add the acquisition to the list of
+                // acquisitions to import into pacs
+                if (!QualityTag.ERROR.equals(acquisition.getQualityTag())) {
+                    generatedAcquisitions.add(acquisition);
+                } else {
+                    LOG.info(
                             "Dataset acquisition for serie instance UID {} has control quality tag ERROR and will not be imported.",
                             acquisition.getSeriesInstanceUID());
-                    }
                 }
 
             } finally {
@@ -280,17 +275,15 @@ public class ImporterService {
                 eventService.publishEvent(event);
             }
         }
-        LOG.warn(generatedAcquisitions.size() + " dataset acquisitions generated for examination {}.",
-                examination.getId());
         // If all series to be imported are in error we consider that the whole import failed
         if (generatedAcquisitions.isEmpty()) {
             // if the examination was created for this import, we delete it as it will be empty
             List<DatasetAcquisition> examinationDatasetAcquisitions = datasetAcquisitionService.findByExamination(examination.getId());
             if (examinationDatasetAcquisitions == null || examinationDatasetAcquisitions.isEmpty()) {
-                LOG.warn("All series to be imported for the new examination {} have control quality tag ERROR, the examination will be deleted.", examination.getComment());
-                examinationRepository.deleteById(examination.getId());
+                LOG.warn("All series to be imported for the new examination {} have control quality tag ERROR, the examination will be deleted if empty.", examination.getComment());
+                examinationService.deleteEmptyExamination(examination.getId());
             }
-            throw new QualityException(null, qualityResult, null);
+            throw new QualityException(null, qualityResult, new Throwable("All series to be imported have control quality tag ERROR"));
         }
         return generatedAcquisitions;
     }

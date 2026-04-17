@@ -161,6 +161,21 @@ public class ExaminationServiceImpl implements ExaminationService {
     }
 
     @Async
+    @Override
+    public void deleteEmptyExamination(Long id) throws EntityNotFoundException {
+        Optional<Examination> examinationOpt = examinationRepository.findById(id);
+        if (!examinationOpt.isPresent()) {
+            throw new EntityNotFoundException(Examination.class, id);
+        }
+        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findByExamination(id);
+        if (CollectionUtils.isEmpty(acquisitions)) {
+            examinationRepository.deleteById(id);
+        } else {
+            LOG.warn("Trying to delete an examination with id {} that is not empty, deletion skipped.", id);
+        }
+    }
+
+    @Async
     @Transactional
     public void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event) {
         try {
