@@ -212,7 +212,7 @@ public class QualityCardRule extends AbstractEntity {
 
     private QualityCardResultEntry initResult(DatasetAcquisition datasetAcquisition) {
         QualityCardResultEntry result = new QualityCardResultEntry();
-        result.setSubjectName(datasetAcquisition.getExamination().getSubject().getName());
+        result.setSubjectName(datasetAcquisition.getExamination().getSubject() != null ? datasetAcquisition.getExamination().getSubject().getName() : null);
         result.setDatasetAcquisitionId(datasetAcquisition.getId());
         result.setExaminationDate(datasetAcquisition.getExamination().getExaminationDate());
         result.setExaminationComment(datasetAcquisition.getExamination().getComment());

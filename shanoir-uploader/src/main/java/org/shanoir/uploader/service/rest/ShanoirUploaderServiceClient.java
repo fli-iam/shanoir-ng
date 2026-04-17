@@ -924,7 +924,7 @@ public class ShanoirUploaderServiceClient {
     public void deleteExamination(Long examinationUID) throws Exception {
         try (CloseableHttpResponse response = httpService.delete(this.serviceURLExaminationsDelete + examinationUID)) {
             int code = response.getCode();
-            if (code == HttpStatus.SC_OK) {
+            if (code == HttpStatus.SC_NO_CONTENT) {
                 LOG.info("Examination with UID " + examinationUID + " successfully deleted on server.");
             } else {
                 LOG.error("Error in deleteExamination: with examinationUID " + examinationUID + " (status code: " + code

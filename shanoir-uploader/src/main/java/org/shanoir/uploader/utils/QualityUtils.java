@@ -142,8 +142,8 @@ public class QualityUtils {
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setEditable(false);
-        textArea.setPreferredSize(new Dimension(800, 300));
         JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(800, 300));
 
         return scrollPane;
     }

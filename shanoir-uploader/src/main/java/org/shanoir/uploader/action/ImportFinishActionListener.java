@@ -262,6 +262,7 @@ public class ImportFinishActionListener implements ActionListener {
             // If quality check resulted in errors, show a message and do not start the
             // import
             if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError())) {
+
                 JOptionPane.showMessageDialog(mainWindow.frame,
                         QualityUtils.getQualityControlreportScrollPane(qualityControlResult),
                         ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"),
@@ -280,7 +281,7 @@ public class ImportFinishActionListener implements ActionListener {
                             }
                         }
                     logger.error("The upload for the patient {} and examination {} failed because none of the series passed the quality control.",
-                        importJob.getSubject().getName(), importJob.getExaminationComment()); // check why no subjectName() and examinationComment() in importJob
+                        importJob.getSubjectName(), importJob.getStudy().getStudyDescription());
                 }
             } else {
                 // If quality control condition is VALID we do not set a quality card result
