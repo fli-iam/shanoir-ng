@@ -192,7 +192,7 @@ public class CardsProcessingService {
             // examination only
             List<DatasetAcquisition> updatedAcquisitions = new ArrayList<>();
             try {
-                datasetAcquisitions.parallelStream().forEach(datasetAcquisition -> {
+                datasetAcquisitions.stream().forEach(datasetAcquisition -> {
                     event.setStatus(2);
                     event.setMessage("Checking quality for acquisition " + datasetAcquisition.getId()
                             + " in examination " + examination.getComment());
