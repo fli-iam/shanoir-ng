@@ -273,6 +273,7 @@ scan_logs() {
             -e 'rabbitmq.*(error|disk space monitor)' \
             -e 'dcm4chee-arc.*Name or service not known' \
             -e 'UnknownHostException.*dcm4chee' \
+            -e 'WFLYELY00024: Certificate \[rootca\].*CertificateExpiredException' \
             -e 'Unexpected error occurred in scheduled task' \
             -e 'LastLoginDateApiController' \
             -e 'ExceptionTranslationFilter' \
