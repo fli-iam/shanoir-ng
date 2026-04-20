@@ -73,6 +73,11 @@ export class SolrService {
             });
     }
 
+    public getAllIds(solrReq: SolrRequest): Promise<number[]> {
+        return this.http.post<number[]>(AppUtils.BACKEND_API_SOLR_URL + '/datasetIds', this.stringifySolrRequest(solrReq))
+        .toPromise();
+    }
+
     private stringifySolrRequest(solrRequest: SolrRequest): string {
         return JSON.stringify(solrRequest, (key, value) => {
             // write a Map as a key value object
