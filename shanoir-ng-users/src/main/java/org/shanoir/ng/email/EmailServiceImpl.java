@@ -199,11 +199,32 @@ public class EmailServiceImpl implements EmailService {
                     LOG.info(content);
                     messageHelper.setText(content, true);
                 };
-                // Send the message
-                LOG.info("Sending approve-study mail to {} for study {}", studyMember.getUsername(), email.getStudyId());
+                LOG.info("Sending study approval mail to {} for study {}", studyMember.getEmail(), email.getStudyId());
                 mailSender.send(messagePreparator);
             }
         }
+
+        // Notify the admins too.
+        final List<String> adminEmails = userRepository.findAdminEmails();
+        User approvingAdmin = userRepository.findById(email.getUserId()).orElse(null);
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            this.setFromAdministrator(messageHelper);
+            messageHelper.setTo(adminEmails.toArray(new String[0]));
+            messageHelper.setSubject("Study approved");
+            final Map<String, Object> variables = new HashMap<>();
+            variables.put(FIRSTNAME, approvingAdmin.getFirstName());
+            variables.put(LASTNAME, approvingAdmin.getLastName());
+            variables.put(USERNAME, approvingAdmin.getUsername());
+            variables.put(EMAIL, approvingAdmin.getEmail());
+            variables.put(STUDY_NAME, email.getStudyName());
+            variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/details/" + email.getStudyId());
+            final String content = build("notifyAdminStudyApproval", variables);
+            LOG.info(content);
+            messageHelper.setText(content, true);
+        };
+        LOG.info("Sending study approval mail to admins {} for study {}", adminEmails, email.getStudyId());
+        mailSender.send(messagePreparator);
     }
 
     @Override
