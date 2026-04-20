@@ -56,7 +56,7 @@ jobs:
             docker-compose
 
       - name: Bootstrap installation
-        run: bash ./bootstrap.sh --clean --no-build --no-dcm4chee
+        run: bash ./bootstrap.sh --clean --no-build
 
       - name: Debug container state
         if: failure()
