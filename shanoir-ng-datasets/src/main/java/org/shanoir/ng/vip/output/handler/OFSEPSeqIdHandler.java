@@ -100,7 +100,8 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             "dimension",
             "dimensions",
             "axis",
-            "sequenceList"
+            "sequenceList",
+            "acquisitionNumber"
     };
 
     public static final String TYPE = "type";
