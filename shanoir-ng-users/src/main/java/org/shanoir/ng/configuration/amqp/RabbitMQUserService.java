@@ -154,6 +154,7 @@ public class RabbitMQUserService {
         try {
             EmailStudy mail = mapper.readValue(generatedMailAsString, EmailStudy.class);
             this.emailService.notifyStudyMembersStudyApproval(mail);
+            this.emailService.notifyAdminStudyEvent(mail);
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the study created event.", e);
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);

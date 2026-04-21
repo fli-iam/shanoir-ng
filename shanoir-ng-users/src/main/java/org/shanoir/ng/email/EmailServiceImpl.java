@@ -170,8 +170,16 @@ public class EmailServiceImpl implements EmailService {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             this.setFromAdministrator(messageHelper);
             messageHelper.setTo(adminEmails.toArray(new String[0]));
-            messageHelper.setSubject(email.getIsNew() ? "New draft study created" : "Draft study got edited");
-            final Map<String, Object> variables = buildDraftStudyEmailVariables(user, email, shanoirServerAddress);
+
+            if (email.getAction() == "created") {
+                messageHelper.setSubject("New draft study created");
+            } else if (email.getAction() == "edited") {
+                messageHelper.setSubject("A draft study got edited");
+            } else if (email.getAction() == "approved") {
+                messageHelper.setSubject("A study got approved");
+            }
+
+            final Map<String, Object> variables = buildStudyEmailVariables(user, email, shanoirServerAddress);
             final String content = build("notifyAdminDraftStudy", variables);
             LOG.info(content);
             messageHelper.setText(content, true);
@@ -203,28 +211,6 @@ public class EmailServiceImpl implements EmailService {
                 mailSender.send(messagePreparator);
             }
         }
-
-        // Notify the admins too.
-        final List<String> adminEmails = userRepository.findAdminEmails();
-        User approvingAdmin = userRepository.findById(email.getUserId()).orElse(null);
-        MimeMessagePreparator messagePreparator = mimeMessage -> {
-            final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            this.setFromAdministrator(messageHelper);
-            messageHelper.setTo(adminEmails.toArray(new String[0]));
-            messageHelper.setSubject("Study approved");
-            final Map<String, Object> variables = new HashMap<>();
-            variables.put(FIRSTNAME, approvingAdmin.getFirstName());
-            variables.put(LASTNAME, approvingAdmin.getLastName());
-            variables.put(USERNAME, approvingAdmin.getUsername());
-            variables.put(EMAIL, approvingAdmin.getEmail());
-            variables.put(STUDY_NAME, email.getStudyName());
-            variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/details/" + email.getStudyId());
-            final String content = build("notifyAdminStudyApproval", variables);
-            LOG.info(content);
-            messageHelper.setText(content, true);
-        };
-        LOG.info("Sending study approval mail to admins {} for study {}", adminEmails, email.getStudyId());
-        mailSender.send(messagePreparator);
     }
 
     @Override
@@ -776,10 +762,10 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private Map<String, Object> buildDraftStudyEmailVariables(User user, EmailStudy email, String shanoirServerAddress) {
+    private Map<String, Object> buildStudyEmailVariables(User user, EmailStudy email, String shanoirServerAddress) {
         Map<String, Object> variables = new HashMap<>();
 
-        // User info
+        // User who performed action info
         variables.put(FIRSTNAME, user.getFirstName());
         variables.put(LASTNAME, user.getLastName());
         variables.put(EMAIL, user.getEmail());
@@ -796,7 +782,7 @@ public class EmailServiceImpl implements EmailService {
         variables.put("studyCardPolicy", email.getStudyCardPolicy());
         variables.put("clinical", email.isClinical());
         variables.put("challenge", email.isChallenge());
-        variables.put("isNew", email.getIsNew());
+        variables.put("action", email.getAction());
 
         // Extra details
         variables.put("expectedNbOfSubjects", email.getExpectedNbOfSubjects());
