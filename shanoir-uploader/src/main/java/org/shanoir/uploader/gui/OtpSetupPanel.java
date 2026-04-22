@@ -67,7 +67,6 @@ public class OtpSetupPanel extends JPanel {
     public JTextField otpText;
     public JLabel deviceLabelLabel;
     public JTextField deviceLabelText;
-    public JLabel logoutOtherDevicesLabel;
     public JCheckBox logoutOtherDevicesCheckBox;
     public JPanel buttonPanel;
     public JButton submit;
