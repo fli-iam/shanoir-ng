@@ -15,11 +15,14 @@
 package org.shanoir.uploader.gui;
 
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.ByteArrayInputStream;
 
 import javax.imageio.ImageIO;
@@ -41,9 +44,11 @@ import org.springframework.stereotype.Component;
 
 /**
  * Startup panel displayed when Keycloak requires initial TOTP enrollment (2FA
- * not yet configured on the user account). Shows the QR code (or the manual
- * base32 key as a fallback), then asks the user to enter the first code from
- * their authenticator app together with an optional device label.
+ * not yet configured on the user account).
+ *
+ * <p>By default the QR code is shown. A toggle link below it ("Unable to scan?")
+ * switches to a read-only text field containing the base32 manual key; clicking
+ * the link again ("Scan QR code") restores the QR code view.
  */
 @Component
 public class OtpSetupPanel extends JPanel {
@@ -51,13 +56,15 @@ public class OtpSetupPanel extends JPanel {
     private static final Logger LOG = LoggerFactory.getLogger(OtpSetupPanel.class);
 
     public JLabel qrCodeLabel;
-    public JLabel manualKeyLabel;
-    public JLabel manualKeyValue;
+    public JTextField manualKeyValue;
+    public JLabel toggleLink;
     public JLabel otpLabel;
     public JTextField otpText;
     public JLabel deviceLabelLabel;
     public JTextField deviceLabelText;
     public JButton submit;
+
+    private boolean showingQr = true;
 
     @Autowired
     private OtpSetupPanelActionListener otpSetupPanelActionListener;
@@ -67,68 +74,90 @@ public class OtpSetupPanel extends JPanel {
         container.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
         this.add(container);
         this.setBorder(new EmptyBorder(5, 5, 5, 5));
 
+        // Row 0 — QR code (visible by default)
         qrCodeLabel = new JLabel();
         qrCodeLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.weightx = 1.0;
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 3;
-        gbc.insets = new Insets(5, 5, 5, 5);
         container.add(qrCodeLabel, gbc);
+
+        // Row 1 — manual key field (hidden by default)
+        manualKeyValue = new JTextField("");
+        manualKeyValue.setPreferredSize(new Dimension(200, 20));
+        manualKeyValue.setEditable(false);
+        manualKeyValue.setVisible(false);
+        gbc.weightx = 1.0;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 3;
+        container.add(manualKeyValue, gbc);
+
+        // Row 2 — toggle link
+        toggleLink = new JLabel(linkText(true));
+        toggleLink.setHorizontalAlignment(SwingConstants.CENTER);
+        toggleLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        toggleLink.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                showingQr = !showingQr;
+                qrCodeLabel.setVisible(showingQr);
+                manualKeyValue.setVisible(!showingQr);
+                toggleLink.setText(linkText(showingQr));
+                container.revalidate();
+                container.repaint();
+            }
+        });
+        gbc.weightx = 1.0;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 3;
+        container.add(toggleLink, gbc);
 
         gbc.gridwidth = 1;
 
-        manualKeyLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.manual.key"));
-        manualKeyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        gbc.weightx = 0.2;
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        container.add(manualKeyLabel, gbc);
-
-        manualKeyValue = new JLabel("");
-        manualKeyValue.setHorizontalAlignment(SwingConstants.LEFT);
-        gbc.weightx = 0.7;
-        gbc.gridx = 2;
-        gbc.gridy = 1;
-        container.add(manualKeyValue, gbc);
-
+        // Row 3 — OTP code
         otpLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.code"));
         otpLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         gbc.weightx = 0.2;
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         container.add(otpLabel, gbc);
 
         otpText = new JTextField("");
         otpText.setPreferredSize(new Dimension(200, 20));
         gbc.weightx = 0.7;
         gbc.gridx = 2;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         container.add(otpText, gbc);
 
+        // Row 4 — device label
         deviceLabelLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.device.label"));
         deviceLabelLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         gbc.weightx = 0.2;
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         container.add(deviceLabelLabel, gbc);
 
         deviceLabelText = new JTextField("");
         deviceLabelText.setPreferredSize(new Dimension(200, 20));
         gbc.weightx = 0.7;
         gbc.gridx = 2;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
         container.add(deviceLabelText, gbc);
 
+        // Row 5 — submit
         submit = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.submit"));
         submit.setPreferredSize(new Dimension(200, 20));
         submit.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.weightx = 0.7;
         gbc.gridx = 2;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
         container.add(submit, gbc);
 
         otpSetupPanelActionListener.configure(this, sSC);
@@ -136,24 +165,47 @@ public class OtpSetupPanel extends JPanel {
     }
 
     /**
-     * Populates the QR code image and the manual fallback key before the panel
-     * is shown. Called by {@link ShUpStartupDialog#showOtpSetupForm}.
+     * Populates the QR code and manual key, and resets the view to QR mode.
+     * Called by {@link ShUpStartupDialog#showOtpSetupForm} before displaying the panel.
      */
     public void populate(byte[] qrCodeBytes, String totpManualKey) {
+        // Reset to QR view each time the panel is freshly shown
+        showingQr = true;
+        if (qrCodeLabel != null) {
+            qrCodeLabel.setVisible(true);
+        }
+        if (manualKeyValue != null) {
+            manualKeyValue.setVisible(false);
+        }
+        if (toggleLink != null) {
+            toggleLink.setText(linkText(true));
+        }
+
         if (qrCodeBytes != null) {
             try {
                 Image img = ImageIO.read(new ByteArrayInputStream(qrCodeBytes));
-                // Scale to 150×150 to fit the startup dialog
                 Image scaled = img.getScaledInstance(150, 150, Image.SCALE_SMOOTH);
                 qrCodeLabel.setIcon(new ImageIcon(scaled));
                 qrCodeLabel.setText(null);
             } catch (Exception e) {
                 LOG.error("Could not render OTP QR code image: {}", e.getMessage(), e);
+                qrCodeLabel.setIcon(null);
                 qrCodeLabel.setText(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.qr.error"));
             }
         } else {
+            qrCodeLabel.setIcon(null);
             qrCodeLabel.setText(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.qr.unavailable"));
         }
-        manualKeyValue.setText(totpManualKey != null ? totpManualKey : "");
+
+        if (manualKeyValue != null) {
+            manualKeyValue.setText(totpManualKey != null ? totpManualKey : "");
+        }
+    }
+
+    private static String linkText(boolean showingQr) {
+        String key = showingQr
+            ? "shanoir.uploader.otp.setup.unable.to.scan"
+            : "shanoir.uploader.otp.setup.scan.qr";
+        return "<html><a href='#'>" + ShUpConfig.resourceBundle.getString(key) + "</a></html>";
     }
 }
