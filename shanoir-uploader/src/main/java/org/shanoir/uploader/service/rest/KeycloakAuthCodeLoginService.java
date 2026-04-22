@@ -200,11 +200,12 @@ public class KeycloakAuthCodeLoginService {
          * Step 2b: POSTs the TOTP enrollment form (first-time OTP setup).
          * {@code userLabel} is the device name shown in Keycloak; may be empty.
          */
-        public AuthResult submitOtpSetup(String otpCode, String userLabel) throws Exception {
+        public AuthResult submitOtpSetup(String otpCode, String userLabel, boolean logoutOtherSessions) throws Exception {
             String postBody = "totp=" + URLEncoder.encode(otpCode, StandardCharsets.UTF_8)
                 + "&totpSecret=" + URLEncoder.encode(currentTotpSecret != null ? currentTotpSecret : "", StandardCharsets.UTF_8)
                 + "&userLabel=" + URLEncoder.encode(userLabel != null ? userLabel : "", StandardCharsets.UTF_8)
-                + "&credentialId=";
+                + "&credentialId="
+                + (logoutOtherSessions ? "&logout-sessions=on" : "");
             return doPost(currentActionUrl, postBody);
         }
 

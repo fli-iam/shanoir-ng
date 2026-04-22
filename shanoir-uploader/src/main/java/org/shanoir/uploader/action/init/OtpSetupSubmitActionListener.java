@@ -54,6 +54,7 @@ public class OtpSetupSubmitActionListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String otpCode = otpSetupPanel.otpText.getText().trim();
         String deviceLabel = otpSetupPanel.deviceLabelText.getText().trim();
+        boolean logoutOtherSessions = otpSetupPanel.logoutOtherDevicesCheckBox.isSelected();
         LoginSession session = sSC.getLoginSession();
         if (session == null) {
             LOG.error("No active login session found for OTP setup submission.");
@@ -65,7 +66,7 @@ public class OtpSetupSubmitActionListener implements ActionListener {
         }
 
         try {
-            AuthResult result = session.submitOtpSetup(otpCode, deviceLabel);
+            AuthResult result = session.submitOtpSetup(otpCode, deviceLabel, logoutOtherSessions);
             handleResult(result);
         } catch (Exception ex) {
             LOG.error("OTP setup submission error: {}", ex.getMessage(), ex);
