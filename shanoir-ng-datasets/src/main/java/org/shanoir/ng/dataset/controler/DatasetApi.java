@@ -357,7 +357,7 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "500", description = "unexpected error")})
     @GetMapping(value = "/download/event/{eventId}", produces = {"application/zip"})
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(
+    ResponseEntity<ByteArrayResource> downloadByEventId(
             @Parameter(description = "id of the event", required = true) @PathVariable("eventId") String eventId)
             throws RestServiceException, IOException;
 
@@ -410,5 +410,3 @@ public interface DatasetApi {
             @Parameter(description = "Keys of the metadata to extract", required = true) @Valid
             @RequestParam List<String> metadataKeys) throws Exception;
 }
-
-

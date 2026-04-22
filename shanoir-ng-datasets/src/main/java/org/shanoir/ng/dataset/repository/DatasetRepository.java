@@ -11,7 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 package org.shanoir.ng.dataset.repository;
 
 import java.util.List;
@@ -21,19 +20,20 @@ import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetRightsDTO;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, CrudRepository<Dataset, Long> {
+public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, JpaRepository<Dataset, Long> {
 
     @Query(value = "SELECT COUNT(*) FROM dataset as ds "
             + "INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id "
@@ -78,7 +78,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN dataset_acquisition inputAcq ON inputs.dataset_acquisition_id = inputAcq.id "
             + "WHERE inputAcq.examination_id = :examId", nativeQuery = true)
     List<Long> findDatasetAndOutputByExaminationId(Long examId);
-
 
     @Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr "
             + "WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL "
@@ -193,5 +192,25 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     Set<DatasetStudyCenter> getDatasetsByAcquisitionAndExaminationIds(
             @Param("acquisitionIds") List<Long> acquisitionIds,
             @Param("examinationIds") List<Long> examinationIds);
+
+    @Query("""
+            SELECT new org.shanoir.ng.dataset.model.DatasetRightsDTO(
+                d.id,
+                e.centerId,
+                dp.studyId,
+                e.study.id
+            )
+            FROM Dataset d
+            LEFT JOIN d.datasetProcessing dp
+            LEFT JOIN d.datasetAcquisition da
+            LEFT JOIN da.examination e
+            WHERE d.id = :id
+            """)
+    DatasetRightsDTO findRightsDtoBaseById(@Param("id") Long id);
+
+    @Query("""
+            SELECT rs.id FROM Dataset d JOIN d.relatedStudies rs WHERE d.id = :id
+            """)
+    Set<Long> findRelatedStudyIds(@Param("id") Long id);
 
 }
