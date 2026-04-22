@@ -55,9 +55,12 @@ public class OtpSetupPanel extends JPanel {
 
     private static final Logger LOG = LoggerFactory.getLogger(OtpSetupPanel.class);
 
+    public JLabel instructionsLabel;
+    public JLabel scanOrEnterLabel;
     public JLabel qrCodeLabel;
     public JTextField manualKeyValue;
     public JLabel toggleLink;
+    public JLabel setupHintLabel;
     public JLabel otpLabel;
     public JTextField otpText;
     public JLabel deviceLabelLabel;
@@ -78,27 +81,45 @@ public class OtpSetupPanel extends JPanel {
         this.add(container);
         this.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        // Row 0 — QR code (visible by default)
-        qrCodeLabel = new JLabel();
-        qrCodeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        // Row 0 — instructions
+        instructionsLabel = new JLabel(instructionsHtml());
+        instructionsLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.weightx = 1.0;
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 3;
+        container.add(instructionsLabel, gbc);
+
+        // Row 1 — contextual label (changes with toggle)
+        scanOrEnterLabel = new JLabel(scanOrEnterText(true));
+        scanOrEnterLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.weightx = 1.0;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.gridwidth = 3;
+        container.add(scanOrEnterLabel, gbc);
+
+        // Row 2 — QR code (visible by default)
+        qrCodeLabel = new JLabel();
+        qrCodeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.weightx = 1.0;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 3;
         container.add(qrCodeLabel, gbc);
 
-        // Row 1 — manual key field (hidden by default)
+        // Row 3 — manual key field (hidden by default)
         manualKeyValue = new JTextField("");
         manualKeyValue.setPreferredSize(new Dimension(200, 20));
         manualKeyValue.setEditable(false);
         manualKeyValue.setVisible(false);
         gbc.weightx = 1.0;
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = 3;
         gbc.gridwidth = 3;
         container.add(manualKeyValue, gbc);
 
-        // Row 2 — toggle link
+        // Row 4 — toggle link
         toggleLink = new JLabel(linkText(true));
         toggleLink.setHorizontalAlignment(SwingConstants.CENTER);
         toggleLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -106,6 +127,7 @@ public class OtpSetupPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 showingQr = !showingQr;
+                scanOrEnterLabel.setText(scanOrEnterText(showingQr));
                 qrCodeLabel.setVisible(showingQr);
                 manualKeyValue.setVisible(!showingQr);
                 toggleLink.setText(linkText(showingQr));
@@ -115,49 +137,58 @@ public class OtpSetupPanel extends JPanel {
         });
         gbc.weightx = 1.0;
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 4;
         gbc.gridwidth = 3;
         container.add(toggleLink, gbc);
 
+        // Row 5 — setup hint
+        setupHintLabel = new JLabel(setupHintHtml());
+        setupHintLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.weightx = 1.0;
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.gridwidth = 3;
+        container.add(setupHintLabel, gbc);
+
         gbc.gridwidth = 1;
 
-        // Row 3 — OTP code
+        // Row 6 — OTP code
         otpLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.code"));
         otpLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         gbc.weightx = 0.2;
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 6;
         container.add(otpLabel, gbc);
 
         otpText = new JTextField("");
         otpText.setPreferredSize(new Dimension(200, 20));
         gbc.weightx = 0.7;
         gbc.gridx = 2;
-        gbc.gridy = 3;
+        gbc.gridy = 6;
         container.add(otpText, gbc);
 
-        // Row 4 — device label
+        // Row 7 — device label
         deviceLabelLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.device.label"));
         deviceLabelLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         gbc.weightx = 0.2;
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 7;
         container.add(deviceLabelLabel, gbc);
 
         deviceLabelText = new JTextField("");
         deviceLabelText.setPreferredSize(new Dimension(200, 20));
         gbc.weightx = 0.7;
         gbc.gridx = 2;
-        gbc.gridy = 4;
+        gbc.gridy = 7;
         container.add(deviceLabelText, gbc);
 
-        // Row 5 — submit
+        // Row 8 — submit
         submit = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.submit"));
         submit.setPreferredSize(new Dimension(200, 20));
         submit.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.weightx = 0.7;
         gbc.gridx = 2;
-        gbc.gridy = 5;
+        gbc.gridy = 8;
         container.add(submit, gbc);
 
         otpSetupPanelActionListener.configure(this, sSC);
@@ -176,6 +207,9 @@ public class OtpSetupPanel extends JPanel {
         }
         if (manualKeyValue != null) {
             manualKeyValue.setVisible(false);
+        }
+        if (scanOrEnterLabel != null) {
+            scanOrEnterLabel.setText(scanOrEnterText(true));
         }
         if (toggleLink != null) {
             toggleLink.setText(linkText(true));
@@ -202,10 +236,35 @@ public class OtpSetupPanel extends JPanel {
         }
     }
 
+    private static String scanOrEnterText(boolean showingQr) {
+        String key = showingQr
+            ? "shanoir.uploader.otp.setup.open.scan"
+            : "shanoir.uploader.otp.setup.open.enter";
+        return ShUpConfig.resourceBundle.getString(key);
+    }
+
     private static String linkText(boolean showingQr) {
         String key = showingQr
             ? "shanoir.uploader.otp.setup.unable.to.scan"
             : "shanoir.uploader.otp.setup.scan.qr";
         return "<html><a href='#'>" + ShUpConfig.resourceBundle.getString(key) + "</a></html>";
+    }
+
+    private static String setupHintHtml() {
+        return "<html><div style='text-align:center'>"
+            + ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.hint.enter.code") + "<br/><br/>"
+            + ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.hint.device.name")
+            + "</div></html>";
+    }
+
+    private static String instructionsHtml() {
+        return "<html><div style='text-align:center'>"
+            + "<h2>" + ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.title") + "</h2>"
+            + ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.description") + "<br/>"
+            + ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.install") + "<br/><br/>"
+            + ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.app.microsoft") + "</li><br/>"
+            + ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.app.google") + "</li><br/>"
+            + ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.app.freeotp") + "</li><br/>"
+            + "</div></html>";
     }
 }
