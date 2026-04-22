@@ -77,6 +77,10 @@ public class OtpSetupPanel extends JPanel {
     private OtpSetupSubmitActionListener otpSetupSubmitActionListener;
 
     public void configure(StartupStateContext sSC) {
+        this.removeAll();
+        this.revalidate();
+        this.repaint();
+
         Container container = new Container();
         container.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
