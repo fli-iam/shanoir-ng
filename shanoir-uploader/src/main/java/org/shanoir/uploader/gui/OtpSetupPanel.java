@@ -120,6 +120,7 @@ public class OtpSetupPanel extends JPanel {
         manualKeyValue = new JTextField("");
         manualKeyValue.setPreferredSize(new Dimension(200, 20));
         manualKeyValue.setEditable(false);
+        manualKeyValue.setHorizontalAlignment(JTextField.CENTER);
         manualKeyValue.setVisible(false);
         gbc.weightx = 1.0;
         gbc.gridx = 0;

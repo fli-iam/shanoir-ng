@@ -391,7 +391,7 @@ public class KeycloakAuthCodeLoginService {
     private static String extractTotpManualKey(String html) {
         // The base32 key shown to users for manual entry into authenticator apps
         Matcher m = Pattern.compile(
-            "<span id=\"kc-totp-secret-key\">([^<]+)</span>"
+            "id=\"totpSecret\"[^>]*value=\"([^\"]+)\""
         ).matcher(html);
         return m.find() ? m.group(1).trim() : null;
     }
