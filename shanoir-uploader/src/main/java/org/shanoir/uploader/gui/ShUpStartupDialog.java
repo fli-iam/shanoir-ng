@@ -211,7 +211,6 @@ public class ShUpStartupDialog extends JFrame {
         additionalPanel.add(otpInputPanel);
         otpInputPanel.repaint();
         otpInputPanel.revalidate();
-        pack();
     }
 
     public void showOtpSetupForm() {
@@ -225,7 +224,6 @@ public class ShUpStartupDialog extends JFrame {
         additionalPanel.add(otpSetupPanel);
         otpSetupPanel.repaint();
         otpSetupPanel.revalidate();
-        pack();
     }
 
 }
