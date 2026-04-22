@@ -35,7 +35,8 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.action.init.OtpSetupPanelActionListener;
+import org.shanoir.uploader.action.init.OtpCancelActionListener;
+import org.shanoir.uploader.action.init.OtpSetupSubmitActionListener;
 import org.shanoir.uploader.action.init.StartupStateContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +71,10 @@ public class OtpSetupPanel extends JPanel {
     private boolean showingQr = true;
 
     @Autowired
-    private OtpSetupPanelActionListener otpSetupPanelActionListener;
+    private OtpCancelActionListener otpCancelActionListener;
+
+    @Autowired
+    private OtpSetupSubmitActionListener otpSetupSubmitActionListener;
 
     public void configure(StartupStateContext sSC) {
         Container container = new Container();
@@ -182,7 +186,18 @@ public class OtpSetupPanel extends JPanel {
         gbc.gridy = 7;
         container.add(deviceLabelText, gbc);
 
-        // Row 8 — submit
+        // Row 8 — cancel and submit
+        JButton cancel = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.cancel"));
+        cancel.setPreferredSize(new Dimension(200, 20));
+        cancel.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.weightx = 0.3;
+        gbc.gridx = 0;
+        gbc.gridy = 8;
+        container.add(cancel, gbc);
+
+        otpCancelActionListener.configure(sSC);
+        cancel.addActionListener(otpCancelActionListener);
+
         submit = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.submit"));
         submit.setPreferredSize(new Dimension(200, 20));
         submit.setHorizontalAlignment(SwingConstants.CENTER);
@@ -191,8 +206,8 @@ public class OtpSetupPanel extends JPanel {
         gbc.gridy = 8;
         container.add(submit, gbc);
 
-        otpSetupPanelActionListener.configure(this, sSC);
-        submit.addActionListener(otpSetupPanelActionListener);
+        otpSetupSubmitActionListener.configure(this, sSC);
+        submit.addActionListener(otpSetupSubmitActionListener);
     }
 
     /**
