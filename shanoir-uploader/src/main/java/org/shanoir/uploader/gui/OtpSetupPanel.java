@@ -187,27 +187,28 @@ public class OtpSetupPanel extends JPanel {
         container.add(deviceLabelText, gbc);
 
         // Row 8 — cancel and submit
-        JButton cancel = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.cancel"));
-        cancel.setPreferredSize(new Dimension(200, 20));
-        cancel.setHorizontalAlignment(SwingConstants.CENTER);
-        gbc.weightx = 0.3;
-        gbc.gridx = 0;
-        gbc.gridy = 8;
-        container.add(cancel, gbc);
+        JPanel buttonPanel = new JPanel(); // FlowLayout by default
 
+        JButton cancel = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.cancel"));
+        cancel.setPreferredSize(new Dimension(100, 20));
+        cancel.setHorizontalAlignment(SwingConstants.CENTER);
         otpCancelActionListener.configure(sSC);
         cancel.addActionListener(otpCancelActionListener);
 
         submit = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.submit"));
-        submit.setPreferredSize(new Dimension(200, 20));
+        submit.setPreferredSize(new Dimension(100, 20));
         submit.setHorizontalAlignment(SwingConstants.CENTER);
-        gbc.weightx = 0.7;
-        gbc.gridx = 2;
-        gbc.gridy = 8;
-        container.add(submit, gbc);
-
         otpSetupSubmitActionListener.configure(this, sSC);
         submit.addActionListener(otpSetupSubmitActionListener);
+
+        buttonPanel.add(cancel);
+        buttonPanel.add(submit);
+
+        gbc.gridx = 0;
+        gbc.gridy = 8;
+        gbc.gridwidth = 3;
+
+        container.add(buttonPanel, gbc);
     }
 
     /**
