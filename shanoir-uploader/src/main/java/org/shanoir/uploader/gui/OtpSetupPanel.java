@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -66,7 +67,11 @@ public class OtpSetupPanel extends JPanel {
     public JTextField otpText;
     public JLabel deviceLabelLabel;
     public JTextField deviceLabelText;
+    public JLabel logoutOtherDevicesLabel;
+    public JCheckBox logoutOtherDevicesCheckBox;
+    public JPanel buttonPanel;
     public JButton submit;
+    public JButton cancel;
 
     private boolean showingQr = true;
 
@@ -191,10 +196,17 @@ public class OtpSetupPanel extends JPanel {
         gbc.gridy = 7;
         container.add(deviceLabelText, gbc);
 
-        // Row 8 — cancel and submit
-        JPanel buttonPanel = new JPanel(); // FlowLayout by default
+        // Row 8 — logout from other devices
+        logoutOtherDevicesCheckBox = new JCheckBox(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.setup.logout.other.devices.label"));
+        logoutOtherDevicesCheckBox.setHorizontalAlignment(SwingConstants.CENTER);
+        gbc.gridx = 0;
+        gbc.gridy = 8;
+        gbc.gridwidth = 3;
+        gbc.weightx = 1.0;
+        container.add(logoutOtherDevicesCheckBox, gbc);
 
-        JButton cancel = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.cancel"));
+        // Row 9 — cancel and submit
+        cancel = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.cancel"));
         cancel.setPreferredSize(new Dimension(100, 20));
         cancel.setHorizontalAlignment(SwingConstants.CENTER);
         otpCancelActionListener.configure(sSC);
@@ -206,13 +218,12 @@ public class OtpSetupPanel extends JPanel {
         otpSetupSubmitActionListener.configure(this, sSC);
         submit.addActionListener(otpSetupSubmitActionListener);
 
+        buttonPanel = new JPanel();
         buttonPanel.add(cancel);
         buttonPanel.add(submit);
-
         gbc.gridx = 0;
-        gbc.gridy = 8;
+        gbc.gridy = 9;
         gbc.gridwidth = 3;
-
         container.add(buttonPanel, gbc);
     }
 

@@ -89,7 +89,7 @@ public class ShUpStartupDialog extends JFrame {
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (int) ((dimension.getWidth() - frame.getWidth()) / 2);
         int y = (int) ((dimension.getHeight() - frame.getHeight()) / 2);
-        setBounds(x - 200, y - 300, 400, 800);
+        setBounds(x - 200, y - 300, 400, 820);
         contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         initTitle();
