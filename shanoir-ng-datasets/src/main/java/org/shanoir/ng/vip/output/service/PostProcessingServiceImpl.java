@@ -70,6 +70,7 @@ public class PostProcessingServiceImpl implements PostProcessingService {
         for (OutputHandler outputHandler : outputHandlers) {
             if (outputHandler.canProcess(comment + "_post_processing", true)) {
                 relevantOutputHandler = outputHandler;
+                break;
             }
         }
     }
@@ -101,6 +102,7 @@ public class PostProcessingServiceImpl implements PostProcessingService {
                 } catch (Exception e) {
                     LOG.error("Post processing of monitoring name: {}, {} failed.", monitoring.getName(), monitoring.getId(), e);
                 }
+                latch.countDown();
             });
         }
 

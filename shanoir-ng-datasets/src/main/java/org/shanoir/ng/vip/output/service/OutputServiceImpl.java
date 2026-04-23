@@ -20,6 +20,7 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.assertj.core.util.Lists;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
@@ -62,33 +63,53 @@ public class OutputServiceImpl implements OutputService {
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
 
-    public void process(ExecutionMonitoring monitoring) throws ResultHandlerException, EntityNotFoundException {
-        OutputHandler relevantOutputHandler = null;
-        for (OutputHandler outputHandler : outputHandlers) {
-            if (outputHandler.canProcess(monitoring, false)) {
-                relevantOutputHandler = outputHandler;
-                break;
-            }
-        }
-        process(monitoring, relevantOutputHandler);
+    public void process(ExecutionMonitoring monitoring, OutputHandler outputHandler) throws ResultHandlerException, EntityNotFoundException {
+        process(monitoring, Lists.list(outputHandler), true);
     }
 
-    public void process(ExecutionMonitoring monitoring, OutputHandler outputHandler) throws ResultHandlerException, EntityNotFoundException {
-        final File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
+    public void process(ExecutionMonitoring monitoring) throws ResultHandlerException, EntityNotFoundException {
+        process(monitoring, outputHandlers, false);
+    }
 
-        for (File archive : getArchivesToProcess(userImportDir)) {
-            File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
-            List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
+    /**
+     *
+     * Process the result of the given execution with the given output handlers
+     *
+     * @param monitoring
+     * @param selectedOutputHandlers
+     * @throws ResultHandlerException
+     */
+    private void process(ExecutionMonitoring monitoring, List<OutputHandler> selectedOutputHandlers, boolean postProcessing) throws ResultHandlerException, EntityNotFoundException {
 
-            LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
-            outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
+        File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
 
-            deleteTemporaryDirectory(cacheFolder);        }
 
+        if (userImportDir.exists()) {
+            for (File archive : getArchivesToProcess(userImportDir)) {
+                LOG.info("Processing archive : " + archive.getAbsolutePath());
+                File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
+                try {
+                    List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
+
+                    for (OutputHandler outputHandler : selectedOutputHandlers) {
+                        if (outputHandler.canProcess(monitoring, postProcessing)) {
+                            LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
+                            outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
+                        }
+                    }
+                } finally {
+                    System.gc();
+                    deleteTemporaryDirectory(cacheFolder);
+                }
+            }
+        }
+
+        LOG.info("Output processing for monitoring " +  monitoring.getId() + " finished.");
         // Remove processed datasets from current execution monitoring
         monitoring.setInputDatasets(Collections.emptyList());
         datasetProcessingService.update(monitoring);
         processingResourceRepository.deleteByProcessingId(monitoring.getId());
+        LOG.info("Working files for output processing removed.");
     }
 
     /**
@@ -150,6 +171,7 @@ public class OutputServiceImpl implements OutputService {
             FileUtils.deleteDirectory(directory);
         } catch (IOException e) {
             LOG.error("I/O error while deleting cache dir [{}]", directory.getAbsolutePath());
+            LOG.error(e.getCause().getMessage(), e);
         }
     }
 }

@@ -136,7 +136,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
     @Override
     public boolean canProcess(ExecutionMonitoring processing, boolean postProcessing) throws ResultHandlerException {
-        return canProcess(processing.getPipelineIdentifier(), postProcessing);
+        return canProcess(processing.getName(), postProcessing);
     }
 
     public boolean canProcess(String pipelineIdentifier, boolean postProcessing) throws ResultHandlerException {
