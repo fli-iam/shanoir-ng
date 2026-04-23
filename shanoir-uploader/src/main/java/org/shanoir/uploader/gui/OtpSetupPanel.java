@@ -36,7 +36,8 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.action.init.OtpCancelActionListener;
+import org.shanoir.uploader.action.init.AuthCancelActionListener;
+import org.shanoir.uploader.action.init.AuthCancelActionListener.CancelTarget;
 import org.shanoir.uploader.action.init.OtpSetupSubmitActionListener;
 import org.shanoir.uploader.action.init.StartupStateContext;
 import org.slf4j.Logger;
@@ -75,7 +76,7 @@ public class OtpSetupPanel extends JPanel {
     private boolean showingQr = true;
 
     @Autowired
-    private OtpCancelActionListener otpCancelActionListener;
+    private AuthCancelActionListener authCancelActionListener;
 
     @Autowired
     private OtpSetupSubmitActionListener otpSetupSubmitActionListener;
@@ -205,11 +206,11 @@ public class OtpSetupPanel extends JPanel {
         container.add(logoutOtherDevicesCheckBox, gbc);
 
         // Row 9 — cancel and submit
-        cancel = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.cancel"));
+        cancel = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.cancel"));
         cancel.setPreferredSize(new Dimension(100, 20));
         cancel.setHorizontalAlignment(SwingConstants.CENTER);
-        otpCancelActionListener.configure(sSC);
-        cancel.addActionListener(otpCancelActionListener);
+        authCancelActionListener.configure(sSC, CancelTarget.LOGIN);
+        cancel.addActionListener(authCancelActionListener);
 
         submit = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.submit"));
         submit.setPreferredSize(new Dimension(100, 20));
@@ -223,6 +224,7 @@ public class OtpSetupPanel extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 9;
         gbc.gridwidth = 3;
+
         container.add(buttonPanel, gbc);
     }
 

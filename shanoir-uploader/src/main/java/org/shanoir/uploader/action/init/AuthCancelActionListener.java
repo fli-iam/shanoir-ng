@@ -17,32 +17,33 @@ package org.shanoir.uploader.action.init;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.action.init.StartupStateContext;
-import org.shanoir.uploader.action.init.AuthenticationManualConfigurationState;
 import org.shanoir.uploader.gui.ShUpStartupDialog;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OtpCancelActionListener implements ActionListener {
+public class AuthCancelActionListener implements ActionListener {
+
+    public enum CancelTarget { LOGIN, SELECT_PROFILE }
 
     private StartupStateContext sSC;
+    private CancelTarget cancelTarget = CancelTarget.LOGIN;
 
     @Autowired
     private ShUpStartupDialog shUpStartupDialog;
 
-    @Autowired
-    private AuthenticationManualConfigurationState authenticationManualConfigurationState;
-
-    public void configure(StartupStateContext sSC) {
+    public void configure(StartupStateContext sSC, CancelTarget target) {
         this.sSC = sSC;
+        this.cancelTarget = target;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        // Go back to login screen
-        shUpStartupDialog.showLoginForm();
+        if (cancelTarget == CancelTarget.LOGIN) {
+            shUpStartupDialog.showLoginForm();
+        } else if (cancelTarget == CancelTarget.SELECT_PROFILE) {
+            shUpStartupDialog.showSelectProfileForm();
+        }
     }
 }

@@ -29,9 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OtpInputPanelActionListener implements ActionListener {
+public class OtpInputSubmitActionListener implements ActionListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OtpInputPanelActionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OtpInputSubmitActionListener.class);
 
     private OtpInputPanel otpInputPanel;
     private StartupStateContext sSC;

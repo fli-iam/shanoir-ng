@@ -28,7 +28,9 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.action.init.OtpInputPanelActionListener;
+import org.shanoir.uploader.action.init.AuthCancelActionListener;
+import org.shanoir.uploader.action.init.AuthCancelActionListener.CancelTarget;
+import org.shanoir.uploader.action.init.OtpInputSubmitActionListener;
 import org.shanoir.uploader.action.init.StartupStateContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,12 +45,21 @@ public class OtpInputPanel extends JPanel {
 
     public JLabel otpLabel;
     public JTextField otpText;
+    public JPanel buttonPanel;
+    public JButton cancel;
     public JButton submit;
 
     @Autowired
-    private OtpInputPanelActionListener otpInputPanelActionListener;
+    private AuthCancelActionListener authCancelActionListener;
+
+    @Autowired
+    private OtpInputSubmitActionListener otpInputSubmitActionListener;
 
     public void configure(StartupStateContext sSC) {
+        this.removeAll();
+        this.revalidate();
+        this.repaint();
+
         Container container = new Container();
         container.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -72,15 +83,25 @@ public class OtpInputPanel extends JPanel {
         gbc.gridy = 0;
         container.add(otpText, gbc);
 
+        cancel = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.cancel"));
+        cancel.setPreferredSize(new Dimension(100, 20));
+        cancel.setHorizontalAlignment(SwingConstants.CENTER);
+        authCancelActionListener.configure(sSC, CancelTarget.LOGIN);
+        cancel.addActionListener(authCancelActionListener);
+
         submit = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.otp.submit"));
-        submit.setPreferredSize(new Dimension(200, 20));
+        submit.setPreferredSize(new Dimension(100, 20));
         submit.setHorizontalAlignment(SwingConstants.CENTER);
-        gbc.weightx = 0.7;
+        otpInputSubmitActionListener.configure(this, sSC);
+        submit.addActionListener(otpInputSubmitActionListener);
+
+        buttonPanel = new JPanel();
+        buttonPanel.add(cancel);
+        buttonPanel.add(submit);
+        gbc.gridx = 0;
         gbc.gridx = 2;
         gbc.gridy = 1;
-        container.add(submit, gbc);
 
-        otpInputPanelActionListener.configure(this, sSC);
-        submit.addActionListener(otpInputPanelActionListener);
+        container.add(buttonPanel, gbc);
     }
 }
