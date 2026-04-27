@@ -52,6 +52,7 @@ import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.importer.service.ProcessedDatasetImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -63,6 +64,8 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -154,6 +157,9 @@ public class DatasetApiController implements DatasetApi {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private StorageService storageService;
 
     /** Number of downloadable datasets. */
     private static final int DATASET_LIMIT = 500;
@@ -657,6 +663,26 @@ public class DatasetApiController implements DatasetApi {
             ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while shaping HTTP response.", e.getMessage());
             throw new RestServiceException(e, error);
         }
-
     }
+
+    @Override
+    public ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException {
+        List<Examination> examinations = examinationService.findAll();
+        List<FileEntryDTO> entries = new ArrayList<>();
+        for (Examination examination : examinations) {
+            Long examinationId = examination.getId();
+            String directory = storageService.getDirectoryExtraData(examinationId);
+            if (examination.getExtraDataFilePathList() != null) {
+                for (String path : examination.getExtraDataFilePathList()) {
+                    boolean exists = storageService.existsExtraData(examinationId, path);
+                    entries.add(new FileEntryDTO(examination.getStudyId(), directory + path, "EXTRA-DATA", exists));
+                }
+            }
+        }
+        if (entries.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(entries, HttpStatus.OK);
+    }
+
 }

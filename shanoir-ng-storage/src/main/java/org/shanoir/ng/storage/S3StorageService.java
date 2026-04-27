@@ -155,6 +155,16 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
+    public boolean existsExtraData(Long examinationId, String fileName) throws StorageException {
+        String key = datasetsPrefix + EXAMINATION + examinationId + SLASH + fileName;
+        try {
+            return s3Template.objectExists(datasetsBucket, key);
+        } catch (Exception e) {
+            throw new StorageException("S3 existence check failed for: " + fileName, e);
+        }
+    }
+
+    @Override
     public String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
@@ -411,6 +421,16 @@ public class S3StorageService implements StorageService {
             throw new StorageException("Missing studies bucket configuration.", null);
         }
         String directory = studiesPrefix + STUDY + studyId;
+        return directory + SLASH;
+    }
+
+    @Override
+    public String getDirectoryExtraData(Long examinationId)
+            throws StorageException {
+        if (datasetsBucket.equals(UNUSED)) {
+            throw new StorageException("Missing datasets bucket configuration.", null);
+        }
+        String directory = datasetsPrefix + EXAMINATION + examinationId;
         return directory + SLASH;
     }
 

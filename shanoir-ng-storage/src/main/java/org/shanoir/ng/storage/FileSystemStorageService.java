@@ -56,6 +56,13 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public boolean existsExtraData(Long examinationId, String fileName) throws StorageException {
+        String directory = EXAMINATION + examinationId;
+        Path filePath = Paths.get(baseDirDatasets, directory, fileName);
+        return Files.exists(filePath);
+    }
+
+    @Override
     public String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
@@ -74,6 +81,17 @@ public class FileSystemStorageService implements StorageService {
         }
         String directory = STUDY + studyId;
         Path dirPath = Paths.get(baseDirStudies, directory);
+        return dirPath.toString() + SLASH;
+    }
+
+    @Override
+    public String getDirectoryExtraData(Long examinationId)
+            throws StorageException {
+        if (baseDirDatasets.equals(UNUSED)) {
+            throw new StorageException("Missing datasets directory configuration.", null);
+        }
+        String directory = EXAMINATION + examinationId;
+        Path dirPath = Paths.get(baseDirDatasets, directory);
         return dirPath.toString() + SLASH;
     }
 

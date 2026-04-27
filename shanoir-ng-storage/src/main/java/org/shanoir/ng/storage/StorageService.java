@@ -31,7 +31,7 @@ public interface StorageService {
 
     public static final String PATHOLOGY_MODEL = "pathology-model-";
 
-    public static final String DERIVATIVES = "derivatives";
+    public static final String DERIVATIVES = "processed-dataset";
 
     public static final String UNUSED = "UNUSED";
 
@@ -40,6 +40,8 @@ public interface StorageService {
     public static final String UNDERSCORE = "_";
 
     boolean existsStudyData(Long studyId, String fileName) throws StorageException;
+
+    boolean existsExtraData(Long examinationId, String fileName) throws StorageException;
 
     String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
@@ -78,6 +80,8 @@ public interface StorageService {
     Resource loadPathologyModelData(Long pathologyModelId, String fileName) throws StorageException;
 
     String getDirectoryStudyData(Long studyId) throws StorageException;
+
+    String getDirectoryExtraData(Long examinationId) throws StorageException;
 
     long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException;
 
