@@ -264,7 +264,7 @@ public class StudyServiceImpl implements StudyService {
             sendStudyUserReport(studyDb, studyDb.getStudyUserList());
             if (studyDb.getIsDraft()) {
                 // Notify users service to send emails to study admins about new study
-                sendAdminEmailReport(studyDb, true);
+                sendAdminEmailReport(studyDb, "created");
             }
         }
 
@@ -279,6 +279,7 @@ public class StudyServiceImpl implements StudyService {
         study.setIsDraft(false);
         studyRepository.save(study);
         updateStudyName(studyMapper.studyToStudyDTODetailed(study));
+        sendAdminEmailReport(study, "approved");
         sendMembersApprovalEmailReport(study);
         return study;
     }
@@ -466,7 +467,7 @@ public class StudyServiceImpl implements StudyService {
         }
 
         if (studyDb.getIsDraft()) {
-            sendAdminEmailReport(studyDb, false);
+            sendAdminEmailReport(studyDb, "edited");
         }
 
         return studyDb;
@@ -831,9 +832,9 @@ public class StudyServiceImpl implements StudyService {
         }
     }
 
-    private void sendAdminEmailReport(Study study, boolean isNew) {
+    private void sendAdminEmailReport(Study study, String action) {
         EmailStudy email = buildAdminEmailReport(study);
-        email.setIsNew(isNew);
+        email.setAction(action);
 
         try {
             rabbitTemplate.convertAndSend(
