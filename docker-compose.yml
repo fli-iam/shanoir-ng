@@ -16,7 +16,7 @@ services:
   #
   keycloak-database:
     container_name: "${SHANOIR_PREFIX}keycloak-database"
-    image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:NG_v2.9.3"
+    image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:NG_v2.10.0"
     environment:
       - MYSQL_DATABASE=keycloak
     ulimits:
@@ -49,7 +49,7 @@ services:
       - SHANOIR_SMTP_STARTTLS_ENABLE
       - SHANOIR_SMTP_STARTTLS_REQUIRED
       - SHANOIR_SMTP_FROM
-    image: "ghcr.io/fli-iam/shanoir-ng/keycloak:NG_v2.9.3"
+    image: "ghcr.io/fli-iam/shanoir-ng/keycloak:NG_v2.10.0"
     volumes:
       - "keycloak-logs:/opt/keycloak/data/log"
     networks:
@@ -76,7 +76,7 @@ services:
   #
   database:
     container_name: "${SHANOIR_PREFIX}database"
-    image: "ghcr.io/fli-iam/shanoir-ng/database:NG_v2.9.3"
+    image: "ghcr.io/fli-iam/shanoir-ng/database:NG_v2.10.0"
     command: --max_allowed_packet 20000000
     env_file:
       - ./docker-compose/database/variables.env
@@ -101,7 +101,7 @@ services:
   #
   database-migrations:
     container_name: "${SHANOIR_PREFIX}database-migrations"
-    image: "ghcr.io/fli-iam/shanoir-ng/database-migrations:NG_v2.9.3"
+    image: "ghcr.io/fli-iam/shanoir-ng/database-migrations:NG_v2.10.0"
     environment:
       - SHANOIR_MIGRATION
     networks:
@@ -115,7 +115,7 @@ services:
   #
   users:
     container_name: "${SHANOIR_PREFIX}users"
-    image: "ghcr.io/fli-iam/shanoir-ng/users:NG_v2.9.3"
+    image: "ghcr.io/fli-iam/shanoir-ng/users:NG_v2.10.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -151,7 +151,7 @@ services:
   #
   studies:
     container_name: "${SHANOIR_PREFIX}studies"
-    image: "ghcr.io/fli-iam/shanoir-ng/studies:NG_v2.9.3"
+    image: "ghcr.io/fli-iam/shanoir-ng/studies:NG_v2.10.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -188,7 +188,7 @@ services:
   #
   import:
     container_name: "${SHANOIR_PREFIX}import"
-    image: "ghcr.io/fli-iam/shanoir-ng/import:NG_v2.9.3"
+    image: "ghcr.io/fli-iam/shanoir-ng/import:NG_v2.10.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -221,7 +221,7 @@ services:
   #
   datasets:
     container_name: "${SHANOIR_PREFIX}datasets"
-    image: "ghcr.io/fli-iam/shanoir-ng/datasets:NG_v2.9.3"
+    image: "ghcr.io/fli-iam/shanoir-ng/datasets:NG_v2.10.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -265,7 +265,7 @@ services:
   #
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"
-    image: "ghcr.io/fli-iam/shanoir-ng/preclinical:NG_v2.9.3"
+    image: "ghcr.io/fli-iam/shanoir-ng/preclinical:NG_v2.10.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -301,7 +301,7 @@ services:
   #
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
-    image: "ghcr.io/fli-iam/shanoir-ng/nifti-conversion:NG_v2.9.3"
+    image: "ghcr.io/fli-iam/shanoir-ng/nifti-conversion:NG_v2.10.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
@@ -319,7 +319,7 @@ services:
   #
   solr:
     container_name: "${SHANOIR_PREFIX}solr"
-    image: "ghcr.io/fli-iam/shanoir-ng/solr:NG_v2.9.3"
+    image: "ghcr.io/fli-iam/shanoir-ng/solr:NG_v2.10.0"
     environment:
       - SOLR_LOG_LEVEL=SEVERE
     volumes:
@@ -392,7 +392,7 @@ services:
   #
   nginx:
     container_name: shanoir-ng-nginx
-    image: "ghcr.io/fli-iam/shanoir-ng/nginx:NG_v2.9.3"
+    image: "ghcr.io/fli-iam/shanoir-ng/nginx:NG_v2.10.0"
     environment:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
