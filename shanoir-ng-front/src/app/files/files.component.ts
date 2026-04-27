@@ -16,6 +16,8 @@ import { Component } from '@angular/core';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyService } from '../studies/shared/study.service';
+import { DatasetService } from '../datasets/shared/dataset.service';
+
 
 @Component({
     selector: 'files',
@@ -26,6 +28,7 @@ import { StudyService } from '../studies/shared/study.service';
 export class FilesComponent {
 
     constructor(private studyService: StudyService,
+                private datasetService: DatasetService,
                 private breadcrumbsService: BreadcrumbsService) {
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
@@ -33,8 +36,18 @@ export class FilesComponent {
         });
     }
 
-    openFilesJson(): void {
+    openStudiesFilesJson(): void {
         this.studyService.getStudiesFiles().then(json => {
+            const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const newTab = window.open(url, '_blank');
+            // Revoke the object URL after the tab has loaded to free memory
+            newTab?.addEventListener('load', () => URL.revokeObjectURL(url));
+        });
+    }
+
+    openDatasetsFilesJson(): void {
+        this.datasetService.getDatasetsFiles().then(json => {
             const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const newTab = window.open(url, '_blank');
