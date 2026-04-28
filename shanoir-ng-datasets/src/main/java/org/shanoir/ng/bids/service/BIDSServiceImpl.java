@@ -575,13 +575,13 @@ public class BIDSServiceImpl implements BIDSService {
             }
             // default case, dataFolder is still null => undefined folder
             if (dataFolder == null) {
-                dataFolder = createDataFolder("undefined", workDir);
+                dataFolder = createDataFolder("anat", workDir);
             }
         } else if (dataset instanceof BidsDataset) {
             BidsDataset bidsdataset = (BidsDataset) dataset;
             dataFolder = createDataFolder(bidsdataset.getBidsDataType(), workDir);
         } else {
-            dataFolder = createDataFolder("undefined", workDir);
+            dataFolder = createDataFolder("anat", workDir);
         }
         return dataFolder;
     }
