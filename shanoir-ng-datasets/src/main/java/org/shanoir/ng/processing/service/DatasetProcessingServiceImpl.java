@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -98,6 +99,10 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     @Override
     public List<DatasetProcessing> findByInputDatasetId(Long datasetId) {
         return repository.findAllByInputDatasets_Id(datasetId);
+    }
+
+    public List<DatasetProcessing> findByMonitoringId(Long monitoringId) {
+        return StreamSupport.stream(repository.findAllById(repository.findAllIdsByMonitoringId(monitoringId)).spliterator(), false).collect(Collectors.toList());
     }
 
     @Override

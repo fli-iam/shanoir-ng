@@ -75,14 +75,27 @@ public interface DatasetProcessingService {
     /**
      * Get all entities.
      *
-     * @return a list of manufacturers.
+     * @return exhaustive list of datasetProcessing.
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     List<DatasetProcessing> findAll();
 
+    /**
+     * Get a list of datasetProcessing having the given dataset as input
+     *
+     * @return a datasetProcessing list.
+     */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     List<DatasetProcessing> findByInputDatasetId(Long datasetId);
 
+
+    /**
+     * Get a list of datasetProcessing having the given monitoring as monitoring
+     *
+     * @return a datasetProcessing list.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    List<DatasetProcessing> findByMonitoringId(Long monitoringId);
     /**
      * Delete an entity.
      *

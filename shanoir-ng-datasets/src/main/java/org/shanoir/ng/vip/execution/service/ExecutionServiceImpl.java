@@ -20,6 +20,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.dto.ParameterResourceDTO;
+import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -30,7 +31,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
-import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringServiceImpl;
 import org.shanoir.ng.vip.processingResource.service.ProcessingResourceServiceImpl;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
@@ -86,6 +86,9 @@ public class ExecutionServiceImpl implements ExecutionService {
     private ExecutionTrackingServiceImpl executionTrackingService;
 
     @Autowired
+    private DatasetProcessingRepository datasetProcessingRepository;
+
+    @Autowired
     private Utils utils;
 
     @PostConstruct
@@ -123,29 +126,32 @@ public class ExecutionServiceImpl implements ExecutionService {
                 });
     }
 
-    public Mono<String> getExecutionStderr(String identifier) {
+    public Mono<String> getExecutionStderr(Long processingId) {
+        DatasetProcessingRepository.IdentificationData identificationData = datasetProcessingRepository.findIdentificationDataFromProcessingId(processingId);
 
-        String url = vipExecutionUri + "/" + identifier + "/stderr";
+        String url = vipExecutionUri + "/" + identificationData.getMonitoringIdentifier() + "/jobs/" + identificationData.getMonitoringIndex() + "/stderr";
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
                 .retrieve()
                 .bodyToMono(String.class)
                 .onErrorResume(e -> {
-                    ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] stderr logs from VIP API", e.getMessage());
+                    ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get processing [" + processingId + "] stderr logs from VIP API", e.getMessage());
                     return Mono.error(new RestServiceException(e, model));
                 });
     }
 
-    public Mono<String> getExecutionStdout(String identifier) {
-        String url = vipExecutionUri + "/" + identifier + "/stdout";
+    public Mono<String> getExecutionStdout(Long processingId) {
+        DatasetProcessingRepository.IdentificationData identificationData = datasetProcessingRepository.findIdentificationDataFromProcessingId(processingId);
+
+        String url = vipExecutionUri + "/" + identificationData.getMonitoringIdentifier() + "/jobs/" + identificationData.getMonitoringIndex() + "/stdout";
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
                 .retrieve()
                 .bodyToMono(String.class)
                 .onErrorResume(e -> {
-                    ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] stdout logs from VIP API", e.getMessage());
+                    ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + processingId + "] stdout logs from VIP API", e.getMessage());
                     return Mono.error(new RestServiceException(e, model));
                 });
     }
@@ -159,7 +165,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         String url = vipExecutionUri + "/" + identifier;
         HttpHeaders headers = getServiceAccountHttpHeaders();
 
-        Mono<LinkedHashMap> a = webClient.get()
+        return webClient.get()
                 .uri(url)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
@@ -170,51 +176,11 @@ public class ExecutionServiceImpl implements ExecutionService {
                     }
                     return Mono.error(new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", null));
                 })
-                .bodyToMono(LinkedHashMap.class)
+                .bodyToMono(VipExecutionDTO.class)
                 .onErrorResume(e -> {
                     ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] from VIP API", e.getMessage());
                     return Mono.error(new RestServiceException(e, model));
                 });
-
-        LinkedHashMap b = a.block();
-        VipExecutionDTO dto = new VipExecutionDTO();
-        dto.setIdentifier(b.get("identifier").toString());
-        dto.setName(b.get("name").toString());
-        dto.setPipelineIdentifier(b.get("pipelineIdentifier").toString());
-        dto.setTimeout(Integer.parseInt(b.get("timeout").toString()));
-        dto.setStatus(ExecutionStatus.fromRestLabel(b.get("status").toString()));
-        LinkedHashMap<String, String> c = (LinkedHashMap<String, String>) b.get("inputValues");
-        LinkedHashMap<String, List<String>> d = new LinkedHashMap<>();
-        d.put("dicom_archive", List.of(c.get("dicom_archive")));
-        dto.setInputValues(d);
-        dto.setReturnedFiles(null);
-        dto.setStudyIdentifier(null);
-        dto.setErrorCode(null);
-        dto.setStartDate((Long) b.get("startDate"));
-        dto.setEndDate(null);
-        dto.setResultsLocation(null);
-        dto.setJobs((LinkedHashMap<String, LinkedHashMap<String, String>>) b.get("jobs"));
-        return Mono.just(dto);
-
-//        String url = vipExecutionUri + "/" + identifier + "/summary";
-//        HttpHeaders headers = getServiceAccountHttpHeaders();
-//
-//        Mono<LinkedHashMap> a = webClient.get()
-//                .uri(url)
-//                .headers(httpHeaders -> httpHeaders.addAll(headers))
-//                .retrieve()
-//                .onStatus(HttpStatusCode::is4xxClientError, response -> {
-//                    if (response.statusCode().equals(HttpStatus.UNAUTHORIZED)) {
-//                        LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
-//                        return Mono.empty();
-//                    }
-//                    return Mono.error(new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", null));
-//                })
-//                .bodyToMono(VipExecutionDTO.class)
-//                .onErrorResume(e -> {
-//                    ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] from VIP API", e.getMessage());
-//                    return Mono.error(new RestServiceException(e, model));
-//                });
     }
 
     /**
@@ -278,12 +244,12 @@ public class ExecutionServiceImpl implements ExecutionService {
     /**
      * Get location of exec results as URI
      */
-    private String getResultsLocationUri(String resultLocation, ExecutionCandidateDTO candidate) {
-        return shanoirURIScheme + resultLocation
+    private List<String> getResultsLocationUri(String resultLocation, ExecutionCandidateDTO candidate) {
+        return List.of(shanoirURIScheme + resultLocation
                 + "?token=" + KeycloakUtil.getToken()
                 + "&refreshToken=" + candidate.getRefreshToken()
                 + "&clientId=" + candidate.getClient()
-                + "&md5=none&type=File";
+                + "&md5=none&type=File");
     }
 
     /**
