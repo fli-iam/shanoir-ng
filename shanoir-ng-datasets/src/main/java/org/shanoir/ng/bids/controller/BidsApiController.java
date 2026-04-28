@@ -207,7 +207,7 @@ public class BidsApiController implements BidsApi {
             @Parameter(description = "Id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath) throws RestServiceException, IOException {
 
-        if (!filePath.startsWith("/var/datasets-data/bids-data/stud-" + studyId)) {
+        if (!filePath.startsWith(bidsStorageDir)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
