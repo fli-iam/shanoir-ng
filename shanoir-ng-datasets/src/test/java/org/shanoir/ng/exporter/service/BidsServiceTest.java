@@ -14,6 +14,10 @@
 
 package org.shanoir.ng.exporter.service;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.BDDMockito.given;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,11 +27,8 @@ import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -95,8 +96,6 @@ public class BidsServiceTest {
 
     @Mock
     private ShanoirEventService eventService;
-
-    private String studyName = "STUDY";
 
     private Examination exam = ModelsUtil.createExamination();
 
