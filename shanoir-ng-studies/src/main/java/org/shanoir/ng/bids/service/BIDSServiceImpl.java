@@ -133,12 +133,12 @@ public class BIDSServiceImpl implements BIDSService {
         buffer.append(CSV_SPLITTER);
 
         for (Subject subject : subjs) {
-            String subjectName = subject.getName();
+            String subjectName = formatLabel(subject.getName());
             String subjectAge = ageCalculation(subject);
             String subjectSex = subject.getSex() != null ? subject.getSex().name() : "O";
             subjectName = this.formatLabel(subjectName);
             // Write in the file the values
-            buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subjectName).append(CSV_SEPARATOR)
+            buffer.append(SUBJECT_PREFIX).append(subject.getId()).append(subjectName).append(CSV_SEPARATOR)
                     .append(subject.getId()).append(CSV_SEPARATOR)
                     .append(subjectAge).append(CSV_SEPARATOR)
                     .append(subjectSex).append(CSV_SEPARATOR)
@@ -165,7 +165,6 @@ public class BIDSServiceImpl implements BIDSService {
 
     private File createBaseBidsFolder(File workFolder, String studyName) {
         workFolder.mkdirs();
-
         // 2. Create dataset_description.json and README
         DatasetDescription datasetDescription = new DatasetDescription();
         datasetDescription.setName(studyName);
@@ -175,7 +174,6 @@ public class BIDSServiceImpl implements BIDSService {
         } catch (IOException e) {
             LOG.error(e.getMessage());
         }
-
         return workFolder;
     }
 

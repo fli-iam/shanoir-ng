@@ -13,6 +13,7 @@
  */
 package org.shanoir.ng.study.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,35 +30,35 @@ public class DatasetDescription {
 
     /** REQUIRED. The version of the BIDS standard that was used. */
     @JsonProperty("BIDSVersion")
-    private String bidsVersion = "1.1.2-dev";
+    private String bidsVersion = "1.11.1";
 
     /** RECOMMENDED. What license is this dataset distributed under? The use of license name abbreviations is suggested for specifying a license. A list of common licenses with suggested abbreviations can be found in Appendix II. */
     @JsonProperty("License")
-    private String license;
+    private String license = "";
 
     /** OPTIONAL. List of individuals who contributed to the creation/curation of the dataset. */
     @JsonProperty("Authors")
-    private List<String> authors;
+    private List<String> authors = new ArrayList<>();
 
     /** OPTIONAL. Text acknowledging contributions of individuals or institutions beyond those listed in Authors or Funding. */
     @JsonProperty("Acknowledgements")
-    private String acknowledgements;
+    private String acknowledgements = "";
 
     /** OPTIONAL. Text containing instructions on how researchers using this dataset should acknowledge the original authors. This field can also be used to define a publication that should be cited in publications that use the dataset. */
     @JsonProperty("HowToAcknowledge")
-    private String howToAcknowledge;
+    private String howToAcknowledge = "";
 
     /** OPTIONAL. List of sources of funding (grant numbers) */
     @JsonProperty("Funding")
-    private String funding;
+    private String funding = "";
 
     /** OPTIONAL. List of references to publication that contain information on the dataset, or links. */
     @JsonProperty("ReferencesAndLinks")
-    private String referencesAndLinks;
+    private String referencesAndLinks = "";
 
     /** OPTIONAL. The Document Object Identifier of the dataset (not the corresponding paper). */
     @JsonProperty("datasetDOI")
-    private String datasetDOI;
+    private String datasetDOI = "";
 
     /**
      * @return the name

@@ -39,7 +39,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataSetDescription;
@@ -111,8 +110,6 @@ public class BIDSServiceImpl implements BIDSService {
     private static final Logger LOG = LoggerFactory.getLogger(BIDSServiceImpl.class);
 
     private static final String TASK = "_task_";
-
-    private static final String DATASET_DESCRIPTION_FILE = "dataset_description.json";
 
     private static final String README_FILE = "README";
 
@@ -211,13 +208,10 @@ public class BIDSServiceImpl implements BIDSService {
                         + "like building the BIDS tree or running the validator.");
                 eventService.publishEvent(event);
 
-                // Otherwise, create it from scratch
-                File baseDir = createBaseBidsFolder(workFolder, studyName);
-
                 // Iterate over subjects got from call to SubjectApiController.findSubjectsByStudyId() and get list of subjects
                 List<Subject> subjs = getSubjectsForStudy(studyId);
                 if (org.apache.commons.collections4.CollectionUtils.isEmpty(subjs)) {
-                    return baseDir;
+                    return workFolder;
                 }
 
                 // Sort by ID
@@ -233,7 +227,7 @@ public class BIDSServiceImpl implements BIDSService {
                     event.setMessage("Exporting subject " + subj.getName() + " as BIDS for study " + studyName);
                     event.setProgress((float) (index - 1) / subjs.size());
                     eventService.publishEvent(event);
-                    exportAsBids(subj, studyName, studyId, baseDir, index);
+                    exportAsBids(subj, studyName, studyId, workFolder, index);
                     index++;
                 }
                 event.setMessage("Export BIDS for study " + studyName + " completed");
@@ -241,7 +235,7 @@ public class BIDSServiceImpl implements BIDSService {
                 event.setStatus(ShanoirEvent.SUCCESS);
                 eventService.publishEvent(event);
 
-                return baseDir;
+                return workFolder;
             }
         } catch (Exception e) {
             if (event != null) {
@@ -271,27 +265,6 @@ public class BIDSServiceImpl implements BIDSService {
     }
 
     /**
-     * Create the study/BASE BIDS folder.
-     * @param studyName the study name
-     * @return the base folder newly created
-     */
-    private File createBaseBidsFolder(File workFolder, String studyName) {
-        workFolder.mkdirs();
-
-        // 2. Create dataset_description.json and README
-        DatasetDescription datasetDescription = new DatasetDescription();
-        datasetDescription.setName(studyName);
-        try {
-            objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + DATASET_DESCRIPTION_FILE), datasetDescription);
-            objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + README_FILE), studyName);
-        } catch (IOException e) {
-            LOG.error(e.getMessage());
-        }
-
-        return workFolder;
-    }
-
-    /**
      * Create all the data in a BIDS folder for a given subject
      * @param subject the subject we want to export as BIDS
      * @param studyName the study name
@@ -301,7 +274,7 @@ public class BIDSServiceImpl implements BIDSService {
      * @throws IOException
      */
     private void exportAsBids(final Subject subject, final String studyName, Long studyId, final File workDir, int index) throws IOException {
-        File subjDir = createSubjectFolder(subject.getName(), index, workDir);
+        File subjDir = createSubjectFolder(subject.getName(), subject.getId(), workDir);
 
         // Get subject examinations and filter on the one with adapted study only
         List<Examination> examinationList = examService.findBySubjectIdStudyId(subject.getId(), studyId);
@@ -352,11 +325,11 @@ public class BIDSServiceImpl implements BIDSService {
      * @return the newly created folder
      * @throws IOException
      */
-    private File createSubjectFolder(String subjectName, final int index, final File baseDir) throws IOException {
+    private File createSubjectFolder(String subjectName, Long subjectId, final File baseDir) throws IOException {
         // Generate another ID here ?
         subjectName = this.formatLabel(subjectName);
 
-        File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + StorageService.SUBJECT + index + subjectName);
+        File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + StorageService.SUBJECT + subjectId + subjectName);
         if (!subjectFolder.exists()) {
             subjectFolder.mkdirs();
         }
