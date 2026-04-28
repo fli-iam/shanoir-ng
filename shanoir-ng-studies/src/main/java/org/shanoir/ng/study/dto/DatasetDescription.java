@@ -30,7 +30,7 @@ public class DatasetDescription {
 
     /** REQUIRED. The version of the BIDS standard that was used. */
     @JsonProperty("BIDSVersion")
-    private String bidsVersion = "1.11.1";
+    private String bidsVersion = "1.10.0";
 
     /** RECOMMENDED. What license is this dataset distributed under? The use of license name abbreviations is suggested for specifying a license. A list of common licenses with suggested abbreviations can be found in Appendix II. */
     @JsonProperty("License")
@@ -50,14 +50,14 @@ public class DatasetDescription {
 
     /** OPTIONAL. List of sources of funding (grant numbers) */
     @JsonProperty("Funding")
-    private String funding = "";
+    private List<String> funding = new ArrayList<>();
 
     /** OPTIONAL. List of references to publication that contain information on the dataset, or links. */
     @JsonProperty("ReferencesAndLinks")
-    private String referencesAndLinks = "";
+    private List<String> referencesAndLinks = new ArrayList<>();
 
     /** OPTIONAL. The Document Object Identifier of the dataset (not the corresponding paper). */
-    @JsonProperty("datasetDOI")
+    @JsonProperty("DatasetDOI")
     private String datasetDOI = "";
 
     /**
@@ -147,28 +147,28 @@ public class DatasetDescription {
     /**
      * @return the funding
      */
-    public String getFunding() {
+    public List<String> getFunding() {
         return funding;
     }
 
     /**
      * @param funding the funding to set
      */
-    public void setFunding(String funding) {
+    public void setFunding(List<String> funding) {
         this.funding = funding;
     }
 
     /**
      * @return the referencesAndLinks
      */
-    public String getReferencesAndLinks() {
+    public List<String> getReferencesAndLinks() {
         return referencesAndLinks;
     }
 
     /**
      * @param referencesAndLinks the referencesAndLinks to set
      */
-    public void setReferencesAndLinks(String referencesAndLinks) {
+    public void setReferencesAndLinks(List<String> referencesAndLinks) {
         this.referencesAndLinks = referencesAndLinks;
     }
 
