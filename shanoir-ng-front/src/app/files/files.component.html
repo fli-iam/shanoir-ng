@@ -21,11 +21,19 @@ The MS Studies stores study (protocols etc.) and data use agreement files.
 <a (click)="openStudiesFilesJson()" href="javascript:void(0)">View all MS Studies files (JSON)</a>
 
 <h3 class="header command-zone">MS Datasets</h3>
-The MS Datasets stores clinical and preclinical examination files, called extra-data.
+The MS Datasets stores clinical (and preclinical) examination files, called extra-data.
+For Bruker imports the original Bruker archive is stored as regular extra-data during the import.
 <br />
 <a (click)="openDatasetsFilesJson()" href="javascript:void(0)">View all MS Datasets files (JSON)</a>
 <br />
 The MS Datasets stores BIDS (NIfTI, no DICOM) and EEG files, imported with their corresponding imports.
 <br />
-The MS Datasets stores DICOM files (in dcm4chee-arc, backup-PACS) and processed-datasets.
+The MS Datasets stores DICOM files (in dcm4chee-arc, backup-PACS) and processed-datasets files (via manual import or via VIP).
 <br />
+
+<h3 class="header command-zone">MS Preclinical</h3>
+The MS Preclinical stores PhysiologicalData and BloodGasData files as ExaminationExtraData.
+PathologyModel files are stored there too.
+
+<h3 class="header command-zone">MS NIfTI Conversion</h3>
+The MS NIfTI Conversion does temporarily generate files, either in /var/datasets-data or in /var/bids-data.
