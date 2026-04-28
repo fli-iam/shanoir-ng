@@ -58,12 +58,12 @@ public class ExecutionApiController implements ExecutionApi {
         return ResponseEntity.ok(executionService.getExecution(identifier).map(VipExecutionDTO::getStatus).block());
     }
 
-    public ResponseEntity<String> getExecutionStderr(String identifier) {
-        return ResponseEntity.ok(executionService.getExecutionStderr(identifier).block());
+    public ResponseEntity<String> getExecutionStderr(Long processingId) {
+        return ResponseEntity.ok(executionService.getExecutionStderr(processingId).block());
 
     }
 
-    public ResponseEntity<String> getExecutionStdout(String identifier) {
-        return ResponseEntity.ok(executionService.getExecutionStdout(identifier).block());
+    public ResponseEntity<String> getExecutionStdout(Long processingId) {
+        return ResponseEntity.ok(executionService.getExecutionStdout(processingId).block());
     }
 }

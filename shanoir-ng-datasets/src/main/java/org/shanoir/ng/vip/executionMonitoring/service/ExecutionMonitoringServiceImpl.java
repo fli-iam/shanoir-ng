@@ -171,11 +171,18 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                     }
 
                     switch (dto.getStatus()) {
-                        case FINISHED -> emProxyService.processFinishedJob(monitoring, event, dto.getEndDate());
-                        case UNKNOWN, EXECUTION_FAILED, KILLED ->
-                                emProxyService.processKilledJob(monitoring, event, dto);
+                        case FINISHED -> {
+                            monitoring.setJobs(dto.getJobs());
+                            monitoring.setStatus(dto.getStatus());
+                            emProxyService.processFinishedJob(monitoring, event, dto.getEndDate());
+                        }
+                        case UNKNOWN, EXECUTION_FAILED, KILLED -> {
+                            monitoring.setJobs(dto.getJobs());
+                            monitoring.setStatus(dto.getStatus());
+                            emProxyService.processKilledJob(monitoring, event, dto);
+                        }
                         default -> {
-                            if(!(Objects.isNull(dto.getJobs()) || Objects.equals(dto.getJobs().size(), 0))) {
+                            if (!(Objects.isNull(dto.getJobs()) || Objects.equals(dto.getJobs().size(), 0))) {
                                 Integer doneJobs = dto.getJobs().values().stream().mapToInt(e -> (ExecutionStatus.RUNNING.getRestLabel().toUpperCase().equals(e.get("status")) || ExecutionStatus.QUEUED.getRestLabel().toUpperCase().equals(e.get("status"))) ? 0 : 1).sum();
                                 updateShanoirEvent(event, doneJobs, jobsNumber, execLabel);
                             }
