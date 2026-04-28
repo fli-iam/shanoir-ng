@@ -152,6 +152,7 @@ public class BIDSServiceImpl implements BIDSService {
     @Autowired
     private StorageService storageService;
 
+    @Autowired
     private BidsTreeSemaphore bidsTreeSemaphore;
 
     @Autowired
