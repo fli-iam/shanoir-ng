@@ -24,6 +24,7 @@ import org.apache.commons.io.FileUtils;
 import org.joda.time.DurationFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.Years;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.dto.DatasetDescription;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
@@ -58,10 +59,6 @@ public class BIDSServiceImpl implements BIDSService {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    private static final String STUDY_PREFIX = "study-";
-
-    private static final String SUBJECT_PREFIX = "sub-";
 
     private static final String SUBJECT_IDENTIFIER = "subject_identifier";
 
@@ -123,8 +120,7 @@ public class BIDSServiceImpl implements BIDSService {
         return buffer.toString();
     }
 
-    public StringBuilder participantsSerializer(List<Subject> subjs) {
-        int index = 1;
+    public StringBuilder participantsSerializer(List<Subject> subjects) {
         StringBuilder buffer =  new StringBuilder();
         // Headers
         for (String columnHeader : CSV_PARTICIPANTS_HEADER) {
@@ -132,13 +128,11 @@ public class BIDSServiceImpl implements BIDSService {
         }
         buffer.append(CSV_SPLITTER);
 
-        for (Subject subject : subjs) {
-            String subjectName = formatLabel(subject.getName());
+        for (Subject subject : subjects) {
             String subjectAge = ageCalculation(subject);
             String subjectSex = subject.getSex() != null ? subject.getSex().name() : "O";
-            subjectName = this.formatLabel(subjectName);
             // Write in the file the values
-            buffer.append(SUBJECT_PREFIX).append(subject.getId()).append(subjectName).append(CSV_SEPARATOR)
+            buffer.append(StorageService.SUBJECT).append(subject.getId()).append(CSV_SEPARATOR)
                     .append(subject.getId()).append(CSV_SEPARATOR)
                     .append(subjectAge).append(CSV_SEPARATOR)
                     .append(subjectSex).append(CSV_SEPARATOR)
@@ -148,10 +142,6 @@ public class BIDSServiceImpl implements BIDSService {
         return buffer;
     }
 
-    private String formatLabel(String label) {
-        return label.replaceAll("[^a-zA-Z0-9]+", "");
-    }
-
     private List<Subject> getSubjectsForStudy(final Long studyId) throws JsonParseException, JsonMappingException, IOException {
         // Get the list of subjects
         List<Subject> subjects = subjectRepository.findByStudy_Id(studyId);
@@ -159,7 +149,7 @@ public class BIDSServiceImpl implements BIDSService {
     }
 
     public File getBidsFolderPath(final Long studyId) {
-        String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId;
+        String tmpFilePath = bidsStorageDir + File.separator + StorageService.STUDY + studyId;
         return new File(tmpFilePath);
     }
 
