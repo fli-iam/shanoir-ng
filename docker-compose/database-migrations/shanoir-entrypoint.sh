@@ -216,7 +216,11 @@ manual)
   exit $?
   ;;
 dev)
-  echo "$HEADER mode '$SHANOIR_MIGRATION': nothing to do, exiting"
+  # dev mode
+  # - create the procedures
+  # - exit
+  echo "$HEADER mode '$SHANOIR_MIGRATION': apply init procedures"
+  apply_init_procedures
   exit 0
   ;;
 '')
