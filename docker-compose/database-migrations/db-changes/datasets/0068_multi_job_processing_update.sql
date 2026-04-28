@@ -10,8 +10,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-ALTER TABLE dataset_processing ADD COLUMN monitoring_index TINYINT(3);
-ALTER TABLE dataset_processing ADD COLUMN processing_status TINYINT(1);
+ALTER TABLE dataset_processing ADD COLUMN monitoring_index INT(3);
+ALTER TABLE dataset_processing ADD COLUMN processing_status TINYINT(4);
 UPDATE dataset_processing SET monitoring_index = 1 WHERE parent_id IS NULL;
 UPDATE dataset_processing dp
     JOIN execution_monitoring em ON em.id = dp.parent_id
