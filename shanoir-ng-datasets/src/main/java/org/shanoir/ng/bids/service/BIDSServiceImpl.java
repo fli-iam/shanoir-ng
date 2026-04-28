@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -62,6 +63,9 @@ import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
@@ -71,6 +75,7 @@ import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.DatasetFileUtils;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -103,12 +108,6 @@ public class BIDSServiceImpl implements BIDSService {
     private static final String NEW_LINE = "\n";
 
     private static final String SCANS_FILE_EXTENSION = "_scans.tsv";
-
-    private static final String SESSION_PREFIX = "ses-";
-
-    private static final String SUBJECT_PREFIX = "sub-";
-
-    private static final String STUDY_PREFIX = "study-";
 
     private static final Logger LOG = LoggerFactory.getLogger(BIDSServiceImpl.class);
 
@@ -154,6 +153,11 @@ public class BIDSServiceImpl implements BIDSService {
     @Autowired
     private StorageService storageService;
 
+    private BidsTreeSemaphore bidsTreeSemaphore;
+
+    @Autowired
+    private ShanoirEventService eventService;
+
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 
     private DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -168,7 +172,7 @@ public class BIDSServiceImpl implements BIDSService {
     public void deleteBidsFolder(Long studyId) {
         try {
             // Try to delete the BIDS folder recursively if possible
-            File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId);
+            File bidsDir = new File(bidsStorageDir + File.separator + StorageService.STUDY + studyId);
             if (bidsDir.exists()) {
                 FileUtils.deleteDirectory(bidsDir);
             }
@@ -179,50 +183,77 @@ public class BIDSServiceImpl implements BIDSService {
 
     @Override
     public File getBidsFolderPath(final Long studyId) {
-        String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId;
+        String tmpFilePath = bidsStorageDir + File.separator + StorageService.STUDY + studyId;
         return new File(tmpFilePath);
     }
 
-    /**
-     * Returns data from the study formatted as BIDS in a .zip file.
-     * @param studyId the study ID we want to export as BIDS
-     * @param studyName the study name
-     * @return data from the study formatted as BIDS in a .zip file.
-     * @throws IOException
-     */
-    @Override
-    public File exportAsBids(final Long studyId) throws IOException {
+    public File exportAsBids(final Long studyId) throws IOException, BidsTreeLockedException {
         // Get folder
         File workFolder = getBidsFolderPath(studyId);
-        if (workFolder.exists()) {
-            // If the file already exists, just return it
-            return workFolder;
-        }
-
+        bidsTreeSemaphore.lockOrThrow(studyId);
         Study study = studyRepo.findById(studyId).orElseThrow();
         String studyName = study.getName();
-        // Otherwise, create it from scratch
-        File baseDir = createBaseBidsFolder(workFolder, studyName);
+        ShanoirEvent event = null;
+        try { // ensure unlock in finally
+            if (workFolder.exists()) {
+                // If the file already exists, just return it
+                return workFolder;
+            } else {
+                event = new ShanoirEvent(
+                        ShanoirEventType.BIDS_EXPORT,
+                        studyId.toString(),
+                        KeycloakUtil.getTokenUserId(),
+                        "Export BIDS for study " + studyName,
+                        ShanoirEvent.IN_PROGRESS,
+                        0f,
+                        studyId);
+                event.setReport("This operation is automatically triggered at least once per study as a preparation for operations "
+                        + "like building the BIDS tree or running the validator.");
+                eventService.publishEvent(event);
 
-        // Iterate over subjects got from call to SubjectApiController.findSubjectsByStudyId() and get list of subjects
-        List<Subject> subjs = getSubjectsForStudy(studyId);
-        if (org.apache.commons.collections4.CollectionUtils.isEmpty(subjs)) {
-            return baseDir;
+                // Otherwise, create it from scratch
+                File baseDir = createBaseBidsFolder(workFolder, studyName);
+
+                // Iterate over subjects got from call to SubjectApiController.findSubjectsByStudyId() and get list of subjects
+                List<Subject> subjs = getSubjectsForStudy(studyId);
+                if (org.apache.commons.collections4.CollectionUtils.isEmpty(subjs)) {
+                    return baseDir;
+                }
+
+                // Sort by ID
+                subjs.sort(Comparator.comparing(Subject::getId));
+
+                // Create participants.tsv
+                event.setMessage("Getting participants.tsv for study " + studyName);
+                eventService.publishEvent(event);
+                rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
+
+                int index = 1;
+                for (Subject subj : subjs) {
+                    event.setMessage("Exporting subject " + subj.getName() + " as BIDS for study " + studyName);
+                    event.setProgress((float) (index - 1) / subjs.size());
+                    eventService.publishEvent(event);
+                    exportAsBids(subj, studyName, studyId, baseDir, index);
+                    index++;
+                }
+                event.setMessage("Export BIDS for study " + studyName + " completed");
+                event.setProgress(1f);
+                event.setStatus(ShanoirEvent.SUCCESS);
+                eventService.publishEvent(event);
+
+                return baseDir;
+            }
+        } catch (Exception e) {
+            if (event != null) {
+                event.setMessage("Export BIDS for study " + studyName + " failed: " + e.getMessage());
+                event.setProgress(1f);
+                event.setStatus(ShanoirEvent.ERROR);
+                eventService.publishEvent(event);
+            }
+            throw e;
+        } finally {
+            bidsTreeSemaphore.unlock(studyId);
         }
-
-        // Sort by ID
-        subjs.sort(Comparator.comparing(Subject::getId));
-
-        // Create participants.tsv
-        rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
-
-        int index = 1;
-        for (Subject subj : subjs) {
-            exportAsBids(subj, studyName, studyId, baseDir, index);
-            index++;
-        }
-
-        return baseDir;
     }
 
     /**
@@ -325,7 +356,7 @@ public class BIDSServiceImpl implements BIDSService {
         // Generate another ID here ?
         subjectName = this.formatLabel(subjectName);
 
-        File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + index + subjectName);
+        File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + StorageService.SUBJECT + index + subjectName);
         if (!subjectFolder.exists()) {
             subjectFolder.mkdirs();
         }
@@ -381,7 +412,7 @@ public class BIDSServiceImpl implements BIDSService {
         String sessionLabel = this.getSessionLabel(examination);
 
         // Create exam/session folder
-        File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  sessionLabel);
+        File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + StorageService.SESSION +  sessionLabel);
         if (!examFolder.exists()) {
             examFolder.mkdirs();
         }
@@ -414,7 +445,7 @@ public class BIDSServiceImpl implements BIDSService {
             return;
         }
         String subjectNameUpdated = this.formatLabel(subjectName);
-        String datasetFilePrefix = workDir.getName().contains(SESSION_PREFIX) ? workDir.getParentFile().getName() + "_" + workDir.getName() : workDir.getName();
+        String datasetFilePrefix = workDir.getName().contains(StorageService.SESSION) ? workDir.getParentFile().getName() + "_" + workDir.getName() : workDir.getName();
 
         dataFolder = createSpecificDataFolder(dataset, workDir, dataFolder, subjectNameUpdated, studyName);
 
@@ -593,7 +624,7 @@ public class BIDSServiceImpl implements BIDSService {
         String fileName = parentFile.getName() + SCANS_FILE_EXTENSION;
         subjectName = this.formatLabel(subjectName);
         if (!parentFile.getName().contains(subjectName)) {
-            fileName = SUBJECT_PREFIX + subjectName + "_" + parentFile.getName() + SCANS_FILE_EXTENSION;
+            fileName = StorageService.SUBJECT + subjectName + "_" + parentFile.getName() + SCANS_FILE_EXTENSION;
         }
         File scansFile = new File(parentFile.getAbsolutePath() + File.separator + fileName);
         if (!scansFile.exists()) {
@@ -663,7 +694,7 @@ public class BIDSServiceImpl implements BIDSService {
     private void exportSpecificEegFiles(final EegDataset dataset, final String subjectName, final String sessionId, final String studyName, final String runId, File dataFolder) throws IOException {
         // Create _eeg.json
 
-        String datasetFilePrefix = dataFolder.getParentFile().getName().contains(SESSION_PREFIX) ? dataFolder.getParentFile().getParentFile().getName() + "_" + dataFolder.getParentFile().getName() : dataFolder.getParentFile().getName();
+        String datasetFilePrefix = dataFolder.getParentFile().getName().contains(StorageService.SESSION) ? dataFolder.getParentFile().getParentFile().getName() + "_" + dataFolder.getParentFile().getName() : dataFolder.getParentFile().getName();
 
         String fileName = TASK + studyName + "_eeg.json";
         String destFile = dataFolder.getAbsolutePath() + File.separator + datasetFilePrefix + "_" + fileName;

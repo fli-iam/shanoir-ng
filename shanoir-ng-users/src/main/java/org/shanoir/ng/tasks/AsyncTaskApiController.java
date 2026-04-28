@@ -16,6 +16,7 @@ package org.shanoir.ng.tasks;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.time.DateUtils;
@@ -45,7 +46,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
     @Autowired
     private ShanoirEventsService taskService;
 
-    public static final List<UserSseEmitter> EMITTERS = Collections.synchronizedList(new ArrayList<>());
+    public static final List<UserSseEmitter> EMITTERS = new CopyOnWriteArrayList<>();
 
     @Override
     public ResponseEntity<List<ShanoirEventLight>> findTasks() {
@@ -61,7 +62,8 @@ public class AsyncTaskApiController implements AsyncTaskApi {
                 ShanoirEventType.MASSIVE_OUTPUTS_DOWNLOAD,
                 ShanoirEventType.DELETE_EXAMINATION_EVENT,
                 ShanoirEventType.DELETE_NIFTI_EVENT,
-                ShanoirEventType.DELETE_DATASET_EVENT);
+                ShanoirEventType.DELETE_DATASET_EVENT,
+                ShanoirEventType.BIDS_EXPORT);
 
         // Get only event with last updates < 7 days
         Date now = new Date();
