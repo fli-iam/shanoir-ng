@@ -331,6 +331,8 @@ services:
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - "datasets-data:/var/datasets-data"
+      # NIfTI conversion writes into BIDS-tree
+      - "bids-data:/var/bids-data" # temporary
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
