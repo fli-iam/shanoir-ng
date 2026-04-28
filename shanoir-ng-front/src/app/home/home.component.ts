@@ -35,8 +35,6 @@ import { UserService } from '../users/shared/user.service';
 
 export class HomeComponent {
 
-    shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
-
     challengeDua: DataUserAgreement;
     challengeStudies: StudyLight[];
     studies: StudyLight[];

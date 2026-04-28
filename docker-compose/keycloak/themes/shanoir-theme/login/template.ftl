@@ -33,7 +33,7 @@
         <body class="${properties.kcBodyClass!}">
             <div class="logo">
                 <#if realm.name == "shanoir-ng">
-                    <img src="${properties.assets!}/images/logo.shanoir.white.png"/>
+                    <img src="${properties.assets!}/images/shanoirLogoWhite.svg"/>
 
                 </#if>
             </div>
