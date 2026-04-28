@@ -19,6 +19,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 The MS Studies stores study (protocols etc.) and data use agreement files.
 <br/>
 <a (click)="openStudiesFilesJson()" href="javascript:void(0)">View all MS Studies files (JSON)</a>
+<br />
+<br />
+The MS Studies temporarily writes files into the BIDS tree, /var/bids-data.
 
 <h3 class="header command-zone">MS Datasets</h3>
 The MS Datasets stores clinical (and preclinical) examination files, called extra-data.
@@ -30,10 +33,14 @@ The MS Datasets stores BIDS (NIfTI, no DICOM) and EEG files, imported with their
 <br />
 The MS Datasets stores DICOM files (in dcm4chee-arc, backup-PACS) and processed-datasets files (via manual import or via VIP).
 <br />
+<br />
+The MS Datasets temporarily writes files into the BIDS tree, /var/bids-data.
 
 <h3 class="header command-zone">MS Preclinical</h3>
 The MS Preclinical stores PhysiologicalData and BloodGasData files as ExaminationExtraData.
 PathologyModel files are stored there too.
 
 <h3 class="header command-zone">MS NIfTI Conversion</h3>
-The MS NIfTI Conversion does temporarily generate files, either in /var/datasets-data or in /var/bids-data.
+The MS NIfTI Conversion temporarily generates files in /var/datasets-data.
+<br />
+The MS NIfTI Conversion temporarily writes files into the BIDS tree, /var/bids-data.
