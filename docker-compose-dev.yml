@@ -454,9 +454,9 @@ services:
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
       - IN_QUEUE=bids.validate
       - OUT_QUEUE=bids.validated
-      - DATA_ROOT=/var/datasets-data/bids-data
+      - DATA_ROOT=/var/bids-data
     volumes:
-      - datasets-data:/var/datasets-data:ro
+      - "bids-data:/var/bids-data" # temporary
     depends_on:
       - rabbitmq
     networks:
