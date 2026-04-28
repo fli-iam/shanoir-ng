@@ -57,20 +57,20 @@ public interface ExecutionService {
     Mono<VipExecutionDTO> getExecution(String identifier);
 
     /**
-     * Get execution stderr logs from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getStderr">VIP API</a>
+     * Get processing stderr logs from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getStderr">VIP API</a>
      *
-     * @param identifier
+     * @param processingId
      * @return string
      */
-    Mono<String> getExecutionStderr(String identifier);
+    Mono<String> getExecutionStderr(Long processingId);
 
     /**
-     * Get execution stdout logs from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getStdout">VIP API</a>
+     * Get processing stdout logs from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getStdout">VIP API</a>
      *
-     * @param identifier
+     * @param processingId
      * @return string
      */
-    Mono<String> getExecutionStdout(String identifier);
+    Mono<String> getExecutionStdout(Long processingId);
 
     /**
      * Try to get execution from <a href="https://app.swaggerhub.com/apis/CARMIN/carmin-common_api_for_research_medical_imaging_network/0.3.1#/default/getExecution">VIP API</a>

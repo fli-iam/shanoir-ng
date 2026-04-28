@@ -18,6 +18,7 @@ import { MrDataset } from '../dataset/mr/dataset.mr.model';
 
 import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetProcessingService } from './dataset-processing.service';
+import {StatusEnum} from "../../vip/models/execution";
 
 @Injectable()
 export class DatasetProcessingDTOService {
@@ -67,7 +68,7 @@ export class DatasetProcessingDTOService {
         entity.comment = dto.comment;
         entity.datasetProcessingType = dto.datasetProcessingType;
         if(dto.inputDatasets) {
-            entity.inputDatasets = dto.inputDatasets.map(id => { 
+            entity.inputDatasets = dto.inputDatasets.map(id => {
                 const dataset = new MrDataset();
                 dataset.id = id;
                 return dataset;
@@ -83,6 +84,8 @@ export class DatasetProcessingDTOService {
         entity.processingDate = new Date(dto.processingDate);
         entity.studyId = dto.studyId;
         entity.parentId = dto.parentId;
+        entity.processingStatus = dto.processingStatus;
+        entity.monitoringIndex = dto.monitoringIndex;
         return entity;
     }
 
@@ -98,6 +101,9 @@ export class DatasetProcessingInDTO {
 	processingDate: Date;
     studyId: number;
     parentId: number;
+    processingStatus:  StatusEnum;
+    monitoringIndex: number;
+
 }
 
 export class DatasetProcessingOutDTO {

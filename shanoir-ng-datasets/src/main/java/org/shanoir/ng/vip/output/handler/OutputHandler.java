@@ -42,5 +42,5 @@ public abstract class OutputHandler {
      * @param parentFolder the temporary arent folder in which we are currently working
      * @param processing   the corresponding dataset processing.
      */
-    public abstract void manageTarGzResult(List<File> resultFiles, File parentFolder, ExecutionMonitoring processing) throws ResultHandlerException;
+    public abstract void manageTarGzResult(List<File> resultFiles, File parentFolder, ExecutionMonitoring processing, String resourceId) throws ResultHandlerException;
 }
