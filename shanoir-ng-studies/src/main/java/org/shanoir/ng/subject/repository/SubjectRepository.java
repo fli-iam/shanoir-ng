@@ -17,12 +17,14 @@ package org.shanoir.ng.subject.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.subject.model.Subject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 /**
@@ -39,17 +41,22 @@ import org.springframework.data.repository.query.Param;
  * @author msimon
  * @author mkain
  */
-public interface SubjectRepository extends CrudRepository<Subject, Long>, SubjectRepositoryCustom {
+public interface SubjectRepository extends JpaRepository<Subject, Long>, SubjectRepositoryCustom {
 
     @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags", "subjectStudyList.subjectStudyTags", "subjectStudyList.study.studyUserList", "pseudonymusHashValues"})
     Optional<Subject> findById(Long id);
 
     @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.studyUserList"})
-    Iterable<Subject> findAllById(Iterable<Long> ids);
+    List<Subject> findAllById(Iterable<Long> ids);
+
+    @EntityGraph(attributePaths = {"tags"})
+    List<Subject> findWithTagsByIdIn(Iterable<Long> ids);
 
     List<Subject> findByName(String name);
 
     Subject findByStudyIdAndName(Long studyId, String name);
+
+    List<Subject> findByStudyIdAndNameIn(Long studyId, Iterable<String> names);
 
     @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags"})
     Subject findFirstByIdentifierAndSubjectStudyListStudyIdIn(String identifier, Iterable<Long> studyIds);
@@ -77,4 +84,16 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
     boolean existsBySubjectStudyListStudyIdAndName(Long studyId, String name);
 
     List<Subject> findByStudy_Id(Long studyId);
+
+    // delete subject study tags by subject id
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM SubjectStudyTag sst WHERE sst.subjectStudy.subject.id = :subjectId")
+    void deleteSubjectStudyTagsBySubjectId(@Param("subjectId") Long subjectId);
+
+    @Query("""
+            select new org.shanoir.ng.shared.core.model.IdName(s.id, s.name)
+            from Subject s
+            where s.id in :ids
+            """)
+    List<IdName> findNamesByIdIn(@Param("ids") Iterable<Long> ids);
 }

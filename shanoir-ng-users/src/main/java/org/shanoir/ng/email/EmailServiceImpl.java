@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.email;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -24,6 +26,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.model.DatasetDetail;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -108,6 +112,9 @@ public class EmailServiceImpl implements EmailService {
     @Value("${server.administrator.email}")
     private String administratorEmail;
 
+    @Value("${server.administrator.name}")
+    private String administratorName;
+
     @Value("${front.server.address}")
     private String shanoirServerAddress;
 
@@ -116,11 +123,31 @@ public class EmailServiceImpl implements EmailService {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("MMM d yyyy");
 
+    private void setFromAdministrator(MimeMessageHelper messageHelper)
+            throws UnsupportedEncodingException, MessagingException {
+        messageHelper.setFrom(new InternetAddress(administratorEmail, administratorName));
+    }
+
+    private void setFromUser(MimeMessageHelper messageHelper, User user)
+            throws UnsupportedEncodingException, MessagingException {
+        String host = "shanoir";
+        try {
+            host = new URL(shanoirServerAddress).getHost();
+        } catch (Exception e) {
+        }
+        // Note: we put the user email in 'Reply-To' instead of 'From' to avoid
+        // sending emails with a source address in a foreign domain
+        messageHelper.setFrom(new InternetAddress(
+                administratorEmail,
+                String.format("%s %s (via %s)", user.getFirstName(), user.getLastName(), host)));
+        messageHelper.setReplyTo(user.getEmail());
+    }
+
     @Override
     public void notifyAccountWillExpire(User user) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(user.getEmail());
             messageHelper.setSubject("Shanoir Account Expiration");
             final Map<String, Object> variables = new HashMap<>();
@@ -141,10 +168,18 @@ public class EmailServiceImpl implements EmailService {
         final List<String> adminEmails = userRepository.findAdminEmails();
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(adminEmails.toArray(new String[0]));
-            messageHelper.setSubject(email.getIsNew() ? "New draft study created" : "Draft study got edited");
-            final Map<String, Object> variables = buildDraftStudyEmailVariables(user, email, shanoirServerAddress);
+
+            if (email.getAction() == "created") {
+                messageHelper.setSubject("New draft study created");
+            } else if (email.getAction() == "edited") {
+                messageHelper.setSubject("A draft study got edited");
+            } else if (email.getAction() == "approved") {
+                messageHelper.setSubject("A study got approved");
+            }
+
+            final Map<String, Object> variables = buildStudyEmailVariables(user, email, shanoirServerAddress);
             final String content = build("notifyAdminDraftStudy", variables);
             LOG.info(content);
             messageHelper.setText(content, true);
@@ -160,7 +195,7 @@ public class EmailServiceImpl implements EmailService {
             for (User studyMember : studyMembers) {
                 MimeMessagePreparator messagePreparator = mimeMessage -> {
                     final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-                    messageHelper.setFrom(administratorEmail);
+                    this.setFromAdministrator(messageHelper);
                     messageHelper.setTo(studyMember.getEmail());
                     messageHelper.setSubject("Study approved");
                     final Map<String, Object> variables = new HashMap<>();
@@ -172,8 +207,7 @@ public class EmailServiceImpl implements EmailService {
                     LOG.info(content);
                     messageHelper.setText(content, true);
                 };
-                // Send the message
-                LOG.info("Sending approve-study mail to {} for study {}", studyMember.getUsername(), email.getStudyId());
+                LOG.info("Sending study approval mail to {} for study {}", studyMember.getEmail(), email.getStudyId());
                 mailSender.send(messagePreparator);
             }
         }
@@ -186,7 +220,7 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(adminEmails.toArray(new String[0]));
             messageHelper.setSubject("User account extension request from " + shanoirServerAddress);
             final Map<String, Object> variables = new HashMap<>();
@@ -226,7 +260,7 @@ public class EmailServiceImpl implements EmailService {
     public void notifyCreateUser(final User user, final String password) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(user.getEmail());
             messageHelper.setSubject("Shanoir Account Creation");
             final Map<String, Object> variables = new HashMap<>();
@@ -246,7 +280,7 @@ public class EmailServiceImpl implements EmailService {
     public void notifyCreateAccountRequest(final User user, final String password) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(user.getEmail());
             messageHelper.setSubject("Shanoir Account Creation");
             final Map<String, Object> variables = new HashMap<>();
@@ -266,7 +300,7 @@ public class EmailServiceImpl implements EmailService {
     public void notifyUserResetPassword(final User user, final String password) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(user.getEmail());
             messageHelper.setSubject("[Shanoir] Réinitialisation du mot de passe");
             final Map<String, Object> variables = new HashMap<>();
@@ -296,7 +330,7 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(adminEmails.toArray(new String[0]));
             messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
             final Map<String, Object> variables = new HashMap<>();
@@ -316,7 +350,7 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(adminEmails.toArray(new String[0]));
             messageHelper.setSubject("User account request DENIED (" + shanoirServerAddress + ")");
             final Map<String, Object> variables = new HashMap<>();
@@ -334,7 +368,7 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(adminEmails.toArray(new String[0]));
             messageHelper.setSubject("User account request granted (" + shanoirServerAddress + ")");
             final Map<String, Object> variables = new HashMap<>();
@@ -354,7 +388,7 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(adminEmails.toArray(new String[0]));
             messageHelper.setSubject("User account request DENIED (" + shanoirServerAddress + ")");
             final Map<String, Object> variables = new HashMap<>();
@@ -368,7 +402,7 @@ public class EmailServiceImpl implements EmailService {
     private void notifyUserAccountRequestAccepted(final User user) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(user.getEmail());
             messageHelper.setSubject("Granted: Your Shanoir account has been activated");
             final Map<String, Object> variables = new HashMap<>();
@@ -384,7 +418,7 @@ public class EmailServiceImpl implements EmailService {
     private void notifyUserAccountRequestDenied(final User user) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(user.getEmail());
             messageHelper.setSubject("DENIED: Your Shanoir account request has been denied");
             final Map<String, Object> variables = new HashMap<>();
@@ -401,7 +435,7 @@ public class EmailServiceImpl implements EmailService {
     private void notifyUserExtensionRequestAccepted(final User user) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(user.getEmail());
             messageHelper.setSubject("Granted: Your Shanoir account extension has been extended");
             final Map<String, Object> variables = new HashMap<>();
@@ -418,7 +452,7 @@ public class EmailServiceImpl implements EmailService {
     private void notifyUserExtensionRequestDenied(final User user) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(user.getEmail());
             messageHelper.setSubject("DENIED: Your Shanoir account extension request has been denied");
             final Map<String, Object> variables = new HashMap<>();
@@ -455,7 +489,7 @@ public class EmailServiceImpl implements EmailService {
         for (User admin : admins) {
             MimeMessagePreparator messagePreparator = mimeMessage -> {
                 final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-                messageHelper.setFrom(administratorEmail);
+                this.setFromAdministrator(messageHelper);
                 messageHelper.setTo(admin.getEmail());
                 messageHelper.setSubject("[Shanoir] Data imported to " + generatedMail.getStudyName());
                 final Map<String, Object> variables = new HashMap<>();
@@ -496,7 +530,7 @@ public class EmailServiceImpl implements EmailService {
         for (User admin : admins) {
             MimeMessagePreparator messagePreparator = mimeMessage -> {
                 final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-                messageHelper.setFrom(administratorEmail);
+                this.setFromAdministrator(messageHelper);
                 messageHelper.setTo(admin.getEmail());
                 messageHelper.setSubject("[Shanoir] Import failure for " + generatedMail.getStudyName());
                 final Map<String, Object> variables = new HashMap<>();
@@ -533,7 +567,7 @@ public class EmailServiceImpl implements EmailService {
             for (User studyAdmin : studyAdmins) {
                 MimeMessagePreparator messagePreparator = mimeMessage -> {
                     final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-                    messageHelper.setFrom(administratorEmail);
+                    this.setFromAdministrator(messageHelper);
                     messageHelper.setCc(user != null ? user.getEmail() : administratorEmail);
                     messageHelper.setTo(studyAdmin.getEmail());
                     messageHelper.setSubject("[Shanoir] Member(s) added to " + email.getStudyName());
@@ -558,7 +592,7 @@ public class EmailServiceImpl implements EmailService {
         for (User studyUser : newStudyUsers) {
             MimeMessagePreparator messagePreparator = mimeMessage -> {
                 final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-                messageHelper.setFrom(administratorEmail);
+                this.setFromAdministrator(messageHelper);
                 messageHelper.setTo(studyUser.getEmail());
                 messageHelper.setSubject("[Shanoir] Welcome to " + email.getStudyName());
                 final Map<String, Object> variables = new HashMap<>();
@@ -587,7 +621,7 @@ public class EmailServiceImpl implements EmailService {
             for (User studyAdmin : studyAdmins) {
                 MimeMessagePreparator messagePreparator = mimeMessage -> {
                     final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-                    messageHelper.setFrom(administratorEmail);
+                    this.setFromAdministrator(messageHelper);
                     messageHelper.setTo(studyAdmin.getEmail());
                     messageHelper.setSubject("[Shanoir] Member(s) access request to " + createdRequest.getStudyName());
                     final Map<String, Object> variables = new HashMap<>();
@@ -627,7 +661,7 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(email.getInvitedMail());
             messageHelper.setSubject("[Shanoir] Access to study " + email.getStudyName());
             final Map<String, Object> variables = new HashMap<>();
@@ -672,7 +706,7 @@ public class EmailServiceImpl implements EmailService {
 
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom(administratorEmail);
+            this.setFromAdministrator(messageHelper);
             messageHelper.setTo(user.getEmail());
             messageHelper.setSubject("[Shanoir] Access to study " + refusedRequest.getStudyName());
             final Map<String, Object> variables = new HashMap<>();
@@ -696,7 +730,7 @@ public class EmailServiceImpl implements EmailService {
         } else {
             MimeMessagePreparator messagePreparator = mimeMessage -> {
                 final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-                messageHelper.setFrom(user.get().getEmail());
+                this.setFromUser(messageHelper, user.get());
                 messageHelper.setTo(mail.getRecipienEmailAddress());
                 messageHelper.setSubject("[Shanoir] pleaser help configure DUA for study " + mail.getStudyName());
                 final Map<String, Object> variables = new HashMap<>();
@@ -713,7 +747,7 @@ public class EmailServiceImpl implements EmailService {
 
             messagePreparator = mimeMessage -> {
                 final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-                messageHelper.setFrom(administratorEmail);
+                this.setFromAdministrator(messageHelper);
                 messageHelper.setTo(user.get().getEmail());
                 messageHelper.setSubject("[Shanoir] DUA draft created for study " + mail.getStudyName());
                 final Map<String, Object> variables = new HashMap<>();
@@ -728,10 +762,10 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private Map<String, Object> buildDraftStudyEmailVariables(User user, EmailStudy email, String shanoirServerAddress) {
+    private Map<String, Object> buildStudyEmailVariables(User user, EmailStudy email, String shanoirServerAddress) {
         Map<String, Object> variables = new HashMap<>();
 
-        // User info
+        // User who performed action info
         variables.put(FIRSTNAME, user.getFirstName());
         variables.put(LASTNAME, user.getLastName());
         variables.put(EMAIL, user.getEmail());
@@ -748,7 +782,7 @@ public class EmailServiceImpl implements EmailService {
         variables.put("studyCardPolicy", email.getStudyCardPolicy());
         variables.put("clinical", email.isClinical());
         variables.put("challenge", email.isChallenge());
-        variables.put("isNew", email.getIsNew());
+        variables.put("action", email.getAction());
 
         // Extra details
         variables.put("expectedNbOfSubjects", email.getExpectedNbOfSubjects());

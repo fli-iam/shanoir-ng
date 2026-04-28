@@ -230,21 +230,21 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
             throw new Exception("The extraction " + extraction.get("extraction_identifier") + "has no filters array.");
         } else if (!extraction.get("filter").isArray() || extraction.get("filter").isEmpty()) {
             throw new Exception("There is no extraction filter defined for the extraction " + extraction.get("extraction_identifier") + ".");
-        } else if (StreamSupport.stream(extraction.get("filter").spliterator(), false).map(it -> it.get("type").asText()).noneMatch(filterType -> filterType.contains("processing"))) {
+        } else if (StreamSupport.stream(extraction.get("filter").spliterator(), false).map(it -> it.get("type").asText()).noneMatch(filterType -> filterType.contains("processing") || filterType.contains("dataset"))) {
             throw new Exception("There is no specific processing filter defined for the extraction " + extraction.get("extraction_identifier") + ".");
         }
 
         Map<String, List<String>> queryFilters = new HashMap<>();
         String query = "SELECT DISTINCT dataset.id FROM dataset dataset "
-                + "JOIN dataset_metadata AS metadata ON metadata.id = dataset.updated_metadata_id "
-                + "JOIN dataset_processing AS processing ON dataset.dataset_processing_id = processing.id "
+                + "LEFT JOIN dataset_metadata AS metadata ON metadata.id = dataset.updated_metadata_id "
+                + "LEFT JOIN dataset_processing AS processing ON dataset.dataset_processing_id = processing.id "
                 + "LEFT JOIN execution_monitoring AS monitoring ON monitoring.id = processing.parent_id "
-                + "JOIN input_of_dataset_processing AS input_link ON processing.id = input_link.processing_id "
-                + "JOIN dataset AS input_dataset ON input_link.dataset_id = input_dataset.id "
-                + "JOIN dataset_acquisition AS acquisition ON input_dataset.dataset_acquisition_id = acquisition.id "
-                + "JOIN examination AS examination ON acquisition.examination_id = examination.id "
-                + "JOIN subject ON dataset.subject_id = subject.id "
-                + "JOIN study ON examination.study_id = study.id "
+                + "LEFT JOIN input_of_dataset_processing AS input_link ON processing.id = input_link.processing_id "
+                + "LEFT JOIN dataset AS input_dataset ON input_link.dataset_id = input_dataset.id "
+                + "LEFT JOIN dataset_acquisition AS acquisition ON input_dataset.dataset_acquisition_id = acquisition.id "
+                + "LEFT JOIN examination AS examination ON acquisition.examination_id = examination.id "
+                + "LEFT JOIN subject ON dataset.subject_id = subject.id "
+                + "LEFT JOIN study ON examination.study_id = study.id "
                 + "WHERE ";
 
         for (JsonNode jsonFilter : extraction.get("filter")) {

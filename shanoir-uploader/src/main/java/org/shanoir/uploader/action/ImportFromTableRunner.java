@@ -109,6 +109,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
                     // find the correct equipment for each study card and add it
                     if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
                         studyCard.setAcquisitionEquipment(acquisitionEquipment);
+                        studyCard.setCenterId(acquisitionEquipment.getCenter().getId());
                     }
                 }
             }
@@ -381,7 +382,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         if (importJob.getExaminationComment() != null || !importJob.getExaminationComment().isEmpty()) {
             studyDescription = importJob.getExaminationComment();
         }
-        Examination examination = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId);
+        boolean agreeWithDataReuse = importJob.getExaminationDataReuseAgreement();
+        Examination examination = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId, agreeWithDataReuse);
         if (examination == null) {
             importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
             line[6] = resourceBundle.getString("shanoir.uploader.import.table.error.examination");

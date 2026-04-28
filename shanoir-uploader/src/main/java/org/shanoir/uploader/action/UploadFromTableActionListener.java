@@ -93,7 +93,7 @@ public class UploadFromTableActionListener implements ActionListener {
             }
         } catch (InvalidFormatException | IOException | IllegalStateException e) {
             LOG.error("Error while parsing the input file: ", e);
-            this.importFromTableWindow.displayError(resourceBundle.getString("shanoir.uploader.import.table.error.csv"));
+            this.importFromTableWindow.displayError(resourceBundle.getString("shanoir.uploader.import.table.error.file"));
             return;
         }
         LOG.info(importJobs.entrySet().size() + " import jobs (== DICOM studies/examinations) read from table.");
@@ -137,6 +137,9 @@ public class UploadFromTableActionListener implements ActionListener {
         Cell examComment = row.getCell(16);
         value = handleCell(examComment);
         importJob.setExaminationComment(value);
+        Cell examDataReuseAgreement = row.getCell(17);
+        value = handleCell(examDataReuseAgreement);
+        importJob.setExaminationDataReuseAgreement("true".equalsIgnoreCase(value) || "1".equals(value));
     }
 
     private void readDicomQuery(Row row, ImportJob importJob) {
