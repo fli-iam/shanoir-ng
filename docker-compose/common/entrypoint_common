@@ -54,7 +54,7 @@ require()
     do
         local value="${!name}"
 
-        if [ -z "$value" ] && [[ $name == SHANOIR_* ]]; then
+        if [ -z "$value" ]; then
             error "env var '$name' must not be blank"
             return
         fi
