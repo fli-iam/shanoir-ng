@@ -24,7 +24,7 @@ public class FileEntryDTO {
 
     private boolean exists;
 
-    public FileEntryDTO() {}
+    public FileEntryDTO() { }
 
     public FileEntryDTO(Long studyId, String fileName, String fileType, boolean exists) {
         this.studyId = studyId;
