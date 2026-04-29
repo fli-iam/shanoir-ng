@@ -19,6 +19,7 @@ services:
     image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:NG_v2.10.0"
     environment:
       - MYSQL_DATABASE=keycloak
+      - MARIADB_ROOT_PASSWORD=password
       - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
@@ -28,6 +29,12 @@ services:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
       - shanoir_ng_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
@@ -58,7 +65,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - "keycloak-database"
+      keycloak-database:
+        condition: service_healthy
   #
   # RabbitMQ: inter-microservices communication
   #
