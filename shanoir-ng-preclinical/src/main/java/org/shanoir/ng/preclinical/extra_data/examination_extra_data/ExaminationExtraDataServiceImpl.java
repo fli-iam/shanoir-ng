@@ -53,6 +53,11 @@ public class ExaminationExtraDataServiceImpl implements ExtraDataService<Examina
     }
 
     @Override
+    public List<ExaminationExtraData> findAll() {
+        return Utils.toList(extraDataRepository.findAll());
+    }
+
+    @Override
     public ExaminationExtraData findById(final Long id) {
         return extraDataRepository.findById(id).orElse(null);
     }

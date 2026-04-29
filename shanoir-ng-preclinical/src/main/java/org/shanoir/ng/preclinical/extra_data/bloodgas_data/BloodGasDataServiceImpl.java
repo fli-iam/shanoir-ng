@@ -16,7 +16,6 @@ package org.shanoir.ng.preclinical.extra_data.bloodgas_data;
 
 import java.util.List;
 
-import org.shanoir.ng.preclinical.extra_data.ExtraDataBaseRepository;
 import org.shanoir.ng.preclinical.extra_data.ExtraDataService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
@@ -45,9 +44,6 @@ public class BloodGasDataServiceImpl implements ExtraDataService<BloodGasData> {
     @Autowired
     private BloodGasDataRepository bloodGasRepository;
 
-    @Autowired
-    private ExtraDataBaseRepository<BloodGasData> bloodGasRepository2;
-
     @Override
     public void deleteById(final Long id) throws ShanoirException {
         bloodGasRepository.deleteById(id);
@@ -56,6 +52,11 @@ public class BloodGasDataServiceImpl implements ExtraDataService<BloodGasData> {
     @Override
     public List<BloodGasData> findAllByExaminationId(Long id) {
         return Utils.toList(bloodGasRepository.findAllByExaminationId(id));
+    }
+
+    @Override
+    public List<BloodGasData> findAll() {
+        return Utils.toList(bloodGasRepository.findAll());
     }
 
     @Override

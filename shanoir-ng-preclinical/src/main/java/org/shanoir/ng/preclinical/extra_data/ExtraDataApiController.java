@@ -16,15 +16,16 @@ package org.shanoir.ng.preclinical.extra_data;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloogGasUniqueConstraintManager;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
 import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysioDataUniqueConstraintManager;
 import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalData;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -53,9 +54,9 @@ import jakarta.servlet.http.HttpServletResponse;
 @Controller
 public class ExtraDataApiController implements ExtraDataApi {
 
-    private static final String BAD_ARGUMENTS = "Bad arguments";
-
     private static final Logger LOG = LoggerFactory.getLogger(ExtraDataApiController.class);
+
+    private static final String BAD_ARGUMENTS = "Bad arguments";
 
     @Autowired
     private ExtraDataService<ExaminationExtraData> extraDataService;
@@ -213,11 +214,8 @@ public class ExtraDataApiController implements ExtraDataApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         try {
-            // Find and delete corresponding file
-            if (Paths.get(toDelete.getFilepath()).toFile().exists()) {
-                Files.delete(Paths.get(toDelete.getFilepath()));
-            }
-        } catch (Exception e) {
+            storageService.deletePreclinicalExtraData(toDelete.getExaminationId(), toDelete.getFilename());
+        } catch (StorageException e) {
             LOG.error("There was an error trying to delete files from " + toDelete.getFilepath()
                     + toDelete.getFilename() + " " + e.getMessage(), e);
         }
@@ -373,6 +371,23 @@ public class ExtraDataApiController implements ExtraDataApi {
             return null;
         }
         return examinationExtraData;
+    }
+
+    @Override
+    public ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException {
+        List<ExaminationExtraData> allExtraData = extraDataService.findAll();
+        if (allExtraData == null || allExtraData.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        List<FileEntryDTO> fileEntries = allExtraData.stream()
+                .filter(extraData -> extraData.getFilepath() != null && extraData.getFilename() != null)
+                .map(extraData -> {
+                    boolean exists = Paths.get(extraData.getFilepath()).toFile().exists();
+                    return new FileEntryDTO(extraData.getId(),
+                            extraData.getFilename(), extraData.getExtraDataType(), exists);
+                })
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(fileEntries, HttpStatus.OK);
     }
 
 }

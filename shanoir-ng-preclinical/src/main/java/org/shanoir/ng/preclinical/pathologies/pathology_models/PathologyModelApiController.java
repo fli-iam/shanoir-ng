@@ -15,12 +15,13 @@
 package org.shanoir.ng.preclinical.pathologies.pathology_models;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -29,6 +30,7 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -111,11 +113,8 @@ public class PathologyModelApiController implements PathologyModelApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         try {
-            // Find and delete corresponding file
-            if (Paths.get(toDelete.getFilepath()).toFile().exists()) {
-                Files.delete(Paths.get(toDelete.getFilepath()));
-            }
-        } catch (Exception e) {
+            storageService.deletePathologyModelData(toDelete.getId(), toDelete.getFilename());
+        } catch (StorageException e) {
             LOG.error("There was an error trying to delete files from " + toDelete.getFilepath()
                     + toDelete.getFilename() + " " + e.getMessage(), e);
         }
@@ -279,6 +278,22 @@ public class PathologyModelApiController implements PathologyModelApi {
             return null;
         }
         return model;
+    }
+
+    @Override
+    public ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException {
+        final List<PathologyModel> models = modelsService.findAll();
+        if (models == null || models.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        List<FileEntryDTO> fileEntries = models.stream()
+                .filter(model -> model.getFilepath() != null && model.getFilename() != null)
+                .map(model -> {
+                    boolean exists = Paths.get(model.getFilepath()).toFile().exists();
+                    return new FileEntryDTO(model.getId(), model.getFilename(), "PATHOLOGY-MODEL", exists);
+                })
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(fileEntries, HttpStatus.OK);
     }
 
 }
