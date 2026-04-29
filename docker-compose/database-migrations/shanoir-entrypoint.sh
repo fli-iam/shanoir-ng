@@ -183,7 +183,6 @@ init)
   # - create and populate the migrations table
   # - create the procedures
   # - exit
-
   wait_mysqld
   init_migrations
   apply_init_procedures
@@ -216,7 +215,11 @@ manual)
   exit $?
   ;;
 dev)
-  echo "$HEADER mode '$SHANOIR_MIGRATION': nothing to do, exiting"
+  # dev mode
+  # - create the procedures
+  # - exit
+  echo "$HEADER mode '$SHANOIR_MIGRATION': apply init procedures"
+  apply_init_procedures
   exit 0
   ;;
 '')

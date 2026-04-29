@@ -14,6 +14,7 @@
 
 package org.shanoir.uploader.action.init;
 
+import org.shanoir.uploader.service.rest.KeycloakAuthCodeLoginService.LoginSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,15 @@ public class StartupStateContext {
     private State state;
 
     private ShUpStartupDialog shUpStartupDialog;
+
+    /** The active Keycloak browser-flow session, kept across OTP steps. */
+    private LoginSession loginSession;
+
+    /** QR-code PNG bytes passed from LoginPanelActionListener to OtpSetupState. */
+    private byte[] pendingQrCodeBytes;
+
+    /** Base32 manual key passed from LoginPanelActionListener to OtpSetupState. */
+    private String pendingTotpManualKey;
 
     @Autowired
     private InitialStartupState initialStartupState;
@@ -72,6 +82,30 @@ public class StartupStateContext {
 
     public void setShUpStartupDialog(ShUpStartupDialog shUpStartupDialog) {
         this.shUpStartupDialog = shUpStartupDialog;
+    }
+
+    public LoginSession getLoginSession() {
+        return loginSession;
+    }
+
+    public void setLoginSession(LoginSession loginSession) {
+        this.loginSession = loginSession;
+    }
+
+    public byte[] getPendingQrCodeBytes() {
+        return pendingQrCodeBytes;
+    }
+
+    public void setPendingQrCodeBytes(byte[] pendingQrCodeBytes) {
+        this.pendingQrCodeBytes = pendingQrCodeBytes;
+    }
+
+    public String getPendingTotpManualKey() {
+        return pendingTotpManualKey;
+    }
+
+    public void setPendingTotpManualKey(String pendingTotpManualKey) {
+        this.pendingTotpManualKey = pendingTotpManualKey;
     }
 
 }
