@@ -278,7 +278,7 @@ FROM quay.io/keycloak/keycloak:26.2.5 AS keycloak-base
 # The relevant variables can be listed with: /opt/keycloak/bin/kc.sh show-config
 #
 # All other variables are set in the entrypoint.
-ENV KC_DB="mysql" \
+ENV KC_DB="mariadb" \
     KC_LOG="console,file" \
     KC_HTTP_RELATIVE_PATH="/auth"
 
@@ -379,7 +379,7 @@ CMD []
 
 ################ keycloak-database ##################################################
 
-FROM mysql/mysql-server:5.7 AS keycloak-database
+FROM mariadb:11.4 AS keycloak-database
 
 COPY --link --chmod=0755 keycloak-database/1_add_users.sql /docker-entrypoint-initdb.d/
 
