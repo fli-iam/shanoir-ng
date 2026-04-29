@@ -19,7 +19,9 @@ import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.storage.StorageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -219,5 +221,15 @@ public interface ExaminationApi {
     void downloadExtraData(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
+
+    @Operation(summary = "", description = "Returns a JSON table of all extra-data files indexed by study ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "file list returned"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/files", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException;
 
 }

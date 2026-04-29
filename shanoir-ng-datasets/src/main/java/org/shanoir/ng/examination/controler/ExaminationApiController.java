@@ -29,6 +29,7 @@ import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -377,4 +378,25 @@ public class ExaminationApiController implements ExaminationApi {
         String newUID = generator.getNewUID();
         examination.setStudyInstanceUID(newUID);
     }
+
+    @Override
+    public ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException {
+        List<Examination> examinations = examinationService.findAll();
+        List<FileEntryDTO> entries = new ArrayList<>();
+        for (Examination examination : examinations) {
+            Long examinationId = examination.getId();
+            String directory = storageService.getDirectoryExtraData(examinationId);
+            if (examination.getExtraDataFilePathList() != null) {
+                for (String path : examination.getExtraDataFilePathList()) {
+                    boolean exists = storageService.existsExtraData(examinationId, path);
+                    entries.add(new FileEntryDTO(examination.getStudyId(), directory + path, "EXTRA-DATA", exists));
+                }
+            }
+        }
+        if (entries.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(entries, HttpStatus.OK);
+    }
+
 }

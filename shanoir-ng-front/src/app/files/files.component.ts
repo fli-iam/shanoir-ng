@@ -16,7 +16,7 @@ import { Component } from '@angular/core';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyService } from '../studies/shared/study.service';
-import { DatasetService } from '../datasets/shared/dataset.service';
+import { ExaminationService } from '../examinations/shared/examination.service';
 import { ExtraDataService } from '../preclinical/extraData/extraData/shared/extradata.service';
 import { PathologyModelService } from '../preclinical/pathologies/pathologyModel/shared/pathologyModel.service';
 
@@ -29,8 +29,8 @@ import { PathologyModelService } from '../preclinical/pathologies/pathologyModel
 export class FilesComponent {
 
     constructor(private studyService: StudyService,
-                private datasetService: DatasetService,
-                private extraDataService: ExtraDataService,
+                private examinationService: ExaminationService,
+                private preclinicalExtraDataService: ExtraDataService,
                 private pathologyModelService: PathologyModelService,
                 private breadcrumbsService: BreadcrumbsService) {
         setTimeout(() => {
@@ -49,8 +49,8 @@ export class FilesComponent {
         });
     }
 
-    openDatasetsFilesJson(): void {
-        this.datasetService.getDatasetsFiles().then(json => {
+    openExtraDataFilesJson(): void {
+        this.examinationService.getExtraDataFiles().then(json => {
             const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const newTab = window.open(url, '_blank');
@@ -60,7 +60,7 @@ export class FilesComponent {
     }
 
     openPreclinicalExtraDataFilesJson(): void {
-        this.extraDataService.getExtraDataFiles().then(json => {
+        this.preclinicalExtraDataService.getExtraDataFiles().then(json => {
             const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const newTab = window.open(url, '_blank');

@@ -92,4 +92,10 @@ export class ExaminationService extends EntityService<Examination> {
         const dto = new ExaminationDTO(entity);
         return JSON.stringify(dto, this.customReplacer);
     }
+
+    getExtraDataFiles(): Promise<JSON> {
+        return this.http.get<JSON>(AppUtils.BACKEND_API_EXTRA_DATA_FILES_URL)
+            .toPromise();
+    }
+
 }

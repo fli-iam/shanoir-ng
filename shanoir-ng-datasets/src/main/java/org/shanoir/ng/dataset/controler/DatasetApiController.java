@@ -665,24 +665,4 @@ public class DatasetApiController implements DatasetApi {
         }
     }
 
-    @Override
-    public ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException {
-        List<Examination> examinations = examinationService.findAll();
-        List<FileEntryDTO> entries = new ArrayList<>();
-        for (Examination examination : examinations) {
-            Long examinationId = examination.getId();
-            String directory = storageService.getDirectoryExtraData(examinationId);
-            if (examination.getExtraDataFilePathList() != null) {
-                for (String path : examination.getExtraDataFilePathList()) {
-                    boolean exists = storageService.existsExtraData(examinationId, path);
-                    entries.add(new FileEntryDTO(examination.getStudyId(), directory + path, "EXTRA-DATA", exists));
-                }
-            }
-        }
-        if (entries.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(entries, HttpStatus.OK);
-    }
-
 }

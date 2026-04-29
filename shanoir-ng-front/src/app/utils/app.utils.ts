@@ -97,7 +97,6 @@ export const BACKEND_API_COIL_URL: string = BACKEND_API_STUDIES_MS_URL + '/coils
 // Datasets http api
 export const BACKEND_API_DATASET_MS_URL: string = BACKEND_API_URL + '/datasets';
 export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/datasets';
-export const BACKEND_API_DATASET_FILES_URL: string = BACKEND_API_DATASET_URL + '/files';
 export const BACKEND_API_PROCESSED_DATASET_URL: string = BACKEND_API_DATASET_URL + '/processedDataset';
 export const BACKEND_API_OVERALL_STATISTICS_URL: string = BACKEND_API_DATASET_URL + '/overallStatistics';
 
@@ -122,6 +121,7 @@ export const BACKEND_API_UPDATE_TASKS_URL: string = BACKEND_API_TASKS_URL + '/up
 
 // Examinations http api
 export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
+export const BACKEND_API_EXTRA_DATA_FILES_URL: string = BACKEND_API_EXAMINATION_URL + '/files';
 export const BACKEND_API_EXAMINATION_PRECLINICAL_URL: string = BACKEND_API_EXAMINATION_URL + '/preclinical';
 
 // Acquisition equipment http api

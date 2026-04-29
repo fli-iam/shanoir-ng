@@ -77,11 +77,6 @@ export class DatasetService extends EntityService<Dataset> {
         return DatasetUtils.getDatasetInstance(entity.type);
     }
 
-    getDatasetsFiles(): Promise<JSON> {
-        return this.http.get<JSON>(AppUtils.BACKEND_API_DATASET_FILES_URL)
-            .toPromise();
-    }
-
     getPage(pageable: Pageable): Promise<Page<Dataset>> {
         return this.http.get<Page<Dataset>>(AppUtils.BACKEND_API_DATASET_URL, { 'params': pageable.toParams() })
             .toPromise()

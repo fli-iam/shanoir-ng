@@ -412,14 +412,4 @@ public interface DatasetApi {
             @Parameter(description = "Keys of the metadata to extract", required = true) @Valid
             @RequestParam List<String> metadataKeys) throws Exception;
 
-    @Operation(summary = "", description = "Returns a JSON table of all extra-data files indexed by study ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "file list returned"),
-            @ApiResponse(responseCode = "401", description = "unauthorized"),
-            @ApiResponse(responseCode = "403", description = "forbidden"),
-            @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @GetMapping(value = "/files", produces = { "application/json" })
-    @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException;
-
 }
