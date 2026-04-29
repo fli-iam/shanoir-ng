@@ -19,7 +19,6 @@ import { TaskService } from '../async-tasks/task.service';
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DataUserAgreement } from '../dua/shared/dua.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
-import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 import { StudyLight } from '../studies/shared/study.dto';
 import { StudyService } from '../studies/shared/study.service';
 import { AccessRequest } from '../users/access-request/access-request.model';
