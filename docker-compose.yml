@@ -18,7 +18,7 @@ services:
     container_name: "${SHANOIR_PREFIX}keycloak-database"
     image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:NG_v2.10.0"
     environment:
-      - MYSQL_DATABASE=keycloak
+      - MARIADB_DATABASE=keycloak
       - MARIADB_ROOT_PASSWORD=password
       - MARIADB_AUTO_UPGRADE=1
     ulimits:
