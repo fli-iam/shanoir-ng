@@ -19,6 +19,7 @@ services:
     image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:NG_v2.10.0"
     environment:
       - MYSQL_DATABASE=keycloak
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -78,8 +79,9 @@ services:
     container_name: "${SHANOIR_PREFIX}database"
     image: "ghcr.io/fli-iam/shanoir-ng/database:NG_v2.10.0"
     command: --max_allowed_packet 20000000
-    env_file:
-      - ./docker-compose/database/variables.env
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
