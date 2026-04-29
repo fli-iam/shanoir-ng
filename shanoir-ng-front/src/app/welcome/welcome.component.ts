@@ -371,7 +371,7 @@ export class WelcomeComponent implements OnInit {
         // get public studies
 		this.studyService.getPublicStudiesData().then(studies => {
 			// sort by nbExaminations
-			this.publicStudies = studies?.sort((a, b) => {
+			this.publicStudies = (studies ?? []).sort((a, b) => {
 				// To order by dates :
 				// return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
 				return (b.nbExaminations) - (a.nbExaminations);
