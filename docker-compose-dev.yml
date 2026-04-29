@@ -31,6 +31,12 @@ services:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
       - shanoir_ng_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
