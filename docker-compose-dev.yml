@@ -21,6 +21,7 @@ services:
       target: keycloak-database
     environment:
       - MYSQL_DATABASE=keycloak
+      - MARIADB_ROOT_PASSWORD=password
       - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
