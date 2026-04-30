@@ -43,6 +43,16 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      */
     List<DatasetProcessing> findAllByInputDatasets_Id(Long datasetId);
 
+    /**
+     * Find all processings that are linked to given monitoring through parent_id column
+     *
+     * @param monitoringId
+     * @return
+     */
+    @Query(value = "SELECT DISTINCT processing.id FROM dataset_processing as processing "
+            + "WHERE processing.parent_id = :monitoringId", nativeQuery = true)
+    List<Long> findAllIdsByMonitoringId(Long monitoringId);
+
     List<DatasetProcessing> findAllByParentId(Long id);
 
     /**
@@ -57,4 +67,21 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id "
             + "WHERE acquisition.examination_id IN (:examinationIds)", nativeQuery = true)
     List<Long> findAllIdsByExaminationIds(List<Long> examinationIds);
+
+    /**
+     * Find all identifying fields for a given processing id
+     *
+     * @param processingId
+     * @return
+     */
+    @Query(value = "SELECT processing.monitoring_index as monitoringIndex, monitoring.identifier as monitoringIdentifier FROM dataset_processing as processing "
+            + "INNER JOIN dataset_processing as parent on parent.id = processing.parent_id "
+            + "INNER JOIN execution_monitoring as monitoring on monitoring.id = parent.id "
+            + "WHERE processing.id = :processingId", nativeQuery = true)
+    IdentificationData findIdentificationDataFromProcessingId(Long processingId);
+
+    interface IdentificationData {
+        Long getMonitoringIndex();
+        String getMonitoringIdentifier();
+    }
 }

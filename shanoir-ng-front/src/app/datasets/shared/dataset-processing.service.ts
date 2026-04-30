@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -21,15 +21,17 @@ import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetProcessingDTOService, DatasetProcessingInDTO, DatasetProcessingOutDTO } from './dataset-processing.dto';
 import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
+import {DatasetService} from "./dataset.service";
 
 @Injectable()
 export class DatasetProcessingService extends EntityService<DatasetProcessing> {
 
     API_URL = AppUtils.BACKEND_API_DATASET_PROCESSING_URL;
 
-    constructor(protected http: HttpClient, 
+    constructor(protected http: HttpClient,
         private datasetDTOService: DatasetDTOService,
-        private datasetProcessingDTOService: DatasetProcessingDTOService) {
+        private datasetProcessingDTOService: DatasetProcessingDTOService,
+        private datasetService: DatasetService) {
         super(http)
         datasetProcessingDTOService.setDatasetProcessingService(this);
     }
@@ -41,6 +43,11 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
 
     findByInputDatasetId(datasetId: number): Promise<DatasetProcessing[]> {
         return this.http.get<DatasetProcessingInDTO[]>(this.API_URL + '/inputDataset/' + datasetId)
+            .toPromise().then(dtos => this.mapEntityList(dtos));
+    }
+
+    findByMonitoringId(monitoringId: number): Promise<DatasetProcessing[]> {
+        return this.http.get<DatasetProcessingInDTO[]>(this.API_URL + '/monitoring/' + monitoringId)
             .toPromise().then(dtos => this.mapEntityList(dtos));
     }
 
@@ -70,9 +77,18 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
         if (result == undefined) result = [];
         return this.datasetProcessingDTOService.toEntityList(dtos, result);
     }
-    
+
     public stringify(entity: DatasetProcessing) {
         const dto = new DatasetProcessingOutDTO(entity);
         return JSON.stringify(dto, this.customReplacer);
+    }
+
+    async getFirstRealInput(proc: DatasetProcessing): Promise<Dataset> {
+        if (proc.inputDatasets && proc.inputDatasets.length > 0) {
+            return this.datasetService.get(proc.inputDatasets[0].id);
+        }
+
+        const children = await this.findByMonitoringId(proc.id);
+        return this.getFirstRealInput(children[0]);
     }
 }

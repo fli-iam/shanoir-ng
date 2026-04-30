@@ -16,7 +16,6 @@ package org.shanoir.ng.vip.executionMonitoring.service;
 
 import java.util.List;
 
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -30,11 +29,10 @@ public interface ExecutionMonitoringService {
     /**
      * Create execution monitoring
      *
-     * @param execution
-     * @param inputDatasets
+     * @param sample a item of the exec candidate list
      * @return the created execution monitoring
      */
-    ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO execution, List<Dataset> inputDatasets) throws RestServiceException;
+    ExecutionMonitoring createExecutionMonitoring(ExecutionCandidateDTO sample) throws RestServiceException;
 
     /**
      * Update an execution monitoring.
@@ -59,5 +57,5 @@ public interface ExecutionMonitoringService {
      * @param processing
      * @param event
      */
-    void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event) throws EntityNotFoundException, SecurityException;
+    void startMonitoringJob(ExecutionMonitoring processing, ShanoirEvent event, Integer jobsNumber) throws EntityNotFoundException, SecurityException;
 }
