@@ -1,0 +1,117 @@
+# Shanoir NG - Import, manage and share neuroimaging data
+# Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+# Contact us on https://project.inria.fr/shanoir/
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+
+# Test that the Shanoir NG docker-compose deployment starts correctly.
+#
+# This workflow uses the pre-built images from GHCR (docker-compose.yml) and
+# follows the same initialization sequence as bootstrap.sh (without building
+# from source). dcm4chee is skipped to keep resource usage within the limits
+# of GitHub-hosted runners.
+
+name: Deployment smoke test
+
+on:
+  pull_request:
+    branches: [develop, master]
+  workflow_dispatch:
+
+concurrency:
+  group: deployment-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deployment-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: read
+
+    env:
+      COMPOSE_FILE: "docker-compose.yml:docker-compose.ci.yml"
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Configure /etc/hosts
+        run: |
+          sudo sh -c 'echo "127.0.0.1 shanoir-ng-nginx viewer" >> /etc/hosts'
+
+      - name: Build database-migrations image
+        run: |
+          docker build \
+            -f docker-compose/Dockerfile \
+            --target database-migrations \
+            -t "ghcr.io/fli-iam/shanoir-ng/database-migrations:NG_v2.9.3" \
+            docker-compose
+
+      - name: Bootstrap installation
+        run: bash ./bootstrap.sh --clean --no-build
+
+      - name: Debug container state
+        if: failure()
+        run: |
+          echo "--- Container statuses ---"
+          docker compose ps --all
+          echo ""
+          echo "--- users container config (non-secret) ---"
+          docker exec users sh -c 'echo "SMTP_HOST=$SHANOIR_SMTP_HOST SMTP_PORT=$SHANOIR_SMTP_PORT MIGRATION=$SHANOIR_MIGRATION LOG_LEVEL=$SHANOIR_CONSOLE_LOG_LEVEL"' 2>/dev/null || echo "(exec failed)"
+          echo ""
+          echo "--- users container logs (last 50 lines) ---"
+          docker logs --tail=50 users 2>&1 || echo "(no logs)"
+          echo ""
+          echo "--- users container inspect (State) ---"
+          docker inspect --format='Status={{.State.Status}} Running={{.State.Running}} OOMKilled={{.State.OOMKilled}} ExitCode={{.State.ExitCode}} Pid={{.State.Pid}}' users 2>/dev/null || echo "(inspect failed)"
+          echo ""
+          echo "--- system memory ---"
+          free -h
+          echo ""
+          echo "--- docker stats (no-stream) ---"
+          docker stats --no-stream --format "table {{.Name}}\t{{.MemUsage}}\t{{.CPUPerc}}" 2>/dev/null | head -20
+
+      - name: Wait for microservices
+        run: |
+          bash .github/scripts/helpers.sh wait_for_log keycloak 'Keycloak .* started in' 300
+          for ms in users studies datasets import preclinical; do
+            bash .github/scripts/helpers.sh wait_for_log "$ms" 'Started .* in' 300
+          done
+          bash .github/scripts/helpers.sh wait_for_url https://shanoir-ng-nginx/ 120
+
+      - name: Create Keycloak admin user
+        run: bash .github/scripts/create-keycloak-user.sh
+
+      - name: Smoke tests
+        run: bash .github/scripts/helpers.sh smoke_tests
+
+      - name: Functional tests
+        run: bash .github/scripts/functional-tests.sh
+
+      - name: Dump logs on failure
+        if: failure()
+        run: |
+          mkdir -p /tmp/shanoir-logs
+          docker compose logs --no-color > /tmp/shanoir-logs/compose.log 2>&1
+          docker compose ps --all > /tmp/shanoir-logs/ps.log 2>&1
+
+      - name: Upload logs on failure
+        if: failure()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-logs
+          path: /tmp/shanoir-logs/
+          retention-days: 7
+
+      - name: Teardown
+        if: always()
+        run: docker compose down -v

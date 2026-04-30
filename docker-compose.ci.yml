@@ -1,0 +1,61 @@
+# CI-only compose overrides.
+#
+# This file is layered on top of docker-compose.yml via:
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.ci.yml
+#
+# * adds a disposable SMTP sink
+# * relaxes logging
+# * overrides the Spring Security issuer-uri so that microservices can start before nginx is ready.
+# * make java.security.SecureRandom read from /dev/urandom to avoid stalling in CI containers
+
+services:
+  smtp-sink:
+    container_name: smtp-sink
+    image: mailhog/mailhog:v1.0.1
+    networks:
+      - shanoir_ng_network
+  users:
+    environment:
+      - SHANOIR_SMTP_HOST=smtp-sink
+      - SHANOIR_SMTP_PORT=1025
+      - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+    depends_on:
+      smtp-sink:
+        condition: service_started
+  studies:
+    environment:
+      - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+  datasets:
+    environment:
+      - VIP_URL_HOST=localhost
+      - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+  import:
+    environment:
+      - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+  preclinical:
+    environment:
+      - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+  nifti-conversion:
+    environment:
+      - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
+  keycloak:
+    environment:
+      - SHANOIR_SMTP_HOST=smtp-sink
+      - SHANOIR_SMTP_PORT=1025
+    depends_on:
+      smtp-sink:
+        condition: service_started
+  nginx:
+    environment:
+      - VIP_URL_HOST=localhost

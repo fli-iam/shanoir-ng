@@ -85,6 +85,8 @@ services:
       context: docker-compose
       target: database
     command: --max_allowed_packet 20000000
+    environment:
+      - SHANOIR_MIGRATION
     env_file:
       - ./docker-compose/database/variables.env
     ulimits:
