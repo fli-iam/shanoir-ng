@@ -453,9 +453,12 @@ public class QueryPACSService {
      * @param patient
      */
     private void queryStudies(Association association, DicomQuery dicomQuery, Patient patient) {
-        DicomParam modality = initDicomParam(Tag.Modality, dicomQuery.getModality());
-        DicomParam patientName = initDicomParam(Tag.PatientName, patient.getPatientName());
+        // Only use PatientID to query PACS for all his DICOM studies for the patient
+        // In case multiple patients, same ID, but different PatientNames are returned,
+        // it covers this case too and queries the PACS only once for all studies
         DicomParam patientID = initDicomParam(Tag.PatientID, patient.getPatientID());
+        DicomParam modality = initDicomParam(Tag.Modality, dicomQuery.getModality());
+        DicomParam patientName = initDicomParam(Tag.PatientName, dicomQuery.getPatientName());
         DicomParam studyDescription = initDicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription());
         // query studies, at first using the potential study date entered by the user via the GUI
         // most users will leave this empty, when the query patient root level queries
