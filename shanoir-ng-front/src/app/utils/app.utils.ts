@@ -479,3 +479,14 @@ export function getSizeStr(size: number): string {
 type UnionKeys<T> = T extends T ? keyof T : never;
 type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never;
 export type StrictUnion<T> = StrictUnionHelper<T, T>
+
+const INVALID_FILENAME_CHARS = /[<>:"/\\|?*\n\r\t]/g
+
+export function sanitizeFilename(name) {
+  return name
+    .replace(INVALID_FILENAME_CHARS, '_')
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/\.+$/, '')
+}
