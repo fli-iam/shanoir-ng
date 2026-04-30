@@ -68,6 +68,12 @@ public class ShUpStartupDialog extends JFrame {
     @Autowired
     public SelectProfileConfigurationPanel selectProfilePanel;
 
+    @Autowired
+    public OtpInputPanel otpInputPanel;
+
+    @Autowired
+    public OtpSetupPanel otpSetupPanel;
+
     public JPanel logPanel;
 
     public JPanel additionalPanel = null; // handle the additional panel that can be info, proxy or login panel
@@ -83,7 +89,7 @@ public class ShUpStartupDialog extends JFrame {
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (int) ((dimension.getWidth() - frame.getWidth()) / 2);
         int y = (int) ((dimension.getHeight() - frame.getHeight()) / 2);
-        setBounds(x - 200, y - 300, 400, 600);
+        setBounds(x - 200, y - 300, 400, 820);
         contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         initTitle();
@@ -193,6 +199,31 @@ public class ShUpStartupDialog extends JFrame {
         additionalPanel.add(selectProfilePanel);
         selectProfilePanel.repaint();
         selectProfilePanel.revalidate();
+    }
+
+    public void showOtpInputForm() {
+        additionalPanel.removeAll();
+        otpInputPanel.submit.setEnabled(true);
+        otpInputPanel.otpText.setText("");
+        otpInputPanel.setFocusable(true);
+        otpInputPanel.requestFocusInWindow();
+        frame.getRootPane().setDefaultButton(otpInputPanel.submit);
+        additionalPanel.add(otpInputPanel);
+        otpInputPanel.repaint();
+        otpInputPanel.revalidate();
+    }
+
+    public void showOtpSetupForm() {
+        additionalPanel.removeAll();
+        otpSetupPanel.submit.setEnabled(true);
+        otpSetupPanel.otpText.setText("");
+        otpSetupPanel.deviceLabelText.setText("");
+        otpSetupPanel.setFocusable(true);
+        otpSetupPanel.requestFocusInWindow();
+        frame.getRootPane().setDefaultButton(otpSetupPanel.submit);
+        additionalPanel.add(otpSetupPanel);
+        otpSetupPanel.repaint();
+        otpSetupPanel.revalidate();
     }
 
 }
