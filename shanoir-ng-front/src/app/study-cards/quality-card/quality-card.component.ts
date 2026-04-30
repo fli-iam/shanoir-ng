@@ -206,7 +206,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     apply() {
         this.confirmService.confirm(
             'Apply Quality Card', 
-            `Do you want to apply the quality card named "${this.qualityCard.name}" all over the study "${this.qualityCard.study.name}" ? This would permanentely overwrite previous quality tags for the study's subjects.`
+            `Do you want to apply the quality card named "${this.qualityCard.name}" all over the study "${this.qualityCard.study.name}" ? This would permanently overwrite previous quality tags set on dataset acquisitions.`
         ).then(accept => {
             if (accept) {
                 this.applying = true;

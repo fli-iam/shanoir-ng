@@ -17,6 +17,7 @@ package org.shanoir.ng.studycard.controler;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
@@ -136,7 +137,7 @@ public interface QualityCardApi {
     @RequestMapping(value = "/test/{qualityCardId}", method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<QualityCardResult> testQualityCardOnStudy(
-            @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
+            @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException, PacsException;
 
     @Operation(summary = "", description = "Test a quality card on a study for quality control")
     @ApiResponses(value = {
@@ -152,5 +153,5 @@ public interface QualityCardApi {
     ResponseEntity<QualityCardResult> testQualityCardOnStudy(
             @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
             @Parameter(description = "examination number start ", required = true) @PathVariable("start") int start,
-            @Parameter(description = "examination number stop", required = true) @PathVariable("stop") int stop) throws RestServiceException, MicroServiceCommunicationException;
+            @Parameter(description = "examination number stop", required = true) @PathVariable("stop") int stop) throws RestServiceException, MicroServiceCommunicationException, PacsException;
 }
