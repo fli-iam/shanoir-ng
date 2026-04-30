@@ -341,8 +341,8 @@ public class QueryPACSService {
                     synchronized (patients) {
                         patients.add(patient);
                     }
+                    queryStudies(association, dicomQuery, patient);
                 }
-                queryStudies(association, dicomQuery, patient, patientExists);
             });
             patients.sort(new PatientNameSorter());
             importJob.setPatients(patients);
@@ -452,14 +452,9 @@ public class QueryPACSService {
      * @param dicomQuery
      * @param patient
      */
-    private void queryStudies(Association association, DicomQuery dicomQuery, Patient patient, boolean patientExists) {
+    private void queryStudies(Association association, DicomQuery dicomQuery, Patient patient) {
         DicomParam modality = initDicomParam(Tag.Modality, dicomQuery.getModality());
-        DicomParam patientName = null;
-        if (patientExists) {
-            patientName = initDicomParam(Tag.PatientName, "");
-        } else {
-            patientName = initDicomParam(Tag.PatientName, patient.getPatientName());
-        }
+        DicomParam patientName = initDicomParam(Tag.PatientName, patient.getPatientName());
         DicomParam patientID = initDicomParam(Tag.PatientID, patient.getPatientID());
         DicomParam studyDescription = initDicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription());
         // query studies, at first using the potential study date entered by the user via the GUI
