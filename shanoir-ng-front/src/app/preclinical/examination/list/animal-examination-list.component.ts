@@ -30,7 +30,7 @@ import { StudyUserRight } from '../../../studies/shared/study-user-right.enum';
 @Component({
     selector: 'animal-examination-list',
     templateUrl: 'animal-examination-list.component.html',
-    standalone: false
+    imports: [TableComponent]
 })
 export class AnimalExaminationListComponent extends EntityListComponent<Examination>{
     @ViewChild('table', { static: false }) table: TableComponent;

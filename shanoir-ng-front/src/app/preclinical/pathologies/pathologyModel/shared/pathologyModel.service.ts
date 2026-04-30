@@ -14,7 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../../../utils/app.utils';
@@ -36,8 +36,7 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
 
     getPathologyModelsByPathology(pathology:Pathology): Promise<PathologyModel[]> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_PATHOLOGIES_URL}${pathology.id}/${PreclinicalUtils.PRECLINICAL_MODEL_DATA}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
-        return this.http.get<PathologyModel[]>(url)
-            .toPromise()
+        return firstValueFrom(this.http.get<PathologyModel[]>(url))
             .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
 
@@ -46,9 +45,9 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
     }
 
     downloadFile(model: PathologyModel): Promise<void> {
-        return this.http.get(`${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/download/specs/`+model.id,
+        return firstValueFrom(this.http.get(`${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/download/specs/`+model.id,
             { observe: 'response', responseType: 'blob' }
-        ).toPromise().then(response => {this.downloadIntoBrowser(response);});
+        )).then(response => {this.downloadIntoBrowser(response);});
     }
     
      postFile(fileToUpload: File,  model_id: number): Observable<any> {

@@ -13,8 +13,10 @@
  */
 
 import { formatDate } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
+    FormsModule,
+    ReactiveFormsModule,
     UntypedFormControl,
     UntypedFormGroup,
     ValidatorFn,
@@ -34,8 +36,7 @@ import { ParameterType } from 'src/app/vip/models/parameterType';
 import { Pipeline } from 'src/app/vip/models/pipeline';
 
 import { ConsoleService } from "../../shared/console/console.service";
-import { Option } from '../../shared/select/select.component';
-import { ServiceLocator } from "../../utils/locator.service";
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { ExecutionDataService } from '../execution.data-service';
 import { DatasetParameterDTO } from "../models/dataset-parameter.dto";
 import { ExecutionCandidateDto } from "../models/execution-candidate.dto";
@@ -46,11 +47,11 @@ import { PipelineParameter } from "../models/pipelineParameter";
     selector: 'app-execution',
     templateUrl: './execution.component.html',
     styleUrls: ['./execution.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent]
 })
 export class ExecutionComponent implements OnInit {
 
-    protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    protected consoleService = inject(ConsoleService);
     pipeline: Pipeline;
     executionForm: UntypedFormGroup;
     private selectedDatasets: Set<DatasetLight>;
@@ -282,7 +283,7 @@ export class ExecutionComponent implements OnInit {
     getDefaultExecutionName(): string {
         return this.cleanProcessingName(this.pipeline.name
         + "_" + this.pipeline.version
-        + "_" + formatDate(new Date(), 'dd-MM-YYYY_HHmmss', 'en-US'));
+        + "_" + formatDate(new Date(), 'dd-MM-yyyy_HHmmss', 'en-US'));
 
     }
 

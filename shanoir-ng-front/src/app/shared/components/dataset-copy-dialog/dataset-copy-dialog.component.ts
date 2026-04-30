@@ -13,17 +13,18 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
-import { StudyService } from 'src/app/studies/shared/study.service';
 import { CopyData, CopyDataService } from 'src/app/studies/shared/copy-data.service';
+import { StudyService } from 'src/app/studies/shared/study.service';
 
 import { StudyRightsService } from "../../../studies/shared/study-rights.service";
 import { StudyUserRight } from "../../../studies/shared/study-user-right.enum";
-import { ServiceLocator } from "../../../utils/locator.service";
 import { ConsoleService } from "../../console/console.service";
 import { KeycloakService } from "../../keycloak/keycloak.service";
 import { IdName } from '../../models/id-name.model';
+import { SelectBoxComponent } from '../../select/select.component';
 
 
 export type InputDataset = {
@@ -37,7 +38,7 @@ export type InputDataset = {
     selector: 'user-action-dialog',
     templateUrl: 'dataset-copy-dialog.component.html',
     styleUrls: ['dataset-copy-dialog.component.css'],
-    standalone: false
+    imports: [SelectBoxComponent, FormsModule]
 })
 export class DatasetCopyDialogComponent {
 
@@ -52,7 +53,7 @@ export class DatasetCopyDialogComponent {
     protected canCopy: boolean = true;
     protected centerIds: number[] = [];
     protected subjectIds: number[] = [];
-    protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    protected consoleService = inject(ConsoleService);
 
     constructor(private http: HttpClient,
         private studyRightsService: StudyRightsService,
@@ -121,14 +122,16 @@ export class DatasetCopyDialogComponent {
                     this.canCopy = false;
                     if (reason.status == 403) {
                         this.statusMessage = "You must have IMPORT right.";
-                    } else throw Error(reason);
+                    } else {
+                        this.close();
+                        throw Error(reason);
+                    }
                 });
             }
         });
     }
 
     private buildCopyData(): CopyData {
-        console.log("Building copy data with input datasets: ", this.inputDatasets);
         return {
             datasets: this.inputDatasets.map(d => ({
                 datasetId: d.datasetId,

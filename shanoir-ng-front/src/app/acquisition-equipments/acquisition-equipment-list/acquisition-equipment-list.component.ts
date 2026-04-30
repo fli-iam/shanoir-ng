@@ -27,7 +27,7 @@ import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.ser
 @Component({
     selector: 'acquisition-equipment-list',
     templateUrl: 'acquisition-equipment-list.component.html',
-    standalone: false
+    imports: [TableComponent]
 })
 
 export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListComponent<AcquisitionEquipment> {

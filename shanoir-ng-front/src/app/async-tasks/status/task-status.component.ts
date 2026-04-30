@@ -14,6 +14,8 @@
 import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HttpClient } from "@angular/common/http";
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
 import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
@@ -26,12 +28,15 @@ import {Task} from '../task.model';
 import {TaskService} from "../task.service";
 import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 import {ConsoleService} from "../../shared/console/console.service";
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
     selector: 'task-status',
     templateUrl: 'task-status.component.html',
     styleUrls: ['task-status.component.css'],
-    standalone: false
+    imports: [FormsModule, LoadingBarComponent, RouterLink, TableComponent, LocalDateFormatPipe]
 })
 export class TaskStatusComponent implements OnDestroy, OnChanges {
 

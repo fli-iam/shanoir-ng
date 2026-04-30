@@ -14,6 +14,7 @@
 
 import { Component, OnInit, SimpleChanges, Input, HostBinding, OnDestroy, OnChanges } from "@angular/core";
 
+
 declare let papaya: any;
 declare let papayaContainers: any[];
 
@@ -21,7 +22,7 @@ declare let papayaContainers: any[];
     selector: "papaya",
     templateUrl: "papaya.component.html",
     styleUrls: ["papaya.component.css"],
-    standalone: false
+    imports: []
 })
 export class PapayaComponent implements OnInit, OnDestroy, OnChanges {
     @Input() params: any[];

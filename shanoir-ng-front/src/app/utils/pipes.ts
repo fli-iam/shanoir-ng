@@ -23,10 +23,7 @@ import { Pipe, PipeTransform } from '@angular/core';
  *   {{ 2 | exponentialStrength:10 }}
  *   formats to: 1024
 */
-@Pipe({
-    name: 'replaceSpace',
-    standalone: false
-})
+@Pipe({ name: 'replaceSpace' })
 export class ReplaceSpacePipe implements PipeTransform {
   transform(value: string, replacementChar: string = '-'): string {
     return value.replace(/ /g, replacementChar);

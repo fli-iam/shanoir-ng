@@ -12,6 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { RouterLinkActive, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { Coil } from '../coils/shared/coil.model';
 import { CoilService } from '../coils/shared/coil.service';
@@ -23,13 +25,15 @@ import { TableComponent } from '../shared/components/table/table.component';
 import { QualityCard } from '../study-cards/shared/quality-card.model';
 import { QualityCardService } from '../study-cards/shared/quality-card.service';
 import * as AppUtils from '../utils/app.utils';
+import { StudyCardRulesComponent } from '../study-cards/study-card-rules/study-card-rules.component';
+import { CheckboxComponent } from '../shared/checkbox/checkbox.component';
 
 
 @Component({
     selector: 'quality-control',
     templateUrl: 'quality-control.component.html',
     styleUrls: ['quality-control.component.css'],
-    standalone: false
+    imports: [RouterLinkActive, RouterLink, StudyCardRulesComponent, FormsModule, CheckboxComponent, TableComponent]
 })
 
 export class QualityControlComponent implements OnChanges {

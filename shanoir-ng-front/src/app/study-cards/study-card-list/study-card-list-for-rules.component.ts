@@ -19,6 +19,7 @@ import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { TableComponent } from '../../shared/components/table/table.component';
 
 import { StudyCardListComponent } from './study-card-list.component';
 
@@ -28,7 +29,7 @@ import { StudyCardListComponent } from './study-card-list.component';
     selector: 'study-card-list-for-rules',
     templateUrl: 'study-card-list-for-rules.component.html',
     styleUrls: ['study-card-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class StudyCardForRulesListComponent extends StudyCardListComponent implements OnInit {
 

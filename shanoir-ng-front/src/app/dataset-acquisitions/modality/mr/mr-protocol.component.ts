@@ -29,8 +29,7 @@ import {MrProtocol} from './mr-protocol.model';
             useExisting: forwardRef(() => MrProtocolComponent),
             multi: true,
         }
-    ],
-    standalone: false
+    ]
 })
 export class MrProtocolComponent implements ControlValueAccessor {
 
