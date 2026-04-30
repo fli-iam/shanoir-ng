@@ -30,14 +30,18 @@ import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.bids.BidsDeserializer;
 import org.shanoir.ng.bids.model.BidsElement;
-import org.shanoir.ng.bids.model.BidsFolder;
 import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.bids.service.BidsTreeLockedException;
+import org.shanoir.ng.bids.service.BidsTreeSemaphore;
+import org.shanoir.ng.bids.service.BidsValidationPublisher;
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,7 +70,13 @@ public class BidsApiController implements BidsApi {
     private BidsDeserializer bidsDeserializer;
 
     @Autowired
-    private StudyRepository studyRepo;
+    private StudyService studyService;
+
+    @Autowired
+    private BidsValidationPublisher bidsValidationPublisher;
+
+    @Autowired
+    private BidsTreeSemaphore bidsTreeSemaphore;
 
     private final HttpServletRequest request;
 
@@ -79,7 +89,11 @@ public class BidsApiController implements BidsApi {
     public ResponseEntity<Void> generateBIDSByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "name of the study", required = true) @PathVariable("studyName") String studyName) throws IOException {
-        bidsService.exportAsBids(studyId, studyName);
+        try {
+            bidsService.exportAsBids(studyId, studyName);
+        } catch (BidsTreeLockedException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
         return ResponseEntity.ok().build();
     }
 
@@ -160,13 +174,57 @@ public class BidsApiController implements BidsApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException, IOException {
 
-        BidsElement studyBidsElement = new BidsFolder("Error while retrieving the study bids structure, please reload the page");
-        Study study = studyRepo.findById(studyId).orElse(null);
+        BidsElement studyBidsElement;
+        Study study = studyService.findById(studyId);
         if (study != null) {
-            studyBidsElement = bidsDeserializer.deserialize(bidsService.exportAsBids(studyId, study.getName()));
+            boolean unlocked = bidsTreeSemaphore.awaitUnlock(studyId, 30, java.util.concurrent.TimeUnit.SECONDS);
+            if (!unlocked) { // still locked after timeout
+                throw new RestServiceException(
+                        new ErrorModel(HttpStatus.CONFLICT.value(), "The BIDS tree is locked and the timeout has been reached", null));
+            } else { // now unlocked
+                try {
+                    // try to get the BIDS structure
+                    studyBidsElement = bidsDeserializer.deserialize(bidsService.exportAsBids(studyId, study.getName()));
+                    return new ResponseEntity<>(studyBidsElement, HttpStatus.OK);
+                } catch (BidsTreeLockedException e) {
+                    // if, by any bad luck, it has been locked between those lines by the same user requesting a refresh, throw exception
+                    throw new RestServiceException(
+                            new ErrorModel(HttpStatus.CONFLICT.value(), "The BIDS tree is currently reconstructing, try again later", null));
+                }
+            }
+        } else {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.NOT_FOUND.value(), "Study with id " + studyId + " not found", null));
         }
 
-        return new ResponseEntity<>(studyBidsElement, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<String> validateBidsByStudyId(
+            @Parameter(description = "Id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(description = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath) throws RestServiceException, IOException {
+
+        if (!filePath.startsWith("/var/datasets-data/bids-data/stud-" + studyId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        // Ensure BIDS tree is exported
+        Study study = studyService.findById(studyId);
+        try {
+            bidsService.exportAsBids(studyId, study.getName()); // will not recreate if already existing
+        } catch (BidsTreeLockedException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.CONFLICT.value(), "The BIDS tree is currently reconstructing, try again later", null));
+        }
+
+        // Request BIDS validation
+        try {
+            String validationResultJson = bidsValidationPublisher.requestValidationSync(filePath);
+            return new ResponseEntity<>(validationResultJson, HttpStatus.OK);
+        } catch (AmqpException e) {
+            ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while validating BIDS dataset", e.getMessage());
+            throw new RestServiceException(e, error);
+        }
     }
 
     /**
