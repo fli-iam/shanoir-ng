@@ -293,7 +293,7 @@ public class BidsImporterService {
                 dsFile.setPath(path);
                 files.add(dsFile);
             } catch (Exception e) {
-                throw new RuntimeException("Could not read file: " + importedFile.getName(), e);
+                throw new RuntimeException("Error with storage of file: " + importedFile.getName(), e);
             }
 
             if (equipmentId == 0L && importedFile.getName().endsWith(".json")
