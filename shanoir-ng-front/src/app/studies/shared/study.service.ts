@@ -268,8 +268,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     validateStudyForBIDS(studyId: number, path: string): Promise<any> {
         if (!studyId) throw Error('study id is required');
         const params = new HttpParams().set("filePath", path);
-        return this.http.get<any>(AppUtils.BACKEND_API_BIDS_URL + '/validateBidsStudy/' + studyId, { params: params })
-            .toPromise();
+        return firstValueFrom(this.http.get<any>(AppUtils.BACKEND_API_BIDS_URL + '/validateBidsStudy/' + studyId, { params: params }));
     }
 
     protected static getIgnoreList(): string[] {
