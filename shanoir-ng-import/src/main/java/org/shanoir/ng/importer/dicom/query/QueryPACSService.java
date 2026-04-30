@@ -458,6 +458,7 @@ public class QueryPACSService {
         // it covers this case too and queries the PACS only once for all studies
         DicomParam patientID = initDicomParam(Tag.PatientID, patient.getPatientID());
         DicomParam modality = initDicomParam(Tag.Modality, dicomQuery.getModality());
+        // In case the user itself filters by PatientName, his selection is integrated too
         DicomParam patientName = initDicomParam(Tag.PatientName, dicomQuery.getPatientName());
         DicomParam studyDescription = initDicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription());
         // query studies, at first using the potential study date entered by the user via the GUI
