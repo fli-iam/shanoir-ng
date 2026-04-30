@@ -14,19 +14,19 @@
 
 import { Location } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { ConsoleService } from '../../shared/console/console.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 
 @Component({
     selector: 'upload-extra-data',
     templateUrl: 'upload-extra-data.component.html',
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent]
 })
 
 export class UploadExtraDataComponent implements OnInit, OnChanges {
@@ -93,7 +93,7 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
     };
 
    back(id?: number): void {
-        if (this.closing.observers.length > 0) {
+        if (this.closing.observed) {
            this.closing.emit(id);
         } else {
             this.location.back();

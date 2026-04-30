@@ -11,8 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ElementRef, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
@@ -21,12 +22,18 @@ import { MassDownloadService } from "../../shared/mass-download/mass-download.se
 import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+
+import { MetadataNodeComponent } from './metadata-node.component';
+import { ProcessingNodeComponent } from './processing-node.component';
 
 
 @Component({
     selector: 'simple-dataset-node',
     templateUrl: 'dataset-node.component.html',
-    standalone: false
+    imports: [TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, MetadataNodeComponent, forwardRef(() => ProcessingNodeComponent)]
 })
 
 export class SimpleDatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode> implements OnChanges {

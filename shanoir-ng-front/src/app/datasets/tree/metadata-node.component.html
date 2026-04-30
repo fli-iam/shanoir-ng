@@ -12,12 +12,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<node
-        *ngIf="node"
+@if (node) {
+    <node
         [class.selected]="treeService.isSelected(node.id, 'dicomMetadata')"
-        (labelClick)="null"
+        (labelClick)="(null)"
         [route]="detailsPath + node.id"
         label="DICOM metadata"
         awesome="fas fa-file-code"
-        [hasChildren]="false">
-</node>
+        [hasChildren]="false"></node>
+}

@@ -23,7 +23,6 @@ import { Entity } from '../../shared/components/entity/entity.abstract';
 @Component({
     selector: 'abstract-subject-pathology-list',
     templateUrl: 'subjectEntity-list-input.abstract.html',
-    standalone: false
 })
 
 export abstract class SubjectAbstractListInput<T extends Entity>  extends BrowserPaginEntityListComponent<T> {

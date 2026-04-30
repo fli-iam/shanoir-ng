@@ -11,8 +11,8 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<node
-        *ngIf="node"
+@if (node) {
+    <node
         [class.selected]="menuOpened || treeService.isSelected(node.id, 'equipment')"
         [label]="node.label"
         awesome="fas fa-microscope"
@@ -21,11 +21,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [route]="node.route"
         [hasChildren]="false"
         [title]="node.title + ' n°' + node.id">
-
-    <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && withMenu">
-        <a [routerLink]="detailsPath + node.id" class="open-new-tab">
-            <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
-        </a>
-        <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteEquipment()"></menu-item>
-    </dropdown-menu>
-</node>
+        @if (menuOpened && withMenu && withMenu) {
+            <dropdown-menu [(openInput)]="menuOpened">
+                <a [routerLink]="detailsPath + node.id" class="open-new-tab">
+                    <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+                </a>
+                @if (node.canDelete) {
+                    <menu-item label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteEquipment()"></menu-item>
+                }
+            </dropdown-menu>
+        }
+    </node>
+}

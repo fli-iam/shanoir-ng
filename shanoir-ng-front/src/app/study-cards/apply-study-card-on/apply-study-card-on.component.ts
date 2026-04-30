@@ -14,6 +14,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
@@ -21,25 +22,25 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
-import { slideRight } from '../../shared/animations/animations';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
 export type Status = 'default' | 'loading' | 'done' | 'error';
 @Component({
     selector: 'apply-study-card-on',
     templateUrl: 'apply-study-card-on.component.html',
     styleUrls: ['apply-study-card-on.component.css'],
-    animations: [slideRight],
-    standalone: false
+    imports: [SelectBoxComponent, FormsModule, TableComponent, AcquisitionEquipmentPipe]
 })
 export class ApplyStudyCardOnComponent implements OnInit {
 

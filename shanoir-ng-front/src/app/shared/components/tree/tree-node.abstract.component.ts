@@ -15,7 +15,7 @@ import { AfterContentInit, Directive, ElementRef, EventEmitter, Input, Output, O
 import { Subscription } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
-import { ShanoirNode } from 'src/app/tree/tree.model';
+import { ShanoirNode, UNLOADED } from 'src/app/tree/tree.model';
 import { SuperPromise } from 'src/app/utils/super-promise';
 
 @Directive()
@@ -47,6 +47,14 @@ export class TreeNodeAbstractComponent<T extends ShanoirNode> implements AfterCo
     ngOnDestroy() {
         for (const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
+        }
+    }
+
+    asNode(node: ShanoirNode | string): any {
+        if (node === UNLOADED) {
+            return null;
+        } else {
+            return node as ShanoirNode;
         }
     }
 }

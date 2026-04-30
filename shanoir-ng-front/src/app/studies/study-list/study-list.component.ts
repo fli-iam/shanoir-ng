@@ -32,7 +32,7 @@ import { StudyService } from '../shared/study.service';
     selector: 'study-list',
     templateUrl: 'study-list.component.html',
     styleUrls: ['study-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {

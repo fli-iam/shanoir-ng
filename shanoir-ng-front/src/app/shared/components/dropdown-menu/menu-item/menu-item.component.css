@@ -21,3 +21,12 @@
 
 i { margin-right: 7px; color: var(--greyer); }
 li { min-height: 0; }
+
+.slide-right {
+    animation: slideRight 500ms ease-in-out both;
+}
+
+@keyframes slideRight {
+    from { max-width: 0; }
+    to   { max-width: 300px; }
+}

@@ -29,7 +29,7 @@ import { StudyUser } from '../../studies/shared/study-user.model';
     selector: 'user-list',
     templateUrl: 'user-list.component.html',
     styleUrls: ['user-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 
 export class UserListComponent extends BrowserPaginEntityListComponent<User>{

@@ -13,15 +13,15 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
 import { DicomQuery, ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { ConsoleService } from '../../shared/console/console.service';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFormGroup ): ValidationErrors | null => {
     const hasAtLeastOneNotBlank = group && group.controls && Object.keys(group.controls)
@@ -33,8 +33,7 @@ export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFo
     selector: 'query-pacs',
     templateUrl: 'query-pacs.component.html',
     styleUrls: ['../shared/import.step.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, TooltipComponent]
 })
 
 export class QueryPacsComponent{
@@ -87,13 +86,24 @@ export class QueryPacsComponent{
         // The wildcard search is not allowed for patientName and patientID
         const noWildcardPattern = /^((?!\*).)*$/;
         this.form = this.formBuilder.group({
-            'patientName': [this.dicomQuery.patientName, [Validators.maxLength(64), Validators.pattern(noWildcardPattern)]],
-            'patientID': [this.dicomQuery.patientID, [Validators.maxLength(64), Validators.pattern(noWildcardPattern)]],
-            'patientBirthDate': [this.dicomQuery.patientBirthDate, Validators.pattern(pacsDatePattern)],
-            'studyDescription': [this.dicomQuery.studyDescription, [Validators.maxLength(64), Validators.minLength(4)]],
-            'studyDate': [this.dicomQuery.studyDate, Validators.pattern(pacsDatePattern)],
-            'modality': [this.dicomQuery.modality]
-        }, { validator: atLeastOneNotBlank(Validators.required) });
+            patientName: this.formBuilder.control(this.dicomQuery.patientName, {
+                validators: [Validators.maxLength(64), Validators.pattern(noWildcardPattern)]
+            }),
+            patientId: this.formBuilder.control(this.dicomQuery.patientID, {
+                validators: [Validators.maxLength(64), Validators.pattern(noWildcardPattern)]
+            }),
+            patientBirthDate: this.formBuilder.control(this.dicomQuery.patientBirthDate, {
+                validators: [Validators.pattern(pacsDatePattern)]
+            }),
+            studyDescription: this.formBuilder.control(this.dicomQuery.studyDescription, {
+                validators: [Validators.maxLength(64), Validators.minLength(4)]
+            }),
+            studyDate: this.formBuilder.control(this.dicomQuery.studyDate, {
+                validators: [Validators.pattern(pacsDatePattern)]
+            }),
+            modality: this.formBuilder.control(this.dicomQuery.modality)
+        });
+        this.form.setValidators(atLeastOneNotBlank(Validators.required));
     }
 
     formErrors(field: string): any {

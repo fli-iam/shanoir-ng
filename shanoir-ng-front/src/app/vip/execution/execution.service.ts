@@ -14,7 +14,7 @@
 
 import {Injectable} from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import {Observable} from "rxjs";
+import {Observable, firstValueFrom} from "rxjs";
 
 import * as AppUtils from "../../utils/app.utils";
 import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
@@ -38,7 +38,7 @@ export class ExecutionService {
     if (execution === null || execution === undefined) {
       throw new Error('Required parameter execution was null or undefined when calling createExecution.');
     }
-    return this.httpClient.post<IdName>(`${this.executionUrl}/`,execution).toPromise();
+    return firstValueFrom(this.httpClient.post<IdName>(`${this.executionUrl}/`,execution));
   }
 
   /**

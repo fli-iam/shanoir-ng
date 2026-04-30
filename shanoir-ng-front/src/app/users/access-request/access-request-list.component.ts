@@ -12,21 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { disapearUp } from '../../shared/animations/animations';
 import { UserService } from '../shared/user.service';
 
 import { AccessRequest } from './access-request.model';
 import { AccessRequestService } from './access-request.service';
 
-
 @Component({
     selector: 'accessRequestList',
     templateUrl: 'access-request-list.component.html',
     styleUrls: ['access-request-list.component.css'],
-    animations: [disapearUp],
-    standalone: false
+    imports: [FormsModule, RouterLink]
 })
 
 export class AccessRequestListComponent {

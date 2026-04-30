@@ -25,7 +25,7 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
     selector: 'dataset-processing-list',
     templateUrl: 'dataset-processing-list.component.html',
     styleUrls: ['dataset-processing-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class DatasetProcessingListComponent extends BrowserPaginEntityListComponent<DatasetProcessing> {
 

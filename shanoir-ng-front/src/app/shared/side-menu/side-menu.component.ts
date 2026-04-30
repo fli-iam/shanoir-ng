@@ -13,26 +13,27 @@
  */
 import { Component, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DatePipe } from '@angular/common';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import { environment } from '../../../environments/environment';
 import { VERSION } from '../../../environments/version';
 import { SolrService } from '../../solr/solr.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { UserService } from '../../users/shared/user.service';
-import { disapearUp, slideDown } from '../animations/animations';
 import { ConfirmDialogService } from "../components/confirm-dialog/confirm-dialog.service";
 import { ConsoleService } from '../console/console.service';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
+import { LoadingBarComponent } from '../components/loading-bar/loading-bar.component';
 
 
 @Component({
     selector: 'side-menu',
     templateUrl: 'side-menu.component.html',
     styleUrls: ['side-menu.component.css', environment.production ? 'prod.css' : 'dev.css'],
-    animations: [slideDown, disapearUp],
-    standalone: false
+    imports: [RouterLink, RouterLinkActive, LoadingBarComponent, DatePipe]
 })
 
 export class SideMenuComponent {

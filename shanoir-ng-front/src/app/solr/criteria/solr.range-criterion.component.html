@@ -14,15 +14,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="title" (click)="open = !open">
     <span class="left-icon">
-        <i *ngIf="awesome" [class]="awesome"></i>
-        {{label}}
+        @if (awesome) {
+            <i [class]="awesome"></i>
+        }
+        {{ label }}
     </span>
-    <span *ngIf="!open" class="colapse"><i class="fas fa-chevron-down"></i></span>
-    <span *ngIf="open" class="colapse"><i class="fas fa-chevron-up"></i></span>
+    @if (!open) {
+        <span class="colapse"><i class="fas fa-chevron-down"></i></span>
+    }
+    @if (open) {
+        <span class="colapse"><i class="fas fa-chevron-up"></i></span>
+    }
 </div>
-<div class="body content" *ngIf="open && range" @slideDown>
-    <span>from : </span>
-    <input type="number" [(ngModel)]="range.lowerBound" (change)="change()"/>
-    <span>to : </span>
-    <input type="number" [(ngModel)]="range.upperBound" (change)="change()"/>
-</div>
+@if (open && range) {
+    <div class="body content">
+        <span>from :</span>
+        <input type="number" [(ngModel)]="range.lowerBound" (change)="change()" />
+        <span>to :</span>
+        <input type="number" [(ngModel)]="range.upperBound" (change)="change()" />
+    </div>
+}

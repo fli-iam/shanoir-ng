@@ -25,7 +25,7 @@ import { QualityCardService } from '../shared/quality-card.service';
 @Component({
     selector: 'quality-card-list',
     templateUrl: 'quality-card-list.component.html',
-    standalone: false
+    imports: [TableComponent]
 })
 export class QualityCardListComponent extends BrowserPaginEntityListComponent<QualityCard> {
     

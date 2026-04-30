@@ -13,6 +13,7 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import { EntityService } from '../../../shared/components/entity/entity.abstract.service';
 import { Subject } from '../../../subjects/shared/subject.model';
@@ -35,26 +36,22 @@ export class AnimalSubjectService extends EntityService<AnimalSubject>{
 
     getAnimalSubjects(ids: IterableIterator<any>): Promise<AnimalSubject[]>{
         const formData: FormData = new FormData();
-        formData.set('ids', Array.from(ids).join(","));
-        return this.http.post<AnimalSubject[]>(PreclinicalUtils.PRECLINICAL_API_SUBJECT_FIND_URL, formData)
-            .toPromise();
+        formData.set('subjectIds', Array.from(ids).join(","));
+        return firstValueFrom(this.http.post<AnimalSubject[]>(PreclinicalUtils.PRECLINICAL_API_SUBJECT_FIND_URL, formData));
     }
 
     getAnimalSubject(id: number): Promise<AnimalSubject>{
-        return this.http.get<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL+"/"+id)
-            .toPromise();
+        return firstValueFrom(this.http.get<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL+"/"+id));
     }
 
     updateAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/`+animalSubject.id;
-        return this.http
-            .put<AnimalSubject>(url, this.stringify(animalSubject))
-            .toPromise();
+        return firstValueFrom(this.http
+            .put<AnimalSubject>(url, this.stringify(animalSubject)));
     }
 
     findSubjectByIdentifier(identifier: string): Promise<Subject> {
-        return this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier)
-        .toPromise()    ;
+        return firstValueFrom(this.http.get<Subject>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier));
     }
 
     public stringify(entity: AnimalSubject) {

@@ -14,18 +14,19 @@
 
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject, Subscription } from 'rxjs';
+import { Subject, Subscription, firstValueFrom } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import { WaitBurstEnd } from '../utils/wait-burst-end';
 
 import { BreadcrumbsService, Step } from './breadcrumbs.service';
 
+
 @Component({
     selector: 'breadcrumbs',
     templateUrl: 'breadcrumbs.component.html',
     styleUrls: ['breadcrumbs.component.css'],
-    standalone: false
+    imports: []
 })
 
 export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterViewChecked {
@@ -92,7 +93,7 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
         this.router.navigate(['/home']);
     }
 
-    @HostListener('window:resize', ['$event'])
+    @HostListener('window:resize')
     onResize() {
         this.onResizeEnd.fire();
     }
@@ -122,12 +123,12 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
     private tryToExpand(): Promise<void> {
         if (this.nbDisplayedSteps >= this.steps.filter(s => !s.disabled)?.length) return Promise.resolve();
         this.nbDisplayedSteps++;
-        return this.onViewChecked.pipe(take(1)).toPromise().then(() => {
+        return firstValueFrom(this.onViewChecked.pipe(take(1))).then(() => {
             const componentWidth: number = this.elementRef.nativeElement.offsetWidth;
             const listWidth: number = this.elementRef.nativeElement.scrollWidth;
             if (listWidth > componentWidth) { // if overflow, finally reduce
                 this.nbDisplayedSteps--;
-                return this.onViewChecked.pipe(take(1)).toPromise();
+                return firstValueFrom(this.onViewChecked.pipe(take(1)));
             } else { // else continue
                 return this.tryToExpand();
             }
@@ -137,7 +138,7 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
     private reduceUntilFit(): Promise<void> {
         if (this.nbDisplayedSteps <= 0) return Promise.resolve();
         this.nbDisplayedSteps--;
-        return this.onViewChecked.pipe(take(1)).toPromise().then(() => {
+        return firstValueFrom(this.onViewChecked.pipe(take(1))).then(() => {
             const componentWidth: number = this.elementRef.nativeElement.offsetWidth;
             const listWidth: number = this.elementRef.nativeElement.scrollWidth;
             if (listWidth > componentWidth) { // if overflow, reduce again

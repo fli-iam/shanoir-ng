@@ -29,8 +29,7 @@ import {CtProtocol} from './ct-protocol.model';
             useExisting: forwardRef(() => CtProtocolComponent),
             multi: true,
         }
-    ],
-    standalone: false
+    ]
 })
 export class CtProtocolComponent implements ControlValueAccessor {
 

@@ -13,12 +13,11 @@
  */
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
-import { slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
 import { Reference } from '../../reference/shared/reference.model';
 import { ReferenceService } from '../../reference/shared/reference.service';
@@ -28,13 +27,13 @@ import { InjectionType } from '../../shared/enum/injectionType';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { ContrastAgent } from '../shared/contrastAgent.model';
 import { ContrastAgentService } from '../shared/contrastAgent.service';
+import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 
 @Component({
     selector: 'contrast-agent-form',
     templateUrl: 'contrastAgent-form.component.html',
     styleUrls: ['contrastAgent-form.component.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
 })
 export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
 

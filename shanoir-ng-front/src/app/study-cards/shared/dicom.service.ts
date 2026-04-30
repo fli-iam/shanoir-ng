@@ -13,6 +13,7 @@
  */
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import { BACKEND_API_STUDY_CARD_URL } from '../../utils/app.utils';
 
@@ -31,8 +32,7 @@ export class DicomService {
     getDicomTags(): Promise<DicomTag[]> {
         if (!this.tagRequested) {
             this.tagRequested = true;
-            this.http.get<DicomTag[]>(BACKEND_API_STUDY_CARD_URL + '/dicomTags')
-                .toPromise()
+            firstValueFrom(this.http.get<DicomTag[]>(BACKEND_API_STUDY_CARD_URL + '/dicomTags'))
                 .then(tags => {
                     this.tagPromiseResolve(tags);
                 });

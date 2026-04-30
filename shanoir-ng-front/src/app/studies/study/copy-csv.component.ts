@@ -29,7 +29,6 @@ import { TreeService } from './tree.service';
             <input #input hidden type="file" (change)="copyDatasetsTo($event)" accept=".csv, .tsv"/>
         </button>
     `,
-    standalone: false
 })
 
 export class CopyFromCsvComponent {

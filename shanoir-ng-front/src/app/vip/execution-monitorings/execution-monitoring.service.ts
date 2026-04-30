@@ -14,7 +14,7 @@
 
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { Observable, firstValueFrom } from "rxjs";
 
 import { EntityService } from "src/app/shared/components/entity/entity.abstract.service";
 
@@ -42,9 +42,8 @@ export class ExecutionMonitoringService extends EntityService<ExecutionMonitorin
     }
 
     public updateAndStart(monitoring: ExecutionMonitoring){
-        return this.http.put<any>(this.API_URL + '/' + monitoring.id + '?start=true', this.stringify(monitoring), {reportProgress: true,
-            observe: 'events'})
-            .toPromise();
+        return firstValueFrom(this.http.put<any>(this.API_URL + '/' + monitoring.id + '?start=true', this.stringify(monitoring), {reportProgress: true,
+            observe: 'events'}));
     }
 
 }

@@ -16,10 +16,7 @@ import { Pipe, PipeTransform } from "@angular/core";
 
 import * as AppUtils from '../../utils/app.utils';
 
-@Pipe({
-    name: "size",
-    standalone: false
-})
+@Pipe({ name: "size" })
 export class SizePipe implements PipeTransform {
 
     transform(sizeInBytes: number): string {
