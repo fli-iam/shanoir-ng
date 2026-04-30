@@ -17,20 +17,25 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { NgTemplateOutlet } from '@angular/common';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
+import { DatasetService } from 'src/app/datasets/shared/dataset.service';
+import { StudyService } from 'src/app/studies/shared/study.service';
+import { Task, TaskStatus } from 'src/app/async-tasks/task.model';
+import { NotificationsService } from 'src/app/shared/notifications/notifications.service';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { BidsElement } from '../model/bidsElement.model'
-import * as AppUtils from '../../utils/app.utils';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { GlobalService } from '../../shared/services/global.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
-import {DatasetService} from "../../datasets/shared/dataset.service";
+import * as AppUtils from '../../utils/app.utils';
+import { BidsElement } from '../model/bidsElement.model';
 
 @Component({
     selector: 'bids-tree',
     templateUrl: 'bids-tree.component.html',
     styleUrls: ['bids-tree.component.css'],
-    imports: [TreeNodeComponent, NgTemplateOutlet, NgxJsonViewerModule]
+    imports: [TreeNodeComponent, NgTemplateOutlet, NgxJsonViewerModule, LoadingBarComponent]
 })
 
 export class BidsTreeComponent implements OnDestroy, OnInit {
@@ -46,19 +51,37 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     private globalClickSubscription: Subscription;
     public load: string;
     private hasDownloadRight: boolean;
+    protected report: any; // JSON
+    protected truncatedReport: any; // JSON
+    private subscriptions: Subscription[] = [];
+    protected task: Task;
 
     constructor(private globalService: GlobalService,
                 private elementRef: ElementRef,
                 private datasetService: DatasetService,
                 protected http: HttpClient,
                 private keycloakService: KeycloakService,
-                private studyRightsService: StudyRightsService) {
-        this.globalClickSubscription = globalService.onGlobalClick.subscribe(clickEvent => {
+                private studyRightsService: StudyRightsService,
+                private studyService: StudyService,
+                private notificationsService: NotificationsService) {
+
+        this.subscriptions.push(globalService.onGlobalClick.subscribe(clickEvent => {
             if (!this.elementRef.nativeElement.contains(clickEvent.target)) {
                 this.selectedIndex = null;
                 this.removeContent();
             }
-        })
+        }));
+        this.subscriptions.push(
+            this.notificationsService.getNotifications().subscribe(tasks => {
+                this.task = tasks.find(t => 
+                        t.id === this.task?.id ||
+                        (
+                            t.eventType === 'bidsExport.event'
+                            && t.objectId === this.studyId
+                            && [TaskStatus.IN_PROGRESS, TaskStatus.QUEUED, TaskStatus.IN_PROGRESS_BUT_WARNING].includes(t.status))
+                        );               
+            })
+        );
     }
 
     ngOnInit(): void {
@@ -68,17 +91,20 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     }
 
     ngOnDestroy(): void {
-        this.globalClickSubscription.unsubscribe();
+        this.subscriptions.forEach(subscription => subscription.unsubscribe());
     }
 
-    getBidsStructure() {
+    getBidsStructure(): Promise<void> {
        if (!this.load) {
-        this.load="loading"
-            this.datasetService.getBidsStructure(this.studyId).then(element => {
+            this.load="loading";
+            return this.datasetService.getBidsStructure(this.studyId).then(element => {
                 this.sort(element);
                 this.list = [element];
+            }).finally(() => {
                 this.load = "loaded";
             });
+        } else {
+            return Promise.resolve();
         }
     }
 
@@ -177,5 +203,55 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
         return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
     }
 
+    protected callBidsValidator(): void {
+        this.getBidsStructure().then(() => {
+            // currently the list object always contains one element which is the root folder
+            this.studyService.validateStudyForBIDS(this.studyId, this.list[0]?.path).then(report => {
+                this.report = report.report;
+                this.truncateReportForDisplay();
+            });
+        });
+    }
 
+    private truncateReportForDisplay(): void {
+        const MAX_NB_ISSUES_DISPLAY = 30;
+        if (!this.report) {
+            this.truncatedReport = null;
+            return;
+        }
+        // Create a deep copy of the report to truncate for display
+        this.truncatedReport = JSON.parse(JSON.stringify(this.report));
+
+        // Truncate the "issues" arrays
+        const truncateIssues = (obj: any) => {
+            if (obj && typeof obj === 'object') {
+                for (const key in obj) {
+                    if (key === 'issues' && Array.isArray(obj[key])) {
+                        const length = obj[key].length;
+                        if (length > MAX_NB_ISSUES_DISPLAY) {
+                            obj[key] = obj[key].slice(0, MAX_NB_ISSUES_DISPLAY);
+                            obj[key].push({ message: `... and ${length - MAX_NB_ISSUES_DISPLAY} more issues not displayed. 
+                                You can download the full report for more details.` });
+                        }
+                    } else {
+                        truncateIssues(obj[key]);
+                    }
+                }
+            }
+        };
+
+        truncateIssues(this.truncatedReport);
+    }
+
+    protected downloadBidsValidatorReport(): void {
+        if (!this.report) return;
+        const blob = new Blob([JSON.stringify(this.report, null, 4)], {
+            type: 'application/json'
+        });
+        AppUtils.browserDownloadFile(blob, 'bids_validator_' 
+            + AppUtils.sanitizeFilename(this.studyName) + '_'
+            + new Date().toLocaleString('fr-FR')
+            + '.json'
+        );
+    }
 }

@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
@@ -39,6 +38,7 @@ import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
+import org.shanoir.ng.solr.repository.ShanoirMetadataRepositoryCustom;
 import org.shanoir.ng.solr.solrj.SolrJWrapper;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -65,6 +65,8 @@ import org.springframework.util.CollectionUtils;
  */
 @Service
 public class SolrServiceImpl implements SolrService {
+
+    private int indexationPartitionSize = 100000;
 
     @Autowired
     private SolrJWrapper solrJWrapper;
@@ -109,15 +111,12 @@ public class SolrServiceImpl implements SolrService {
     @Async
     @Transactional
     public void indexAll() {
-        List<ShanoirMetadata> documents = new ArrayList<>();
-        Map<Long, List<String>> tags = new HashMap<>();
         ShanoirEvent event;
 
         try {
             event = beginIndexationProcess();
             cleanOldIndex(event);
-            fetchDatasToIndex(event, documents, tags);
-            indexDatas(event, documents, tags);
+            fetchAndIndexData(event);
         } catch (SolrServerException | IOException e) {
             LOG.error("Solr indexation failed", e);
         }
@@ -126,8 +125,6 @@ public class SolrServiceImpl implements SolrService {
     @Async
     @Transactional
     public void indexAllNoAuth() {
-        List<ShanoirMetadata> documents = new ArrayList<>();
-        Map<Long, List<String>> tags = new HashMap<>();
         ShanoirEvent event;
 
         try {
@@ -140,8 +137,7 @@ public class SolrServiceImpl implements SolrService {
                     0f);
             eventService.publishEvent(event);
             cleanOldIndex(event);
-            fetchDatasToIndex(event, documents, tags);
-            indexDatas(event, documents, tags);
+            fetchAndIndexData(event);
         } catch (SolrServerException | IOException ignored) {
         }
     }
@@ -290,27 +286,6 @@ public class SolrServiceImpl implements SolrService {
     }
 
     /**
-     * Index data to the existing index and manage shanoir event
-     * @param event the Shanoir event relative to the indexation
-     * @param documents the documents to index
-     * @param tags the tags relative to the documents to index
-     */
-    private void indexDatas(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags) {
-        try {
-            int totalData = documents.size();
-            int indexedData = 0;
-            for (List<ShanoirMetadata> partition : ListUtils.partition(documents, 100000)) {
-                indexedData += partition.size();
-                event.setProgress((float) Math.floor(30F + ((indexedData / (float) totalData) * 70F)) / 100F);
-                indexDataPartition(event, partition, tags, indexedData);
-            }
-        } catch (Exception e) {
-            LOG.error("Error indexing datasets into Solr.", e);
-            eventService.publishErrorEvent(event, "Error indexing datasets into Solr : " + e.getMessage());
-        }
-    }
-
-    /**
      * Index data to the existing index by partition and manage shanoir event
      * @param event the Shanoir event relative to the indexation
      * @param documents the documents to index
@@ -327,20 +302,40 @@ public class SolrServiceImpl implements SolrService {
     }
 
     /**
-     * Get all datasets and tags and put them in lists
+     * Fetch and index data to the existing index and manage shanoir event
      * @param event the Shanoir event relative to the indexation
-     * @param documents the list in which are stored all datasets fetched for indexation
-     * @param tags the list in which are stored all tags fetched for iddexation
      */
-    private void fetchDatasToIndex(ShanoirEvent event, List<ShanoirMetadata> documents, Map<Long, List<String>> tags) {
+    private void fetchAndIndexData(ShanoirEvent event) throws SolrServerException, IOException {
+        int indexationProgess = 0;
+        int indexedDataNumber = 0;
+        List<ShanoirMetadata> docPartition;
+        Map<Long, List<String>> tags = shanoirMetadataRepository.findAllTags(null);
+
         try {
-            documents.addAll(shanoirMetadataRepository.findAllAsSolrDoc());
-            eventService.publishEvent(event, "Fetching data to index...", 0.2f);
-            tags.putAll(shanoirMetadataRepository.findAllTags(null));
-            eventService.publishEvent(event, "Fetching data to index...", 0.3f);
+            for (String query : ShanoirMetadataRepositoryCustom.ALL_DATASET_QUERIES) {
+                int offSet = 0;
+
+                if (!Objects.equals(query, ShanoirMetadataRepositoryCustom.PROCESSED_QUERY)) {
+                    query += " AND d.dataset_processing_id IS NULL";
+                }
+
+                while (true) {
+                    query += " LIMIT " + indexationPartitionSize + " OFFSET " + offSet;
+                    docPartition = shanoirMetadataRepository.findSpecificSolrDoc(query);
+
+                    offSet += indexationPartitionSize;
+                    indexedDataNumber += docPartition.size();
+                    indexDataPartition(event, docPartition, tags, indexedDataNumber);
+
+                    if (docPartition.size() < indexationPartitionSize) {
+                        event.setProgress((float) Math.floor(10F + ((indexationProgess / (float) ShanoirMetadataRepositoryCustom.ALL_DATASET_QUERIES.size()) * 90F)) / 100F);
+                        break; // Switch to the next query type
+                    }
+                }
+            }
         } catch (Exception e) {
-            LOG.error("Error while fetching data to index.", e);
-            eventService.publishErrorEvent(event, "Error while fetching data to index : " + e.getMessage());
+            LOG.error("Error while fetching/indexing data to solr.", e);
+            eventService.publishErrorEvent(event, "Error while fetching/indexing data to solr : " + e.getMessage());
             throw e;
         }
     }
