@@ -17,11 +17,13 @@ package org.shanoir.ng.bids.service;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
@@ -32,13 +34,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataSetDescription;
@@ -70,6 +70,8 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -78,6 +80,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriUtils;
 
@@ -104,19 +107,9 @@ public class BIDSServiceImpl implements BIDSService {
 
     private static final String SCANS_FILE_EXTENSION = "_scans.tsv";
 
-    private static final String SESSION_PREFIX = "ses-";
-
-    private static final String SUBJECT_PREFIX = "sub-";
-
-    private static final String STUDY_PREFIX = "stud-";
-
     private static final Logger LOG = LoggerFactory.getLogger(BIDSServiceImpl.class);
 
     private static final String TASK = "_task_";
-
-    private static final String DATASET_DESCRIPTION_FILE = "dataset_description.json";
-
-    private static final String README_FILE = "README";
 
     private static final Map<String, String> NATURE_MAP;
     static {
@@ -130,7 +123,7 @@ public class BIDSServiceImpl implements BIDSService {
         NATURE_MAP = Collections.unmodifiableMap(aMap);
     }
 
-    @Value("${bids-data-folder}")
+    @Value("${storage.file-system.bids-data}")
     private String bidsStorageDir;
 
     @Autowired
@@ -152,6 +145,9 @@ public class BIDSServiceImpl implements BIDSService {
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
+    private StorageService storageService;
+
+    @Autowired
     private BidsTreeSemaphore bidsTreeSemaphore;
 
     @Autowired
@@ -164,47 +160,34 @@ public class BIDSServiceImpl implements BIDSService {
     @RabbitListener(queues = RabbitMQConfiguration.RELOAD_BIDS)
     public void deleteBidsForStudy(String studyId) {
         Study studyDeleted = studyRepo.findById(Long.valueOf(studyId)).orElse(null);
-        this.deleteBidsFolder(studyDeleted.getId(), studyDeleted.getName());
+        this.deleteBidsFolder(studyDeleted.getId());
     }
 
     @Override
-    public void deleteBidsFolder(Long studyId, String studyName) {
+    public void deleteBidsFolder(Long studyId) {
         try {
-            if (studyName == null) {
-                Optional<Study> study = studyRepo.findById(studyId);
-                if (!study.isEmpty())
-                    studyName = study.get().getName();
-            }
             // Try to delete the BIDS folder recursively if possible
-            File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName);
+            File bidsDir = new File(bidsStorageDir + File.separator + StorageService.STUDY + studyId);
             if (bidsDir.exists()) {
                 FileUtils.deleteDirectory(bidsDir);
             }
         } catch (Exception e) {
-            LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}, {}", studyId, studyName, e);
+            LOG.error("ERROR when deleting BIDS folder: please delete it manually: {}", studyId, e);
         }
     }
 
     @Override
-    public File getBidsFolderpath(final Long studyId, String studyName) {
-        studyName = this.formatLabel(studyName);
-        String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName;
+    public File getBidsFolderPath(final Long studyId) {
+        String tmpFilePath = bidsStorageDir + File.separator + StorageService.STUDY + studyId;
         return new File(tmpFilePath);
     }
 
-    /**
-     * Returns data from the study formatted as BIDS in a .zip file.
-     * @param studyId the study ID we want to export as BIDS
-     * @param studyName the study name
-     * @return data from the study formatted as BIDS in a .zip file.
-     * @throws IOException
-     * @throws BidsTreeLockedException
-     */
-    @Override
-    public File exportAsBids(final Long studyId, String studyName) throws IOException, BidsTreeLockedException {
+    public File exportAsBids(final Long studyId) throws IOException, BidsTreeLockedException {
         // Get folder
-        File workFolder = getBidsFolderpath(studyId, studyName);
+        File workFolder = getBidsFolderPath(studyId);
         bidsTreeSemaphore.lockOrThrow(studyId);
+        Study study = studyRepo.findById(studyId).orElseThrow();
+        String studyName = study.getName();
         ShanoirEvent event = null;
         try { // ensure unlock in finally
             if (workFolder.exists()) {
@@ -223,17 +206,14 @@ public class BIDSServiceImpl implements BIDSService {
                         + "like building the BIDS tree or running the validator.");
                 eventService.publishEvent(event);
 
-                // Otherwise, create it from scratch
-                File baseDir = createBaseBidsFolder(workFolder, studyName);
-
                 // Iterate over subjects got from call to SubjectApiController.findSubjectsByStudyId() and get list of subjects
-                List<Subject> subjs = getSubjectsForStudy(studyId);
-                if (org.apache.commons.collections4.CollectionUtils.isEmpty(subjs)) {
-                    return baseDir;
+                List<Subject> subjects = getSubjectsForStudy(studyId);
+                if (org.apache.commons.collections4.CollectionUtils.isEmpty(subjects)) {
+                    return workFolder;
                 }
 
                 // Sort by ID
-                subjs.sort(Comparator.comparing(Subject::getId));
+                subjects.sort(Comparator.comparing(Subject::getId));
 
                 // Create participants.tsv
                 event.setMessage("Getting participants.tsv for study " + studyName);
@@ -241,11 +221,11 @@ public class BIDSServiceImpl implements BIDSService {
                 rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_PARTICIPANTS_TSV, objectMapper.writeValueAsString(studyId));
 
                 int index = 1;
-                for (Subject subj : subjs) {
-                    event.setMessage("Exporting subject " + subj.getName() + " as BIDS for study " + studyName);
-                    event.setProgress((float) (index - 1) / subjs.size());
+                for (Subject subject : subjects) {
+                    event.setMessage("Exporting subject " + subject.getName() + " as BIDS for study " + studyName);
+                    event.setProgress((float) (index - 1) / subjects.size());
                     eventService.publishEvent(event);
-                    exportAsBids(subj, studyName, studyId, baseDir, index);
+                    exportAsBids(subject, studyName, studyId, workFolder);
                     index++;
                 }
                 event.setMessage("Export BIDS for study " + studyName + " completed");
@@ -253,7 +233,7 @@ public class BIDSServiceImpl implements BIDSService {
                 event.setStatus(ShanoirEvent.SUCCESS);
                 eventService.publishEvent(event);
 
-                return baseDir;
+                return workFolder;
             }
         } catch (Exception e) {
             if (event != null) {
@@ -283,27 +263,6 @@ public class BIDSServiceImpl implements BIDSService {
     }
 
     /**
-     * Create the study/BASE BIDS folder.
-     * @param studyName the study name
-     * @return the base folder newly created
-     */
-    private File createBaseBidsFolder(File workFolder, String studyName) {
-        workFolder.mkdirs();
-
-        // 2. Create dataset_description.json and README
-        DatasetDescription datasetDescription = new DatasetDescription();
-        datasetDescription.setName(studyName);
-        try {
-            objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + DATASET_DESCRIPTION_FILE), datasetDescription);
-            objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + README_FILE), studyName);
-        } catch (IOException e) {
-            LOG.error(e.getMessage());
-        }
-
-        return workFolder;
-    }
-
-    /**
      * Create all the data in a BIDS folder for a given subject
      * @param subject the subject we want to export as BIDS
      * @param studyName the study name
@@ -312,8 +271,8 @@ public class BIDSServiceImpl implements BIDSService {
      * @return data from the subject formatted as BIDS in a .zip file.
      * @throws IOException
      */
-    private void exportAsBids(final Subject subject, final String studyName, Long studyId, final File workDir, int index) throws IOException {
-        File subjDir = createSubjectFolder(subject.getName(), index, workDir);
+    private void exportAsBids(final Subject subject, final String studyName, Long studyId, final File workDir) throws IOException {
+        File subjectFolder = createSubjectFolder(subject.getId(), workDir);
 
         // Get subject examinations and filter on the one with adapted study only
         List<Examination> examinationList = examService.findBySubjectIdStudyId(subject.getId(), studyId);
@@ -323,7 +282,7 @@ public class BIDSServiceImpl implements BIDSService {
         File sessionFile = null;
         try {
 
-            sessionFile = new File(subjDir.getAbsolutePath() + "/" + subjDir.getName() + SESSIONS_TSV);
+            sessionFile = new File(subjectFolder.getAbsolutePath() + "/" + subjectFolder.getName() + SESSIONS_TSV);
             if (useSessionFolder) {
                 // Generate  sub-<label>_sessions.tsv file
                 sessionFile.getParentFile().mkdirs();
@@ -332,7 +291,6 @@ public class BIDSServiceImpl implements BIDSService {
                 buffer.append("session_id").append(TABULATION)
                 .append("acq_time").append(TABULATION)
                 .append(NEW_LINE);
-
                 for (Examination examination : examinationList) {
                     String sessionLabel = this.getSessionLabel(examination);
 
@@ -344,12 +302,12 @@ public class BIDSServiceImpl implements BIDSService {
                 Files.write(Paths.get(sessionFile.getAbsolutePath()), buffer.toString().getBytes());
             }
             // Iterate over examinations to export them as BIDS
-            File examDir = subjDir;
+            File examDir = subjectFolder;
             for (Examination exam : examinationList) {
                 if (useSessionFolder) {
-                    examDir = createExaminationFolder(exam, subjDir);
+                    examDir = createExaminationFolder(exam, subjectFolder);
                 }
-                exportAsBids(exam, examDir, studyName, subject.getName());
+                exportAsBids(exam, examDir, studyName, String.valueOf(subject.getId()));
             }
         } catch (Exception e) {
             LOG.error("Fail to process sessionFile [{}] for study [{}]", sessionFile, studyName, e);
@@ -364,11 +322,8 @@ public class BIDSServiceImpl implements BIDSService {
      * @return the newly created folder
      * @throws IOException
      */
-    private File createSubjectFolder(String subjectName, final int index, final File baseDir) throws IOException {
-        // Generate another ID here ?
-        subjectName = this.formatLabel(subjectName);
-
-        File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + index + subjectName);
+    private File createSubjectFolder(Long subjectId, final File baseDir) throws IOException {
+        File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + StorageService.SUBJECT + subjectId);
         if (!subjectFolder.exists()) {
             subjectFolder.mkdirs();
         }
@@ -382,14 +337,17 @@ public class BIDSServiceImpl implements BIDSService {
      * @param subjectName the subject name
      * @return data from the examination formatted as BIDS in a .zip file.
      * @throws IOException
+     * @throws StorageException
      */
-    private void exportAsBids(final Examination examination, final File examDir, final String studyName, final String subjectName) throws IOException {
-        // Add examination extra-data
+    private void exportAsBids(final Examination examination, final File examDir, final String studyName, final String subjectName) throws IOException, StorageException {
+        // Add examination extra-data: actually copy them out of file-system or S3 storage
         for (String filePath : examination.getExtraDataFilePathList()) {
-            File file = new File(this.examService.getExtraDataFilePath(examination.getId(), filePath));
-            if (file.exists()) {
-                Path bidsExtraFilePath = Path.of(examDir.getAbsolutePath() + "/" + file.getName());
-                Files.createLink(bidsExtraFilePath, file.toPath());
+            Resource resource = storageService.loadExtraData(examination.getId(), filePath);
+            if (resource.exists()) {
+                Path bidsExtraFilePath = Path.of(examDir.getAbsolutePath() + "/" + resource.getFilename());
+                try (InputStream inputStream = resource.getInputStream()) {
+                    Files.copy(inputStream, bidsExtraFilePath, StandardCopyOption.REPLACE_EXISTING);
+                }
             }
         }
 
@@ -421,7 +379,7 @@ public class BIDSServiceImpl implements BIDSService {
         String sessionLabel = this.getSessionLabel(examination);
 
         // Create exam/session folder
-        File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  sessionLabel);
+        File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + StorageService.SESSION +  sessionLabel);
         if (!examFolder.exists()) {
             examFolder.mkdirs();
         }
@@ -433,30 +391,34 @@ public class BIDSServiceImpl implements BIDSService {
         if (!StringUtils.isBlank(examination.getComment())) {
             label += examination.getComment();
         }
-
         return formatLabel(label);
     }
 
     /**
      * Create the list of BIDS files associated to a dataset.
-     * @param dataset the dataset from which we want the specific BIDS files to be created
-     * @param workDir the working directory where files will be created
-     * @param studyName the study name
+     *
+     * @param dataset     the dataset from which we want the specific BIDS files to
+     *                    be created
+     * @param workDir     the working directory where files will be created
+     * @param studyName   the study name
      * @param subjectName the subject name
-     * @return A list of newly created specific BIDS files associated to the dataset in entry
+     * @return A list of newly created specific BIDS files associated to the dataset
+     *         in entry
      * @throws IOException when we fail to create a file
      */
-    private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
+    private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName,
+            final String subjectName) throws IOException {
         File dataFolder = null;
 
         if (dataset.getDatasetProcessing() != null) {
             LOG.warn("Submitted dataset is a processed dataset.");
             return;
         }
-        String subjectNameUpdated = this.formatLabel(subjectName);
-        String datasetFilePrefix = workDir.getName().contains(SESSION_PREFIX) ? workDir.getParentFile().getName() + "_" + workDir.getName() : workDir.getName();
+        String datasetFilePrefix = workDir.getName().contains(StorageService.SESSION)
+                ? workDir.getParentFile().getName() + "_" + workDir.getName()
+                : workDir.getName();
 
-        dataFolder = createSpecificDataFolder(dataset, workDir, dataFolder, subjectNameUpdated, studyName);
+        dataFolder = createSpecificDataFolder(dataset, workDir, dataFolder, subjectName, studyName);
 
         // Copy dataset files in the directory AS hard link to avoid duplicating files
         List<URL> pathURLs = new ArrayList<>();
@@ -479,7 +441,9 @@ public class BIDSServiceImpl implements BIDSService {
                 downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, null);
 
                 // Convert them, sending to import microservice
-                boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath() + ";" + dataFolder.getAbsolutePath());
+                boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(
+                        RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE,
+                        converterId + ";" + workFolder.getAbsolutePath() + ";" + dataFolder.getAbsolutePath());
 
                 if (!result) {
                     throw new ShanoirException("Could not convert from dicom to nifti.");
@@ -493,15 +457,55 @@ public class BIDSServiceImpl implements BIDSService {
                 });
 
                 if (newFiles != null && newFiles.length != 0) {
-                    // Add the file to the scans.tsv reference
                     File scansTsvFile = getScansFile(workDir, subjectName);
-                    for (File fileResult : newFiles) {
-                        String buffer = fileResult.getParentFile().getName() + File.separator + fileResult.getName() + TABULATION
-                                + format.format(dataset.getDatasetAcquisition().getExamination().getExaminationDate().atStartOfDay()) + TABULATION
-                                + dataset.getDatasetAcquisition().getExamination().getId()
-                                + NEW_LINE;
 
-                        Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.getBytes(), StandardOpenOption.APPEND);
+                    // Derive session label once, reused for all files in this dataset
+                    String sesLabel = workDir.getName().contains(StorageService.SESSION)
+                            ? "_ses-" + formatLabel(workDir.getName())
+                            : "";
+                    String suffix = getBidsSuffix(dataset); // e.g. "T1w", "bold", "dwi", "CT"
+
+                    for (File fileResult : newFiles) {
+                        String baseName = fileResult.getName();
+                        String extension;
+
+                        // Preserve .nii.gz, .nii, .json, .bvec, .bval extensions
+                        if (baseName.endsWith(".nii.gz")) {
+                            extension = ".nii.gz";
+                        } else if (baseName.endsWith(".nii")) {
+                            extension = ".nii";
+                        } else if (baseName.endsWith(".json")) {
+                            extension = ".json";
+                        } else if (baseName.endsWith(".bvec")) {
+                            extension = ".bvec";
+                        } else if (baseName.endsWith(".bval")) {
+                            extension = ".bval";
+                        } else {
+                            LOG.warn("Unrecognised file extension, skipping BIDS rename: {}", baseName);
+                            continue;
+                        }
+
+                        // Build BIDS-compliant filename: sub-<subject>[_ses-<session>]_<suffix><ext>
+                        String bidsName = StorageService.SUBJECT + subjectName + sesLabel + "_" + suffix + extension;
+                        File renamedFile = new File(dataFolder.getAbsolutePath() + File.separator + bidsName);
+
+                        if (!fileResult.renameTo(renamedFile)) {
+                            LOG.error("Could not rename {} to BIDS name {}", fileResult.getName(), bidsName);
+                            renamedFile = fileResult; // fall back to original to still register it
+                        }
+
+                        // Write scans.tsv entry only for NIfTI files (not JSON sidecar or bvec/bval)
+                        if (extension.equals(".nii") || extension.equals(".nii.gz")) {
+                            String buffer = dataFolder.getName() + File.separator + renamedFile.getName()
+                                    + TABULATION
+                                    + format.format(dataset.getDatasetAcquisition().getExamination()
+                                            .getExaminationDate().atStartOfDay())
+                                    + TABULATION
+                                    + dataset.getDatasetAcquisition().getExamination().getId()
+                                    + NEW_LINE;
+                            Files.write(Paths.get(scansTsvFile.getAbsolutePath()),
+                                    buffer.getBytes(), StandardOpenOption.APPEND);
+                        }
                     }
                 }
 
@@ -509,7 +513,8 @@ public class BIDSServiceImpl implements BIDSService {
                 LOG.error("Could not convert from dicom to nifti", e);
                 File errorfile = new File(dataFolder.getAbsolutePath() + "/error.txt");
                 Files.createFile(errorfile.toPath());
-                Files.write(errorfile.toPath(), "Could not convert data from dicom to nifti for this dataset.".getBytes());
+                Files.write(errorfile.toPath(),
+                        "Could not convert data from dicom to nifti for this dataset.".getBytes());
             } finally {
                 FileUtils.deleteQuietly(workFolder);
             }
@@ -519,7 +524,7 @@ public class BIDSServiceImpl implements BIDSService {
         getDatasetFilePathURLs(dataset, pathURLs, null);
 
         for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
-            URL url =  iterator.next();
+            URL url = iterator.next();
             File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
             String fileName = datasetFilePrefix + "_";
 
@@ -527,10 +532,12 @@ public class BIDSServiceImpl implements BIDSService {
 
             if (dataset instanceof MrDataset) {
                 MrDataset mrDataset = (MrDataset) dataset;
-                if (mrDataset.getUpdatedMrMetadata() != null && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
+                if (mrDataset.getUpdatedMrMetadata() != null
+                        && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
                     nature = mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();
                     fileName += NATURE_MAP.get(nature) + "_";
-                } else if (mrDataset.getOriginMrMetadata() != null && mrDataset.getOriginMrMetadata().getMrDatasetNature() != null) {
+                } else if (mrDataset.getOriginMrMetadata() != null
+                        && mrDataset.getOriginMrMetadata().getMrDatasetNature() != null) {
                     nature = mrDataset.getOriginMrMetadata().getMrDatasetNature().name();
                     fileName += NATURE_MAP.get(nature) + "_";
                 }
@@ -551,17 +558,46 @@ public class BIDSServiceImpl implements BIDSService {
                 // Add the file to the scans.tsv reference
                 File scansTsvFile = getScansFile(workDir, subjectName);
                 StringBuilder buffer = new StringBuilder();
-                buffer.append(pathToGo.getParent().getFileName() + File.separator + pathToGo.getFileName()).append(TABULATION)
-                .append(format.format(dataset.getDatasetAcquisition().getExamination().getExaminationDate().atStartOfDay())).append(TABULATION)
-                .append(dataset.getDatasetAcquisition().getExamination().getId())
-                .append(NEW_LINE);
+                buffer.append(pathToGo.getParent().getFileName() + File.separator + pathToGo.getFileName())
+                        .append(TABULATION)
+                        .append(format.format(
+                                dataset.getDatasetAcquisition().getExamination().getExaminationDate().atStartOfDay()))
+                        .append(TABULATION)
+                        .append(dataset.getDatasetAcquisition().getExamination().getId())
+                        .append(NEW_LINE);
 
-                Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
+                Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(),
+                        StandardOpenOption.APPEND);
 
             } catch (IOException exception) {
                 LOG.error("File could not be created: {}", srcFile.getAbsolutePath(), exception);
             }
         }
+    }
+
+    /**
+     * Returns the BIDS suffix (e.g. "T1w", "bold", "dwi", "CT") for a given
+     * dataset.
+     */
+    private String getBidsSuffix(Dataset dataset) {
+        if (dataset instanceof MrDataset) {
+            MrDataset mr = (MrDataset) dataset;
+            MrDatasetNature nature = null;
+            if (mr.getUpdatedMrMetadata() != null && mr.getUpdatedMrMetadata().getMrDatasetNature() != null) {
+                nature = mr.getUpdatedMrMetadata().getMrDatasetNature();
+            } else if (mr.getOriginMrMetadata() != null && mr.getOriginMrMetadata().getMrDatasetNature() != null) {
+                nature = mr.getOriginMrMetadata().getMrDatasetNature();
+            }
+            if (nature != null) {
+                String mapped = NATURE_MAP.get(nature.name()); // reuse your existing map
+                if (mapped != null)
+                    return mapped;
+            }
+            return "MR"; // fallback
+        }
+        if ("CT".equals(dataset.getType()))
+            return "CT";
+        return dataset.getType() != null ? formatLabel(dataset.getType().name()) : "unknown";
     }
 
     private boolean onlyHasDicom(Dataset dataset) {
@@ -574,9 +610,6 @@ public class BIDSServiceImpl implements BIDSService {
     }
 
     private File createSpecificDataFolder(Dataset dataset, File workDir, File dataFolder, String subjectName, String studyName) throws IOException {
-
-
-
         // Create specific files (EEG, MS, MEG, etc..)
         if (dataset instanceof EegDataset) {
             dataFolder = createDataFolder("eeg", workDir);
@@ -614,13 +647,13 @@ public class BIDSServiceImpl implements BIDSService {
             }
             // default case, dataFolder is still null => undefined folder
             if (dataFolder == null) {
-                dataFolder = createDataFolder("undefined", workDir);
+                dataFolder = createDataFolder("anat", workDir);
             }
         } else if (dataset instanceof BidsDataset) {
             BidsDataset bidsdataset = (BidsDataset) dataset;
             dataFolder = createDataFolder(bidsdataset.getBidsDataType(), workDir);
         } else {
-            dataFolder = createDataFolder("undefined", workDir);
+            dataFolder = createDataFolder("anat", workDir);
         }
         return dataFolder;
     }
@@ -636,7 +669,7 @@ public class BIDSServiceImpl implements BIDSService {
         String fileName = parentFile.getName() + SCANS_FILE_EXTENSION;
         subjectName = this.formatLabel(subjectName);
         if (!parentFile.getName().contains(subjectName)) {
-            fileName = SUBJECT_PREFIX + subjectName + "_" + parentFile.getName() + SCANS_FILE_EXTENSION;
+            fileName = StorageService.SUBJECT + subjectName + "_" + parentFile.getName() + SCANS_FILE_EXTENSION;
         }
         File scansFile = new File(parentFile.getAbsolutePath() + File.separator + fileName);
         if (!scansFile.exists()) {
@@ -706,7 +739,7 @@ public class BIDSServiceImpl implements BIDSService {
     private void exportSpecificEegFiles(final EegDataset dataset, final String subjectName, final String sessionId, final String studyName, final String runId, File dataFolder) throws IOException {
         // Create _eeg.json
 
-        String datasetFilePrefix = dataFolder.getParentFile().getName().contains(SESSION_PREFIX) ? dataFolder.getParentFile().getParentFile().getName() + "_" + dataFolder.getParentFile().getName() : dataFolder.getParentFile().getName();
+        String datasetFilePrefix = dataFolder.getParentFile().getName().contains(StorageService.SESSION) ? dataFolder.getParentFile().getParentFile().getName() + "_" + dataFolder.getParentFile().getName() : dataFolder.getParentFile().getName();
 
         String fileName = TASK + studyName + "_eeg.json";
         String destFile = dataFolder.getAbsolutePath() + File.separator + datasetFilePrefix + "_" + fileName;

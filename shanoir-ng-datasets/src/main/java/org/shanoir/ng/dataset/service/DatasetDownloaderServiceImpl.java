@@ -34,6 +34,7 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -95,6 +96,9 @@ public class DatasetDownloaderServiceImpl {
 
     @Autowired
     protected ObjectMapper objectMapper;
+
+    @Autowired
+    private StorageService storageService;
 
     @PostConstruct
     protected void initialize() {
@@ -229,7 +233,7 @@ public class DatasetDownloaderServiceImpl {
         return datasetDownloadPath;
     }
 
-    protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String outputFormat, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, Map<String, List<String>> datasetDownloadNameListPerPath) throws IOException, RestServiceException {
+    protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String outputFormat, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, Map<String, List<String>> datasetDownloadNameListPerPath) throws Exception {
         if (!dataset.isDownloadable()) {
             downloadResults.put(dataset.getId(), new DatasetDownloadError("Dataset not downloadable", DatasetDownloadError.ERROR));
             return;
@@ -252,14 +256,15 @@ public class DatasetDownloaderServiceImpl {
             try {
                 Long converterToUse = (converterId != null) ? converterId : DEFAULT_NIFTI_CONVERTER_ID;
                 tempDir = convertToNifti(dataset, pathURLs, converterToUse, downloadResult, subjectName);
-                DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
+                DatasetFileUtils.copyFilesForDownload(storageService, pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
             } finally {
                 LOG.info("Deleting temporary conversion folder [{}]", tempDir.getAbsolutePath());
                 FileUtils.deleteQuietly(tempDir);
             }
         } else { // Download the other types
             DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, format, downloadResult);
-            DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
+            DatasetFileUtils.copyFilesForDownload(storageService,
+                    pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
         }
         if (downloadResult.getStatus() == null)
             downloadResults.remove(dataset.getId());
@@ -347,4 +352,5 @@ public class DatasetDownloaderServiceImpl {
         }
         return datasetFilePath;
     }
+
 }

@@ -14,15 +14,14 @@
 
 package org.shanoir.ng.preclinical.pathologies.pathology_models;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -31,12 +30,12 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -67,14 +66,14 @@ public class PathologyModelApiController implements PathologyModelApi {
     @Autowired
     private ShanoirEventService eventService;
 
-    @Value("${preclinical.uploadExtradataFolder}")
-    private String extraDataPath;
-
     @Autowired
     private PathologyModelUniqueValidator uniqueValidator;
 
     @Autowired
     private PathologyModelEditableByManager editableOnlyValidator;
+
+    @Autowired
+    private StorageService storageService;
 
     @Override
     public ResponseEntity<PathologyModel> createPathologyModel(
@@ -114,11 +113,8 @@ public class PathologyModelApiController implements PathologyModelApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         try {
-            // Find and delete corresponding file
-            if (Paths.get(toDelete.getFilepath()).toFile().exists()) {
-                Files.delete(Paths.get(toDelete.getFilepath()));
-            }
-        } catch (Exception e) {
+            storageService.deletePathologyModelData(toDelete.getId(), toDelete.getFilename());
+        } catch (StorageException e) {
             LOG.error("There was an error trying to delete files from " + toDelete.getFilepath()
                     + toDelete.getFilename() + " " + e.getMessage(), e);
         }
@@ -232,23 +228,21 @@ public class PathologyModelApiController implements PathologyModelApi {
     public ResponseEntity<Resource> downloadModelSpecifications(
             @Parameter(name = "ID of model specifications file to download", required = true) @PathVariable("id") Long id)
             throws RestServiceException {
-
         final PathologyModel model = modelsService.findById(id);
         if (model != null) {
             try {
-                File toDownload = new File(model.getFilepath());
-                Path path = Paths.get(toDownload.getAbsolutePath());
-                ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
-
+                Resource resource = storageService.loadPathologyModelData(model.getId(), model.getFilepath());
+                if (!resource.exists()) {
+                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                }
                 HttpHeaders header = new HttpHeaders();
                 header.setContentType(MediaType.APPLICATION_PDF);
                 header.set(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename = " + model.getFilename().replace(" ", "_"));
-
-                return ResponseEntity.ok().headers(header).contentLength(toDownload.length())
+                        "attachment;filename = " + model.getFilename().replace(" ", "_"));
+                return ResponseEntity.ok().headers(header).contentLength(resource.contentLength())
                         .contentType(MediaType.parseMediaType("application/octet-stream")).body((Resource) resource);
-            } catch (IOException ioe) {
-                LOG.error("Error while getting file to download " + ioe.getMessage(), ioe);
+            } catch (Exception e) {
+                LOG.error("Error while getting file to download " + e.getMessage(), e);
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
         }
@@ -268,16 +262,38 @@ public class PathologyModelApiController implements PathologyModelApi {
     }
 
     private PathologyModel saveUploadedFile(PathologyModel model, MultipartFile file) throws IOException {
-        // Create corresponding folders
-        File createdFolder = new File(extraDataPath + "/models/" + model.getId());
-        createdFolder.mkdirs();
-        // Path to file
-        File fileToGet = new File(createdFolder + "/" + file.getOriginalFilename());
-        file.transferTo(fileToGet);
-
-        model.setFilename(file.getOriginalFilename());
-        model.setFilepath(fileToGet.getAbsolutePath());
+        try {
+            LOG.info("Saving file {} for pathology model: {}", file.getOriginalFilename(), model.getId());
+            String filePath = storageService.storePathologyModelData(
+                    model.getId(),
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getContentType(),
+                    file.getSize());
+            model.setFilename(file.getOriginalFilename());
+            model.setFilepath(filePath);
+        } catch (Exception e) {
+            LOG.error("Error while uploading file {} for pathology model: {}. File not uploaded. {}",
+                    file.getOriginalFilename(), model.getId(), e);
+            return null;
+        }
         return model;
+    }
+
+    @Override
+    public ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException {
+        final List<PathologyModel> models = modelsService.findAll();
+        if (models == null || models.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        List<FileEntryDTO> fileEntries = models.stream()
+                .filter(model -> model.getFilepath() != null && model.getFilename() != null)
+                .map(model -> {
+                    boolean exists = Paths.get(model.getFilepath()).toFile().exists();
+                    return new FileEntryDTO(model.getId(), model.getFilename(), "PATHOLOGY-MODEL", exists);
+                })
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(fileEntries, HttpStatus.OK);
     }
 
 }

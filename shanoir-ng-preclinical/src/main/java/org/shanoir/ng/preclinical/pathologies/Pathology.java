@@ -98,4 +98,5 @@ public class Pathology extends HalEntity {
         }
         return o.toString().replace("\n", "\n    ");
     }
+
 }

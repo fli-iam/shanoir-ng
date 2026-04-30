@@ -20,6 +20,15 @@ server:
       enabled: false
 ##### Database #####
 spring:
+  cloud:
+    aws:
+      s3:
+        endpoint: ${S3_ENDPOINT:http://ninja:9000}
+        path-style-access-enabled: true
+        region: ${S3_REGION:eu-west-1}
+      credentials:
+        access-key: ${S3_ACCESS_KEY_ID}
+        secret-key: ${S3_SECRET_ACCESS_KEY}
   datasource:
     url: jdbc:mysql://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:preclinical}?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: preclinical
@@ -96,11 +105,17 @@ logging:
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
-#Upload Extradata
-preclinical:
-  uploadExtradataFolder: /var/extra-data
-  uploadBrukerFolder: /tmp/
-  separator: /
+
+storage:
+  type: ${SHANOIR_STORAGE_TYPE:file-system} # "file-system" or "s3"
+  file-system:
+    preclinical-data: /var/preclinical-data
+    uploadBrukerFolder: /tmp/
+    separator: /
+  s3:
+    preclinical:
+      bucket: ${S3_BUCKET_PRECLINICAL:preclinical}
+      prefix: preclinical/
 
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
