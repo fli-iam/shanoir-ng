@@ -344,7 +344,7 @@ public class QueryPACSService {
                     patients.add(patient);
                     existingPatient = patient;
                 }
-                queryStudies(association, dicomQuery, existingPatient, existingPatient.getStudies());
+                queryStudies(association, dicomQuery, patient, existingPatient.getStudies());
             });
             patients.sort(new PatientNameSorter());
             importJob.setPatients(patients);
