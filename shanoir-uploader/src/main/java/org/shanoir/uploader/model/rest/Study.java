@@ -14,9 +14,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  */
 public class Study implements Comparable<Study> {
 
-    public static final String SC_MANDATORY = "MANDATORY";
+    public static final String SC_MANDATORY = "1";
 
-    public static final String SC_DISABLED = "DISABLED";
+    public static final String SC_DISABLED = "2";
 
     private Long id;
 
