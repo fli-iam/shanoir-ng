@@ -23,6 +23,7 @@ import org.apache.commons.io.IOUtils;
 import org.assertj.core.util.Lists;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
+import org.shanoir.ng.vip.output.handler.DefaultHandler;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.shanoir.ng.vip.output.handler.OutputHandler;
@@ -80,7 +81,6 @@ public class OutputServiceImpl implements OutputService {
 
         File userImportDir = new File(this.importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator + monitoring.getResultsLocation());
 
-
         if (userImportDir.exists()) {
             for (File archive : getArchivesToProcess(userImportDir)) {
                 LOG.info("Processing archive : " + archive.getAbsolutePath());
@@ -97,15 +97,23 @@ public class OutputServiceImpl implements OutputService {
                     }
                 } finally {
                     System.gc();
-                    deleteTemporaryDirectory(cacheFolder);
+                    deleteDirectory(cacheFolder);
                 }
             }
         }
 
+        if (selectedOutputHandlers.stream().anyMatch(handler -> handler instanceof DefaultHandler) && monitoring.getPipelineIdentifier().endsWith("post_processing")) {
+            LOG.info("Output processing for monitoring " +  monitoring.getId() + " finished. Output kept for post-processing.");
+            // Remove processed datasets from current execution monitoring
+        } else {
+            deleteDirectory(userImportDir);
+            processingResourceRepository.deleteByProcessingId(monitoring.getId());
+            LOG.info("Working files for output processing removed.");
+        }
+
         LOG.info("Output processing for monitoring " +  monitoring.getId() + " finished.");
         // Remove processed datasets from current execution monitoring
-        processingResourceRepository.deleteByProcessingId(monitoring.getId());
-        LOG.info("Working files for output processing removed.");
+
     }
 
     /**
@@ -162,7 +170,7 @@ public class OutputServiceImpl implements OutputService {
     /**
      * Remove directory given as parameter
      */
-    private void deleteTemporaryDirectory(File directory) {
+    private void deleteDirectory(File directory) {
         try {
             FileUtils.deleteDirectory(directory);
         } catch (IOException e) {
