@@ -55,6 +55,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     protected inputDatasetsColumnDefs: ColumnDefinition[];
     protected isExecutionMonitoring: boolean = false;
     protected executionMonitoring: ExecutionMonitoring;
+    protected childrenProcessings: DatasetProcessing[];
 
 
     constructor(
@@ -96,7 +97,10 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.studyService.get(this.datasetProcessing.studyId, "lazy").then(study => {
             this.studyOptions = [new Option<number>(study.id, study.name)];
         });
-        this.completeDatasetsDetails();
+        if (this.datasetProcessing.outputDatasets.length > 0 || this.datasetProcessing.inputDatasets.length > 0) {
+            this.completeDatasetsDetails();
+        }
+
         // checking if the datasetProcessing is not execution monitoring
         this.subscriptions.push(
             this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe(
@@ -174,6 +178,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     setExecutionMonitoring(executionMonitoring: ExecutionMonitoring){
         this.isExecutionMonitoring = true;
         this.executionMonitoring = executionMonitoring;
+        this.datasetProcessingService.findByMonitoringId(executionMonitoring.id).then(list => this.childrenProcessings = list);
     }
 
     resetExecutionMonitoring(){
@@ -313,21 +318,21 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     public downloadStdout() {
-        if(!this.executionMonitoring){
+        if(this.isExecutionMonitoring){
             return;
         }
-        const filename = this.executionMonitoring.name + ".stdout.log";
-        this.vipClientService.getStdout(this.executionMonitoring.identifier).toPromise().then(response => {
+        const filename = this.datasetProcessing.id + ".stdout.log";
+        this.vipClientService.getStdout(this.datasetProcessing.id).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
         });
     }
 
     public downloadStderr() {
-        if(!this.executionMonitoring){
+        if(this.isExecutionMonitoring){
             return;
         }
-        const filename = this.executionMonitoring.name + ".stderr.log";
-        this.vipClientService.getStderr(this.executionMonitoring.identifier).toPromise().then(response => {
+        const filename = this.datasetProcessing.id + ".stderr.log";
+        this.vipClientService.getStderr(this.datasetProcessing.id).toPromise().then(response => {
             this.downloadLogIntoBrowser(response, filename );
         });
     }

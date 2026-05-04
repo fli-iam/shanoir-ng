@@ -59,5 +59,4 @@ public class EventsApiController implements EventsApi {
             throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()));
         }
     }
-
 }

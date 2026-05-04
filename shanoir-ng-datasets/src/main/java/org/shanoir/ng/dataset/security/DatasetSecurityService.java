@@ -1141,22 +1141,24 @@ public class DatasetSecurityService {
     /**
      * Check that the connected user has the CAN_EXECUTE right for every dataset in the execution candidate.
      *
-     * @param executionCandidate the execution candidate
+     * @param executionCandidates the execution candidates
      * @return true or false
      * @throws EntityNotFoundException
      */
-    public boolean hasRightOnExecutionCandidate(ExecutionCandidateDTO executionCandidate) throws EntityNotFoundException {
+    public boolean hasRightOnExecutionCandidates(List<ExecutionCandidateDTO> executionCandidates) throws EntityNotFoundException {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }
-        if (executionCandidate == null) {
+        if (executionCandidates == null || executionCandidates.isEmpty()) {
             throw new IllegalArgumentException("Execution candidate cannot be null here.");
         }
         Set<Long> dsIds = new HashSet<>();
-        if (executionCandidate.getDatasetParameters() != null) {
-            for (DatasetParameterDTO param : executionCandidate.getDatasetParameters()) {
-                if (param.getDatasetIds() != null) {
-                    dsIds.addAll(param.getDatasetIds());
+        for (ExecutionCandidateDTO executionCandidate : executionCandidates) {
+            if (executionCandidate.getDatasetParameters() != null) {
+                for (DatasetParameterDTO param : executionCandidate.getDatasetParameters()) {
+                    if (param.getDatasetIds() != null) {
+                        dsIds.addAll(param.getDatasetIds());
+                    }
                 }
             }
         }

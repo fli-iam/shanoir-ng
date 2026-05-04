@@ -19,12 +19,14 @@ import java.util.Optional;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * Repository for dataset processings.
  *
  * @author msimon
  */
+@Repository
 public interface DatasetProcessingRepository extends CrudRepository<DatasetProcessing, Long> {
 
     /**
@@ -35,6 +37,22 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      */
     Optional<DatasetProcessing> findByComment(String comment);
 
+
+    /**
+     * Find all dataset processing by comment and type.
+     *
+     * @param comment Comment.
+     * @param type Dataset processing type.
+     * @return List of dataset processing.
+     */
+    @Query(value = "SELECT DISTINCT processing.id FROM dataset_processing as processing "
+            + "INNER JOIN execution_monitoring AS monitoring ON monitoring.id = processing.id "
+            + "WHERE processing.dataset_processing_type = :type "
+            + "AND processing.comment LIKE :comment "
+            + "AND monitoring.name LIKE '%post_processing' "
+            + "AND monitoring.status = 1", nativeQuery = true)
+    List<Long> findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(String comment, int type);
+
     /**
      * Find all processings that are linked to given dataset through INPUT_OF_DATASET_PROCESSING table
      *
@@ -43,6 +61,22 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      */
     List<DatasetProcessing> findAllByInputDatasets_Id(Long datasetId);
 
+    /**
+     * Find all processings that are linked to given monitoring through parent_id column
+     *
+     * @param monitoringId
+     * @return
+     */
+    @Query(value = "SELECT DISTINCT processing.id FROM dataset_processing as processing "
+            + "WHERE processing.parent_id = :monitoringId", nativeQuery = true)
+    List<Long> findAllIdsByMonitoringId(Long monitoringId);
+
+    /**
+     * Find all processings that are linked to given parent processing id
+     *
+     * @param id
+     * @return
+     */
     List<DatasetProcessing> findAllByParentId(Long id);
 
     /**
@@ -57,4 +91,21 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id "
             + "WHERE acquisition.examination_id IN (:examinationIds)", nativeQuery = true)
     List<Long> findAllIdsByExaminationIds(List<Long> examinationIds);
+
+    /**
+     * Find all identifying fields for a given processing id
+     *
+     * @param processingId
+     * @return
+     */
+    @Query(value = "SELECT processing.monitoring_index as monitoringIndex, monitoring.identifier as monitoringIdentifier FROM dataset_processing as processing "
+            + "INNER JOIN dataset_processing as parent on parent.id = processing.parent_id "
+            + "INNER JOIN execution_monitoring as monitoring on monitoring.id = parent.id "
+            + "WHERE processing.id = :processingId", nativeQuery = true)
+    IdentificationData findIdentificationDataFromProcessingId(Long processingId);
+
+    interface IdentificationData {
+        Long getMonitoringIndex();
+        String getMonitoringIdentifier();
+    }
 }

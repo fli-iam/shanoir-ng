@@ -39,10 +39,12 @@ import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
 import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
+import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -128,18 +130,23 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     @Autowired
     private StudyService studyService;
 
+    @Autowired
+    private ProcessingResourceRepository processingResourceRepository;
 
     @Override
-    public boolean canProcess(ExecutionMonitoring processing) throws ResultHandlerException {
-        if (processing.getPipelineIdentifier() == null || processing.getPipelineIdentifier().isEmpty()) {
-            throw new ResultHandlerException("Pipeline identifier is not set for processing [" + processing.getName() + "]", null);
-        }
-        return processing.getPipelineIdentifier().startsWith("ofsep_sequences_identification")  || processing.getPipelineIdentifier().startsWith("SIMS");
+    public boolean canProcess(ExecutionMonitoring processing, boolean postProcessing) throws ResultHandlerException {
+        return canProcess(processing.getPipelineIdentifier(), postProcessing);
     }
 
-    @Override
-    public void manageTarGzResult(List<File> resultFiles, File parentFolder, ExecutionMonitoring processing) {
+    public boolean canProcess(String pipelineIdentifier, boolean postProcessing) throws ResultHandlerException {
+        if (Objects.isNull(pipelineIdentifier)) {
+            throw new ResultHandlerException("Pipeline identifier can not be null", null);
+        }
+        return (pipelineIdentifier.startsWith("SIMS") || pipelineIdentifier.startsWith("ofsep_sequences_identification")) && postProcessing == pipelineIdentifier.endsWith("post_processing");
+    }
 
+    @Transactional
+    public void manageTarGzResult(List<File> resultFiles, File parentFolder, ExecutionMonitoring monitoring, String resourceId) {
         for (File file : resultFiles) {
             if (!file.getName().equals(PIPELINE_OUTPUT)) {
                 continue;
@@ -158,7 +165,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                     LOG.warn("Series list is empty in result file [{}].", file.getAbsolutePath());
                     return;
                 }
-                processSeries(series, processing);
+                processSeries(series, monitoring, resourceId);
             } catch (Exception e) {
                 LOG.error("An error occured while extracting result from result archive.", e);
             }
@@ -275,19 +282,26 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     /**
      * Process all series / acquisitions found in output JSON
      */
-    private void processSeries(JSONArray series, ExecutionMonitoring execution) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
+    private void processSeries(JSONArray series, ExecutionMonitoring monitoring, String resourceId) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
+        Long examinationId = null;
+
         for (int i = 0; i < series.length(); i++) {
             JSONObject serie = series.getJSONObject(i);
             Long serieId = serie.getLong(ID);
 
-            List<Dataset> datasets = execution.getInputDatasets().stream()
-                    .filter(ds -> ds.getDatasetAcquisition() != null
+
+            List<Dataset> datasets = processingResourceRepository.findDatasetsByResourceId(resourceId)
+                    .stream().filter(ds -> ds.getDatasetAcquisition() != null
                             && ds.getDatasetAcquisition().getId().equals(serieId))
                     .collect(Collectors.toList());
 
             if (datasets.isEmpty()) {
                 LOG.error("No dataset found for serie/acquisition [" + serieId + "]");
                 continue;
+            }
+
+            if (Objects.isNull(examinationId)) {
+                examinationId = datasets.get(0).getFirstRealInput().getDatasetAcquisition().getExamination().getId();
             }
 
             for (Dataset ds : datasets) {
@@ -309,16 +323,16 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
                     LOG.info("Dataset {} updated", ds.getId());
 
-                    List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, execution);
+                    List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, monitoring);
                     addDatasetTags(ds, properties);
-                    properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, execution));
+                    properties.addAll(getDatasetPropertiesFromDicom(attributes, ds,  monitoring));
                     datasetPropertyService.createAll(properties);
                 } else {
                     LOG.info("Dataset {} ignored, no update", ds.getId());
                 }
             }
         }
-        LOG.info("Output.json processed for execution {}", execution.getId());
+        LOG.info("Output.json processed for examination {}", examinationId);
     }
 
     /**
