@@ -44,15 +44,15 @@ import jakarta.validation.constraints.NotNull;
 @DiscriminatorColumn(name = "scope", discriminatorType = DiscriminatorType.STRING, length = 47)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "scope")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = StudyCardDICOMConditionOnDatasets.class, name = "StudyCardDICOMConditionOnDatasets"),
+    @JsonSubTypes.Type(value = ExamDICOMConditionOnDatasets.class, name = "StudyCardDICOMConditionOnDatasets"),
     @JsonSubTypes.Type(value = ExamMetadataCondOnDatasets.class, name = "ExamMetadataCondOnDatasets"),
     @JsonSubTypes.Type(value = ExamMetadataCondOnAcq.class, name = "ExamMetadataCondOnAcq"),
     @JsonSubTypes.Type(value = DatasetMetadataCondOnDataset.class, name = "DatasetMetadataCondOnDataset"),
     @JsonSubTypes.Type(value = AcqMetadataCondOnDatasets.class, name = "AcqMetadataCondOnDatasets"),
     @JsonSubTypes.Type(value = AcqMetadataCondOnAcq.class, name = "AcqMetadataCondOnAcq")})
-public abstract class StudyCardCondition extends AbstractEntity {
+public abstract class CardCondition extends AbstractEntity {
 
-    private static final Logger LOG = LoggerFactory.getLogger(StudyCardCondition.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CardCondition.class);
 
     public static final String LIST_SEPERATOR = ",";
 
