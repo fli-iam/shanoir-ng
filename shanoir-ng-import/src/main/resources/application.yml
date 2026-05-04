@@ -108,6 +108,7 @@ logging:
 shanoir:
   import:
     directory: /tmp
+    vip: /var/datasets-data/vip-data
     # Import from PACS configuration
     pacs:
       query:

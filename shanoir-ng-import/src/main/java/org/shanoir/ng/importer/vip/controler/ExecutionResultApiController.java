@@ -54,7 +54,7 @@ import jakarta.validation.Valid;
 @Controller
 public class ExecutionResultApiController implements ExecutionResultApi {
 
-    private static final String VIP_UPLOAD_FOLDER = "vip_uploads";
+    private static final String VIP_UPLOAD_FOLDER = "output_uploads";
     private static final String ERROR_WHILE_SAVING_UPLOADED_FILE = "Error while saving uploaded file.";
     private static final String PATH_PREFIX = "/carmin-data/";
 
@@ -68,7 +68,7 @@ public class ExecutionResultApiController implements ExecutionResultApi {
 
     }
 
-    @Value("${shanoir.import.directory}")
+    @Value("${shanoir.import.vip}")
     private String importDir;
 
     @Override

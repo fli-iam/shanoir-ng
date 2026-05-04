@@ -21,7 +21,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.util.Lists;
-import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
@@ -41,7 +40,6 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,14 +49,13 @@ public class OutputServiceImpl implements OutputService {
 
     private static final Logger LOG = LoggerFactory.getLogger(OutputServiceImpl.class);
 
-    @Value("${vip.upload-folder}")
+    @Value("${vip-data-folder}")
     private String importDir;
+
+    private static final String VIP_UPLOAD_FOLDER = "output_uploads";
 
     @Autowired
     private List<OutputHandler> outputHandlers;
-
-    @Autowired
-    private DatasetProcessingService datasetProcessingService;
 
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
@@ -81,7 +78,7 @@ public class OutputServiceImpl implements OutputService {
      */
     private void process(ExecutionMonitoring monitoring, List<OutputHandler> selectedOutputHandlers, boolean postProcessing) throws ResultHandlerException, EntityNotFoundException {
 
-        File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
+        File userImportDir = new File(this.importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator + monitoring.getResultsLocation());
 
 
         if (userImportDir.exists()) {
@@ -89,12 +86,13 @@ public class OutputServiceImpl implements OutputService {
                 LOG.info("Processing archive : " + archive.getAbsolutePath());
                 File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
                 try {
+                    String resourceId = archive.getName().split("\\+")[1];
                     List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
 
                     for (OutputHandler outputHandler : selectedOutputHandlers) {
                         if (outputHandler.canProcess(monitoring, postProcessing)) {
                             LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
-                            outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
+                            outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring, resourceId);
                         }
                     }
                 } finally {
@@ -106,8 +104,6 @@ public class OutputServiceImpl implements OutputService {
 
         LOG.info("Output processing for monitoring " +  monitoring.getId() + " finished.");
         // Remove processed datasets from current execution monitoring
-        monitoring.setInputDatasets(Collections.emptyList());
-        datasetProcessingService.update(monitoring);
         processingResourceRepository.deleteByProcessingId(monitoring.getId());
         LOG.info("Working files for output processing removed.");
     }

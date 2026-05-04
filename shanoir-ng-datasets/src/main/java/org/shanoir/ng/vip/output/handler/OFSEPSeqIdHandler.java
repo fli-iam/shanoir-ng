@@ -27,7 +27,6 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.property.model.DatasetProperty;
@@ -135,8 +134,8 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     private ProcessingResourceRepository processingResourceRepository;
 
     @Override
-    public boolean canProcess(ExecutionMonitoring processing) throws ResultHandlerException {
-        return canProcess(processing.getPipelineIdentifier(), false);
+    public boolean canProcess(ExecutionMonitoring processing, boolean postProcessing) throws ResultHandlerException {
+        return canProcess(processing.getPipelineIdentifier(), postProcessing);
     }
 
     public boolean canProcess(String pipelineIdentifier, boolean postProcessing) throws ResultHandlerException {

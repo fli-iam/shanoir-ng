@@ -54,7 +54,7 @@ public class DefaultHandler extends OutputHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultHandler.class);
 
-    @Value("${vip.result-file-name}")
+    @Value("${vip.result-file-name}") // It's a generic file returned by VIP listing outputs in archive
     private String resultFileName;
 
     @Autowired
