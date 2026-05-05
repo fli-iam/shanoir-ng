@@ -31,10 +31,13 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.persistence.Entity;
+
 /**
  * Abstract class to represent a condition on DICOM metadata of datasets.
  * The tested dataset subset can be either exam, acquisition or dataset metadata depending on the child class.
  */
+@Entity
 public abstract class DICOMConditionOnDatasets extends CardCondition {
 
     private static final Logger LOG = LoggerFactory.getLogger(DICOMConditionOnDatasets.class);

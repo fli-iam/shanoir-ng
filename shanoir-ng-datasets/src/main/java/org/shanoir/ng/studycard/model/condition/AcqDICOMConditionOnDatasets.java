@@ -74,7 +74,4 @@ public class AcqDICOMConditionOnDatasets extends DICOMConditionOnDatasets {
         writeConditionsReport(report, complies, nbOk, nbUnknown, total);
         return complies;
     }
-
-
-
 }
