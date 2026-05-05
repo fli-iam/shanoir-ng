@@ -174,11 +174,13 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
                         case FINISHED -> {
                             monitoring.setJobs(dto.getJobs());
                             monitoring.setStatus(dto.getStatus());
+                            LOG.info("Monitoring of execution id: " + monitoring.getId() + ", status: " + monitoring.getStatus());
                             emProxyService.processFinishedJob(monitoring, event, dto.getEndDate());
                         }
                         case UNKNOWN, EXECUTION_FAILED, KILLED -> {
                             monitoring.setJobs(dto.getJobs());
                             monitoring.setStatus(dto.getStatus());
+                            LOG.info("Monitoring of execution id: " + monitoring.getId() + ", status: " + monitoring.getStatus());
                             emProxyService.processKilledJob(monitoring, event, dto);
                         }
                         default -> {
