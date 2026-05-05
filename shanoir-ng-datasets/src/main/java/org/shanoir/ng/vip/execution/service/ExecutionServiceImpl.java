@@ -162,7 +162,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
         }
 
-        String url = vipExecutionUri + "/" + identifier;
+        String url = vipExecutionUri + "/" + identifier + "/summary";
         HttpHeaders headers = getServiceAccountHttpHeaders();
 
         return webClient.get()
