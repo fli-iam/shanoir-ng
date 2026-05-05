@@ -31,7 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<span class="always"><i class="fas fa-infinity"></i>Always</span>
 	</div>
 	<div>
-		<span *ngIf="mode != 'view'" class="add" (click)="addNewCondition()"><i class="fas fa-plus"></i>Add a condition</span>
+		<span *ngIf="mode != 'view'" class="add" (click)="addNewCondition(rule.scope)"><i class="fas fa-plus"></i>Add a condition</span>
 	</div>
 </div>
 

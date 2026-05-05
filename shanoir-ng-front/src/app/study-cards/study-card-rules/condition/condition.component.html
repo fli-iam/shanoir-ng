@@ -14,13 +14,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <span>if,&nbsp;</span>
 <span class="view" *ngIf="mode == 'view'">
-    <span class="cardinality-type" *ngIf="condition.cardinality == -1">for every</span>
-    <span class="cardinality-type" *ngIf="condition.cardinality == 0">for no</span>
-    <span class="cardinality-type" *ngIf="condition.cardinality > 0">for at least</span>
-    <span class="cardinality" *ngIf="condition.cardinality > 0">{{condition.cardinality}}</span>
-    <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
-    <span class="var" *ngIf="condition.scope == 'StudyCardDICOMConditionOnDatasets'" title="{{condition.dicomTag | dicomTagLabel}}">{{condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag?.code | dicomTagLabel)}}</span>
-    <span class="var" *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets'">{{fieldLabel}}</span>
+    @if (["DatasetDICOMConditionOnDataset", "DatasetMetadataCondOnDataset"].includes(condition.scope)) {
+        <span>for a dataset</span>
+    } @else if ("AcqMetadataCondOnAcq" == condition.scope) {
+        <span>for an acquisition</span>
+    } @else {
+        <span class="cardinality-type" *ngIf="condition.cardinality == -1">for every</span>
+        <span class="cardinality-type" *ngIf="condition.cardinality == 0">for no</span>
+        <span class="cardinality-type" *ngIf="condition.cardinality > 0">for at least</span>
+        <span class="cardinality" *ngIf="condition.cardinality > 0">{{condition.cardinality}}</span>
+        @if (["AcqDICOMConditionOnDatasets", "AcqMetadataCondOnDatasets"].includes(condition.scope)) {
+            <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the acquisition, </span>
+        } @else if (["ExamDICOMConditionOnDatasets", "ExamMetadataCondOnDatasets"].includes(condition.scope)) {
+            <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
+        } @else if ("ExamMetadataCondOnAcq" == condition.scope) {
+            <span>acquisition<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
+        } 
+    }
+    <span class="var" *ngIf="condition.scope?.includes('DICOMCondition')" title="{{condition.dicomTag | dicomTagLabel}}">{{condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag?.code | dicomTagLabel)}}</span>
+    <span class="var" *ngIf="!condition.scope?.includes('DICOMCondition')">{{fieldLabel}}</span>
     <span class="method">
         <i *ngIf="condition.operation == 'EQUALS'" class="fa-solid fa-equals"></i>
         <i *ngIf="condition.operation == 'NOT_EQUALS'" class="fa-solid fa-not-equal"></i>
@@ -44,33 +56,41 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </span>
 </span>
 <ng-container *ngIf="mode != 'view' && init">
-    <select-box
-        class="cardinality-type auto-width"
-        [(ngModel)]="cardinalityType"
-        (userChange)="onCardinalityTypeChange()"
-        [clear]="false"
-        placeholder="select cardinality"
-        [search]="false"
-        [options]="[{label: 'for no', value: 'NONE'}, {label: 'for every', value: 'ALL'}, {label: 'for at least', value: 'AT_LEAST'}]">
-    </select-box>
-    <input type="number"
-        class="cardinality auto-width"
-        *ngIf="cardinalityType == 'AT_LEAST'"
-        [(ngModel)]="condition.cardinality"
-        [class.error]="cardinalityError"
-        min="1" 
-        [style.width]="(condition.cardinality ? ((condition.cardinality+'').length + 3) : '4') + 'ch'">
-    <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
+    @if (!["DatasetDICOMConditionOnDataset", "DatasetMetadataCondOnDataset", "AcqMetadataCondOnAcq"].includes(condition.scope)) { 
+        <select-box
+            class="cardinality-type auto-width"
+            [(ngModel)]="cardinalityType"
+            (userChange)="onCardinalityTypeChange()"
+            [clear]="false"
+            placeholder="select cardinality"
+            [search]="false"
+            [options]="[{label: 'for no', value: 'NONE'}, {label: 'for every', value: 'ALL'}, {label: 'for at least', value: 'AT_LEAST'}]">
+        </select-box>
+        <input type="number"
+            class="cardinality auto-width"
+            *ngIf="cardinalityType == 'AT_LEAST'"
+            [(ngModel)]="condition.cardinality"
+            [class.error]="cardinalityError"
+            min="1" 
+            [style.width]="(condition.cardinality ? ((condition.cardinality+'').length + 3) : '4') + 'ch'">
+        @if (["AcqDICOMConditionOnDatasets", "AcqMetadataCondOnDatasets"].includes(condition.scope)) {
+            <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the acquisition, </span>
+        } @else if (["ExamDICOMConditionOnDatasets", "ExamMetadataCondOnDatasets"].includes(condition.scope)) {
+            <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
+        } @else if ("ExamMetadataCondOnAcq" == condition.scope) {
+            <span>acquisition<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
+        } 
+    }
     <select-box 
-        class="type auto-width"
-        [ngModel]="condition.scope" 
-        (userChange)="onConditionTypeChange($event)" 
-        [options]="conditionTypeOptions"
-        placeholder="select conditition type" 
-        [clear]="false">
+            class="type auto-width"
+            [ngModel]="condition.scope" 
+            (userChange)="onConditionTypeChange($event)" 
+            [options]="conditionTypeOptions"
+            placeholder="select conditition type" 
+            [clear]="false">
     </select-box>
     <select-box 
-            *ngIf="condition.scope == 'StudyCardDICOMConditionOnDatasets'"
+            *ngIf="condition.scope?.includes('DICOMCondition')"
             class="var auto-width" 
             [class.error]="tagError"
             [(ngModel)]="condition.dicomTag"
@@ -81,7 +101,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [clear]="false">
     </select-box>
     <select-box 
-            *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets'"
+            *ngIf="!condition.scope?.includes('DICOMCondition')"
             class="var auto-width" 
             [class.error]="shanoirFieldError"
             [(ngModel)]="condition.shanoirField" 
@@ -104,7 +124,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </select-box>
     <ng-container *ngIf="condition?.operation != 'PRESENT' && condition?.operation != 'ABSENT'"> 
         <form [formGroup]="form">
-            <span *ngIf="condition.scope == 'StudyCardDICOMConditionOnDatasets' || !(shanoirFieldOptions?.length > 0)" formArrayName="values" class="multi-value edit">
+            <span *ngIf="condition.scope?.includes('DICOMCondition') || !(shanoirFieldOptions?.length > 0)" formArrayName="values" class="multi-value edit">
                 <span *ngFor="let value of condition.values; let i  = index; trackBy: trackByFn" class="one-value">
                     <auto-ajust-input 
                             [formControlName]="i"
@@ -122,7 +142,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </span>
                 </div>
             </span>
-            <span *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets' && (shanoirFieldOptions?.length > 0)" formArrayName="values" class="multi-value edit">
+            <span *ngIf="!condition.scope?.includes('DICOMCondition') && (shanoirFieldOptions?.length > 0)" formArrayName="values" class="multi-value edit">
                 <select-box 
                         *ngFor="let value of condition.values; let i  = index"
                         [formControlName]="i"
