@@ -24,7 +24,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <span class="cardinality-type" *ngIf="condition.cardinality > 0">for at least</span>
         <span class="cardinality" *ngIf="condition.cardinality > 0">{{condition.cardinality}}</span>
         @if (["AcqDICOMConditionOnDatasets", "AcqMetadataCondOnDatasets"].includes(condition.scope)) {
-            <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the acquisition, </span>
+            <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the DICOM serie/dataset acquisition, </span>
         } @else if (["ExamDICOMConditionOnDatasets", "ExamMetadataCondOnDatasets"].includes(condition.scope)) {
             <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
         } @else if ("ExamMetadataCondOnAcq" == condition.scope) {

@@ -173,18 +173,18 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         if (changes.ruleScope && this.ruleScope) {
             if (this.ruleScope == 'Dataset') {
                 this.conditionTypeOptions = [
-                    new Option('StudyCardDICOMConditionOnDatasets', 'the DICOM field'),
-                    new Option('DatasetMetadataCondOnDataset', 'the dataset field'),
+                    new Option('DatasetDICOMConditionOnDataset', 'the DICOM field'), // no cardinality
+                    new Option('DatasetMetadataCondOnDataset', 'the dataset field'), // no cardinality
                 ];
             } else if (this.ruleScope == 'DatasetAcquisition') {
                 this.conditionTypeOptions = [
-                    new Option('StudyCardDICOMConditionOnDatasets', 'the DICOM field'),
-                    new Option('AcqMetadataCondOnAcq', 'the acquisition field'),
+                    new Option('AcqDICOMConditionOnDatasets', 'the DICOM field'),
+                    new Option('AcqMetadataCondOnAcq', 'the acquisition field'), // no cardinality
                     new Option('AcqMetadataCondOnDatasets', 'the dataset field'),
                 ];
             } else if (this.ruleScope == 'Examination') {
                 this.conditionTypeOptions = [
-                    new Option('StudyCardDICOMConditionOnDatasets', 'the DICOM field'),
+                    new Option('ExamDICOMConditionOnDatasets', 'the DICOM field'),
                     new Option('ExamMetadataCondOnAcq', 'the acquisition field'),
                     new Option('ExamMetadataCondOnDatasets', 'the dataset field'),
                 ];
@@ -324,7 +324,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
      * Filter the available operations
      */
     private filterOperations() {
-        if (this.condition.scope == 'StudyCardDICOMConditionOnDatasets') { // DICOM fields
+        if (this.condition.scope?.includes('DICOMCondition')) { // DICOM fields
             if (this.condition?.dicomTag) {
                 const type: TagType = this.condition.dicomTag.type;
                 if (['Double', 'Float', 'Integer', 'Long', 'Date'].includes(type)) {
@@ -432,7 +432,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             this.computeConditionOptionsSubscription.unsubscribe();
             this.computeConditionOptionsSubscription = null;
         }
-        if (this.condition.scope != 'StudyCardDICOMConditionOnDatasets') {
+        if (!this.condition.scope?.includes('DICOMCondition')) {
             const conditionField: ShanoirMetadataField = this.fields.find(metadataField => metadataField.field == this.condition.shanoirField);
             if (conditionField && conditionField.options) {
                 this.computeConditionOptionsSubscription = conditionField.options.subscribe(opts => {
