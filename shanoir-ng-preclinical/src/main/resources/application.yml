@@ -30,10 +30,10 @@ spring:
         access-key: ${S3_ACCESS_KEY_ID}
         secret-key: ${S3_SECRET_ACCESS_KEY}
   datasource:
-    url: jdbc:mysql://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:preclinical}?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:preclinical}?characterEncoding=utf-8
     username: preclinical
     password: password
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
@@ -65,7 +65,7 @@ spring:
     mapper:
       use-getters-as-setters: false
   jooq:
-    sql-dialect: Mysql
+    sql-dialect: MariaDB
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
