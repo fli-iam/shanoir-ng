@@ -44,15 +44,13 @@ public class ZipFileImportTest extends AbstractTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ZipFileImportTest.class);
 
-    private static final String IN_PROGRESS = "IN_PROGRESS";
-
     private static final String ACR_PHANTOM_T1_ZIP = "acr_phantom_t1.zip";
 
     @Test
     public void testImportWithDicomZipUpload() {
         try {
             org.shanoir.uploader.model.rest.Study study = createStudyAndCenterAndStudyCard();
-            for (int i = 0; i < 0; i++) {
+            for (int i = 0; i < 1; i++) {
                 ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
                 if (!importJob.getPatients().isEmpty()) {
                     selectAllSeriesForImport(importJob);
@@ -89,56 +87,6 @@ public class ZipFileImportTest extends AbstractTest {
             //     step4StartImport(importJob, subject, examination, study);
             // }
         }
-    }
-
-    private org.shanoir.uploader.model.rest.Study createStudyAndCenterAndStudyCard() {
-        StudyExtraDetails studyExtraDetails = new StudyExtraDetails();
-        studyExtraDetails.setExpectedNbOfSubjects(5L);
-        studyExtraDetails.setExpectedNbOfCenters(5L);
-        studyExtraDetails.setSponsor("sponsor");
-        studyExtraDetails.setPrincipalInvestigator("pi");
-        org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
-        study.setExtraDetails(studyExtraDetails);
-        final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
-        study.setName(randomStudyName);
-        study.setIsDraft(Boolean.TRUE);
-        Date today = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(today);
-        calendar.add(Calendar.YEAR, 1);
-        Date todayPlusOneYear = calendar.getTime();
-        study.setStartDate(today);
-        study.setEndDate(todayPlusOneYear);
-        study.setStudyStatus(IN_PROGRESS);
-        study.setStudyCardPolicy(org.shanoir.uploader.model.rest.Study.SC_MANDATORY);
-        // add center to study
-        List<StudyCenter> studyCenterList = new ArrayList<StudyCenter>();
-        final StudyCenter studyCenter = new StudyCenter();
-        Center createdCenter = createCenter();
-        Assertions.assertNotNull(createdCenter);
-        studyCenter.setCenter(createdCenter);
-        studyCenterList.add(studyCenter);
-        study.setStudyCenterList(studyCenterList);
-        // create study
-        study = shUpClient.createStudy(study);
-        Assertions.assertNotNull(study);
-        // create equipment
-        AcquisitionEquipment createdEquipment = createEquipment(createdCenter);
-        Assertions.assertNotNull(createdEquipment);
-        // create study card and add to study
-        StudyCard studyCard = new StudyCard();
-        final String randomStudyCardName = "Study-Card-Name-" + UUID.randomUUID().toString();
-        studyCard.setName(randomStudyCardName);
-        studyCard.setAcquisitionEquipmentId(createdEquipment.getId());
-        studyCard.setAcquisitionEquipment(createdEquipment);
-        studyCard.setCenterId(createdCenter.getId());
-        studyCard.setStudyId(study.getId());
-        shUpClient.createStudyCard(studyCard);
-        Assertions.assertNotNull(studyCard);
-        List<StudyCard> studyCards = new ArrayList<>();
-        studyCards.add(studyCard);
-        study.setStudyCards(studyCards);
-        return study;
     }
 
     /**
