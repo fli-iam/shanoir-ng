@@ -19,3 +19,29 @@ SET c.scope = CASE
     ELSE 'ExamDICOMConditionOnDatasets'
 END
 WHERE c.scope = 'StudyCardDICOMConditionOnDatasets';
+
+-- RENAME TABLE study_card_condition TO card_condition;
+-- 1. Drop FKs
+ALTER TABLE study_card_condition_join
+DROP FOREIGN KEY FK1k7n1md79nkowvqbibyn7a72k;
+
+ALTER TABLE study_card_condition_values
+DROP FOREIGN KEY FKnitnq7oo33kq0uu3dc647nj5b;
+
+-- 2. Rename tables
+RENAME TABLE study_card_condition TO card_condition;
+RENAME TABLE study_card_condition_values TO card_condition_values;
+
+-- 3. Recreate FKs
+ALTER TABLE study_card_condition_join
+ADD CONSTRAINT FK1k7n1md79nkowvqbibyn7a72k
+FOREIGN KEY (condition_id)
+REFERENCES card_condition(id);
+
+ALTER TABLE card_condition_values
+ADD CONSTRAINT FKnitnq7oo33kq0uu3dc647nj5b
+FOREIGN KEY (card_condition_id)
+REFERENCES card_condition(id);
+
+RENAME TABLE study_card_condition_join TO card_condition_join;
+ALTER TABLE card_condition_values CHANGE study_card_condition_id card_condition_id BIGINT(20) NOT NULL;
