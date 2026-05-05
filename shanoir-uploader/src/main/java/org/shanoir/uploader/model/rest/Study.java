@@ -40,6 +40,16 @@ public class Study implements Comparable<Study> {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
     private Date endDate;
 
+    private StudyExtraDetails extraDetails;
+
+    public StudyExtraDetails getExtraDetails() {
+        return extraDetails;
+    }
+
+    public void setExtraDetails(StudyExtraDetails extraDetails) {
+        this.extraDetails = extraDetails;
+    }
+
     public Long getId() {
         return id;
     }
