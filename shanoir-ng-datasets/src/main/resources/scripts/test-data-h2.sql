@@ -11,7 +11,7 @@
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 -- Manually create this table
-CREATE TABLE `study_card_condition` (
+CREATE TABLE `card_condition` (
                                         `id` bigint(20) NOT NULL AUTO_INCREMENT,
                                         `dicom_tag` int(11) DEFAULT NULL,
                                         `operation` int(11) NOT NULL,
@@ -53,7 +53,7 @@ VALUES
 	(7,11,'OVERRIDEN','Dataset'),
 	(8,4,'4','Dataset');
 
-INSERT INTO study_card_condition
+INSERT INTO card_condition
 	(id, shanoir_field, operation, scope, dicom_tag, cardinality)
 VALUES
 	(1,2,4,'AcqMetadataCondOnAcq', null, 1),
@@ -62,8 +62,8 @@ VALUES
 	(4,1573009,6,'AcqMetadataCondOnAcq', null, 1),
 	(5,1573013,6,'AcqMetadataCondOnAcq', null, 1);
 
-INSERT INTO study_card_condition_values
-	(value, study_card_condition_id)
+INSERT INTO card_condition_values
+	(value, card_condition_id)
 VALUES
 	('TOF',1),
 	('flight',1),
@@ -75,7 +75,7 @@ VALUES
 	('150',4),
 	('781.00',5);
 
-INSERT INTO study_card_condition_join
+INSERT INTO card_condition_join
 	(study_card_rule_id, condition_id)
 VALUES
 	(7,1),
@@ -181,4 +181,3 @@ VALUES
 	(2, 1, 0, 1, 3, 1, 'admin'),
 	(3, 1, 0, 0, 1, 2, 'jlouis'),
 	(4, 1, 0, 1, 2, 1, 'admin');
-
