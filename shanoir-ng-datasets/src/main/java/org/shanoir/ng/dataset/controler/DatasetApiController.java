@@ -63,6 +63,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -70,7 +71,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ByteArrayResource;
@@ -105,14 +105,7 @@ public class DatasetApiController implements DatasetApi {
 
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
-    private static final String SUB_PREFIX = "sub-";
-
-    private static final String SES_PREFIX = "ses-";
-
     private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
-
-    @Value("${datasets-data}")
-    private String niftiStorageDir;
 
     @Autowired
     private DatasetMapper datasetMapper;
@@ -162,6 +155,9 @@ public class DatasetApiController implements DatasetApi {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private StorageService storageService;
 
     /** Number of downloadable datasets. */
     private static final int DATASET_LIMIT = 500;
@@ -659,12 +655,12 @@ public class DatasetApiController implements DatasetApi {
             }
             LOG.info("Metadata file download ended.");
             return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + file.getName() + "\"")
                     .body(resource);
         } catch (IOException e) {
             ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while shaping HTTP response.", e.getMessage());
             throw new RestServiceException(e, error);
         }
-
     }
+
 }

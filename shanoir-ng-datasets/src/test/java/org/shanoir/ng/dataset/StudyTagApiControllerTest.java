@@ -64,6 +64,7 @@ import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControllerSecurityService;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.tag.mapper.StudyTagMapper;
 import org.shanoir.ng.tag.service.StudyTagService;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -176,6 +177,9 @@ public class StudyTagApiControllerTest {
 
     @MockBean
     private SolrService solrService;
+
+    @MockBean
+    private StorageService storageService;
 
     @Autowired
     private ObjectMapper mapper;

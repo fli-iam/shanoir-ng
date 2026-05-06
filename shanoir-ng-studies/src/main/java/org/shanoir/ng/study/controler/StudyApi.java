@@ -19,10 +19,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.study.dto.CopyData;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
@@ -219,7 +221,7 @@ public interface StudyApi {
     ResponseEntity<Void> updateStudy(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "study to update", required = true) @RequestBody Study study, BindingResult result)
-            throws RestServiceException;
+            throws Exception;
 
     @Operation(summary = "", description = "Get my rights on this study")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "here are your rights"),
@@ -291,7 +293,7 @@ public interface StudyApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_DOWNLOAD'))")
     void downloadProtocolFile(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
+            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws Exception;
 
     @Operation(summary = "", description = "If one or more exist, return a list of data user agreements (DUAs) waiting for the given user id")
     @ApiResponses(value = {
@@ -341,7 +343,7 @@ public interface StudyApi {
     @PostMapping(value = "dua-upload/{studyId}", produces = { "application/json" }, consumes = {
             "multipart/form-data" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
-    ResponseEntity<Void> uploadDataUserAgreement(
+    ResponseEntity<Void> uploadDataUseAgreement(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
             throws RestServiceException;
@@ -355,9 +357,9 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "dua-download/{studyId}/{fileName:.+}/")
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    void downloadDataUserAgreement(
+    void downloadDataUseAgreement(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
+            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws Exception;
 
     @Operation(summary = "", description = "Deletes the user of a study")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "user removed from study"),
@@ -414,5 +416,15 @@ public interface StudyApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
     ResponseEntity<List<Long>> getStudiesByRightForCurrentUser(
             @Parameter(description = "right requested", required = true) @PathVariable("right") StudyUserRight right) throws RestServiceException;
+
+    @Operation(summary = "", description = "Returns a JSON table of all protocol and DUA files indexed by study ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "file list returned"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/files", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException;
 
 }

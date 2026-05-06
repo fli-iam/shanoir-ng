@@ -14,13 +14,21 @@
 
 package org.shanoir.ng.study.service;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
@@ -36,6 +44,8 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
@@ -71,7 +81,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -120,9 +130,6 @@ public class StudyServiceImpl implements StudyService {
     @Autowired
     private StudyMapper studyMapper;
 
-    @Value("${studies-data}")
-    private String dataDir;
-
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -137,6 +144,9 @@ public class StudyServiceImpl implements StudyService {
 
     @Autowired
     private ShanoirEventService eventService;
+
+    @Autowired
+    private StorageService storageService;
 
     @Autowired
     private TagRepository tagRepository;
@@ -302,7 +312,7 @@ public class StudyServiceImpl implements StudyService {
 
     @Override
     @Transactional(rollbackOn = { ShanoirException.class })
-    public Study update(Study study) throws ShanoirException {
+    public Study update(Study study) throws ShanoirException, StorageException {
         Study studyDb = studyRepository.findById(study.getId()).orElse(null);
 
         if (study.getIsDraft() && hasMembershipChanged(study, studyDb)) {
@@ -433,9 +443,7 @@ public class StudyServiceImpl implements StudyService {
         if (studyDb.getProtocolFilePaths() != null) {
             for (String filePath : studyDb.getProtocolFilePaths()) {
                 if (!study.getProtocolFilePaths().contains(filePath)) {
-                    // Delete file
-                    String filePathToDelete = getStudyFilePath(studyDb.getId(), filePath);
-                    FileUtils.deleteQuietly(new File(filePathToDelete));
+                    storageService.deleteStudyData(study.getId(), filePath);
                 }
             }
         }
@@ -576,18 +584,6 @@ public class StudyServiceImpl implements StudyService {
         return studyTagsToDelete;
     }
 
-    /**
-     * Gets the protocol or data user agreement file path
-     *
-     * @param studyId  id of the study
-     * @param fileName name of the file
-     * @return the file path of the file
-     */
-    @Override
-    public String getStudyFilePath(Long studyId, String fileName) {
-        return dataDir + "/study-" + studyId + "/" + fileName;
-    }
-
     @Override
     @Transactional
     public List<Study> findAll() {
@@ -666,7 +662,7 @@ public class StudyServiceImpl implements StudyService {
     }
 
     @Transactional
-    protected void updateStudyUsers(Study studyDb, Study study) {
+    protected void updateStudyUsers(Study studyDb, Study study) throws StorageException {
         if (study.getStudyUserList() == null) {
             study.setStudyUserList(new ArrayList<>());
         }
@@ -792,16 +788,15 @@ public class StudyServiceImpl implements StudyService {
         sendStudyUserReport(study, created);
     }
 
-    private void archiveDuaFile(Study study) {
+    private void archiveDuaFile(Study study) throws StorageException {
         if (CollectionUtils.isEmpty(study.getDataUserAgreementPaths())) {
             return;
         }
-        // Archive old DUA -> Rename it with deletion date
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyymmddHHMM");
-        File deletedFile = new File(this.getStudyFilePath(study.getId(), study.getDataUserAgreementPaths().get(0)));
-        File archiveFile = new File(this.getStudyFilePath(study.getId(),
-                "archive_" + formatter.format(new Date()) + "_" + study.getDataUserAgreementPaths().get(0)));
-        deletedFile.renameTo(archiveFile);
+        String originalFilename = study.getDataUserAgreementPaths().get(0);
+        String archiveFilename = "archive_"
+                + new SimpleDateFormat("yyyyMMddHHmm").format(new Date())
+                + "_" + originalFilename;
+        storageService.moveStudyData(study.getId(), originalFilename, archiveFilename);
     }
 
     private void sendStudyUserReport(Study study, List<StudyUser> created) {
@@ -1059,24 +1054,24 @@ public class StudyServiceImpl implements StudyService {
     private long getStudyFilesSize(Long studyId) {
         Optional<Study> study = this.studyRepository.findById(studyId);
         return study.map(this::getStudyFilesSize).orElse(0L);
-
     }
 
     private long getStudyFilesSize(Study study) {
-
         List<String> paths = Stream.of(study.getDataUserAgreementPaths(), study.getProtocolFilePaths())
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-
         long size = 0L;
-
         for (String path : paths) {
-            File f = new File(this.getStudyFilePath(study.getId(), path));
-            if (f.exists()) {
-                size += f.length();
+            Resource resource;
+            try {
+                resource = storageService.loadStudyData(study.getId(), path);
+                if (resource.exists()) {
+                    size += resource.contentLength();
+                }
+            } catch (Exception e) {
+                LOG.error(e.getMessage());
             }
         }
-
         return size;
     }
 
@@ -1096,4 +1091,5 @@ public class StudyServiceImpl implements StudyService {
     public List<Long> queryStudiesByRight(StudyUserRight right) {
         return studyRepository.findByUserIdAndStudyUserRight(KeycloakUtil.getTokenUserId(), right.getId());
     }
+
 }

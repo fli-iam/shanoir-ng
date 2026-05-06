@@ -20,6 +20,15 @@ server:
       enabled: false
 ##### Database #####
 spring:
+  cloud:
+    aws:
+      s3:
+        endpoint: ${S3_ENDPOINT:http://ninja:9000}
+        path-style-access-enabled: true
+        region: ${S3_REGION:eu-west-1}
+      credentials:
+        access-key: ${S3_ACCESS_KEY_ID}
+        secret-key: ${S3_SECRET_ACCESS_KEY}
   datasource:
     url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:studies}?characterEncoding=utf-8
     username: studies
@@ -95,10 +104,19 @@ front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
-# data paths
-studies-data: /var/studies-data
-# Data folder configuration
-bids-data-folder: /var/datasets-data/bids-data
+storage:
+  type: ${SHANOIR_STORAGE_TYPE:file-system} # "file-system" or "s3"
+  file-system:
+    studies-data: /var/studies-data
+    # file-system only (by design, e.g. validator) and temporary data: no S3
+    bids-data: /var/bids-data
+    # file-system only: temporary data: no S3
+    vip-data: /var/vip-data
+  s3:
+    studies:
+      bucket: ${S3_BUCKET_STUDIES:studies}
+      prefix: studies/
+
 # logging configuration
 logging:
   pattern:
@@ -147,8 +165,7 @@ keycloak:
   auth-server-url: https://shanoir-ng-nginx/auth
 # data paths
 studies-data: /tmp
-# Data folder configuration
-bids-data-folder: /var/datasets-data/bids-data
+
 # logging configuration
 logging:
   file:
