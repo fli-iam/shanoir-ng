@@ -51,7 +51,9 @@ public class UploadFromTableActionListener implements ActionListener {
     private static SimpleDateFormat birthDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     private JFileChooser fileChooser;
+
     private ImportFromTableWindow importFromTableWindow;
+
     private ResourceBundle resourceBundle;
 
     public UploadFromTableActionListener(ImportFromTableWindow importFromTableWindow, ResourceBundle resourceBundle) {
@@ -131,13 +133,16 @@ public class UploadFromTableActionListener implements ActionListener {
         Cell studyCardName = row.getCell(14);
         String value = handleCell(studyCardName);
         importJob.setStudyCardName(value);
-        Cell subjectName = row.getCell(15);
+        Cell centerId = row.getCell(15);
+        value = handleCell(centerId);
+        importJob.setCenterId(Long.valueOf(value));
+        Cell subjectName = row.getCell(16);
         value = handleCell(subjectName);
         importJob.setSubjectName(value);
-        Cell examComment = row.getCell(16);
+        Cell examComment = row.getCell(17);
         value = handleCell(examComment);
         importJob.setExaminationComment(value);
-        Cell examDataReuseAgreement = row.getCell(17);
+        Cell examDataReuseAgreement = row.getCell(18);
         value = handleCell(examDataReuseAgreement);
         importJob.setExaminationDataReuseAgreement("true".equalsIgnoreCase(value) || "1".equals(value));
     }
