@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -51,14 +52,22 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public boolean existsStudyData(Long studyId, String fileName) throws StorageException {
         String directory = STUDY + studyId;
-        Path filePath = Paths.get(baseDirStudies, directory, fileName);
+        try {
+            Path filePath = Paths.get(baseDirStudies, directory, fileName);
+        } catch(InvalidPathException e) {
+            return false;
+        }
         return Files.exists(filePath);
     }
 
     @Override
     public boolean existsExtraData(Long examinationId, String fileName) throws StorageException {
         String directory = EXAMINATION + examinationId;
-        Path filePath = Paths.get(baseDirDatasets, directory, fileName);
+        try {
+            Path filePath = Paths.get(baseDirDatasets, directory, fileName);
+        } catch (InvalidPathException e) {
+            return false;
+        }
         return Files.exists(filePath);
     }
 
