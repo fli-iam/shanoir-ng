@@ -26,7 +26,7 @@ ALTER TABLE study_card_condition_join
 DROP FOREIGN KEY FK1k7n1md79nkowvqbibyn7a72k;
 
 ALTER TABLE study_card_condition_values
-DROP FOREIGN KEY FKnitnq7oo33kq0uu3dc647nj5b;
+DROP FOREIGN KEY FKnmg0gxqrew2nqktd0mm5hvi64;
 
 -- 2. Rename tables
 RENAME TABLE study_card_condition TO card_condition;
@@ -38,10 +38,11 @@ ADD CONSTRAINT FK1k7n1md79nkowvqbibyn7a72k
 FOREIGN KEY (condition_id)
 REFERENCES card_condition(id);
 
+ALTER TABLE card_condition_values CHANGE study_card_condition_id card_condition_id BIGINT(20) NOT NULL;
+
 ALTER TABLE card_condition_values
-ADD CONSTRAINT FKnitnq7oo33kq0uu3dc647nj5b
+ADD CONSTRAINT FKnmg0gxqrew2nqktd0mm5hvi64
 FOREIGN KEY (card_condition_id)
 REFERENCES card_condition(id);
 
 RENAME TABLE study_card_condition_join TO card_condition_join;
-ALTER TABLE card_condition_values CHANGE study_card_condition_id card_condition_id BIGINT(20) NOT NULL;
