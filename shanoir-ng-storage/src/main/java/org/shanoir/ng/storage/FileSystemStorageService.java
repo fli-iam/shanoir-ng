@@ -54,10 +54,10 @@ public class FileSystemStorageService implements StorageService {
         String directory = STUDY + studyId;
         try {
             Path filePath = Paths.get(baseDirStudies, directory, fileName);
+            return Files.exists(filePath);
         } catch(InvalidPathException e) {
             return false;
         }
-        return Files.exists(filePath);
     }
 
     @Override
@@ -65,10 +65,10 @@ public class FileSystemStorageService implements StorageService {
         String directory = EXAMINATION + examinationId;
         try {
             Path filePath = Paths.get(baseDirDatasets, directory, fileName);
+            return Files.exists(filePath);
         } catch (InvalidPathException e) {
             return false;
         }
-        return Files.exists(filePath);
     }
 
     @Override
