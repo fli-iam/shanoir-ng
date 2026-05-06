@@ -41,6 +41,7 @@ import org.shanoir.ng.importer.model.PatientVerification;
 import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 public class UploadFromTableActionListener implements ActionListener {
 
@@ -133,9 +134,13 @@ public class UploadFromTableActionListener implements ActionListener {
         Cell studyCardName = row.getCell(14);
         String value = handleCell(studyCardName);
         importJob.setStudyCardName(value);
-        Cell centerId = row.getCell(15);
-        value = handleCell(centerId);
-        importJob.setCenterId(Long.valueOf(value));
+        Long centerId = null;
+        Cell cellCenterId = row.getCell(15);
+        value = handleCell(cellCenterId);
+        if (value != null && !value.isEmpty()) {
+            centerId = Long.valueOf(value);
+        }
+        importJob.setCenterId(centerId);
         Cell subjectName = row.getCell(16);
         value = handleCell(subjectName);
         importJob.setSubjectName(value);
