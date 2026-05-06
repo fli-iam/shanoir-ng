@@ -291,6 +291,7 @@ public class ImportFromTableWindow extends JFrame {
             rowData.addAll(Arrays.asList(importJob.getDicomQuery().displayDicomQuery()));
             rowData.addAll(Arrays.asList(importJob.getPatientVerification().displayPatientVerification()));
             rowData.add(importJob.getStudyCardName());
+            rowData.add(String.valueOf(importJob.getCenterId()));
             rowData.add(importJob.getSubjectName());
             rowData.add(importJob.getExaminationComment());
             rowData.add(importJob.getExaminationDataReuseAgreement().toString());
