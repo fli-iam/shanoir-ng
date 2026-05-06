@@ -144,7 +144,7 @@ public class ImportFinishActionListener implements ActionListener {
                 equipmentDicom.setManufacturerModelName(mainWindow.importDialog.mriManufacturersModelNameText.getText());
                 equipmentDicom.setMagneticFieldStrength(mainWindow.importDialog.mriMagneticFieldStrengthText.getText());
                 equipmentDicom.setDeviceSerialNumber(mainWindow.importDialog.mriDeviceSerialNumberText.getText());
-                equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, center);
+                equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, centerId);
                 if (equipment == null) {
                     logger.error("No study card: equipment not found or created.");
                     JOptionPane.showMessageDialog(mainWindow.frame,
