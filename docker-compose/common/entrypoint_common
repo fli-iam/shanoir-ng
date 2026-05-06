@@ -63,6 +63,8 @@ require()
             SHANOIR_PREFIX)         match "$name" '^([a-zA-Z0-9][a-zA-Z0-9_.-]*)$'      ;;
             SHANOIR_URL_SCHEME)     match "$name" '^(http|https)$'                      ;;
             SHANOIR_URL_HOST)       match "$name" '^([a-z0-9.-]+)$'                     ;;
+            SHANOIR_KEYCLOAK_URL)                match "$name" '^(http|https)://[a-z0-9./-]+$' ;;
+            SHANOIR_KEYCLOAK_INTERNAL_URL)       match "$name" '^(http|https)://[a-z0-9./-]+$' ;;
             SHANOIR_VIEWER_OHIF_URL_SCHEME)      match "$name" '^(http|https)$'                      ;;
             SHANOIR_VIEWER_OHIF_URL_HOST)        match "$name" '^([a-z0-9.-]+)$'                     ;;
             SHANOIR_CERTIFICATE)    match "$name" '^(auto|manual)$'                     ;;
@@ -106,8 +108,16 @@ require()
     done
 }
 
-# Ensure that the value of the listed environment variables is well-formatted
-# or blank.
+# set default values for the keycloak urls
+: ${SHANOIR_KEYCLOAK_URL:=$SHANOIR_URL_SCHEME://$SHANOIR_URL_HOST/auth}
+: ${SHANOIR_KEYCLOAK_INTERNAL_URL:=${SHANOIR_KEYCLOAK_URL}}
+export SHANOIR_KEYCLOAK_URL
+export SHANOIR_KEYCLOAK_INTERNAL_URL
+
+
+# For each listed environment variable:
+# - if its value is blank, then fill it with its default (if any)
+# - ensure that its value is well-formatted of blank
 # 
 # usage:  require VARNAME [VARNAME...]
 optional()
@@ -136,7 +146,7 @@ optional()
 #############################################################################
 
 env=()
-
+oneshot_args=()
 
 # Set the default value for an environment variable
 # 
@@ -157,6 +167,15 @@ env_setdefault()
 	else
 		echo "overriden var: $1='$override'  (default would be '$2')"
 	fi
+}
+
+# Wait extra seconds before sending the SIGTERM signal when running in the init mode.
+#
+# usage: init_wait SECONDS
+#
+init_wait()
+{
+	oneshot_args+=("--wait" "$1")
 }
 
 # Process the 'SHANOIR_MIGRATION' env var and adjust the spring config
@@ -207,7 +226,7 @@ run_microservice()
 	if [ -n "$_ms_oneshot" ] ; then
 		# 'oneshot' run
 		# (launch the server and kill it once it is started)
-		exec oneshot 'main.*Application.*Started [A-Za-z0-9]*Application in .* seconds' \
+		exec oneshot ${oneshot_args[@]} 'main.*Application.*Started [A-Za-z0-9]*Application in .* seconds' \
 			-- ${cmd[@]}
 	else
 		# 'normal' run
