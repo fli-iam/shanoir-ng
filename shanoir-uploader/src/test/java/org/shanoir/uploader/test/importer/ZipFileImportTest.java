@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +30,7 @@ import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.StudyCenter;
+import org.shanoir.uploader.model.rest.StudyExtraDetails;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.test.AbstractTest;
 import org.shanoir.uploader.utils.ImportUtils;
@@ -72,7 +74,7 @@ public class ZipFileImportTest extends AbstractTest {
         Date studyDateDate = Date.from(studyDateInstant);
         String examinationComment = dicomStudy.getStudyDescription();
         Examination examination = ImportUtils.createExamination(study, subject, studyDateDate,
-            examinationComment, study.getStudyCards().get(0).getCenterId());
+            examinationComment, study.getStudyCards().get(0).getCenterId(), false);
         return examination.getId();
     }
 
@@ -90,9 +92,23 @@ public class ZipFileImportTest extends AbstractTest {
     }
 
     private org.shanoir.uploader.model.rest.Study createStudyAndCenterAndStudyCard() {
+        StudyExtraDetails studyExtraDetails = new StudyExtraDetails();
+        studyExtraDetails.setExpectedNbOfSubjects(5L);
+        studyExtraDetails.setExpectedNbOfCenters(5L);
+        studyExtraDetails.setSponsor("sponsor");
+        studyExtraDetails.setPrincipalInvestigator("pi");
         org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
+        study.setExtraDetails(studyExtraDetails);
         final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
         study.setName(randomStudyName);
+        study.setIsDraft(Boolean.TRUE);
+        Date today = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(today);
+        calendar.add(Calendar.YEAR, 1);
+        Date todayPlusOneYear = calendar.getTime();
+        study.setStartDate(today);
+        study.setEndDate(todayPlusOneYear);
         study.setStudyStatus(IN_PROGRESS);
         study.setStudyCardPolicy(org.shanoir.uploader.model.rest.Study.SC_MANDATORY);
         // add center to study

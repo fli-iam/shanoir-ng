@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dto.StudyExaminationsDTO.StudyExaminationDTO;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -138,6 +139,14 @@ public interface StudyService {
      * @param centerId
      */
     void addExaminationToStudy(Long examinationId, Long studyId, Long centerId, Long subjectId);
+
+    /**
+     * Links multiple examinations to a study
+     *
+     * @param studyExaminationDTOList a list of examination IDs and center IDs
+     * @param studyId                 the linked study ID
+     */
+    void addExaminationsToStudy(List<StudyExaminationDTO> studyExaminationDTOList, Long studyId);
 
     /**
      * Deletes an examination from a study

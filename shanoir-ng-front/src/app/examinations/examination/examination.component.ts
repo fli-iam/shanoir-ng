@@ -146,6 +146,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             'center': [{value: this.examination.center, disabled: this.inImport || !this.examination.study}, Validators.required],
             'examinationDate': [{value: this.examination.examinationDate, disabled: this.inImport && this.examination.examinationDate}, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],
+            'dataReuseAgreement': [{value: this.examination.dataReuseAgreement, disabled: this.mode == 'view'}],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight],
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]

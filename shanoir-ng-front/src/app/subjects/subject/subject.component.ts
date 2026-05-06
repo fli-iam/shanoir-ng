@@ -285,7 +285,6 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             .then(studies => {
                 this.studies = studies;
             });
-        console.log(123)
     }
 
     studyNameForSubject() {

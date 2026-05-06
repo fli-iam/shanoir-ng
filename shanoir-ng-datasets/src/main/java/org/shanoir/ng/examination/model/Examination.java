@@ -154,6 +154,8 @@ public class Examination extends HalEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
     private List<Examination> copies;
 
+    private Boolean dataReuseAgreement = Boolean.FALSE;
+
     public Examination() {
     }
 
@@ -183,6 +185,7 @@ public class Examination extends HalEntity {
         this.source = other.source;
         this.copies = other.copies;
         this.studyInstanceUID = other.studyInstanceUID;
+        this.dataReuseAgreement = other.dataReuseAgreement;
     }
 
     /**
@@ -474,4 +477,11 @@ public class Examination extends HalEntity {
                 + ", preclinical=" + preclinical + ", studyInstanceUID=" + studyInstanceUID + "]";
     }
 
+    public Boolean getDataReuseAgreement() {
+        return dataReuseAgreement;
+    }
+
+    public void setDataReuseAgreement(Boolean dataReuseAgreement) {
+        this.dataReuseAgreement = dataReuseAgreement;
+    }
 }

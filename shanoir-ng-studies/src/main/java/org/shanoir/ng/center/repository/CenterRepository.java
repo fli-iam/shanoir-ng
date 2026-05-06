@@ -22,7 +22,7 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
 /**
@@ -30,7 +30,7 @@ import org.springframework.data.repository.query.Param;
  *
  * @author msimon
  */
-public interface CenterRepository extends CrudRepository<Center, Long> {
+public interface CenterRepository extends JpaRepository<Center, Long> {
 
     //@EntityGraph(attributePaths = "studyCenterList.study.name")
     @Query("SELECT c FROM Center c LEFT JOIN FETCH c.acquisitionEquipments")

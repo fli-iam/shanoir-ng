@@ -11,10 +11,19 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<p>Caution: Shanoir offers a web-based configuration possibility to auto-generate a BIDS-compliant tree,
+<p class="info-frame">
+    <i class="fas fa-exclamation-triangle"></i>
+    <b>Caution :</b> 
+    Shanoir offers a web-based configuration possibility to auto-generate a BIDS-compliant tree,
     based on the meta-data available, see BIDS data type. Very often a special, study-specific mapping configuration
     is necessary to generate a fully-compliant BIDS tree (see undefined folders). This configuration needs to be done
-    by a study expert on using the study cards, that are applied during the import or afterwards to complete this mapping.</p>
+    by a study expert on using the study cards, that are applied during the import or afterwards to complete this mapping.
+    <br/><br/>
+    The BIDS Validator button below allows to check the compliance of the generated BIDS tree. It uses the official BIDS Validator
+    (<a href="https://bids-standard.github.io/bids-validator/" target="_blank" rel="noopener noreferrer">https://bids-standard.github.io/bids-validator/</a>)
+    in a safe way, as no data is sent to any external server.
+</p>
+
 <ng-template #recursiveList let-datas let-id="id">
     <node *ngFor="let item of datas; let i = index" 
         [label]="getFileName(item.path)" 
@@ -30,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </node>
 </ng-template>
 
-<node label="BIDS" awesome="far fa-folder" class="root-node" (firstOpen)="getBidsStructure()" [dataLoading]="load=='loading'" [hasChildren]="list ? (list.length > 0 ? true : false) : 'unknown' "
+<node label="BIDS" awesome="far fa-folder" class="root-node" (firstOpen)="getBidsStructure()" [dataLoading]="load=='loading' || (task && task.progress < 1)" [hasChildren]="list ? (list.length > 0 ? true : false) : 'unknown' "
         [buttonPicto]="'fas fa-refresh'"
         (buttonClick)="refresh()">
     <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list, id: 'ID' }"></ng-container>
@@ -50,3 +59,42 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </tr>
     </table>
 </div>
+
+@if (!report && !buildingReport) {
+    <div>
+        <button class="right-icon" (click)="callBidsValidator()" [disabled]="task && task.progress < 1">
+            Call BIDS Validator
+        </button>
+    </div>
+} @else {
+    <div class="json-report">
+        <h4>BIDS Validator Report</h4>
+        <span (click)="downloadBidsValidatorReport()" class="dl-button" title="Download BIDS Validator Report as JSON">
+            <i class="fas fa-download"></i>
+        </span>
+        <span (click)="callBidsValidator()" class="refresh-button" title="Refresh BIDS Validator Report">
+            @if (buildingReport) {
+                <i class="fas fa-spinner fa-spin"></i>
+            } @else {
+                 <i class="fas fa-refresh"></i>
+            }
+        </span>
+        @if (report) {
+            <ngx-json-viewer class="report-viewer" [json]="truncatedReport"></ngx-json-viewer>
+        }
+    </div>
+}
+
+@if (task && task.progress < 1) {
+    <div class="json-report">
+        <p class="info-frame">
+            <progress-bar [progress]="task?.progress" [width]="200" [warning]="task.status == 5 || task.status == 3"></progress-bar>
+            <br/>
+            <i class="fas fa-info-circle"></i>
+            BIDS export is in progress and can take some time depending of the size of your study.
+            Once the export is finished, you will be able to use the generated BIDS tree and call the BIDS Validator.
+            Unless you manually trigger a refresh, the export will not be required again, even if you navigate away from the BIDS tree and come back later. 
+        </p>
+    </div>
+}
+
