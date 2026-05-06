@@ -135,8 +135,8 @@ public class UploadFromTableActionListener implements ActionListener {
         String value = handleCell(studyCardName);
         importJob.setStudyCardName(value);
         Long centerId = null;
-        Cell cellCenterId = row.getCell(15);
-        value = handleCell(cellCenterId);
+        Cell centerIdCell = row.getCell(15);
+        value = handleCell(centerIdCell);
         if (value != null && !value.isEmpty()) {
             centerId = Long.valueOf(value);
         }
