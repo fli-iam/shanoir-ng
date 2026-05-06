@@ -1069,7 +1069,7 @@ public class StudyServiceImpl implements StudyService {
                     size += resource.contentLength();
                 }
             } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error(e.getMessage());
             }
         }
         return size;
