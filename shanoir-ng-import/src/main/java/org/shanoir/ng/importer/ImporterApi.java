@@ -143,7 +143,7 @@ public interface ImporterApi {
               + "(hasRole('ADMIN') or "
               + "(hasAnyRole('EXPERT', 'USER') and "
               + "@importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT')))")
-    ResponseEntity<Void> startImportJob(@Parameter(name = "ImportJob", required = true) @RequestBody @P("importJob") ImportJob importJob) throws RestServiceException;
+    ResponseEntity<Void> startImportJob(@Parameter(name = "ImportJob", required = true) @P("importJob") @RequestBody ImportJob importJob) throws RestServiceException;
 
     @Operation(summary = "Start analysis of EEG job", description = "Start analysis eeg job")
     @ApiResponses(value = {

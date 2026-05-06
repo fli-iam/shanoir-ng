@@ -52,6 +52,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -222,7 +223,7 @@ public class ImporterApiController implements ImporterApi {
 
     @Override
     public ResponseEntity<Void> startImportJob(
-            @Parameter(name = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
+            @Parameter(name = "ImportJob", required = true) @P("importJob") @Valid @RequestBody final ImportJob importJob)
                     throws RestServiceException {
         File userImportDir = ImportUtils.getUserImportDir(importDir);
         final Long userId = KeycloakUtil.getTokenUserId();
