@@ -106,7 +106,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings, false), HttpStatus.OK);
     }
 
     @Override
@@ -115,7 +115,15 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings, false), HttpStatus.OK);
+    }
+
+    public ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByMonitoring(@Parameter(description = "id of the monitoring", required = true) @PathVariable("monitoringId") Long monitoringId) {
+        final List<DatasetProcessing> datasetProcessings = datasetProcessingService.findByMonitoringId(monitoringId);
+        if (datasetProcessings.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings, true), HttpStatus.OK);
     }
 
     @Override

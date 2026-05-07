@@ -15,7 +15,6 @@
 package org.shanoir.ng.vip.execution.controler;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -41,12 +40,13 @@ public class ExecutionApiController implements ExecutionApi {
 
     @Override
     public ResponseEntity<IdName> createExecution(
-            @Parameter(description = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException {
+            @Parameter(description = "execution", required = true) @RequestBody final List<ExecutionCandidateDTO> candidates) throws EntityNotFoundException, SecurityException, RestServiceException {
+        if (candidates == null || candidates.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }
+        IdName createdMonitoring = executionService.createExecutions(candidates);
 
-        List<Dataset> inputDatasets = executionService.getDatasetsFromParams(candidate.getDatasetParameters());
-        IdName createdMonitoring = executionService.createExecution(candidate, inputDatasets);
-
-        return new ResponseEntity<>(createdMonitoring, HttpStatus.OK);
+        return ResponseEntity.ok(createdMonitoring);
     }
 
     public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {
@@ -58,12 +58,12 @@ public class ExecutionApiController implements ExecutionApi {
         return ResponseEntity.ok(executionService.getExecution(identifier).map(VipExecutionDTO::getStatus).block());
     }
 
-    public ResponseEntity<String> getExecutionStderr(String identifier) {
-        return ResponseEntity.ok(executionService.getExecutionStderr(identifier).block());
+    public ResponseEntity<String> getExecutionStderr(Long processingId) {
+        return ResponseEntity.ok(executionService.getExecutionStderr(processingId).block());
 
     }
 
-    public ResponseEntity<String> getExecutionStdout(String identifier) {
-        return ResponseEntity.ok(executionService.getExecutionStdout(identifier).block());
+    public ResponseEntity<String> getExecutionStdout(Long processingId) {
+        return ResponseEntity.ok(executionService.getExecutionStdout(processingId).block());
     }
 }

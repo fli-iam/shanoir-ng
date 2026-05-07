@@ -20,6 +20,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.dto.ParameterResourceDTO;
+import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -47,10 +48,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ExecutionServiceImpl implements ExecutionService {
@@ -88,6 +86,9 @@ public class ExecutionServiceImpl implements ExecutionService {
     private ExecutionTrackingServiceImpl executionTrackingService;
 
     @Autowired
+    private DatasetProcessingRepository datasetProcessingRepository;
+
+    @Autowired
     private Utils utils;
 
     @PostConstruct
@@ -96,13 +97,12 @@ public class ExecutionServiceImpl implements ExecutionService {
         shanoirURIScheme = (shanoirURISchemeLocal.contains(".") ? shanoirURISchemeLocal.substring(0, shanoirURISchemeLocal.indexOf('.')).replaceAll("-", "") : "local") + ":/";
     }
 
-    public IdName createExecution(ExecutionCandidateDTO candidate, List<Dataset> inputDatasets) throws SecurityException, EntityNotFoundException, RestServiceException {
-        ExecutionMonitoring executionMonitoring = executionMonitoringService.createExecutionMonitoring(candidate, inputDatasets);
-        executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.VALID);
-
-        VipExecutionDTO createdExecution = createVipExecution(candidate, executionMonitoring);
-        executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.SENT);
-        return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution);
+    public IdName createExecutions(List<ExecutionCandidateDTO> candidates) throws SecurityException, EntityNotFoundException, RestServiceException {
+        ExecutionMonitoring executionMonitoring = executionMonitoringService.createExecutionMonitoring(candidates.getFirst());
+        //executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.VALID);
+        VipExecutionDTO createdExecution = createVipExecution(candidates, executionMonitoring);
+        //executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.SENT);
+        return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution, candidates.size());
     }
 
     public List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters) {
@@ -126,29 +126,32 @@ public class ExecutionServiceImpl implements ExecutionService {
                 });
     }
 
-    public Mono<String> getExecutionStderr(String identifier) {
+    public Mono<String> getExecutionStderr(Long processingId) {
+        DatasetProcessingRepository.IdentificationData identificationData = datasetProcessingRepository.findIdentificationDataFromProcessingId(processingId);
 
-        String url = vipExecutionUri + "/" + identifier + "/stderr";
+        String url = vipExecutionUri + "/" + identificationData.getMonitoringIdentifier() + "/jobs/" + identificationData.getMonitoringIndex() + "/stderr";
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
                 .retrieve()
                 .bodyToMono(String.class)
                 .onErrorResume(e -> {
-                    ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] stderr logs from VIP API", e.getMessage());
+                    ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get processing [" + processingId + "] stderr logs from VIP API", e.getMessage());
                     return Mono.error(new RestServiceException(e, model));
                 });
     }
 
-    public Mono<String> getExecutionStdout(String identifier) {
-        String url = vipExecutionUri + "/" + identifier + "/stdout";
+    public Mono<String> getExecutionStdout(Long processingId) {
+        DatasetProcessingRepository.IdentificationData identificationData = datasetProcessingRepository.findIdentificationDataFromProcessingId(processingId);
+
+        String url = vipExecutionUri + "/" + identificationData.getMonitoringIdentifier() + "/jobs/" + identificationData.getMonitoringIndex() + "/stdout";
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
                 .retrieve()
                 .bodyToMono(String.class)
                 .onErrorResume(e -> {
-                    ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + identifier + "] stdout logs from VIP API", e.getMessage());
+                    ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get execution [" + processingId + "] stdout logs from VIP API", e.getMessage());
                     return Mono.error(new RestServiceException(e, model));
                 });
     }
@@ -183,26 +186,28 @@ public class ExecutionServiceImpl implements ExecutionService {
     /**
      * Update monitoring with vip execution details and persist it in DB
      */
-    private IdName updateAndStartExecutionMonitoring(ExecutionMonitoring executionMonitoring, VipExecutionDTO execCreated) throws EntityNotFoundException, SecurityException {
+    private IdName updateAndStartExecutionMonitoring(ExecutionMonitoring executionMonitoring, VipExecutionDTO execCreated, Integer jobsNumber) throws EntityNotFoundException, SecurityException {
         executionMonitoring.setIdentifier(execCreated.getIdentifier());
         executionMonitoring.setStatus(execCreated.getStatus());
         executionMonitoring.setStartDate(execCreated.getStartDate());
         ExecutionMonitoring createdMonitoring = executionMonitoringService.update(executionMonitoring);
-        executionMonitoringService.startMonitoringJob(createdMonitoring, null);
+        executionMonitoringService.startMonitoringJob(createdMonitoring, null, jobsNumber);
         return new IdName(createdMonitoring.getId(), createdMonitoring.getName());
     }
 
     /**
      * Create execution into VIP and return created execution
      */
-    private VipExecutionDTO createVipExecution(ExecutionCandidateDTO candidate, ExecutionMonitoring executionMonitoring) throws EntityNotFoundException {
+    private VipExecutionDTO createVipExecution(List<ExecutionCandidateDTO> candidates, ExecutionMonitoring executionMonitoring) throws EntityNotFoundException {
+        ExecutionCandidateDTO sample = candidates.getFirst();
+
         VipExecutionDTO dto = new VipExecutionDTO();
-        dto.setName(candidate.getName());
-        dto.setPipelineIdentifier(candidate.getPipelineIdentifier());
-        dto.setStudyIdentifier(candidate.getStudyIdentifier().toString());
-        dto.setSorting(candidate.getSorting());
-        dto.setResultsLocation(getResultsLocationUri(executionMonitoring.getResultsLocation(), candidate));
-        dto.setInputValues(getInputValues(executionMonitoring, candidate));
+        dto.setName(sample.getName());
+        dto.setPipelineIdentifier(sample.getPipelineIdentifier());
+        dto.setStudyIdentifier(sample.getStudyIdentifier().toString());
+        dto.setSorting(sample.getSorting());
+        dto.setResultsLocation(getResultsLocationUri(executionMonitoring.getResultsLocation(), sample));
+        dto.setInputValues(getInputValues(executionMonitoring, candidates));
 
         return createExecution(dto)
                 .onErrorMap(WebClientResponseException.BadRequest.class, ex ->
@@ -213,52 +218,52 @@ public class ExecutionServiceImpl implements ExecutionService {
     /**
      * Set non-file parameters and processed datasets parameters as URIs
      */
-    private Map<String, Object> getInputValues(ExecutionMonitoring createdMonitoring, ExecutionCandidateDTO candidate) throws EntityNotFoundException {
-
-        Map<String, Object> inputValues = new HashMap<>(candidate.getInputParameters());
+    private Map<String, List<String>> getInputValues(ExecutionMonitoring createdMonitoring, List<ExecutionCandidateDTO> candidates) throws EntityNotFoundException {
         Map<String, List<String>> inputDatasets = new HashMap<>();
+        List<ParameterResourceDTO> parametersDatasets = new ArrayList<>();
 
-        List<ParameterResourceDTO> parametersDatasets = processingResourceService.createProcessingResources(createdMonitoring, candidate.getDatasetParameters());
+        for (ExecutionCandidateDTO candidate : candidates) {
+            parametersDatasets.addAll(processingResourceService.createProcessingResources(createdMonitoring, candidate.getDatasetParameters()));
+        }
 
         for (ParameterResourceDTO parameterResourcesDTO : parametersDatasets) {
             String groupBy = parameterResourcesDTO.getGroupBy().name().toLowerCase();
             String exportFormat = parameterResourcesDTO.getExportFormat();
-            inputDatasets.put(parameterResourcesDTO.getParameter(), new ArrayList<>());
+            inputDatasets.putIfAbsent(parameterResourcesDTO.getParameter(), new ArrayList<>());
 
             for (String resourceId : parameterResourcesDTO.getResourceIds()) {
-                String inputValue = getInputValueUri(candidate, groupBy, exportFormat, resourceId, KeycloakUtil.getToken());
+                String inputValue = getInputValueUri(Objects.requireNonNull(candidates.getFirst()), groupBy, exportFormat, resourceId, KeycloakUtil.getToken());
                 inputDatasets.get(parameterResourcesDTO.getParameter()).add(inputValue);
             }
         }
-        inputValues.putAll(inputDatasets);
 
-        return inputValues;
+        return inputDatasets;
     }
 
 
     /**
      * Get location of exec results as URI
      */
-    private String getResultsLocationUri(String resultLocation, ExecutionCandidateDTO candidate) {
-        return shanoirURIScheme + resultLocation
+    private List<String> getResultsLocationUri(String resultLocation, ExecutionCandidateDTO candidate) {
+        return List.of(shanoirURIScheme + resultLocation
                 + "?token=" + KeycloakUtil.getToken()
                 + "&refreshToken=" + candidate.getRefreshToken()
                 + "&clientId=" + candidate.getClient()
-                + "&md5=none&type=File";
+                + "&md5=none&type=File");
     }
 
     /**
      * Get input values of exec as URI
      */
-    private String getInputValueUri(ExecutionCandidateDTO candidate, String groupBy, String exportFormat, String resourceId, String authenticationToken) {
+    private String getInputValueUri(ExecutionCandidateDTO sample, String groupBy, String exportFormat, String resourceId, String authenticationToken) {
         String entityName = "resource_id+" + resourceId + "+" + groupBy + ("dcm".equals(exportFormat) ? ".zip" : ".nii.gz");
         return shanoirURIScheme + entityName
                 + "?format=" + exportFormat
                 + "&resourceId=" + resourceId
                 + "&token=" + authenticationToken
-                + (candidate.getConverterId()  != null ? ("&converterId=" + candidate.getConverterId()) : "")
-                + "&refreshToken=" + candidate.getRefreshToken()
-                + "&clientId=" + candidate.getClient()
+                + (sample.getConverterId()  != null ? ("&converterId=" + sample.getConverterId()) : "")
+                + "&refreshToken=" + sample.getRefreshToken()
+                + "&clientId=" + sample.getClient()
                 + "&md5=none&type=File";
     }
 
@@ -268,7 +273,6 @@ public class ExecutionServiceImpl implements ExecutionService {
      * @return ExecutionDTO
      */
     private Mono<VipExecutionDTO> createExecution(VipExecutionDTO execution) {
-
         return webClient.post()
                 .uri(vipExecutionUri)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))

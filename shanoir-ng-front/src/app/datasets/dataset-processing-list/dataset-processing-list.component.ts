@@ -2,17 +2,17 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
+import {Component, Input, ViewChild} from '@angular/core';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
@@ -29,27 +29,32 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 })
 export class DatasetProcessingListComponent extends BrowserPaginEntityListComponent<DatasetProcessing> {
 
+    @Input() processings: DatasetProcessing[] = [];
+
     @ViewChild('table', { static: false }) table: TableComponent;
-    
+
     constructor(private datasetProcessingService: DatasetProcessingService) {
         super('dataset-processing');
     }
-    
+
     getService(): EntityService<DatasetProcessing> {
         return this.datasetProcessingService;
     }
 
     getOptions() {
         return {
-            new: true,
-            view: true, 
-            edit: this.keycloakService.isUserAdminOrExpert(), 
-            delete: this.keycloakService.isUserAdminOrExpert()
+            new: false,
+            view: true,
+            edit: false,
+            delete: false
         };
     }
 
     getEntities(): Promise<DatasetProcessing[]> {
-        return this.datasetProcessingService.getAll(); 
+        if (this.processings && this.processings.length > 0) {
+            return Promise.resolve(this.processings);
+        }
+        return this.datasetProcessingService.getAll();
     }
 
     getColumnDefs(): ColumnDefinition[] {
@@ -57,6 +62,7 @@ export class DatasetProcessingListComponent extends BrowserPaginEntityListCompon
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true},
             { headerName: "Processing", field: "datasetProcessingType" },
             { headerName: "Comment", field: "comment" },
+            { headerName: "Status", field: "processingStatus" },
             { headerName: "Date", field: "processingDate", type: "date" }
         ];
         return columnDefs;
