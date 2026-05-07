@@ -16,8 +16,12 @@ JOIN study_card_rule r ON j.study_card_rule_id = r.id
 SET c.scope = CASE
     WHEN r.scope = 'DatasetAcquisition' THEN 'AcqDICOMConditionOnDatasets'
     WHEN r.scope = 'Dataset' THEN 'DatasetDICOMConditionOnDataset'
-    ELSE 'ExamDICOMConditionOnDatasets'
 END
+WHERE c.scope = 'StudyCardDICOMConditionOnDatasets';
+
+-- remaining ones are exam conditions
+UPDATE card_condition c
+SET c.scope = 'ExamDICOMConditionOnDatasets'
 WHERE c.scope = 'StudyCardDICOMConditionOnDatasets';
 
 -- RENAME TABLE study_card_condition TO card_condition;
@@ -44,5 +48,3 @@ ALTER TABLE card_condition_values
 ADD CONSTRAINT FKnmg0gxqrew2nqktd0mm5hvi64
 FOREIGN KEY (card_condition_id)
 REFERENCES card_condition(id);
-
-RENAME TABLE study_card_condition_join TO card_condition_join;
