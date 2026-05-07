@@ -44,6 +44,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     public studyCards: StudyCard[];
     public acquisitionEquipments: AcquisitionEquipment[];
     hasDownloadRight: boolean = false;
+    hasAdministrateRight: boolean = false;
     noDatasets: boolean = false;
     hasDicom: boolean = false;
     protected downloadState: TaskState = new TaskState();
@@ -89,10 +90,12 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
         })
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
+            this.hasAdministrateRight = true;
             return Promise.resolve();
         } else {
             return this.studyRightsService.getMyRightsForStudy(this.datasetAcquisition.examination.study.id).then(rights => {
                 this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
             });
         }
     }
