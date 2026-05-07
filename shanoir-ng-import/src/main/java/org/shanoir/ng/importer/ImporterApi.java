@@ -22,6 +22,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -142,7 +143,7 @@ public interface ImporterApi {
               + "(hasRole('ADMIN') or "
               + "(hasAnyRole('EXPERT', 'USER') and "
               + "@importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT')))")
-    ResponseEntity<Void> startImportJob(@Parameter(name = "ImportJob", required = true) @RequestBody ImportJob importJob) throws RestServiceException;
+    ResponseEntity<Void> startImportJob(@Parameter(name = "ImportJob", required = true) @P("importJob") @RequestBody ImportJob importJob) throws RestServiceException;
 
     @Operation(summary = "Start analysis of EEG job", description = "Start analysis eeg job")
     @ApiResponses(value = {
