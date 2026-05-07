@@ -14,16 +14,28 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
+import org.dcm4che3.data.Attributes;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
+/**
+ * Condition on DICOM attributes of one dataset.
+ */
 @Entity
-public abstract class StudyCardMetadataCondition<T> extends CardCondition {
+@DiscriminatorValue("DatasetDICOMConditionOnDataset")
+@JsonTypeName("DatasetDICOMConditionOnDataset")
+public class DatasetDICOMConditionOnDataset extends DICOMConditionOnDatasets {
 
-    protected int shanoirField;
+    public Boolean fulfilled(Attributes dicomAttributes) {
+        return fulfilled(dicomAttributes, new StringBuffer());
+    }
 
-    abstract MetadataFieldInterface<T> getShanoirField();
+    @Override
+    public Boolean fulfilled(Attributes dicomAttributes, StringBuffer errorMsg) {
+        return super.fulfilled(dicomAttributes, errorMsg);
+    }
 
-    abstract void setShanoirField(MetadataFieldInterface<T> field);
 }
