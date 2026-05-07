@@ -138,6 +138,9 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
     	this.pathologyModel.filename = this.fileToUpload.name;
+    	const filenameCtrl = this.form.get('filename');
+    	filenameCtrl.markAsDirty();
+    	filenameCtrl.updateValueAndValidity();
     }
 
     public save(): Promise<PathologyModel> {
