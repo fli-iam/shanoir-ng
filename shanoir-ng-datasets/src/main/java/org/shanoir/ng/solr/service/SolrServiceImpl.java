@@ -320,8 +320,8 @@ public class SolrServiceImpl implements SolrService {
                 }
 
                 while (true) {
-                    query += " LIMIT " + indexationPartitionSize + " OFFSET " + offSet;
-                    docPartition = shanoirMetadataRepository.findSpecificSolrDoc(query);
+                    String offsetQuery = query + " LIMIT " + indexationPartitionSize + " OFFSET " + offSet;
+                    docPartition = shanoirMetadataRepository.findSpecificSolrDoc(offsetQuery);
 
                     offSet += indexationPartitionSize;
                     indexedDataNumber += docPartition.size();
