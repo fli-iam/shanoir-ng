@@ -239,14 +239,14 @@ public class PathologyModelApiController implements PathologyModelApi {
                 File toDownload = new File(model.getFilepath());
                 Path path = Paths.get(toDownload.getAbsolutePath());
                 ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
-
                 HttpHeaders header = new HttpHeaders();
-                header.setContentType(MediaType.APPLICATION_PDF);
-                header.set(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename = " + model.getFilename().replace(" ", "_"));
+                header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + model.getFilename().replace(" ", "_"));
 
-                return ResponseEntity.ok().headers(header).contentLength(toDownload.length())
-                        .contentType(MediaType.parseMediaType("application/octet-stream")).body((Resource) resource);
+                return ResponseEntity.ok()
+                        .headers(header)
+                        .contentLength(toDownload.length())
+                        .contentType(MediaType.parseMediaType("application/octet-stream"))
+                        .body((Resource) resource);
             } catch (IOException ioe) {
                 LOG.error("Error while getting file to download " + ioe.getMessage(), ioe);
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);

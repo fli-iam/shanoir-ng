@@ -13,10 +13,12 @@
  */
 
 import { Component } from '@angular/core';
-import {  Validators, UntypedFormGroup } from '@angular/forms';
-import {  ActivatedRoute } from '@angular/router';
+import { Validators, UntypedFormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
 
 import { PathologyModel }    from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
@@ -37,45 +39,56 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
 
     pathologies: Pathology[];
     uploadUrl: string;
+    downloadUrl: string;
+    hasAdministrateRight: boolean = false;
+    hasDownloadRight: boolean = false;
+    downloadState: TaskState = new TaskState();
     fileToUpload: File = null;
 
-    public isModelUnique = true;
+    isModelUnique = true;
 
     constructor(
         private route: ActivatedRoute,
-        private modelService: PathologyModelService,
-        private pathologyService: PathologyService)
-        {
-
-            super(route);
-            this.manageSaveEntity();
+        private pathologyService: PathologyService,
+        private pathologyModelService: PathologyModelService,
+        private studyRightsService: StudyRightsService,
+    ) {
+        super(route);
     }
 
     protected getRoutingName(): string {
         return 'preclinical-pathology-model';
     }
 
-    get model(): PathologyModel { return this.entity; }
-    set model(model: PathologyModel) { this.entity = model; }
+    get pathologyModel(): PathologyModel { return this.entity; }
+    set pathologyModel(model: PathologyModel) { this.entity = model; }
+
 
     getService(): EntityService<PathologyModel> {
-        return this.modelService;
+        return this.pathologyModelService;
     }
 
     initView(): Promise<void> {
-        return Promise.resolve();
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasAdministrateRight = true;
+            this.hasDownloadRight = true;
+            return;
+        } else {
+            this.hasAdministrateRight = this.keycloakService.isUserAdminOrExpert();
+            this.hasDownloadRight = this.keycloakService.isUserAdminOrExpert();
+        }
     }
 
     initEdit(): Promise<void> {
         this.loadData();
         if(this.pathologies){
             for(const patho of this.pathologies){
-                if(patho.id == this.model.pathology.id)
-                    this.model.pathology = patho;
+                if(patho.id == this.pathologyModel.pathology.id)
+                    this.pathologyModel.pathology = patho;
             }
         }
         //Generate url for upload
-        this.uploadUrl = this.modelService.getUploadUrl(this.model.id);
+        this.uploadUrl = this.pathologyModelService.getUploadUrl(this.pathologyModel.id);
         return Promise.resolve();
     }
 
@@ -87,10 +100,10 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
 
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
-            'name': [this.model.name, [Validators.required, this.registerOnSubmitValidator('unique', 'name')]],
-            'pathology': [this.model.pathology, Validators.required],
-            'comment': [this.model.comment],
-            'filename': [this.model.filename]
+            'name': [this.pathologyModel.name, [Validators.required, this.registerOnSubmitValidator('unique', 'name')]],
+            'pathology': [this.pathologyModel.pathology, Validators.required],
+            'comment': [this.pathologyModel.comment],
+            'filename': [this.pathologyModel.filename]
         });
     }
 
@@ -99,7 +112,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
             this.onSave.subscribe(response => {
                 if (this.fileToUpload){
                     //Then upload specifications file
-                    this.modelService.postFile(this.fileToUpload, response.id);
+                    this.pathologyModelService.postFile(this.fileToUpload, response.id);
                 }
             })
         );
@@ -124,12 +137,83 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
 
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
-    	this.model.filename = this.fileToUpload.name;
+    	this.pathologyModel.filename = this.fileToUpload.name;
+    	const filenameCtrl = this.form.get('filename');
+    	filenameCtrl.markAsDirty();
+    	filenameCtrl.updateValueAndValidity();
     }
 
+    public save(): Promise<PathologyModel> {
+        if (this.pathologyModel.id) {
+            return this.updatePathologyModel().then(pathologyModel => {
+                if (this.fileToUpload)
+                    this.pathologyModelService.postFile(this.fileToUpload, pathologyModel.id)
+                        .subscribe({
+                            next: () => this.consoleService.log('info', 'File uploaded successfully'),
+                            error: () => this.consoleService.log('error', 'File upload failed')
+                        });
 
+                this.onSave.next(pathologyModel);
+                this.chooseRouteAfterSave(pathologyModel);
+                this.consoleService.log('info', 'Preclinical-pathology-model ' + pathologyModel.name + ' has been successfully saved under the id ' + pathologyModel.id);
+                return pathologyModel;
+            }).catch(reason => {
+                this.footerState.loading = false;
+                this.catchSavingErrors(reason);
+                return null;
+            });
+        } else {
+            return this.addPathologyModel().then(async pathologyModel => {
+                if (pathologyModel == null) return;
 
+                if (this.fileToUpload)
+                    this.pathologyModelService.postFile(this.fileToUpload, pathologyModel.id)
+                        .subscribe({
+                            next: () => this.consoleService.log('info', 'File uploaded successfully'),
+                            error: () => this.consoleService.log('error', 'File upload failed')
+                        });
 
+                this.onSave.next(pathologyModel);
+                this.chooseRouteAfterSave(pathologyModel);
+                this.consoleService.log('info', 'Preclinical-pathology-model ' + pathologyModel.name + ' has been successfully saved under the id ' + pathologyModel.id);
+                return pathologyModel;
+            }).catch(reason => {
+                this.footerState.loading = false;
+                this.catchSavingErrors(reason);
+                return null;
+            });
+        }
+    }
 
+    async addPathologyModel(): Promise<PathologyModel> {
+        if (!this.pathologyModel) return Promise.resolve(null);
+        try {
+            this.pathologyModel = await this.pathologyModelService.create(this.pathologyModel);;
+            return this.pathologyModel;
+        } catch (reason) {
+            return this.catchSavingErrors(reason);
+        }
+    }
 
+    async updatePathologyModel(): Promise<PathologyModel> {
+        if (!this.pathologyModel) return Promise.resolve(null);
+        try {
+            await this.pathologyModelService.update(this.pathologyModel.id, this.pathologyModel);
+            return this.pathologyModel;
+        } catch (reason) {
+            return this.catchSavingErrors(reason);
+        }
+    }
+
+    downloadModelSpecifications() {
+        if (this.pathologyModel.filename) {
+        	this.pathologyModelService.downloadFile(this.pathologyModel);
+        } else {
+        	this.openInformationDialog(this.pathologyModel);
+        }
+    }
+
+    openInformationDialog = (pathologyModel: PathologyModel) => {
+        this.confirmDialogService .inform('Download Specifications', 'No specifications have been found for ' + pathologyModel.name);
+    }
 }

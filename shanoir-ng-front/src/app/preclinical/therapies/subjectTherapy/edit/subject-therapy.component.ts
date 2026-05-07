@@ -48,7 +48,7 @@ export class SubjectTherapyComponent extends EntityComponent<SubjectTherapy> {
     }
 
     protected getRoutingName(): string {
-        return 'subject-pathology';
+        return 'subject-therapy';
     }
 
     get subjectTherapy(): SubjectTherapy { return this.entity; }
@@ -106,7 +106,7 @@ export class SubjectTherapyComponent extends EntityComponent<SubjectTherapy> {
     loadTherapies() {
         this.therapyService.getAll().then(therapies => this.therapies = therapies);
     }
-    
+
     loadUnits() {
         this.referenceService.getReferencesByCategory(PreclinicalUtils.PRECLINICAL_CAT_UNIT).then(units => this.units = units);
     }
