@@ -63,8 +63,9 @@ export class AnimalExaminationFormComponent extends ExaminationComponent {
             private animalExaminationService: AnimalExaminationService,
             private examAnestheticService: ExaminationAnestheticService,
             private extradatasService: ExtraDataService,
-            private animalSubjectService: AnimalSubjectService) {
-        super(route, examinationService, centerService, studyService, studyRightsService, breadcrumbsService, downloadService);
+            private animalSubjectService: AnimalSubjectService,
+            userRightsService: StudyRightsService) {
+        super(route, examinationService, centerService, studyService, studyRightsService, breadcrumbsService, downloadService, userRightsService);
         this.manageSaveEntity();
     }
 
