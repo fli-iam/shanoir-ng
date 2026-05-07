@@ -20,7 +20,7 @@ END
 WHERE c.scope = 'StudyCardDICOMConditionOnDatasets';
 
 -- remaining ones are exam conditions
-UPDATE card_condition c
+UPDATE study_card_condition c
 SET c.scope = 'ExamDICOMConditionOnDatasets'
 WHERE c.scope = 'StudyCardDICOMConditionOnDatasets';
 
