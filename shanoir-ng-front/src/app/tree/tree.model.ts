@@ -318,10 +318,25 @@ export class DatasetAcquisitionNode extends ShanoirNode {
         public id: number,
         public label: string,
         public datasets: DatasetNode[] | UNLOADED,
+        public qualityTag: QualityTag,
         public canDelete: boolean,
         public canDownload: boolean
     ) {
         super(parent, id, label);
+        if (qualityTag) {
+            const tag: Tag = new Tag();
+            tag.id = -1;
+            if (qualityTag == QualityTag.VALID) {
+                tag.name = 'Valid';
+                tag.color = 'green';
+            } else if (qualityTag == QualityTag.WARNING) {
+                tag.name = 'Warning';
+                tag.color = 'chocolate';
+            } else if (qualityTag == QualityTag.ERROR) {
+                tag.name = 'Error';
+                tag.color = 'red';
+            }
+        }
     }
 
     public selected: boolean = false;
@@ -334,6 +349,7 @@ export class DatasetAcquisitionNode extends ShanoirNode {
             dsAcq.id,
             dsAcq.name,
             null,
+            dsAcq.qualityTag,
             canDelete,
             canDownload
         );

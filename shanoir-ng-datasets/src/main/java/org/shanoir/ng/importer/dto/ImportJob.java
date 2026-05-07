@@ -18,7 +18,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.quality.QualityTag;
 
 /**
  * @author atouboul
@@ -65,8 +64,6 @@ public class ImportJob implements Serializable {
     private Long userId;
 
     private String username;
-
-    private QualityTag qualityTag;
 
     private String studyInstanceUID;
 
@@ -229,14 +226,6 @@ public class ImportJob implements Serializable {
 
     public void setShanoirEvent(ShanoirEvent shanoirEvent) {
         this.shanoirEvent = shanoirEvent;
-    }
-
-    public QualityTag getQualityTag() {
-        return qualityTag;
-    }
-
-    public void setQualityTag(QualityTag qualityTag) {
-        this.qualityTag = qualityTag;
     }
 
     public Serie getFirstSerie() {

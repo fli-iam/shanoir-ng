@@ -21,6 +21,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
@@ -157,13 +158,20 @@ public class QualityCardApiController implements QualityCardApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         LOG.info("apply quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
-        QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, true);
+        QualityCardResult results = null;
+        try {
+            results = cardProcessingService.applyQualityCardOnStudy(qualityCard, true);
+        } catch (MicroServiceCommunicationException e) {
+            LOG.error("Error during microservice communication while applying quality card on study", e);
+        } catch (PacsException e) {
+            LOG.error("Error during PACS communication while applying quality card on study", e);
+        }
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
-             Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
+             Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException, PacsException {
 
         final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {
@@ -178,7 +186,7 @@ public class QualityCardApiController implements QualityCardApi {
     public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
             Long qualityCardId,
             int start,
-            int stop) throws RestServiceException, MicroServiceCommunicationException {
+            int stop) throws RestServiceException, MicroServiceCommunicationException, PacsException {
 
         final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {

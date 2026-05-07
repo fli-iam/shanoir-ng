@@ -48,6 +48,15 @@ public interface ExaminationService {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))")
     void deleteById(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException;
 
+    /*
+     * Delete an empty examination without checking rights,
+     * used during quality control to delete any empty examination created during import.
+     *
+     * @param id examination id.
+     * @throws EntityNotFoundException
+     */
+    void deleteEmptyExamination(Long id) throws EntityNotFoundException;
+
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE'))")
     void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event);
 

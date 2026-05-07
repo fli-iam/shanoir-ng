@@ -202,7 +202,11 @@ public class StudyCardApiController implements StudyCardApi {
         StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
         LOG.debug("re-apply studycard n° " + studyCard.getId());
         List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
-        cardProcessingService.applyStudyCard(studyCard, acquisitions);
+        try {
+            cardProcessingService.applyStudyCard(studyCard, acquisitions);
+        } catch (PacsException | EntityNotFoundException e) {
+            LOG.error("Study card could not be applied for acquisitions {}", studyCardApplyObject.getDatasetAcquisitionIds(), e);
+        }
 
         // Get all updated dataset ids
         List<Long> datasetIds = new ArrayList<Long>();
