@@ -96,8 +96,7 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     			let hasSubjects: boolean  = false;
     			hasSubjects = subjectPathologies.length > 0;
     			if (hasSubjects){
-    				this.confirmDialogService
-                		.confirm('Delete pathology model', 'This pathology model is linked to subjects, it can not be deleted');
+                    this.consoleService.log('warn', 'This pathology model is linked to subjects, it can not be deleted');
     			}else{
     				this.openDeletePathologyModelConfirmDialog(entity);
     			}
