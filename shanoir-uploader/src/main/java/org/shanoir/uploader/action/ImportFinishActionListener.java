@@ -50,7 +50,7 @@ public class ImportFinishActionListener implements ActionListener {
     private Subject subjectREST;
 
     private ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG;
-  
+
     public ImportFinishActionListener(final MainWindow mainWindow, File uploadFolder, Subject subjectREST,
             ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBILNG) {
         this.mainWindow = mainWindow;
@@ -115,7 +115,7 @@ public class ImportFinishActionListener implements ActionListener {
             }
             String magneticFieldStrength = mainWindow.importDialog.mriMagneticFieldStrengthText.getText();
             // Check that magnetic field strength is a number value if modality is not CT or XA
-			      if (importJob.getFirstSelectedSerie().getModality() != null 
+			      if (importJob.getFirstSelectedSerie().getModality() != null
 					    && !importJob.getFirstSelectedSerie().getModality().equals("CT")
 					    && !importJob.getFirstSelectedSerie().getModality().equals("XA")) {
 				    String regex = "\\d+(\\.\\d+)?";
@@ -139,7 +139,7 @@ public class ImportFinishActionListener implements ActionListener {
                 equipmentDicom.setManufacturerModelName(mainWindow.importDialog.mriManufacturersModelNameText.getText());
                 equipmentDicom.setMagneticFieldStrength(mainWindow.importDialog.mriMagneticFieldStrengthText.getText());
                 equipmentDicom.setDeviceSerialNumber(mainWindow.importDialog.mriDeviceSerialNumberText.getText());
-                equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, center);
+                equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, centerId);
                 if (equipment == null) {
                     logger.error("No study card: equipment not found or created.");
                     JOptionPane.showMessageDialog(mainWindow.frame,
