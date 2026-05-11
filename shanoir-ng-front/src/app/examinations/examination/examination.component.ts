@@ -76,7 +76,8 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         protected studyService: StudyService,
         protected studyRightsService: StudyRightsService,
         public breadcrumbsService: BreadcrumbsService,
-        protected downloadService: MassDownloadService
+        protected downloadService: MassDownloadService,
+        private userRightsService: StudyRightsService
     ) {
         super(route);
         this.inImport = this.breadcrumbsService.isImporting();
@@ -218,6 +219,15 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
+                this.userRightsService.getMyRights().then(rights => {
+                    if (!this.keycloakService.isUserAdmin()) {
+                        // filter studies to only those with import or admin rights
+                        this.studies = this.studies.filter(study => {
+                            const studyRights = rights.get(study.id);
+                            return studyRights && (studyRights.includes(StudyUserRight.CAN_IMPORT) || studyRights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                        });
+                    }
+                });
             });
     }
 
