@@ -20,7 +20,9 @@ services:
       context: docker-compose
       target: keycloak-database
     environment:
-      - MYSQL_DATABASE=keycloak
+      - MARIADB_DATABASE=keycloak
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -29,6 +31,12 @@ services:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
       - shanoir_ng_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
@@ -62,7 +70,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - "keycloak-database"
+      keycloak-database:
+          condition: service_healthy
   #
   # RabbitMQ: inter-microservices communication
   #
@@ -85,8 +94,9 @@ services:
       context: docker-compose
       target: database
     command: --max_allowed_packet 20000000
-    env_file:
-      - ./docker-compose/database/variables.env
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -98,7 +108,7 @@ services:
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
       interval: 3s
       timeout: 2s
       retries: 10
@@ -117,7 +127,7 @@ services:
       - shanoir_ng_network
     depends_on:
       database:
-        condition: service_healthy  # wait for MySQL to be ready
+        condition: service_healthy  # wait for MariaDB to be ready
     restart: "no" # don't restart after it exits cleanly
   #
   # Users microservice

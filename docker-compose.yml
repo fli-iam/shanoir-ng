@@ -18,7 +18,9 @@ services:
     container_name: "${SHANOIR_PREFIX}keycloak-database"
     image: "ghcr.io/fli-iam/shanoir-ng/keycloak-database:NG_v2.10.0"
     environment:
-      - MYSQL_DATABASE=keycloak
+      - MARIADB_DATABASE=keycloak
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -27,6 +29,12 @@ services:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
       - shanoir_ng_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
@@ -57,7 +65,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - "keycloak-database"
+      keycloak-database:
+        condition: service_healthy
   #
   # RabbitMQ: inter-microservices communication
   #
@@ -78,8 +87,9 @@ services:
     container_name: "${SHANOIR_PREFIX}database"
     image: "ghcr.io/fli-iam/shanoir-ng/database:NG_v2.10.0"
     command: --max_allowed_packet 20000000
-    env_file:
-      - ./docker-compose/database/variables.env
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -91,7 +101,7 @@ services:
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
       interval: 3s
       timeout: 2s
       retries: 10

@@ -19,8 +19,7 @@ import java.awt.event.ActionListener;
 
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.gui.LoginConfigurationPanel;
-import org.shanoir.uploader.service.rest.KeycloakAuthCodeLoginService;
+import org.shanoir.uploader.gui.OtpSetupPanel;
 import org.shanoir.uploader.service.rest.KeycloakAuthCodeLoginService.AuthResult;
 import org.shanoir.uploader.service.rest.KeycloakAuthCodeLoginService.AuthStep;
 import org.shanoir.uploader.service.rest.KeycloakAuthCodeLoginService.LoginSession;
@@ -30,94 +29,70 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LoginPanelActionListener implements ActionListener {
+public class OtpSetupSubmitActionListener implements ActionListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LoginPanelActionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OtpSetupSubmitActionListener.class);
 
-    private LoginConfigurationPanel loginPanel;
+    private OtpSetupPanel otpSetupPanel;
     private StartupStateContext sSC;
-
-    @Autowired
-    private KeycloakAuthCodeLoginService keycloakBrowserLoginService;
 
     @Autowired
     private PacsConfigurationState pacsConfigurationState;
 
     @Autowired
-    private AuthenticationManualConfigurationState authenticationManualConfigurationState;
-
-    @Autowired
     private OtpInputState otpInputState;
 
     @Autowired
-    private OtpSetupState otpSetupState;
+    private AuthenticationManualConfigurationState authenticationManualConfigurationState;
 
-    public void configure(LoginConfigurationPanel loginPanel, StartupStateContext sSC) {
-        this.loginPanel = loginPanel;
+    public void configure(OtpSetupPanel panel, StartupStateContext sSC) {
+        this.otpSetupPanel = panel;
         this.sSC = sSC;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource().equals(loginPanel.connect)) {
-            String username = loginPanel.loginText.getText();
-            String password = String.valueOf(loginPanel.passwordText.getPassword());
-            login(username, password);
-        } else if (e.getSource().equals(loginPanel.connectLater)) {
-            LOG.info("Connect later: offline mode selected.");
-            ShUpConfig.username = "anonymous";
-            sSC.setState(pacsConfigurationState);
-            sSC.nextState();
-        }
-    }
-
-    public void login(String username, String password) {
-        String serverUrl = ShUpConfig.profileProperties.getProperty("shanoir.server.url");
-        try {
-            LoginSession session = keycloakBrowserLoginService.createSession(serverUrl);
-            sSC.setLoginSession(session);
-
-            AuthResult result = session.submitCredentials(username, password);
-            handleResult(result, username);
-        } catch (Exception e) {
-            LOG.error("Login error: {}", e.getMessage(), e);
+        String otpCode = otpSetupPanel.otpText.getText().trim();
+        String deviceLabel = otpSetupPanel.deviceLabelText.getText().trim();
+        boolean logoutOtherSessions = otpSetupPanel.logoutOtherDevicesCheckBox.isSelected();
+        LoginSession session = sSC.getLoginSession();
+        if (session == null) {
+            LOG.error("No active login session found for OTP setup submission.");
             sSC.getShUpStartupDialog().updateStartupText(
                 "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
-            ShUpConfig.username = null;
+            sSC.setState(authenticationManualConfigurationState);
+            sSC.nextState();
+            return;
+        }
+
+        try {
+            AuthResult result = session.submitOtpSetup(otpCode, deviceLabel, logoutOtherSessions);
+            handleResult(result);
+        } catch (Exception ex) {
+            LOG.error("OTP setup submission error: {}", ex.getMessage(), ex);
+            sSC.getShUpStartupDialog().updateStartupText(
+                "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
             sSC.setState(authenticationManualConfigurationState);
             sSC.nextState();
         }
     }
 
-    private void handleResult(AuthResult result, String username) {
+    private void handleResult(AuthResult result) {
         if (result.step == AuthStep.SUCCESS) {
             ShUpOnloadConfig.setTokenString(result.accessToken);
             sSC.getShUpStartupDialog().updateStartupText(
                 "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.success"));
-            LOG.info("Login successful for username: {}", username);
-            ShUpConfig.username = username;
+            LOG.info("OTP setup and verification succeeded.");
             sSC.setState(pacsConfigurationState);
             sSC.nextState();
-
         } else if (result.step == AuthStep.OTP_REQUIRED) {
-            LOG.info("OTP required for username: {}", username);
-            ShUpConfig.username = username;
+            // Keycloak confirmed enrollment and now asks for a fresh OTP code
             sSC.setState(otpInputState);
             sSC.nextState();
-
-        } else if (result.step == AuthStep.OTP_SETUP_REQUIRED) {
-            LOG.info("OTP setup required for username: {}", username);
-            ShUpConfig.username = username;
-            sSC.setPendingQrCodeBytes(result.qrCodeBytes);
-            sSC.setPendingTotpManualKey(result.totpManualKey);
-            sSC.setState(otpSetupState);
-            sSC.nextState();
-
         } else {
             sSC.getShUpStartupDialog().updateStartupText(
                 "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
-            LOG.info("Login failed for username: {}", username);
-            ShUpConfig.username = null;
+            LOG.warn("OTP setup failed (step={})", result.step);
             sSC.setState(authenticationManualConfigurationState);
             sSC.nextState();
         }
