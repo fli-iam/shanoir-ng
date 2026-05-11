@@ -12,17 +12,46 @@
 
 # Test that the Shanoir NG docker-compose deployment starts correctly.
 #
-# This workflow uses the pre-built images from GHCR (docker-compose.yml) and
-# follows the same initialization sequence as bootstrap.sh (without building
-# from source). dcm4chee is skipped to keep resource usage within the limits
-# of GitHub-hosted runners.
+# This workflow uses pre-built images from GHCR through docker-compose.yml
+# and follows the bootstrap.sh initialization sequence without building
+# application images from source.
+#
+# It is a fresh-install smoke test only. It does not validate upgrades,
+# backup/restore, production hardening, or hospital-specific configuration.
+#
+# CI-only stack: see docker-compose.ci.yml (Mailhog, internal JWT issuer, etc.).
+# This is not a production or hospital reference configuration.
+#
+# Triggers: weekly schedule (limits Actions minutes), manual workflow_dispatch,
+# and pull requests that touch deployment-related paths only. For other PRs,
+# run this workflow manually from the branch (Actions → Deployment smoke test).
 
 name: Deployment smoke test
 
 on:
+  schedule:
+    # Weekly Monday 03:00 UTC — adjust time/day as needed.
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: >
+          GHCR tag for ghcr.io/fli-iam/shanoir-ng/* images. Prefer develop (daily
+          snaps) or a release NG_vX.Y.Z. Do not rely on latest — several services
+          are not published under that tag.
+        required: false
+        default: "develop"
+        type: string
   pull_request:
     branches: [develop, master]
-  workflow_dispatch:
+    paths:
+      - "docker-compose.yml"
+      - "docker-compose.ci.yml"
+      - "bootstrap.sh"
+      - ".github/workflows/deployment-test.yaml"
+      - ".github/workflows/hospital-*.yml"
+      - ".github/scripts/**"
+      - "hospital-validation/**"
 
 concurrency:
   group: deployment-test-${{ github.ref }}
@@ -30,30 +59,123 @@ concurrency:
 
 jobs:
   deployment-test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
 
     permissions:
       contents: read
+      packages: read
 
     env:
       COMPOSE_FILE: "docker-compose.yml:docker-compose.ci.yml"
+      # Tracked .env uses SHANOIR_MIGRATION=dev, which skips database-migrations
+      # init procedures (stored procedures, etc.). CI must run like a real deploy.
+      SHANOIR_MIGRATION: auto
 
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
 
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      # Manifest inspect / pulls to ghcr.io are more reliable authenticated.
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Resolve SHANOIR_IMAGE_TAG
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG='${{ github.event.inputs.image_tag }}'
+          TAG="${TAG:-develop}"
+
+          images=(
+            keycloak-database keycloak database database-migrations users studies
+            import datasets preclinical nifti-conversion solr nginx
+          )
+
+          full_stack_present() {
+            local t="$1"
+            local img
+            for img in "${images[@]}"; do
+              ref="ghcr.io/fli-iam/shanoir-ng/${img}:${t}"
+              if ! docker manifest inspect "${ref}" >/dev/null 2>&1; then
+                return 1
+              fi
+            done
+            return 0
+          }
+
+          if full_stack_present "${TAG}"; then
+            echo "Using image tag: ${TAG}"
+            echo "SHANOIR_IMAGE_TAG=${TAG}" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          echo "WARN: tag '${TAG}' is missing one or more required images."
+
+          # Rolling daily images (upstream); avoid 'latest' (incomplete for infra).
+          for fallback in develop NG_v2.10.0; do
+            if [ "${fallback}" != "${TAG}" ] && full_stack_present "${fallback}"; then
+              echo "Fallback: using image tag ${fallback} instead."
+              echo "SHANOIR_IMAGE_TAG=${fallback}" >> "$GITHUB_ENV"
+              exit 0
+            fi
+          done
+
+          echo "ERROR: Could not find a GHCR tag with all required microservice images." >&2
+          echo "Set workflow_dispatch image_tag explicitly (e.g. develop or NG_v2.10.0)." >&2
+          exit 1
+
       - name: Configure /etc/hosts
         run: |
           sudo sh -c 'echo "127.0.0.1 shanoir-ng-nginx viewer" >> /etc/hosts'
 
-      - name: Build database-migrations image
+      - name: Validate image tag availability
+        shell: bash
         run: |
-          docker build \
-            -f docker-compose/Dockerfile \
-            --target database-migrations \
-            -t "ghcr.io/fli-iam/shanoir-ng/database-migrations:NG_v2.9.3" \
-            docker-compose
+          set -euo pipefail
+          TAG="${SHANOIR_IMAGE_TAG}"
+
+          images=(
+            keycloak-database
+            keycloak
+            database
+            database-migrations
+            users
+            studies
+            import
+            datasets
+            preclinical
+            nifti-conversion
+            solr
+            nginx
+          )
+
+          missing=0
+          for img in "${images[@]}"; do
+            ref="ghcr.io/fli-iam/shanoir-ng/${img}:${TAG}"
+            if docker manifest inspect "$ref" >/dev/null 2>&1; then
+              echo "OK: $ref"
+            else
+              echo "MISSING: $ref"
+              missing=1
+            fi
+          done
+
+          if [ "$missing" -ne 0 ]; then
+            echo "ERROR: Some required images are missing for tag ${TAG}"
+            exit 1
+          fi
+
+      - name: Pull published images
+        run: docker compose pull
 
       - name: Bootstrap installation
         run: bash ./bootstrap.sh --clean --no-build
@@ -85,7 +207,7 @@ jobs:
           for ms in users studies datasets import preclinical; do
             bash .github/scripts/helpers.sh wait_for_log "$ms" 'Started .* in' 300
           done
-          bash .github/scripts/helpers.sh wait_for_url https://shanoir-ng-nginx/ 120
+          bash .github/scripts/helpers.sh wait_for_url https://shanoir-ng-nginx/ 180
 
       - name: Create Keycloak admin user
         run: bash .github/scripts/create-keycloak-user.sh
@@ -95,6 +217,16 @@ jobs:
 
       - name: Functional tests
         run: bash .github/scripts/functional-tests.sh
+
+      - name: Restart stack and validate persistence
+        run: |
+          docker compose restart
+          sleep 30
+          # Do not rely on wait_for_log here: Docker keeps pre-restart logs, so patterns
+          # like "Started ... in" match immediately while services are still booting.
+          bash .github/scripts/helpers.sh wait_for_shanoir_password_token 240
+          bash .github/scripts/helpers.sh wait_for_url https://shanoir-ng-nginx/ 180
+          bash .github/scripts/post-restart-validation.sh
 
       - name: Dump logs on failure
         if: failure()

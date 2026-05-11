@@ -7,7 +7,8 @@
 #   2. Seed data: initial records were loaded (roles, profiles, etc.)
 #   3. Authentication: OAuth2 password grant returns a valid token
 #   4. API endpoints: each microservice responds to authenticated requests
-#   5. Log scan: no ERROR/Exception in docker compose logs
+#   5. User lifecycle: create user via Users API, set Keycloak password, token as that user
+#   6. Log scan: no ERROR/Exception in docker compose logs
 #
 # Usage: functional-tests.sh
 #
@@ -15,6 +16,7 @@
 #   - mysql client (or docker exec to the database container)
 #   - curl, jq
 #   - SHANOIR_TEST_USER / SHANOIR_TEST_PASSWORD (or defaults from create-keycloak-user.sh)
+#   - SHANOIR_KEYCLOAK_USER / SHANOIR_KEYCLOAK_PASSWORD in .env (for user lifecycle kcadm step)
 
 set -euo pipefail
 
@@ -26,11 +28,23 @@ NGINX_BASE="https://shanoir-ng-nginx"
 TEST_USER="${SHANOIR_TEST_USER:-shanoir-admin}"
 TEST_PASS="${SHANOIR_TEST_PASSWORD:-Ch4ng3M3!@2025}"
 
+# Keycloak master credentials (for kcadm set-password on newly created users). Same pattern as create-keycloak-user.sh.
+_read_env() { grep -E "^$1=" .env 2>/dev/null | head -1 | sed "s/^$1=//"; }
+: "${SHANOIR_KEYCLOAK_USER:=$(_read_env SHANOIR_KEYCLOAK_USER)}"
+: "${SHANOIR_KEYCLOAK_PASSWORD:=$(_read_env SHANOIR_KEYCLOAK_PASSWORD)}"
+
+# Written on successful user lifecycle (for post-restart-validation.sh).
+CI_LIFECYCLE_STATE_FILE="${CI_LIFECYCLE_STATE_FILE:-/tmp/shanoir-ci-lifecycle.env}"
+
 # Token acquisition goes through the docker network so that the JWT issuer
 # matches what the microservices expect (SPRING_SECURITY_..._ISSUER_URI).
 KC_INTERNAL_BASE="http://keycloak:8080/auth"
 
 docker_curl() {
+    if [ "$(docker inspect shanoir-ng-nginx --format '{{.State.Running}}' 2>/dev/null)" != "true" ]; then
+        echo "ERROR: container shanoir-ng-nginx is not running." >&2
+        return 1
+    fi
     docker exec shanoir-ng-nginx curl -s "$@"
 }
 
@@ -246,6 +260,118 @@ test_api() {
         "${NGINX_BASE}/shanoir-ng/preclinical/pathology" "200|204"
 }
 
+# ─── 3b. User lifecycle (Users API + Keycloak password + token) ─────
+
+test_user_lifecycle() {
+    echo ""
+    echo "======== User Lifecycle Tests ========"
+
+    if [ -z "$TOKEN" ]; then
+        fail "User lifecycle tests skipped (no admin token)"
+        return
+    fi
+
+    if [ -z "${SHANOIR_KEYCLOAK_USER:-}" ] || [ -z "${SHANOIR_KEYCLOAK_PASSWORD:-}" ]; then
+        fail "User lifecycle tests need SHANOIR_KEYCLOAK_USER / SHANOIR_KEYCLOAK_PASSWORD (from .env)"
+        return
+    fi
+
+    local username="ci-user-$(date +%s)"
+    local email="${username}@shanoir-test.local"
+    # Keycloak policy requires min special chars; avoid ! for interactive bash history.
+    local password="CiUser2026xPass@1"
+
+    echo ""
+    echo "---- Create user through Users API ----"
+
+    local create_body create_code tmp
+    tmp=$(mktemp)
+    create_code=$(curl -sk -o "$tmp" -w "%{http_code}" --max-time 30 \
+        -X POST "${NGINX_BASE}/shanoir-ng/users/users" \
+        -H "Authorization: Bearer ${TOKEN}" \
+        -H "Content-Type: application/json" \
+        -d "$(jq -nc \
+            --arg u "$username" \
+            --arg e "$email" \
+            '{
+              firstName: "CI",
+              lastName: "User",
+              username: $u,
+              email: $e,
+              role: { id: 1, displayName: "Administrator" }
+            }')") || create_code="000"
+
+    create_body=$(cat "$tmp")
+    rm -f "$tmp"
+
+    if echo "$create_code" | grep -qxE "200|201"; then
+        pass "Created user '${username}' through Users API (HTTP ${create_code})"
+    else
+        fail "Could not create user '${username}' through Users API (HTTP ${create_code})"
+        echo "$create_body" | sed 's/^/ | /'
+        return
+    fi
+
+    echo ""
+    echo "---- Verify user through Users API ----"
+
+    local users_body
+    users_body=$(curl -sk --max-time 20 \
+        -H "Authorization: Bearer ${TOKEN}" \
+        "${NGINX_BASE}/shanoir-ng/users/users") || users_body=""
+
+    if echo "$users_body" | jq -e --arg username "$username" '.[] | select(.username == $username)' >/dev/null 2>&1; then
+        pass "User '${username}' is visible through Users API"
+    else
+        fail "User '${username}' is not visible through Users API"
+        return
+    fi
+
+    echo ""
+    echo "---- Set password in Keycloak (kcadm) ----"
+
+    if docker compose exec -T \
+        -e KCADM_USER="${SHANOIR_KEYCLOAK_USER}" \
+        -e KCADM_PASS="${SHANOIR_KEYCLOAK_PASSWORD}" \
+        -e CI_USER="${username}" \
+        -e CI_PASS="${password}" \
+        keycloak sh -lc '/opt/keycloak/bin/kcadm.sh config credentials \
+            --server http://localhost:8080/auth --realm master \
+            --user "$KCADM_USER" --password "$KCADM_PASS" >/dev/null 2>&1 && \
+            /opt/keycloak/bin/kcadm.sh set-password -r shanoir-ng \
+            --username "$CI_USER" --new-password "$CI_PASS"'; then
+        pass "Password set for '${username}' in Keycloak"
+    else
+        fail "Could not set password for '${username}' in Keycloak"
+        return
+    fi
+
+    echo ""
+    echo "---- Token acquisition as created user ----"
+
+    local user_token_body user_token
+    user_token_body=$(docker_curl -X POST \
+        "${KC_INTERNAL_BASE}/realms/${REALM}/protocol/openid-connect/token" \
+        --data-urlencode "client_id=shanoir-swagger" \
+        --data-urlencode "username=${username}" \
+        --data-urlencode "password=${password}" \
+        --data-urlencode "grant_type=password") || user_token_body=""
+
+    user_token=$(echo "$user_token_body" | jq -r '.access_token // empty')
+    if [ -n "$user_token" ]; then
+        pass "Token acquired for created user '${username}'"
+        {
+            echo "export CI_LIFECYCLE_USER=$(printf '%q' "$username")"
+            echo "export CI_LIFECYCLE_PASS=$(printf '%q' "$password")"
+        } > "$CI_LIFECYCLE_STATE_FILE"
+    else
+        local err
+        err=$(echo "$user_token_body" | jq -r '.error_description // .error // empty' 2>/dev/null || true)
+        fail "Token acquisition failed for created user '${username}'${err:+: $err}"
+        rm -f "$CI_LIFECYCLE_STATE_FILE"
+    fi
+}
+
 # ─── 4. Log error scan ───────────────────────────────────────────────
 
 scan_logs() {
@@ -300,6 +426,7 @@ echo "╚═══════════════════════�
 test_database
 test_auth
 test_api
+test_user_lifecycle
 scan_logs
 
 echo ""

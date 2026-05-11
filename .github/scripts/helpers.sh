@@ -16,7 +16,15 @@ wait_for_log() {
 
 	echo "Waiting for pattern '$pattern' in logs of '$container' (timeout: ${timeout}s)..."
 	while [ "$elapsed" -lt "$timeout" ]; do
-		if docker logs "$container" 2>&1 | grep -qE "$pattern"; then
+		# -a: treat logs as text (docker occasionally emits NUL/control bytes; grep
+		# may otherwise skip "binary" stdin and miss matches).
+		#
+		# IMPORTANT: With `set -o pipefail`, when grep -q matches it exits immediately
+		# and docker logs receives SIGPIPE (often exit 141). The pipeline status is
+		# then non-zero even though grep succeeded — the loop never sees a match.
+		# Run this pipeline without pipefail so the exit status reflects grep only.
+		if ( set +o pipefail
+		     docker logs "$container" 2>&1 | grep -aqE "$pattern" ); then
 			echo "Pattern matched in '$container' logs (after ${elapsed}s)"
 			return 0
 		fi
@@ -42,21 +50,76 @@ wait_for_url() {
 	local url="$1"
 	local timeout="${2:-120}"
 	local elapsed=0
+	local code="000"
 
 	echo "Waiting for URL $url (timeout: ${timeout}s)..."
 	while [ "$elapsed" -lt "$timeout" ]; do
-		local code
-		code="$(curl -sk -o /dev/null -w '%{http_code}' --max-time 5 "$url" 2>/dev/null || echo "000")"
+		# Prefer IPv4: on some hosts curl tries IPv6 first and gets connection refused
+		# while Docker publishes 443 on IPv4 only.
+		code="$(curl -4sk -o /dev/null -w '%{http_code}' --max-time 5 "$url" 2>/dev/null || echo "000")"
+		code="$(echo "$code" | tr -d '[:space:]')"
 		if [ "$code" -ge 200 ] 2>/dev/null && [ "$code" -lt 400 ] 2>/dev/null; then
 			echo "URL $url is ready (status $code, after ${elapsed}s)"
 			return 0
+		fi
+		if [ $((elapsed % 30)) -eq 0 ] && [ "$elapsed" -gt 0 ]; then
+			local nx_status="n/a"
+			case "$url" in *shanoir-ng-nginx*)
+				nx_status="$(docker inspect --format '{{.State.Status}} exit={{.State.ExitCode}}' shanoir-ng-nginx 2>/dev/null || echo 'unknown')"
+				;;
+			esac
+			echo "  ... still waiting for $url (HTTP ${code}, ${elapsed}s elapsed; nginx: ${nx_status})"
 		fi
 		sleep 5
 		elapsed=$((elapsed + 5))
 	done
 
-	echo "Timed out waiting for URL $url"
+	echo "Timed out waiting for URL $url (last HTTP code: ${code})"
 	return $TIMEOUT_EXIT
+}
+
+# Poll Keycloak until the shanoir-admin password grant returns an access token.
+# After `docker compose restart`, `wait_for_log` often matches *old* log lines and
+# returns immediately while Keycloak is still starting — use this instead for readiness.
+# Usage: wait_for_shanoir_password_token [timeout_seconds]
+wait_for_shanoir_password_token() {
+	local timeout="${1:-180}"
+	local elapsed=0
+	local REALM="${REALM:-shanoir-ng}"
+	local KC_INTERNAL_BASE="${KC_INTERNAL_BASE:-http://keycloak:8080/auth}"
+	local U="${SHANOIR_TEST_USER:-shanoir-admin}"
+	local P="${SHANOIR_TEST_PASSWORD:-Ch4ng3M3!@2025}"
+
+	if [ "$(docker inspect shanoir-ng-nginx --format '{{.State.Running}}' 2>/dev/null)" != "true" ]; then
+		echo "ERROR: shanoir-ng-nginx is not running; cannot reach Keycloak from the stack." >&2
+		return 1
+	fi
+
+	echo "Waiting for Shanoir admin password grant (Keycloak realm ${REALM}, timeout: ${timeout}s)..."
+	while [ "$elapsed" -lt "$timeout" ]; do
+		local body token
+		body=$(
+			docker exec shanoir-ng-nginx curl -sS \
+				-X POST "${KC_INTERNAL_BASE}/realms/${REALM}/protocol/openid-connect/token" \
+				--data-urlencode "client_id=shanoir-swagger" \
+				--data-urlencode "username=${U}" \
+				--data-urlencode "password=${P}" \
+				--data-urlencode "grant_type=password" 2>/dev/null || true
+		)
+		token=$(echo "$body" | jq -r '.access_token // empty' 2>/dev/null || true)
+		if [ -n "$token" ]; then
+			echo "Password grant succeeded (after ${elapsed}s)"
+			return 0
+		fi
+		if [ $((elapsed % 20)) -eq 0 ] && [ "$elapsed" -gt 0 ]; then
+			echo "  ... still waiting (${elapsed}s; Keycloak may still be starting after restart)"
+		fi
+		sleep 5
+		elapsed=$((elapsed + 5))
+	done
+
+	echo "Timed out waiting for password grant from Keycloak"
+	return 124
 }
 
 # Check an HTTP endpoint and record pass/fail.
@@ -68,7 +131,7 @@ smoke_check_http() {
 	local url="$2"
 	local allowed="$3"
 	local code
-	code="$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 "$url" 2>/dev/null || echo "000")"
+	code="$(curl -4sk -o /dev/null -w '%{http_code}' --max-time 10 "$url" 2>/dev/null || echo "000")"
 	if echo "$code" | grep -qxE "$allowed"; then
 		echo "[PASS] $label (HTTP $code)"
 	else
@@ -129,7 +192,7 @@ smoke_tests() {
 
 if [ $# -eq 0 ]; then
 	echo "Usage: $0 <function> [args...]"
-	echo "Functions: wait_for_log, wait_for_url, smoke_tests"
+	echo "Functions: wait_for_log, wait_for_url, wait_for_shanoir_password_token, smoke_tests"
 	exit 1
 fi
 

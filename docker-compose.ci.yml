@@ -1,12 +1,17 @@
-# CI-only compose overrides.
+# CI-only compose overrides (not a production or hospital template).
 #
 # This file is layered on top of docker-compose.yml via:
 #   COMPOSE_FILE=docker-compose.yml:docker-compose.ci.yml
 #
-# * adds a disposable SMTP sink
-# * relaxes logging
-# * overrides the Spring Security issuer-uri so that microservices can start before nginx is ready.
-# * make java.security.SecureRandom read from /dev/urandom to avoid stalling in CI containers
+# Differences from a typical hospital deployment:
+#   - Mailhog as SMTP sink (no real mail relay)
+#   - Internal HTTP issuer URI for Spring Resource Server (JWT from Keycloak inside Docker network)
+#   - Relaxed console log levels for CI
+#   - java.security.egd=/dev/./urandom to avoid SecureRandom stalls in CI
+#   - create-keycloak-user.sh may set sslRequired=NONE on the realm when CI=true
+#
+# Production should use a real SMTP relay, proper TLS, DNS hostnames, and
+# SHANOIR_MIGRATION=never for normal operation (see README).
 
 services:
   smtp-sink:

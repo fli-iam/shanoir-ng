@@ -20,9 +20,7 @@ services:
       context: docker-compose
       target: keycloak-database
     environment:
-      - MARIADB_DATABASE=keycloak
-      - MARIADB_ROOT_PASSWORD=password
-      - MARIADB_AUTO_UPGRADE=1
+      - MYSQL_DATABASE=keycloak
     ulimits:
       nofile:
         soft: 262144
@@ -31,12 +29,6 @@ services:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
       - shanoir_ng_network
-    healthcheck:
-      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
-      interval: 3s
-      timeout: 2s
-      retries: 10
-      start_period: 10s
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
@@ -70,8 +62,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      keycloak-database:
-          condition: service_healthy
+      - "keycloak-database"
   #
   # RabbitMQ: inter-microservices communication
   #
@@ -109,7 +100,7 @@ services:
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
       interval: 3s
       timeout: 2s
       retries: 10
@@ -128,7 +119,7 @@ services:
       - shanoir_ng_network
     depends_on:
       database:
-        condition: service_healthy  # wait for MariaDB to be ready
+        condition: service_healthy  # wait for MySQL to be ready
     restart: "no" # don't restart after it exits cleanly
   #
   # Users microservice
@@ -457,23 +448,6 @@ services:
       - "import"
       - "datasets"
       - "preclinical"
-
-  bids-validator:
-    container_name: "${SHANOIR_PREFIX}bids-validator"
-    build:
-      context: docker-compose
-      target: bids-validator
-    environment:
-      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
-      - IN_QUEUE=bids.validate
-      - OUT_QUEUE=bids.validated
-      - DATA_ROOT=/var/bids-data
-    volumes:
-      - "bids-data:/var/bids-data" # temporary
-    depends_on:
-      - rabbitmq
-    networks:
-      - shanoir_ng_network
 
 volumes:
   keycloak-database-data:
