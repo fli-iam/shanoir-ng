@@ -255,10 +255,10 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
                 if (rule.conditions?.find(cond => cond.scope == null)) {
                     errors.noType = true; 
                 }
-                if (rule.conditions?.find(cond => cond.scope == 'StudyCardDICOMConditionOnDatasets' && !cond.dicomTag)) {
+                if (rule.conditions?.find(cond => cond.scope.includes('DICOMCondition') && !cond.dicomTag)) {
                     errors.missingField = 'condition dicomTag';
                 }
-                if (rule.conditions?.find(cond => cond.scope != 'StudyCardDICOMConditionOnDatasets' && !cond.shanoirField)) {
+                if (rule.conditions?.find(cond => !cond.scope.includes('DICOMCondition') && !cond.shanoirField)) {
                     errors.missingField = 'condition shanoirField';
                 }
                 if (rule.conditions?.find(cond => !cond.operation)) {
