@@ -75,7 +75,7 @@ VALUES
 	('150',4),
 	('781.00',5);
 
-INSERT INTO card_condition_join
+INSERT INTO study_card_condition_join
 	(study_card_rule_id, condition_id)
 VALUES
 	(7,1),
