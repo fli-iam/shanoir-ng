@@ -30,7 +30,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()"
         (firstOpen)="loadDatasets()"
         [dataLoading]="loading"
-        [title]="node.title + ' n°' + node.id">
+        [title]="node.title + ' n°' + node.id"
+        [qualityTag]="node.qualityTag">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && withMenu && node.id != null">
         <a [routerLink]="detailsPath + node.id" class="open-new-tab">

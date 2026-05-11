@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <span class="cardinality-type" *ngIf="condition.cardinality == 0">for no</span>
     <span class="cardinality-type" *ngIf="condition.cardinality > 0">for at least</span>
     <span class="cardinality" *ngIf="condition.cardinality > 0">{{condition.cardinality}}</span>
-    <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
+    <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the DICOM serie/dataset acquisition, </span>
     <span class="var" *ngIf="condition.scope == 'StudyCardDICOMConditionOnDatasets'" title="{{condition.dicomTag | dicomTagLabel}}">{{condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag?.code | dicomTagLabel)}}</span>
     <span class="var" *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets'">{{fieldLabel}}</span>
     <span class="method">
@@ -60,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [class.error]="cardinalityError"
         min="1" 
         [style.width]="(condition.cardinality ? ((condition.cardinality+'').length + 3) : '4') + 'ch'">
-    <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
+    <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the DICOM serie/dataset acquisition, </span>
     <select-box 
         class="type auto-width"
         [ngModel]="condition.scope" 

@@ -26,6 +26,8 @@ public class QualityCardResultEntry {
 
     private String subjectName;
 
+    private Long datasetAcquisitionId;
+
     @LocalDateAnnotations
     private LocalDate examinationDate;
 
@@ -43,6 +45,14 @@ public class QualityCardResultEntry {
 
     public void setSubjectName(String subjectName) {
         this.subjectName = subjectName;
+    }
+
+    public Long getDatasetAcquisitionId() {
+        return datasetAcquisitionId;
+    }
+
+    public void setDatasetAcquisitionId(Long datasetAcquisitionId) {
+        this.datasetAcquisitionId = datasetAcquisitionId;
     }
 
     public LocalDate getExaminationDate() {

@@ -98,4 +98,17 @@ public class Encryption {
         }
     }
 
+    /*
+     * Anonymizes a string by replacing characters with asterisks, keeping the first and last characters.
+     * @param name the string to anonymize
+     * @return the anonymized string
+     */
+    public static String anonymizeName(String data) {
+        if (data == null || data.length() <= 2) {
+            return data;
+        }
+        String stars = "*".repeat(data.length() - 2);
+        return data.charAt(0) + stars + data.charAt(data.length() - 1);
+}
+
 }

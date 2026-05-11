@@ -17,7 +17,7 @@ package org.shanoir.ng.studycard.service;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
+import org.shanoir.ng.studycard.model.rule.QualityCardRule;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +100,7 @@ public class QualityCardServiceImpl implements QualityCardService {
         qualityCardDb.setId(qualityCard.getId());
         qualityCardDb.setStudyId(qualityCard.getStudyId());
         qualityCardDb.setToCheckAtImport(qualityCard.isToCheckAtImport());
-        if (qualityCardDb.getRules() == null) qualityCardDb.setRules(new ArrayList<QualityExaminationRule>());
+        if (qualityCardDb.getRules() == null) qualityCardDb.setRules(new ArrayList<QualityCardRule>());
         else qualityCardDb.getRules().clear();
         if (qualityCard.getRules() != null) qualityCardDb.getRules().addAll(qualityCard.getRules());
         return qualityCardDb;

@@ -14,15 +14,6 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,13 +24,21 @@ import java.util.Optional;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.Spy;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -202,6 +201,9 @@ public class ImporterServiceTest {
         attributes.setString(Tag.StudyInstanceUID, VR.UI, "123412341234");
         acquisitionAttributes.addDatasetAttributes("1", attributes);
 
+        QualityCard qualityCard = new QualityCard();
+        qualityCard.setId(1L);
+
         try (MockedStatic<DicomProcessing> dicomProcessingMock = Mockito.mockStatic(DicomProcessing.class)) {
             dicomProcessingMock
                     .when(() -> DicomProcessing.getDicomAcquisitionAttributes(serie))
@@ -209,13 +211,13 @@ public class ImporterServiceTest {
             when(datasetAcquisitionContext.generateDeepDatasetAcquisitionForSerie(Mockito.eq(importJob.getUsername()), Mockito.eq(examination.getSubject().getId()), Mockito.eq(serie), Mockito.eq(0), Mockito.any())).thenReturn(datasetAcq);
             when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
             when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
-            when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests
-            when(qualityService.checkQuality(Mockito.eq(examData), Mockito.eq(importJob), any())).thenReturn(qualityResult);
-            when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(qualityResult);
+            when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(qualityCard)); // TODO perform quality card tests
+            when(qualityService.checkQuality(Mockito.eq(datasetAcq), Mockito.eq(acquisitionAttributes), Mockito.eq(Utils.toList(qualityCard)))).thenReturn(qualityResult);
+            //when(qualityService.retrieveQualityCardResult(importJob)).thenReturn(qualityResult);
 
             // WHEN we treat this importjob
-            assertNotNull(qualityResult);
             service.createAllDatasetAcquisition(importJob, 1L);
+            assertNotNull(qualityResult);
 
             ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
             Mockito.verify(taskService, Mockito.times(4)).publishEvent(argument.capture());

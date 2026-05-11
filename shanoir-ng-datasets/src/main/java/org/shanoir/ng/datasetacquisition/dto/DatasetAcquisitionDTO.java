@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.model.StudyCard;
 
 public class DatasetAcquisitionDTO {
@@ -52,6 +53,8 @@ public class DatasetAcquisitionDTO {
     private List<Long> copies;
 
     private LocalDateTime acquisitionStartTime;
+
+    private QualityTag qualityTag;
 
     public Long getId() {
         return id;
@@ -171,5 +174,13 @@ public class DatasetAcquisitionDTO {
 
     public void setAcquisitionStartTime(LocalDateTime acquisitionStartTime) {
         this.acquisitionStartTime = acquisitionStartTime;
+    }
+
+    public QualityTag getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualityTag(QualityTag qualityTag) {
+        this.qualityTag = qualityTag;
     }
 }
