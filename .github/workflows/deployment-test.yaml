@@ -36,11 +36,13 @@ on:
     inputs:
       image_tag:
         description: >
-          GHCR tag for ghcr.io/fli-iam/shanoir-ng/* images. Prefer develop (daily
-          snaps) or a release NG_vX.Y.Z. Do not rely on latest — several services
-          are not published under that tag.
+          GHCR tag for ghcr.io/fli-iam/shanoir-ng/* images. Use auto to select
+          the newest complete NG_vX.Y.Z release image set, or pass an explicit
+          published tag such as NG_v2.10.0. Development builds, when published,
+          are tagged by commit SHA rather than by the develop branch name. Do
+          not rely on latest; it is not a complete stack tag.
         required: false
-        default: "develop"
+        default: "auto"
         type: string
   pull_request:
     branches: [develop, master]
@@ -86,14 +88,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Resolve SHANOIR_IMAGE_TAG
         shell: bash
         run: |
           set -euo pipefail
 
           TAG='${{ github.event.inputs.image_tag }}'
-          TAG="${TAG:-develop}"
+          TAG="${TAG:-auto}"
 
           images=(
             keycloak-database keycloak database database-migrations users studies
@@ -112,6 +114,27 @@ jobs:
             return 0
           }
 
+          if [ "${TAG}" = "auto" ]; then
+            echo "Resolving newest complete NG_vX.Y.Z image set..."
+            while IFS= read -r candidate; do
+              if full_stack_present "${candidate}"; then
+                echo "Using image tag: ${candidate}"
+                echo "SHANOIR_IMAGE_TAG=${candidate}" >> "$GITHUB_ENV"
+                exit 0
+              fi
+              echo "Skipping incomplete image tag: ${candidate}"
+            done < <(
+              git ls-remote --tags --refs https://github.com/fli-iam/shanoir-ng.git 'NG_v*' \
+                | awk '{print $2}' \
+                | sed 's#refs/tags/##' \
+                | grep -E '^NG_v[0-9]+\.[0-9]+\.[0-9]+$' \
+                | sort -Vr
+            )
+
+            echo "ERROR: Could not find a complete NG_vX.Y.Z image set in GHCR." >&2
+            exit 1
+          fi
+
           if full_stack_present "${TAG}"; then
             echo "Using image tag: ${TAG}"
             echo "SHANOIR_IMAGE_TAG=${TAG}" >> "$GITHUB_ENV"
@@ -120,17 +143,8 @@ jobs:
 
           echo "WARN: tag '${TAG}' is missing one or more required images."
 
-          # Rolling daily images (upstream); avoid 'latest' (incomplete for infra).
-          for fallback in develop NG_v2.10.0; do
-            if [ "${fallback}" != "${TAG}" ] && full_stack_present "${fallback}"; then
-              echo "Fallback: using image tag ${fallback} instead."
-              echo "SHANOIR_IMAGE_TAG=${fallback}" >> "$GITHUB_ENV"
-              exit 0
-            fi
-          done
-
           echo "ERROR: Could not find a GHCR tag with all required microservice images." >&2
-          echo "Set workflow_dispatch image_tag explicitly (e.g. develop or NG_v2.10.0)." >&2
+          echo "Set workflow_dispatch image_tag explicitly (e.g. NG_v2.10.0 or a published commit SHA)." >&2
           exit 1
 
       - name: Configure /etc/hosts
