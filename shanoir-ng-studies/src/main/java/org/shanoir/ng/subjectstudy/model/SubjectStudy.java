@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.subjectstudy.model;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.quality.QualityTag;
@@ -24,13 +24,11 @@ import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.tag.model.Tag;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 
@@ -66,23 +64,20 @@ public class SubjectStudy extends AbstractEntity {
     /** Subject type. */
     private Integer subjectType;
 
-    /** Tags associated to the subject. */
-    @OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.MERGE, orphanRemoval = true)
-    private List<SubjectStudyTag> subjectStudyTags;
+    @Transient
+    private List<Tag> tags;
 
     /** QualityCard tags associated to the subject. */
     private Integer qualityTag;
 
-    /**
-     * @return the tags
-     */
     public List<Tag> getTags() {
-        if (getSubjectStudyTags() == null) return null;
-        return getSubjectStudyTags().stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
+        if (tags != null) return tags;
+        if (subject == null || subject.getTags() == null) return null;
+        return new ArrayList<>(subject.getTags());
     }
 
-    public List<SubjectStudyTag> getSubjectStudyTags() {
-        return subjectStudyTags;
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
     }
 
     public QualityTag getQualityTag() {
@@ -91,10 +86,6 @@ public class SubjectStudy extends AbstractEntity {
 
     public void setQualityTag(QualityTag tag) {
         this.qualityTag = tag != null ? tag.getId() : null;
-    }
-
-    public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {
-        this.subjectStudyTags = subjectStudyTags;
     }
 
     /**
