@@ -14,6 +14,18 @@
 # SHANOIR_MIGRATION=never for normal operation (see README).
 
 services:
+  database:
+    environment:
+      - MARIADB_ROOT_PASSWORD=shanoir-ci
+      - MARIADB_DATABASE=shanoir
+      - MARIADB_USER=shanoir
+      - MARIADB_PASSWORD=shanoir
+  keycloak-database:
+    environment:
+      - MARIADB_ROOT_PASSWORD=shanoir-ci
+      - MARIADB_DATABASE=keycloak
+      - MARIADB_USER=keycloak
+      - MARIADB_PASSWORD=keycloak
   smtp-sink:
     container_name: smtp-sink
     image: mailhog/mailhog:v1.0.1
