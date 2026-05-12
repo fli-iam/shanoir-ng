@@ -60,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </table>
 </div>
 
-@if (!report) {
+@if (!report && !buildingReport) {
     <div>
         <button class="right-icon" (click)="callBidsValidator()" [disabled]="task && task.progress < 1">
             Call BIDS Validator
@@ -72,7 +72,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <span (click)="downloadBidsValidatorReport()" class="dl-button" title="Download BIDS Validator Report as JSON">
             <i class="fas fa-download"></i>
         </span>
-        <ngx-json-viewer class="report-viewer" [json]="truncatedReport"></ngx-json-viewer>
+        <span (click)="callBidsValidator()" class="refresh-button" title="Refresh BIDS Validator Report">
+            @if (buildingReport) {
+                <i class="fas fa-spinner fa-spin"></i>
+            } @else {
+                 <i class="fas fa-refresh"></i>
+            }
+        </span>
+        @if (report) {
+            <ngx-json-viewer class="report-viewer" [json]="truncatedReport"></ngx-json-viewer>
+        }
     </div>
 }
 
