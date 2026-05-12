@@ -17,6 +17,13 @@ services:
   keycloak-database:
     environment:
       - MYSQL_ROOT_PASSWORD=password
+  database:
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-ppassword" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
   smtp-sink:
     container_name: smtp-sink
     image: mailhog/mailhog:v1.0.1
