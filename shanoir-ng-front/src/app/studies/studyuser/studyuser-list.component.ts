@@ -70,6 +70,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     invitationMail: string;
     invitationFunction: string;
     newUser: User[] = [];
+    minExpirationDate: Date = new Date();
 
     private onTouchedCallback = () => { return; };
     private onChangeCallback: (any) => void = () => { return; };
@@ -183,6 +184,11 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         else if (index > -1 && !selected) {
             su.centers.splice(index, 1);
         }
+        this.onStudyUserEdit();
+    }
+
+    onExpirationChange(su: StudyUser, expiration: Date) {
+        su.expiration = expiration;
         this.onStudyUserEdit();
     }
 

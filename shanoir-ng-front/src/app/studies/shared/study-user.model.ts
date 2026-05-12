@@ -31,6 +31,7 @@ export class StudyUser {
     user: User;
     confirmed: boolean = false;
     centers: Center[];
+    expiration: Date;
 
     public completeMember(users: User[]) {
         StudyUser.completeMember(this, users);
@@ -39,6 +40,10 @@ export class StudyUser {
     public static completeMember(studyUser: StudyUser, users: User[]) {
         const user: User = users.find(u => u.id == studyUser.userId);
         if (user) studyUser.user = user;
+    }
+    
+    get expired(): boolean {
+        return this.expiration && this.expiration.getTime() < new Date().getTime();
     }
 }
 
@@ -53,6 +58,7 @@ export class StudyUserDTO {
     user: User;
     confirmed: boolean = false;
     centerIds: number[];
+    expiration: Date;
 
     constructor(studyUser: StudyUser) {
         this.id = studyUser.id;
@@ -65,5 +71,6 @@ export class StudyUserDTO {
         this.user = studyUser.user;
         this.confirmed = studyUser.confirmed;
         this.centerIds = studyUser.centers?.map(center => center.id);
+        this.expiration = studyUser.expiration;
     }
 }

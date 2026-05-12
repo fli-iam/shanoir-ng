@@ -23,7 +23,8 @@ import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErr
                 [disabled]="disabled"
                 [ngModel]="dateString"
                 (ngModelChange)="onModelChange($event)"
-                (focusout)="onTouch()"/>
+                (focusout)="onTouch()"
+                [min]="min ? (min | date:'yyyy-MM-dd') : null"/>
     `,
     styles: [
         ':host { display: inline-block; height: 19px; }',
@@ -46,6 +47,7 @@ export class DatepickerComponent implements ControlValueAccessor {
     onTouch: () => void;
     private onChange: (value) => void;
     @Input() disabled: boolean = false;
+    @Input() min: Date;
 
     onModelChange(dateStr: string) {
         if (this.dateString == dateStr) return;

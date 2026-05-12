@@ -109,8 +109,8 @@ export class StudyDTOService {
         if (dto.studyUserList) {
             entity.studyUserList = dto.studyUserList.map(studyUserDto => {
                 const studyUser: StudyUser = new StudyUser();
-                //studyUser.completeMember = studyUserDto.completeMember;
                 studyUser.confirmed = studyUserDto.confirmed;
+                studyUser.expiration = new Date(studyUserDto.expiration);
                 studyUser.id = studyUserDto.id;
                 studyUser.receiveNewImportReport = studyUserDto.receiveNewImportReport;
                 studyUser.receiveStudyUserReport = studyUserDto.receiveStudyUserReport;
