@@ -67,7 +67,6 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
@@ -225,7 +224,6 @@ public class StudyServiceImpl implements StudyService {
         if (study.getSubjectStudyList() != null) {
             subjectStudyListSave = new ArrayList<SubjectStudy>(study.getSubjectStudyList());
         }
-        Map<Long, List<SubjectStudyTag>> subjectStudyTagSave = new HashMap<>();
         study.setSubjectStudyList(null);
         Study studyDb = studyRepository.save(study);
 
@@ -239,16 +237,7 @@ public class StudyServiceImpl implements StudyService {
                 newSubjectStudy.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
                 newSubjectStudy.setSubjectType(subjectStudy.getSubjectType());
                 newSubjectStudy.setStudy(studyDb);
-                subjectStudyTagSave.put(subjectStudy.getSubject().getId(), subjectStudy.getSubjectStudyTags());
                 studyDb.getSubjectStudyList().add(newSubjectStudy);
-            }
-            studyDb = studyRepository.save(studyDb);
-
-            for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) {
-                subjectStudy.setSubjectStudyTags(subjectStudyTagSave.get(subjectStudy.getSubject().getId()));
-                for (SubjectStudyTag ssTag : subjectStudy.getSubjectStudyTags()) {
-                    ssTag.setSubjectStudy(subjectStudy);
-                }
             }
             studyDb = studyRepository.save(studyDb);
         }
