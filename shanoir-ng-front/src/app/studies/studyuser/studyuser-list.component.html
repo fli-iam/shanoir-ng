@@ -89,18 +89,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<span *ngIf="!pannelStudyUser.confirmed" class="bool-false"><i class="fas fa-times"></i></span>
 							</span>
 						</li>
-						<li *ngIf="pannelStudyUser.expiration">
-							<label>Expiration</label>
-							<span class="right-col fix-icon left-icon">
-								<span *ngIf="!pannelStudyUser.expired" class="bool-true"><i class="fas fa-check"></i></span>
-								<span *ngIf="pannelStudyUser.expired" class="bool-false"><i class="fas fa-times"></i></span>
-								@if (mode == 'view') {
-									{{pannelStudyUser.expiration | date}}
-								} @else {
-									<datepicker [ngModel]="pannelStudyUser.expiration" (userChange)="onExpirationChange(pannelStudyUser, $event)" [min]="minExpirationDate"></datepicker>
-								}
-							</span>
-						</li>
+						@if (pannelStudyUser.expiration || mode != 'view') {
+							<li>
+								<label>Expiration</label>
+								<span class="right-col fix-icon left-icon">
+									<span *ngIf="!pannelStudyUser.expired" class="bool-true"><i class="fas fa-check"></i></span>
+									<span *ngIf="pannelStudyUser.expired" class="bool-false"><i class="fas fa-times"></i></span>
+									@if (mode == 'view' && pannelStudyUser.expiration) {
+										{{pannelStudyUser.expiration | localDateFormatPipe}}
+									} @else {
+										<datepicker [ngModel]="pannelStudyUser.expiration" (ngModelChange)="onExpirationChange(pannelStudyUser, $event)" [min]="minExpirationDate"></datepicker>
+									}
+								</span>
+							</li>
+						}
 						<li>
 							<label>Can see all</label>
 							<span class="right-col">
