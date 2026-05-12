@@ -19,7 +19,7 @@ services:
       - MYSQL_ROOT_PASSWORD=password
   database:
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-ppassword" ]
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
       interval: 5s
       timeout: 5s
       retries: 20
