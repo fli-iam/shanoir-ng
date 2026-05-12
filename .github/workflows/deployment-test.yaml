@@ -191,7 +191,7 @@ jobs:
       - name: Pull published images
         run: |
           set -euo pipefail
-          for attempt in 1 2 3; do;
+          for attempt in 1 2 3; do
             if docker compose pull; then
               exit 0
             fi
