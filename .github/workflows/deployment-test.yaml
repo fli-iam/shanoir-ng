@@ -189,7 +189,18 @@ jobs:
           fi
 
       - name: Pull published images
-        run: docker compose pull
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do;
+            if docker compose pull; then
+              exit 0
+            fi
+            echo "Pull failed on attempt ${attempt}, retrying..."
+            sleep $((attempt * 20 ))
+          done
+          echo "Pulling failed after 3 attempts" >&2
+          exit 1
+
 
       - name: Bootstrap installation
         run: bash ./bootstrap.sh --clean --no-build --no-dcm4chee
