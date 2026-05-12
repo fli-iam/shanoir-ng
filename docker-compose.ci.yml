@@ -51,6 +51,7 @@ services:
     environment:
       - VIP_URL_HOST=localhost
       - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - SHANOIR_MIGRATION=dev
       - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
       - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
   import:
