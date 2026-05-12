@@ -17,6 +17,9 @@ services:
   keycloak-database:
     environment:
       - MYSQL_ROOT_PASSWORD=password
+  database-migrations:
+    environment:
+      - SHANOIR_MIGRATION=dev
   database:
     healthcheck:
       test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
