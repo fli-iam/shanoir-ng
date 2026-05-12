@@ -23,7 +23,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -43,7 +42,7 @@ import org.springframework.data.repository.query.Param;
  */
 public interface SubjectRepository extends JpaRepository<Subject, Long>, SubjectRepositoryCustom {
 
-    @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags", "subjectStudyList.subjectStudyTags", "subjectStudyList.study.studyUserList", "pseudonymusHashValues", "study.id", "study.studyUserList", "study.studyUserList.studyUserRights"})
+    @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags", "subjectStudyList.study.studyUserList", "pseudonymusHashValues", "study.id", "study.studyUserList", "study.studyUserList.studyUserRights"})
     Optional<Subject> findById(Long id);
 
     @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.studyUserList"})
@@ -84,11 +83,6 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>, Subject
     boolean existsBySubjectStudyListStudyIdAndName(Long studyId, String name);
 
     List<Subject> findByStudy_Id(Long studyId);
-
-    // delete subject study tags by subject id
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM SubjectStudyTag sst WHERE sst.subjectStudy.subject.id = :subjectId")
-    void deleteSubjectStudyTagsBySubjectId(@Param("subjectId") Long subjectId);
 
     @Query("""
             select new org.shanoir.ng.shared.core.model.IdName(s.id, s.name)
