@@ -16,7 +16,6 @@ package org.shanoir.ng.subject.service;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +42,6 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.tag.repository.TagRepository;
@@ -119,7 +117,6 @@ public class SubjectServiceImpl implements SubjectService {
         // Delete all associated study_examination
         studyExaminationRepository.deleteBySubjectId(id);
         subject.get().getTags().clear();
-        subjectRepository.deleteSubjectStudyTagsBySubjectId(id);
         subjectRepository.deleteById(id);
         if (subject.get().isPreclinical())
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
@@ -282,7 +279,6 @@ public class SubjectServiceImpl implements SubjectService {
             subjectStudy.setSubjectType(subject.getSubjectType());
             subjectStudy.setPhysicallyInvolved(subject.isPhysicallyInvolved());
             subjectStudy.setSubjectStudyIdentifier(subject.getStudyIdentifier());
-            List<SubjectStudyTag> subjectStudyTagList = new ArrayList<>();
             if (subject.getTags() != null && !subject.getTags().isEmpty()) {
                 Set<Tag> managedTags = new HashSet<>();
                 List<Long> tagIds = subject.getTags().stream()
@@ -290,15 +286,8 @@ public class SubjectServiceImpl implements SubjectService {
                         .collect(Collectors.toList());
                 Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
                 managedTagsIt.forEach(managedTags::add);
-                subject.setTags((managedTags));
-                for (Tag managedTag : managedTags) {
-                    SubjectStudyTag subjectStudyTag = new SubjectStudyTag();
-                    subjectStudyTag.setTag(managedTag);
-                    subjectStudyTag.setSubjectStudy(subjectStudy);
-                    subjectStudyTagList.add(subjectStudyTag);
-                }
+                subject.setTags(managedTags);
             }
-            subjectStudy.setSubjectStudyTags(subjectStudyTagList);
             List<SubjectStudy> subjectStudyListNew = new ArrayList<SubjectStudy>();
             subjectStudyListNew.add(subjectStudy);
             subject.setSubjectStudyList(subjectStudyListNew);
@@ -312,28 +301,7 @@ public class SubjectServiceImpl implements SubjectService {
         subject.setSubjectType(subjectStudy.getSubjectType());
         subject.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
         subject.setQualityTag(subjectStudy.getQualityTag());
-        mapSubjectStudyTagListToSubjectTagList(subject, subjectStudy);
         return subject;
-    }
-
-    private void mapSubjectStudyTagListToSubjectTagList(Subject subject, SubjectStudy subjectStudy) {
-        Set<Tag> tags;
-        if (subject.getTags() == null) {
-            tags = new HashSet<Tag>();
-        } else {
-            tags = subject.getTags();
-        }
-        tags.clear(); // always update with new state
-        if (subjectStudy.getSubjectStudyTags() != null) {
-            subjectStudy.getSubjectStudyTags().stream().forEach(st -> {
-                Optional<Tag> tagOpt = tagRepository.findById(st.getTag().getId());
-                if (tagOpt.isPresent()) {
-                    Tag tag = tagOpt.get();
-                    tags.add(tag);
-                }
-            });
-        }
-        subject.setTags(tags);
     }
 
     @Override
@@ -387,34 +355,6 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public void mapSubjectStudyTagListToSubjectStudyTagList(SubjectStudy sSOld, SubjectStudy sSNew) {
-        List<SubjectStudyTag> subjectStudyTagsOld = sSOld.getSubjectStudyTags();
-        if (subjectStudyTagsOld == null) {
-            subjectStudyTagsOld = new ArrayList<>();
-        }
-        Set<Long> newTagIds = sSNew.getSubjectStudyTags() == null
-                ? Collections.emptySet()
-                : sSNew.getSubjectStudyTags().stream()
-                        .map(sst -> sst.getTag().getId())
-                        .collect(Collectors.toSet());
-        subjectStudyTagsOld.removeIf(oldTag -> !newTagIds.contains(oldTag.getTag().getId()));
-        if (sSNew.getSubjectStudyTags() != null) {
-            for (SubjectStudyTag sst : sSNew.getSubjectStudyTags()) {
-                boolean alreadyExists = subjectStudyTagsOld.stream()
-                        .anyMatch(old -> old.getTag().getId().equals(sst.getTag().getId()));
-                if (!alreadyExists) {
-                    SubjectStudyTag subjectStudyTag = new SubjectStudyTag();
-                    Optional<Tag> tag = tagRepository.findById(sst.getTag().getId());
-                    subjectStudyTag.setTag(tag.get());
-                    subjectStudyTag.setSubjectStudy(sSOld);
-                    subjectStudyTagsOld.add(subjectStudyTag);
-                }
-            }
-        }
-        sSOld.setSubjectStudyTags(subjectStudyTagsOld);
-    }
-
-    @Override
     public boolean updateSubjectInMicroservices(SubjectDTO subjectDTO) throws MicroServiceCommunicationException {
         try {
             rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE,
@@ -460,9 +400,6 @@ public class SubjectServiceImpl implements SubjectService {
         Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
         if (subjectStudyList != null) {
             subjectStudyList.stream().forEach(ss -> {
-                // after testing this seems to be useless :
-                // ss.setSubjectStudyTags(subjectStudyRepository.findSubjectStudyTagsByStudyIdAndSubjectId(studyId,
-                // ss.getSubject().getId()));
                 if (studyWithTags != null) {
                     ss.getStudy().setTags(studyWithTags.getTags());
                 }
@@ -494,9 +431,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public Subject findByIdentifierInStudiesWithRights(String identifier, List<Study> studies) {
         Iterable<Long> studyIds = studies.stream().map(AbstractEntity::getId).collect(Collectors.toList());
-        Subject subject = subjectRepository.findFirstByIdentifierAndSubjectStudyListStudyIdIn(identifier, studyIds);
-        loadSubjectStudyTags(subject);
-        return subject;
+        return subjectRepository.findFirstByIdentifierAndSubjectStudyListStudyIdIn(identifier, studyIds);
     }
 
     @Override
@@ -516,11 +451,7 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public List<Subject> findByPreclinical(boolean preclinical) {
-        List<Subject> subjects = subjectRepository.findByPreclinical(preclinical);
-        subjects.stream().forEach(s -> {
-            loadSubjectStudyTags(s);
-        });
-        return subjects;
+        return subjectRepository.findByPreclinical(preclinical);
     }
 
     @Override
@@ -531,29 +462,6 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public boolean isSubjectNameExistForStudy(Long studyId, String subjectName) {
         return this.subjectRepository.existsBySubjectStudyListStudyIdAndName(studyId, subjectName);
-    }
-
-    /**
-     * Use this method to avoid two bags violation exception and load
-     * subjectStudyTags.
-     *
-     * @param subject
-     */
-    private void loadSubjectStudyTags(Subject subject) {
-        if (subject != null) {
-            List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
-            if (subjectStudyList != null) {
-                subjectStudyList.stream().forEach(ss -> {
-                    ss.getSubjectStudyTags().clear();
-                    ss.getSubjectStudyTags().addAll(subjectStudyRepository
-                            .findSubjectStudyTagsByStudyIdAndSubjectId(ss.getStudy().getId(), ss.getSubject().getId()));
-                    Study studyWithTags = studyRepository.findStudyWithTagsById(ss.getStudy().getId());
-                    if (studyWithTags != null) {
-                        ss.getStudy().setTags(studyWithTags.getTags());
-                    }
-                });
-            }
-        }
     }
 
 }
