@@ -137,7 +137,7 @@ public class UploadFromTableActionListener implements ActionListener {
         Long centerId = null;
         Cell centerIdCell = row.getCell(15);
         value = handleCell(centerIdCell);
-        if (value != null && !value.isEmpty()) {
+        if (StringUtils.hasText(value) && value.matches("\\d+")) {
             centerId = Long.valueOf(value);
         }
         importJob.setCenterId(centerId);
