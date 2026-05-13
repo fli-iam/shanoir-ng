@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
+import org.assertj.core.util.Lists;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -48,6 +49,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -226,7 +229,22 @@ public class DatasetDownloaderServiceImpl {
             }
 
             if (sorting.contains("acquisition")) {
-                path += "/Acq_id_" + relevantDataset.getDatasetAcquisition().getId();
+                if (sorting.contains("acquisitionDate")) {
+                    String dateTime;
+                    if (Objects.isNull(relevantDataset.getDatasetAcquisition().getAcquisitionStartTime())) {
+                        Map<String, String> dateTimeMap = datasetService.getSpecificDicomMetadataValues(relevantDataset, Lists.list("AcquisitionDate", "AcquisitionTime"));
+                        dateTimeMap.putIfAbsent("AcquisitionDate", "NoDate");
+                        dateTimeMap.putIfAbsent("AcquisitionDate", "NoTime");
+                        dateTime = LocalDateTime.parse(dateTimeMap.get("AcquisitionDate"), DateTimeFormatter.ofPattern("yyyyMMdd")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                            + "_"
+                            + dateTimeMap.get("AcquisitionTime").substring(0, 2) + "-" + dateTimeMap.get("AcquisitionTime").substring(2, 4);
+                    } else {
+                        dateTime = relevantDataset.getDatasetAcquisition().getAcquisitionStartTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH:mm"));
+                    }
+                    path += "/Acq_date_" + dateTime + "_acq_id_" + relevantDataset.getDatasetAcquisition().getId();
+                } else {
+                    path += "/Acq_id_" + relevantDataset.getDatasetAcquisition().getId();
+                }
             }
             datasetDownloadPath.put(dataset.getId(), path);
         }

@@ -585,6 +585,26 @@ public class DatasetServiceImpl implements DatasetService {
         return metadataFile;
     }
 
+    public Map<String, String> getSpecificDicomMetadataValues(Dataset dataset, List<String> metadataKeys) {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode metadatas = null;
+        Map<String, String> results = new HashMap<>();
+
+        try {
+            String metadataStr = getMetadataFromDicom(dataset);
+            metadatas = mapper.readTree(metadataStr).get(0);
+        } catch (Exception ignored) {
+        }
+
+        for (String metadataKey : metadataKeys) {
+            if (Objects.nonNull(metadatas) && metadatas.has(metadataKey) && metadatas.get(metadataKey).has("Value")) {
+                results.put(metadataKey, metadatas.get(metadataKey).get("Value").get(0).asText());
+            }
+        }
+        LOG.info("TEMPO : " + results);
+        return results;
+    }
+
     protected void fillMetadataFile(File metadataFile, List<Long> datasetIds, List<String> metadataKeys) throws Exception {
         LOG.info("Filling metadata file.");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(metadataFile, true))) {
