@@ -18,12 +18,8 @@ import java.util.List;
 
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.shanoir.ng.dataset.dto.DatasetWithProcessingsDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.tag.model.StudyTag;

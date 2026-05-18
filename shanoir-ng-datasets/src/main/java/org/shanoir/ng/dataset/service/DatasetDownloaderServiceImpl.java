@@ -18,9 +18,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
+import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -42,6 +44,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,6 +82,9 @@ public class DatasetDownloaderServiceImpl {
     protected DatasetService datasetService;
 
     @Autowired
+    protected DatasetRepository datasetRepository;
+
+    @Autowired
     protected WADODownloaderService downloader;
 
     @Autowired
@@ -110,6 +116,7 @@ public class DatasetDownloaderServiceImpl {
         massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, null);
     }
 
+    @Transactional(readOnly = true)
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting) throws RestServiceException {
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
@@ -127,6 +134,7 @@ public class DatasetDownloaderServiceImpl {
             }
 
             for (Dataset dataset : datasets) {
+                Hibernate.initialize(dataset.getDatasetExpressions());
                 String datasetFilePath = "";
                 String subjectName = getSubjectName(dataset).replace(File.separator, "_");
 

@@ -27,7 +27,9 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.springframework.stereotype.Service;
 
+@Service
 public final class DatasetUtils {
 
     private DatasetUtils() { }
@@ -137,6 +139,13 @@ public final class DatasetUtils {
         return dataset;
     }
 
+    /**
+     * Care, some fields might be lazy loaded, ensure to use this method in a transaction
+     * And to get the parameter from a repository inside it
+     * @param d the dataset to copy
+     *
+     * @return a new dataset copy object
+     */
     public static Dataset copyDatasetFromDataset(Dataset d) {
         DatasetType type = d.getType();
         return switch (type) {

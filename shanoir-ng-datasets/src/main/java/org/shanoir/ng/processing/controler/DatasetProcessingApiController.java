@@ -123,7 +123,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
         final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
         List<Dataset> inputDatasets = datasetProcessing.get().getInputDatasets();
-        return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(inputDatasets), HttpStatus.OK);
+        return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOList(inputDatasets), HttpStatus.OK);
     }
 
     @Override
@@ -131,7 +131,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
         final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
         List<Dataset> outputDatasets = datasetProcessing.get().getOutputDatasets();
-        return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(outputDatasets), HttpStatus.OK);
+        return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOList(outputDatasets), HttpStatus.OK);
     }
 
     @Override

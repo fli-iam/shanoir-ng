@@ -38,6 +38,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -138,8 +139,10 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         massiveDownload(processingList, resultOnly, format, response, withManifest, converterId);
     }
 
+    @Transactional(readOnly = true)
     protected void manageProcessingsDownload(List<DatasetProcessing> processingList, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String format, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId) throws RestServiceException, IOException {
         for (DatasetProcessing processing : processingList) {
+            datasetProcessingRepository.findById(processing.getId()).get();
             String processingFilePath = getExecFilepath(processing.getId(), getExaminationDatas(processing.getInputDatasets()));
             String subjectName = getProcessingSubject(processing);
             List<Dataset> inputs = processing.getInputDatasets();

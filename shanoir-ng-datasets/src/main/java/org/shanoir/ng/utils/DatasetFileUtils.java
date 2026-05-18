@@ -29,6 +29,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.dto.InputDTO;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -105,6 +106,7 @@ public final class DatasetFileUtils {
     public static Optional<URL> getFirstDatasetFilePathURL(
             final Dataset dataset,
             final DatasetExpressionFormat format) {
+        Hibernate.initialize(dataset.getDatasetExpressions());
         return dataset.getDatasetExpressions().stream()
                 .filter(expr -> format.equals(expr.getDatasetExpressionFormat()))
                 .findFirst()

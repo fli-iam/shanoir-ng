@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -275,7 +276,8 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     /**
      * Process all series / acquisitions found in output JSON
      */
-    private void processSeries(JSONArray series, ExecutionMonitoring execution) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
+    @Transactional(readOnly = true)
+    protected void processSeries(JSONArray series, ExecutionMonitoring execution) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
         for (int i = 0; i < series.length(); i++) {
             JSONObject serie = series.getJSONObject(i);
             Long serieId = serie.getLong(ID);
@@ -283,7 +285,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             List<Dataset> datasets = execution.getInputDatasets().stream()
                     .filter(ds -> ds.getDatasetAcquisition() != null
                             && ds.getDatasetAcquisition().getId().equals(serieId))
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (datasets.isEmpty()) {
                 LOG.error("No dataset found for serie/acquisition [" + serieId + "]");

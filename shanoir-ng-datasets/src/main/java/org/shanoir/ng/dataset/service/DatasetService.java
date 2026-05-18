@@ -24,6 +24,7 @@ import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
@@ -181,4 +182,11 @@ public interface DatasetService {
      * @return the centerId
      */
     Long getCenterId(Dataset dataset);
+
+    /**
+     * @param dataset the involved dataset
+     *
+     * @return the datasetExpression
+     */
+    List<DatasetExpression> getDatasetExpressions(Dataset dataset);
 }

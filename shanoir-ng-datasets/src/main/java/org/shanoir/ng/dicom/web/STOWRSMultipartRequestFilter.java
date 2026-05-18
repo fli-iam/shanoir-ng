@@ -150,7 +150,7 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
                     || DICOM_MODALITY_CT.equals(modality)
                     || DICOM_MODALITY_PT.equals(modality)
                     || DICOM_MODALITY_NM.equals(modality)) {
-                if (!dicomImporterService.importDicom(metaInformationAttributes, datasetAttributes, modality)) {
+                if (!dicomImporterService.importDicom(metaInformationAttributes, datasetAttributes)) {
                     LOG.error("Error during import of DICOM MR/CT/PT/NM.");
                     throw new ServletException("Error during import of DICOM MR/CT/PT/NM.");
                 }

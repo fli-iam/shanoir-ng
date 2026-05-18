@@ -23,6 +23,7 @@ import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
@@ -48,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 
 @Service
@@ -70,6 +72,9 @@ public class CardsProcessingService {
     @Autowired
     private ShanoirEventService eventService;
 
+    @Autowired
+    private DatasetAcquisitionRepository acquisitionRepository;
+
 
     /**
      * Apply study card on given acquisitions
@@ -78,10 +83,12 @@ public class CardsProcessingService {
      * @param acquisitions
      * @throws PacsException
      */
+    @Transactional(readOnly = true)
     public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) throws PacsException {
         boolean changeInAtLeastOneAcquisition = false;
         for (DatasetAcquisition acquisition : acquisitions) {
             if (CollectionUtils.isNotEmpty(acquisition.getDatasets()) && CollectionUtils.isNotEmpty(studyCard.getRules())) {
+                acquisition = acquisitionRepository.findById(acquisition.getId()).orElse(null);
                 AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
                 changeInAtLeastOneAcquisition = studyCard.apply(acquisition, dicomAttributes);
             }
@@ -212,7 +219,7 @@ public class CardsProcessingService {
         }
     }
 
-    private void loadExaminationsLazyCollections(List<Examination> examinations, ShanoirEvent event) {
+    protected void loadExaminationsLazyCollections(List<Examination> examinations, ShanoirEvent event) {
         if (examinations != null) {
             int i = 0;
             for (Examination examination : examinations) {
@@ -227,6 +234,7 @@ public class CardsProcessingService {
                         if (acquisition.getDatasets() != null) {
                             for (Dataset dataset : acquisition.getDatasets()) {
                                 if (dataset.getDatasetExpressions() != null) {
+                                    Hibernate.initialize(dataset.getDatasetExpressions());
                                     for (DatasetExpression expression : dataset.getDatasetExpressions()) {
                                         Hibernate.initialize(expression.getDatasetFiles());
                                     }

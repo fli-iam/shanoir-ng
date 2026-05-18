@@ -21,8 +21,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.shanoir.ng.dataset.dto.DatasetMetadataDTO;
-import org.shanoir.ng.dataset.dto.DatasetWithProcessingsDTO;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;

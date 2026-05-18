@@ -49,6 +49,7 @@ import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
@@ -79,6 +80,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -161,6 +163,9 @@ public class BIDSServiceImpl implements BIDSService {
 
     private DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
+    @Autowired
+    private DatasetService datasetService;
+
     @RabbitListener(queues = RabbitMQConfiguration.RELOAD_BIDS)
     public void deleteBidsForStudy(String studyId) {
         Study studyDeleted = studyRepo.findById(Long.valueOf(studyId)).orElse(null);
@@ -201,6 +206,7 @@ public class BIDSServiceImpl implements BIDSService {
      * @throws BidsTreeLockedException
      */
     @Override
+    @Transactional(readOnly = true)
     public File exportAsBids(final Long studyId, String studyName) throws IOException, BidsTreeLockedException {
         // Get folder
         File workFolder = getBidsFolderpath(studyId, studyName);

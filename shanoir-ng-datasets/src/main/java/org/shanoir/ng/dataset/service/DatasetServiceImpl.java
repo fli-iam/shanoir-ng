@@ -598,6 +598,18 @@ public class DatasetServiceImpl implements DatasetService {
         return acq.getExamination().getCenterId();
     }
 
+    @Transactional(readOnly = true)
+    public List<DatasetExpression> getDatasetExpressions(Dataset dataset) {
+        dataset = repository.findById(dataset.getId()).orElse(null);
+        List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
+
+        if (Objects.isNull(datasetExpressions)) {
+            datasetExpressions = new ArrayList<>();
+        }
+        return datasetExpressions;
+    }
+
+    @Transactional(readOnly = true)
     protected void fillMetadataFile(File metadataFile, List<Long> datasetIds, List<String> metadataKeys) throws Exception {
         LOG.info("Filling metadata file.");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(metadataFile, true))) {

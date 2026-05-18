@@ -36,6 +36,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class SeriesInstanceUIDHandler {
@@ -65,6 +66,7 @@ public class SeriesInstanceUIDHandler {
         LOG.info("DICOMWeb cache cleared: acquisitionUIDToSeriesInstanceUIDCache");
     }
 
+    @Transactional(readOnly = true)
     public String findSeriesInstanceUIDFromCacheOrDatabase(String acquisitionUID) {
         String seriesInstanceUID = acquisitionUIDToSeriesInstanceUIDCache.get(acquisitionUID);
         if (seriesInstanceUID == null) {

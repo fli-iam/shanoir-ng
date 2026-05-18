@@ -14,11 +14,9 @@
 
 package org.shanoir.ng.dataset.service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -160,6 +158,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     // Save dataset and dataset files in batch to avoid memory overflow
     @Transactional
     public void saveDatasetWithDatasetFileBatch(Dataset dataset) {
+        Hibernate.initialize(dataset.getDatasetExpressions());
         List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions(); // save list
         dataset.setDatasetExpressions(List.of()); // empty it
         Dataset savedDataset = datasetRepository.save(dataset); // save dataset without dataset expressions

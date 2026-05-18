@@ -210,7 +210,7 @@ public class DicomImporterService {
     }
 
     @Transactional
-    public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes, String modality)
+    public boolean importDicom(Attributes metaInformationAttributes, Attributes attributes)
             throws Exception {
         String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
         Sequence deIdentificationMethodCodeSequence = attributes.getSequence(Tag.DeidentificationMethodCodeSequence);
@@ -636,7 +636,6 @@ public class DicomImporterService {
      * Create the necessary dataset expression.
      *
      * @param attributes
-     * @param measurementDataset
      * @throws MalformedURLException
      * @throws ShanoirException
      */

@@ -523,7 +523,7 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     public boolean getInPacs() {
-        return getDatasetExpressions() != null && getDatasetExpressions().size() > 0;
+        return !getDatasetExpressions().isEmpty();
     }
 
     public List<StudyTag> getTags() {
