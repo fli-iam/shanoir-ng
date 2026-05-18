@@ -35,6 +35,7 @@ import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.tag.mapper.StudyTagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Decorator for dataset acquisitions mapper.
@@ -44,6 +45,9 @@ import org.springframework.data.domain.Page;
  *
  */
 public abstract class DatasetDecorator implements DatasetMapper {
+
+    @Autowired
+    private DatasetMapper delegate;
 
     @Autowired
     private MrDatasetMapper mrMapper;
@@ -66,6 +70,7 @@ public abstract class DatasetDecorator implements DatasetMapper {
     @Autowired
     protected StudyTagMapper studyTagMapper;
 
+    @Override
     public List<IdName> datasetsToIdNameDTOs(final List<Dataset> datasets) {
         final List<IdName> datasetDTOs = new ArrayList<>();
         for (Dataset dataset : datasets) {
@@ -74,6 +79,8 @@ public abstract class DatasetDecorator implements DatasetMapper {
         return datasetDTOs;
     }
 
+    @Override
+    @Transactional(readOnly = true)
     public PageImpl<DatasetDTO> datasetToDatasetDTO(Page<Dataset> page) {
         Page<DatasetDTO> mappedPage = page.map(new Function<Dataset, DatasetDTO>() {
             public DatasetDTO apply(Dataset entity) {
@@ -89,6 +96,8 @@ public abstract class DatasetDecorator implements DatasetMapper {
         return new PageImpl<>(mappedPage);
     }
 
+    @Override
+    @Transactional(readOnly = true)
     public DatasetDTO datasetToDatasetDTO(Dataset dataset) {
         if (dataset == null) {
             return null;
@@ -116,6 +125,8 @@ public abstract class DatasetDecorator implements DatasetMapper {
         return datasetDTO;
     }
 
+    @Override
+    @Transactional(readOnly = true)
     public DatasetWithDependenciesDTO datasetToDatasetWithParentsAndProcessingsDTO(Dataset dataset) {
         if (dataset == null) {
             return null;
@@ -149,5 +160,12 @@ public abstract class DatasetDecorator implements DatasetMapper {
                 .map(Dataset::getId)
                 .collect(Collectors.toList()));
         return datasetWithDependenciesDTO;
+    }
+
+    //Only for DB optimization (creating one connexion for the list, otherwise would be for each element)
+    @Override
+    @Transactional(readOnly = true)
+    public List<DatasetDTO> datasetListToDatasetDTOList(List<Dataset> datasets) {
+        return delegate.datasetListToDatasetDTOList(datasets);
     }
 }

@@ -33,6 +33,7 @@ import org.shanoir.ng.tag.mapper.StudyTagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Decorator for dataset acquisitions mapper.
@@ -79,6 +80,7 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageImpl<MrDatasetDTO> datasetToDatasetDTO(Page<MrDataset> page) {
         org.springframework.data.domain.Page<MrDatasetDTO> mappedPage =  page.map(new Function<MrDataset, MrDatasetDTO>() {
             public MrDatasetDTO apply(MrDataset entity) {
@@ -89,6 +91,7 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MrDatasetDTO datasetToDatasetDTO(MrDataset dataset) {
         if (dataset == null) {
             return null;
@@ -133,6 +136,7 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MrDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(MrDataset dataset) {
         if (dataset == null) {
             return null;

@@ -17,16 +17,12 @@ package org.shanoir.ng.datasetacquisition.dto.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.shanoir.ng.dataset.dto.DatasetWithProcessingsDTO;
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetType;
-import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
-import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
-import org.shanoir.ng.tag.mapper.StudyTagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -43,15 +39,6 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 
     @Autowired
     private ExaminationDatasetAcquisitionMapper delegate;
-
-    @Autowired
-    private DatasetService datasetService;
-
-    @Autowired
-    protected StudyTagMapper studyTagMapper;
-
-    @Autowired
-    protected DatasetProcessingMapper datasetProcessingMapper;
 
     @Override
     public List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
@@ -75,33 +62,6 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
         datasetAcquisitionDTO.setStudyId(datasetAcquisition.getExamination().getStudyId());
         datasetAcquisitionDTO.setExaminationId(datasetAcquisition.getExamination().getId());
         return datasetAcquisitionDTO;
-    }
-
-    @Override
-    public DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset) {
-        if (dataset == null) {
-            return null;
-        }
-
-        DatasetWithProcessingsDTO datasetWithProcessingsDTO = new DatasetWithProcessingsDTO();
-
-        datasetWithProcessingsDTO.setCreationDate(dataset.getCreationDate());
-        datasetWithProcessingsDTO.setGroupOfSubjectsId(dataset.getGroupOfSubjectsId());
-        datasetWithProcessingsDTO.setId(dataset.getId());
-        datasetWithProcessingsDTO.setOriginMetadata(datasetMetadataToDatasetMetadataDTO(dataset.getOriginMetadata()));
-        datasetWithProcessingsDTO.setStudyId(dataset.getStudyId());
-        datasetWithProcessingsDTO.setSubjectId(dataset.getSubjectId());
-        datasetWithProcessingsDTO.setUpdatedMetadata(datasetMetadataToDatasetMetadataDTO(dataset.getUpdatedMetadata()));
-        datasetWithProcessingsDTO.setName(dataset.getName());
-        if (dataset.getType() != null) {
-            datasetWithProcessingsDTO.setType(dataset.getType().name());
-        }
-        datasetWithProcessingsDTO.setCenterId(datasetService.getCenterId(dataset));
-        datasetWithProcessingsDTO.setInPacs(dataset.getInPacs());
-        datasetWithProcessingsDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(dataset.getTags()));
-        datasetWithProcessingsDTO.setProcessings(datasetProcessingMapper.datasetProcessingListToDatasetProcessingDTOList(dataset.getProcessings()));
-
-        return datasetWithProcessingsDTO;
     }
 
     /**

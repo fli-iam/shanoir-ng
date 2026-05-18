@@ -49,7 +49,4 @@ public interface DatasetProcessingMapper {
      * @return list of dataset processings DTO.
      */
     List<DatasetProcessingDTO> datasetProcessingListToDatasetProcessingDTOList(List<DatasetProcessing> datasetProcessings);
-
-    @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
-    DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset);
 }

@@ -31,6 +31,7 @@ import org.shanoir.ng.tag.mapper.StudyTagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Decorator for dataset acquisitions mapper.
@@ -77,6 +78,7 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageImpl<EegDatasetDTO> datasetToDatasetDTO(Page<EegDataset> page) {
         org.springframework.data.domain.Page<EegDatasetDTO> mappedPage =  page.map(new Function<EegDataset, EegDatasetDTO>() {
             public EegDatasetDTO apply(EegDataset entity) {
@@ -87,6 +89,7 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EegDatasetDTO datasetToDatasetDTO(EegDataset dataset) {
         if (dataset == null) {
             return null;
@@ -126,6 +129,7 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EegDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(EegDataset dataset) {
         if (dataset == null) {
             return null;

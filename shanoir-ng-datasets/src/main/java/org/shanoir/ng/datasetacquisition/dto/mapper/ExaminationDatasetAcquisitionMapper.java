@@ -61,8 +61,5 @@ public interface ExaminationDatasetAcquisitionMapper {
     ExaminationDatasetAcquisitionDTO datasetAcquisitionToExaminationDatasetAcquisitionDTO(
             DatasetAcquisition datasetAcquisition);
 
-    @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
-    DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset);
-
     DatasetMetadataDTO datasetMetadataToDatasetMetadataDTO(DatasetMetadata datasetMetadata);
 }

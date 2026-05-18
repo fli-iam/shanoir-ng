@@ -281,7 +281,7 @@ public class DatasetApiController implements DatasetApi {
         if (datasets.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+            return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOList(datasets), HttpStatus.OK);
         }
     }
 
@@ -291,7 +291,7 @@ public class DatasetApiController implements DatasetApi {
         if (datasets.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+            return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOList(datasets), HttpStatus.OK);
         }
     }
 
@@ -301,7 +301,7 @@ public class DatasetApiController implements DatasetApi {
         if (datasets.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+            return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOList(datasets), HttpStatus.OK);
         }
     }
 
@@ -335,7 +335,7 @@ public class DatasetApiController implements DatasetApi {
             Long subjectId,
             Long studyId) {
         List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
-        return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+        return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetListToDatasetDTOList(datasets), HttpStatus.OK);
     }
 
     private List<Dataset> getBySubjectStudy(Long subjectId, Long studyId) {

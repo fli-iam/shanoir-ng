@@ -74,7 +74,7 @@ public interface DatasetMapper {
      * @return dataset DTO.
      */
     @IterableMapping(qualifiedByName = "standard")
-    List<DatasetDTO> datasetToDatasetDTO(List<Dataset> datasets);
+    List<DatasetDTO> datasetListToDatasetDTOList(List<Dataset> datasets);
 
 
     /**
@@ -89,8 +89,7 @@ public interface DatasetMapper {
     /**
      * Map a @Dataset to a @IdNameDTO.
      *
-     * @param dataset
-     *            dataset to map.
+     * @param dataset dataset to map.
      * @return dataset DTO.
      */
     IdName datasetToIdNameDTO(Dataset dataset);
