@@ -46,6 +46,8 @@ import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.property.service.DatasetPropertyService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -57,7 +59,6 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
-import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
@@ -143,8 +144,7 @@ public class DatasetServiceImpl implements DatasetService {
     private StudyCardService studyCardService;
 
     @Autowired
-    @Lazy
-    private SubjectRepository subjectRepository;
+    private DatasetProcessingRepository processingRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -583,6 +583,19 @@ public class DatasetServiceImpl implements DatasetService {
         File metadataFile = createMetadataFile(metadataKeys);
         fillMetadataFile(metadataFile, datasetIds, metadataKeys);
         return metadataFile;
+    }
+
+    @Transactional(readOnly = true)
+    public Long getCenterId(Dataset dataset) {
+        DatasetAcquisition acq = dataset.getDatasetAcquisition();
+        if (acq == null || acq.getExamination() == null) {
+            DatasetProcessing dp = processingRepository.findById(dataset.getDatasetProcessing().getId()).orElse(null);
+            if (dp != null && dp.getInputDatasets() != null) {
+                return getCenterId(dp.getInputDatasets().get(0));
+            }
+            return null;
+        }
+        return acq.getExamination().getCenterId();
     }
 
     protected void fillMetadataFile(File metadataFile, List<Long> datasetIds, List<String> metadataKeys) throws Exception {

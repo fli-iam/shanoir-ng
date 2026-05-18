@@ -22,11 +22,13 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.shanoir.ng.dataset.dto.DatasetWithProcessingsDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
+import org.shanoir.ng.tag.model.StudyTag;
 
-@Mapper(componentModel = "spring", uses = { DatasetMapper.class })
+@Mapper(componentModel = "spring", uses = { StudyTag.class, DatasetMetadataMapper.class, DatasetMapper.class})
 @DecoratedWith(DatasetProcessingDecorator.class)
 public interface DatasetProcessingMapper {
 
@@ -46,7 +48,7 @@ public interface DatasetProcessingMapper {
      *            list of dataset processings.
      * @return list of dataset processings DTO.
      */
-    List<DatasetProcessingDTO> datasetProcessingsToDatasetProcessingDTOs(List<DatasetProcessing> datasetProcessings);
+    List<DatasetProcessingDTO> datasetProcessingListToDatasetProcessingDTOList(List<DatasetProcessing> datasetProcessings);
 
     @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
     DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset);

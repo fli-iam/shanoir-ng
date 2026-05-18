@@ -27,6 +27,7 @@ import org.shanoir.ng.dataset.dto.DatasetForRights;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetRightsDTO;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
@@ -92,6 +93,9 @@ public class DatasetSecurityService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private DatasetService datasetService;
 
     /**
      * Check that the connected user has the given right for the given study.
@@ -477,7 +481,7 @@ public class DatasetSecurityService {
         Set<Long> studies = new HashSet<>();
         studies.add(studyId);
         CollectionUtils.emptyIfNull(dataset.getRelatedStudies()).forEach(s -> studies.add(s.getId()));
-        return hasRightOnStudiesCenter(dataset.getCenterId(), studies, rightStr);
+        return hasRightOnStudiesCenter(datasetService.getCenterId(dataset), studies, rightStr);
     }
 
     /**

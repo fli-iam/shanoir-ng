@@ -174,4 +174,11 @@ public interface DatasetService {
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
     File extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws Exception;
+
+    /**
+     * @param dataset the involved dataset
+     *
+     * @return the centerId
+     */
+    Long getCenterId(Dataset dataset);
 }

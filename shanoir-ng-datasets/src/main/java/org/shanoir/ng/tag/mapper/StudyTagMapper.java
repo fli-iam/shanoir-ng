@@ -18,6 +18,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.StudyTagDTO;
+import org.shanoir.ng.tag.model.StudyTagDTOLight;
 
 import java.util.List;
 
@@ -31,4 +32,8 @@ public interface StudyTagMapper {
     List<StudyTag> studyTagDTOListToStudyTagList(List<StudyTagDTO> dtos);
 
     StudyTag studyTagDTOToStudyTag(StudyTagDTO dto);
+
+    StudyTagDTOLight studyTagToStudyTagDTOLight(StudyTag studyTag);
+
+    List<StudyTagDTOLight> studyTagListToStudyTagDTOLightList(List<StudyTag> list);
 }

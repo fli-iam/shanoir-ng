@@ -106,7 +106,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingListToDatasetProcessingDTOList(datasetProcessings), HttpStatus.OK);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingListToDatasetProcessingDTOList(datasetProcessings), HttpStatus.OK);
     }
 
     @Override

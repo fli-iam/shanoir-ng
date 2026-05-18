@@ -15,14 +15,15 @@
 package org.shanoir.ng.dataset.modality;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.mapstruct.*;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
+import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.tag.mapper.StudyTagMapper;
 import org.springframework.data.domain.Page;
 
 /**
@@ -31,7 +32,7 @@ import org.springframework.data.domain.Page;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class, DatasetAcquisitionMapper.class })
+@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class, DatasetProcessingMapper.class, DatasetAcquisitionMapper.class, StudyTagMapper.class, DatasetMapper.class })
 @DecoratedWith(MrDatasetDecorator.class)
 public interface MrDatasetMapper {
 
@@ -39,8 +40,7 @@ public interface MrDatasetMapper {
     /**
      * Map list of @Dataset to list of @IdNameDTO.
      *
-     * @param datasets
-     *            list of datasets.
+     * @param datasets list of datasets.
      * @return list of datasets DTO.
      */
     List<IdName> datasetsToIdNameDTOs(List<MrDataset> datasets);
@@ -48,41 +48,25 @@ public interface MrDatasetMapper {
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param dataset dataset.
      * @return dataset DTO.
      */
     @Named(value = "standard")
-    @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
     MrDatasetDTO datasetToDatasetDTO(MrDataset dataset);
 
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param dataset dataset.
      * @return dataset DTO.
      */
     @Named(value = "withProcessings")
-    @Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
-    @Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
     MrDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(MrDataset dataset);
 
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
-     * @return dataset DTO.
-     */
-    @IterableMapping(qualifiedByName = "standard")
-    List<MrDatasetDTO> datasetToDatasetDTO(List<MrDataset> datasets);
-
-    /**
-     * Map a @Dataset to a @DatasetDTO.
-     *
-     * @param datasets
-     *            dataset.
+     * @param page dataset.
      * @return dataset DTO.
      */
     @IterableMapping(qualifiedByName = "standard")
@@ -96,17 +80,4 @@ public interface MrDatasetMapper {
      * @return dataset DTO.
      */
     IdName datasetToIdNameDTO(MrDataset dataset);
-
-    default List<Long> mapCopiesFromDataset(List<Dataset> copies) {
-        if (copies == null) {
-            return null;
-        }
-        return copies.stream()
-                .map(Dataset::getId)
-                .collect(Collectors.toList());
-    }
-
-    default Long mapSourceFromDataset(Dataset source) {
-        return source != null ? source.getId() : null;
-    }
 }

@@ -27,8 +27,12 @@ import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
+import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.tag.mapper.StudyTagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
@@ -42,15 +46,26 @@ import org.springframework.data.domain.Page;
 public abstract class DatasetDecorator implements DatasetMapper {
 
     @Autowired
-    private DatasetMapper defaultMapper;
-
-    @Autowired
     private MrDatasetMapper mrMapper;
 
     @Autowired
-    protected EegDatasetMapper eegMapper;
+    private EegDatasetMapper eegMapper;
 
-    @Override
+    @Autowired
+    protected DatasetMetadataMapper datasetMetadataMapper;
+
+    @Autowired
+    protected DatasetService datasetService;
+
+    @Autowired
+    protected DatasetProcessingMapper datasetProcessingMapper;
+
+    @Autowired
+    protected DatasetAcquisitionMapper datasetAcquisitionMapper;
+
+    @Autowired
+    protected StudyTagMapper studyTagMapper;
+
     public List<IdName> datasetsToIdNameDTOs(final List<Dataset> datasets) {
         final List<IdName> datasetDTOs = new ArrayList<>();
         for (Dataset dataset : datasets) {
@@ -59,7 +74,6 @@ public abstract class DatasetDecorator implements DatasetMapper {
         return datasetDTOs;
     }
 
-    @Override
     public PageImpl<DatasetDTO> datasetToDatasetDTO(Page<Dataset> page) {
         Page<DatasetDTO> mappedPage = page.map(new Function<Dataset, DatasetDTO>() {
             public DatasetDTO apply(Dataset entity) {
@@ -68,25 +82,72 @@ public abstract class DatasetDecorator implements DatasetMapper {
                 } else if (entity instanceof EegDataset) {
                     return eegMapper.datasetToDatasetDTO((EegDataset) entity);
                 } else {
-                    return defaultMapper.datasetToDatasetDTO(entity);
+                    return datasetToDatasetDTO(entity);
                 }
             }
         });
         return new PageImpl<>(mappedPage);
     }
 
-    @Override
-    public IdName datasetToIdNameDTO(final Dataset dataset) {
-        return defaultMapper.datasetToIdNameDTO(dataset);
+    public DatasetDTO datasetToDatasetDTO(Dataset dataset) {
+        if (dataset == null) {
+            return null;
+        }
+
+        DatasetDTO datasetDTO = new DatasetDTO();
+
+        datasetDTO.setCreationDate(dataset.getCreationDate());
+        datasetDTO.setGroupOfSubjectsId(dataset.getGroupOfSubjectsId());
+        datasetDTO.setId(dataset.getId());
+        datasetDTO.setOriginMetadata(datasetMetadataMapper.datasetMetadataToDatasetMetadataDTO(dataset.getOriginMetadata()));
+        datasetDTO.setStudyId(dataset.getStudyId());
+        datasetDTO.setSubjectId(dataset.getSubjectId());
+        datasetDTO.setUpdatedMetadata(datasetMetadataMapper.datasetMetadataToDatasetMetadataDTO(dataset.getUpdatedMetadata()));
+        datasetDTO.setName(dataset.getName());
+        if (dataset.getType() != null) {
+            datasetDTO.setType(dataset.getType().name());
+        }
+        datasetDTO.setCenterId(datasetService.getCenterId(dataset));
+        datasetDTO.setInPacs(dataset.getInPacs());
+        datasetDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(dataset.getTags()));
+        datasetDTO.setSource(mapSourceFromDataset(dataset.getSource()));
+        datasetDTO.setCopies(mapCopiesFromDataset(dataset.getCopies()));
+
+        return datasetDTO;
     }
 
-    @Override
     public DatasetWithDependenciesDTO datasetToDatasetWithParentsAndProcessingsDTO(Dataset dataset) {
-        final DatasetWithDependenciesDTO datasetDTO = defaultMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset);
+        if (dataset == null) {
+            return null;
+        }
+
+        DatasetWithDependenciesDTO datasetWithDependenciesDTO = new DatasetWithDependenciesDTO();
+
+        datasetWithDependenciesDTO.setCreationDate(dataset.getCreationDate());
+        datasetWithDependenciesDTO.setGroupOfSubjectsId(dataset.getGroupOfSubjectsId());
+        datasetWithDependenciesDTO.setId(dataset.getId());
+        datasetWithDependenciesDTO.setOriginMetadata(datasetMetadataMapper.datasetMetadataToDatasetMetadataDTO(dataset.getOriginMetadata()));
+        datasetWithDependenciesDTO.setStudyId(dataset.getStudyId());
+        datasetWithDependenciesDTO.setSubjectId(dataset.getSubjectId());
+        datasetWithDependenciesDTO.setUpdatedMetadata(datasetMetadataMapper.datasetMetadataToDatasetMetadataDTO(dataset.getUpdatedMetadata()));
+        datasetWithDependenciesDTO.setName(dataset.getName());
+        if (dataset.getType() != null) {
+            datasetWithDependenciesDTO.setType(dataset.getType().name());
+        }
+        datasetWithDependenciesDTO.setCenterId(datasetService.getCenterId(dataset));
+        datasetWithDependenciesDTO.setInPacs(dataset.getInPacs());
+        datasetWithDependenciesDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(dataset.getTags()));
+        datasetWithDependenciesDTO.setProcessings(datasetProcessingMapper.datasetProcessingListToDatasetProcessingDTOList(dataset.getProcessings()));
+        datasetWithDependenciesDTO.setDatasetAcquisition(datasetAcquisitionMapper.datasetAcquisitionToDatasetAcquisitionDTO(dataset.getDatasetAcquisition()));
+        datasetWithDependenciesDTO.setDatasetProcessing(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(dataset.getDatasetProcessing()));
+
+        datasetWithDependenciesDTO.setCopies(mapCopiesFromDataset(dataset.getCopies()));
+        datasetWithDependenciesDTO.setSource(mapSourceFromDataset(dataset.getSource()));
+
         Hibernate.initialize(dataset.getCopies());
-        datasetDTO.setCopies(dataset.getCopies().stream()
+        datasetWithDependenciesDTO.setCopies(dataset.getCopies().stream()
                 .map(Dataset::getId)
                 .collect(Collectors.toList()));
-        return datasetDTO;
+        return datasetWithDependenciesDTO;
     }
 }

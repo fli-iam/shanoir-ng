@@ -62,6 +62,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Dataset.
@@ -122,7 +123,7 @@ public abstract class Dataset extends AbstractEntity {
      * Dataset Processing.
      */
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "dataset_processing_id")
     private DatasetProcessing datasetProcessing;
 
@@ -421,24 +422,11 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     /**
-     * @return the centerId
-     */
-    @Transient
-    public Long getCenterId() {
-        if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
-            if (getDatasetProcessing() != null && getDatasetProcessing().getInputDatasets() != null) {
-                return getDatasetProcessing().getInputDatasets().get(0).getCenterId();
-            }
-            return null;
-        }
-        return getDatasetAcquisition().getExamination().getCenterId();
-    }
-
-    /**
      * @return The first original (non-derived) Dataset in the chain.
      */
     @JsonIgnore
     @Transient
+    @Transactional
     public Dataset getFirstRealInput() {
         if (this.datasetProcessing != null) {
             return this.datasetProcessing.getInputDatasets().get(0).getFirstRealInput();

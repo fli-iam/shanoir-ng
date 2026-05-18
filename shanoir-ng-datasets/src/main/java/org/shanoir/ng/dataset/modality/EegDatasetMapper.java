@@ -15,18 +15,18 @@
 package org.shanoir.ng.dataset.modality;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Named;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
+import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.tag.mapper.StudyTagMapper;
 import org.springframework.data.domain.Page;
 
 /**
@@ -35,7 +35,7 @@ import org.springframework.data.domain.Page;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class })
+@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class, DatasetProcessingMapper.class, DatasetAcquisitionMapper.class, StudyTagMapper.class, DatasetMapper.class })
 @DecoratedWith(EegDatasetDecorator.class)
 public interface EegDatasetMapper {
 
@@ -52,8 +52,7 @@ public interface EegDatasetMapper {
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param dataset eegDataset.
      * @return dataset DTO.
      */
     @Named(value = "standard")
@@ -62,27 +61,16 @@ public interface EegDatasetMapper {
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param dataset eegDataset.
      * @return dataset DTO.
      */
     @Named(value = "withProcessings")
     EegDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(EegDataset dataset);
-    /**
-     * Map a @Dataset to a @DatasetDTO.
-     *
-     * @param datasets
-     *            dataset.
-     * @return dataset DTO.
-     */
-    @IterableMapping(qualifiedByName = "standard")
-    List<EegDatasetDTO> datasetToDatasetDTO(List<EegDataset> datasets);
 
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param page eegDataset.
      * @return dataset DTO.
      */
     @IterableMapping(qualifiedByName = "standard")
@@ -96,50 +84,4 @@ public interface EegDatasetMapper {
      * @return dataset DTO.
      */
     IdName datasetToIdNameDTO(EegDataset dataset);
-
-    default List<Long> mapCopiesFromDataset(List<Dataset> copies) {
-        if (copies == null) {
-            return null;
-        }
-        return copies.stream()
-                .map(Dataset::getId)
-                .collect(Collectors.toList());
-    }
-
-    default Long mapSourceFromDataset(Dataset source) {
-        return source != null ? source.getId() : null;
-    }
-    default List<Long> mapCopiesFromDatasetAcquisition(List<DatasetAcquisition> copies) {
-        if (copies == null) {
-            return null;
-        }
-        return copies.stream()
-                .map(DatasetAcquisition::getId)
-                .collect(Collectors.toList());
-    }
-
-    default Long mapSourceFromDatasetAcquisition(DatasetAcquisition source) {
-        return source != null ? source.getId() : null;
-    }
-
-    default List<DatasetAcquisition> mapCopiesDatasetAcquisitionFromLong(List<Long> copies) {
-        return null;
-    }
-
-    default DatasetAcquisition mapSourceDatasetAcquisitionFromLong(Long source) {
-        return null;
-    }
-
-    default List<Long> mapCopiesFromExamination(List<Examination> copies) {
-        if (copies == null) {
-            return null;
-        }
-        return copies.stream()
-                .map(Examination::getId)
-                .collect(Collectors.toList());
-    }
-
-    default Long mapSourceFromExamination(Examination source) {
-        return source != null ? source.getId() : null;
-    }
 }

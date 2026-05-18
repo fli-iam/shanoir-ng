@@ -20,11 +20,14 @@ import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
+import org.shanoir.ng.dataset.dto.DatasetMetadataDTO;
 import org.shanoir.ng.dataset.dto.DatasetWithProcessingsDTO;
-import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
+import org.shanoir.ng.tag.model.StudyTag;
 
 /**
  * Mapper for dataset acquisitions.
@@ -32,7 +35,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { DatasetMapper.class })
+@Mapper(componentModel = "spring", uses = { StudyTag.class, DatasetProcessingMapper.class })
 @DecoratedWith(ExaminationDatasetAcquisitionDecorator.class)
 public interface ExaminationDatasetAcquisitionMapper {
 
@@ -61,4 +64,5 @@ public interface ExaminationDatasetAcquisitionMapper {
     @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
     DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset);
 
+    DatasetMetadataDTO datasetMetadataToDatasetMetadataDTO(DatasetMetadata datasetMetadata);
 }

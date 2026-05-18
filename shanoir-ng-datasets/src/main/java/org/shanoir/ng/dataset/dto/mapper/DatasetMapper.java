@@ -22,6 +22,7 @@ import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.tag.mapper.StudyTagMapper;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class, DatasetProcessingMapper.class, DatasetAcquisitionMapper.class })
+@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class, DatasetProcessingMapper.class, DatasetAcquisitionMapper.class, StudyTagMapper.class })
 @DecoratedWith(DatasetDecorator.class)
 public interface DatasetMapper {
 
@@ -49,8 +50,7 @@ public interface DatasetMapper {
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param dataset dataset.
      * @return dataset DTO.
      */
     @Named(value = "standard")
@@ -59,8 +59,7 @@ public interface DatasetMapper {
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param dataset dataset.
      * @return dataset DTO.
      */
     @Named(value = "withProcessings")
@@ -71,8 +70,7 @@ public interface DatasetMapper {
     /**
      * Map a @Dataset list to a @DatasetDTO list.
      *
-     * @param datasets
-     *            dataset.
+     * @param datasets list of dataset.
      * @return dataset DTO.
      */
     @IterableMapping(qualifiedByName = "standard")
@@ -82,12 +80,11 @@ public interface DatasetMapper {
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param page dataset.
      * @return dataset DTO.
      */
     @IterableMapping(qualifiedByName = "standard")
-    public PageImpl<DatasetDTO> datasetToDatasetDTO(Page<Dataset> page);
+    PageImpl<DatasetDTO> datasetToDatasetDTO(Page<Dataset> page);
 
     /**
      * Map a @Dataset to a @IdNameDTO.
