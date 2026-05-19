@@ -84,11 +84,14 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
     }
 
     async getFirstRealInput(proc: DatasetProcessing): Promise<Dataset> {
-        if (proc.inputDatasets && proc.inputDatasets.length > 0) {
+        if (proc?.inputDatasets?.length) {
             return this.datasetService.get(proc.inputDatasets[0].id);
         }
 
         const children = await this.findByMonitoringId(proc.id);
+        if (children?.length) {
+            return null;
+        }
         return this.getFirstRealInput(children[0]);
     }
 }

@@ -38,7 +38,7 @@ export class ExecutionService {
     if (execution === null || execution === undefined) {
       throw new Error('Required parameter execution was null or undefined when calling createExecution.');
     }
-    return this.httpClient.post<IdName>(`${this.executionUrl}/`,execution).toPromise();
+    return this.httpClient.post<IdName>(`${this.executionUrl}/`,[execution]).toPromise();
   }
 
   /**
