@@ -13,12 +13,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="header command-zone">2. Select series</div>
-<fieldset class="step"> 
+<fieldset class="step">
     <p>Please select only the series useful for your study</p>
     <div class="tree">
-        <node  
-            *ngFor="let patient of patients" 
-            [label]="patient.patientName" 
+        <node
+            *ngFor="let patient of patients"
+            [label]="patient.patientName"
             awesome="fas fa-user"
             (labelClick)="showPatientDetails(patient)"
             [class.selected]="detailedPatient == patient"
@@ -26,23 +26,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             buttonPicto="fa fa-eye"
             (buttonClick)="showPatientDetails(patient)"
             [hasChildren]="patient.studies.length > 0">
-                <node  
-                    *ngFor="let study of patient.studies" 
+                <node
+                    *ngFor="let study of patient.studies"
                     [(label)]="study.studyDescription"
                     [editable]="true"
                     (chkbxChange)="onPatientUpdate()"
                     tooltip="You can change the study description here. The value will then be overwritten in the dicom files."
-                    awesome="fa fa-procedures" 
+                    awesome="fa fa-procedures"
                     hasBox="true"
                     (chkbxChange)="onStudyCheckChange($event, study)"
                     deploy=true
                     [hasChildren]="study.series.length > 0">
-                        <node  
-                            *ngFor="let serie of study.series" 
-                            [label]="serie.seriesDescription" 
-                            awesome="fa fa-brain" 
-                            hasBox="true" 
-                            [(ngModel)]="serie.selected"  
+                        <node
+                            *ngFor="let serie of study.series"
+                            [label]="serie.seriesDescription"
+                            awesome="fa fa-brain"
+                            hasBox="true"
+                            [(ngModel)]="serie.selected"
                             (chkbxChange)="onPatientUpdate()"
                             (labelClick)="showSerieDetails(serie);"
                             [class.selected]="detailedSerie == serie"
@@ -72,18 +72,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </tr>
             <tr class="item">
                 <td class="label">Birth date</td>
-                <td class="value">{{detailedPatient?.patientBirthDate | date: 'dd/MM/yyyy'}}</td>
+                <td class="value">{{detailedPatient?.patientBirthDate | localDateFormatPipe}}</td>
             </tr>
         </table>
     </div>
 
     <div class="data-preview" *ngIf="detailedSerie">
         <h3>Serie</h3>
-        <div *ngIf="!papayaError"> 
-            <papaya [params]="papayaParams"></papaya>
-        </div>
-        <div *ngIf="papayaError" class="error"> 
-            Sorry, there was an error with the papaya viewer.
+        <div>
+            <papaya [loadingCallback]="papayaLoadingCallback"></papaya>
         </div>
         <table>
             <tr class="item">
@@ -100,7 +97,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </tr>
             <tr class="item">
                 <td class="label">Series date</td>
-                <td class="value">{{detailedSerie?.seriesDate | date: 'dd/MM/yyyy'}}</td>
+                <td class="value">{{detailedSerie?.seriesDate | localDateFormatPipe}}</td>
             </tr>
             <tr class="item">
                 <td class="label">Series number</td>
@@ -119,6 +116,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <td class="value">{{detailedSerie?.nonImagesNumber}}</td>
             </tr>
         </table>
-    </div>     
+    </div>
 </fieldset>
 <button class="next" [disabled]="!valid" (click)="next()">Next</button>

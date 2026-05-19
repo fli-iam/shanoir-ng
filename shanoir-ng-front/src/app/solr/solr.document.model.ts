@@ -32,7 +32,7 @@ export class SolrDocument {
     subjectType: string;
     acquisitionEquipmentName: string;
     subjectId: string;
-
+    dataReuseAgreement: boolean;
     sortingIndex: number;
     studyName: string;
     studyId: string;
@@ -47,6 +47,7 @@ export class SolrRequest {
     subjectName: string[];
     subjectId: string[];
     sortingIndex: number[];
+    dataReuseAgreement: boolean[];
     subjectType: string[];
     acquisitionEquipmentName: string[];
     examinationId: string[];
@@ -68,7 +69,7 @@ export class SolrRequest {
     sliceThickness: Range = new Range(null, null);
     pixelBandwidth: Range = new Range(null, null);
     magneticFieldStrength: Range = new Range(null, null);
-    facetPaging: Map<String, FacetPageable>;
+    facetPaging: Map<string, FacetPageable>;
  }
 
 export class FacetField {

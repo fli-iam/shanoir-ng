@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="expert-mode">
     <div>
-        <toggle-switch [(ngModel)]="expertMode" (ngModelChange)="onExpertModeChange()" (onChange)="onExpertModeUserChange()" mode="on-off"></toggle-switch>
+        <toggle-switch [(ngModel)]="expertMode" (ngModelChange)="onExpertModeChange()" (userChange)="onExpertModeUserChange()" mode="on-off"></toggle-switch>
         <span [class.enabled]="expertMode" class="right-icon">
             Expert mode
             <span class="info right-icon clickable" (click)="showInfo = !showInfo">( info<i *ngIf="!showInfo" class="fas fa-caret-down"></i><i *ngIf="showInfo" class="fas fa-caret-up"></i> )</span>
@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <code>(*:* -datasetName:*localizer* AND -datasetName:*scout*)</code>
         <br/><span class="italic">(all existing datasets except those which names contains "localizer" or "scout")</span>
         <p>The present field names are :
-            <code>centerName, datasetCreationDate, studyName, subjectName, subjectType, acquisitionEquipmentName, datasetId, datasetName, datasetNature, datasetType, processed, examinationComment, examinationDate, importDate, tags, magneticFieldStrength, pixelBandwidth, sliceThickness, studyId, </code>
+            <code>centerName, datasetCreationDate, studyName, subjectName, subjectType, acquisitionEquipmentName, datasetId, datasetName, datasetNature, datasetType, processed, examinationComment, examinationDate, importDate, tags, magneticFieldStrength, pixelBandwidth, sliceThickness, studyId, username</code>
         </p>
         <p>For further information, see the <a href="https://solr.apache.org/guide/8_1/the-standard-query-parser.html#specifying-terms-for-the-standard-query-parser" target="_blank">Solr official documentation</a>.</p>
     </div>

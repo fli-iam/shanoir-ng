@@ -35,8 +35,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 node
                 *ngFor="let acquisitionEquipment of node.acquisitionEquipments; let i = index"
                 [input]="acquisitionEquipment"
-                (onEquipmentDelete)="onEquipmentDelete(i)"
-                (onNodeSelect)="onEquipementNodeSelect.emit($event)"
+                (equipmentDelete)="onEquipmentDelete(i)"
+                (nodeSelect)="equipementNodeSelect.emit($event)"
                 [withMenu]="withMenu">
         </equipment-node>
     </ng-container>

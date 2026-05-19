@@ -13,6 +13,7 @@
  */
 
 import { Entity } from '../shared/components/entity/entity.abstract';
+import { Field } from '../shared/reflect/field.decorator';
 import { camelToSpaces } from '../utils/app.utils';
 
 export enum TaskStatus {
@@ -37,22 +38,24 @@ export class TaskState {
 
 export class Task extends Entity {
 
-    debugTs: number = Date.now();
-    id: number;
-    completeId: BigInt;
-    creationDate: Date;
-    lastUpdate: Date;
-    report: string;
+    @Field() debugTs: number = Date.now();
+    @Field() id: number;
+    @Field() completeId: bigint;
+    @Field() creationDate: Date;
+    @Field() lastUpdate: Date;
+    @Field() report: string;
     private _status: TaskStatus;
     private _message: string;
     private _progress: number;
     _eventType: string;
-    eventLabel: string;
-    objectId: number;
-    route: string;
-    hasReport: boolean;
-    sessionId: string;
+    @Field() eventLabel: string;
+    @Field() objectId: number;
+    @Field() studyId: number;
+    @Field() route: string;
+    @Field() hasReport: boolean;
+    @Field() sessionId: string;
     _idAsString: string;
+    @Field() hideFromMenu: boolean;
     private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report', 'sessionId', '_idAsString'];
 
     set eventType(eventType: string) {
@@ -60,7 +63,7 @@ export class Task extends Entity {
         this.eventLabel = camelToSpaces(this.eventType.replace('.event', ''));
     }
 
-    get eventType(): string {
+    @Field() get eventType(): string {
         return this._eventType;
     }
 
@@ -69,7 +72,7 @@ export class Task extends Entity {
         if (status == -1) this._progress = -1;
     }
 
-    get status(): TaskStatus {
+    @Field() get status(): TaskStatus {
         return this._status;
     }
 
@@ -78,7 +81,7 @@ export class Task extends Entity {
         else this._progress = progress;
     }
 
-    get progress(): number {
+    @Field() get progress(): number {
         return this._progress;
     }
 
@@ -87,11 +90,11 @@ export class Task extends Entity {
         this.route = this.buildRoute();
     }
 
-    get message(): string {
+    @Field() get message(): string {
         return this._message;
     }
 
-    get idAsString(): string {
+    @Field() get idAsString(): string {
         return this._idAsString;
     }
 
@@ -103,20 +106,20 @@ export class Task extends Entity {
     private buildRoute(): string {
         if (this.eventType === 'importDataset.event' && this.status != -1) {
             if (this.message.lastIndexOf('examination [') != -1) {
-                let substring = this.message.match(/examination \[\d+\]/g)[0];
+                const substring = this.message.match(/examination \[\d+\]/g)[0];
                 return '/examination/details/' + substring.slice(substring.lastIndexOf("[") + 1, substring.lastIndexOf("]"));
             } else if (this.message.indexOf('dataset [') != -1) {
-                let substring = this.message.match(/dataset \[\d+\]/g)[0];
+                const substring = this.message.match(/dataset \[\d+\]/g)[0];
                 return '/dataset/details/' + substring.slice(substring.lastIndexOf("[") + 1, substring.lastIndexOf("]"));
             }
         } else if (this.eventType === 'executionMonitoring.event' && this.status != -1) {
             return '/dataset-processing/details/' + this.objectId
         } else if (this.eventType === 'solrIndexAll.event' && this.status != -1) {
             return '/solr-search';
-        } else if (this.eventType === 'copyDataset.event' && this.status != -1 && this.message.lastIndexOf('study [') != -1) {
-            return '/study/details/' + this.message.slice(this.message.lastIndexOf("[") + 1, this.message.lastIndexOf("]"));
-        } else if (this.eventType === 'downloadStatistics.event' && this.status != -1 && this.status != 2) {
+        } else if (['downloadStatistics.event', 'copyDataset.event'].includes(this.eventType) && this.status != -1 && this.status != 2) {
             return '/datasets/download/event/' + this.idAsString;
+        } else if (this.eventType === 'massiveOutputsDownload.event' && this.status != -1 && this.status != 2) {
+            return '/datasets/massiveProcessingOutputsDownload';
         }
         return null;
     }
@@ -126,19 +129,19 @@ export class Task extends Entity {
     }
 
     clone(): Task {
-        let clone: Task = new Task();
+        const clone: Task = new Task();
         this.FIELDS.forEach(fieldName => clone[fieldName] = this[fieldName]);
         return clone;
     }
 
     equals(task: Task) {
-        for (let fieldName of this.FIELDS) {
+        for (const fieldName of this.FIELDS) {
             if (task[fieldName] != this[fieldName]) return false;
         }
         return true;
     }
 
-    updateWith(task: Task) {
+    updateWith(task: Task): Task {
         if (task.status != undefined) this.status = task.status;
         if (task.progress != undefined) this.progress = task.progress;
         if (task.lastUpdate) this.lastUpdate = task.lastUpdate;
@@ -146,6 +149,15 @@ export class Task extends Entity {
         if (task.report) this.report = task.report;
         if (task.message) this.message = task.message;
         if (task.idAsString) this.idAsString = task.idAsString;
+        if (task.hideFromMenu != undefined) this.hideFromMenu = task.hideFromMenu;
+        if (task.sessionId) this.sessionId = task.sessionId;
+        if (task.eventLabel) this.eventLabel = task.eventLabel;
+        if (task.debugTs) this.debugTs = task.debugTs;
+        if (task.objectId) this.objectId = task.objectId;
+        if (task.studyId) this.studyId = task.studyId;
+        if (task.route) this.route = task.route;
+        if (task.hasReport != undefined) this.hasReport = task.hasReport;
+        return this;
     }
 }
 

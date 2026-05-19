@@ -13,7 +13,9 @@
  */
 
 import { Injectable } from '@angular/core';
+
 import { KeycloakService } from '../keycloak/keycloak.service';
+
 import { KeycloakSession } from './keycloak-session.model';
 
 @Injectable()
@@ -58,12 +60,12 @@ export class KeycloakSessionService {
     }
 
     get hasBeenAskedDUA(): boolean {
-        let session = this.getSessionObject();
+        const session = this.getSessionObject();
         return session ? session.hadDUAAlert : false;
     }
 
     set hasBeenAskedDUA(value: boolean) {
-        let session: KeycloakSession = this.getSessionObject();
+        const session: KeycloakSession = this.getSessionObject();
         if (session) {
             session.hadDUAAlert = value;
             this.saveSessionObject(session);

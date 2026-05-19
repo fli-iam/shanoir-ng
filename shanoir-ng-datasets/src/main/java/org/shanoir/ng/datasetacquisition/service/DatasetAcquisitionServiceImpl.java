@@ -14,6 +14,20 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -21,8 +35,10 @@ import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -47,18 +63,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
 
-
     @Autowired
     private DatasetAcquisitionRepository repository;
+
+    @Autowired
+    private ExaminationRepository examRepository;
 
     @Autowired
     private SecurityService securityService;
@@ -73,7 +85,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private DatasetService datasetService;
 
     @Autowired
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Autowired
     private DICOMWebService dicomWebService;
@@ -85,13 +97,14 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private DatasetAcquisitionAsyncService datasetAcquisitionAsyncService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
+
     @Override
     public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             return repository.findByStudyCardId(studyCardId);
         } else {
             List<Pair<Long, Long>> studyCenters = new ArrayList<>();
-            Set<Long> unrestrictedStudies = new HashSet<Long>();
+            Set<Long> unrestrictedStudies = new HashSet<>();
             securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
             return repository.findByStudyCardIdAndStudyCenterOrStudyIdIn(studyCardId, studyCenters, unrestrictedStudies);
         }
@@ -104,7 +117,17 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     public List<DatasetAcquisition> findByExamination(Long examinationId) {
-        return repository.findByExaminationId(examinationId);
+        Optional<Examination> exam = examRepository.findByIdWithEagerAcquisitions(examinationId);
+        if (exam.isPresent()) {
+            return exam.get().getDatasetAcquisitions();
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID) {
+        return repository.findByExaminationAndSeriesInstanceUIDWithDatasets(examinationId, seriesInstanceUID);
     }
 
     private DatasetAcquisition updateValues(DatasetAcquisition from, DatasetAcquisition to) {
@@ -115,6 +138,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         to.setSoftwareRelease(from.getSoftwareRelease());
         to.setSortingIndex(from.getSortingIndex());
         to.setStudyCard(from.getStudyCard());
+        to.setAcquisitionStartTime(from.getAcquisitionStartTime()); // immutable
         return to;
     }
 
@@ -139,21 +163,40 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             return repository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
         }
     }
-    
+
     @Override
     public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
-    	Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
-    	for (DatasetAcquisition acquisition: result) {
-            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, acquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, acquisition.getExamination().getStudyId()));
-    	}
-    	return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
+        Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
+        result.forEach(a -> indexDatasets(a));
+        return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
-    public DatasetAcquisition create(DatasetAcquisition entity) {
+    public DatasetAcquisition create(DatasetAcquisition entity, boolean indexDatasetsToSolr) {
         DatasetAcquisition savedEntity = repository.save(entity);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        if (indexDatasetsToSolr) {
+            indexDatasets(savedEntity);
+        }
         return savedEntity;
+    }
+
+    private void indexDatasets(DatasetAcquisition datasetAcquisition) {
+        DatasetAcquisition acq = findByIdWithDatasets(datasetAcquisition.getId());
+        if (acq != null && acq.getDatasets() != null && !acq.getDatasets().isEmpty()) {
+            List<Long> datasetIds = acq.getDatasets().stream()
+                    .map(Dataset::getId)
+                    .collect(Collectors.toList());
+            solrService.indexDatasets(datasetIds);
+            LOG.info("Indexed {} datasets for acquisition {}", datasetIds.size(), datasetAcquisition.getId());
+        } else {
+            LOG.warn("No datasets found for acquisition {}", datasetAcquisition.getId());
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DatasetAcquisition findByIdWithDatasets(Long id) {
+        return repository.findByIdWithDatasets(id).orElseThrow();
     }
 
     @Override
@@ -247,14 +290,13 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     @Transactional
     public void deleteById(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-        final DatasetAcquisition entity = repository.findById(id).orElse(null);
-
-        if (entity == null) {
+        final DatasetAcquisition acquisition = repository.findById(id).orElse(null);
+        if (acquisition == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
 
         Map<String, String> eventProperties = new HashMap<>();
-        eventProperties.put("progressMax", String.valueOf(entity.getDatasets().size()));
+        eventProperties.put("progressMax", String.valueOf(acquisition.getDatasets().size()));
         event.setEventProperties(eventProperties);
         event.setMessage("Delete DatasetAcquisition with id : " + id);
         shanoirEventService.publishEvent(event);
@@ -262,9 +304,10 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(entity.getExamination());
         String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(entity);
 
-        datasetAcquisitionAsyncService.deleteByIdAsync(entity, event);
+        datasetAcquisitionAsyncService.deleteByIdAsync(acquisition, event);
 
-        dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
+        if (acquisition.getSource() == null)
+            dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
 
         repository.deleteById(id);
     }

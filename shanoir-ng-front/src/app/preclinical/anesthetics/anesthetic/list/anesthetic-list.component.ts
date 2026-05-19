@@ -13,15 +13,14 @@
  */
 import { Component, ViewChild } from '@angular/core';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import {
     BrowserPaginEntityListComponent,
 } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { ShanoirError } from '../../../../shared/models/error.model';
-import { ConsoleService } from '../../../../shared/console/console.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { AnestheticType } from '../../../shared/enum/anestheticType';
 import { ExaminationAnestheticService } from '../../examination_anesthetic/shared/examinationAnesthetic.service';
 import { Anesthetic } from '../shared/anesthetic.model';
 import { AnestheticService } from '../shared/anesthetic.service';
@@ -31,7 +30,6 @@ import { AnestheticService } from '../shared/anesthetic.service';
     selector: 'anesthetic-list',
     templateUrl: 'anesthetic-list.component.html',
     styleUrls: ['anesthetic-list.component.css'],
-    providers: [AnestheticService],
     standalone: false
 })
 export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<Anesthetic>{

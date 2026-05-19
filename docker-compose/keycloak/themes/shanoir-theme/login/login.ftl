@@ -3,6 +3,11 @@
     <#if section = "header">
         ${msg("loginAccountTitle")}
     <#elseif section = "form">
+		<div class="${properties.kcFormGroupClass!}" style="padding-bottom:20px;">
+			<span class="kc-password-policy-inline">
+			  ${msg("updatePasswordPolicies")}
+			</span>
+		</div>
         <#if messagesPerField.existsError('username','password')>
             <span id="input-error" class="alert ${properties.kcInputErrorMessageClass!}" aria-live="polite">
                     ${kcSanitize(messagesPerField.getFirstError('username','password'))?no_esc}

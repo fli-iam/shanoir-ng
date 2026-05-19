@@ -18,18 +18,19 @@ import { InjectionType } from "../../../shared/enum/injectionType";
 import { InjectionInterval } from "../../../shared/enum/injectionInterval";
 import { InjectionSite } from "../../../shared/enum/injectionSite";
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
+import { Field } from '../../../../shared/reflect/field.decorator';
 
 export class ExaminationAnesthetic extends Entity {
-  id: number;
-  internal_id: number;
-  examination_id: number;
-  anesthetic:Anesthetic;
-  dose:number;
-  dose_unit:Reference;
-  injection_interval: InjectionInterval;
-  injection_site: InjectionSite;
-  injection_type: InjectionType;
-  startDate: Date;
-  endDate : Date;
+    @Field() id: number;
+    @Field() internalId: number;
+    @Field() examinationId: number;
+    @Field() anesthetic:Anesthetic;
+    @Field() dose: number;
+    @Field() doseUnit: Reference;
+    @Field() injectionInterval: InjectionInterval;
+    @Field() injectionSite: InjectionSite;
+    @Field() injectionType: InjectionType;
+    @Field() startDate: Date;
+    @Field() endDate: Date;
 }
 

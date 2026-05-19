@@ -13,8 +13,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -24,15 +24,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <relativePath>../shanoir-ng-back</relativePath>
     </parent>
 
-  <artifactId>nifti-conversion</artifactId>
-  <packaging>jar</packaging>
+    <artifactId>nifti-conversion</artifactId>
+    <packaging>jar</packaging>
 
-  <name>shanoir-ng-nifti-conversion</name>
-  <description>Shanoir-NG nifti conversion Microservice</description>
-  
-    <properties>
-        <dcm4che.version>5.14.1</dcm4che.version>
-    </properties>
+    <name>shanoir-ng-nifti-conversion</name>
+    <description>NIfTI conversion microservice</description>
 
     <dependencies>
         <dependency>
@@ -41,47 +37,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <version>3.4.0</version>
         </dependency>
         <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.dcm4che</groupId>
-            <artifactId>dcm4che-core</artifactId>
-            <version>${dcm4che.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.dcm4che</groupId>
-            <artifactId>dcm4che-dcmr</artifactId>
-            <version>${dcm4che.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.dcm4che</groupId>
-            <artifactId>dcm4che-emf</artifactId>
-            <version>${dcm4che.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.dcm4che.tool</groupId>
-            <artifactId>dcm4che-tool-storescu</artifactId>
-            <version>${dcm4che.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
     </dependencies>
-  
+
     <build>
         <plugins>
-            <!-- Package shanoir-ng-nifti-conversion.jar as Spring Boot executable: Avoid error: 
-                no main manifest attribute, in /shanoir-ng-nifti-converter.jar -->
+            <!-- Package shanoir-ng-nifti-conversion.jar as Spring Boot executable: Avoid error:
+            no main manifest attribute, in /shanoir-ng-nifti-converter.jar -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -109,7 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <configuration>
                             <target>
                                 <copy file="target/${project.build.finalName}.jar"
-                                    tofile="${basedir}/../docker-compose/nifti-conversion/${project.artifactId}.jar" />
+                                      tofile="${basedir}/../docker-compose/nifti-conversion/${project.artifactId}.jar" />
                             </target>
                         </configuration>
                         <goals>

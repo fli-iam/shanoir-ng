@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dicom.web.dto;
 
 import java.util.List;
@@ -5,247 +19,247 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MetadataDTO {
-	
-	@JsonProperty("SOPInstanceUID")
-	private String sopInstanceUID;
-	
-	@JsonProperty("SeriesInstanceUID")
-	private String seriesInstanceUID;
-	
-	@JsonProperty("SeriesDate")
-	private String seriesDate;
 
-	@JsonProperty("StudyInstanceUID")
-	private String studyInstanceUID;
+    @JsonProperty("SOPInstanceUID")
+    private String sopInstanceUID;
 
-	@JsonProperty("InstanceNumber")
-	private Integer instanceNumber;
+    @JsonProperty("SeriesInstanceUID")
+    private String seriesInstanceUID;
 
-	@JsonProperty("SOPClassUID")
-	private String sopClassUID;
-	
-	@JsonProperty("Modality")
-	private String modality;
-	
-	@JsonProperty("Columns")
-	private Integer columns;
-	
-	@JsonProperty("Rows")
-	private Integer rows;
-	
-	@JsonProperty("FrameOfReferenceUID")
-	private String frameOfReferenceUID;
+    @JsonProperty("SeriesDate")
+    private String seriesDate;
 
-	@JsonProperty("PhotometricInterpretation")
-	private String photometricInterpretation;
-	
-	@JsonProperty("BitsAllocated")
-	private Integer bitsAllocated;
-	
-	@JsonProperty("BitsStored")
-	private Integer bitsStored;
+    @JsonProperty("StudyInstanceUID")
+    private String studyInstanceUID;
 
-	@JsonProperty("PixelRepresentation")
-	private Integer pixelRepresentation;
-	
-	@JsonProperty("SamplesPerPixel")
-	private Integer samplesPerPixel;
-	
-	@JsonProperty("PixelSpacing")
-	private List<Float> pixelSpacing;
-		
-	@JsonProperty("HighBit")
-	private Integer highBit;
-	
-	@JsonProperty("ImageOrientationPatient")
-	private List<Integer> imageOrientationPatient;
-	
-	@JsonProperty("ImagePositionPatient")
-	private List<Integer> imagePositionPatient;
-	
-	@JsonProperty("ImageType")
-	private List<String> imageType;
-	
-	@JsonProperty("WindowCenter")
-	private Integer windowCenter;
-	
-	@JsonProperty("WindowWidth")
-	private Integer windowWidth;
+    @JsonProperty("InstanceNumber")
+    private Integer instanceNumber;
 
-	public String getSopInstanceUID() {
-		return sopInstanceUID;
-	}
+    @JsonProperty("SOPClassUID")
+    private String sopClassUID;
 
-	public void setSopInstanceUID(String sopInstanceUID) {
-		this.sopInstanceUID = sopInstanceUID;
-	}
+    @JsonProperty("Modality")
+    private String modality;
 
-	public String getSeriesInstanceUID() {
-		return seriesInstanceUID;
-	}
+    @JsonProperty("Columns")
+    private Integer columns;
 
-	public void setSeriesInstanceUID(String seriesInstanceUID) {
-		this.seriesInstanceUID = seriesInstanceUID;
-	}
+    @JsonProperty("Rows")
+    private Integer rows;
 
-	public String getSeriesDate() {
-		return seriesDate;
-	}
+    @JsonProperty("FrameOfReferenceUID")
+    private String frameOfReferenceUID;
 
-	public void setSeriesDate(String seriesDate) {
-		this.seriesDate = seriesDate;
-	}
+    @JsonProperty("PhotometricInterpretation")
+    private String photometricInterpretation;
 
-	public String getStudyInstanceUID() {
-		return studyInstanceUID;
-	}
+    @JsonProperty("BitsAllocated")
+    private Integer bitsAllocated;
 
-	public void setStudyInstanceUID(String studyInstanceUID) {
-		this.studyInstanceUID = studyInstanceUID;
-	}
+    @JsonProperty("BitsStored")
+    private Integer bitsStored;
 
-	public Integer getInstanceNumber() {
-		return instanceNumber;
-	}
+    @JsonProperty("PixelRepresentation")
+    private Integer pixelRepresentation;
 
-	public void setInstanceNumber(Integer instanceNumber) {
-		this.instanceNumber = instanceNumber;
-	}
+    @JsonProperty("SamplesPerPixel")
+    private Integer samplesPerPixel;
 
-	public String getSopClassUID() {
-		return sopClassUID;
-	}
+    @JsonProperty("PixelSpacing")
+    private List<Float> pixelSpacing;
 
-	public void setSopClassUID(String sopClassUID) {
-		this.sopClassUID = sopClassUID;
-	}
+    @JsonProperty("HighBit")
+    private Integer highBit;
 
-	public String getModality() {
-		return modality;
-	}
+    @JsonProperty("ImageOrientationPatient")
+    private List<Integer> imageOrientationPatient;
 
-	public void setModality(String modality) {
-		this.modality = modality;
-	}
+    @JsonProperty("ImagePositionPatient")
+    private List<Integer> imagePositionPatient;
 
-	public Integer getColumns() {
-		return columns;
-	}
+    @JsonProperty("ImageType")
+    private List<String> imageType;
 
-	public void setColumns(Integer columns) {
-		this.columns = columns;
-	}
+    @JsonProperty("WindowCenter")
+    private Integer windowCenter;
 
-	public Integer getRows() {
-		return rows;
-	}
+    @JsonProperty("WindowWidth")
+    private Integer windowWidth;
 
-	public void setRows(Integer rows) {
-		this.rows = rows;
-	}
+    public String getSopInstanceUID() {
+        return sopInstanceUID;
+    }
 
-	public String getFrameOfReferenceUID() {
-		return frameOfReferenceUID;
-	}
+    public void setSopInstanceUID(String sopInstanceUID) {
+        this.sopInstanceUID = sopInstanceUID;
+    }
 
-	public void setFrameOfReferenceUID(String frameOfReferenceUID) {
-		this.frameOfReferenceUID = frameOfReferenceUID;
-	}
+    public String getSeriesInstanceUID() {
+        return seriesInstanceUID;
+    }
 
-	public String getPhotometricInterpretation() {
-		return photometricInterpretation;
-	}
+    public void setSeriesInstanceUID(String seriesInstanceUID) {
+        this.seriesInstanceUID = seriesInstanceUID;
+    }
 
-	public void setPhotometricInterpretation(String photometricInterpretation) {
-		this.photometricInterpretation = photometricInterpretation;
-	}
+    public String getSeriesDate() {
+        return seriesDate;
+    }
 
-	public Integer getBitsAllocated() {
-		return bitsAllocated;
-	}
+    public void setSeriesDate(String seriesDate) {
+        this.seriesDate = seriesDate;
+    }
 
-	public void setBitsAllocated(Integer bitsAllocated) {
-		this.bitsAllocated = bitsAllocated;
-	}
+    public String getStudyInstanceUID() {
+        return studyInstanceUID;
+    }
 
-	public Integer getBitsStored() {
-		return bitsStored;
-	}
+    public void setStudyInstanceUID(String studyInstanceUID) {
+        this.studyInstanceUID = studyInstanceUID;
+    }
 
-	public void setBitsStored(Integer bitsStored) {
-		this.bitsStored = bitsStored;
-	}
+    public Integer getInstanceNumber() {
+        return instanceNumber;
+    }
 
-	public Integer getPixelRepresentation() {
-		return pixelRepresentation;
-	}
+    public void setInstanceNumber(Integer instanceNumber) {
+        this.instanceNumber = instanceNumber;
+    }
 
-	public void setPixelRepresentation(Integer pixelRepresentation) {
-		this.pixelRepresentation = pixelRepresentation;
-	}
+    public String getSopClassUID() {
+        return sopClassUID;
+    }
 
-	public Integer getSamplesPerPixel() {
-		return samplesPerPixel;
-	}
+    public void setSopClassUID(String sopClassUID) {
+        this.sopClassUID = sopClassUID;
+    }
 
-	public void setSamplesPerPixel(Integer samplesPerPixel) {
-		this.samplesPerPixel = samplesPerPixel;
-	}
+    public String getModality() {
+        return modality;
+    }
 
-	public List<Float> getPixelSpacing() {
-		return pixelSpacing;
-	}
+    public void setModality(String modality) {
+        this.modality = modality;
+    }
 
-	public void setPixelSpacing(List<Float> pixelSpacing) {
-		this.pixelSpacing = pixelSpacing;
-	}
+    public Integer getColumns() {
+        return columns;
+    }
 
-	public Integer getHighBit() {
-		return highBit;
-	}
+    public void setColumns(Integer columns) {
+        this.columns = columns;
+    }
 
-	public void setHighBit(Integer highBit) {
-		this.highBit = highBit;
-	}
+    public Integer getRows() {
+        return rows;
+    }
 
-	public List<Integer> getImageOrientationPatient() {
-		return imageOrientationPatient;
-	}
+    public void setRows(Integer rows) {
+        this.rows = rows;
+    }
 
-	public void setImageOrientationPatient(List<Integer> imageOrientationPatient) {
-		this.imageOrientationPatient = imageOrientationPatient;
-	}
+    public String getFrameOfReferenceUID() {
+        return frameOfReferenceUID;
+    }
 
-	public List<Integer> getImagePositionPatient() {
-		return imagePositionPatient;
-	}
+    public void setFrameOfReferenceUID(String frameOfReferenceUID) {
+        this.frameOfReferenceUID = frameOfReferenceUID;
+    }
 
-	public void setImagePositionPatient(List<Integer> imagePositionPatient) {
-		this.imagePositionPatient = imagePositionPatient;
-	}
+    public String getPhotometricInterpretation() {
+        return photometricInterpretation;
+    }
 
-	public List<String> getImageType() {
-		return imageType;
-	}
+    public void setPhotometricInterpretation(String photometricInterpretation) {
+        this.photometricInterpretation = photometricInterpretation;
+    }
 
-	public void setImageType(List<String> imageType) {
-		this.imageType = imageType;
-	}
+    public Integer getBitsAllocated() {
+        return bitsAllocated;
+    }
 
-	public Integer getWindowCenter() {
-		return windowCenter;
-	}
+    public void setBitsAllocated(Integer bitsAllocated) {
+        this.bitsAllocated = bitsAllocated;
+    }
 
-	public void setWindowCenter(Integer windowCenter) {
-		this.windowCenter = windowCenter;
-	}
+    public Integer getBitsStored() {
+        return bitsStored;
+    }
 
-	public Integer getWindowWidth() {
-		return windowWidth;
-	}
+    public void setBitsStored(Integer bitsStored) {
+        this.bitsStored = bitsStored;
+    }
 
-	public void setWindowWidth(Integer windowWidth) {
-		this.windowWidth = windowWidth;
-	}
+    public Integer getPixelRepresentation() {
+        return pixelRepresentation;
+    }
+
+    public void setPixelRepresentation(Integer pixelRepresentation) {
+        this.pixelRepresentation = pixelRepresentation;
+    }
+
+    public Integer getSamplesPerPixel() {
+        return samplesPerPixel;
+    }
+
+    public void setSamplesPerPixel(Integer samplesPerPixel) {
+        this.samplesPerPixel = samplesPerPixel;
+    }
+
+    public List<Float> getPixelSpacing() {
+        return pixelSpacing;
+    }
+
+    public void setPixelSpacing(List<Float> pixelSpacing) {
+        this.pixelSpacing = pixelSpacing;
+    }
+
+    public Integer getHighBit() {
+        return highBit;
+    }
+
+    public void setHighBit(Integer highBit) {
+        this.highBit = highBit;
+    }
+
+    public List<Integer> getImageOrientationPatient() {
+        return imageOrientationPatient;
+    }
+
+    public void setImageOrientationPatient(List<Integer> imageOrientationPatient) {
+        this.imageOrientationPatient = imageOrientationPatient;
+    }
+
+    public List<Integer> getImagePositionPatient() {
+        return imagePositionPatient;
+    }
+
+    public void setImagePositionPatient(List<Integer> imagePositionPatient) {
+        this.imagePositionPatient = imagePositionPatient;
+    }
+
+    public List<String> getImageType() {
+        return imageType;
+    }
+
+    public void setImageType(List<String> imageType) {
+        this.imageType = imageType;
+    }
+
+    public Integer getWindowCenter() {
+        return windowCenter;
+    }
+
+    public void setWindowCenter(Integer windowCenter) {
+        this.windowCenter = windowCenter;
+    }
+
+    public Integer getWindowWidth() {
+        return windowWidth;
+    }
+
+    public void setWindowWidth(Integer windowWidth) {
+        this.windowWidth = windowWidth;
+    }
 
 }

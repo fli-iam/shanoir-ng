@@ -15,15 +15,16 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { Coil } from '../../coils/shared/coil.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Study } from '../../studies/shared/study.model';
+import { Field } from '../../shared/reflect/field.decorator';
 
 
 export class StudyCard extends Entity {
 
-    id: number;
-    name: string;
-    study: Study;
-    acquisitionEquipment: AcquisitionEquipment;
-    rules: StudyCardRule[] = [];
+    @Field() id: number;
+    @Field() name: string;
+    @Field() study: Study;
+    @Field() acquisitionEquipment: AcquisitionEquipment;
+    @Field() rules: StudyCardRule[] = [];
 }
 
 
@@ -36,15 +37,15 @@ export class StudyCardRule {
     orConditions: boolean = false;
 
     static copy(rule: StudyCardRule): StudyCardRule {
-        let copy: StudyCardRule = new StudyCardRule(rule.scope);
+        const copy: StudyCardRule = new StudyCardRule(rule.scope);
         copy.assignments = rule.assignments.map(ass => {
-            let assCopy: StudyCardAssignment = new StudyCardAssignment(ass.scope);
+            const assCopy: StudyCardAssignment = new StudyCardAssignment(ass.scope);
             assCopy.field = ass.field;
             assCopy.value = ass.value;
             return assCopy;
         });
         copy.conditions = rule.conditions.map(con => {
-            let conCopy: StudyCardCondition = new StudyCardCondition(con.scope);
+            const conCopy: StudyCardCondition = new StudyCardCondition(con.scope);
             conCopy.dicomTag = con.dicomTag;
             conCopy.shanoirField = con.shanoirField;
             conCopy.values = [...con.values];
@@ -84,9 +85,23 @@ export class StudyCardCondition {
     dicomTag: DicomTag;
     operation: Operation;
     values: (string | Coil)[] = [];
-    cardinality: number;
+    private _cardinality: number = -1; // -1 means condition on every dataset / acquisition
 
-    constructor(public scope: ConditionScope) {}
+    set cardinality(value: number) {
+        if (!["DatasetDICOMConditionOnDataset", "DatasetMetadataCondOnDataset", "AcqMetadataCondOnAcq"].includes(this.scope)) {
+            this._cardinality = value;
+        }
+    }
+
+    get cardinality(): number {
+        return this._cardinality;
+    }
+
+    constructor(public scope: ConditionScope) {
+        if (["DatasetDICOMConditionOnDataset", "DatasetMetadataCondOnDataset", "AcqMetadataCondOnAcq"].includes(scope)) {
+            this._cardinality = -1;
+        }
+    }
 
     get type(): 'string' | 'Coil' {
         if (this.values?.[0] instanceof Coil) {
@@ -116,7 +131,7 @@ export class DicomTag {
 
 export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'DOES_NOT_CONTAIN' | 'SMALLER_THAN' | 'BIGGER_THAN' | 'DOES_NOT_START_WITH' | 'NOT_EQUALS' | 'DOES_NOT_END_WITH' | 'PRESENT' | 'ABSENT';
 
-export type ConditionScope = 'StudyCardDICOMConditionOnDatasets' | 'AcqMetadataCondOnAcq' | 'AcqMetadataCondOnDatasets' | 
+export type ConditionScope = 'ExamDICOMConditionOnDatasets' | 'AcqDICOMConditionOnDatasets' | 'DatasetDICOMConditionOnDataset' | 'AcqMetadataCondOnAcq' | 'AcqMetadataCondOnDatasets' | 
     'DatasetMetadataCondOnDataset' | 'ExamMetadataCondOnAcq' | 'ExamMetadataCondOnDatasets';
 
 export type MetadataFieldScope = 'Dataset' | 'DatasetAcquisition';

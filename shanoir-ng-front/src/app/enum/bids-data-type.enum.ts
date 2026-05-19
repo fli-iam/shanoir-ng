@@ -26,7 +26,7 @@ export enum BidsDataType {
 
 } export namespace BidsDataType {
 
-    export function all(): Array<BidsDataType> {
+    export function all(): BidsDataType[] {
         return allOfEnum<BidsDataType>(BidsDataType);
     }
 
@@ -34,5 +34,5 @@ export enum BidsDataType {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export var options: Option<BidsDataType>[] = all().map(prop => new Option<BidsDataType>(prop, getLabel(prop)));
+    export const options: Option<BidsDataType>[] = all().map(prop => new Option<BidsDataType>(prop, getLabel(prop)));
 }

@@ -52,6 +52,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </encoder>
     </appender>
 
+    <appender name="ECC_FILE_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/shanoir-ng-logs/shanoir-ecc.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
     <appender name="RESULTHANDLER_FILE" class="ch.qos.logback.core.FileAppender">
         <file>/var/log/shanoir-ng-logs/shanoir-vip-handler.log</file>
         <encoder>
@@ -69,6 +77,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	
     <logger name="org.shanoir.ng.dicom.DIMSEService" level="INFO" additivity="false">
         <appender-ref ref="DIMSE_FILE_LOG" />
+    </logger>
+    
+    <logger name="org.shanoir.ng.examination.schedule.ExaminationsConsistencyChecker" level="INFO" additivity="false">
+        <appender-ref ref="ECC_FILE_LOG" />
     </logger>
 
     <logger name="org.shanoir.ng.solr.runner" level="INFO" additivity="false">

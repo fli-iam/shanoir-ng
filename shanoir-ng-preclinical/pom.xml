@@ -65,7 +65,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<build>
 		<plugins>
-			<!-- Package shanoir-ng-preclinical.jar as Spring Boot executable: Avoid 
+			<!-- Package shanoir-ng-preclinical.jar as Spring Boot executable: Avoid
 				error: no main manifest attribute, in /shanoir-ng-preclinical.jar -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

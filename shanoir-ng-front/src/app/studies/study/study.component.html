@@ -20,21 +20,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(save)="save()"
 					(edit)="goToEdit()"
 					(delete) = "delete()"
-					(cancel)="goToView()"
+					(dismiss)="goToView()"
 					(back)="goBack()">
-			</form-footer>
+				<button *ngIf="mode == 'view' && hasDownloadRight && downloadService.advancedDownloadCompat" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
+			    @if (mode == 'view') {
+                    @if (hasStudyImportRight && mode == 'view') {
+                        <copy-from-csv class="copy-button" [studyId]="id"></copy-from-csv>
+                    }
+                    <button *ngIf="keycloakService.isUserAdmin() && study.isDraft" class="right-icon dl-button" type="button" (click)="approveStudy()">Approve<i class="fas fa-check"></i></button>
+                }
+            </form-footer>
+            <h2 class="header command-zone" [class.draft-title]="study?.isDraft">
+                @switch (mode) {
+                    @case ('view') {
+                        Details on study
+                    }
+                    @case ('edit') {
+                        Edit study
+                    }
+                    @case ('create') {
+                        Create study
+                    }
 
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone" i18n="View study|Title@@studyDetailViewTitle">Details on study</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone" i18n="Edit study|Title@@studyDetailEditTitle">Edit study</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone" i18n="Create study|Title@@studyDetailCreateTitle">Create study</h2>
-				</ng-template>
-			</span>
+                }
+                @if(study?.isDraft) {
+                    <span class="draft-tag" title="Draft"><i class="fa-regular fa-clipboard"></i></span>
+                }
+            </h2>
 			<ul class="tabs">
 				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'" replaceUrl="true">
 					<span class="general">General</span>
@@ -65,6 +77,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li class="tags" *ngIf="isStudyAdmin" [class.active]="activeTab == 'history'" [routerLink]="'.'" [fragment]="'history'" replaceUrl="true" (click)="loadHistory()">
                     <span class="history">History</span>
                 </li>
+				@if (accessRequests?.length > 0) {
+					<li class="ar-tab highlighted" *ngIf="isStudyAdmin" [class.active]="activeTab == 'access-requests'" [routerLink]="'.'" [fragment]="'access-requests'" replaceUrl="true">
+						<span class="access-requests left-icon">
+							<i class="fas fa-warning"></i>
+							Access requests ({{accessRequests?.length}})
+						</span>
+					</li>
+				}
 			</ul>
 
 			<fieldset [class.hidden-tab]="activeTab != 'general'" tab="general">
@@ -77,7 +97,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{study.name}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" formControlName="name" [(ngModel)]="study.name" />
+							<input type="text" formControlName="name"/>
 							<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert" i18n="Edit study|Name required error@@studyDetailNameRequiredError">Name is required!</label>
 							<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit study|Name length error@@studyDetailNameLengthError">Name length must be between 2 and 200!</label>
 							<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert" i18n="Study detail|Name unique error@@studyDetailNameUniqueError">Name should be unique!</label>
@@ -91,7 +111,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{study.description}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<textarea type="text" formControlName="description" [(ngModel)]="study.description"></textarea>
+							<textarea type="text" formControlName="description"></textarea>
 						</ng-template>
 						</span>
                     </li>
@@ -102,7 +122,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							{{study.license}}
 						</ng-template>
 						<ng-template ngSwitchDefault>
-							<input type="text" formControlName="license" [(ngModel)]="study.license">
+							<input type="text" formControlName="license">
 						</ng-template>
 						</span>
                     </li>
@@ -110,11 +130,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|Start date label@@studyDetailStartDate">Start date</label>
 						<span class="right-col">
 							<ng-container *ngIf="mode == 'view' || mode == 'edit'">
-								{{study.startDate | date: 'dd/MM/yyyy'}}
+								{{study.startDate | localDateFormatPipe}}
 							</ng-container>
 							<ng-container *ngIf="mode == 'create'">
-								<datepicker [(ngModel)]="study.startDate" formControlName="startDate"></datepicker>
-								<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date vali error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+								<datepicker formControlName="startDate"></datepicker>
+								<label *ngIf="hasError('startDate', ['required'])" class="form-validation-alert" i18n="Study detail|Date required error@@studyDetailStartDateRequiredError">Start date is required!</label>
+								<label *ngIf="hasError('startDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 							</ng-container>
 						</span>
 					</li>
@@ -122,11 +143,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|End date label@@studyDetailEndDate">End date</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{study.endDate | date: 'dd/MM/yyyy'}}
+								{{study.endDate | localDateFormatPipe}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<datepicker [(ngModel)]="study.endDate" formControlName="endDate"></datepicker>
-								<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+								<datepicker formControlName="endDate"></datepicker>
+								<label *ngIf="hasError('endDate', ['required'])" class="form-validation-alert" i18n="Study detail|Date required error@@studyDetailEndDateRequiredError">End date is required!</label>
+								<label *ngIf="hasError('endDate', ['format'])" class="form-validation-alert" i18n="Study detail|Date valid error@@dateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
 								<label *ngIf="hasError('endDate', ['order'])" class="form-validation-alert">End date must be subsequent to start date</label>
 							</ng-template>
 						</span>
@@ -135,15 +157,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|Status label@@studyDetailStatus">Status</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{studyStatusStr(study.studyStatus)}}
+								{{enumStrToStr(study.studyStatus)}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="studyStatus" [(ngModel)]="study.studyStatus" [options]="studyStatusOptions">
+								<select-box formControlName="studyStatus" [options]="studyStatusOptions">
 								</select-box>
 								<label *ngIf="hasError('studyStatus', ['required'])" class="form-validation-alert" i18n="Study detail|Status required error@@studyDetailStatusRequiredError">Status is required!</label>
 							</ng-template>
 						</span>
 					</li>
+                    <ng-container *ngIf="mode == 'view' || mode == 'edit'">
+                        <li>
+                            <label i18n="Study detail|Draft state label@@studyDetailApprovalStatus">Draft</label>
+                            <span class="right-col">
+                                    @if (study.isDraft) {
+                                        <span class="bool-true"><i class="fas fa-check"></i></span>
+                                    } @else {
+                                        <span class="bool-false"><i class="fas fa-times"></i></span>
+                                    }
+                            </span>
+                        </li>
+                    </ng-container>
 					<li>
 						<label>Pseudonymization profile</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -151,9 +185,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								{{study.profile?.profileName}}
 							</ng-container>
 							<ng-container *ngIf="mode == 'create'">
-								<select-box formControlName="profile" [(ngModel)]="study.profile" [options]="profileOptions">
+								<select-box formControlName="profile" [options]="profileOptions">
 								</select-box>
-								<label *ngIf="hasError('profile', ['required'])" class="form-validation-alert" i18n="Study detail|Profile required error@@studyDetailStatusRequiredError">Profile is required!</label>
+								<label *ngIf="hasError('profile', ['required'])" class="form-validation-alert" i18n="Study detail|Profile required error@@studyDetailProfileRequiredError">Profile is required!</label>
 							</ng-container>
 						</span>
                     </li>
@@ -166,9 +200,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							    </ng-container>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-                                <input type="radio" [(ngModel)]="study.studyCardPolicy" formControlName="studyCardPolicy" value="MANDATORY"/>Mandatory
-                                <input type="radio" [(ngModel)]="study.studyCardPolicy" formControlName="studyCardPolicy" value="OPTIONAL"/>Optional
-                                <input type="radio" [(ngModel)]="study.studyCardPolicy" formControlName="studyCardPolicy" value="DISABLED"/>Disabled
+                                <input type="radio" formControlName="studyCardPolicy" value="MANDATORY"/>Mandatory
+                                <input type="radio" formControlName="studyCardPolicy" value="DISABLED"/>Disabled
                             </ng-template>
 						</span>
                     </li>
@@ -181,7 +214,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         {{ item.key }}
                                     </td>
                                     <td>
-                                        {{ storageVolumePrettyPrint(item.value) }}
+                                        {{ item.value | size }}
                                     </td>
                                 </tr>
                                 <tr *ngIf="study.totalSize > 0">
@@ -189,7 +222,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         Total
                                     </td>
                                     <td class="volume-storage-total" >
-                                        {{ storageVolumePrettyPrint(study.totalSize) }}
+                                        {{ study.totalSize | size }}
                                     </td>
                                 </tr>
                                 <tr *ngIf="!study.totalSize || study.totalSize == 0" >
@@ -211,7 +244,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<span *ngIf="!study.clinical" class="bool-false"><i class="fas fa-times"></i></span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<checkbox [(ngModel)]="study.clinical" formControlName="clinical"></checkbox>
+								<checkbox formControlName="clinical"></checkbox>
 							</ng-template>
 						</span>
 					</li>
@@ -223,7 +256,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<span *ngIf="!study.challenge" class="bool-false"><i class="fas fa-times"></i></span>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<checkbox [(ngModel)]="study.challenge" formControlName="challenge"></checkbox>
+								<checkbox formControlName="challenge"></checkbox>
 							</ng-template>
 						</span>
                     </li>
@@ -235,56 +268,179 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <span *ngIf="!study.visibleByDefault" class="bool-false"><i class="fas fa-times"></i></span>
                             </ng-template>
                             <ng-template ngSwitchDefault>
-                                <checkbox [(ngModel)]="study.visibleByDefault" formControlName="visibleByDefault"></checkbox>
+                                <checkbox formControlName="visibleByDefault"></checkbox>
                             </ng-template>
 						</span>
 					</li>
-				</ol>
-			</fieldset>
-			<fieldset [class.hidden-tab]="activeTab != 'files'" tab="files">
-				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
-					Data use agreement (DUA)
-					<tool-tip class="larger">
-						Adding a data use agreement (DUA) to a study changes the study member experience, for all members.
-						If a DUA is present all members of the study will have to accept the DUA after signing in the next time to Shanoir.
-						Until the DUA is accepted, a member has no access/no rights to any data of the study, except administrators.
-					</tool-tip>
-				</legend>
-				<ol>
-					<li *ngIf="mode != 'view'">
-						<label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
-						<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
-							<input #duaInput hidden formControlName="dataUserAgreement" type="file" (change)="attachDataUserAgreement($event)" />
-							<button type="button" class="left-icon" (click)="setDuaFile()">
-								<i class="fas fa-upload"></i>Choose file
-							</button>
-						</span>
-					 	<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]" class="right-col">
-					 		{{study.dataUserAgreementPaths[0]}}
-							<button type="button" class="dl-button" (click)="deleteDataUserAgreement()">
-								<i class="fa-regular fa-trash-can"></i>
-							</button>
-						</span>
-					</li>
-					<li *ngIf="mode == 'view'">
-						<label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
-						<div [hidden]="!duaDownloadState?.progress">
+                    <li>
+                        <label i18n="Study detail|Expected number of subjects label@@expectedNbOfSubjects">Expected number of subjects</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <ng-container *ngIf="mode == 'view'">
+                                    {{study.expectedNbOfSubjects}}
+                                </ng-container>
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <input type="number" formControlName="expectedNbOfSubjects"/>
+                                <label *ngIf="hasError('expectedNbOfSubjects', ['required'])" [@slideDown]="hasError('expectedNbOfSubjects', ['required'])" class="form-validation-alert" i18n="Edit study|Expected number of subjects required error@@studyDetailExpectedNbOfSubjectsRequiredError">Expected number of subjects is required!</label>
+                                <label *ngIf="hasError('expectedNbOfSubjects', ['min'])" [@slideDown]="hasError('expectedNbOfSubjects', ['min'])" class="form-validation-alert" i18n="Edit study|Expected number of subjects value error@@studyDetailExpectedNbOfSubjectsValueError">Expected number of subjects cannot be less than 1!</label>
+                            </ng-template>
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Study detail|Average examination size label@@averageExaminationSize">Average examination size (GBs)</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <ng-container *ngIf="mode == 'view'">
+                                    {{study.averageExaminationSize}}
+                                </ng-container>
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <input type="number" formControlName="averageExaminationSize"/>
+                                <label *ngIf="hasError('averageExaminationSize', ['min'])" [@slideDown]="hasError('averageExaminationSize', ['min'])" class="form-validation-alert" i18n="Edit study|Average examination size value error@@studyDetailAverageExaminationSizeValueError">Average examination size cannot be less than 1</label>
+                            </ng-template>
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Study detail|Estimated total volume label@@estimatedTotalVolume">Estimated total volume (GBs)</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <ng-container *ngIf="mode == 'view'">
+                                    {{study.estimatedTotalVolume}}
+                                </ng-container>
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <input type="number" formControlName="estimatedTotalVolume"/>
+                                <label *ngIf="hasError('estimatedTotalVolume', ['min'])" [@slideDown]="hasError('estimatedTotalVolume', ['min'])" class="form-validation-alert" i18n="Edit study|Estimated total volume value error@@studyDetailEstimatedTotalVolumeValueError">Estimated total volume cannot be less than 1</label>
+                            </ng-template>
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Study detail|Expected number of centers label@@expectedNbOfCenters">Expected number of centers</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <ng-container *ngIf="mode == 'view'">
+                                    {{study.expectedNbOfCenters}}
+                                </ng-container>
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <input type="number" formControlName="expectedNbOfCenters"/>
+                                <label *ngIf="hasError('expectedNbOfCenters', ['required'])" [@slideDown]="hasError('expectedNbOfCenters', ['required'])" class="form-validation-alert" i18n="Edit study|Expected number of centers required error@@studyDetailExpectedNbOfCentersRequiredError">Expected number of centers is required!</label>
+                                <label *ngIf="hasError('expectedNbOfCenters', ['min'])" [@slideDown]="hasError('expectedNbOfCenters', ['min'])" class="form-validation-alert" i18n="Edit study|Expected number of centers value error@@studyDetailExpectedNbOCentersValueError">Expected number of centers cannot be less than 1</label>
+                            </ng-template>
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Study detail|Subject inclusion rate label@@inclusionRate">Subject inclusion rate</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                {{ study.inclusionRate }} {{enumStrToStr(study.inclusionRateUnit)}}
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <input type="number" formControlName="inclusionRate"/>
+                                <label *ngIf="hasError('inclusionRate', ['min'])" [@slideDown]="hasError('inclusionRate', ['min'])" class="form-validation-alert" i18n="Edit study|Inclusion rate value error@@studyDetailInclusionRateValueError">Inclusion rate cannot be less than 1</label>
+                                <label *ngIf="form.hasError('inclusionRatePair') && (form.get('inclusionRate')?.touched || form.get('inclusionRateUnit')?.touched)" class="form-validation-alert" i18n="Edit study|Inclusion rate pair error@@studyDetailInclusionRatePairError"> Both inclusion rate and unit must be provided together!</label>
+                            </ng-template>
+                        </span>
+                    </li>
+                    <li *ngIf="mode != 'view'">
+                        <label i18n="Study detail|Subject inclusion rate label@@inclusionRateUnit">Subject inclusion rate unit</label>
+                        <span class="right-col">
+                            <select-box formControlName="inclusionRateUnit" [options]="inclusionRateOptions" placeholder=""></select-box>
+                            <label *ngIf="form.hasError('inclusionRatePair') && (form.get('inclusionRate')?.touched || form.get('inclusionRateUnit')?.touched)" class="form-validation-alert" i18n="Edit study|Inclusion rate pair error@@studyDetailInclusionRatePairError"> Both inclusion rate and unit must be provided together!</label>
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Study detail|Sponsor label@@sponsor">Sponsor</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <ng-container *ngIf="mode == 'view'">
+                                    {{study.sponsor}}
+                                </ng-container>
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <input type="text" formControlName="sponsor"/>
+                                <label *ngIf="hasError('sponsor', ['required'])" [@slideDown]="hasError('sponsor', ['required'])" class="form-validation-alert" i18n="Edit study|Sponsor required error@@studyDetailSponsorRequiredError">Sponsor is required!</label>
+                                <label *ngIf="hasError('sponsor', ['minlength', 'maxlength'])" [@slideDown]="hasError('sponsor', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit study|Sponsor length error@@studyDetailSponsorLengthError">Sponsor length must be between 2 and 200!</label>
+                            </ng-template>
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Study detail|Principal investigator label@@principalInvestigator">Principal investigator</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <ng-container *ngIf="mode == 'view'">
+                                    {{study.principalInvestigator}}
+                                </ng-container>
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <input type="text" formControlName="principalInvestigator"/>
+                                <label *ngIf="hasError('principalInvestigator', ['required'])" [@slideDown]="hasError('principalInvestigator', ['required'])" class="form-validation-alert" i18n="Edit study|Principal investigator required error@@studyDetailPrincipalInvestigatorRequiredError">Principal investigator is required!</label>
+                                <label *ngIf="hasError('principalInvestigator', ['minlength', 'maxlength'])" [@slideDown]="hasError('principalInvestigator', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit study|Principal investigator length error@@studyDetailPrincipalInvestigatorLengthError">Principal investigator length must be between 2 and 200!</label>
+                            </ng-template>
+                        </span>
+                    </li>
+                    <li>
+                        <label i18n="Study detail|Scientific advisor label@@scientificAdvisor">Scientific advisor</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <ng-container *ngIf="mode == 'view'">
+                                    {{study.scientificAdvisor}}
+                                </ng-container>
+                            </ng-template>
+                            <ng-template ngSwitchDefault>
+                                <input type="text" formControlName="scientificAdvisor"/>
+                                <label *ngIf="hasError('scientificAdvisor', ['minlength', 'maxlength'])" [@slideDown]="hasError('scientificAdvisor', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Edit study|Scientific advisor length error@@studyDetailScientificAdvisorLengthError">Scientific advisor length must be between 2 and 200!</label>
+                            </ng-template>
+                        </span>
+                    </li>
+                </ol>
+            </fieldset>
+            <fieldset [class.hidden-tab]="activeTab != 'files'" tab="files">
+                <legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
+                    Data use agreement (DUA)
+                    <tool-tip class="larger">
+                        Adding a data use agreement (DUA) to a study changes the study member experience, for all members.
+                        If a DUA is present all members of the study will have to accept the DUA after signing in the next time to Shanoir.
+                        Until the DUA is accepted, a member has no access/no rights to any data of the study, except administrators.
+                    </tool-tip>
+                </legend>
+                <ol>
+                    <li *ngIf="mode != 'create'"><button type="button" class="left-icon normal" [routerLink]="'/dua/create/' + study.id"><i class="fa-solid fa-wand-magic-sparkles"></i>Open DUA assistant</button></li>
+                    <li *ngIf="mode != 'view'">
+                        <label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
+                        <span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
+                            <input #duaInput hidden formControlName="dataUserAgreement" type="file" (change)="attachDataUserAgreement($event)" />
+                            <button type="button" class="left-icon" (click)="setDuaFile()">
+                                <i class="fas fa-upload"></i>Choose file
+                            </button>
+                        </span>
+                        <span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]" class="right-col">
+                            {{study.dataUserAgreementPaths[0]}}
+                            <button type="button" class="dl-button" (click)="deleteDataUserAgreement()">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </span>
+                    </li>
+                    <li *ngIf="mode == 'view'">
+                        <label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
+                        <div [hidden]="!duaDownloadState?.progress">
                             <progress-bar [progress]="duaDownloadState?.progress" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                         </div>
                         <span class="right-col">
-							<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
-								{{study.dataUserAgreementPaths[0]}}
-								<button type="button" class="dl-button" (click)="downloadDataUserAgreement()"><i class="fas fa-download"></i></button>
-							</span>
-							<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
-						</span>
+                            <span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
+                                {{study.dataUserAgreementPaths[0]}}
+                                <button type="button" class="dl-button" (click)="downloadDataUserAgreement()"><i class="fas fa-download"></i></button>
+                            </span>
+                            <span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
+                        </span>
                     </li>
                 </ol>
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'subjects'" tab="subjects">
                 <legend>Subject tags</legend>
-                <tag-creator ngDefaultControl [mode]="mode" [tagsInUse]="subjectTagsInUse" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
-                <subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
+                <tag-creator ngDefaultControl [mode]="mode" [tagsInUse]="subjectTagsInUse" (userChange)="onTagListChange()" formControlName="tags"></tag-creator>
+                <subject-study-list [allowRemove]="false" [study]="study" [selectableList]="subjects" formControlName="subjects" [mode]="mode"></subject-study-list>
             </fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
                 <legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
@@ -300,14 +456,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers label@@studyDetailCentersAndPI">Center</label>
 						<span class="right-col">
-							<select-box [(ngModel)]="selectedCenter" formControlName="selectedCenter" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [options]="centerOptions">
+							<select-box placeholder="Select a center ..." (addClick)="onCenterAdd($event)" [options]="centerOptions">
 							</select-box>
 							<label *ngIf="hasError('studyCenterList', ['noCenter'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
 					</li>
 					<li *ngIf="mode != 'view'">
 						<span class="study-center-list">
-							<input type="hidden" formControlName="studyCenterList" [(ngModel)]="study.studyCenterList"/>
+							<input type="hidden" formControlName="studyCenterList"/>
 							<table>
 								<tr>
 									<th>Acquisition Center</th>
@@ -370,14 +526,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
 				<studyuser-list
 				    formControlName="studyUserList"
-					[(ngModel)]="study.studyUserList"
 					[users]="users"
 					[studyCenters]="study.studyCenterList"
 					[study] = "study"
 					[mode]="mode">
 				</studyuser-list>
 			</fieldset>
-			<fieldset *ngIf="keycloakService.isUserAdmin() && accessRequests?.length > 0" class="access-requests">
+			<fieldset [class.hidden-tab]="activeTab != 'access-requests'" *ngIf="keycloakService.isUserAdmin() && accessRequests?.length > 0" class="access-requests">
 				<legend>Pending access requests for this study</legend>
 				<ul>
 					<li *ngFor="let a of accessRequests">
@@ -395,7 +550,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
             <fieldset [class.hidden-tab]="activeTab != 'tags'" class="tags">
                 <legend>Public Study tags</legend>
-                <tag-creator ngDefaultControl [mode]="mode" [(ngModel)]="study.studyTags" (onChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
+                <tag-creator ngDefaultControl [mode]="mode" (userChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
             </fieldset>
             <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'bids'" tab="bids">
 				        <legend>BIDS tree</legend>

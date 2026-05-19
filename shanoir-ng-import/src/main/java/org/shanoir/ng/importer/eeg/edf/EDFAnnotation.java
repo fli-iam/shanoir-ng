@@ -1,66 +1,56 @@
-/*
- * (The MIT license)
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
  *
- * Copyright (c) 2012 MIPT (mr.santak@gmail.com)
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
- * and associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies
- * or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+
 package org.shanoir.ng.importer.eeg.edf;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class EDFAnnotation
-{
-        private double onSet = 0;
-        private double duration = 0;
-        private final List<String> annotations = new ArrayList<>();
+public class EDFAnnotation {
 
-        EDFAnnotation(String onSet, String duration, String[] annotations)
-        {
-                this.onSet = Double.parseDouble(onSet);
-                if (duration != null && !Objects.equals(duration, ""))
-                        this.duration = Double.parseDouble(duration);
-                for (int i = 0; i < annotations.length; i++)
-                {
-                        if (annotations[i] == null || annotations[i].trim().equals(""))
-                                continue;
-                        this.annotations.add(annotations[i]);
-                }
-        }
+    private double onSet = 0;
+    private double duration = 0;
+    private final List<String> annotations = new ArrayList<>();
 
-        public double getOnSet()
-        {
-                return onSet;
+    EDFAnnotation(String onSet, String duration, String[] annotations) {
+        this.onSet = Double.parseDouble(onSet);
+        if (duration != null && !Objects.equals(duration, "")) {
+            this.duration = Double.parseDouble(duration);
         }
+        for (int i = 0; i < annotations.length; i++) {
+            if (annotations[i] == null || annotations[i].trim().equals("")) {
+                continue;
+            }
+            this.annotations.add(annotations[i]);
+        }
+    }
 
-        public double getDuration()
-        {
-                return duration;
-        }
+    public double getOnSet() {
+        return onSet;
+    }
 
-        public List<String> getAnnotations()
-        {
-                return annotations;
-        }
+    public double getDuration() {
+        return duration;
+    }
 
-        @Override
-        public String toString()
-        {
-                return "Annotation [onSet=" + onSet + ", duration=" + duration + ", annotations=" + annotations + "]";
-        }
+    public List<String> getAnnotations() {
+        return annotations;
+    }
+
+    @Override
+    public String toString() {
+        return "Annotation [onSet=" + onSet + ", duration=" + duration + ", annotations=" + annotations + "]";
+    }
 }

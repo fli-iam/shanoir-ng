@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -25,20 +25,20 @@ import java.util.List;
 // keep the annotations here.
 public interface CardService<T extends Card> {
 
-	void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
+    void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
 
-	T save(T card) throws MicroServiceCommunicationException;
-	
-	T update(T card) throws EntityNotFoundException, MicroServiceCommunicationException;
-	
-	List<T> findAll();
-	
-	T findById(Long id);
-	
-	T findByName(String name);
+    T save(T card) throws MicroServiceCommunicationException;
 
-	List<T> search(List<Long> studyIdList);
-	
-	List<T> findByStudy (Long studyId);
+    T update(T card) throws EntityNotFoundException, MicroServiceCommunicationException;
+
+    List<T> findAll();
+
+    T findById(Long id);
+
+    T findByName(String name);
+
+    List<T> search(List<Long> studyIdList);
+
+    List<T> findByStudy(Long studyId);
 
 }

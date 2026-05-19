@@ -12,10 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
+
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { disapearUp } from '../../shared/animations/animations';
-
 import { UserService } from '../shared/user.service';
+
 import { AccessRequest } from './access-request.model';
 import { AccessRequestService } from './access-request.service';
 

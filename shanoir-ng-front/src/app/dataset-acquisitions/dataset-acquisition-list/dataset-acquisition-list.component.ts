@@ -13,6 +13,7 @@
  */
 
 import { Component, ViewChild } from '@angular/core';
+
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
@@ -58,7 +59,7 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
             { headerName: 'Type', field: 'type', width: '22px', disableSorting: true},
             { headerName: "Center Equipment", field: "acquisitionEquipment", orderBy: ['acquisitionEquipmentId'],
@@ -88,7 +89,7 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
         if (!acqEqpt || acqEqpt.id == 0) return "";
         else if (!acqEqpt.manufacturerModel) return String(acqEqpt.id);
         else {
-            let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
+            const manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
             return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
                 + " (" + DatasetModalityType.getLabel(manufModel.datasetModalityType) + ") " + acqEqpt.serialNumber
         }

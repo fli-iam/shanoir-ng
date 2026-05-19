@@ -55,7 +55,7 @@ export class QualityCardListComponent extends BrowserPaginEntityListComponent<Qu
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Name", field: "name" },
             { headerName: "Study", field: 'study.name', defaultField: 'study.id',
 			 	route: (qualityCard: QualityCard) => '/study/details/' + qualityCard.study.id

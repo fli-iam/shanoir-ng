@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -61,105 +61,105 @@ import com.google.gson.GsonBuilder;
 @ActiveProfiles("test")
 public class SubjectPathologyApiControllerTest {
 
-	private static final String REQUEST_PATH_SUBJECT = "/subject";
-	private static final String SUBJECT_ID = "/1";
-	private static final String REQUEST_PATH_PATHOLOGY = "/pathology";
-	private static final String REQUEST_PATH = REQUEST_PATH_SUBJECT + SUBJECT_ID + REQUEST_PATH_PATHOLOGY;
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-	private static final String REQUEST_PATH_SUBJECT_BY_PATHO = REQUEST_PATH_SUBJECT + "/all" + REQUEST_PATH_PATHOLOGY
-			+ "/1";
-	private static final String REQUEST_PATH_PATHO_BY_SUBJECT = REQUEST_PATH_SUBJECT + SUBJECT_ID
-			+ REQUEST_PATH_PATHOLOGY + "/all";
+    private static final String REQUEST_PATH_SUBJECT = "/subject";
+    private static final String SUBJECT_ID = "/1";
+    private static final String REQUEST_PATH_PATHOLOGY = "/pathology";
+    private static final String REQUEST_PATH = REQUEST_PATH_SUBJECT + SUBJECT_ID + REQUEST_PATH_PATHOLOGY;
+    private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    private static final String REQUEST_PATH_SUBJECT_BY_PATHO = REQUEST_PATH_SUBJECT + "/all" + REQUEST_PATH_PATHOLOGY
+            + "/1";
+    private static final String REQUEST_PATH_PATHO_BY_SUBJECT = REQUEST_PATH_SUBJECT + SUBJECT_ID
+            + REQUEST_PATH_PATHOLOGY + "/all";
 
-	private Gson gson;
+    private Gson gson;
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private SubjectPathologyService subPathosServiceMock;
-	@MockBean
-	private AnimalSubjectService subjectsServiceMock;
-	@MockBean
-	private PathologyService pathologiesServiceMock;
-	@MockBean
-	private RefsService refsServiceMock;
-	@MockBean
+    @MockBean
+    private SubjectPathologyService subPathosServiceMock;
+    @MockBean
+    private AnimalSubjectService subjectsServiceMock;
+    @MockBean
+    private PathologyService pathologiesServiceMock;
+    @MockBean
+    private RefsService refsServiceMock;
+    @MockBean
     private PathologyModelService pathoService;
-	@MockBean
-	private SubjectPathologyValidator uniqueValidator;
-	@MockBean
-	private SubjectPathologyEditableByManager editableOnlyValidator;
+    @MockBean
+    private SubjectPathologyValidator uniqueValidator;
+    @MockBean
+    private SubjectPathologyEditableByManager editableOnlyValidator;
 
 
-	@BeforeEach
-	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+    @BeforeEach
+    public void setup() throws ShanoirException {
+        gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		doNothing().when(subPathosServiceMock).deleteById(1L);
-		given(subPathosServiceMock.findAll()).willReturn(Arrays.asList(new SubjectPathology()));
-		given(subjectsServiceMock.getBySubjectId(1L)).willReturn(new AnimalSubject());
-		given(pathologiesServiceMock.findById(1L)).willReturn(new Pathology());
-		given(refsServiceMock.findById(1L)).willReturn(new Reference());
-		given(subPathosServiceMock.findByAnimalSubject(new AnimalSubject()))
-				.willReturn(Arrays.asList(new SubjectPathology()));
-		given(subPathosServiceMock.findAllByPathology(new Pathology()))
-				.willReturn(Arrays.asList(new SubjectPathology()));
-		given(subPathosServiceMock.findById(1L)).willReturn(new SubjectPathology());
-		given(subPathosServiceMock.save(Mockito.mock(SubjectPathology.class))).willReturn(new SubjectPathology());
-		
+        doNothing().when(subPathosServiceMock).deleteById(1L);
+        given(subPathosServiceMock.findAll()).willReturn(Arrays.asList(new SubjectPathology()));
+        given(subjectsServiceMock.getById(1L)).willReturn(new AnimalSubject());
+        given(pathologiesServiceMock.findById(1L)).willReturn(new Pathology());
+        given(refsServiceMock.findById(1L)).willReturn(new Reference());
+        given(subPathosServiceMock.findByAnimalSubject(new AnimalSubject()))
+                .willReturn(Arrays.asList(new SubjectPathology()));
+        given(subPathosServiceMock.findAllByPathology(new Pathology()))
+                .willReturn(Arrays.asList(new SubjectPathology()));
+        given(subPathosServiceMock.findById(1L)).willReturn(new SubjectPathology());
+        given(subPathosServiceMock.save(Mockito.mock(SubjectPathology.class))).willReturn(new SubjectPathology());
 
-		given(uniqueValidator.validate(Mockito.any(SubjectPathology.class))).willReturn(new FieldErrorMap());
-		given(editableOnlyValidator.validate(Mockito.any(SubjectPathology.class))).willReturn(new FieldErrorMap());
-	}
 
-	@Test
-	@WithMockUser(authorities = { "adminRole" })
-	public void deleteSubjectPathologyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+        given(uniqueValidator.validate(Mockito.any(SubjectPathology.class))).willReturn(new FieldErrorMap());
+        given(editableOnlyValidator.validate(Mockito.any(SubjectPathology.class))).willReturn(new FieldErrorMap());
+    }
 
-	@Test
-	@WithMockUser(authorities = { "adminRole" })
-	public void deleteSubjectPathologiesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "adminRole" })
+    public void deleteSubjectPathologyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findSubjectPathologyByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser(authorities = { "adminRole" })
+    public void deleteSubjectPathologiesTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	public void findSubjectPathologiesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    public void findSubjectPathologyByIdTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void saveNewSubjectPathologyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(PathologyModelUtil.createSubjectPathology()))).andExpect(status().isOk());
-	}
+    @Test
+    public void findSubjectPathologiesTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-	@Test
-	@WithMockUser
-	public void updateSubjectPathologyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(PathologyModelUtil.createSubjectPathology()))).andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void saveNewSubjectPathologyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(PathologyModelUtil.createSubjectPathology()))).andExpect(status().isOk());
+    }
 
-	@Test
-	public void findSubjectsByPathologyTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_SUBJECT_BY_PATHO).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockUser
+    public void updateSubjectPathologyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(PathologyModelUtil.createSubjectPathology()))).andExpect(status().isOk());
+    }
+
+    @Test
+    public void findSubjectsByPathologyTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_SUBJECT_BY_PATHO).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
 }

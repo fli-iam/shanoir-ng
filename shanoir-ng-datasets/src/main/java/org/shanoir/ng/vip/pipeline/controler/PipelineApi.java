@@ -1,5 +1,4 @@
 /**
-
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
@@ -29,10 +28,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 /**
  * @author Alae Es-saki
  */
-@Tag(name = "VIP pipeline", description="Proxy API for VIP /pipelines")
+@Tag(name = "VIP pipeline", description = "Proxy API for VIP /pipelines")
 @RequestMapping("/vip/pipeline")
 public interface PipelineApi {
-    @Operation(summary = "Get all available pipelines in VIP", description = "Returns all the pipelines available to the authenticated user in VIP", tags={  })
+    @Operation(summary = "Get all available pipelines in VIP", description = "Returns all the pipelines available to the authenticated user in VIP", tags = { })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
@@ -43,7 +42,7 @@ public interface PipelineApi {
             method = RequestMethod.GET)
     ResponseEntity<String> getPipelineAll() throws SecurityException;
 
-    @Operation(summary = "Get the description of pipeline [name] in the version [version]", description = "Returns the VIp description of the pipeline [name] in the version [version].", tags={  })
+    @Operation(summary = "Get the description of pipeline [name] in the version [version]", description = "Returns the VIp description of the pipeline [name] in the version [version].", tags = { })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful response, returns the status"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
@@ -52,7 +51,7 @@ public interface PipelineApi {
     @RequestMapping(value = "/{identifier}/{version}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
-    ResponseEntity<String> getPipeline(@Parameter(description = "The pipeline identifier", required=true) @PathVariable("identifier") String identifier, @Parameter(description = "The pipeline version", required=true) @PathVariable("version") String version) throws SecurityException;
+    ResponseEntity<String> getPipeline(@Parameter(description = "The pipeline identifier", required = true) @PathVariable("identifier") String identifier, @Parameter(description = "The pipeline version", required = true) @PathVariable("version") String version) throws SecurityException;
 
 
 }

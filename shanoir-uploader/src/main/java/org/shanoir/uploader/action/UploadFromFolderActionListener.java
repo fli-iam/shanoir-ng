@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.action;
 
 import java.awt.event.ActionEvent;
@@ -17,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 public class UploadFromFolderActionListener implements ActionListener {
 
-    private static Logger logger = LoggerFactory.getLogger(UploadFromFolderActionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UploadFromFolderActionListener.class);
 
     JFileChooser fileChooser;
 
@@ -50,8 +64,8 @@ public class UploadFromFolderActionListener implements ActionListener {
         this.importFromFolderWindow.studyCardCB.setEnabled(false);
 
         FolderImport folderImport = new FolderImport();
-        folderImport.setStudy(((Study)importFromFolderWindow.studyCB.getSelectedItem()));
-        folderImport.setStudyCard(((StudyCard)importFromFolderWindow.studyCardCB.getSelectedItem()));
+        folderImport.setStudy(((Study) importFromFolderWindow.studyCB.getSelectedItem()));
+        folderImport.setStudyCard(((StudyCard) importFromFolderWindow.studyCardCB.getSelectedItem()));
 
         folderImport.setExaminationImports(new ArrayList<>());
         // Check if it is a folder
@@ -66,7 +80,7 @@ public class UploadFromFolderActionListener implements ActionListener {
         }
         for (File subjectFile : selectedFile.listFiles()) {
             if (!subjectFile.isDirectory() || subjectFile.listFiles().length == 0) {
-                logger.info("Ignoring subject level file " + subjectFile.getName() + ", not a folder.");
+                LOG.info("Ignoring subject level file " + subjectFile.getName() + ", not a folder.");
                 continue;
             }
             String subjectName = subjectFile.getName();

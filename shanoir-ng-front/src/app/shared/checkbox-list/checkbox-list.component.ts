@@ -14,6 +14,7 @@
 
 import { Component, forwardRef, Input, OnChanges, SimpleChanges, ChangeDetectorRef } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+
 import { FacetResultPage } from "../../solr/solr.document.model";
 
 @Component({
@@ -31,9 +32,9 @@ import { FacetResultPage } from "../../solr/solr.document.model";
 })
 
 export class CheckboxListComponent implements ControlValueAccessor, OnChanges{
-    onChange = (_: any) => {};
+    onChange: (any) => void = () => { return; };
     searchBarContent: string;
-    onTouched = () => {};
+    onTouched = () => { return; };
     @Input() items: FacetResultPage;
     selectedItems: any[] = [];
     selectAll: boolean = true;

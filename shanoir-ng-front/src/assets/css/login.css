@@ -21,6 +21,7 @@ body { background-color: var(--color-a); display: table-cell; vertical-align: mi
 	#kc-form-buttons { margin: 10px 0; }
 	#kc-form-options a { text-decoration: none; color: var(--color-b-light); }
   #kc-form-options > div { margin-bottom: 5px; color: var(--very-light-grey);}
+  #kc-social-providers { display: none; }
   #input-error-password { color: #FF6565; display: block; }
   #input-error-password-confirm { color: #FF6565; display: block; }
 	.alert { margin-bottom: 15px; color: #FF6565; display: inline-block; }

@@ -11,33 +11,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, ViewChild} from '@angular/core';
-import {EntityService} from 'src/app/shared/components/entity/entity.abstract.service';
+import { Component, ViewChild } from '@angular/core';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import {
     BrowserPaginEntityListComponent
 } from '../../../shared/components/entity/entity-list.browser.component.abstract';
-import {ColumnDefinition} from '../../../shared/components/table/column.definition.type';
-import {TableComponent} from '../../../shared/components/table/table.component';
-import {ShanoirError} from '../../../shared/models/error.model';
-import {ImagedObjectCategory} from '../../../subjects/shared/imaged-object-category.enum';
-import {SubjectService} from '../../../subjects/shared/subject.service';
-import {AnimalSubjectService} from '../shared/animalSubject.service';
-import {PreclinicalSubject} from '../shared/preclinicalSubject.model';
+import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
+import { TableComponent } from '../../../shared/components/table/table.component';
+import { ShanoirError } from '../../../shared/models/error.model';
+import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
+import { SubjectService } from '../../../subjects/shared/subject.service';
+import { AnimalSubjectService } from '../shared/animalSubject.service';
+import { AnimalSubject } from '../shared/animalSubject.model';
 
 
 @Component({
     selector: 'animalSubject-list',
     templateUrl: 'animalSubject-list.component.html',
     styleUrls: ['animalSubject-list.component.css'],
-    providers: [AnimalSubjectService],
     standalone: false
 })
-export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponent<PreclinicalSubject>{
+export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponent<AnimalSubject>{
 
     @ViewChild('preclinicalSubjectsTable', { static: false }) table: TableComponent;
 
-    public preclinicalSubjects: PreclinicalSubject[];
+    public animalSubjects: AnimalSubject[];
 
     constructor(
         private animalSubjectService: AnimalSubjectService,
@@ -45,13 +45,13 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
             super('preclinical-subject');
     }
 
-    getService(): EntityService<PreclinicalSubject> {
+    getService(): EntityService<AnimalSubject> {
         return this.animalSubjectService;
     }
 
-    getEntities(): Promise<PreclinicalSubject[]> {
+    getEntities(): Promise<AnimalSubject[]> {
 
-        this.preclinicalSubjects = [];
+        this.animalSubjects = [];
 
         return this.subjectService.getPreclinicalSubjects().then(subjects => {
 
@@ -60,7 +60,7 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
             }
 
             const subMap = new Map();
-            for (let sub of subjects) {
+            for (const sub of subjects) {
                 subMap.set(sub.id, sub);
             }
 
@@ -70,27 +70,26 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
                     return [];
                 }
 
-                for (let aSub of animalSubject){
-                    let preSubject: PreclinicalSubject = new PreclinicalSubject();
-                    preSubject.animalSubject = aSub;
+                for (const aSub of animalSubject){
+                    const preSubject: AnimalSubject = aSub;
                     preSubject.id = aSub.id;
                     preSubject.subject = subMap.get(preSubject.id);
-                    this.preclinicalSubjects.push(preSubject);
+                    this.animalSubjects.push(preSubject);
                 }
-                return this.preclinicalSubjects;
+                return this.animalSubjects;
             });
         });
     }
 
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             {headerName: "Common name", field: "subject.name"},
             {headerName: "Imaged object category", field: "subject.imagedObjectCategory", cellRenderer: function (params: any) {
                     if(!params.data.subject){
                         return "";
                     }
-                    let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory> params.data.subject.imagedObjectCategory;
+                    const imagedObjectCat: ImagedObjectCategory = params.data.subject.imagedObjectCategory;
                     if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.PHANTOM) {
                     	return 'Phantom';
                     }else if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.LIVING_ANIMAL) {
@@ -125,18 +124,18 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
         };
     }
 
-    protected openDeleteConfirmDialog = (entity: PreclinicalSubject) => {
+    protected openDeleteConfirmDialog = (entity: AnimalSubject) => {
         if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.confirmDialogService
             .confirm(
                 'Delete', 'Are you sure you want to delete preclinical-subject n° ' + entity.id + ' ?'
             ).then(res => {
                 if (res) {
-                    this.subjectService.delete(entity.id).then((res) => {
+                    this.subjectService.delete(entity.id).then(() => {
                         this.onDelete.next({entity: entity});
-                        const index: number = this.preclinicalSubjects.indexOf(entity);
+                        const index: number = this.animalSubjects.indexOf(entity);
                         if (index !== -1) {
-                            this.preclinicalSubjects.splice(index);
+                            this.animalSubjects.splice(index);
                         }
                         this.table.refresh();
                         this.consoleService.log('info', 'The preclinical-subject n°' + entity.id + ' was sucessfully deleted');

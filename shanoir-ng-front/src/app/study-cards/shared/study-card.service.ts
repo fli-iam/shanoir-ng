@@ -12,11 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
+
 import { StudyCardDTOService } from './study-card.dto';
 import { StudyCardDTO } from './study-card.dto.model';
 import { StudyCard } from './study-card.model';
@@ -27,10 +28,6 @@ export class StudyCardService extends EntityService<StudyCard> {
     API_URL = AppUtils.BACKEND_API_STUDY_CARD_URL;
 
     private studyCardDTOService: StudyCardDTOService = ServiceLocator.injector.get(StudyCardDTOService);
-
-    constructor(protected http: HttpClient) {
-        super(http)
-    }
 
     getEntityInstance() { return new StudyCard(); }
 
@@ -51,20 +48,13 @@ export class StudyCardService extends EntityService<StudyCard> {
     }
 
     public stringify(entity: StudyCard) {
-        let dto = new StudyCardDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        const dto = new StudyCardDTO(entity);
+        return JSON.stringify(dto, this.customReplacer);
     }
 
     applyStudyCardOn(studyCardId: number, datasetAcquisitionIds: number[]): Promise<any> {
         return this.http.post<any[]>(this.API_URL + '/apply', JSON.stringify({studyCardId: studyCardId, datasetAcquisitionIds: datasetAcquisitionIds}))
             .toPromise()
             .then();
-    }
-
-    applyStudyCardOnStudy(studyCardId: number): Promise<any> {
-        return this.http.get<any[]>(this.API_URL + '/apply-quality-card/' + studyCardId)
-            .toPromise();
     }
 }

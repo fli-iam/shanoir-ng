@@ -1,32 +1,40 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.action;
 
 import java.io.File;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
-import org.apache.commons.lang.StringUtils;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
@@ -35,19 +43,8 @@ import org.shanoir.uploader.gui.ImportFromFolderWindow;
 import org.shanoir.uploader.model.ExaminationImport;
 import org.shanoir.uploader.model.FolderImport;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
-import org.shanoir.uploader.model.rest.Examination;
-import org.shanoir.uploader.model.rest.ImagedObjectCategory;
-import org.shanoir.uploader.model.rest.Sex;
-import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.Subject;
-import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.upload.UploadJob;
-import org.shanoir.uploader.upload.UploadJobManager;
-import org.shanoir.uploader.upload.UploadState;
-import org.shanoir.uploader.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +55,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
     private static final String DICOMDIR = "DICOMDIR";
 
-    private static Logger logger = LoggerFactory.getLogger(ImportFromFolderRunner.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportFromFolderRunner.class);
 
     private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
 
@@ -122,24 +119,24 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
     private boolean importData(ExaminationImport importTodo) {
         // 1. Read dicom to retrieve information
-        logger.info("1 - Get data from folder's path and copy it to destination folder");
+        LOG.info("1 - Get data from folder's path and copy it to destination folder");
         File selectedRootDir = new File(importTodo.getPath());
         List<Patient> patients = new ArrayList<>();
         try {
             boolean dicomDirGenerated = false;
             File dicomDirFile = new File(selectedRootDir, DICOMDIR);
             if (!dicomDirFile.exists()) {
-                logger.info("No DICOMDIR found: generating one.");
+                LOG.info("No DICOMDIR found: generating one.");
                 dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDirFile, selectedRootDir);
                 dicomDirGenerated = true;
-                logger.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
+                LOG.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
             }
             final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
             patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
 
-            logger.error(mapper.writeValueAsString(this.folderimport.getStudyCard()));
+            LOG.error(mapper.writeValueAsString(this.folderimport.getStudyCard()));
             String filePathDicomDir = selectedRootDir.toString();
 
             // clean up in case of dicomdir generated
@@ -147,13 +144,13 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
                 dicomDirFile.delete();
             }
         } catch (Exception e) {
-            logger.error("Something wrong happened while retrieving data: ", e);
+            LOG.error("Something wrong happened while retrieving data: ", e);
             importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.dicom"));
             importFromFolderWindow.displayImports(folderimport);
             return false;
         }
 
-        logger.error("Loading patients");
+        LOG.error("Loading patients");
         // Create dicom data to be able to move things
         Subject subject = null;
         Set<SerieTreeNode> selectedSeriesNodes = new HashSet<>();
@@ -166,10 +163,10 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         for (Serie serie: patients.get(0).getStudies().get(0).getSeries()) {
             SerieTreeNode serieNode = new SerieTreeNode(serie);
             serieNode.setSelected(true);
-            stNode.addTreeNode(serie.getSeriesInstanceUID(), serieNode);
+            stNode.addTreeNode(serieNode);
             selectedSeriesNodes.add(serieNode);
         }
-        patNode.addTreeNode(patients.get(0).getPatientID(), stNode);
+        patNode.addTreeNode(stNode);
         String subjectIdentifier = null;
         try {
             subject = new Subject();
@@ -179,7 +176,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
 
 
             // Change birth date to first day of year
-            logger.error("Study date could not be used for import.");
+            LOG.error("Study date could not be used for import.");
             final LocalDate dicomBirthDate = patNode.getPatient().getPatientBirthDate();
             if (dicomBirthDate != null) {
                 Calendar cal = Calendar.getInstance();
@@ -189,7 +186,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
                 subject.setBirthDate(LocalDate.from(cal.toInstant()));
             }
         } catch (Exception e) {
-            logger.error("Something wrong happened while analyzing data from the dicom", e);
+            LOG.error("Something wrong happened while analyzing data from the dicom", e);
             importTodo.setMessage(resourceBundle.getString("shanoir.uploader.import.folder.error.dicom"));
             return false;
         }
@@ -206,16 +203,16 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
             }
         }
 /**
- * 
+ *
         Study study = new Study();
         study.setId(importTodo.getParent().getStudy().getId());
         study.setName(importTodo.getParent().getStudy().getName());
         Subject subject;
         if (subjectFound != null) {
-            logger.info("8 Subject exists, just use it");
+            LOG.info("8 Subject exists, just use it");
             subject = subjectFound;
         } else {
-            logger.info("8 Creating a new subject");
+            LOG.info("8 Creating a new subject");
             subject = new org.shanoir.uploader.model.rest.Subject();
             subject.setName(subjectName);
             if (!StringUtils.isEmpty(patients.get(0).getPatientSex())) {
@@ -243,7 +240,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         }
 
         // 9. Create examination
-        logger.info("9 Create exam");
+        LOG.info("9 Create exam");
 
         Examination examDTO = new Examination();
         examDTO.setCenterId(importTodo.getParent().getStudyCard().getCenterId());
@@ -261,7 +258,7 @@ public class ImportFromFolderRunner extends SwingWorker<Void, Integer>  {
         }
  */
 
-        logger.info("10 Import.json");
+        LOG.info("10 Import.json");
 
 //        ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), createdExam.getId(), study, importTodo.getParent().getStudyCard());
 //        importJob.setFromShanoirUploader(true);

@@ -1,19 +1,31 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
-
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
-import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
-import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,100 +33,103 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
-	
-	@Autowired
-	DicomProcessing dicomProcessing;
-	
-	@Autowired
-	DatasetExpressionContext datasetExpressionContext;
-	
-	@Override
-	public DatasetsWrapper<GenericDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
-			ImportJob importJob) throws Exception {
-		DatasetsWrapper<GenericDataset> datasetWrapper = new DatasetsWrapper<>();
-		/**
-		 * retrieve number of dataset in current serie if Number of dataset > 1 then
-		 * each dataset will be named with an int at the end of the name. else the is
-		 * only one dataset => no need for extension.
-		 */
-		int datasetIndex;
-		if (serie.getDatasets().size() > 1) {
-			datasetIndex = 1;
-		} else {
-			datasetIndex = -1;
-		}
 
-		for (Dataset anyDataset : serie.getDatasets()) {
-			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
-			GenericDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, importJob);
-			datasetWrapper.getDatasets().add(dataset);
-			datasetIndex++;
-		}
+    @Autowired
+    private DicomProcessing dicomProcessing;
 
-		return datasetWrapper;
+    @Autowired
+    private DatasetExpressionContext datasetExpressionContext;
 
-	}
+    @Override
+    public DatasetsWrapper<GenericDataset> generateDatasetsForSerie(AcquisitionAttributes<String> dicomAttributes, Serie serie,
+            Long subjectId) throws Exception {
+        DatasetsWrapper<GenericDataset> datasetWrapper = new DatasetsWrapper<>();
+        /**
+         * retrieve number of dataset in current serie if Number of dataset > 1 then
+         * each dataset will be named with an int at the end of the name. else the is
+         * only one dataset => no need for extension.
+         */
+        int datasetIndex;
+        if (serie.getDatasets().size() > 1) {
+            datasetIndex = 1;
+        } else {
+            datasetIndex = -1;
+        }
 
-	@Override
-	public GenericDataset generateSingleDataset(Attributes dicomAttributes, Serie serie, Dataset dataset,
-			int datasetIndex, ImportJob importJob) throws Exception {
-		GenericDataset genericDataset = new GenericDataset();
-		genericDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
-		genericDataset.setCreationDate(serie.getSeriesDate());
-		final String serieDescription = serie.getSeriesDescription();
+        for (Dataset anyDataset : serie.getDatasets()) {
+            GenericDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.getFirstImageSOPInstanceUID()), serie, anyDataset, datasetIndex, subjectId);
+            datasetWrapper.getDatasets().add(dataset);
+            datasetIndex++;
+        }
 
-		DatasetMetadata datasetMetadata = new DatasetMetadata();
-		genericDataset.setOriginMetadata(datasetMetadata);
-		// set the series description as the dataset comment & name
-		if (serieDescription != null && !"".equals(serieDescription)) {
-			genericDataset.getOriginMetadata().setName(computeDatasetName(serieDescription, datasetIndex));
-			genericDataset.getOriginMetadata().setComment(serieDescription);
-		}
+        return datasetWrapper;
+    }
 
-		// Pre-select the type Reconstructed dataset
-		genericDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
+    @Override
+    public GenericDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset,
+            int datasetIndex, Long subjectId) throws Exception {
+        GenericDataset genericDataset = new GenericDataset();
+        genericDataset.setSOPInstanceUID(dataset.getFirstImageSOPInstanceUID());
+        genericDataset.setCreationDate(serie.getSeriesDate());
+        final String seriesDescription = serie.getSeriesDescription();
 
-		// Set the study and the subject
-		genericDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
+        DatasetMetadata datasetMetadata = new DatasetMetadata();
+        genericDataset.setOriginMetadata(datasetMetadata);
+        // set the series description as the dataset comment & name
+        if (seriesDescription != null && !"".equals(seriesDescription)) {
+            genericDataset.getOriginMetadata().setName(computeDatasetName(seriesDescription, datasetIndex));
+            genericDataset.getOriginMetadata().setComment(seriesDescription);
+        }
 
-		// Set the modality from dicom fields
-		genericDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+        // Pre-select the type Reconstructed dataset
+        genericDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 
-		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
-		if (genericDataset.getSubjectId() != null) {
-			refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET;
-		} else {
-			refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
-		}
-		genericDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
-		
-		/**
-		 *  The part below will generate automatically the datasetExpression according to :
-		 *   -  type found in the importJob.serie.datasets.dataset.expressionFormat.type
-		 * 
-		 *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current ctDataset
-		 * 
-		 **/
-		for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
-			datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
-			DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, importJob, expressionFormat);
-			datasetExpression.setDataset(genericDataset);
-			genericDataset.getDatasetExpressions().add(datasetExpression);
-		}
-		
-		DatasetMetadata originalDM = genericDataset.getOriginMetadata();
-		genericDataset.setUpdatedMetadata(originalDM);
-		
-		return genericDataset;
-	}
+        // Set the study and the subject
+        genericDataset.setSubjectId(subjectId);
 
-	@Override
-	public String computeDatasetName(String name, int index) {
-		if (index == -1) {
-			return name;
-		} else {
-			return name + " " + index;
-		}
-	}
+        // Pre-select the type Reconstructed dataset
+        genericDataset.getOriginMetadata().setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
+
+        CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
+        if (genericDataset.getSubjectId() != null) {
+            refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET;
+        } else {
+            refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
+        }
+        genericDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
+        String[] orientationArray = attributes.getStrings(Tag.ImageOrientationPatient);
+        if (orientationArray != null) {
+            String orientationString = String.join("\\", orientationArray);
+            genericDataset.getOriginMetadata().setImageOrientationPatient(orientationString);
+        }
+
+        /**
+         *  The part below will generate automatically the datasetExpression according to :
+         *   -  type found in the importJob.serie.datasets.dataset.expressionFormat.type
+         *
+         *  The DatasetExpressionFactory will return the proper object according to the expression format type and add it to the current ctDataset
+         *
+         **/
+        for (ExpressionFormat expressionFormat : dataset.getExpressionFormats()) {
+            datasetExpressionContext.setDatasetExpressionStrategy(expressionFormat.getType());
+            DatasetExpression datasetExpression = datasetExpressionContext.generateDatasetExpression(serie, expressionFormat);
+            datasetExpression.setDataset(genericDataset);
+            genericDataset.getDatasetExpressions().add(datasetExpression);
+        }
+
+        DatasetMetadata originalDM = genericDataset.getOriginMetadata();
+        genericDataset.setUpdatedMetadata(originalDM);
+
+        return genericDataset;
+    }
+
+    @Override
+    public String computeDatasetName(String name, int index) {
+        if (index == -1) {
+            return name;
+        } else {
+            return name + " " + index;
+        }
+    }
 
 }

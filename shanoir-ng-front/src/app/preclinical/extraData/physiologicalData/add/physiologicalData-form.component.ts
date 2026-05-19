@@ -2,71 +2,69 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { UntypedFormGroup, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
-import { Location } from '@angular/common';
 
 
-import { PhysiologicalData }    from '../shared/physiologicalData.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { PhysiologicalDataFile }    from '../shared/physiologicalDataFile.model';
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
-
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { Mode } from "../../../shared/mode/mode.model";
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ExtraData } from '../../extraData/shared/extradata.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
     selector: 'physiological-data-upload-form',
     templateUrl: 'physiologicalData-form.component.html',
-    providers: [ExtraDataService],
     animations: [slideDown],
     standalone: false
 })
-@ModesAware
-export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalData> {
+export class PhysiologicalDataFormComponent extends EntityComponent<PhysiologicalDataFile> {
 
-    @Input() examination_id:number;
-    @Input() isStandalone:boolean = false;
-    @Input() canModify: Boolean = false;
-    @Output() physioDataReady = new EventEmitter();
-  
+    @Input() examinationId:number;
+    @Input() canModify: boolean = false;
+    @Output() physioDataReady: EventEmitter<PhysiologicalDataFile> = new EventEmitter();
+
     urlupload:string;
     fileToUpload: File = null;
-    @Output() bloodGasDataReady = new EventEmitter();
 
     constructor(
         private route: ActivatedRoute,
         private extradatasService: ExtraDataService) {
 
-        super(route, 'preclinical-physiogicaldata');
+        super(route);
     }
 
-    get physioData(): PhysiologicalData { return this.entity; }
-    set physioData(physioData: PhysiologicalData) { this.entity = physioData; }
+    protected getRoutingName(): string {
+        return 'preclinical-physiogicaldata';
+    }
+
+    get physioData(): PhysiologicalDataFile { return this.entity; }
+    set physioData(physioData: PhysiologicalDataFile) { this.entity = physioData; }
 
     // Note: should be getService(): EntityService<PhysiologicalData> {
     getService(): EntityService<any> {
         return this.extradatasService;
     }
 
-    protected fetchEntity: () => Promise<PhysiologicalData> = () => {
-        return  this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
-            return this.getExaminationExtraDatas(extradatas);
+    protected fetchEntity: () => Promise<PhysiologicalDataFile> = () => {
+        return  this.extradatasService.getExtraDatas(this.examinationId).then(extradatas => {
+            const physioData: PhysiologicalDataFile = this.getExaminationExtraDatas(extradatas);
+            this.emitEvent(physioData);
+            return physioData;
         });
     }
 
@@ -79,30 +77,30 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     }
 
     initCreate(): Promise<void> {
-        this.entity = new PhysiologicalData();
+        this.entity = new PhysiologicalDataFile();
         return Promise.resolve();
     }
 
-    getExaminationExtraDatas(extradatas: ExtraData[]): PhysiologicalData {
-    	for (let ex of extradatas) {
+    getExaminationExtraDatas(extradatas: ExtraData[]): PhysiologicalDataFile {
+    	for (const ex of extradatas) {
     		// instanceof does not work??
-    		if (ex.extradatatype == "Physiological data"){
-    			return this.physioData;
+    		if (ex.extraDataType == "Physiological data"){
+    			return ex as PhysiologicalDataFile;
     		}
     	}
-        return new PhysiologicalData();
+        return new PhysiologicalDataFile();
     }
 
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
-            'has_heart_rate':[this.physioData.has_heart_rate],
-            'has_respiratory_rate':[this.physioData.has_respiratory_rate],
-            'has_sao2':[this.physioData.has_sao2],
-            'has_temperature':[this.physioData.has_temperature],
+            'hasHeartRate':[this.physioData.hasHeartRate],
+            'hasRespiratoryRate':[this.physioData.hasRespiratoryRate],
+            'hasSao2':[this.physioData.hasSao2],
+            'hasTemperature':[this.physioData.hasTemperature],
         });
     }
 
-    public save(): Promise<PhysiologicalData> {
+    public save(): Promise<PhysiologicalDataFile> {
         return this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.physioData).then((physioData) => {
             this.chooseRouteAfterSave(this.physioData);
             this.consoleService.log('info', 'New preclinical physiogicaldata successfully saved with n° ' + physioData.id);
@@ -110,50 +108,27 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
         });
     }
 
-    
-  
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
-    	this.physioData.filename= this.fileToUpload.name;
-    	let physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
-    	physioDataFile.filename = this.fileToUpload.name;
-    	physioDataFile.physiologicalDataFile = this.fileToUpload;
-    	physioDataFile.has_heart_rate = this.physioData.has_heart_rate;
-    	physioDataFile.has_respiratory_rate = this.physioData.has_respiratory_rate;
-    	physioDataFile.has_sao2 = this.physioData.has_sao2;
-    	physioDataFile.has_temperature = this.physioData.has_temperature;
-    	this.emitEvent(physioDataFile);
-      	this.physioData = new PhysiologicalData();
+    	this.physioData.filename = this.fileToUpload.name;
+        this.physioData.physiologicalDataFile = this.fileToUpload;
+    	this.emitEvent(this.physioData);
     }
-    
+
     isYesOrNo(value:boolean): string{
         if(value) return 'Yes';
         return 'No';
     }
-  
-    emitEvent(physioDataFile : PhysiologicalDataFile) {
-        if(!this.isStandalone){
-            this.physioDataReady.emit(physioDataFile);
-        }
-    }
-    
-    downloadFile() {
-        this.extradatasService.downloadFile(this.entity.id);
+
+    emitEvent(physioData: PhysiologicalDataFile = this.physioData) {
+        this.physioDataReady.emit(physioData);
     }
 
-    changePhysio(){
-        let physioDataFile: PhysiologicalDataFile = new PhysiologicalDataFile();
-        physioDataFile.filename = this.physioData.filename;
-        physioDataFile.has_heart_rate = this.physioData.has_heart_rate;
-        physioDataFile.has_respiratory_rate = this.physioData.has_respiratory_rate;
-        physioDataFile.has_sao2 = this.physioData.has_sao2;
-        physioDataFile.has_temperature = this.physioData.has_temperature;
-        this.emitEvent(physioDataFile);
+    downloadFile() {
+        this.extradatasService.downloadFile(this.entity.id);
     }
 
     public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
-
-    
 }

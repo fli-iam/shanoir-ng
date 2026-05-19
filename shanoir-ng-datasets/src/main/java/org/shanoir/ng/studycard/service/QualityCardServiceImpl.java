@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -17,7 +17,6 @@ package org.shanoir.ng.studycard.service;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.utils.Utils;
@@ -51,35 +50,35 @@ public class QualityCardServiceImpl implements QualityCardService {
     }
 
     @Override
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
     public List<QualityCard> findAll() {
         return Utils.toList(qualityCardRepository.findAll());
     }
 
     @Override
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("returnObject == null || @datasetSecurityService.hasRightOnStudy(returnObject.getStudyId(), 'CAN_SEE_ALL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("returnObject == null || @datasetSecurityService.hasRightOnStudy(returnObject.getStudyId(), 'CAN_SEE_ALL')")
     public QualityCard findById(final Long id) {
         return qualityCardRepository.findById(id).orElse(null);
     }
 
     @Override
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#card.getStudyId(), 'CAN_ADMINISTRATE'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#card.getStudyId(), 'CAN_ADMINISTRATE'))")
     public QualityCard save(final QualityCard card) throws MicroServiceCommunicationException {
         QualityCard savedQualityCard = qualityCardRepository.save(card);
         return savedQualityCard;
     }
 
     @Override
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
     public List<QualityCard> search(final List<Long> studyIdList) {
         return qualityCardRepository.findByStudyIdIn(studyIdList);
     }
 
     @Override
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnCard(#card, 'CAN_ADMINISTRATE'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnCard(#card, 'CAN_ADMINISTRATE'))")
     public QualityCard update(final QualityCard card) throws EntityNotFoundException, MicroServiceCommunicationException {
         QualityCard qualityCardDb = qualityCardRepository.findById(card.getId()).orElse(null);
         if (qualityCardDb == null) throw new EntityNotFoundException(QualityCard.class, card.getId());
@@ -108,14 +107,14 @@ public class QualityCardServiceImpl implements QualityCardService {
     }
 
     @Override
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
     public List<QualityCard> findByStudy(Long studyId) {
         return this.qualityCardRepository.findByStudyId(studyId);
     }
 
     @Override
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     public QualityCard findByName(String name) {
         return qualityCardRepository.findByName(name);
     }

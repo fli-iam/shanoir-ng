@@ -12,14 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { Field } from '../../shared/reflect/field.decorator';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { User } from '../../users/shared/user.model';
 
 export class AccessRequest extends Entity {
-    id: number;
-    studyId: number;
-    studyName: string;
-    user: User;
-    motivation: string;
-    status: number;
+    @Field() id: number;
+    @Field() studyId: number;
+    @Field() studyName: string;
+    @Field() user: User;
+    @Field() motivation: string;
+    @Field() status: number;
 }

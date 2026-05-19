@@ -30,9 +30,15 @@ export class ShanoirError {
 
     public hasFieldError(field: string, code: string, value?: string): boolean {
         if (this.details && this.details.fieldErrors && this.details.fieldErrors[field]) {
-            for (let error of this.details.fieldErrors[field]) {
+            for (const error of this.details.fieldErrors[field]) {
                 if (error.code == code && (!value || error.givenValue == value)) return true;
             }
         }
+    }
+}
+
+export class RightsError extends Error {
+    constructor() {
+        super('You don\'t have the required rights to perform this action.');
     }
 }

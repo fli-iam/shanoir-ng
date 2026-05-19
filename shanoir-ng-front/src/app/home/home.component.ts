@@ -12,15 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
+
 import { Task, TaskState } from '../async-tasks/task.model';
 import { TaskService } from '../async-tasks/task.service';
-
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DataUserAgreement } from '../dua/shared/dua.model';
-import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
-import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 import { StudyLight } from '../studies/shared/study.dto';
 import { StudyService } from '../studies/shared/study.service';
 import { AccessRequest } from '../users/access-request/access-request.model';
@@ -35,8 +33,6 @@ import { UserService } from '../users/shared/user.service';
 })
 
 export class HomeComponent {
-
-    shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
 
     challengeDua: DataUserAgreement;
     challengeStudies: StudyLight[];
@@ -70,7 +66,7 @@ export class HomeComponent {
             this.notifications = null;
             if (duas) {
                 this.notifications = duas.slice(0, 10);
-                for (let dua of duas) {
+                for (const dua of duas) {
                     if (dua.isChallenge) {
                         this.challengeDua = dua;
                         return;
@@ -105,7 +101,7 @@ export class HomeComponent {
             if (studies) {
                 this.allStudies = studies;
                 this.studies = studies.slice(0, 8);
-                for (let study of studies) {
+                for (const study of studies) {
                     if (study.challenge) {
                         this.challengeStudies.push(study);
                     }
@@ -130,7 +126,7 @@ export class HomeComponent {
         return this.keycloakService.isUserAdminOrExpert();
     }
 
-    public getStudyName(studyId: number): String {
+    public getStudyName(studyId: number): string {
         if (this.allStudies) {
             return this.allStudies.find(study => study.id == studyId).name;
         }

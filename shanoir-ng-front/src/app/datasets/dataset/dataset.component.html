@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<form-footer
 					[state]="footerState"
 					(edit)="goToEdit()"
-					(cancel)="goToView()"
+					(dismiss)="goToView()"
                     (delete) = "delete()"
 					(back)="goBack()"
 					(save)="save()">
@@ -38,7 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ng-template>
 			</span>
 
-			<common-dataset-details [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></common-dataset-details>
+			<common-dataset-details [mode]="mode" [dataset]="dataset" [parentFormGroup]="form" [hasAdministrateRight]="hasAdministrateRight"></common-dataset-details>
 			<mr-dataset-details *ngIf="dataset.type == 'Mr'" [mode]="mode" [dataset]="dataset" [parentFormGroup]="form"></mr-dataset-details>
             <eeg-dataset-details *ngIf="dataset.type == 'Eeg'" [mode]="mode" [dataset]="dataset"></eeg-dataset-details>
 
@@ -47,8 +47,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 			<fieldset *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg' && dataset.type != 'BIDS' && dataset.type != 'Measurement'">
 				<legend>Preview</legend>
-                <button *ngIf="!papayaLoaded" (click)="loadDicomInMemory()">Load preview</button>
-				<papaya *ngIf="papayaLoaded" [params]="papayaParams"></papaya>
+				<papaya [loadingCallback]="papayaLoadCallback"></papaya>
 			</fieldset>
 		</div>
 	</form>

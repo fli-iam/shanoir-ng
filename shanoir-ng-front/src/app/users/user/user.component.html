@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [state]="footerState"
             (save)="save()"
             (edit)="goToEdit()"
-            (cancel)="goToView()"
+            (dismiss)="goToView()"
             (back)="goBack()">
             <button type="submit" *ngIf="mode != 'create' && user.accountRequestDemand" (click)="deny()" i18n="Edit user|Deny account request button label@@editUserDenyAccountRequestButton"
                     class="Button">
@@ -62,7 +62,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     {{user.firstName}}
                 </ng-template>
                 <ng-template ngSwitchDefault>
-                    <input type="text" id="firstName" formControlName="firstName" [(ngModel)]="user.firstName"/>
+                    <input type="text" id="firstName" formControlName="firstName"/>
                 </ng-template>
                 <label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Edit user|First name required error@@editUserFirstNameRequiredError">First Name is required!</label>
                 <label *ngIf="hasError('firstName', ['length'])" class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">First Name length must be between 2 and 50!</label>
@@ -75,7 +75,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         {{user.lastName}}
                     </ng-template>
                     <ng-template ngSwitchDefault>
-                        <input type="text" id="lastName" formControlName="lastName" [(ngModel)]="user.lastName"/>
+                        <input type="text" id="lastName" formControlName="lastName"/>
                     </ng-template>
                     <label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Edit user|Last name required error@@editUserLastNameRequiredError">Last Name is required!</label>
                     <label *ngIf="hasError('lastName', ['length'])" class="form-validation-alert" i18n="Edit user|Last name length error@@editUserLastNameLengthError">Last Name length must be between 2 and 50!</label>
@@ -94,7 +94,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         {{user.email}}
                     </ng-template>
                     <ng-template ngSwitchDefault>
-                        <input type="email" id="email" formControlName="email" [(ngModel)]="user.email"/>
+                        <input type="email" id="email" formControlName="email"/>
                     </ng-template>
                     <label *ngIf="hasError('email', ['required'])" class="form-validation-alert" i18n="Edit user|Email required error@@editUserEmailRequiredError">Email is required!</label>
                     <label *ngIf="hasError('email', ['pattern'])" class="form-validation-alert" i18n="Edit user|Email pattern error@@editUserEmailPatternError">Email should be valid!</label>
@@ -109,11 +109,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label i18n="Edit user|Expiration date label@@editUserExpirationDate">Expiration Date</label>
                 <span class="right-col">
                     <ng-container *ngIf="mode == 'view' || !isUserAdmin()">
-                        {{user.expirationDate | date: 'dd/MM/yyyy'}}
+                        {{user.expirationDate | localDateFormatPipe}}
                     </ng-container>
                     <ng-container *ngIf="mode != 'view' && isUserAdmin()">
-                        <datepicker formControlName="expirationDate" [(ngModel)]="user.expirationDate"></datepicker>
-                        <label *ngIf="hasError('expirationDate', ['format'])"  class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateValidError">Date should be valid! Date format: dd/mm/yyyy</label>
+                        <datepicker formControlName="expirationDate"></datepicker>
+                        <label *ngIf="hasError('expirationDate', ['format'])"  class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateValidError">Date should be valid! Date format: {{ dateDisplay }}</label>
                         <label *ngIf="hasError('expirationDate', ['future'])"  class="form-validation-alert" i18n="Edit user|Date valid error@@editUserDateFutureError">This date should be in the future!</label>
                     </ng-container>
                 </span>
@@ -125,7 +125,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         {{user.role.displayName}}
                     </ng-container>
                     <ng-container *ngIf="mode != 'view' && isUserAdmin()">
-                        <select id="role" formControlName="role" [(ngModel)]="user.role">
+                        <select id="role" formControlName="role">
                             <option *ngFor="let role of roles" [ngValue]="role">{{role.displayName}}</option>
                         </select>
                         <label *ngIf="hasError('role', ['required'])" class="form-validation-alert" i18n="Edit user|Role required error@@editUserRoleRequiredError">Role is required!</label>
@@ -140,7 +140,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span *ngIf="!user.canAccessToDicomAssociation" class="bool-false"><i class="fas fa-times"></i></span>
                     </ng-container>
                     <ng-container *ngIf="mode != 'view' && isUserAdmin()">
-                        <checkbox [(ngModel)]="user.canAccessToDicomAssociation" formControlName="canAccessToDicomAssociation"></checkbox>
+                        <checkbox formControlName="canAccessToDicomAssociation"></checkbox>
                     </ng-container>
                 </span>
             </li>
@@ -170,7 +170,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <legend class="right-icon">
                 Account request details
             </legend>
-            <account-request-info [ngModel]="user.accountRequestInfo" formControlName="accountRequestInfo"></account-request-info>
+            <account-request-info formControlName="accountRequestInfo"></account-request-info>
         </fieldset>
 
         <fieldset *ngIf="user.extensionRequestDemand">
@@ -178,7 +178,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li>
                 <label i18n="Extension comment |Extension comment label@@editUserExtensionComment">Extension comment</label>
                 <span class="right-col">
-                    <textarea autosize formControlName="extensionMotivation" [(ngModel)]="user.extensionRequestInfo.extensionMotivation" readonly></textarea>
+                    <textarea autosize formControlName="extensionMotivation" readonly></textarea>
                 </span>
                 </li>
             </ol>

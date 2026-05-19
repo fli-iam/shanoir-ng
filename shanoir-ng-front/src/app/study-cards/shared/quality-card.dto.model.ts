@@ -29,7 +29,7 @@ export class QualityCardDTO {
             this.name = qualityCard.name;
             this.studyId = qualityCard.study ? qualityCard.study.id : this.studyId;
             this.rules = qualityCard.rules.map(rule => {
-                let ruleDTO: QualityCardRuleDTO = new QualityCardRuleDTO();
+                const ruleDTO: QualityCardRuleDTO = new QualityCardRuleDTO();
                 ruleDTO.conditions = rule.conditions.map(cond => new StudyCardConditionDTO(cond));
                 ruleDTO.qualityTag = rule.tag;
                 ruleDTO.orConditions = rule.orConditions;

@@ -1,7 +1,25 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.preclinical.subjects.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,18 +27,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
 
-@JsonIgnoreProperties(
-        ignoreUnknown = true
-)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SubjectDto {
 
     @JsonProperty("id")
-    private long id;
+    private Long id;
 
     @JsonProperty("name")
     private String name;
+
+    private String identifier;
 
     @JsonProperty("birthDate")
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -40,11 +57,19 @@ public class SubjectDto {
     @JsonProperty("preclinical")
     private boolean preclinical;
 
-    public long getId() {
+    private IdName study;
+
+    private boolean physicallyInvolved;
+
+    private SubjectType subjectType;
+
+    private List<TagDto> tags;
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -107,4 +132,45 @@ public class SubjectDto {
     public void setPreclinical(boolean preclinical) {
         this.preclinical = preclinical;
     }
+
+    public IdName getStudy() {
+        return study;
+    }
+
+    public void setStudy(IdName study) {
+        this.study = study;
+    }
+
+    public boolean isPhysicallyInvolved() {
+        return physicallyInvolved;
+    }
+
+    public void setPhysicallyInvolved(boolean physicallyInvolved) {
+        this.physicallyInvolved = physicallyInvolved;
+    }
+
+    public SubjectType getSubjectType() {
+        return subjectType;
+    }
+
+    public void setSubjectType(SubjectType subjectType) {
+        this.subjectType = subjectType;
+    }
+
+    public List<TagDto> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<TagDto> tags) {
+        this.tags = tags;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
 }

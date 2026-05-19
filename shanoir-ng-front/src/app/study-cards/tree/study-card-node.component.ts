@@ -14,12 +14,13 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { CardNode } from '../../tree/tree.model';
 import { QualityCard } from '../shared/quality-card.model';
 import { QualityCardService } from '../shared/quality-card.service';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from "../shared/study-card.service";
-import { TreeService } from 'src/app/studies/study/tree.service';
 
 
 @Component({
@@ -31,7 +32,7 @@ import { TreeService } from 'src/app/studies/study/tree.service';
 export class StudyCardNodeComponent extends TreeNodeAbstractComponent<CardNode> implements OnChanges {
 
     @Input() input: CardNode | StudyCard | QualityCard;
-    @Output() onCardDelete: EventEmitter<void> = new EventEmitter();
+    @Output() cardDelete: EventEmitter<void> = new EventEmitter();
     @Input() detailsPath: string;
 
     constructor(
@@ -58,7 +59,7 @@ export class StudyCardNodeComponent extends TreeNodeAbstractComponent<CardNode> 
         service.get(this.node.id).then(entity => {
             service.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onCardDelete.emit();
+                    this.cardDelete.emit();
                 }
             });
         })

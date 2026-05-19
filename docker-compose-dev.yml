@@ -1,16 +1,15 @@
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-version: '3'
 services:
   #
   # Keycloak: database and service
@@ -21,7 +20,9 @@ services:
       context: docker-compose
       target: keycloak-database
     environment:
-      - MYSQL_DATABASE=keycloak
+      - MARIADB_DATABASE=keycloak
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -30,6 +31,12 @@ services:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
       - shanoir_ng_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
@@ -40,25 +47,34 @@ services:
       - SHANOIR_URL_HOST
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
-      - SHANOIR_SMTP_HOST
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_ALLOWED_ADMIN_IPS
+      - SHANOIR_SMTP_HOST
+      - SHANOIR_SMTP_PORT
+      - SHANOIR_SMTP_AUTH
+      - SHANOIR_SMTP_USERNAME
+      - SHANOIR_SMTP_PASSWORD
+      - SHANOIR_SMTP_STARTTLS_ENABLE
+      - SHANOIR_SMTP_STARTTLS_REQUIRED
+      - SHANOIR_SMTP_FROM
     build:
       context: docker-compose
       target: keycloak
     volumes:
       - "keycloak-logs:/opt/keycloak/data/log"
+      - ./docker-compose/keycloak/themes/shanoir-theme:/opt/keycloak/themes/shanoir-theme
     networks:
       - shanoir_ng_network
     ports:
       - "8080:8080"
     depends_on:
-      - "keycloak-database"
+      keycloak-database:
+          condition: service_healthy
   #
   # RabbitMQ: inter-microservices communication
-  #  
+  #
   rabbitmq:
     container_name: "${SHANOIR_PREFIX}rabbitmq"
     image: rabbitmq:3.10.7
@@ -68,7 +84,7 @@ services:
      - "5672:5672"
      - "15672:15672"
     networks:
-      - shanoir_ng_network 
+      - shanoir_ng_network
   #
   # Database for all other microservices
   #
@@ -78,10 +94,9 @@ services:
       context: docker-compose
       target: database
     command: --max_allowed_packet 20000000
-    env_file:
-      - ./docker-compose/database/variables.env
     environment:
-      - SHANOIR_MIGRATION
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -92,6 +107,28 @@ services:
      - "3307:3306"
     networks:
       - shanoir_ng_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
+  #
+  # Migrations for the database
+  #
+  database-migrations:
+    container_name: "${SHANOIR_PREFIX}database-migrations"
+    build:
+      context: docker-compose
+      target: database-migrations
+    environment:
+      - SHANOIR_MIGRATION
+    networks:
+      - shanoir_ng_network
+    depends_on:
+      database:
+        condition: service_healthy  # wait for MariaDB to be ready
+    restart: "no" # don't restart after it exits cleanly
   #
   # Users microservice
   #
@@ -106,13 +143,15 @@ services:
       - SHANOIR_URL_HOST
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
-      - SHANOIR_SMTP_HOST
       - SHANOIR_ADMIN_EMAIL
+      - SHANOIR_ADMIN_NAME
       - SHANOIR_CERTIFICATE
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_MIGRATION
       - VIP_SERVICE_EMAIL
+      - SHANOIR_SMTP_HOST
+      - SHANOIR_SMTP_PORT
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java
@@ -122,8 +161,12 @@ services:
      - "9901:9901"
      - "9911:9911"
     depends_on:
-      - "database"
-      - "rabbitmq"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
   #
   # Studies microservice
   #
@@ -141,6 +184,8 @@ services:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
       - "studies-data:/var/studies-data"
+      # This is related to participants.tsv file
+      - "datasets-data:/var/datasets-data"
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
@@ -148,9 +193,14 @@ services:
      - "9902:9902"
      - "9912:9912"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
   #
   # Import microservice
   #
@@ -178,9 +228,14 @@ services:
      # do not add by default, as it blocks local ShUp from using 44105
      # - "44105:44105"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
   #
   # Datasets microservice
   #
@@ -210,11 +265,19 @@ services:
      - "9904:9904"
      - "9914:9914"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
-      - "solr"
-
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
+      solr:
+        condition: service_started
+  #
+  # Preclinical microservice
+  #
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"
     build:
@@ -236,9 +299,14 @@ services:
      - "9905:9905"
      - "9915:9915"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
   #
   # Nifti conversion microservice
   #
@@ -258,9 +326,6 @@ services:
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
-    depends_on:
-      - "import"
-      - "datasets"
 
   #
   # Solr microservice for Shanoir-NG search
@@ -372,8 +437,23 @@ services:
       - "import"
       - "datasets"
       - "preclinical"
-      - "rabbitmq"
-      - "nifti-conversion"
+
+  bids-validator:
+    container_name: "${SHANOIR_PREFIX}bids-validator"
+    build:
+      context: docker-compose
+      target: bids-validator
+    environment:
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+      - IN_QUEUE=bids.validate
+      - OUT_QUEUE=bids.validated
+      - DATA_ROOT=/var/datasets-data/bids-data
+    volumes:
+      - datasets-data:/var/datasets-data:ro
+    depends_on:
+      - rabbitmq
+    networks:
+      - shanoir_ng_network
 
 volumes:
   keycloak-database-data:

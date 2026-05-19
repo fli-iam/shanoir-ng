@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -28,6 +28,7 @@ import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -35,6 +36,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -82,241 +84,246 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class ExaminationApiControllerTest {
 
-	@TempDir
-	public File tempFolder;
-	
-	public String tempFolderPath;
+    @TempDir
+    private File tempFolder;
 
-	@MockBean
-	private DicomSEGAndSRImporterService dicomSRImporterService;
+    private String tempFolderPath;
 
-	@BeforeEach
-	public void beforeClass() {
-		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-	    System.setProperty("datasets-data", tempFolderPath);
-	}
+    @MockBean
+    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
-	private static final String REQUEST_PATH = "/examinations";
-	private static final String REQUEST_PATH_COUNT = REQUEST_PATH + "/count";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    @MockBean
+    private DicomImporterService dicomImporterService;
 
-	@Autowired
-	private MockMvc mvc;
+    @BeforeEach
+    public void beforeClass() {
+        tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
+        System.setProperty("datasets-data", tempFolderPath);
+    }
 
-	@MockBean
-	private ExaminationMapper examinationMapperMock;
+    private static final String REQUEST_PATH = "/examinations";
+    private static final String REQUEST_PATH_COUNT = REQUEST_PATH + "/count";
+    private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
-	@MockBean
-	private ExaminationService examinationServiceMock;
-	
-	@MockBean
-	private SubjectRepository subjectRepository;
-	
-	@MockBean
-	private CenterRepository centerRepository;
+    @Autowired
+    private MockMvc mvc;
 
-	@MockBean
-	private Pageable pageable;
+    @MockBean
+    private ExaminationMapper examinationMapperMock;
 
-	@MockBean
-	private BIDSService bidsService;
+    @MockBean
+    private ExaminationService examinationServiceMock;
 
-	@MockBean
-	private ShanoirEventService eventService;
+    @MockBean
+    private SubjectRepository subjectRepository;
 
-	@MockBean
-	private StudyRepository studyRepository;
+    @MockBean
+    private CenterRepository centerRepository;
 
-	@MockBean
-	private RabbitTemplate rabbitTemplate;
-	
-	@MockBean
-	ExaminationRepository examRepo;
-	
-	@Autowired
-	ObjectMapper objectMapper;
+    @MockBean
+    private Pageable pageable;
 
-	@BeforeEach
-	public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {
-		doNothing().when(examinationServiceMock).deleteById(1L, null);
-		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false), Mockito.eq(null), Mockito.eq(null))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
-		Examination exam = new Examination();
-		exam.setId(Long.valueOf(123));
-		given(examinationServiceMock.save(Mockito.any(Examination.class))).willReturn(exam);
-	}
+    @MockBean
+    private BIDSService bidsService;
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void deleteExaminationTest() throws Exception {
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-		given(examinationServiceMock.getExtraDataFilePath(1L, "")).willReturn("nonExisting");
+    @MockBean
+    private ShanoirEventService eventService;
 
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isNoContent());
-		
-		// Test event here
-	}
+    @MockBean
+    private StudyRepository studyRepository;
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void testDeleteExaminationWithExtraData() throws IOException {
-		Examination exam = new Examination();
-		exam.setStudy(new Study());
-		exam.getStudy().setId(3L);
-		exam.setId(1L);
-		given(examinationServiceMock.findById(1L)).willReturn(exam);
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
 
-		// GIVEN an examination to delete with extra data files
-		File extraData = new File(tempFolderPath + "examination-1");
-		extraData.mkdirs();
+    @MockBean
+    private ExaminationRepository examRepo;
 
-		given(examinationServiceMock.getExtraDataFilePath(1L, "")).willReturn(extraData.getPath());
+    @Autowired
+    private ObjectMapper objectMapper;
 
-		// WHEN we delete the examination
-		try {
-			mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isNoContent());
+    @BeforeEach
+    public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {
+        doNothing().when(examinationServiceMock).deleteById(1L, null);
+        given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false), Mockito.eq(null), Mockito.eq(null))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
+        Examination exam = new Examination();
+        exam.setId(Long.valueOf(123));
+        given(examinationServiceMock.save(Mockito.any(Examination.class))).willReturn(exam);
+    }
 
-			// Test events
-			ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
-			Mockito.verify(eventService).publishEvent(eventCatcher.capture());
-			
-			ShanoirEvent event = eventCatcher.getValue();
-			assertNotNull(event);
-			assertEquals(exam.getStudyId().toString(), String.valueOf(event.getStudyId()));
-			assertEquals(exam.getId().toString(), event.getObjectId());
-			assertEquals(ShanoirEventType.DELETE_EXAMINATION_EVENT, event.getEventType());
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void deleteExaminationTest() throws Exception {
+        given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+        given(examinationServiceMock.getExtraDataFilePath(1L, "")).willReturn("nonExisting");
 
-			// THEN both examination and files are deleted
-			assertFalse(!extraData.exists());
-		} catch (Exception e) {
-			System.err.println("ERROR:" + e.getMessage());
-			fail();
-		}
-	}
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void findExaminationByIdTest() throws Exception {
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+        // Test event here
+    }
 
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk());
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testDeleteExaminationWithExtraData() throws IOException {
+        Examination exam = new Examination();
+        exam.setStudy(new Study());
+        exam.getStudy().setId(3L);
+        exam.setId(1L);
+        given(examinationServiceMock.findById(1L)).willReturn(exam);
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void findExaminationsTest() throws Exception {
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+        // GIVEN an examination to delete with extra data files
+        File extraData = new File(tempFolderPath + "examination-1");
+        extraData.mkdirs();
 
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(PageRequest.of(0, 10))))
-		.andExpect(status().isOk());
-	}
+        given(examinationServiceMock.getExtraDataFilePath(1L, "")).willReturn(extraData.getPath());
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void saveNewExaminationTest() throws Exception {
-		Examination exam = new Examination();
-		exam.setId(123L);
-		exam.setStudy(new Study());
-		exam.getStudy().setId(3L);
-		given(examinationServiceMock.findById(1L)).willReturn(exam);
-		given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
+        // WHEN we delete the examination
+        try {
+            mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isNoContent());
 
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination())))
-		.andExpect(status().isOk());
-		
-		// Check event here to verify that the message is well set to event
-		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
-		Mockito.verify(eventService).publishEvent(eventCatcher.capture());
-		
-		ShanoirEvent event = eventCatcher.getValue();
-		assertNotNull(event);
-		assertEquals(exam.getStudyId(), event.getStudyId());
-		assertEquals(exam.getId().toString(), event.getObjectId());
-		// This is import, plese keep it, or change RabbitMQStudiesService#linkExamination method
-		assertEquals("centerId:" + exam.getCenterId() + ";subjectId:" + (exam.getSubject() != null ? exam.getSubject().getName() : null), event.getMessage());
+            // Test events
+            ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
+            Mockito.verify(eventService).publishEvent(eventCatcher.capture());
 
-		assertEquals(ShanoirEventType.CREATE_EXAMINATION_EVENT, event.getEventType());
-	}
+            ShanoirEvent event = eventCatcher.getValue();
+            assertNotNull(event);
+            assertEquals(exam.getStudyId().toString(), String.valueOf(event.getStudyId()));
+            assertEquals(exam.getId().toString(), event.getObjectId());
+            assertEquals(ShanoirEventType.DELETE_EXAMINATION_EVENT, event.getEventType());
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void updateExaminationTest() throws Exception {
-		given(examinationServiceMock.findById(1L)).willReturn(ModelsUtil.createExamination(1L));
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination(1L))))
-		.andExpect(status().isNoContent());
-	}
+            // THEN both examination and files are deleted
+            assertFalse(!extraData.exists());
+        } catch (Exception e) {
+            System.err.println("ERROR:" + e.getMessage());
+            fail();
+        }
+    }
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void testAddExtraData() throws IOException {
-		// GIVEN a file to add to an examination
-		File importZip = tempFolder.createTempFile("test-import-extra-data", ".zip");
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void findExaminationByIdTest() throws Exception {
+        given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 
-		try {
-			importZip.createNewFile();
-			MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.txt", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-			// WHEN The file is added to the examination
-			mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/extra-data-upload/1").file(file))
-			.andExpect(status().isUnprocessableEntity());
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void findExaminationsTest() throws Exception {
+        given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 
-			Mockito.verify(examinationServiceMock).addExtraData(Mockito.any(Long.class), Mockito.any(MultipartFile.class));
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(PageRequest.of(0, 10))))
+                .andExpect(status().isOk());
+    }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void saveNewExaminationTest() throws Exception {
+        Examination exam = new Examination();
+        exam.setId(123L);
+        exam.setStudy(new Study());
+        exam.getStudy().setId(3L);
+        exam.setSubject(new Subject(1L, "1"));
+        given(examinationMapperMock.examinationDTOToExamination(Mockito.any())).willReturn(exam);
+        given(examinationServiceMock.findById(1L)).willReturn(exam);
+        given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void testDownloadExtraDataNotExisting() throws IOException {
-		// GIVEN an examination with no extra-data
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-		given(examinationServiceMock.getExtraDataFilePath(1L, "file.pdf")).willReturn("notExisting");
-		// WHEN we download extra-data
-		try {
-			// THEN we have a "no content" answer.
-			mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file.pdf/"))
-			.andExpect(status().isNoContent());
-		} catch (Exception e) {
-			System.out.println(e);
-			fail();
-		}
-	}
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination())))
+                .andExpect(status().isOk());
 
-	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void testDownloadExtraData() throws IOException {
-		// GIVEN an examination with extra-data files
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+        // Check event here to verify that the message is well set to event
+        ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
+        Mockito.verify(eventService).publishEvent(eventCatcher.capture());
 
-		File todow = new File(tempFolderPath + "examination-1/file1.pdf");
-		//File todow = new File("/var/datasets-data/examination-1/file.pdf");
-		todow.getParentFile().mkdirs();
+        ShanoirEvent event = eventCatcher.getValue();
+        assertNotNull(event);
+        assertEquals(exam.getStudyId(), event.getStudyId());
+        assertEquals(exam.getId().toString(), event.getObjectId());
+        // This is import, plese keep it, or change RabbitMQStudiesService#linkExamination method
+        assertEquals("centerId:" + exam.getCenterId() + ";subjectId:" + (exam.getSubject() != null ? exam.getSubject().getName() : null), event.getMessage());
 
-		given(examinationServiceMock.getExtraDataFilePath(1L, "file1.pdf")).willReturn(todow.getPath());
+        assertEquals(ShanoirEventType.CREATE_EXAMINATION_EVENT, event.getEventType());
+    }
 
-		// WHEN we download extra-data
-		try {
-			todow.createNewFile();
-			FileUtils.write(todow, "test");
-			MvcResult result = mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file1.pdf/"))
-					.andExpect(status().isOk())
-					.andReturn();
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void updateExaminationTest() throws Exception {
+        given(examinationServiceMock.findById(1L)).willReturn(ModelsUtil.createExamination(1L));
+        mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination(1L))))
+                .andExpect(status().isNoContent());
+    }
 
-			// THEN the file is downloaded
-			assertNotNull(result.getResponse().getContentAsString());
-			System.out.println(result.getResponse().getContentAsString());
-		} catch (Exception e) {
-			System.out.println(e);
-			fail();
-		}
-	}
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testAddExtraData() throws IOException {
+        // GIVEN a file to add to an examination
+        File importZip = tempFolder.createTempFile("test-import-extra-data", ".zip");
+
+        try {
+            importZip.createNewFile();
+            MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.txt", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
+
+            // WHEN The file is added to the examination
+            mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/extra-data-upload/1").file(file))
+                    .andExpect(status().isUnprocessableEntity());
+
+            Mockito.verify(examinationServiceMock).addExtraData(Mockito.any(Long.class), Mockito.any(MultipartFile.class));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testDownloadExtraDataNotExisting() throws IOException {
+        // GIVEN an examination with no extra-data
+        given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+        given(examinationServiceMock.getExtraDataFilePath(1L, "file.pdf")).willReturn("notExisting");
+        // WHEN we download extra-data
+        try {
+            // THEN we have a "no content" answer.
+            mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file.pdf/"))
+                    .andExpect(status().isNoContent());
+        } catch (Exception e) {
+            System.out.println(e);
+            fail();
+        }
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testDownloadExtraData() throws IOException {
+        // GIVEN an examination with extra-data files
+        given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+
+        File todow = new File(tempFolderPath + "examination-1/file1.pdf");
+        //File todow = new File("/var/datasets-data/examination-1/file.pdf");
+        todow.getParentFile().mkdirs();
+
+        given(examinationServiceMock.getExtraDataFilePath(1L, "file1.pdf")).willReturn(todow.getPath());
+
+        // WHEN we download extra-data
+        try {
+            todow.createNewFile();
+            FileUtils.write(todow, "test");
+            MvcResult result = mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file1.pdf/"))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            // THEN the file is downloaded
+            assertNotNull(result.getResponse().getContentAsString());
+            System.out.println(result.getResponse().getContentAsString());
+        } catch (Exception e) {
+            System.out.println(e);
+            fail();
+        }
+    }
 
 }

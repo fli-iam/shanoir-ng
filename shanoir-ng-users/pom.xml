@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-users</name>
-	<description>Shanoir-NG Users Microservice</description>
+	<description>Users microservice</description>
 
 	<dependencies>
 		<!-- Common MS dependency -->
@@ -38,7 +38,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>shanoir-ng-ms-common</artifactId>
 			<version>3.4.0</version>
 		</dependency>
-	
 		<!-- Spring boot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -64,7 +63,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>shanoir-ng-study-rights</artifactId>
 			<version>3.4.0</version>
 		</dependency>
-		
+
 		<!-- Test -->
 		<dependency>
 			<groupId>com.icegreen</groupId>

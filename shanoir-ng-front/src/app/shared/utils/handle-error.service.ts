@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -26,8 +26,12 @@ export class HandleErrorService implements ErrorHandler {
     constructor (private consoleService: ConsoleService) { }
 
     public handleError(error: any) {
+        console.error(error);
         try {
             if (error instanceof HttpErrorResponse) {
+                if (error.status !== 404) {
+                    console.error(error);
+                }
                 this.handleHttpError(error);
             } else {
                 console.error(error);
@@ -40,7 +44,7 @@ export class HandleErrorService implements ErrorHandler {
 
     private handleHttpError(error: HttpErrorResponse) {
         try {
-            let details: string[] = [
+            const details: string[] = [
                 formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss', 'en'),
                 '[' + error.status + '] ' + this.getStatus(error.status),
                 error.url,
@@ -48,12 +52,12 @@ export class HandleErrorService implements ErrorHandler {
             ];
             if(error.error instanceof Blob) {
                 error.error.text().then(text => {
-                    let msg = (JSON.parse(text).message);
+                    const msg = (JSON.parse(text).message);
                     this.consoleService.log('error', msg, details);
                 });
             } else {
                 //handle regular json error - useful if you are offline
-                let msg: string = 'Error from ' + this.extractServerNameFromUrl(error.url) + ' server';
+                const msg: string = 'Error from ' + this.extractServerNameFromUrl(error.url) + ' server';
                 this.consoleService.log('error', msg, details);
             }
         } catch (error) {
@@ -67,9 +71,9 @@ export class HandleErrorService implements ErrorHandler {
             return;
         }
         try {
-            let msg: string = 'Error' 
+            let msg: string = 'Error'
             if (error.name != 'Error') msg += ' : ' + error.name;
-            let details: string[] = [error.message];
+            const details: string[] = [error.message];
             this.consoleService.log('error', msg, details);
         } catch (error) {
             console.error(error);
@@ -82,7 +86,7 @@ export class HandleErrorService implements ErrorHandler {
     }
 
     private extractServerNameFromUrl(url: string) {
-        let urlArr: string[] = url.split('/');
+        const urlArr: string[] = url.split('/');
         return urlArr[urlArr.findIndex(str => str == 'shanoir-ng') + 1];
     }
-}  
+}

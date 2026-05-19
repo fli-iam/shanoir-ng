@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.vip.output.handler;
 
 import org.apache.commons.io.IOUtils;
@@ -35,10 +49,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -58,7 +69,11 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             "deviceConstructor",
             "deviceMagneticField",
             "deviceModel",
-            "deviceSerialNumber"
+            "deviceSerialNumber",
+            "burnedInAnnotation",
+            "modality",
+            "originalSerieId",
+            "studyId"
     };
 
     private static final String[] VOLUME_PROPERTIES = {
@@ -84,8 +99,9 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             "numberOfSlices",
             "dimension",
             "dimensions",
-            "axis"
-
+            "axis",
+            "sequenceList",
+            "acquisitionNumber"
     };
 
     public static final String TYPE = "type";
@@ -115,10 +131,10 @@ public class OFSEPSeqIdHandler extends OutputHandler {
 
     @Override
     public boolean canProcess(ExecutionMonitoring processing) throws ResultHandlerException {
-        if(processing.getPipelineIdentifier() == null || processing.getPipelineIdentifier().isEmpty()){
+        if (processing.getPipelineIdentifier() == null || processing.getPipelineIdentifier().isEmpty()) {
             throw new ResultHandlerException("Pipeline identifier is not set for processing [" + processing.getName() + "]", null);
         }
-        return processing.getPipelineIdentifier().startsWith("ofsep_sequences_identification");
+        return processing.getPipelineIdentifier().startsWith("ofsep_sequences_identification")  || processing.getPipelineIdentifier().startsWith("SIMS");
     }
 
     @Override
@@ -138,16 +154,15 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                 JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
                 JSONArray series = json.getJSONArray(SERIES);
 
-                if(series.length() < 1){
+                if (series.length() < 1) {
                     LOG.warn("Series list is empty in result file [{}].", file.getAbsolutePath());
                     return;
                 }
-
                 processSeries(series, processing);
-
             } catch (Exception e) {
                 LOG.error("An error occured while extracting result from result archive.", e);
             }
+            return;
         }
         LOG.error("Expected result file [" + parentFolder.getAbsolutePath() + "/" + PIPELINE_OUTPUT + "] is not present.");
     }
@@ -161,16 +176,16 @@ public class OFSEPSeqIdHandler extends OutputHandler {
      */
     public boolean areOrientationsEquals(double[] dsOrientation, JSONArray volOrientation) throws JSONException {
 
-        if(dsOrientation == null || dsOrientation.length == 0 || volOrientation == null || volOrientation.length() == 0){
+        if (dsOrientation == null || dsOrientation.length == 0 || volOrientation == null || volOrientation.length() == 0) {
             return false;
         }
 
-        if(dsOrientation.length != volOrientation.length()){
+        if (dsOrientation.length != volOrientation.length()) {
             return false;
         }
 
-        for (int i = 0 ; i < dsOrientation.length; i++) {
-            if(dsOrientation[i] != volOrientation.getDouble(i)){
+        for (int i = 0; i < dsOrientation.length; i++) {
+            if (dsOrientation[i] != volOrientation.getDouble(i)) {
                 return false;
             }
         }
@@ -188,104 +203,143 @@ public class OFSEPSeqIdHandler extends OutputHandler {
      */
     public JSONObject getMatchingVolume(Dataset dataset, JSONObject serie, Attributes attributes) throws JSONException {
 
-        if(serie.isNull(VOLUMES)){
+        if (serie.isNull(VOLUMES)) {
             LOG.error("Volumes set is null in result file for serie [{}]", serie.getLong(ID));
             return null;
         }
 
         JSONArray volumes = serie.getJSONArray(VOLUMES);
-        double[] dsOrientation = attributes.getDoubles(Tag.ImageOrientationPatient);
 
-        for (int i = 0 ; i < volumes.length(); i++) {
+        for (int i = 0; i < volumes.length(); i++) {
             JSONObject volume = volumes.getJSONObject(i);
 
-            if(volume.isNull(ORIENTATION)){
+            if (checkIfSameDatasetVolume(dataset, volume)) {
+                JSONObject result = new JSONObject();
+                result.put("serie", serie);
+                result.put("volume", volume);
+                return result;
+            }
+        }
+
+        double[] dsOrientation = attributes.getDoubles(Tag.ImageOrientationPatient);
+
+        for (int i = 0; i < volumes.length(); i++) {
+            JSONObject volume = volumes.getJSONObject(i);
+
+            if (volume.isNull(ORIENTATION)) {
                 LOG.error("Orientation is null in result file for volume [{}]", volume.getString(ID));
                 continue;
             }
 
             JSONArray volOrientation = volume.getJSONArray(ORIENTATION);
 
-            if(dsOrientation == null || dsOrientation.length == 0){
+            if (dsOrientation == null || dsOrientation.length == 0) {
                 LOG.error("ImageOrientationPatient DICOM property is empty for dataset [{}]", dataset.getId());
                 continue;
             }
 
-            if(volOrientation == null || volOrientation.length() == 0){
+            if (volOrientation == null || volOrientation.length() == 0) {
                 LOG.error("Orientation is empty in result file for volume [{}]", volume.getString(ID));
                 continue;
             }
 
-            if(areOrientationsEquals(dsOrientation, volOrientation)){
-                return volume;
+            if (areOrientationsEquals(dsOrientation, volOrientation)) {
+                JSONObject result = new JSONObject();
+                result.put("serie", serie);
+                result.put("volume", volume);
+                return result;
             }
         }
         return null;
+    }
+
+
+    /**
+     * Verify that volume jsonObject is relative to the given dataset
+     */
+    private boolean checkIfSameDatasetVolume(Dataset dataset, JSONObject volume) {
+        try {
+            String shanoirId = volume.getString("shanoirId");
+
+            if (shanoirId.contains(",")) {
+                return Arrays.stream(shanoirId.split(",")).anyMatch(split -> Objects.equals(Long.valueOf(split), dataset.getId()));
+            } else {
+                return Objects.equals(Long.valueOf(shanoirId), dataset.getId());
+            }
+        } catch (JSONException e) {
+            LOG.error("JSON Exception", e);
+            return false;
+        }
     }
 
     /**
      * Process all series / acquisitions found in output JSON
      */
     private void processSeries(JSONArray series, ExecutionMonitoring execution) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
-
         for (int i = 0; i < series.length(); i++) {
-
             JSONObject serie = series.getJSONObject(i);
             Long serieId = serie.getLong(ID);
-
 
             List<Dataset> datasets = execution.getInputDatasets().stream()
                     .filter(ds -> ds.getDatasetAcquisition() != null
                             && ds.getDatasetAcquisition().getId().equals(serieId))
                     .collect(Collectors.toList());
 
-            if(datasets.isEmpty()){
+            if (datasets.isEmpty()) {
                 LOG.error("No dataset found for serie/acquisition [" + serieId + "]");
                 continue;
             }
 
-            for(Dataset ds : datasets){
+            for (Dataset ds : datasets) {
                 Attributes attributes = wadoDownloaderService.getDicomAttributesForDataset(ds);
                 JSONObject vol = getMatchingVolume(ds, serie, attributes);
 
-                if(vol == null){
+                if (vol == null) {
                     LOG.error("No volume from serie [{}] could be match with dataset [{}].", serieId, ds.getId());
                     continue;
                 }
+                JSONObject volume = vol.getJSONObject("volume");
+                if (!volume.has("status") || !Objects.equals("IGNORED", volume.getString("status"))) {
+                    try {
+                        updateDataset(serie, ds, vol);
+                    } catch (CheckedIllegalClassException | EntityNotFoundException | SolrServerException | IOException e) {
+                        LOG.error("Error while updating dataset [{}]", ds.getId(), e);
+                        throw e;
+                    }
 
-                try {
-                    updateDataset(serie, ds, vol);
-                } catch (CheckedIllegalClassException | EntityNotFoundException | SolrServerException | IOException e) {
-                    LOG.error("Error while updating dataset [{}]", ds.getId(), e);
-                    throw e;
+                    LOG.info("Dataset {} updated", ds.getId());
+
+                    List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, execution);
+                    addDatasetTags(ds, properties);
+                    properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, execution));
+                    datasetPropertyService.createAll(properties);
+                } else {
+                    LOG.info("Dataset {} ignored, no update", ds.getId());
                 }
-
-                List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, execution);
-                addDatasetTags(ds, properties);
-                properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, execution));
-                datasetPropertyService.createAll(properties);
-
             }
         }
+        LOG.info("Output.json processed for execution {}", execution.getId());
     }
 
     /**
      * Update dataset from pipeline output serie & volume
      */
     private void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
-        DatasetMetadataField.NAME.update(ds, vol.getString(TYPE));
-        datasetRepository.save(ds);
+        if (!vol.getJSONObject("volume").has("status") || !Objects.equals("IGNORED", vol.getJSONObject("volume").getString("status"))) {
+            DatasetMetadataField.NAME.update(ds, vol.getJSONObject("volume").getString(TYPE));
+            datasetRepository.save(ds);
 
-        if(ds.getDatasetAcquisition() instanceof MrDatasetAcquisition){
-            DatasetAcquisition acq = ds.getDatasetAcquisition();
-            DatasetAcquisitionMetadataField.MR_SEQUENCE_NAME.update(acq, serie.getString(TYPE));
-            acquisitionService.update(acq);
-        }
+            if (ds.getDatasetAcquisition() instanceof MrDatasetAcquisition) {
+                DatasetAcquisition acq = ds.getDatasetAcquisition();
+                DatasetAcquisitionMetadataField.MR_SEQUENCE_NAME.update(acq, serie.getString(TYPE));
+                acquisitionService.update(acq);
+            }
 
-        try {
-            solrService.updateDatasets(Arrays.asList(ds.getId()));
-        }catch (Exception e){
-            LOG.error("Solr update failed for dataset {}", ds.getId(), e);
+            try {
+                solrService.updateDatasets(Arrays.asList(ds.getId()));
+            } catch (Exception e) {
+                LOG.error("Solr update failed for dataset {}", ds.getId(), e);
+            }
         }
     }
 
@@ -296,13 +350,13 @@ public class OFSEPSeqIdHandler extends OutputHandler {
         Map<String, StudyTag> studyTagsByName = studyService.findById(ds.getStudyId()).getStudyTags().stream()
                 .collect(Collectors.toMap(StudyTag::getName, Function.identity()));
 
-        for(DatasetProperty property : properties){
+        for (DatasetProperty property : properties) {
             String tagName = property.getName() + ":" + property.getValue();
 
-            if(studyTagsByName.containsKey(tagName)){
+            if (studyTagsByName.containsKey(tagName)) {
                 StudyTag tag = studyTagsByName.get(tagName);
 
-                if(!ds.getTags().contains(tag)){
+                if (!ds.getTags().contains(tag)) {
                     ds.getTags().add(tag);
                 }
             }
@@ -314,24 +368,28 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     /**
      * Create dataset properties from pipeline output volume
      */
-    private List<DatasetProperty> getDatasetPropertiesFromVolume(Dataset ds, JSONObject volume, ExecutionMonitoring monitoring) throws JSONException {
+    private List<DatasetProperty> getDatasetPropertiesFromVolume(Dataset ds, JSONObject json, ExecutionMonitoring monitoring) throws JSONException {
         List<DatasetProperty> properties = new ArrayList<>();
 
-        for(String name : SERIE_PROPERTIES){
-            if(!volume.has(name)){
+        JSONObject volume = json.getJSONObject("volume");
+        JSONObject serie = json.getJSONObject("serie");
+
+        for (String name : SERIE_PROPERTIES) {
+            if (!serie.has(name)) {
                 continue;
             }
 
             DatasetProperty property = new DatasetProperty();
             property.setDataset(ds);
             property.setName("serie." + name);
-            property.setValue(volume.getString(name));
+            property.setValue(serie.getString(name));
             property.setProcessing(monitoring);
             properties.add(property);
         }
 
-        for(String name : VOLUME_PROPERTIES){
-            if(!volume.has(name)){
+
+        for (String name : VOLUME_PROPERTIES) {
+            if (!volume.has(name)) {
                 continue;
             }
 
@@ -348,20 +406,20 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     /**
      * Get institution properties from attributes associated to dataset
      */
-    private List<DatasetProperty> getDatasetPropertiesFromDicom(Attributes attributes, Dataset ds, ExecutionMonitoring monitoring){
+    private List<DatasetProperty> getDatasetPropertiesFromDicom(Attributes attributes, Dataset ds, ExecutionMonitoring monitoring) {
         List<DatasetProperty> properties = new ArrayList<>();
 
         DatasetProperty institutionName = new DatasetProperty();
         institutionName.setDataset(ds);
         institutionName.setName("dicom.InstitutionName");
-        institutionName.setValue(attributes.getString(Tag.InstitutionName));
+        institutionName.setValue(Objects.isNull(attributes.getString(Tag.InstitutionName)) ? "null" : attributes.getString(Tag.InstitutionName));
         institutionName.setProcessing(monitoring);
         properties.add(institutionName);
 
         DatasetProperty institutionAddress = new DatasetProperty();
         institutionAddress.setDataset(ds);
         institutionAddress.setName("dicom.InstitutionAddress");
-        institutionAddress.setValue(attributes.getString(Tag.InstitutionAddress));
+        institutionAddress.setValue(Objects.isNull(attributes.getString(Tag.InstitutionAddress)) ? "null" : attributes.getString(Tag.InstitutionAddress));
         institutionAddress.setProcessing(monitoring);
         properties.add(institutionAddress);
 

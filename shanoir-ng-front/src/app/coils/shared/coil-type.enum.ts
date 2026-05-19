@@ -24,7 +24,7 @@ export enum CoilType {
 
 export namespace CoilType {
 
-    export function all(): Array<CoilType> {
+    export function all(): CoilType[] {
         return allOfEnum<CoilType>(CoilType);
     }
 }

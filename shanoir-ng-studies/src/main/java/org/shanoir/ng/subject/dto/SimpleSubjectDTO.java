@@ -2,24 +2,27 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 /**
- * 
+ *
  */
 package org.shanoir.ng.subject.dto;
+
+import java.util.List;
 
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
+import org.shanoir.ng.tag.model.TagDTO;
 
 /**
  * Simple DTO for Subject.
@@ -28,75 +31,95 @@ import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
  *
  */
 public class SimpleSubjectDTO {
-	
-	private Long id;
-    
+
+    private Long id;
+
     private String name;
-    
+
     private String identifier;
 
-	private HemisphericDominance languageHemisphericDominance;
+    private HemisphericDominance languageHemisphericDominance;
 
-	private HemisphericDominance manualHemisphericDominance;
+    private HemisphericDominance manualHemisphericDominance;
 
-	private ImagedObjectCategory imagedObjectCategory;
-    
+    private ImagedObjectCategory imagedObjectCategory;
+
     private SubjectStudyDTO subjectStudy;
 
-	public Long getId() {
-		return id;
-	}
+    private Long studyId;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    private List<TagDTO> tags;
 
-	public String getName() {
-		return name;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getIdentifier() {
-		return identifier;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setIdentifier(String identifier) {
-		this.identifier = identifier;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public SubjectStudyDTO getSubjectStudy() {
-		return subjectStudy;
-	}
+    public String getIdentifier() {
+        return identifier;
+    }
 
-	public void setSubjectStudy(SubjectStudyDTO subjectStudy) {
-		this.subjectStudy = subjectStudy;
-	}
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
 
-	public HemisphericDominance getLanguageHemisphericDominance() {
-		return languageHemisphericDominance;
-	}
+    public SubjectStudyDTO getSubjectStudy() {
+        return subjectStudy;
+    }
 
-	public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
-		this.languageHemisphericDominance = languageHemisphericDominance;
-	}
+    public void setSubjectStudy(SubjectStudyDTO subjectStudy) {
+        this.subjectStudy = subjectStudy;
+    }
 
-	public HemisphericDominance getManualHemisphericDominance() {
-		return manualHemisphericDominance;
-	}
+    public HemisphericDominance getLanguageHemisphericDominance() {
+        return languageHemisphericDominance;
+    }
 
-	public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
-		this.manualHemisphericDominance = manualHemisphericDominance;
-	}
+    public void setLanguageHemisphericDominance(HemisphericDominance languageHemisphericDominance) {
+        this.languageHemisphericDominance = languageHemisphericDominance;
+    }
 
-	public ImagedObjectCategory getImagedObjectCategory() {
-		return imagedObjectCategory;
-	}
+    public HemisphericDominance getManualHemisphericDominance() {
+        return manualHemisphericDominance;
+    }
 
-	public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
-		this.imagedObjectCategory = imagedObjectCategory;
-	}
+    public void setManualHemisphericDominance(HemisphericDominance manualHemisphericDominance) {
+        this.manualHemisphericDominance = manualHemisphericDominance;
+    }
+
+    public ImagedObjectCategory getImagedObjectCategory() {
+        return imagedObjectCategory;
+    }
+
+    public void setImagedObjectCategory(ImagedObjectCategory imagedObjectCategory) {
+        this.imagedObjectCategory = imagedObjectCategory;
+    }
+
+    public Long getStudyId() {
+        return studyId;
+    }
+
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
+
+    public List<TagDTO> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<TagDTO> tags) {
+        this.tags = tags;
+    }
 
 }

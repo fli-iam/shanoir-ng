@@ -14,7 +14,6 @@
  */
 
 import { Injectable, ApplicationRef, Injector } from '@angular/core';
-import { Subject } from 'rxjs';
 
 type msgType = 'error' | 'warn' | 'info';
 class Message { 
@@ -30,7 +29,7 @@ export class MsgBoxService {
     private opened: boolean = false;
     private messages: Message[] = [];
     //private appRef: ApplicationRef;
-    private appRef: Promise<ApplicationRef> = new Promise((resolve, reject) => {});
+    private appRef: Promise<ApplicationRef> = new Promise(() => { return; });
     private openingTimeout;
 
     constructor(private injector: Injector) {
@@ -38,7 +37,7 @@ export class MsgBoxService {
      }
 
     public log(type: msgType, txt: string, duration: number = MSG_DURATION) {
-        let message = new Message(type, txt, duration);
+        const message = new Message(type, txt, duration);
         if (this.messages.length > 1 && message.txt == this.messages[this.messages.length - 1].txt) {
             this.messages[this.messages.length - 1].nb ++;
         } else if (this.messages.length == 1 && this.messages[0].txt == message?.txt) {

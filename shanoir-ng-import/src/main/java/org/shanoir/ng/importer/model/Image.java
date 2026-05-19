@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -23,90 +23,90 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Image {
 
-	@JsonProperty("path")
-	public String path;
+    @JsonProperty("path")
+    private String path;
 
-	@JsonProperty("acquisitionNumber")
-	public int acquisitionNumber;
+    @JsonProperty("acquisitionNumber")
+    private int acquisitionNumber;
 
-	@JsonProperty("echoTimes")
-	public Set<EchoTime> echoTimes;
-	
-	@JsonProperty("repetitionTime")
-	public Double repetitionTime;
-	
-	@JsonProperty("inversionTime")
-	public Double inversionTime;
+    @JsonProperty("echoTimes")
+    private Set<EchoTime> echoTimes;
 
-	@JsonProperty("flipAngle")
-	public String flipAngle;
-	
-	@JsonProperty("imageOrientationPatient")
-	public List<Double> imageOrientationPatient;
+    @JsonProperty("repetitionTime")
+    private Double repetitionTime;
 
-	public String SOPInstanceUID;
+    @JsonProperty("inversionTime")
+    private Double inversionTime;
 
-	public String getPath() {
-		return path;
-	}
+    @JsonProperty("flipAngle")
+    private String flipAngle;
 
-	public void setPath(String path) {
-		this.path = path;
-	}
+    @JsonProperty("imageOrientationPatient")
+    private List<Double> imageOrientationPatient;
 
-	public int getAcquisitionNumber() {
-		return acquisitionNumber;
-	}
+    private String sopInstanceUID;
 
-	public void setAcquisitionNumber(int acquisitionNumber) {
-		this.acquisitionNumber = acquisitionNumber;
-	}
+    public String getPath() {
+        return path;
+    }
 
-	public List<Double> getImageOrientationPatient() {
-		return imageOrientationPatient;
-	}
+    public void setPath(String path) {
+        this.path = path;
+    }
 
-	public Set<EchoTime> getEchoTimes() {
-		return echoTimes;
-	}
+    public int getAcquisitionNumber() {
+        return acquisitionNumber;
+    }
 
-	public void setEchoTimes(Set<EchoTime> echoTimes) {
-		this.echoTimes = echoTimes;
-	}
+    public void setAcquisitionNumber(int acquisitionNumber) {
+        this.acquisitionNumber = acquisitionNumber;
+    }
 
-	public void setImageOrientationPatient(List<Double> imageOrientationPatient) {
-		this.imageOrientationPatient = imageOrientationPatient;
-	}
+    public List<Double> getImageOrientationPatient() {
+        return imageOrientationPatient;
+    }
 
-	public Double getRepetitionTime() {
-		return repetitionTime;
-	}
+    public Set<EchoTime> getEchoTimes() {
+        return echoTimes;
+    }
 
-	public void setRepetitionTime(Double repetitionTime) {
-		this.repetitionTime = repetitionTime;
-	}
+    public void setEchoTimes(Set<EchoTime> echoTimes) {
+        this.echoTimes = echoTimes;
+    }
 
-	public Double getInversionTime() {
-		return inversionTime;
-	}
+    public void setImageOrientationPatient(List<Double> imageOrientationPatient) {
+        this.imageOrientationPatient = imageOrientationPatient;
+    }
 
-	public void setInversionTime(Double inversionTime) {
-		this.inversionTime = inversionTime;
-	}
+    public Double getRepetitionTime() {
+        return repetitionTime;
+    }
 
-	public String getFlipAngle() {
-		return flipAngle;
-	}
+    public void setRepetitionTime(Double repetitionTime) {
+        this.repetitionTime = repetitionTime;
+    }
 
-	public void setFlipAngle(String flipAngle) {
-		this.flipAngle = flipAngle;
-	}
+    public Double getInversionTime() {
+        return inversionTime;
+    }
 
-	public String getSOPInstanceUID() {
-		return SOPInstanceUID;
-	}
+    public void setInversionTime(Double inversionTime) {
+        this.inversionTime = inversionTime;
+    }
 
-	public void setSOPInstanceUID(String sOPInstanceUID) {
-		SOPInstanceUID = sOPInstanceUID;
-	}
+    public String getFlipAngle() {
+        return flipAngle;
+    }
+
+    public void setFlipAngle(String flipAngle) {
+        this.flipAngle = flipAngle;
+    }
+
+    public String getSOPInstanceUID() {
+        return sopInstanceUID;
+    }
+
+    public void setSOPInstanceUID(String sopInstanceUID) {
+        this.sopInstanceUID = sopInstanceUID;
+    }
 }

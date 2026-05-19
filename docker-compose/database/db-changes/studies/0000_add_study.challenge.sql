@@ -1,1 +1,0 @@
-ALTER TABLE study ADD COLUMN challenge bit(1) NOT NULL DEFAULT 0;

@@ -29,6 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [route]="node.route"
         [hasChildren]="hasChildren()"
         (firstOpen)="loadDatasets()"
+        [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && withMenu && withMenu && node.id != null">
@@ -47,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [related]="node.id == null"
             (selectedChange)="selectedChange.emit()"
             [hasBox]="hasBox"
-            (onDatasetDelete)="onDatasetDelete(i)"
+            (datasetDelete)="onDatasetDelete(i)"
             [withMenu]="withMenu"
         >
         </dataset-node>

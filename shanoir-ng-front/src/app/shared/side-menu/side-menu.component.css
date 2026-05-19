@@ -4,7 +4,7 @@
 
 .logo { margin-bottom: 20px; display: flex; justify-content: center; min-width: 300px; position: relative; }
 
-.logo img { height: 78px; opacity: 0.2; margin-top: 4px;
+.logo img { height: 60px; opacity: 0.2; margin-top: 11px;
     -webkit-filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9));
     filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9));
 }
@@ -26,7 +26,7 @@ a:hover, a:active { color: inherit; }
 .menu-list li > i, .menu-list li > a i { margin-left: 6px; width: 30px; }
 .menu-list a { text-decoration: none; }
 .menu-list .sub-menu { background-color: var(--color-a-light); overflow: hidden; }
-.menu-list .sub-menu li { font-size: 12px; background-color: var(--color-a-light); padding-left: 25px; }
+.menu-list .sub-menu li { font-size: 12px; background-color: var(--color-a-light); padding-left: 25px; position: relative; }
 .menu-list .single-task { color: var(--color-b-light); font-size: 10px !important; }
 
 .chevron { float: right; font-size: 10px; margin-right: 10px; }
@@ -43,19 +43,6 @@ a:hover, a:active { color: inherit; }
 .user-commands a:link, .user-commands a:visited { color: inherit; text-decoration: none; }
 .user-commands a:hover, .user-commands a:active { text-decoration: none; }
 
-
-.counter { margin: 0 6px;
-    background-color: var(--color-c);
-    border-radius: 21px;
-    width: 15px;
-    height: 15px;
-    display: inline-block;
-    text-align: center;
-    font-size: 10px;
-    vertical-align: middle;
-    padding: 1px 1px 0 0px;
-}
-
 .admin-tag { color: orange; }
     .admin-tag i { margin-right: 4px; }
 .admin-tag-sep { color: var(--color-b-light2); }
@@ -69,14 +56,19 @@ a:hover, a:active { color: inherit; }
     .instance-name::after { content: var(--instance-name); }
 
 progress-bar { background-color: var(--color-b-light); height: 14px; border: 1px solid var(--color-b-light2); vertical-align: -2px; width: 160px; font-size: 10px; }
-progress-bar >>> .text, progress-bar >>> .left-text { line-height: 14px; }
+progress-bar ::ng-deep .text, progress-bar ::ng-deep .left-text { line-height: 14px; }
 .sub-menu progress-bar { width: 100px; height: 12px; font-size: 10px; }
-.sub-menu progress-bar >>> .text, .sub-menu progress-bar >>> .left-text { line-height: 13px; }
+.sub-menu progress-bar ::ng-deep .text, .sub-menu progress-bar ::ng-deep .left-text { line-height: 13px; }
 
 .jobs i { margin-right: 6px; width: auto !important; }
 
 .notif { font-size: 10px; color: #00ff44; vertical-align: 1px; margin-left: 8px; font-weight: bold; }
 .notif i { margin-right: 5px; width: auto !important; }
 .notif.error { color: #ff1900; }
+.notif.button { color: var(--color-b-light2); display: none; }
+.jobs-menu:hover .notif.button { display: inline-block; }
+.jobs-menu { max-width: 100%; }
+.jobs-menu progress-bar { margin-left: 10px; }
 
-.menu-link {width: 100%; display: inline-block; }
+.menu-link { display: inline-block; width: 100%; }
+.remove-task { position: absolute; left: 7px; padding-top: 1px; }

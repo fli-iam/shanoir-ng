@@ -1,26 +1,51 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <div class="welcome-component">
 	<div class="header">
-		<img class="github-logo" title="Shanoir on GitHub" [src]="githubLogoUrl" (click)="toGithub()"/>
+		<img class="github-logo" title="Shanoir on GitHub" [src]="githubLogoUrl" (click)="toGithub()" alt="Shanoir on GitHub"/>
 		<div class="buttons">
 			<button class="left-icon alt" type="button" (click)="login()"><i class="fa-solid fa-right-to-bracket"></i>Sign in</button>
 			<button class="left-icon" type="button" (click)="toShanoir()"><i class="fa-solid fa-circle-info"></i>More info</button>
-			<a href="mailto:developers_shanoir-request@inria.fr">
+			<a href="mailto:developers_shanoir@inria.fr">
 				<button class="left-icon" type="button"><i class="fa-solid fa-paper-plane"></i>Contact</button>
 			</a>
 		</div>
 	</div>
 	<div class="shanoir">
-		<img class="shanoir-logo" [src]="shanoirLogoUrl"/>
+		<img class="shanoir-logo" [src]="shanoirLogoUrl" alt="Shanoir logo"/>
 		<div class="shanoir-text">
-			SHAring iN vivO Imaging Resources
+			<em>SHA</em>ring i<em>N</em> viv<em>O</em>&nbsp;<em>I</em>maging <em>R</em>esources
 		</div>
 	</div>
     <div class="stats">
-        {{ studies?.length }} shared studies
+        {{ welcomeIntroduction }}<br>
+        It has <strong>{{ studiesCount || 'no' }} collection@if (studiesCount > 1) {s}</strong> 
+        (@if (publicStudies.length > 0) {including <strong>{{ publicStudies.length }}</strong>} @else {<strong>none</strong>} <strong> public</strong>)
+        containing <strong>{{ datasetAcquisitionsCount || 'no' }} image@if (datasetAcquisitionsCount > 1) {s}</strong> 
+        of <strong>{{ subjectsCount || 'no' }} subject@if (subjectsCount > 1) {s}</strong>, 
+        for a total of <strong>{{ storageSize }} GB</strong>.<br>
+        There @if (usersCount < 2) {is} @else {are} <strong> {{ usersCount || 'no' }} active user@if (usersCount > 1) {s}</strong> 
+        and @if (eventsCount === 0 || !eventsCount) {
+        <strong>no query</strong> was run during the last month.
+        } @else {
+        <strong>{{ eventsCount }} {{ eventsCount === 1 ? 'query ' : 'queries ' }}</strong> @if (eventsCount === 1) {was} @else {were} run during the last month.
+        }
     </div>
     <div class="study-tab-parent">
-        <div *ngIf="studies?.length > 0" class="study-tab">
-            <div class="studyItem" *ngFor="let study of studies | slice:0:show; let index = index;">
+        <div *ngIf="publicStudies?.length > 0" class="study-tab">
+            <div class="studyItem" *ngFor="let study of publicStudies | slice:0:show; let index = index;">
                 <div class="title link" (click)="accessRequest(study)">
                     <span class="studyTitle"><b>{{study.name}}</b></span>
                     <span *ngIf="study.description" class="studyDescription">
@@ -59,12 +84,12 @@
                         <span class="tag" [style.border-color]="tag.color" *ngFor="let tag of study.studyTags"> {{ tag.name }}</span>
                     </div>
                 </div>
-                <hr *ngIf="index < (studies.length - 1)" />
+                <hr *ngIf="index < (publicStudies.length - 1)" />
                 <div class="accessRequest">
                     <a class="buttonItem" type="button" (click)="accessRequest(study)">Request an access</a>
                 </div>
             </div>
-            <div *ngIf="studies.length > show" class="showMoreButton" #showMore><i class="fa fa-cog fa-spin"></i></div>
+            <div *ngIf="publicStudies.length > show" class="showMoreButton" #showMore><i class="fa fa-cog fa-spin"></i></div>
         </div>
     </div>
 </div>

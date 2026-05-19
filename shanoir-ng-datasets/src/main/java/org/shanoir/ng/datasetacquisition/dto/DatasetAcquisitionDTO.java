@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -15,151 +15,161 @@
 package org.shanoir.ng.datasetacquisition.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.studycard.model.StudyCard;
 
 public class DatasetAcquisitionDTO {
-	
-	private Long id;
 
-	private Long acquisitionEquipmentId;
+    private Long id;
 
-	private ExaminationDTO examination;
-	
-	private StudyCard studyCard;
-	
-	private Long studyCardTimestamp;
+    private Long acquisitionEquipmentId;
 
-	private Integer rank;
+    private ExaminationDTO examination;
 
-	private String softwareRelease;
+    private StudyCard studyCard;
 
-	private Integer sortingIndex;
-	
-	private String type;
+    private Long studyCardTimestamp;
 
-	private Object protocol;
+    private Integer rank;
 
-	private LocalDate importDate;
+    private String softwareRelease;
 
-	private String username;
+    private Integer sortingIndex;
 
-	private Long source;
+    private String type;
 
-	private List<Long> copies;
+    private Object protocol;
 
-	public Long getId() {
-		return id;
-	}
+    private LocalDate importDate;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    private String username;
 
-	public Long getAcquisitionEquipmentId() {
-		return acquisitionEquipmentId;
-	}
+    private Long source;
 
-	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
-		this.acquisitionEquipmentId = acquisitionEquipmentId;
-	}
+    private List<Long> copies;
 
-	public ExaminationDTO getExamination() {
-		return examination;
-	}
+    private LocalDateTime acquisitionStartTime;
 
-	public void setExamination(ExaminationDTO examination) {
-		this.examination = examination;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public StudyCard getStudyCard() {
-		return studyCard;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setStudyCard(StudyCard studyCard) {
-		this.studyCard = studyCard;
-	}
+    public Long getAcquisitionEquipmentId() {
+        return acquisitionEquipmentId;
+    }
 
-	public Long getStudyCardTimestamp() {
-		return studyCardTimestamp;
-	}
+    public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
+        this.acquisitionEquipmentId = acquisitionEquipmentId;
+    }
 
-	public void setStudyCardTimestamp(Long studyCardTimestamp) {
-		this.studyCardTimestamp = studyCardTimestamp;
-	}
+    public ExaminationDTO getExamination() {
+        return examination;
+    }
 
-	public Integer getRank() {
-		return rank;
-	}
+    public void setExamination(ExaminationDTO examination) {
+        this.examination = examination;
+    }
 
-	public void setRank(Integer rank) {
-		this.rank = rank;
-	}
+    public StudyCard getStudyCard() {
+        return studyCard;
+    }
 
-	public String getSoftwareRelease() {
-		return softwareRelease;
-	}
+    public void setStudyCard(StudyCard studyCard) {
+        this.studyCard = studyCard;
+    }
 
-	public void setSoftwareRelease(String softwareRelease) {
-		this.softwareRelease = softwareRelease;
-	}
+    public Long getStudyCardTimestamp() {
+        return studyCardTimestamp;
+    }
 
-	public Integer getSortingIndex() {
-		return sortingIndex;
-	}
+    public void setStudyCardTimestamp(Long studyCardTimestamp) {
+        this.studyCardTimestamp = studyCardTimestamp;
+    }
 
-	public void setSortingIndex(Integer sortingIndex) {
-		this.sortingIndex = sortingIndex;
-	}
+    public Integer getRank() {
+        return rank;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public void setRank(Integer rank) {
+        this.rank = rank;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public String getSoftwareRelease() {
+        return softwareRelease;
+    }
 
-	public Object getProtocol() {
-		return protocol;
-	}
+    public void setSoftwareRelease(String softwareRelease) {
+        this.softwareRelease = softwareRelease;
+    }
 
-	public void setProtocol(Object protocol) {
-		this.protocol = protocol;
-	}
+    public Integer getSortingIndex() {
+        return sortingIndex;
+    }
 
-	public LocalDate getImportDate() {
-		return importDate;
-	}
+    public void setSortingIndex(Integer sortingIndex) {
+        this.sortingIndex = sortingIndex;
+    }
 
-	public void setImportDate(LocalDate importDate) {
-		this.importDate = importDate;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public String getUsername() {
-		return username;
-	}
+    public void setType(String type) {
+        this.type = type;
+    }
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
+    public Object getProtocol() {
+        return protocol;
+    }
 
-	public Long getSource() {
-		return source;
-	}
+    public void setProtocol(Object protocol) {
+        this.protocol = protocol;
+    }
 
-	public void setSource(Long source) {
-		this.source = source;
-	}
+    public LocalDate getImportDate() {
+        return importDate;
+    }
 
-	public List<Long> getCopies() {
-		return copies;
-	}
+    public void setImportDate(LocalDate importDate) {
+        this.importDate = importDate;
+    }
 
-	public void setCopies(List<Long> copies) {
-		this.copies = copies;
-	}
+    public String getUsername() {
+        return username;
+    }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Long getSource() {
+        return source;
+    }
+
+    public void setSource(Long source) {
+        this.source = source;
+    }
+
+    public List<Long> getCopies() {
+        return copies;
+    }
+
+    public void setCopies(List<Long> copies) {
+        this.copies = copies;
+    }
+
+    public LocalDateTime getAcquisitionStartTime() {
+        return acquisitionStartTime;
+    }
+
+    public void setAcquisitionStartTime(LocalDateTime acquisitionStartTime) {
+        this.acquisitionStartTime = acquisitionStartTime;
+    }
 }

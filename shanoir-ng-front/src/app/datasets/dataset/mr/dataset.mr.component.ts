@@ -13,11 +13,13 @@
  */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { Mode } from '../../../shared/components/entity/entity.component.abstract';
-import { MrDataset, MrDatasetMetadata, MrDatasetNature } from './dataset.mr.model';
-import { Option } from '../../../shared/select/select.component';
 import { UntypedFormGroup } from '@angular/forms';
+
+import { Mode } from '../../../shared/components/entity/entity.component.abstract';
+import { Option } from '../../../shared/select/select.component';
 import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
+
+import { MrDataset, MrDatasetMetadata, MrDatasetNature } from './dataset.mr.model';
 
 @Component({
     selector: 'mr-dataset-details',

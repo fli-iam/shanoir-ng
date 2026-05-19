@@ -1,19 +1,40 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.vip.pipeline.service;
 
 import jakarta.annotation.PostConstruct;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.vip.output.exception.ResultHandlerException;
 import org.shanoir.ng.vip.shared.service.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @Service
 public class PipelineServiceImpl implements PipelineService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PipelineServiceImpl.class);
 
     @Value("${vip.uri}")
     private String vipUrl;
@@ -29,10 +50,19 @@ public class PipelineServiceImpl implements PipelineService {
     }
 
     public Mono<String> getPipelineAll() {
+        String username = KeycloakUtil.getTokenUserName();
+
         return webClient.get()
             .uri(vipPipelineUri)
             .headers(headers -> ((HttpHeaders) headers).addAll(utils.getUserHttpHeaders()))
             .retrieve()
+            .onStatus(HttpStatusCode::is4xxClientError, response -> {
+                if (response.statusCode().equals(HttpStatus.UNAUTHORIZED)) {
+                    LOG.error("Unauthorized, current user {} can not request VIP API", username);
+                    return Mono.empty();
+                }
+                return Mono.error(new ResultHandlerException("Can't get pipelines descriptions from VIP API", null));
+            })
             .bodyToMono(String.class)
             .onErrorResume(e -> {
                 ErrorModel model = new ErrorModel(HttpStatus.SERVICE_UNAVAILABLE.value(), "Can't get pipelines descriptions from VIP API", e.getMessage());

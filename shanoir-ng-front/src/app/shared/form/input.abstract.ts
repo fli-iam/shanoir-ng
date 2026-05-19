@@ -14,6 +14,7 @@
 
 import { Input, Directive } from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
+
 import { Mode } from '../components/entity/entity.component.abstract';
 
 @Directive()
@@ -22,10 +23,9 @@ export abstract class AbstractInput<T> implements ControlValueAccessor {
     @Input() mode: Mode;
     model: T;
     disabled: boolean = false;
-    propagateChange = (_: any) => {};
-    protected propagateTouched = () => {};
+    propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
     
-    constructor() {}
 
     writeValue(obj: any): void {
         if (obj) this.model = obj;

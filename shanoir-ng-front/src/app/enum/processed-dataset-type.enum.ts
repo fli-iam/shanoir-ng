@@ -24,7 +24,7 @@ export enum ProcessedDatasetType {
 
 } export namespace ProcessedDatasetType {
 
-    export function all(): Array<ProcessedDatasetType> {
+    export function all(): ProcessedDatasetType[] {
         return allOfEnum<ProcessedDatasetType>(ProcessedDatasetType);
     }
 
@@ -41,5 +41,5 @@ export enum ProcessedDatasetType {
         }
     }
 
-    export var options: Option<ProcessedDatasetType>[] = all().map(prop => new Option<ProcessedDatasetType>(prop, getLabel(prop)));
+    export const options: Option<ProcessedDatasetType>[] = all().map(prop => new Option<ProcessedDatasetType>(prop, getLabel(prop)));
 }

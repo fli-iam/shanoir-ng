@@ -13,16 +13,17 @@
  */
 
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
+import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
-import { SubjectStudy } from './subject-study.model';
+
 import { Subject } from './subject.model';
-import { HttpClient } from '@angular/common/http';
 import { SubjectDTO, SubjectDTOService } from './subject.dto';
-import { SubjectStudyDTO } from './subject-study.dto';
-import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
+
 
 @Injectable()
 export class SubjectService extends EntityService<Subject> {
@@ -57,8 +58,8 @@ export class SubjectService extends EntityService<Subject> {
             .toPromise();
     }
 
-    getPage(pageable: Pageable, name: String):  Promise<Page<Subject>> {
-        let params = { 'params': pageable.toParams() };
+    getPage(pageable: Pageable, name: string):  Promise<Page<Subject>> {
+        const params = { 'params': pageable.toParams() };
         params['params']['name'] = name;
         return this.http.get<Page<Subject>>(AppUtils.BACKEND_API_SUBJECT_FILTER_URL, params).toPromise();
     }
@@ -68,11 +69,10 @@ export class SubjectService extends EntityService<Subject> {
             .toPromise().then(dto => this.mapEntity(dto));
     }
 
-    updateSubjectStudyValues(subjectStudy: SubjectStudy): Promise<void> {
-        return this.http.put<void>(
-                AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id,
-                JSON.stringify(new SubjectStudyDTO(subjectStudy))
-            ).toPromise();
+    isSubjectNameExistForStudy(name: string, studyId: number): Promise<boolean> {
+        return firstValueFrom( 
+            this.http.get<boolean>(AppUtils.BACKEND_API_SUBJECT_URL + '/nameExists/' + name + '/inStudy/' + studyId)
+        );  
     }
 
     protected mapEntity = (dto: SubjectDTO, result?: Subject): Promise<Subject> => {
@@ -86,9 +86,7 @@ export class SubjectService extends EntityService<Subject> {
     }
 
     public stringify(entity: Subject) {
-        let dto = new SubjectDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        const dto = new SubjectDTO(entity);
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

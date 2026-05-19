@@ -23,13 +23,14 @@ import {
     SimpleChanges,
     ViewChildren,
 } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
 import { SuperPromise } from '../../utils/super-promise';
-import { StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
+import { MetadataFieldScope, StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
+
 import { ShanoirMetadataField, StudyCardActionComponent } from './action/action.component';
-import { FormGroup } from '@angular/forms';
 
 
 @Component({
@@ -45,10 +46,10 @@ export class StudyCardRuleComponent implements OnChanges {
     private rulePromise: SuperPromise<StudyCardRule> = new SuperPromise(); 
     @Input() assignmentFields: ShanoirMetadataField[];
     @Input() conditionFields: ShanoirMetadataField[];
-    @Output() change: EventEmitter<StudyCardRule> = new EventEmitter();
+    @Output() userChange: EventEmitter<StudyCardRule> = new EventEmitter();
     @Output() moveUp: EventEmitter<void> = new EventEmitter();
     @Output() moveDown: EventEmitter<void> = new EventEmitter();
-    @Output() onCopy: EventEmitter<void> = new EventEmitter();
+    @Output() copyRule: EventEmitter<void> = new EventEmitter();
     @Output() delete: EventEmitter<void> = new EventEmitter();
     @Input() showErrors: boolean = false;
     @ViewChildren(StudyCardActionComponent) assignmentChildren: QueryList<StudyCardActionComponent>;
@@ -87,28 +88,38 @@ export class StudyCardRuleComponent implements OnChanges {
         }
     }
 
-    addNewCondition() {
-        let cond = new StudyCardCondition('StudyCardDICOMConditionOnDatasets');
+    addNewCondition(metadataFieldScope: MetadataFieldScope) {
+        let cond: StudyCardCondition;
+        switch (metadataFieldScope) {
+            case 'Dataset':
+                cond = new StudyCardCondition('DatasetDICOMConditionOnDataset');
+                break;
+            case 'DatasetAcquisition':
+                cond = new StudyCardCondition('AcqMetadataCondOnAcq');
+                break;
+            default:
+                throw new Error('Unsupported metadata field scope: ' + metadataFieldScope);
+        }
         cond.values = [null];
         this.rule.conditions.push(cond);
-        this.change.emit(this.rule);
+        this.userChange.emit(this.rule);
     }
 
     addNewAction() {
         this.rule.assignments.push(new StudyCardAssignment(this.rule.scope));
-        this.change.emit(this.rule);
+        this.userChange.emit(this.rule);
     }
 
     deleteCondition(index: number) {
         this.rule.conditions.splice(index, 1);
-        this.change.emit(this.rule);
+        this.userChange.emit(this.rule);
     }
     
     deleteAction(index: number) {
-        let fieldOption: Option<string> = this.assignmentFieldOptions.find(opt => opt.value === this.rule.assignments[index].field);
+        const fieldOption: Option<string> = this.assignmentFieldOptions.find(opt => opt.value === this.rule.assignments[index].field);
         if (fieldOption) fieldOption.disabled = false;
         this.rule.assignments.splice(index, 1);
-        this.change.emit(this.rule);
+        this.userChange.emit(this.rule);
     }
 
     @HostListener('document:click', ['$event.target'])

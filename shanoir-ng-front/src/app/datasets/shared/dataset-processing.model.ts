@@ -14,16 +14,18 @@
 
 import { Entity } from "../../shared/components/entity/entity.abstract";
 import { DatasetProcessingType } from "../../enum/dataset-processing-type.enum";
+import { Field } from "../../shared/reflect/field.decorator";
+
 import { Dataset } from "./dataset.model";
 
 export class DatasetProcessing extends Entity {
 
-    id: number;
-    comment: string;
-    datasetProcessingType: DatasetProcessingType;
-    inputDatasets: Dataset[] = [];
-    outputDatasets: Dataset[] = [];
-	processingDate: Date;
-    studyId: number;
-    parentId: number;
+    @Field() id: number;
+    @Field() comment: string;
+    @Field() datasetProcessingType: DatasetProcessingType;
+    @Field() inputDatasets: Dataset[] = [];
+    @Field() outputDatasets: Dataset[] = [];
+	@Field() processingDate: Date;
+    @Field() studyId: number;
+    @Field() parentId: number;
 }

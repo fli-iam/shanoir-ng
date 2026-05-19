@@ -87,8 +87,11 @@ export type ColumnDefinition = {
     onEdit?: (item: any, fieldValue: any) => void,
 
     /** custom graphics of the cell */
-    cellGraphics?: (item) => {color?: string, backgroundColor?: string, tag?: boolean, awesome?: string}
+    cellGraphics?: (item) => {color?: string, backgroundColor?: string, tag?: boolean, awesome?: string},
 
     /** enable text wrapping for this column */
     wrap?: boolean;
+
+    /** adds a download button in the cell */
+    download?: (item: any) => void;
 }

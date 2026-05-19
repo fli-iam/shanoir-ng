@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.shared.security;
 
 
@@ -27,7 +41,7 @@ public class KeycloakServiceAccountUtils {
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(KeycloakServiceAccountUtils.class);
-    private final String GRANT_TYPE="client_credentials";
+    private static final String GRANT_TYPE = "client_credentials";
 
     @Value("${service-account.token.uri:'https://shanoir-ng-nginx/auth'}")
     private String serverUrl;
@@ -57,14 +71,14 @@ public class KeycloakServiceAccountUtils {
 
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
 
-        try{
+        try {
             ResponseEntity<AccessTokenResponse> response = this.restTemplate.exchange(this.serverUrl, HttpMethod.POST, entity, AccessTokenResponse.class);
             return response.getBody();
-        } catch (HttpStatusCodeException e){
+        } catch (HttpStatusCodeException e) {
             // in case of error with a response payload.
             LOG.error("Unexpected error while retrieving access token.", e);
             throw new SecurityException("Unexpected error while retrieving access token.", e);
-        }catch (RestClientException e){
+        } catch (RestClientException e) {
             // in case of an error but no response payload;
             LOG.error("No response payload for service account token request", e);
             throw new SecurityException("No response payload for service account token request", e);

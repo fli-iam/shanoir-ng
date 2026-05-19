@@ -14,6 +14,7 @@
 
 import { EegDataset } from '../dataset/eeg/dataset.eeg.model';
 import { MrDataset } from '../dataset/mr/dataset.mr.model';
+
 import { DatasetType } from './dataset-type.model';
 import { Dataset } from './dataset.model';
 

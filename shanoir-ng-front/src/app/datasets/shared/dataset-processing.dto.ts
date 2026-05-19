@@ -15,16 +15,15 @@ import { Injectable } from '@angular/core';
 
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { MrDataset } from '../dataset/mr/dataset.mr.model';
+
 import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetProcessingService } from './dataset-processing.service';
-import { DatasetDTO } from './dataset.dto';
 
 @Injectable()
 export class DatasetProcessingDTOService {
 
     private datasetProcessingService: DatasetProcessingService;
 
-    constructor() {}
 
     setDatasetProcessingService(datasetProcessingService: DatasetProcessingService) {
         this.datasetProcessingService = datasetProcessingService;
@@ -35,17 +34,11 @@ export class DatasetProcessingDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    public toEntity(dto: DatasetProcessingDTO, result?: DatasetProcessing): Promise<DatasetProcessing> {
+    public toEntity(dto: DatasetProcessingInDTO, result?: DatasetProcessing): Promise<DatasetProcessing> {
         if (!result) result = new DatasetProcessing();
         DatasetProcessingDTOService.mapSyncFields(dto, result);
-        let promises: Promise<any>[] = [];
-        if (dto.inputDatasets && dto.inputDatasets.length > 0) {
-            promises.push(this.datasetProcessingService.getInputDatasets(dto.id).then(inputDatasets => result.inputDatasets = inputDatasets));
-        }
-        if (dto.outputDatasets && dto.outputDatasets.length > 0) {
-            promises.push(this.datasetProcessingService.getOutputDatasets(dto.id).then(outputDatasets => result.outputDatasets = outputDatasets));
-        }
-        return Promise.all(promises).then(([]) => {
+        const promises: Promise<any>[] = [];
+        return Promise.all(promises).then(() => {
             return result;
         });
     }
@@ -54,12 +47,12 @@ export class DatasetProcessingDTOService {
      * Convert from a DTO list to an Entity list
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    public toEntityList(dtos: DatasetProcessingDTO[], result?: DatasetProcessing[]): Promise<DatasetProcessing[]>{
+    public toEntityList(dtos: DatasetProcessingInDTO[], result?: DatasetProcessing[]): Promise<DatasetProcessing[]>{
         if (!result) result = [];
-        let promises: Promise<any>[] = [];
+        const promises: Promise<any>[] = [];
         if (dtos) {
-            for (let dto of dtos ? dtos : []) {
-                let entity = new DatasetProcessing();
+            for (const dto of dtos ? dtos : []) {
+                const entity = new DatasetProcessing();
                 DatasetProcessingDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
@@ -69,23 +62,21 @@ export class DatasetProcessingDTOService {
         })
     }
 
-    static mapSyncFields(dto: DatasetProcessingDTO, entity: DatasetProcessing): DatasetProcessing {
+    static mapSyncFields(dto: DatasetProcessingInDTO, entity: DatasetProcessing): DatasetProcessing {
         entity.id = dto.id;
         entity.comment = dto.comment;
         entity.datasetProcessingType = dto.datasetProcessingType;
         if(dto.inputDatasets) {
-            entity.inputDatasets = dto.inputDatasets.map((datasetIdName)=> {
-                let dataset = new MrDataset();
-                dataset.id = datasetIdName.id;
-                dataset.name = datasetIdName.name;
+            entity.inputDatasets = dto.inputDatasets.map(id => { 
+                const dataset = new MrDataset();
+                dataset.id = id;
                 return dataset;
             })
         }
         if(dto.outputDatasets) {
-            entity.outputDatasets = dto.outputDatasets.map((datasetIdName)=> {
-                let dataset = new MrDataset();
-                dataset.id = datasetIdName.id;
-                dataset.name = datasetIdName.name;
+            entity.outputDatasets = dto.outputDatasets.map(id => {
+                const dataset = new MrDataset();
+                dataset.id = id;
                 return dataset;
             })
         }
@@ -97,13 +88,25 @@ export class DatasetProcessingDTOService {
 
 }
 
-export class DatasetProcessingDTO {
+export class DatasetProcessingInDTO {
 
     id: number;
     comment: string;
     datasetProcessingType: DatasetProcessingType;
-    inputDatasets: DatasetDTO[];
-    outputDatasets: DatasetDTO[];
+    inputDatasets: number[];
+    outputDatasets: number[];
+	processingDate: Date;
+    studyId: number;
+    parentId: number;
+}
+
+export class DatasetProcessingOutDTO {
+
+    id: number;
+    comment: string;
+    datasetProcessingType: DatasetProcessingType;
+    inputDatasets: {id: number, studyId: number}[];
+    outputDatasets: {id: number, studyId: number}[];
 	processingDate: Date;
     studyId: number;
     parentId: number;
@@ -112,16 +115,8 @@ export class DatasetProcessingDTO {
         this.id = datasetProcessing.id;
         this.comment = datasetProcessing.comment;
         this.datasetProcessingType = datasetProcessing.datasetProcessingType;
-        this.inputDatasets = datasetProcessing.inputDatasets.map((dataset)=> {
-            let datasetDTO = new DatasetDTO(dataset);
-            datasetDTO.processings = datasetDTO.processings.map(p=> ({id: p.id} as any));
-            return datasetDTO;
-        });
-        this.outputDatasets = datasetProcessing.outputDatasets.map((dataset)=> {
-            let datasetDTO = new DatasetDTO(dataset);
-            datasetDTO.processings = datasetDTO.processings.map(p=> ({id: p.id} as any));
-            return datasetDTO;
-        });
+        this.inputDatasets = datasetProcessing.inputDatasets.map(ds => {return {id: ds.id, studyId: ds.study?.id}});
+        this.outputDatasets = datasetProcessing.outputDatasets.map(ds => {return {id: ds.id, studyId: ds.study?.id}});
         this.processingDate = datasetProcessing.processingDate;
         this.studyId = datasetProcessing.studyId;
         this.parentId = datasetProcessing.parentId;

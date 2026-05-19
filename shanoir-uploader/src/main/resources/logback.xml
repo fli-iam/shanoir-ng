@@ -1,3 +1,17 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
 <configuration>
 
     <!-- Root logger option -->
@@ -66,9 +80,9 @@
 
     <!-- Define file appender -->
 	<appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${user.home}/.su_v9.0.0/su.log</file>
+        <file>${user.home}/.su_${app.version:-dev}/su.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${user.home}/.su_v9.0.0/archived_logs/su.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>${user.home}/.su_${app.version:-dev}/archived_logs/su.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <!-- each archived file, size max 10MB -->
             <maxFileSize>10MB</maxFileSize>
             <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
