@@ -301,12 +301,10 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(acquisition.getExamination());
         String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(acquisition);
 
-        datasetAcquisitionAsyncService.deleteByIdAsync(entity, event);
+        if (acquisition.getSource() == null)
+            dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
 
-        dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
-
-        repository.deleteById(id);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, acquisition.getExamination().getStudyId()));
+        datasetAcquisitionAsyncService.deleteByIdAsync(acquisition, event);
     }
 
     /**
