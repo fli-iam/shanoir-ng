@@ -97,6 +97,7 @@ public class ExecutionMonitoringServiceImpl implements ExecutionMonitoringServic
         executionMonitoring.setTimeout(20);
         executionMonitoring.setStudyId(sample.getStudyIdentifier());
         executionMonitoring.setStatus(ExecutionStatus.RUNNING);
+        executionMonitoring.setProcessingStatus(ExecutionStatus.UNKNOWN);
         executionMonitoring.setComment(executionMonitoring.getName());
         executionMonitoring.setDatasetProcessingType(DatasetProcessingType.valueOf(sample.getProcessingType()));
         executionMonitoring.setOutputProcessing(null);
