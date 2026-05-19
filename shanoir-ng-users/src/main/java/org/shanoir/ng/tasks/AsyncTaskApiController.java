@@ -48,39 +48,39 @@ public class AsyncTaskApiController implements AsyncTaskApi {
 
     public static final List<UserSseEmitter> EMITTERS = new CopyOnWriteArrayList<>();
 
-	@Override
-	public ResponseEntity<List<ShanoirEventLight>> findTasks() {
-		Long userId = KeycloakUtil.getTokenUserId();
-		List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(
-				userId,
-				ShanoirEventType.IMPORT_DATASET_EVENT,
-				ShanoirEventType.COPY_DATASET_EVENT,
-				ShanoirEventType.EXECUTION_MONITORING_EVENT,
-				ShanoirEventType.CHECK_QUALITY_EVENT,
-				ShanoirEventType.SOLR_INDEX_ALL_EVENT,
-				ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
-				ShanoirEventType.MASSIVE_OUTPUTS_DOWNLOAD,
-				ShanoirEventType.DELETE_EXAMINATION_EVENT,
-				ShanoirEventType.DELETE_NIFTI_EVENT,
-				ShanoirEventType.DELETE_DATASET_EVENT,
-				ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
-				ShanoirEventType.BIDS_EXPORT);
+    @Override
+    public ResponseEntity<List<ShanoirEventLight>> findTasks() {
+        Long userId = KeycloakUtil.getTokenUserId();
+        List<ShanoirEventLight> taskList = taskService.getEventsByUserAndType(
+                userId,
+                ShanoirEventType.IMPORT_DATASET_EVENT,
+                ShanoirEventType.COPY_DATASET_EVENT,
+                ShanoirEventType.EXECUTION_MONITORING_EVENT,
+                ShanoirEventType.CHECK_QUALITY_EVENT,
+                ShanoirEventType.SOLR_INDEX_ALL_EVENT,
+                ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
+                ShanoirEventType.MASSIVE_OUTPUTS_DOWNLOAD,
+                ShanoirEventType.DELETE_EXAMINATION_EVENT,
+                ShanoirEventType.DELETE_NIFTI_EVENT,
+                ShanoirEventType.DELETE_DATASET_EVENT,
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                ShanoirEventType.BIDS_EXPORT);
 
-		// Get only event with last updates < 7 days
-		Date now = new Date();
+        // Get only event with last updates < 7 days
+        Date now = new Date();
         long nowMinusSevenDays = now.getTime() - 7 * DateUtils.MILLIS_PER_DAY;
         taskList = taskList.stream().filter(event -> event.getLastUpdate().getTime() > nowMinusSevenDays).collect(Collectors.toList());
 
          // Order by last update date
-		Comparator<ShanoirEventLight> comparator = new Comparator<ShanoirEventLight>() {
-			@Override
-			public int compare(ShanoirEventLight event1, ShanoirEventLight event2) {
-				return event1.getLastUpdate().before(event2.getLastUpdate()) ? 1 : -1;
-			}
-		};
-		taskList.sort(comparator);
-		return new ResponseEntity<>(taskList, HttpStatus.OK);
-	}
+        Comparator<ShanoirEventLight> comparator = new Comparator<ShanoirEventLight>() {
+            @Override
+            public int compare(ShanoirEventLight event1, ShanoirEventLight event2) {
+                return event1.getLastUpdate().before(event2.getLastUpdate()) ? 1 : -1;
+            }
+        };
+        taskList.sort(comparator);
+        return new ResponseEntity<>(taskList, HttpStatus.OK);
+    }
 
     @Override
     public ResponseEntity<ShanoirEvent> getTaskDetails(
