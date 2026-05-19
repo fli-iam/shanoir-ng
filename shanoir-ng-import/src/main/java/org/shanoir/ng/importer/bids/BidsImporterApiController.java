@@ -108,7 +108,6 @@ public class BidsImporterApiController implements BidsImporterApi {
             @Parameter(name = "name of the study", required = true) @PathVariable("studyName") String studyName,
             @Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId)
                     throws RestServiceException, ShanoirException, IOException {
-
         // STEP 1: Analyze folder and unzip it.
         if (bidsFile == null) {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
@@ -150,7 +149,7 @@ public class BidsImporterApiController implements BidsImporterApi {
                 importJob.setSubjectName(subjectName);
 
                 // Create subject
-                subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, objectMapper.writeValueAsString(subject));
+                subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, objectMapper.writeValueAsString(subject));
                 if (subjectId == null) {
                     throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
                 }

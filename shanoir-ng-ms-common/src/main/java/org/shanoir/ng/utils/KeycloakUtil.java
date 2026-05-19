@@ -48,6 +48,14 @@ public final class KeycloakUtil {
 
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
 
+    public static final String ROLE_EXPERT = "ROLE_EXPERT";
+
+    public static final String ROLE_USER = "ROLE_USER";
+
+    public enum UserRole {
+        ADMIN, EXPERT, USER
+    }
+
     /**
      * Get current user roles from Keycloak token.
      *
@@ -176,6 +184,17 @@ public final class KeycloakUtil {
 
     public static boolean isAdmin() {
         return getTokenRoles().contains(ROLE_ADMIN);
+    }
+
+    public static UserRole getUserRole() {
+        if (isAdmin()) {
+            return UserRole.ADMIN;
+        } else if (getTokenRoles().contains(ROLE_EXPERT)) {
+            return UserRole.EXPERT;
+        } else if (getTokenRoles().contains(ROLE_USER)) {
+            return UserRole.USER;
+        }
+        return null;
     }
 
 }

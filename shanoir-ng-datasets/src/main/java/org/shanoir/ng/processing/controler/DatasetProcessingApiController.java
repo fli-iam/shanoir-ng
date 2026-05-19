@@ -138,7 +138,6 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     public ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(
             @Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
             final BindingResult result) throws RestServiceException {
-
         /* set authenticated username */
         datasetProcessing.setUsername(KeycloakUtil.getTokenUserName());
 

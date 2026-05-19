@@ -39,7 +39,10 @@ window.config = {
 			}, 
 		}, 
 	], 
-	defaultDataSourceName: 'dicomweb', 
+	defaultDataSourceName: 'dicomweb',
+	onnxConfig: {
+		wasmPaths: '/ort/',
+	},
 	oidc: [
   	  {
     	// ~ REQUIRED

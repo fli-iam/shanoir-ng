@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -117,6 +118,8 @@ public class SubjectServiceImpl implements SubjectService {
         }
         // Delete all associated study_examination
         studyExaminationRepository.deleteBySubjectId(id);
+        subject.get().getTags().clear();
+        subjectRepository.deleteSubjectStudyTagsBySubjectId(id);
         subjectRepository.deleteById(id);
         if (subject.get().isPreclinical())
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
@@ -183,7 +186,9 @@ public class SubjectServiceImpl implements SubjectService {
     @Transactional
     public Subject findById(final Long id) {
         Subject subject = subjectRepository.findById(id).orElse(null);
-        Hibernate.initialize(subject.getTags());
+        if (subject != null) {
+            Hibernate.initialize(subject.getTags());
+        }
         return subject;
     }
 
@@ -191,7 +196,12 @@ public class SubjectServiceImpl implements SubjectService {
     @Transactional
     public Subject create(Subject subject, boolean withAMQP) throws ShanoirException {
         subject = mapSubjectStudyListToSubject(subject);
-        Subject subjectDb = subjectRepository.save(subject);
+        Subject subjectDb;
+        try {
+            subjectDb = subjectRepository.save(subject);
+        } catch (DataIntegrityViolationException e) {
+            throw new ShanoirException("Subject with the same name already exists in the study.", HttpStatus.CONFLICT.value());
+        }
         LOG.info("New subject created with ID: {} and Name: {}", subjectDb.getId(), subjectDb.getName());
         if (withAMQP) {
             try {
@@ -243,6 +253,17 @@ public class SubjectServiceImpl implements SubjectService {
      */
     private Subject mapSubjectStudyListToSubject(Subject subject) throws ShanoirException {
         List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+
+        if (subject.getStudy() != null && subject.getStudy().getId() != null) {
+            Long studyId = subject.getStudy().getId();
+            Boolean isDraft = studyRepository.findIsDraftById(studyId);
+            if (Boolean.TRUE.equals(isDraft)) {
+                throw new ShanoirException(
+                    "Cannot create subjects in draft studies. Study must be approved first.",
+                    HttpStatus.FORBIDDEN.value());
+            }
+        }
+
         // Old versions of ShUp will still send subject study objects, and no studyId in
         // subject
         if (subjectStudyList != null && !subjectStudyList.isEmpty()) {

@@ -148,6 +148,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
         this.sortingIndex = other.sortingIndex;
         this.importDate = other.importDate;
         this.username = other.username;
+        this.seriesInstanceUID = other.seriesInstanceUID;
         this.copies = other.copies;
         this.source = other.source;
         this.acquisitionStartTime = other.acquisitionStartTime;

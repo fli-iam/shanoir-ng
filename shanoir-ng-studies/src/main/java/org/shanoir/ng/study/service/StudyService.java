@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dto.StudyExaminationsDTO.StudyExaminationDTO;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -93,6 +94,16 @@ public interface StudyService {
     Study create(Study study) throws MicroServiceCommunicationException;
 
     /**
+     * approve a draft study (or convert it back to draft)
+     *
+     * @param studyId
+     * @return created Study
+     * @throws ShanoirStudiesException
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    public Study approveDraftStudy(Long studyId) throws ShanoirException;
+
+    /**
      * Update a study
      *
      * @param study
@@ -124,10 +135,18 @@ public interface StudyService {
      * Links an examination to a study
      *
      * @param examinationId an examination ID
-     * @param studyId       the lionked study ID
+     * @param studyId       the linked study ID
      * @param centerId
      */
     void addExaminationToStudy(Long examinationId, Long studyId, Long centerId, Long subjectId);
+
+    /**
+     * Links multiple examinations to a study
+     *
+     * @param studyExaminationDTOList a list of examination IDs and center IDs
+     * @param studyId                 the linked study ID
+     */
+    void addExaminationsToStudy(List<StudyExaminationDTO> studyExaminationDTOList, Long studyId);
 
     /**
      * Deletes an examination from a study
@@ -152,6 +171,12 @@ public interface StudyService {
      * Returns all publicly available studies;
      */
     List<Study> findPublicStudies();
+
+    /**
+     * Returns all draft studies the user can access;
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    List<Study> findDraftStudies();
 
     StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId);
 

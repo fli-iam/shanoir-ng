@@ -39,9 +39,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <ul class="menu-list">
     <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
-    <li *ngIf="(duasToSign() + accessRequestsToValidate) > 0" (click)="state.notifOpened = !state.notifOpened; saveState();"><i class="far fa-flag"></i>
-        Notifications<span class="counter">{{duasToSign() + accessRequestsToValidate}}</span><span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    <li *ngIf="(duasToSign() + (isUserAdmin() ? studiesToApprove() : 0) + accessRequestsToValidate) > 0" (click)="state.notifOpened = !state.notifOpened; saveState();"><i class="far fa-flag"></i>
+        Notifications<span class="counter">{{duasToSign() + (isUserAdmin() ? studiesToApprove() : 0) + accessRequestsToValidate}}</span><span class="chevron"><i class="fas fa-chevron-down"></i></span>
     </li>
+    <div *ngIf="state.notifOpened && studiesToApprove() > 0 && isUserAdmin()" class="sub-menu" [@slideDown]="state.notifOpened">
+        <li routerLink="/draft" routerLinkActive="active"><i class="fas fa-file"></i>Draft Studies<span class="counter">{{studiesToApprove()}}</span></li>
+    </div>
     <div *ngIf="state.notifOpened && duasToSign() > 0" class="sub-menu" [@slideDown]="state.notifOpened">
         <li routerLink="/dua" routerLinkActive="active"><i class="fas fa-pen-alt"></i>Data User Agreement<span class="counter">{{duasToSign()}}</span></li>
     </div>
@@ -62,7 +65,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <i class="fa-solid fa-triangle-exclamation"></i>
                 {{notificationsService.nbNewError}}
             </span>
-            <span *ngIf="state.jobsOpened && notificationsService.freshCompletedTasks?.length > 0" 
+            <span *ngIf="state.jobsOpened && notificationsService.freshCompletedTasks?.length > 0"
                     class="notif button" (click)="$event.stopPropagation(); $event.preventDefault(); notificationsService.clearTaskList()" title="remove completed and error tasks">
                 <i class="fa-solid fa-broom"></i>
                 clean

@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.CopyData;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
@@ -78,6 +79,16 @@ public interface StudyApi {
     @RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<StudyDTO>> findStudies();
+
+    @Operation(summary = "", description = "If exists, returns the draft studies that the user is allowed to see")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found approved studies"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/draft", produces = { "application/json" }, method = RequestMethod.GET)
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    ResponseEntity<List<StudyDTO>> findDraftStudies();
 
     @Operation(summary = "", description = "If exists, returns the studies that the user is allowed to see")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
@@ -148,6 +159,18 @@ public interface StudyApi {
             @Parameter(description = "study to create", required = true) @RequestBody Study study, BindingResult result)
             throws RestServiceException;
 
+    @Operation(summary = "", description = "If exists, approve the study")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "approved study"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/approveDraftStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.PUT)
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<StudyDTO> approveDraftStudy(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+            throws RestServiceException;
+
     @Operation(summary = "", description = "Copy a list of dataset to a study")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "copy worked"),
@@ -156,18 +179,9 @@ public interface StudyApi {
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/copyDatasets", produces = { "application/json" }, method = RequestMethod.POST)
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-    ResponseEntity<String> copyDatasetsToStudy(
-            @Parameter(description = "Dataset ids to copy", required = true)
-            @RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
-            @Parameter(description = "Study id to copy in", required = true)
-            @RequestParam(value = "studyId", required = true) String studyId,
-            @Parameter(description = "New subject name", required = false)
-            @RequestParam(value = "subjectName", required = false) String subjectName,
-            @Parameter(description = "Center ids of datasets", required = true)
-            @RequestParam(value = "centerIds", required = true) List<Long> centerIds,
-            @Parameter(description = "Subject ids of datasets", required = true)
-            @RequestParam(value = "subjectIds", required = true) List<String> subjectIds);
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnCopy(#copyData))")
+    ResponseEntity<Long> copyDatasetsToStudy(
+            @Parameter(description = "Data to copy", required = true) @RequestBody CopyData copyData) throws RestServiceException;
 
     @Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
     @ApiResponses(value = {
@@ -226,7 +240,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/tags/{studyId}", produces = { "application/json" }, consumes = {
             "application/json" }, method = RequestMethod.GET)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasAnyRightOnStudy(#studyId, {'CAN_SEE_ALL', 'CAN_IMPORT', 'CAN_ADMINISTRATE'}))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasAnyRightOnStudy(#studyId, 'CAN_SEE_ALL', 'CAN_IMPORT', 'CAN_ADMINISTRATE'))")
     ResponseEntity<List<org.shanoir.ng.tag.model.Tag>> tags(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException;

@@ -32,7 +32,6 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -62,9 +61,6 @@ public class ExaminationServiceTest {
 
     @Mock
     private ExaminationRepository examinationRepository;
-
-    @Mock
-    private MicroserviceRequestsService microservicesRequestsService;
 
     @InjectMocks
     private ExaminationServiceImpl examinationService;

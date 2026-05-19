@@ -42,7 +42,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
 
     papayaParams: any;
     hasDownloadRight: boolean = false;
-    private hasAdministrateRight: boolean = false;
+    hasAdministrateRight: boolean = false;
     public downloadState: TaskState = new TaskState();
     isMRS: boolean = false; // MR Spectroscopy
     papayaLoadCallback: () => Promise<any[]>;

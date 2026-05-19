@@ -14,15 +14,22 @@
 
 package org.shanoir.ng.dataset.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.processing.model.DatasetProcessingType;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Dataset expression.
@@ -108,9 +115,13 @@ public class DatasetExpression extends AbstractEntity {
     }
 
     public DatasetExpression(DatasetExpression dexp, Dataset d) {
+        this(dexp, d, true);
+    }
+
+    public DatasetExpression(DatasetExpression dexp, Dataset d, boolean copyFiles) {
         this.comingFromDatasetExpressions = new ArrayList<>(dexp.getComingFromDatasetExpressions().size());
         for (DatasetExpression de : dexp.getComingFromDatasetExpressions()) {
-            this.comingFromDatasetExpressions.add(new DatasetExpression(de, d));
+            this.comingFromDatasetExpressions.add(new DatasetExpression(de, d, copyFiles));
         }
         this.creationDate = dexp.getExpressionCreationDate();
         this.dataset = d;
@@ -118,8 +129,10 @@ public class DatasetExpression extends AbstractEntity {
         this.size = dexp.getSize();
 
         this.datasetFiles = new ArrayList<>(dexp.getDatasetFiles().size());
-        for (DatasetFile df : dexp.getDatasetFiles()) {
-            this.datasetFiles.add(new DatasetFile(df, this));
+        if (copyFiles) {
+            for (DatasetFile df : dexp.getDatasetFiles()) {
+                this.datasetFiles.add(new DatasetFile(df, this));
+            }
         }
 
         if (dexp.getDatasetProcessingType() != null) {

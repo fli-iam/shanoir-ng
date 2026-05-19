@@ -109,6 +109,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
                     // find the correct equipment for each study card and add it
                     if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
                         studyCard.setAcquisitionEquipment(acquisitionEquipment);
+                        studyCard.setCenterId(acquisitionEquipment.getCenter().getId());
                     }
                 }
             }
@@ -255,12 +256,15 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 
         // With or without study card: we might require the creation of
         // a center and/or an acquisition equipment
-        Long centerId = null;
+        Long centerId = importJob.getCenterId();
         AcquisitionEquipment equipment = null;
         if (studyCard == null) {
-            Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(importJob.getFirstSelectedSerie().getInstitution(), studyREST.getId());
-            centerId = center.getId();
-            equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, center);
+            if (centerId == null) {
+                Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(
+                        importJob.getFirstSelectedSerie().getInstitution(), studyREST.getId());
+                centerId = center.getId();
+            }
+            equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, centerId);
             if (equipment != null) {
                 acquisitionEquipments.add(equipment);
             } else {
@@ -381,7 +385,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         if (importJob.getExaminationComment() != null || !importJob.getExaminationComment().isEmpty()) {
             studyDescription = importJob.getExaminationComment();
         }
-        Examination examination = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId);
+        boolean agreeWithDataReuse = importJob.getExaminationDataReuseAgreement();
+        Examination examination = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId, agreeWithDataReuse);
         if (examination == null) {
             importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
             line[6] = resourceBundle.getString("shanoir.uploader.import.table.error.examination");

@@ -39,6 +39,8 @@ public class ShanoirSolrQuery {
 
     private Collection<Integer> sortingIndex;
 
+    private Collection<Boolean> dataReuseAgreement;
+
     private Collection<Long> examinationId;
 
     private Collection<String> examinationComment;
@@ -366,5 +368,13 @@ public class ShanoirSolrQuery {
 
     public void setUsername(Collection<String> username) {
         this.username = username;
+    }
+
+    public Collection<Boolean> getDataReuseAgreement() {
+        return dataReuseAgreement;
+    }
+
+    public void setDataReuseAgreement(Collection<Boolean> dataReuseAgreement) {
+        this.dataReuseAgreement = dataReuseAgreement;
     }
 }

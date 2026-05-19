@@ -19,8 +19,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -69,6 +72,9 @@ public class DICOMWebApiController implements DICOMWebApi {
 
     @Autowired
     private ExaminationService examinationService;
+
+    @Autowired
+    private DatasetAcquisitionService datasetAcquisitionService;
 
     @Autowired
     private DICOMWebService dicomWebService;
@@ -190,7 +196,13 @@ public class DICOMWebApiController implements DICOMWebApi {
             String response = dicomWebService.findSeriesOfStudy(studyInstanceUID, includefield, seriesInstanceUID);
             if (response != null) {
                 JsonNode root = mapper.readTree(response);
-                root = sortSeriesBySeriesNumber(root);
+                Long examinationID = Long
+                        .valueOf(examinationUID.substring(StudyInstanceUIDAndSubjectNameHandler.PREFIX.length()));
+                List<Integer> seriesNumbers = datasetAcquisitionService.findByExamination(examinationID)
+                        .stream()
+                        .map(DatasetAcquisition::getSortingIndex)
+                        .collect(Collectors.toList());
+                root = filterAndSortSeriesBySeriesNumber(root, seriesNumbers);
                 studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUIDAndPatientInfo(root, examinationUID, false, subjectName);
                 return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
             } else {
@@ -201,18 +213,24 @@ public class DICOMWebApiController implements DICOMWebApi {
         }
     }
 
-    private JsonNode sortSeriesBySeriesNumber(JsonNode root) {
+    private JsonNode filterAndSortSeriesBySeriesNumber(JsonNode root, List<Integer> allowedSeriesNumbers) {
         if (root.isArray()) {
             ArrayNode arrayNode = (ArrayNode) root;
             List<JsonNode> jsonNodes = new ArrayList<>();
             arrayNode.forEach(jsonNodes::add);
-            jsonNodes.sort(Comparator.comparingInt(node -> {
-                JsonNode seriesNumberNode = node.path(SERIES_NUMBER).path(VALUE).get(0);
-                return seriesNumberNode.asInt();
-            }));
-            ArrayNode sortedArrayNode = mapper.createArrayNode();
-            jsonNodes.forEach(sortedArrayNode::add);
-            return (JsonNode) sortedArrayNode;
+            List<JsonNode> filteredAndSorted = jsonNodes.stream()
+                    .filter(node -> {
+                        JsonNode seriesNumberNode = node.path(SERIES_NUMBER).path(VALUE).get(0);
+                        return allowedSeriesNumbers.contains(seriesNumberNode.asInt());
+                    })
+                    .sorted(Comparator.comparingInt(node -> {
+                        JsonNode seriesNumberNode = node.path(SERIES_NUMBER).path(VALUE).get(0);
+                        return seriesNumberNode.asInt();
+                    }))
+                    .collect(Collectors.toList());
+            ArrayNode resultArrayNode = mapper.createArrayNode();
+            filteredAndSorted.forEach(resultArrayNode::add);
+            return resultArrayNode;
         }
         return root;
     }

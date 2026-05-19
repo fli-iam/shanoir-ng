@@ -322,6 +322,7 @@ public class ExaminationServiceImpl implements ExaminationService {
         examinationDb.setExaminationDate(examination.getExaminationDate());
         examinationDb.setNote(examination.getNote());
         examinationDb.setStudy(examination.getStudy());
+        examinationDb.setDataReuseAgreement(examination.getDataReuseAgreement());
         examinationDb.setSubjectWeight(examination.getSubjectWeight());
         examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
         examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
@@ -392,6 +393,19 @@ public class ExaminationServiceImpl implements ExaminationService {
     @Override
     public String getExtraDataFilePath(Long examinationId, String fileName) {
         return dataDir + "/examination-" + examinationId + "/" + fileName;
+    }
+
+    @Override
+    @Transactional
+    public void syncStudyInstanceUIDFromPacs(Long examinationId) throws EntityNotFoundException, ShanoirException {
+        Examination examination = examinationRepository.findByIdWithEagerAcquisitions(examinationId)
+                .orElseThrow(() -> new EntityNotFoundException(Examination.class, examinationId));
+        String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(examination);
+        if (studyInstanceUID == null) {
+            throw new ShanoirException("Could not find StudyInstanceUID from WADO paths for examination: " + examinationId);
+        }
+        LOG.info("Syncing StudyInstanceUID {} from PACS for examination {}", studyInstanceUID, examinationId);
+        examinationRepository.updateStudyInstanceUID(examinationId, studyInstanceUID);
     }
 
 }
