@@ -300,12 +300,10 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(acquisition.getExamination());
         String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(acquisition);
 
-        datasetAcquisitionAsyncService.deleteByIdAsync(acquisition, event);
-
         if (acquisition.getSource() == null)
             dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
 
-        repository.deleteById(id);
+        datasetAcquisitionAsyncService.deleteByIdAsync(acquisition, event);
     }
 
     /**
