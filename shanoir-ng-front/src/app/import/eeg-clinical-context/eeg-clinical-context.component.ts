@@ -188,7 +188,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
 
     protected getPrefilledExamination(): Examination {
         const newExam = new Examination();
-        newExam.preclinical = true;
+        newExam.preclinical = false;
         newExam.hasStudyCenterData = true;
         newExam.study = new IdName(this.study.id, this.study.name);
         if (this.center) {

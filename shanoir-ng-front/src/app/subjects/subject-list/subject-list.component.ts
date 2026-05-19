@@ -81,7 +81,7 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
 
     getOptions() {
         return {
-            new: this.keycloakService.isUserAdminOrExpert(),
+            new: true,
             view: true,
             edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()

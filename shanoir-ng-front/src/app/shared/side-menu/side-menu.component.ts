@@ -109,6 +109,10 @@ export class SideMenuComponent {
         return this.studyService.duasToSign;
     }
 
+    studiesToApprove(): number {
+        return this.studyService.draftStudies;
+    }
+
     saveState() {
         sessionStorage.setItem(this.sessionKey, JSON.stringify(this.state));
     }

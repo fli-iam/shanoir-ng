@@ -14,14 +14,18 @@
 
 package org.shanoir.ng.exporter.controller;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.bids.BidsDeserializer;
 import org.shanoir.ng.bids.controller.BidsApiController;
 import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.bids.service.BidsTreeSemaphore;
+import org.shanoir.ng.bids.service.BidsValidationPublisher;
 import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
-import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,8 +34,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Test for BidsApiController class
@@ -57,7 +59,7 @@ public class BidsApiControllerTest {
     private BidsDeserializer bidsDeserializer;
 
     @MockBean
-    private StudyRepository studyRepo;
+    private StudyService studyService;
 
     @Autowired
     private MockMvc mvc;
@@ -67,6 +69,12 @@ public class BidsApiControllerTest {
 
     @MockBean
     private DicomImporterService dicomImporterService;
+
+    @MockBean
+    private BidsValidationPublisher bidsValidationPublisher;
+
+    @MockBean
+    private BidsTreeSemaphore bidsTreeSemaphore;
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })

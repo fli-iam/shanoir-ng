@@ -185,12 +185,13 @@ public class ExaminationApiController implements ExaminationApi {
             LOG.info("New examination created: " + createdExamination.toString());
             // NB: Message as centerId / subjectId is important in RabbitMQStudiesService
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
-            return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
+            ExaminationDTO createdExaminationDTO = examinationMapper.examinationToExaminationDTO(createdExamination);
+            return new ResponseEntity<>(createdExaminationDTO, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             throw new RestServiceException(
+                    e,
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                        "Couldn't create examination",
-                        e
+                        "Couldn't create examination"
                     )
             );
         }
@@ -222,6 +223,20 @@ public class ExaminationApiController implements ExaminationApi {
         }
         return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations),
                 HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> syncStudyInstanceUIDFromPacs(
+            @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
+            throws RestServiceException {
+        try {
+            examinationService.syncStudyInstanceUIDFromPacs(examinationId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (ShanoirException e) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
+        }
     }
 
     @Override
@@ -272,9 +287,9 @@ public class ExaminationApiController implements ExaminationApi {
             }
         } catch (EntityNotFoundException e) {
             throw new RestServiceException(
+                    e,
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                        "Couldn't create examination",
-                        e
+                        "Couldn't create examination"
                     )
             );
         }

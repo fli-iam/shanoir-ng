@@ -41,6 +41,7 @@ import org.shanoir.ng.importer.model.PatientVerification;
 import org.shanoir.uploader.gui.ImportFromTableWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 public class UploadFromTableActionListener implements ActionListener {
 
@@ -51,7 +52,9 @@ public class UploadFromTableActionListener implements ActionListener {
     private static SimpleDateFormat birthDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     private JFileChooser fileChooser;
+
     private ImportFromTableWindow importFromTableWindow;
+
     private ResourceBundle resourceBundle;
 
     public UploadFromTableActionListener(ImportFromTableWindow importFromTableWindow, ResourceBundle resourceBundle) {
@@ -93,7 +96,7 @@ public class UploadFromTableActionListener implements ActionListener {
             }
         } catch (InvalidFormatException | IOException | IllegalStateException e) {
             LOG.error("Error while parsing the input file: ", e);
-            this.importFromTableWindow.displayError(resourceBundle.getString("shanoir.uploader.import.table.error.csv"));
+            this.importFromTableWindow.displayError(resourceBundle.getString("shanoir.uploader.import.table.error.file"));
             return;
         }
         LOG.info(importJobs.entrySet().size() + " import jobs (== DICOM studies/examinations) read from table.");
@@ -131,12 +134,22 @@ public class UploadFromTableActionListener implements ActionListener {
         Cell studyCardName = row.getCell(14);
         String value = handleCell(studyCardName);
         importJob.setStudyCardName(value);
-        Cell subjectName = row.getCell(15);
+        Long centerId = null;
+        Cell centerIdCell = row.getCell(15);
+        value = handleCell(centerIdCell);
+        if (StringUtils.hasText(value) && value.matches("\\d+")) {
+            centerId = Long.valueOf(value);
+        }
+        importJob.setCenterId(centerId);
+        Cell subjectName = row.getCell(16);
         value = handleCell(subjectName);
         importJob.setSubjectName(value);
-        Cell examComment = row.getCell(16);
+        Cell examComment = row.getCell(17);
         value = handleCell(examComment);
         importJob.setExaminationComment(value);
+        Cell examDataReuseAgreement = row.getCell(18);
+        value = handleCell(examDataReuseAgreement);
+        importJob.setExaminationDataReuseAgreement("true".equalsIgnoreCase(value) || "1".equals(value));
     }
 
     private void readDicomQuery(Row row, ImportJob importJob) {

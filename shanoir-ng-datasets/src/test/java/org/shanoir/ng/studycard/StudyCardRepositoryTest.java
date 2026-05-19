@@ -15,7 +15,7 @@
 package org.shanoir.ng.studycard;
 
 import org.junit.jupiter.api.Test;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,7 @@ public class StudyCardRepositoryTest {
     private StudyCardRepository studyCardRepository;
 
     @MockBean
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Test
     public void findAllTest() throws Exception {

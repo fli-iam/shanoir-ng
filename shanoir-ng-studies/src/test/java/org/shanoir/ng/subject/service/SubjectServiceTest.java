@@ -37,6 +37,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
+import org.shanoir.ng.studyexamination.StudyExaminationBulkRepository;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
@@ -84,6 +85,9 @@ public class SubjectServiceTest {
 
     @Mock
     private StudyExaminationRepository studyExaminationRepository;
+
+    @Mock
+    private StudyExaminationBulkRepository studyExaminationBulkRepository;
 
     @BeforeEach
     public void setup() {

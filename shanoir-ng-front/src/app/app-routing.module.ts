@@ -80,6 +80,7 @@ import { AuthAdminOrExpertGuard } from './shared/roles/auth-admin-or-expert-guar
 import { CanImportFromPACSGuard } from './shared/roles/auth-can-import-from-PACS-guard';
 import { LoginGuard } from "./shared/roles/login-guard";
 import { SolrSearchComponent } from './solr/solr.search.component';
+import { DraftStudiesListComponent } from './studies/draft-studies-list/draft-studies-list.component';
 import { StudyListComponent } from './studies/study-list/study-list.component';
 import { StudyComponent } from './studies/study/study.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
@@ -110,6 +111,10 @@ const routes: Routes = [
     }, {
         path: 'dua',
         component: DUAComponent,
+    }, {
+        path: 'draft',
+        component: DraftStudiesListComponent,
+        canActivate: [AuthAdminGuard]
     }, {
         path: 'account-request',
         component: AccountRequestComponent,

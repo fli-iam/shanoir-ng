@@ -105,6 +105,9 @@ public class RabbitMQConfiguration {
     /** Delete animal subject => Delete associated subject. */
     public static final String DELETE_ANIMAL_SUBJECT_QUEUE = "delete-animal-subject-queue";
 
+    /** Copy animal subject given the subject exists. */
+    public static final String COPY_ANIMAL_SUBJECT_QUEUE = "copy-animal-subject-queue";
+
     /** Study deleted => Delete associated datasets. */
     public static final String DELETE_STUDY_QUEUE = "delete-study-queue";
 
@@ -131,6 +134,9 @@ public class RabbitMQConfiguration {
 
     /** Queue used to get information for study_examination relationship.*/
     public static final String EXAMINATION_STUDY_QUEUE = "examination-study-queue";
+
+    /** Queue used to get information for multiple study_examination relationships.*/
+    public static final String EXAMINATION_STUDIES_QUEUE = "examination-studies-queue";
 
     /** Queue used to get information for study_examination deletion relationship.*/
     public static final String EXAMINATION_STUDY_DELETE_QUEUE = "examination-study-delete-queue";
@@ -197,18 +203,28 @@ public class RabbitMQConfiguration {
     public static final String STUDY_NAME_QUEUE = "study-name-queue";
 
     /** Study name updated => notify dataset MS to change database. */
-    public static final String STUDY_NAME_UPDATE_QUEUE = "study-name-update-queue";
+    public static final String STUDY_UPDATE_QUEUE = "study-update-queue";
+
+    /** Study name updated => notify dataset MS to change database. */
+    public static final String STUDY_DRAFT_STATE_QUEUE = "study-draft-state-queue";
 
     /** Queue to create a study_user when subscribing to a study */
     public static final String STUDY_SUBSCRIPTION_QUEUE = "study-subscription-queue";
 
     /** Create tags on subject-study via quality control using study cards: ms datasets -> ms studies */
     public static final String STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG = "studies-subject-study-study-card-tag";
+
     /** Queue used to get participants.tsv of a study. */
     public static final String STUDY_PARTICIPANTS_TSV = "study-participants-tsv";
 
     /** Send a mail from studies microservice to ms users */
     public static final String STUDY_USER_MAIL_QUEUE = "study-user-mail-queue";
+
+    /** Send a mail from studies microservice when a study is created */
+    public static final String DRAFT_STUDY_MAIL_QUEUE = "draft-study-mail-queue";
+
+    /** Send a mail from studies microservice when a study is created */
+    public static final String APPROVE_STUDY_MAIL_QUEUE = "approve-study-mail-queue";
 
     /** Queue to notify when a user / study is updated / deleted. */
     public static final String STUDY_USER_QUEUE = "study-user";
@@ -222,11 +238,14 @@ public class RabbitMQConfiguration {
     /** Update / create a study user to users MS. */
     public static final String STUDY_USER_QUEUE_USERS = "study-user-queue-users";
 
+    public static final String SUBJECT_BATCH_UPDATE_QUEUE = "subject_batch_update_queue";
+
     /** Subject name updated => notify dataset MS to change database. */
     public static final String SUBJECT_UPDATE_QUEUE = "subject-update-queue";
 
-    /** BIDS purpose => Get a list of subjects to create bids participants file. */
-    public static final String SUBJECTS_QUEUE = "subjects-queue";
+    public static final String SUBJECTS_QUEUE_WITH_DATASETS = "subjects-queue-with-datasets";
+
+    public static final String SUBJECTS_QUEUE_WITHOUT_DATASETS = "subjects-queue-without-datasets";
 
     /** Preclinical subject creation => Check if a subject with this name already exists **/
     public static final String SUBJECTS_NAME_QUEUE = "subjects-name-queue";
@@ -314,6 +333,11 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue deleteAnimalSubjectQueue() {
         return new Queue(DELETE_ANIMAL_SUBJECT_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue copyAnimalSubjectQueue() {
+        return new Queue(COPY_ANIMAL_SUBJECT_QUEUE, true);
     }
 
     @Bean
@@ -483,7 +507,12 @@ public class RabbitMQConfiguration {
 
     @Bean
     public static Queue studyNameUpdateQueue() {
-        return new Queue(STUDY_NAME_UPDATE_QUEUE, true);
+        return new Queue(STUDY_UPDATE_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyDraftStateQueue() {
+        return new Queue(STUDY_DRAFT_STATE_QUEUE, true);
     }
 
     @Bean
@@ -499,6 +528,16 @@ public class RabbitMQConfiguration {
     @Bean
     public static Queue studyUserMailQueue() {
         return new Queue(STUDY_USER_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyCreatedMailQueue() {
+        return new Queue(DRAFT_STUDY_MAIL_QUEUE, true);
+    }
+
+    @Bean
+    public static Queue studyDraftStateMailQueue() {
+        return new Queue(APPROVE_STUDY_MAIL_QUEUE, true);
     }
 
     @Bean
@@ -522,6 +561,11 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
+    public Queue subjectBatchUpdateQueue() {
+        return new Queue(SUBJECT_BATCH_UPDATE_QUEUE, true);
+    }
+
+    @Bean
     public static Queue subjectUpdateQueue() {
         return new Queue(SUBJECT_UPDATE_QUEUE, true);
     }
@@ -533,7 +577,12 @@ public class RabbitMQConfiguration {
 
     @Bean
     public static Queue subjectsQueue() {
-        return new Queue(SUBJECTS_QUEUE, true);
+        return new Queue(SUBJECTS_QUEUE_WITH_DATASETS, true);
+    }
+
+    @Bean
+    public static Queue subjectsWithoutDatasetsQueue() {
+        return new Queue(SUBJECTS_QUEUE_WITHOUT_DATASETS, true);
     }
 
     @Bean

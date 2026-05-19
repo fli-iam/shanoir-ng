@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 
@@ -44,6 +44,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     API_URL = AppUtils.BACKEND_API_STUDY_URL;
     private _duasToSign: number = 0;
+    private _draftStudies: number = 0;
     subscriptions: Subscription[] = [];
     fileUploads: Map<number, Promise<void>> = new Map(); // current uploads
     private studyVolumesCache: Map<number, StudyStorageVolumeDTO> = new Map();
@@ -128,6 +129,27 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise().then(this.mapSubjectList);
     }
 
+    private findStudiesICanImport(): Promise<Study[]> {
+        if (this.keycloakService.isUserAdmin()) {
+            return this.getAll();
+        } else {
+            return this.getAll().then(studies => {
+                const myId: number = KeycloakService.auth.userId;
+                return studies?.filter(study => {
+                    return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_IMPORT)).length > 0;
+                });
+            });
+        }
+    }
+
+    findStudyIdsCanImport(): Promise<number[]> {
+        return this.findStudiesICanImport().then(studies => studies?.map(study => study.id));
+    }
+
+    findStudyIdNamesCanImport(): Promise<IdName[]> {
+        return this.findStudiesICanImport().then(studies => studies?.map(study => new IdName(study.id, study.name)));
+    }
+
     private findStudiesIcanAdmin(): Promise<Study[]> {
         if (this.keycloakService.isUserAdmin()) {
             return this.getAll();
@@ -147,6 +169,23 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     findStudyIdNamesIcanAdmin(): Promise<IdName[]> {
         return this.findStudiesIcanAdmin().then(studies => studies?.map(study => new IdName(study.id, study.name)));
+    }
+
+    findDraftStudies(): Promise<Study[]> {
+        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL + '/draft')
+            .toPromise()
+            .then((studies) => {
+                this._draftStudies = studies ? studies.length : 0;
+                return studies;
+            })
+    }
+
+    get draftStudies(): number {
+        return this._draftStudies;
+    }
+
+    decreaseDraftStudies() {
+        this._draftStudies --;
     }
 
     uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'dua'): Promise<any> {
@@ -233,6 +272,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             observe: 'events',
             responseType: 'blob'
         });
+    }
+
+    validateStudyForBIDS(studyId: number, path: string): Promise<any> {
+        if (!studyId) throw Error('study id is required');
+        const params = new HttpParams().set("filePath", path);
+        return this.http.get<any>(AppUtils.BACKEND_API_BIDS_URL + '/validateBidsStudy/' + studyId, { params: params })
+            .toPromise();
     }
 
     protected static getIgnoreList(): string[] {
@@ -324,4 +370,27 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise();
     }
 
+    async approveStudyById(id: number): Promise<boolean> {
+        const confirmed = await this.confirmDialogService.confirm(
+            'Approve Study',
+            'Are you sure you want to approve this study?\n\n'
+            + 'Once approved, the study will be available to its members according to their permissions.\n\n'
+            + 'This means:\n'
+            + '• Editing the start date will be disabled\n'
+            + '• Dataset importation will be enabled\n'
+            + '• Members will be able to create and manage related entities (e.g., subjects, examinations, datasets) based on their assigned rights.'
+        );
+
+        if (!confirmed) {
+            return false;
+        }
+
+        await this.http
+            .put<any>(AppUtils.BACKEND_API_STUDY_URL + '/approveDraftStudy/' + id, null)
+            .toPromise();
+
+        this.findDraftStudies();
+
+        return true;
+    }
 }

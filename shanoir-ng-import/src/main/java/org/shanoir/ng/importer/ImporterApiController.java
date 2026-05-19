@@ -103,18 +103,6 @@ public class ImporterApiController implements ImporterApi {
     /** The Constant BUFFER_SIZE. */
     private static final int BUFFER_SIZE = 10 * KB;
 
-    @Value("${ms.url.shanoir-ng-datasets-eeg}")
-    private String datasetsMsUrl;
-
-    @Value("${ms.url.shanoir-ng-studies-commons}")
-    private String studiesCommonMsUrl;
-
-    @Value("${ms.url.shanoir-ng-studies-subjects-names}")
-    private String studiesSubjectsNamesMsUrl;
-
-    @Value("${ms.url.shanoir-ng-create-examination}")
-    private String createExaminationMsUrl;
-
     @Value("${shanoir.import.directory}")
     private String importDir;
 
@@ -606,7 +594,8 @@ public class ImporterApiController implements ImporterApi {
      */
     @Override
     public ResponseEntity<Void> startImportEEGJob(
-            @Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob) {
+            @Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob)
+            throws RestServiceException {
         // Comment: Anonymisation is not necessary for pure brainvision EEGs data
         try {
             importJob.setUsername(KeycloakUtil.getTokenUserName());
@@ -758,7 +747,7 @@ public class ImporterApiController implements ImporterApi {
                     // Update birth date to 1st of january of the year
                     LocalDate updateBirthdate = patient.getPatientBirthDate().withDayOfYear(1);
                     subject = ImportUtils.createSubject(subjectName, studyId, studyName, updateBirthdate, patient.getPatientSex(), 1);
-                    Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, objectMapper.writeValueAsString(subject));
+                    Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, objectMapper.writeValueAsString(subject));
                     if (subjectId == null) {
                         throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Subject could not be created, please check data", null));
                     }

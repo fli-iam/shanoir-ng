@@ -119,6 +119,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
+                    <li>
+                        <label i18n="Examination detail|Data reuse agreement label@@examinationDetailDataReuseAgreement">Data reuse agreement</label>
+                        <span class="right-col">
+                            <input type="checkbox" id="dataReuseAgreement" formControlName="dataReuseAgreement"/>
+						</span>
+                    </li>
 					<li *ngIf="!inImport" >
 						<label i18n="Examination detail|Note label@@examinationDetailNote">Note</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -175,20 +181,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </ng-template>
 						</span>
                     </li>
-                    <li *ngIf="mode != 'create' && examination.copies?.length > 0">
-                        <label i18n="Examination detail|Copied entities label@@examinationCopiedEntitiesLabel">This examination has been copied :</label>
-                        <span class="right-col">
-                            <div *ngFor="let entityId of examination.copies">
-                                <a [routerLink]="['/examination/details/', entityId]"> [ {{ entityId }} ] </a>
-                            </div>
-                        </span>
-                    </li>
-                    <li *ngIf="mode != 'create' && examination.source != null">
-                        <label i18n="Examination detail|Copied entities label@@examinationCopiedEntitiesLabel">This examination is the copy of :</label>
-                        <span class="right-col">
-                            <a [routerLink]="['/examination/details/', examination.source]"> [ {{ examination.source }} ] </a>
-                        </span>
-                    </li>
+					@if (mode == 'view' && examination.copies?.length > 0 && hasAdministrateRight) {
+						<li>
+							<label i18n="Examination detail|Copied entities label@@examinationCopiedEntitiesLabel">This examination has been copied :</label>
+							<span class="right-col">
+								<div *ngFor="let entityId of examination.copies">
+									<a [routerLink]="['/examination/details/', entityId]"> [ {{ entityId }} ] </a>
+								</div>
+							</span>
+						</li>
+					}
+					@if (mode == 'view' && examination.source && hasAdministrateRight) {
+						<li>
+							<label i18n="Examination detail|Copied entities label@@examinationCopiedEntitiesLabel">This examination is the copy of :</label>
+							<span class="right-col">
+								<a [routerLink]="['/examination/details/', examination.source]"> [ {{ examination.source }} ] </a>
+							</span>
+						</li>
+					}
 				</ol>
 			</fieldset>
 		</div>

@@ -56,10 +56,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Output() rowEdit: EventEmitter<object> = new EventEmitter<object>();
     @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
+    @Input() greyedCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
     @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
-    @Output() downloadStatsEvent: EventEmitter<any> = new EventEmitter();
     page: Page<object>;
     isLoading: boolean = false;
     maxResultsField: number;
@@ -191,10 +191,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     onRowClick(item: any) {
         if (this.rowClick.observers.length > 0 && !this.rowDisabled(item)) this.rowClick.emit(item);
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
-    }
-
-    downloadStats(item) {
-        this.downloadStatsEvent.emit(item);
     }
 
     public static getCellValue(item: any, col: ColumnDefinition): any {
@@ -581,6 +577,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     rowDisabled(item): boolean {
         return this.disableCondition && this.disableCondition(item);
+    }
+
+    rowGreyedOut(item): boolean {
+        return this.rowDisabled(item) || (this.greyedCondition && this.greyedCondition(item));
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {

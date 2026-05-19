@@ -76,7 +76,8 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         protected studyService: StudyService,
         protected studyRightsService: StudyRightsService,
         public breadcrumbsService: BreadcrumbsService,
-        protected downloadService: MassDownloadService
+        protected downloadService: MassDownloadService,
+        private userRightsService: StudyRightsService
     ) {
         super(route);
         this.inImport = this.breadcrumbsService.isImporting();
@@ -146,6 +147,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             'center': [{value: this.examination.center, disabled: this.inImport || !this.examination.study}, Validators.required],
             'examinationDate': [{value: this.examination.examinationDate, disabled: this.inImport && this.examination.examinationDate}, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],
+            'dataReuseAgreement': [{value: this.examination.dataReuseAgreement, disabled: this.mode == 'view'}],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight],
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
@@ -217,6 +219,15 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
+                this.userRightsService.getMyRights().then(rights => {
+                    if (!this.keycloakService.isUserAdmin()) {
+                        // filter studies to only those with import or admin rights
+                        this.studies = this.studies.filter(study => {
+                            const studyRights = rights.get(study.id);
+                            return studyRights && (studyRights.includes(StudyUserRight.CAN_IMPORT) || studyRights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                        });
+                    }
+                });
             });
     }
 

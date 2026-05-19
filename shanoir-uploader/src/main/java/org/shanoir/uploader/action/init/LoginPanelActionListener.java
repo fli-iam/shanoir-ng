@@ -17,14 +17,17 @@ package org.shanoir.uploader.action.init;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.gui.LoginConfigurationPanel;
+import org.shanoir.uploader.service.rest.KeycloakAuthCodeLoginService;
+import org.shanoir.uploader.service.rest.KeycloakAuthCodeLoginService.AuthResult;
+import org.shanoir.uploader.service.rest.KeycloakAuthCodeLoginService.AuthStep;
+import org.shanoir.uploader.service.rest.KeycloakAuthCodeLoginService.LoginSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.gui.LoginConfigurationPanel;
-import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 
 @Component
 public class LoginPanelActionListener implements ActionListener {
@@ -32,8 +35,10 @@ public class LoginPanelActionListener implements ActionListener {
     private static final Logger LOG = LoggerFactory.getLogger(LoginPanelActionListener.class);
 
     private LoginConfigurationPanel loginPanel;
-
     private StartupStateContext sSC;
+
+    @Autowired
+    private KeycloakAuthCodeLoginService keycloakBrowserLoginService;
 
     @Autowired
     private PacsConfigurationState pacsConfigurationState;
@@ -41,18 +46,25 @@ public class LoginPanelActionListener implements ActionListener {
     @Autowired
     private AuthenticationManualConfigurationState authenticationManualConfigurationState;
 
+    @Autowired
+    private OtpInputState otpInputState;
+
+    @Autowired
+    private OtpSetupState otpSetupState;
+
     public void configure(LoginConfigurationPanel loginPanel, StartupStateContext sSC) {
         this.loginPanel = loginPanel;
         this.sSC = sSC;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource().equals(loginPanel.connect)) {
-            String username = this.loginPanel.loginText.getText();
-            String password = String.valueOf(this.loginPanel.passwordText.getPassword());
+            String username = loginPanel.loginText.getText();
+            String password = String.valueOf(loginPanel.passwordText.getPassword());
             login(username, password);
         } else if (e.getSource().equals(loginPanel.connectLater)) {
-            LOG.info("Connect later, no username.");
+            LOG.info("Connect later: offline mode selected.");
             ShUpConfig.username = "anonymous";
             sSC.setState(pacsConfigurationState);
             sSC.nextState();
@@ -60,31 +72,54 @@ public class LoginPanelActionListener implements ActionListener {
     }
 
     public void login(String username, String password) {
-        ShanoirUploaderServiceClient shanoirUploaderServiceClient = ShUpOnloadConfig.getShanoirUploaderServiceClient();
-        String token;
+        String serverUrl = ShUpConfig.profileProperties.getProperty("shanoir.server.url");
         try {
-            token = shanoirUploaderServiceClient.loginWithKeycloakForToken(username, password);
-            if (token != null) {
-                ShUpOnloadConfig.setTokenString(token);
-                sSC.getShUpStartupDialog().updateStartupText(
-                        "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.success"));
-                LOG.info("Login successful with username: " + username);
-                ShUpConfig.username = username;
-                sSC.setState(pacsConfigurationState);
-            } else {
-                sSC.getShUpStartupDialog().updateStartupText(
-                        "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
-                sSC.setState(authenticationManualConfigurationState);
-                LOG.info("Login error with username: " + username);
-                ShUpConfig.username = null;
-            }
-        } catch (Exception e1) {
-            LOG.error(e1.getMessage(), e1);
+            LoginSession session = keycloakBrowserLoginService.createSession(serverUrl);
+            sSC.setLoginSession(session);
+
+            AuthResult result = session.submitCredentials(username, password);
+            handleResult(result, username);
+        } catch (Exception e) {
+            LOG.error("Login error: {}", e.getMessage(), e);
             sSC.getShUpStartupDialog().updateStartupText(
-                    "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
+                "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
+            ShUpConfig.username = null;
             sSC.setState(authenticationManualConfigurationState);
+            sSC.nextState();
         }
-        sSC.nextState();
     }
 
+    private void handleResult(AuthResult result, String username) {
+        if (result.step == AuthStep.SUCCESS) {
+            ShUpOnloadConfig.setTokenString(result.accessToken);
+            sSC.getShUpStartupDialog().updateStartupText(
+                "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.success"));
+            LOG.info("Login successful for username: {}", username);
+            ShUpConfig.username = username;
+            sSC.setState(pacsConfigurationState);
+            sSC.nextState();
+
+        } else if (result.step == AuthStep.OTP_REQUIRED) {
+            LOG.info("OTP required for username: {}", username);
+            ShUpConfig.username = username;
+            sSC.setState(otpInputState);
+            sSC.nextState();
+
+        } else if (result.step == AuthStep.OTP_SETUP_REQUIRED) {
+            LOG.info("OTP setup required for username: {}", username);
+            ShUpConfig.username = username;
+            sSC.setPendingQrCodeBytes(result.qrCodeBytes);
+            sSC.setPendingTotpManualKey(result.totpManualKey);
+            sSC.setState(otpSetupState);
+            sSC.nextState();
+
+        } else {
+            sSC.getShUpStartupDialog().updateStartupText(
+                "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.fail"));
+            LOG.info("Login failed for username: {}", username);
+            ShUpConfig.username = null;
+            sSC.setState(authenticationManualConfigurationState);
+            sSC.nextState();
+        }
+    }
 }

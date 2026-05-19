@@ -71,7 +71,7 @@ public class ServiceConfiguration {
                 && !ShUpConfig.proxyProperties.getProperty("tls.protocols").equals("")) {
             return ShUpConfig.proxyProperties.getProperty("tls.protocols");
         } else {
-            return "TLSv1.2";
+            return "TLSv1.3, TLSv1.2";
         }
     }
 

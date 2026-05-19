@@ -75,6 +75,7 @@ export class ExaminationDTOService {
         entity.examinationDate = new Date(dto.examinationDate);
         entity.studyInstanceUID = dto.studyInstanceUID;
         entity.comment = dto.comment;
+        entity.dataReuseAgreement = dto.dataReuseAgreement;
         entity.source = dto.source;
         entity.copies = dto.copies;
         entity.note = dto.note;
@@ -104,6 +105,7 @@ export class ExaminationDTO {
     id: number;
     centerId: number;
 	comment: string;
+    dataReuseAgreement: boolean;
     examinationDate: Date;
     studyInstanceUID: string;
     note: string;
@@ -121,6 +123,7 @@ export class ExaminationDTO {
             this.id = examination.id;
             this.centerId = examination.center ? examination.center.id : null;
             this.comment = examination.comment;
+            this.dataReuseAgreement = examination.dataReuseAgreement;
             this.examinationDate = examination.examinationDate;
             this.studyInstanceUID = examination.studyInstanceUID;
             this.note = examination.note;

@@ -45,7 +45,7 @@ import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { SolrService } from "./solr.service";
 
-const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed'];
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed', 'dataReuseAgreement'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
     selector: 'solr-search',
@@ -91,19 +91,19 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     private subscriptions: Subscription[] = [];
 
     constructor(
-        private breadcrumbsService: BreadcrumbsService, 
+        private breadcrumbsService: BreadcrumbsService,
         private formBuilder: UntypedFormBuilder,
-        private solrService: SolrService, 
-        private router: Router, 
-        private datasetService: DatasetService, 
+        private solrService: SolrService,
+        private router: Router,
+        private datasetService: DatasetService,
         private datasetAcquisitionService: DatasetAcquisitionService,
-        private keycloakService: KeycloakService, 
+        private keycloakService: KeycloakService,
         private studyRightsService: StudyRightsService,
-        private downloadService: MassDownloadService, 
+        private downloadService: MassDownloadService,
         private clipboard: Clipboard,
-        private confirmDialogService: ConfirmDialogService, 
-        private consoleService: ConsoleService, 
-        private processingService: ExecutionDataService, 
+        private confirmDialogService: ConfirmDialogService,
+        private consoleService: ConsoleService,
+        private processingService: ExecutionDataService,
         private studyService: StudyService,
         private datasetCopyDialogService: DatasetCopyDialogService) {
 
@@ -142,6 +142,11 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     hasAdminRight(studyId: number) {
         if (this.role == 'admin') return true;
         else return this.rights && this.rights.has(studyId) && this.rights.get(studyId).includes(StudyUserRight.CAN_ADMINISTRATE);
+    }
+
+    hasImportRight(studyId: number) {
+        if (this.role == 'admin') return true;
+        else return this.rights && this.rights.has(studyId) && this.rights.get(studyId).includes(StudyUserRight.CAN_IMPORT);
     }
 
     hasDownloadRight(studyId: number) {
@@ -511,6 +516,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 }
             },
             {headerName: "Exam Date", field:"examinationDate", type: "date"},
+            {headerName: "Data Reuse Agreement", type: "boolean", cellRenderer: row => row.data.dataReuseAgreement, awesome: "fa-solid fa-check", color: "dimgrey", disableSorting: true, tip: item => { return item.dataReuseAgreement ? "data reuse agreement" : "" }},
             {headerName: "Import Date", field:"importDate", type: "date"},
             {headerName: "Imported by", field:"username"},
             {headerName: "Slice Thickness", field: "sliceThickness"},
@@ -625,7 +631,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             }
         }
         this.hasCopyRight = this.selectedStudies.every(data => {
-            return (this.hasAdminRight(Number(data)) == true)
+            return (this.hasImportRight(Number(data)) == true)
         });
         if (this.selectedDatasetIds.size == 0) this.hasCopyRight = false;
     }
@@ -678,7 +684,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 studyId: Number(line.studyId)
             })));
         } else {
-            this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to copy datasets from studies that you don\'t administrate.');
+            this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to copy datasets from studies where you can\'t import.');
         }
     }
 }

@@ -14,9 +14,12 @@
 
 package org.shanoir.ng.bids.service;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DurationFieldType;
 import org.joda.time.LocalDate;
@@ -36,11 +39,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class BIDSServiceImpl implements BIDSService {
 
@@ -181,6 +182,9 @@ public class BIDSServiceImpl implements BIDSService {
 
     private String ageCalculation(Subject subject) {
         java.time.LocalDate bd = subject.getBirthDate();
+        if (bd == null) {
+            return "n/a";
+        }
         LocalDate birthDate = new LocalDate(bd.getYear(), bd.getMonthValue(), bd.getDayOfMonth());
         LocalDate now = new LocalDate();
         Years age = Years.yearsBetween(birthDate, now);

@@ -155,7 +155,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             // { headerName: 'Receive Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
             // { headerName: 'Receive Member Mail', type: 'boolean', field: 'receiveStudyUserReport', editable: true, width: '54px' },
         ];
-        if (deleteButton) {
+        if (deleteButton && !this.study?.isDraft) {
             this.columnDefs.push({ headerName: '', type: 'button', awesome: 'fa-regular fa-trash-can', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)});
         }
     }
@@ -225,7 +225,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         this.onTouchedCallback();
     }
 
-    studyStatusStr(studyStatus: string) {
+    enumStrToStr(studyStatus: string) {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 

@@ -20,7 +20,9 @@ services:
       context: docker-compose
       target: keycloak-database
     environment:
-      - MYSQL_DATABASE=keycloak
+      - MARIADB_DATABASE=keycloak
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -29,6 +31,12 @@ services:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
       - shanoir_ng_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
@@ -62,7 +70,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - "keycloak-database"
+      keycloak-database:
+          condition: service_healthy
   #
   # RabbitMQ: inter-microservices communication
   #
@@ -85,10 +94,9 @@ services:
       context: docker-compose
       target: database
     command: --max_allowed_packet 20000000
-    env_file:
-      - ./docker-compose/database/variables.env
     environment:
-      - SHANOIR_MIGRATION
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -99,6 +107,28 @@ services:
      - "3307:3306"
     networks:
       - shanoir_ng_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
+  #
+  # Migrations for the database
+  #
+  database-migrations:
+    container_name: "${SHANOIR_PREFIX}database-migrations"
+    build:
+      context: docker-compose
+      target: database-migrations
+    environment:
+      - SHANOIR_MIGRATION
+    networks:
+      - shanoir_ng_network
+    depends_on:
+      database:
+        condition: service_healthy  # wait for MariaDB to be ready
+    restart: "no" # don't restart after it exits cleanly
   #
   # Users microservice
   #
@@ -114,6 +144,7 @@ services:
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_ADMIN_EMAIL
+      - SHANOIR_ADMIN_NAME
       - SHANOIR_CERTIFICATE
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
@@ -130,8 +161,12 @@ services:
      - "9901:9901"
      - "9911:9911"
     depends_on:
-      - "database"
-      - "rabbitmq"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
   #
   # Studies microservice
   #
@@ -158,9 +193,14 @@ services:
      - "9902:9902"
      - "9912:9912"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
   #
   # Import microservice
   #
@@ -188,9 +228,14 @@ services:
      # do not add by default, as it blocks local ShUp from using 44105
      # - "44105:44105"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
   #
   # Datasets microservice
   #
@@ -220,11 +265,19 @@ services:
      - "9904:9904"
      - "9914:9914"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
-      - "solr"
-
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
+      solr:
+        condition: service_started
+  #
+  # Preclinical microservice
+  #
   preclinical:
     container_name: "${SHANOIR_PREFIX}preclinical"
     build:
@@ -246,9 +299,14 @@ services:
      - "9905:9905"
      - "9915:9915"
     depends_on:
-      - "database"
-      - "rabbitmq"
-      - "users"
+      database-migrations:
+        condition: service_completed_successfully
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      users:
+        condition: service_started
   #
   # Nifti conversion microservice
   #
@@ -268,9 +326,6 @@ services:
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
-    depends_on:
-      - "import"
-      - "datasets"
 
   #
   # Solr microservice for Shanoir-NG search
@@ -382,8 +437,23 @@ services:
       - "import"
       - "datasets"
       - "preclinical"
-      - "rabbitmq"
-      - "nifti-conversion"
+
+  bids-validator:
+    container_name: "${SHANOIR_PREFIX}bids-validator"
+    build:
+      context: docker-compose
+      target: bids-validator
+    environment:
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+      - IN_QUEUE=bids.validate
+      - OUT_QUEUE=bids.validated
+      - DATA_ROOT=/var/datasets-data/bids-data
+    volumes:
+      - datasets-data:/var/datasets-data:ro
+    depends_on:
+      - rabbitmq
+    networks:
+      - shanoir_ng_network
 
 volumes:
   keycloak-database-data:

@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -74,24 +75,57 @@ public final class DatasetFileUtils {
      * @param pathURLs
      * @throws MalformedURLException
      */
-    public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format, DatasetDownloadError downloadResult) {
-        List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
-        for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
-            DatasetExpression datasetExpression = itExpressions.next();
-            if (datasetExpression.getDatasetExpressionFormat().equals(format)) {
-                List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
-                int i = 0;
-                for (Iterator<DatasetFile> itFiles = datasetFiles.iterator(); itFiles.hasNext(); i++) {
-                    DatasetFile datasetFile = itFiles.next();
-                    URL url;
-                    try {
-                        url = new URL(datasetFile.getPath().replaceAll("%20", " "));
-                        pathURLs.add(url);
-                    } catch (MalformedURLException e) {
-                        downloadResult.update("Malformed URI: " + datasetFile.getPath().replaceAll("%20", " "), DatasetDownloadError.PARTIAL_FAILURE);
-                    }
-                }
-            }
+    public static void getDatasetFilePathURLs(
+            final Dataset dataset,
+            final List<URL> pathURLs,
+            final DatasetExpressionFormat format,
+            DatasetDownloadError downloadResult) {
+        dataset.getDatasetExpressions().stream()
+                .filter(expr -> format.equals(expr.getDatasetExpressionFormat()))
+                .findFirst()
+                .ifPresent(expr -> expr.getDatasetFiles()
+                        .forEach(file -> processDatasetFile(file, pathURLs, downloadResult)));
+    }
+
+    private static void processDatasetFile(
+            DatasetFile file,
+            List<URL> pathURLs,
+            DatasetDownloadError downloadResult) {
+        String normalizedPath = file.getPath().replace("%20", " ");
+        try {
+            pathURLs.add(URI.create(normalizedPath).toURL());
+        } catch (IllegalArgumentException | MalformedURLException e) {
+            downloadResult.update(
+                    "Malformed URI: " + normalizedPath,
+                    DatasetDownloadError.PARTIAL_FAILURE
+            );
+        }
+    }
+
+    public static Optional<URL> getFirstDatasetFilePathURL(
+            final Dataset dataset,
+            final DatasetExpressionFormat format) {
+        return dataset.getDatasetExpressions().stream()
+                .filter(expr -> format.equals(expr.getDatasetExpressionFormat()))
+                .findFirst()
+                .flatMap(DatasetFileUtils::getFirstValidUrl);
+    }
+
+    private static Optional<URL> getFirstValidUrl(DatasetExpression expr) {
+        return expr.getDatasetFiles().stream()
+                .map(DatasetFile::getPath)
+                .map(path -> path.replace("%20", " "))
+                .map(DatasetFileUtils::createURL)
+                .filter(Objects::nonNull)
+                .findFirst();
+    }
+
+    private static URL createURL(String path) {
+        try {
+            return URI.create(path).toURL();
+        } catch (IllegalArgumentException | MalformedURLException e) {
+            LOG.warn("Invalid URL: {}", path, e);
+            return null;
         }
     }
 

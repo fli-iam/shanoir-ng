@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -110,8 +110,13 @@ export class DownloadSetupAltComponent implements OnInit, OnDestroy {
     private buildForm(): UntypedFormGroup {
         const formGroup = this.formBuilder.group({
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
-            'converter': [{value: this.converter}, [this.massDownloadService.requiredIfTypeIsNii()]],
+            'converter': [null, [this.massDownloadService.requiredIfTypeIsNii()]],
         });
+
+        this.subscriptions.push(formGroup.get('format').valueChanges.subscribe(() => {
+            formGroup.get('converter').updateValueAndValidity();
+        }));
+
         return formGroup;
     }
 
@@ -127,13 +132,6 @@ export class DownloadSetupAltComponent implements OnInit, OnDestroy {
         this.closeModal.emit();
     }
 
-    @HostListener('click', ['$event'])
-    onClick(clickEvent) {
-        if (!this.window.nativeElement.contains(clickEvent.target)) {
-            this.cancel();
-        }
-    }
-
     // This method checks if the list of given datasets has dicom or not.
     private hasDicomInDatasets(datasets: Dataset[] | DatasetLight[]) {
         for (const dataset of datasets) {
@@ -142,5 +140,23 @@ export class DownloadSetupAltComponent implements OnInit, OnDestroy {
             }
         }
         return false;
+    }
+
+    hasError(fieldName: string, errors: string[]) {
+        const formError = this.formErrors(fieldName);
+        if (formError) {
+            for (const errorName of errors) {
+                if (formError[errorName]) return true;
+            }
+        }
+        return false;
+    }
+
+    formErrors(field: string): any {
+        if (!this.form) return;
+        const control = this.form.get(field);
+        if (control && !control.valid) {
+            return control.errors;
+        }
     }
 }

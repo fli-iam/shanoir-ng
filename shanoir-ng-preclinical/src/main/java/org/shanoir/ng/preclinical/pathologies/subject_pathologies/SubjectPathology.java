@@ -75,6 +75,16 @@ public class SubjectPathology extends HalEntity {
     @JsonProperty("endDate")
     private Date endDate = null;
 
+    public SubjectPathology(SubjectPathology source) {
+        this.pathology = source.getPathology();
+        this.pathologyModel = source.getPathologyModel();
+        this.location = source.getLocation();
+        this.startDate = source.getStartDate();
+        this.endDate = source.getEndDate();
+    }
+
+    public SubjectPathology() { }
+
     /**
      * Init HATEOAS links
      */

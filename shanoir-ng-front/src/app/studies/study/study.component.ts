@@ -78,6 +78,7 @@ export class StudyComponent extends EntityComponent<Study> {
     openHistory: SuperPromise<void> = new SuperPromise<void>();
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
+    protected hasCopyRight: boolean;
     accessRequests: AccessRequest[];
     isStudyAdmin: boolean;
     subjectTagsInUse: Tag[] = [];
@@ -89,6 +90,13 @@ export class StudyComponent extends EntityComponent<Study> {
     studyStatusOptions: Option<string>[] = [
         new Option<string>('IN_PROGRESS', 'In Progress'),
         new Option<string>('FINISHED', 'Finished')
+    ];
+    inclusionRateOptions: Option<string>[] = [
+        new Option<string>(null, ''),
+        new Option<string>('PER_DAY', 'Per day'),
+        new Option<string>('PER_WEEK', 'Per week'),
+        new Option<string>('PER_MONTH', 'Per month'),
+        new Option<string>('PER_YEAR', 'Per year')
     ];
 
     valueDescOrder = (a: KeyValue<string, number>, b: KeyValue<string, number>): number => {
@@ -157,10 +165,16 @@ export class StudyComponent extends EntityComponent<Study> {
         return this.idPromise.then(() => this.studyService.get(this.id, null));
     }
 
+    isAdmin(): boolean {
+         return this.keycloakService.isUserAdmin();
+    }
+
     initView(): Promise<void> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin()
                 || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_DOWNLOAD));
+            this.hasCopyRight = this.keycloakService.isUserAdmin()
+                || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
         })
 
         this.setLabeledSizes(this.study);
@@ -195,19 +209,14 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initEdit(): Promise<void> {
-
         if (this.study.profile == null) {
             const profile = new Profile();
             profile.profileName = "Profile Neurinfo";
             this.study.profile = profile;
         }
-
         this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
-
         this.getAllSubjects();
-
         this.protocolFiles = [];
-
         this.fetchUsers().then(users => {
             Study.completeMembers(this.study, users);
         });
@@ -249,8 +258,8 @@ export class StudyComponent extends EntityComponent<Study> {
     buildForm(): UntypedFormGroup {
         const formGroup = this.formBuilder.group({
             'name': [this.study.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
-            'startDate': [this.study.startDate, [DatepickerComponent.validator]],
-            'endDate': [this.study.endDate, [DatepickerComponent.validator, this.dateOrdervalidator]],
+            'startDate': [this.study.startDate, [Validators.required, DatepickerComponent.validator]],
+            'endDate': [this.study.endDate, [Validators.required, DatepickerComponent.validator, this.dateOrdervalidator]],
             'studyStatus': [this.study.studyStatus, [Validators.required]],
             'profile': [this.study.profile, [Validators.required]],
             'withExamination': [this.study.withExamination],
@@ -260,18 +269,39 @@ export class StudyComponent extends EntityComponent<Study> {
             'license': [this.study.license],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
-            'studyCenterList': [{value: this.study.studyCenterList}, [this.validateCenter]],
+            'studyCenterList': [{value: this.study.studyCenterList}, [Validators.required, this.validateCenter]],
             'subjects': [this.study.subjects],
             'tags': [this.study.tags],
             'studyTags': [this.study.studyTags],
             'challenge': [this.study.challenge],
             'protocolFile': [],
             'dataUserAgreement': [],
-            'studyUserList': [this.study.studyUserList]
+            'studyUserList': [this.study.studyUserList],
+            'expectedNbOfSubjects': [this.study.expectedNbOfSubjects, [Validators.required, Validators.min(1)]],
+            'averageExaminationSize': [this.study.averageExaminationSize, [Validators.min(1)]],
+            'estimatedTotalVolume': [this.study.estimatedTotalVolume, [Validators.min(1)]],
+            'expectedNbOfCenters': [this.study.expectedNbOfCenters, [Validators.required, Validators.min(1)]],
+            'inclusionRate': [this.study.inclusionRate, [Validators.min(1)]],
+            'inclusionRateUnit': [this.study.inclusionRateUnit],
+            'sponsor': [this.study.sponsor, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+            'principalInvestigator': [this.study.principalInvestigator, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+            'scientificAdvisor': [this.study.scientificAdvisor, [Validators.minLength(2), Validators.maxLength(200)]]
         });
+
+        formGroup.setValidators(this.inclusionRatePairValidator.bind(this));
 
         return formGroup;
     }
+
+    private inclusionRatePairValidator(group: UntypedFormGroup) {
+        const rate = group.get('inclusionRate')?.value;
+        const unit = group.get('inclusionRateUnit')?.value;
+
+        if ((rate && !unit) || (!rate && unit)) return { inclusionRatePair: true };
+
+        return null;
+    }
+
     private setLabeledSizes(study: Study): Promise<void> {
         const waitUploads: Promise<void> = this.studyService.fileUploads.has(study.id)
             ? this.studyService.fileUploads.get(study.id)
@@ -311,6 +341,14 @@ export class StudyComponent extends EntityComponent<Study> {
         const studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    }
+
+    public async hasStudyImportRight(): Promise<boolean> {
+        if (this.keycloakService.isUserAdmin()) return true;
+        if (!this.study?.studyUserList) return false;
+        const studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
+        if (!studyUser) return false;
+        return studyUser.studyUserRights && (studyUser.studyUserRights.includes(StudyUserRight.CAN_IMPORT) || studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE));
     }
 
     public async hasEditRight(): Promise<boolean> {
@@ -425,7 +463,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.study.studyUserList.unshift(studyUser);
     }
 
-    studyStatusStr(studyStatus: string) {
+    enumStrToStr(studyStatus: string) {
       return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 
@@ -479,6 +517,17 @@ export class StudyComponent extends EntityComponent<Study> {
 
     downloadAll() {
         this.downloadService.downloadAllByStudyId(this.study?.id, this.study.totalSize, this.downloadState);
+    }
+
+    approveStudy() {
+        this.studyService.approveStudyById(this.study?.id).then((approved) => {
+            if (!approved) return;
+            this.entity.isDraft = false;
+            this.consoleService.log('info', `Study ${this.entity.name} has been approved successfully.`);
+        }).catch(err => {
+            this.consoleService.log('error', 'Error while approving the study', err);
+            throw err;
+        });
     }
 
     public attachNewFile(event: any) {
@@ -568,6 +617,8 @@ export class StudyComponent extends EntityComponent<Study> {
             } else if (newStudy) {
                 DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);
             }
+            if (this.keycloakService.isUserAdmin())
+                this.studyService.findDraftStudies();
             return study;
         });
     }

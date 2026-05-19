@@ -63,7 +63,7 @@ public class DataUserAgreementService {
         repository.save(dataUserAgreement);
         StudyUser studyUser = repositoryStudyUser.findByUserIdAndStudy_Id(dataUserAgreement.getUserId(), dataUserAgreement.getStudy().getId());
         if (studyUser == null) {
-            throw new ShanoirException("Could not validate the data user agreement acceptation. The user don't seems to be a member of the study.");
+            throw new ShanoirException("Could not validate the data use agreement. The user does not seem to be a member of the study.");
         }
         studyUser.setConfirmed(true);
         repositoryStudyUser.save(studyUser);
