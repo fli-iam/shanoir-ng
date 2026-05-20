@@ -32,11 +32,13 @@ toggle-switch { margin: 0 7px; }
 .center-link { color: var(--color-b-light2); }
 .center-list { min-height: 0px;}
 
-.tabs li { position: relative; display: inline-block; padding: 3px 20px; border-bottom: 1px solid var(--grey); font-size: 14px; cursor: pointer; }
+.tabs li { line-height: 20px; position: relative; display: inline-block; padding: 3px 20px; border-bottom: 1px solid var(--grey); font-size: 14px; cursor: pointer; }
 .tabs li.disabled { cursor: default; color: var(--grey); }
 .tabs li:not(.disabled):not(.active):hover::after { z-index: -1; content: ""; display: block; border: 1px solid rgb(231, 231, 231); position: absolute; top: -1px; bottom: -1px; left: 0; right: 0; }
 .tabs li.active { cursor: default; border-bottom-color: transparent; color: var(--color-a); z-index: 0; }
 .tabs li.active::after { z-index: -1; content: ""; display: block; position: absolute; top: -1px; bottom: -1px; left: -1px; right: -1px; border: 1px solid var(--grey); border-bottom-color: transparent; }
+.tabs li.highlighted i { color: orangered }
+
 textarea { resize : both; }
 
 .motivation { color: var(--color-c); }

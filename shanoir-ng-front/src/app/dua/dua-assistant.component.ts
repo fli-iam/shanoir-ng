@@ -86,8 +86,8 @@ export class DUAAssistantComponent implements OnDestroy {
             this.studyService.findStudyIdNamesIcanAdmin().then(studies => {
                 const study = studies.find(s => s.id == studyId);
                 this.dua.studyId = studyId;
-                this.studyName = study.name;
-                this.dua.studyName = study.name;
+                this.studyName = study?.name;
+                this.dua.studyName = study?.name;
             });
             this.buildForm();
         } else if (this.mode == 'edit') {
