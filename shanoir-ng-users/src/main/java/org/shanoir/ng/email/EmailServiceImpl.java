@@ -170,8 +170,16 @@ public class EmailServiceImpl implements EmailService {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             this.setFromAdministrator(messageHelper);
             messageHelper.setTo(adminEmails.toArray(new String[0]));
-            messageHelper.setSubject(email.getIsNew() ? "New draft study created" : "Draft study got edited");
-            final Map<String, Object> variables = buildDraftStudyEmailVariables(user, email, shanoirServerAddress);
+
+            if (email.getAction() == "created") {
+                messageHelper.setSubject("New draft study created");
+            } else if (email.getAction() == "edited") {
+                messageHelper.setSubject("A draft study got edited");
+            } else if (email.getAction() == "approved") {
+                messageHelper.setSubject("A study got approved");
+            }
+
+            final Map<String, Object> variables = buildStudyEmailVariables(user, email, shanoirServerAddress);
             final String content = build("notifyAdminDraftStudy", variables);
             LOG.info(content);
             messageHelper.setText(content, true);
@@ -199,8 +207,7 @@ public class EmailServiceImpl implements EmailService {
                     LOG.info(content);
                     messageHelper.setText(content, true);
                 };
-                // Send the message
-                LOG.info("Sending approve-study mail to {} for study {}", studyMember.getUsername(), email.getStudyId());
+                LOG.info("Sending study approval mail to {} for study {}", studyMember.getEmail(), email.getStudyId());
                 mailSender.send(messagePreparator);
             }
         }
@@ -755,10 +762,10 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private Map<String, Object> buildDraftStudyEmailVariables(User user, EmailStudy email, String shanoirServerAddress) {
+    private Map<String, Object> buildStudyEmailVariables(User user, EmailStudy email, String shanoirServerAddress) {
         Map<String, Object> variables = new HashMap<>();
 
-        // User info
+        // User who performed action info
         variables.put(FIRSTNAME, user.getFirstName());
         variables.put(LASTNAME, user.getLastName());
         variables.put(EMAIL, user.getEmail());
@@ -775,7 +782,7 @@ public class EmailServiceImpl implements EmailService {
         variables.put("studyCardPolicy", email.getStudyCardPolicy());
         variables.put("clinical", email.isClinical());
         variables.put("challenge", email.isChallenge());
-        variables.put("isNew", email.getIsNew());
+        variables.put("action", email.getAction());
 
         // Extra details
         variables.put("expectedNbOfSubjects", email.getExpectedNbOfSubjects());

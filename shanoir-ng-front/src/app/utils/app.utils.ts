@@ -471,6 +471,7 @@ export function arraysEqual(array1: any[], array2: any[]) {
 }
 
 export function isDarkColor(colorInp: string): boolean {
+    if (!colorInp) return false;
     colorInp = colorInp?.replace('#', '');
     const r = parseInt(colorInp.substring(0, 2), 16); // hexToR
     const g = parseInt(colorInp.substring(2, 4), 16); // hexToG
@@ -496,3 +497,14 @@ export function getSizeStr(size: number): string {
 type UnionKeys<T> = T extends T ? keyof T : never;
 type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never;
 export type StrictUnion<T> = StrictUnionHelper<T, T>
+
+const INVALID_FILENAME_CHARS = /[<>:"/\\|?*\n\r\t]/g
+
+export function sanitizeFilename(name) {
+  return name
+    .replace(INVALID_FILENAME_CHARS, '_')
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/\.+$/, '')
+}

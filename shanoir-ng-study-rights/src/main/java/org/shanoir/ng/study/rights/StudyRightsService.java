@@ -174,11 +174,15 @@ public class StudyRightsService {
         return false;
     }
 
-    public UserRights getUserRights() {
-        Long userId = KeycloakUtil.getTokenUserId();
+    public UserRights getUserRights(Long userId) {
         List<StudyUser> studyUsers = repo
                 .findAllByUserId(userId)
                 .orElseGet(Collections::emptyList);
         return new UserRights(studyUsers);
+    }
+
+    public UserRights getUserRights() {
+        Long userId = KeycloakUtil.getTokenUserId();
+        return getUserRights(userId);
     }
 }

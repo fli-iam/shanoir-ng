@@ -336,13 +336,15 @@ public class QueryPACSService {
             List<Patient> patients = new ArrayList<Patient>();
             IntStream.range(0, patientsNbre).sequential().forEach(i -> {
                 Patient patient = new Patient(patientsAttr.get(i));
-                boolean patientExists = patients.parallelStream().anyMatch(p -> p.getPatientID().equals(patient.getPatientID()));
-                if (!patientExists) {
-                    synchronized (patients) {
-                        patients.add(patient);
-                    }
-                    queryStudies(association, dicomQuery, patient);
+                Patient existingPatient = patients.stream()
+                        .filter(p -> p.getPatientID().equals(patient.getPatientID()))
+                        .findFirst()
+                        .orElse(null);
+                if (existingPatient == null) {
+                    patients.add(patient);
+                    existingPatient = patient;
                 }
+                queryStudies(association, dicomQuery, patient, existingPatient.getStudies());
             });
             patients.sort(new PatientNameSorter());
             importJob.setPatients(patients);
@@ -452,10 +454,12 @@ public class QueryPACSService {
      * @param dicomQuery
      * @param patient
      */
-    private void queryStudies(Association association, DicomQuery dicomQuery, Patient patient) {
-        DicomParam modality = initDicomParam(Tag.Modality, dicomQuery.getModality());
-        DicomParam patientName = initDicomParam(Tag.PatientName, patient.getPatientName());
+    private void queryStudies(Association association, DicomQuery dicomQuery, Patient patient, List<Study> studies) {
         DicomParam patientID = initDicomParam(Tag.PatientID, patient.getPatientID());
+        // Always use PatientName returned from the PACS, in case multiple names for the
+        // same PatientID and to get all DICOM studies respective to "multiple" patients
+        DicomParam patientName = initDicomParam(Tag.PatientName, patient.getPatientName());
+        DicomParam modality = initDicomParam(Tag.Modality, dicomQuery.getModality());
         DicomParam studyDescription = initDicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription());
         // query studies, at first using the potential study date entered by the user via the GUI
         // most users will leave this empty, when the query patient root level queries
@@ -470,7 +474,6 @@ public class QueryPACSService {
         };
         List<Attributes> studiesAttr = queryCFind(association, params, QueryRetrieveLevel.STUDY);
         if (studiesAttr != null) {
-            List<Study> studies = new ArrayList<Study>();
             studiesAttr.parallelStream().forEach(studyAttr -> {
                 Study study = new Study(studyAttr);
                 synchronized (studies) {
@@ -480,7 +483,6 @@ public class QueryPACSService {
                 querySeries(association, study, modality);
             });
             studies.sort(new StudyDateSorter());
-            patient.setStudies(studies);
         }
     }
 

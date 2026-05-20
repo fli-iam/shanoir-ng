@@ -11,17 +11,136 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 package org.shanoir.ng.dataset.service;
-
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.examination.model.Examination;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.Map;
 
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.exception.ShanoirException;
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 public interface DatasetCopyService {
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
-    Object[] moveDataset(Dataset ds, Long studyId, Map<Long, Long> subjectMap, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Long userId) throws Exception;
+
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#dsId, 'CAN_IMPORT'))")
+    DatasetCopyResult moveDataset(
+            Long dsId,
+            Long studyId,
+            Map<Long, IdName> subjectMap,
+            Map<Long, Examination> examMap,
+            Map<Long, DatasetAcquisition> acqMap,
+            Long userId
+    ) throws
+            DatasetCopyService.NotFoundSubjectIdException,
+            DatasetCopyService.NotFoundDatasetIdException,
+            JsonProcessingException;
+
+    public class DatasetCopyResult {
+
+        private Long newDsId;
+        private int countProcessed;
+        private int countSuccess;
+        private int countCopy;
+        private Long examinationId;
+        private Long centerId;
+        private Long subjectId;
+        private String subjectName;
+
+
+        public Long getNewDsId() {
+            return newDsId;
+        }
+
+        public void setNewDsId(Long newDsId) {
+            this.newDsId = newDsId;
+        }
+
+        public int getCountProcessed() {
+            return countProcessed;
+        }
+
+        public int getCountSuccess() {
+            return countSuccess;
+        }
+
+        public int getCountCopy() {
+            return countCopy;
+        }
+
+        public void incrementProcessed() {
+            this.countProcessed++;
+        }
+
+        public void incrementSuccess() {
+            this.countSuccess++;
+        }
+
+        public void incrementCopy() {
+            this.countCopy++;
+        }
+
+        public Long getExaminationId() {
+            return examinationId;
+        }
+
+        public void setExaminationId(Long examinationId) {
+            this.examinationId = examinationId;
+        }
+
+        public Long getCenterId() {
+            return centerId;
+        }
+
+        public void setCenterId(Long centerId) {
+            this.centerId = centerId;
+        }
+
+        public Long getSubjectId() {
+            return subjectId;
+        }
+
+        public void setSubjectId(Long subjectId) {
+            this.subjectId = subjectId;
+        }
+
+        public String getSubjectName() {
+            return subjectName;
+        }
+
+        public void setSubjectName(String subjectName) {
+            this.subjectName = subjectName;
+        }
+
+    }
+
+    public class NotFoundSubjectIdException extends ShanoirException {
+
+        private final Long subjectId;
+
+        public NotFoundSubjectIdException(Long subjectId) {
+            super("No mapping found for subject with id = " + subjectId);
+            this.subjectId = subjectId;
+        }
+
+        public Long getSubjectId() {
+            return subjectId;
+        }
+    }
+
+    public class NotFoundDatasetIdException extends ShanoirException {
+
+        private final Long datasetId;
+
+        public NotFoundDatasetIdException(Long datasetId) {
+            super("No dataset found with id = " + datasetId);
+            this.datasetId = datasetId;
+        }
+
+        public Long getDatasetId() {
+            return datasetId;
+        }
+    }
 }

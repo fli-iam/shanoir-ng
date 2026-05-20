@@ -54,6 +54,8 @@ public class ExaminationDTO {
 
     private List<String> extraDataFilePathList;
 
+    private Boolean dataReuseAgreement = Boolean.FALSE;
+
     /**
      * @return the id
      */
@@ -202,6 +204,14 @@ public class ExaminationDTO {
             return study.getId();
         }
         return null;
+    }
+
+    public Boolean getDataReuseAgreement() {
+        return dataReuseAgreement;
+    }
+
+    public void setDataReuseAgreement(Boolean dataReuseAgreement) {
+        this.dataReuseAgreement = dataReuseAgreement;
     }
 
 }

@@ -26,6 +26,7 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dto.StudyExaminationsDTO.StudyExaminationDTO;
 import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -50,6 +51,7 @@ import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
+import org.shanoir.ng.studyexamination.StudyExaminationBulkRepository;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
@@ -102,6 +104,9 @@ public class StudyServiceImpl implements StudyService {
 
     @Autowired
     private SubjectRepository subjectRepository;
+
+    @Autowired
+    private StudyExaminationBulkRepository studyExaminationBulkRepository;
 
     @Autowired
     private StudyUserUpdateBroadcastService studyUserCom;
@@ -259,7 +264,7 @@ public class StudyServiceImpl implements StudyService {
             sendStudyUserReport(studyDb, studyDb.getStudyUserList());
             if (studyDb.getIsDraft()) {
                 // Notify users service to send emails to study admins about new study
-                sendAdminEmailReport(studyDb, true);
+                sendAdminEmailReport(studyDb, "created");
             }
         }
 
@@ -274,6 +279,7 @@ public class StudyServiceImpl implements StudyService {
         study.setIsDraft(false);
         studyRepository.save(study);
         updateStudyName(studyMapper.studyToStudyDTODetailed(study));
+        sendAdminEmailReport(study, "approved");
         sendMembersApprovalEmailReport(study);
         return study;
     }
@@ -461,7 +467,7 @@ public class StudyServiceImpl implements StudyService {
         }
 
         if (studyDb.getIsDraft()) {
-            sendAdminEmailReport(studyDb, false);
+            sendAdminEmailReport(studyDb, "edited");
         }
 
         return studyDb;
@@ -826,9 +832,9 @@ public class StudyServiceImpl implements StudyService {
         }
     }
 
-    private void sendAdminEmailReport(Study study, boolean isNew) {
+    private void sendAdminEmailReport(Study study, String action) {
         EmailStudy email = buildAdminEmailReport(study);
-        email.setIsNew(isNew);
+        email.setAction(action);
 
         try {
             rabbitTemplate.convertAndSend(
@@ -953,6 +959,12 @@ public class StudyServiceImpl implements StudyService {
             exams.add(studyExam);
             this.studyRepository.save(study);
         }
+    }
+
+    @Override
+    @Transactional
+    public void addExaminationsToStudy(List<StudyExaminationDTO> studyExaminationDTOList, Long studyId) {
+        studyExaminationBulkRepository.insertInBatches(studyExaminationDTOList, studyId);
     }
 
     @Override

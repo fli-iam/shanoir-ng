@@ -189,7 +189,19 @@ export class TreeService {
             Object.entries(this.selectedNode.parent).forEach((entry, ) => {
                 if (Array.isArray(entry[1])) {
                     const i: number = entry[1].findIndex(node => node.route == route);
-                    entry[1].splice(i, 1);
+                    if (i >= 0) {
+                        entry[1].splice(i, 1);
+                    }
+                } else if (entry[1] instanceof ShanoirNode) {
+                    // for example studyNode -> subjectsNode -> subjectNode
+                    Object.entries(entry[1]).forEach((subEntry, ) => {
+                        if (Array.isArray(subEntry[1])) {
+                            const j: number = subEntry[1].findIndex(node => node.route == route);
+                            if (j >= 0) {
+                                subEntry[1].splice(j, 1);
+                            }
+                        }
+                    });
                 }
             });
         }

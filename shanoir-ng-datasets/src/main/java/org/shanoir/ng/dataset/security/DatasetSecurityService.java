@@ -25,6 +25,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetForRights;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetRightsDTO;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
@@ -37,10 +38,10 @@ import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.UserRights;
@@ -56,6 +57,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class DatasetSecurityService {
@@ -328,15 +331,18 @@ public class DatasetSecurityService {
      * @return true or false
      * @throws EntityNotFoundException
      */
+    @Transactional
     public boolean hasRightOnDataset(Long datasetId, String rightStr) throws EntityNotFoundException {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }
-        Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
-        if (dataset == null) {
+        DatasetRightsDTO dto = datasetRepository.findRightsDtoBaseById(datasetId);
+        if (dto == null) {
             throw new EntityNotFoundException("Cannot find dataset with id " + datasetId);
         }
-        return hasRightOnTrustedDataset(dataset, rightStr);
+        Set<Long> related = datasetRepository.findRelatedStudyIds(datasetId);
+        dto.setRelatedStudies(related);
+        return hasRightOnTrustedDataset(dto, rightStr);
     }
 
     /**
@@ -474,7 +480,44 @@ public class DatasetSecurityService {
         return hasRightOnStudiesCenter(dataset.getCenterId(), studies, rightStr);
     }
 
+    /**
+     * Check that the connected user has the given right for the given dataset.
+     *
+     * @param dataset the dataset
+     * @param rightStr the right
+     * @return true or false
+     */
+    public boolean hasRightOnTrustedDataset(DatasetRightsDTO dataset, String rightStr) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        if (dataset == null) {
+            throw new IllegalArgumentException("Dataset cannot be null here.");
+        }
+
+        Long studyId = getStudyIdFromDataset(dataset);
+
+        Set<Long> studies = new HashSet<>();
+        studies.add(studyId);
+        CollectionUtils.emptyIfNull(dataset.getRelatedStudies()).forEach(s -> studies.add(s.getId()));
+        return hasRightOnStudiesCenter(dataset.getCenterId(), studies, rightStr);
+    }
+
     private static Long getStudyIdFromDataset(Dataset dataset) {
+        Long studyId;
+        if (dataset.getDatasetProcessing() != null) {
+            studyId = dataset.getDatasetProcessing().getStudyId();
+        } else if (dataset.getDatasetAcquisition() != null
+                && dataset.getDatasetAcquisition().getExamination() != null
+                && dataset.getDatasetAcquisition().getExamination().getStudyId() != null) {
+            studyId = dataset.getDatasetAcquisition().getExamination().getStudyId();
+        } else {
+            throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");
+        }
+        return studyId;
+    }
+
+    private static Long getStudyIdFromDataset(DatasetRightsDTO dataset) {
         Long studyId;
         if (dataset.getDatasetProcessing() != null) {
             studyId = dataset.getDatasetProcessing().getStudyId();
@@ -1120,6 +1163,40 @@ public class DatasetSecurityService {
         return hasRightOnEveryDataset(new ArrayList<>(dsIds), StudyUserRight.CAN_EXECUTE.toString());
     }
 
+    /**
+     * Check that the GIVEN user has the CAN_SEE_ALL right for every dataset.
+     * @param datasetIds
+     * @param userId
+     * @param role
+     * @return true or false
+     */
+    @Transactional
+    public boolean checkDatasetRelatedDatasets(List<Long> datasetIds, Long userId, KeycloakUtil.UserRole role) {
+        // If the entry is empty, return an empty list
+        if (KeycloakUtil.UserRole.ADMIN.equals(role) || datasetIds == null || datasetIds.isEmpty()) {
+            return true;
+        }
+        List<DatasetForRights> dtos = datasetRepository.findDatasetsForRights(datasetIds)
+                .stream()
+                .map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
+                .collect(Collectors.toList());
+        UserRights userRights = studyRightsService.getUserRights(userId);
+        for (DatasetForRights dataset : dtos) {
+            Set<Long> studyIds = dataset.getAllStudiesIds();
+            Long centerId = dataset.getCenterId();
+            if (!userRights.hasStudiesCenterRights(studyIds, centerId, StudyUserRight.CAN_SEE_ALL.toString())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check that the given study is a draft.
+     *
+     * @param studyId the study id
+     * @return true or false
+     */
     public boolean isDraftStudy(Long studyId) {
         Study study = studyRepository.findById(studyId).orElse(null);
         if (study == null) {
