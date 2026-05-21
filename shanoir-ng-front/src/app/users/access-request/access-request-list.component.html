@@ -13,87 +13,87 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <h2>Access Requests</h2>
-<form *ngFor="let accessRequest of accessRequests; let i = index" @disapearUp>
+<form *ngFor="let request of studyAccessRequests" @disapearUp>
     <ul>
         <li>
             <label i18n="access request|user label@@user">User</label>
             <span class="right-col">
                 @if (isAdmin()) {
-                    <a [routerLink]="['/user/details/', accessRequest.user.id]">
-                        {{ accessRequest.user.username}}
+                    <a [routerLink]="['/user/details/', request.user.id]">
+                        {{ request.user.username}}
                     </a>
                 } @else {
-                    <span>{{ accessRequest.user.username}}</span>
+                    <span>{{ request.user.username}}</span>
                 }
             </span>
         </li>
         <li>
             <label i18n="access request|study label@@study">Study</label>
             <span class="right-col">
-                <a [routerLink]="['/study/details/', accessRequest.studyId]">
-                    {{accessRequest.studyName}}
+                <a [routerLink]="['/study/details/', request.studyId]">
+                    {{request.studyName}}
                 </a>
             </span>
         </li>
         <li>
-            <label i18n="access request|study label@@study" class="required-label">Motivation</label>
+            <label i18n="access request|motivation label@@motivation" class="required-label">Motivation</label>
             <span class="right-col">
-                {{accessRequest.motivation}}
+                {{request.motivation}}
             </span>
         </li>
     </ul>
-    <button type="button" (click)="decide(i, true)" class="accept right-icon">
+    <button type="button" (click)="decide(request, true)" class="accept right-icon">
         Accept
         <i class="fa-solid fa-thumbs-up"></i>
     </button>
-    <button type="button" (click)="decide(i, false)" class="refuse right-icon">
+    <button type="button" (click)="decide(request, false)" class="refuse right-icon">
         Refuse
         <i class="fa-solid fa-thumbs-down"></i>
     </button>
 </form>
-<p *ngIf="!(accessRequests?.length > 0)">
+<p *ngIf="!(studyAccessRequests?.length > 0)">
     No pending access request.
 </p>
 
 <h2>Account Creations</h2>
-<form *ngFor="let accountCreation of accountCreations; let i = index" @disapearUp>
+<form *ngFor="let request of accountCreationRequests" @disapearUp>
     <ul>
         <li>
             <label i18n="access request|user label@@user">User</label>
             <span class="right-col">
                 @if (isAdmin()) {
-                    <a [routerLink]="['/user/details/', accountCreation.user.id]">
-                        {{ accountCreation.user.username}}
+                    <a [routerLink]="['/user/details/', request.user.id]">
+                        {{ request.user.username}}
                     </a>
                 } @else {
-                    <span>{{ accountCreation.user.username}}</span>
+                    <span>{{ request.user.username}}</span>
                 }
             </span>
         </li>
         <li>
             <label i18n="access request|study label@@study">Study</label>
             <span class="right-col">
-                <a [routerLink]="['/study/details/', accountCreation.studyId]">
-                    {{accountCreation.studyName}}
+                <a [routerLink]="['/study/details/', request.studyId]">
+                    {{request.studyName}}
                 </a>
             </span>
         </li>
         <li>
-            <label i18n="access request|study label@@study" class="required-label">Motivation</label>
+            <label i18n="access request|motivation label@@motivation" class="required-label">Motivation</label>
             <span class="right-col">
-                {{accountCreation.motivation}}
+                {{request.motivation}}
             </span>
         </li>
     </ul>
-    <button type="button" (click)="decide(i, true)" class="accept right-icon">
+    <button type="button" (click)="decide(request, true)" class="accept right-icon">
         Accept
         <i class="fa-solid fa-thumbs-up"></i>
     </button>
-    <button type="button" (click)="decide(i, false)" class="refuse right-icon">
+    <button type="button" (click)="decide(request, false)" class="refuse right-icon">
         Refuse
         <i class="fa-solid fa-thumbs-down"></i>
     </button>
 </form>
-<p *ngIf="!(accountCreations?.length > 0)">
+<p *ngIf="!(accountCreationRequests?.length > 0)">
     No pending account creation.
 </p>
