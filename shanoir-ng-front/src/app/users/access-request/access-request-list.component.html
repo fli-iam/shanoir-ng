@@ -59,7 +59,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <form *ngFor="let request of accountCreationRequests" @disapearUp>
     <ul>
         <li>
-            <label i18n="access request|user label@@user">User</label>
+            <label i18n="access request|name label@@name">Name</label>
+            <span class="right-col">{{request.user.firstName}} {{request.user.lastName}}</span>
+        </li>
+        <li>
+            <label i18n="access request|email label@@email">Email</label>
+            <span class="right-col">{{request.user.email}}</span>
+        </li>
+        <li>
+            <label i18n="access request|username label@@username">Username</label>
             <span class="right-col">
                 @if (isAdmin()) {
                     <a [routerLink]="['/user/details/', request.user.id]">
@@ -70,11 +78,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
             </span>
         </li>
-        <li>
+        <li *ngIf="request.user.accountRequestInfo?.studyName">
             <label i18n="access request|study label@@study">Study</label>
             <span class="right-col">
                 <a [routerLink]="['/study/details/', request.studyId]">
-                    {{request.studyName}}
+                    {{request.user.accountRequestInfo.studyName}}
                 </a>
             </span>
         </li>
@@ -83,6 +91,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 {{request.motivation}}
             </span>
+        </li>
+        <li *ngIf="request.user.accountRequestInfo?.institution">
+            <label i18n="access request|institution label@@institution">Institution</label>
+            <span class="right-col">{{request.user.accountRequestInfo.institution}}</span>
+        </li>
+        <li *ngIf="request.user.accountRequestInfo?.function">
+            <label i18n="access request|function label@@function">Function</label>
+            <span class="right-col">{{request.user.accountRequestInfo.function}}</span>
+        </li>
+        <li *ngIf="request.user.accountRequestInfo?.contact">
+            <label i18n="access request|invitationIssuer label@@invitationIssuer">Invitation issuer</label>
+            <span class="right-col">{{request.user.accountRequestInfo.contact}}</span>
         </li>
     </ul>
     <button type="button" (click)="decide(request, true)" class="accept right-icon">
