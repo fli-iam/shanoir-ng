@@ -39,8 +39,8 @@ public class ImportSecurityService {
 
     @PostConstruct
     protected void initialize() {
-        // Set timeout to 10 seconds (consider isDraftStudy can take some time)
-        this.rabbitTemplate.setReplyTimeout(10000);
+        // Set timeout to 15 seconds (consider isDraftStudy can take some time)
+        this.rabbitTemplate.setReplyTimeout(15000);
     }
 
     /**
@@ -93,12 +93,15 @@ public class ImportSecurityService {
      */
     public boolean isDraftStudy(Long studyId) throws EntityNotFoundException {
         try {
+            LOG.warn("message send for studyId: {}", studyId);
+            long start = System.currentTimeMillis();
+
             String response = (String) rabbitTemplate.convertSendAndReceive(
                     RabbitMQConfiguration.STUDY_DRAFT_STATE_QUEUE,
                     String.valueOf(studyId)
             );
 
-            LOG.warn("isDraftStudy on Study ID {}", String.valueOf(studyId));
+            LOG.warn("Response acquired in {}ms : {}", System.currentTimeMillis() - start, response);
 
             if (response == null) {
                 LOG.warn("response from rabbitMQ queue is NULL");

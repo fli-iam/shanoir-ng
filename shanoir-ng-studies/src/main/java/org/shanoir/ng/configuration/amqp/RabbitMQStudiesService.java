@@ -385,19 +385,15 @@ public class RabbitMQStudiesService {
     }
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_DRAFT_STATE_QUEUE, containerFactory = "singleConsumerFactory")
-    //@Transactional
+    @Transactional
     public String getStudyDraftState(String studyIdStr, @Header(AmqpHeaders.REPLY_TO) String replyTo) {
         LOG.warn("replyTo header: {}", replyTo);
         LOG.warn("Listener called with studyId: {}", studyIdStr);
         try {
             Long studyId = Long.valueOf(studyIdStr);
-            Study study = studyRepo.findById(studyId).orElse(null);
-            if (study == null) {
-                return "NOT_FOUND";
-            }
-            String result = String.valueOf(study.getIsDraft());
-            LOG.warn("Response send : {}", result);
-            return result;
+            String isDraft = studyRepo.findIsDraftById(studyId).map(String::valueOf).orElse("NOT_FOUND");
+            LOG.warn("Response send : {}", isDraft);
+            return isDraft;
         } catch (Exception e) {
             LOG.error("Error getting study draft state", e);
             return "ERROR";
