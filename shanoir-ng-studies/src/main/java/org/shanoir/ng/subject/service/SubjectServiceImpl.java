@@ -256,7 +256,7 @@ public class SubjectServiceImpl implements SubjectService {
 
         if (subject.getStudy() != null && subject.getStudy().getId() != null) {
             Long studyId = subject.getStudy().getId();
-            Boolean isDraft = studyRepository.findIsDraftById(studyId);
+            Optional<Boolean> isDraft = studyRepository.findIsDraftById(studyId);
             if (Boolean.TRUE.equals(isDraft)) {
                 throw new ShanoirException(
                     "Cannot create subjects in draft studies. Study must be approved first.",
