@@ -162,13 +162,21 @@ export class DownloadSetupComponent implements OnInit, OnDestroy {
     }
 
     // This method checks if the list of given datasets has dicom or not.
-    private hasDicomInDatasets(datasets: {type: DatasetType, hasProcessings: boolean}[]) {
+    private hasDicomInDatasets(datasets: {type: DatasetType | string, hasProcessings: boolean}[]) {
         for (const dataset of datasets) {
-            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && dataset.type != DatasetType.Generic) {
+            if (!this.isNonDicomDatasetType(dataset.type)) {
                 return true;
             }
         }
         return false;
+    }
+
+    /** Matches DatasetType labels and legacy enum names from DatasetLight (e.g. GENERIC vs Generic). */
+    private isNonDicomDatasetType(type: DatasetType | string): boolean {
+        const normalized = typeof type === 'string' ? type.toLowerCase() : String(type).toLowerCase();
+        return normalized === DatasetType.Eeg.toLowerCase()
+            || normalized === DatasetType.BIDS.toLowerCase()
+            || normalized === DatasetType.Generic.toLowerCase();
     }
 
     ngOnDestroy() {
