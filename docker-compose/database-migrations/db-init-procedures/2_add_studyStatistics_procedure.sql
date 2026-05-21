@@ -44,7 +44,7 @@ SELECT DISTINCT
                                    WHEN 10 THEN 'Beh'
                                    WHEN 11 THEN 'Nirs'
                                    WHEN 12 THEN 'Xa' END) AS modality,
-    (CASE ss.quality_tag WHEN 1 THEN 'Valid' WHEN 2 THEN 'Warning' WHEN 3 THEN 'Error' END) AS quality
+    (CASE da.quality_tag WHEN 1 THEN 'Valid' WHEN 2 THEN 'Warning' WHEN 3 THEN 'Error' END) AS quality
 FROM
     datasets.examination e
 INNER JOIN 
