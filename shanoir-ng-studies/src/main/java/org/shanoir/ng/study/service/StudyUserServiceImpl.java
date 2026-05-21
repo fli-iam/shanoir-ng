@@ -86,7 +86,7 @@ public class StudyUserServiceImpl implements StudyUserService {
     public boolean hasOneStudyToImport() {
         Long userId = KeycloakUtil.getTokenUserId();
         for (StudyUser studyUser : studyUserRepository.findByUserId(userId)) {
-            if (studyUser.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT) && studyUser.isConfirmed()) {
+            if (studyUser.getStudyUserRights().contains(StudyUserRight.CAN_IMPORT) && studyUser.canAccessStudy()) {
                 return true;
             }
         }

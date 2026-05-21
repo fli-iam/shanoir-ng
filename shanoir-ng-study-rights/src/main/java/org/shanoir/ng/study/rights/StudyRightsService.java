@@ -50,7 +50,7 @@ public class StudyRightsService {
                 founded != null
                 && founded.getStudyUserRights() != null
                 && founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))
-                && founded.isConfirmed();
+                && founded.canAccessStudy();
     }
 
     /**
@@ -70,7 +70,7 @@ public class StudyRightsService {
                 founded != null
                 && founded.getStudyUserRights() != null
                 && !founded.getStudyUserRights().isEmpty()
-                && founded.isConfirmed();
+                && founded.canAccessStudy();
     }
 
     public boolean hasRightOnCenter(Long studyId, Long centerId) {
@@ -84,7 +84,7 @@ public class StudyRightsService {
         return
                 founded != null
                 &&
-                (founded.getCenterIds().isEmpty() || founded.getCenterIds().contains(centerId));
+                (founded.getCenterIds().isEmpty() || founded.getCenterIds().contains(centerId)) && founded.canAccessStudy();
     }
 
     /*
@@ -104,7 +104,11 @@ public class StudyRightsService {
         for (StudyUser su  : founded) {
             List<Long> centerIds = repo.findCenterIdsByStudyUserId(su.getId());
             su.setCenterIds(centerIds);
-            hasRight = hasRight || CollectionUtils.isEmpty(su.getCenterIds()) || su.getCenterIds().contains(centerId);
+            hasRight = hasRight || (
+                su.canAccessStudy() && (
+                    CollectionUtils.isEmpty(su.getCenterIds()) || su.getCenterIds().contains(centerId)
+                )
+            );
         }
         return hasRight;
     }
@@ -122,7 +126,7 @@ public class StudyRightsService {
         StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
         if (founded != null && founded.getStudyUserRights() != null) {
             for (String rightStr : rightStrs) {
-                if (founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && founded.isConfirmed()) return true;
+                if (founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && founded.canAccessStudy()) return true;
             }
         }
         return false;
@@ -144,7 +148,7 @@ public class StudyRightsService {
         Set<Long> validIds = new HashSet<>();
         if (founded != null) {
             for (StudyUser su : founded) {
-                if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.isConfirmed()) {
+                if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.canAccessStudy()) {
                     validIds.add(su.getStudyId());
                 }
             }
@@ -166,7 +170,7 @@ public class StudyRightsService {
         Iterable<StudyUser> founded = repo.findByUserId(userId);
         if (founded != null) {
             for (StudyUser su : founded) {
-                if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.isConfirmed()) {
+                if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.canAccessStudy()) {
                     return true;
                 }
             }

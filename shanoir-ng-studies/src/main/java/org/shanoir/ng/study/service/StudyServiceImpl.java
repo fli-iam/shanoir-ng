@@ -736,6 +736,7 @@ public class StudyServiceImpl implements StudyService {
             existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
             existingSu.setConfirmed(replacingSu.isConfirmed());
             existingSu.setCenters(replacingSu.getCenters());
+            existingSu.setExpiration(replacingSu.getExpiration());
             toBeUpdated.add(existingSu);
         }
 

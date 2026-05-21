@@ -114,7 +114,6 @@ public class StudyUser implements StudyUserInterface {
         this.confirmed = confirmed;
     }
 
-
     public boolean canAccessStudy() {
         return isConfirmed() && (getExpiration() == null || getExpiration().isAfter(LocalDate.now()));
     }

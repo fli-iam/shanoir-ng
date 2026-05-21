@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.rights;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -78,5 +79,9 @@ public interface StudyUserInterface {
     public void setId(Long id);
 
     public List<Long> getCenterIds();
+
+    public void setExpiration(LocalDate expiration);
+
+    public LocalDate getExpiration();
 
 }

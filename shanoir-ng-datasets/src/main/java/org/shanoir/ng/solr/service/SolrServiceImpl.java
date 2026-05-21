@@ -20,7 +20,13 @@
 package org.shanoir.ng.solr.service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrServerException;
@@ -243,7 +249,7 @@ public class SolrServiceImpl implements SolrService {
         Map<Long, List<String>> studiesCenter = new HashMap<>();
         List<Center> centers = Utils.toList(centerRepository.findAll());
         for (StudyUser su : studyUsers) {
-            if (su.isConfirmed()) {
+            if (su.canAccessStudy()) {
                 studiesCenter.put(su.getStudyId(), su.getCenterIds().stream().map(centerId -> findCenterName(centers, centerId)).collect(Collectors.toList()));
             }
         }
