@@ -97,6 +97,10 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
             return null;
         }
 
+        //Manage Lazy loadings
+        dataset.setDatasetExpressions(datasetService.getDatasetExpressions(dataset));
+        dataset.setTags(datasetService.getTags(dataset));
+
         MrDatasetDTO mrDatasetDTO = new MrDatasetDTO();
 
         mrDatasetDTO.setCreationDate(dataset.getCreationDate());
@@ -141,6 +145,11 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
         if (dataset == null) {
             return null;
         }
+
+        //Manage Lazy loadings
+        dataset.setDatasetExpressions(datasetService.getDatasetExpressions(dataset));
+        dataset.setTags(datasetService.getTags(dataset));
+        dataset.setProcessings(datasetService.getProcessings(dataset));
 
         MrDatasetWithDependenciesDTO mrDatasetWithDependenciesDTO = new MrDatasetWithDependenciesDTO();
 

@@ -107,7 +107,6 @@ public interface DatasetMapper {
         return source != null ? source.getId() : null;
     }
 
-
     default List<Dataset> mapCopiesFromLong(List<Long> copies) {
         return null;
     }

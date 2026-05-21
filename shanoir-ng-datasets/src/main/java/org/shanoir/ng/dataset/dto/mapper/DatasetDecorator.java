@@ -103,6 +103,10 @@ public abstract class DatasetDecorator implements DatasetMapper {
             return null;
         }
 
+        //Manage Lazy loadings
+        dataset.setDatasetExpressions(datasetService.getDatasetExpressions(dataset));
+        dataset.setTags(datasetService.getTags(dataset));
+
         DatasetDTO datasetDTO = new DatasetDTO();
 
         datasetDTO.setCreationDate(dataset.getCreationDate());
@@ -131,6 +135,11 @@ public abstract class DatasetDecorator implements DatasetMapper {
         if (dataset == null) {
             return null;
         }
+
+        //Manage Lazy loadings
+        dataset.setDatasetExpressions(datasetService.getDatasetExpressions(dataset));
+        dataset.setTags(datasetService.getTags(dataset));
+        dataset.setProcessings(datasetService.getProcessings(dataset));
 
         DatasetWithDependenciesDTO datasetWithDependenciesDTO = new DatasetWithDependenciesDTO();
 

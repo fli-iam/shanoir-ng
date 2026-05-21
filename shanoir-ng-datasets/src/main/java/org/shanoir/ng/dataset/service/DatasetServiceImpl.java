@@ -28,8 +28,10 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.persistence.EntityManager;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
@@ -66,6 +68,7 @@ import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.study.rights.UserRights;
 import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.service.StudyCardService;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -145,6 +148,9 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Autowired
     private DatasetProcessingRepository processingRepository;
+
+    @Autowired
+    private EntityManager em;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -600,13 +606,33 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Transactional(readOnly = true)
     public List<DatasetExpression> getDatasetExpressions(Dataset dataset) {
-        dataset = repository.findById(dataset.getId()).orElse(null);
-        List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
-
-        if (Objects.isNull(datasetExpressions)) {
-            datasetExpressions = new ArrayList<>();
+        if (em.contains(dataset)) {
+            Hibernate.initialize(dataset.getDatasetExpressions());
+            return dataset.getDatasetExpressions();
         }
-        return datasetExpressions;
+
+        dataset = repository.findWithDatasetExpressions(dataset.getId());
+        return dataset.getDatasetExpressions();
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudyTag> getTags(Dataset dataset) {
+        if (em.contains(dataset)) {
+            Hibernate.initialize(dataset.getTags());
+            return dataset.getTags();
+        }
+        dataset = repository.findWithTags(dataset.getId());
+        return dataset.getTags();
+    }
+
+    @Transactional(readOnly = true)
+    public List<DatasetProcessing> getProcessings(Dataset dataset) {
+        if (em.contains(dataset)) {
+            Hibernate.initialize(dataset.getProcessings());
+            return dataset.getProcessings();
+        }
+        dataset = repository.findWithDatasetProcessings(dataset.getId());
+        return dataset.getProcessings();
     }
 
     @Transactional(readOnly = true)

@@ -28,9 +28,11 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -179,14 +181,28 @@ public interface DatasetService {
     /**
      * @param dataset the involved dataset
      *
-     * @return the centerId
+     * @return the centerId, even if not in persistence context
      */
     Long getCenterId(Dataset dataset);
 
     /**
      * @param dataset the involved dataset
      *
-     * @return the datasetExpression
+     * @return the datasetExpression, even if not in persistence context
      */
     List<DatasetExpression> getDatasetExpressions(Dataset dataset);
+
+    /**
+     * @param dataset the involved dataset
+     *
+     * @return the studyTags, even if not in persistence context
+     */
+    List<StudyTag> getTags(Dataset dataset);
+
+    /**
+     * @param dataset the involved dataset
+     *
+     * @return the processings having the involved dataset as input, even if not in persistence context
+     */
+    List<DatasetProcessing> getProcessings(Dataset dataset);
 }

@@ -95,6 +95,10 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
             return null;
         }
 
+        //Manage Lazy loadings
+        dataset.setDatasetExpressions(datasetService.getDatasetExpressions(dataset));
+        dataset.setTags(datasetService.getTags(dataset));
+
         EegDatasetDTO eegDatasetDTO = new EegDatasetDTO();
 
         eegDatasetDTO.setCreationDate(dataset.getCreationDate());
@@ -134,6 +138,11 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
         if (dataset == null) {
             return null;
         }
+
+        //Manage Lazy loadings
+        dataset.setDatasetExpressions(datasetService.getDatasetExpressions(dataset));
+        dataset.setTags(datasetService.getTags(dataset));
+        dataset.setProcessings(datasetService.getProcessings(dataset));
 
         EegDatasetWithDependenciesDTO eegDatasetWithDependenciesDTO = new EegDatasetWithDependenciesDTO();
 
