@@ -33,7 +33,9 @@ import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -205,7 +207,18 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         try {
             Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
 
-            datasetAcquisitionService.deleteById(datasetAcquisitionId, null);
+            ShanoirEvent event = new ShanoirEvent(
+                    ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                    String.valueOf(datasetAcquisitionId),
+                    KeycloakUtil.getTokenUserId(),
+                    "Starting deletion of acquisition with id : " + datasetAcquisitionId,
+                    ShanoirEvent.IN_PROGRESS,
+                    0,
+                    studyId);
+
+            eventService.publishEvent(event);
+
+            datasetAcquisitionService.deleteById(datasetAcquisitionId, event);
 
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 
