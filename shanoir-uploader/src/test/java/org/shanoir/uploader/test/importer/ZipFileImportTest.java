@@ -30,6 +30,7 @@ import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.StudyCenter;
+import org.shanoir.uploader.model.rest.StudyExtraDetails;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.test.AbstractTest;
 import org.shanoir.uploader.utils.ImportUtils;
@@ -91,7 +92,13 @@ public class ZipFileImportTest extends AbstractTest {
     }
 
     private org.shanoir.uploader.model.rest.Study createStudyAndCenterAndStudyCard() {
+        StudyExtraDetails studyExtraDetails = new StudyExtraDetails();
+        studyExtraDetails.setExpectedNbOfSubjects(5L);
+        studyExtraDetails.setExpectedNbOfCenters(5L);
+        studyExtraDetails.setSponsor("sponsor");
+        studyExtraDetails.setPrincipalInvestigator("pi");
         org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
+        study.setExtraDetails(studyExtraDetails);
         final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
         study.setName(randomStudyName);
         study.setIsDraft(Boolean.TRUE);
