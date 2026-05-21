@@ -24,8 +24,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import jakarta.annotation.PostConstruct;
-
 @Service("importSecurityService")
 public class ImportSecurityService {
 
@@ -36,12 +34,6 @@ public class ImportSecurityService {
     private RabbitTemplate rabbitTemplate;
 
     private static final Logger LOG = LoggerFactory.getLogger(ImportSecurityService.class);
-
-    @PostConstruct
-    protected void initialize() {
-        // Set timeout to 15 seconds (consider isDraftStudy can take some time)
-        this.rabbitTemplate.setReplyTimeout(15000);
-    }
 
     /**
      * Check that the connected user has the given right for the given study.
@@ -93,19 +85,10 @@ public class ImportSecurityService {
      */
     public boolean isDraftStudy(Long studyId) throws EntityNotFoundException {
         try {
-            LOG.warn("message send for studyId: {}", studyId);
-            long start = System.currentTimeMillis();
-
             String response = (String) rabbitTemplate.convertSendAndReceive(
                     RabbitMQConfiguration.STUDY_DRAFT_STATE_QUEUE,
                     String.valueOf(studyId)
             );
-
-            LOG.warn("Response acquired in {}ms : {}", System.currentTimeMillis() - start, response);
-
-            if (response == null) {
-                LOG.warn("response from rabbitMQ queue is NULL");
-            }
 
             if (response == null || "NOT_FOUND".equals(response)) {
                 throw new EntityNotFoundException("Cannot find study.");
