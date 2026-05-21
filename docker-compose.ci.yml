@@ -12,8 +12,18 @@
 #
 # Production should use a real SMTP relay, proper TLS, DNS hostnames, and
 # SHANOIR_MIGRATION=never for normal operation (see README).
+#
+# DCM4CHEE is opt-in via the "dcm4chee" profile (heavy; OOMs GitHub Actions runners).
+# CI bootstrap uses: bash ./bootstrap.sh --clean --no-build --no-dcm4chee
+# Local full stack with PACS: docker compose --profile dcm4chee up -d
 
 services:
+  ldap:
+    profiles: ["dcm4chee"]
+  dcm4chee-database:
+    profiles: ["dcm4chee"]
+  dcm4chee-arc:
+    profiles: ["dcm4chee"]
   keycloak-database:
     environment:
       - MYSQL_ROOT_PASSWORD=password

@@ -191,8 +191,14 @@ jobs:
       - name: Pull published images
         run: |
           set -euo pipefail
+          # Skip dcm4chee (profile in docker-compose.ci.yml); Wildfly/PACS images are large and OOM runners.
+          services=(
+            database database-migrations keycloak-database keycloak
+            users studies datasets import preclinical nifti-conversion
+            solr rabbitmq nginx smtp-sink
+          )
           for attempt in 1 2 3; do
-            if docker compose pull; then
+            if docker compose pull "${services[@]}"; then
               exit 0
             fi
             echo "Pull failed on attempt ${attempt}, retrying..."
@@ -247,10 +253,6 @@ jobs:
         run: |
           docker compose restart
           sleep 30
-          # Do not rely on wait_for_log here: Docker keeps pre-restart logs, so patterns
-          # like "Started ... in" match immediately while services are still booting.
-          bash .github/scripts/helpers.sh wait_for_shanoir_password_token 240
-          bash .github/scripts/helpers.sh wait_for_url https://shanoir-ng-nginx/ 180
           bash .github/scripts/post-restart-validation.sh
 
       - name: Dump logs on failure

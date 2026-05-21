@@ -4,10 +4,17 @@
 # Requires a prior successful functional-tests.sh user lifecycle that wrote
 # CI_LIFECYCLE_STATE_FILE (default /tmp/shanoir-ci-lifecycle.env).
 #
-# Usage (from repo root, with stack running):
+# Usage (from repo root, after "docker compose restart"):
+#   bash .github/scripts/helpers.sh wait_for_shanoir_password_token 240
+#   bash .github/scripts/helpers.sh wait_for_url https://shanoir-ng-nginx/ 180
 #   bash .github/scripts/post-restart-validation.sh
+#
+# Or rely on the built-in readiness waits below (do not use wait_for_log after restart:
+# Docker keeps pre-restart log lines and matches while services are still booting).
 
 set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 CI_LIFECYCLE_STATE_FILE="${CI_LIFECYCLE_STATE_FILE:-/tmp/shanoir-ci-lifecycle.env}"
 REALM="shanoir-ng"
@@ -32,6 +39,11 @@ docker_curl() {
 }
 
 echo "======== Post-restart validation ========"
+
+echo ""
+echo "---- Waiting for stack readiness after restart ----"
+bash "$SCRIPT_DIR/helpers.sh" wait_for_shanoir_password_token "${POST_RESTART_TOKEN_TIMEOUT:-240}"
+bash "$SCRIPT_DIR/helpers.sh" wait_for_url https://shanoir-ng-nginx/ "${POST_RESTART_URL_TIMEOUT:-180}"
 
 if [ ! -f "$CI_LIFECYCLE_STATE_FILE" ]; then
     echo "No lifecycle state file at $CI_LIFECYCLE_STATE_FILE — skipping CI user checks."
@@ -60,13 +72,26 @@ if [ -n "$TOKEN" ]; then
     echo ""
     echo "---- GET /users after restart ----"
     users_tmp=$(mktemp)
-    code=$(curl -sk -o "$users_tmp" -w "%{http_code}" --max-time 20 \
-        -H "Authorization: Bearer ${TOKEN}" \
-        "${NGINX_BASE}/shanoir-ng/users/users") || code="000"
+    users_timeout="${POST_RESTART_USERS_TIMEOUT:-180}"
+    users_elapsed=0
+    code="000"
+    while [ "$users_elapsed" -lt "$users_timeout" ]; do
+        code=$(curl -4sk -o "$users_tmp" -w "%{http_code}" --max-time 20 \
+            -H "Authorization: Bearer ${TOKEN}" \
+            "${NGINX_BASE}/shanoir-ng/users/users") || code="000"
+        if echo "$code" | grep -qxE "200|204"; then
+            break
+        fi
+        if [ $((users_elapsed % 30)) -eq 0 ] && [ "$users_elapsed" -gt 0 ]; then
+            echo "  ... /users still HTTP ${code} (${users_elapsed}s; microservices may still be starting)"
+        fi
+        sleep 5
+        users_elapsed=$((users_elapsed + 5))
+    done
     if echo "$code" | grep -qxE "200|204"; then
-        pass "GET /users after restart (HTTP $code)"
+        pass "GET /users after restart (HTTP $code, after ${users_elapsed}s)"
     else
-        fail "GET /users after restart — HTTP $code"
+        fail "GET /users after restart — HTTP $code (waited ${users_elapsed}s)"
     fi
 fi
 

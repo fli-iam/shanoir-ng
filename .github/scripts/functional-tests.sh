@@ -13,7 +13,7 @@
 # Usage: functional-tests.sh
 #
 # Requires:
-#   - mysql client (or docker exec to the database container)
+#   - mariadb or mysql client in the database container (MariaDB 11+ provides mariadb only)
 #   - curl, jq
 #   - SHANOIR_TEST_USER / SHANOIR_TEST_PASSWORD (or defaults from create-keycloak-user.sh)
 #   - SHANOIR_KEYCLOAK_USER / SHANOIR_KEYCLOAK_PASSWORD in .env (for user lifecycle kcadm step)
@@ -60,10 +60,30 @@ b64url_decode() {
 pass() { TESTS=$((TESTS + 1)); echo "[PASS] $1"; }
 fail() { TESTS=$((TESTS + 1)); FAILURES=$((FAILURES + 1)); echo "[FAIL] $1"; }
 
+# Resolve SQL client once (MariaDB 11+ images ship mariadb, not mysql).
+_db_client() {
+    if [ -n "${SHANOIR_DB_CLIENT:-}" ]; then
+        echo "$SHANOIR_DB_CLIENT"
+        return 0
+    fi
+    if docker exec database sh -c 'command -v mariadb' >/dev/null 2>&1; then
+        SHANOIR_DB_CLIENT=mariadb
+    elif docker exec database sh -c 'command -v mysql' >/dev/null 2>&1; then
+        SHANOIR_DB_CLIENT=mysql
+    else
+        echo "ERROR: database container has no mariadb or mysql client in PATH" >&2
+        return 1
+    fi
+    export SHANOIR_DB_CLIENT
+    echo "$SHANOIR_DB_CLIENT"
+}
+
 # Run a SQL query via docker exec on the database container.
 # Usage: db_query <db> <sql>
 db_query() {
-    docker exec database mysql -uroot -ppassword --no-beep -N -B "$1" -e "$2" 2>/dev/null || true
+    local client
+    client=$(_db_client) || return 1
+    docker exec database "$client" -uroot -ppassword --no-beep -N -B "$1" -e "$2" 2>/dev/null || true
 }
 
 # ─── 1. Database checks ──────────────────────────────────────────────
@@ -383,7 +403,7 @@ scan_logs() {
     #   - "ERROR 1007" from MySQL (database already exists)
     #   - "ERROR 1396" from MySQL (user already exists)
     #   - preDestroy / shutdown messages
-    #   - Hibernate SQL error logging that is just a constraint check
+    #   - MariaDB ErrorPacket WARN lines during Hibernate DDL / Keycloak first start
     local errors
     errors=$(docker compose logs --no-color 2>&1 \
         | grep -iE '\bERROR\b|Exception|FATAL' \
@@ -404,6 +424,11 @@ scan_logs() {
             -e 'LastLoginDateApiController' \
             -e 'ExceptionTranslationFilter' \
             -e 'EntityNotFoundException' \
+            -e 'ErrorPacket.*Error: 1146' \
+            -e 'ErrorPacket.*Error: 1054.*dicomTag' \
+            -e 'ErrorPacket.*Error: 1005.*(study_card_condition|quality_card_condition)' \
+            -e 'Error: 1065.*Query was empty' \
+            -e 'DETAILS_JSON' \
         | head -30) || true
 
     if [ -z "$errors" ]; then
