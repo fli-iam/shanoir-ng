@@ -24,6 +24,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
+
 @Service("importSecurityService")
 public class ImportSecurityService {
 
@@ -34,6 +36,12 @@ public class ImportSecurityService {
     private RabbitTemplate rabbitTemplate;
 
     private static final Logger LOG = LoggerFactory.getLogger(ImportSecurityService.class);
+
+    @PostConstruct
+    protected void initialize() {
+        // Set timeout to 10 seconds (consider isDraftStudy can take some time)
+        this.rabbitTemplate.setReplyTimeout(10000);
+    }
 
     /**
      * Check that the connected user has the given right for the given study.

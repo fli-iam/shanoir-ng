@@ -55,7 +55,9 @@ import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -384,7 +386,9 @@ public class RabbitMQStudiesService {
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_DRAFT_STATE_QUEUE, containerFactory = "singleConsumerFactory")
     @Transactional
-    public String getStudyDraftState(String studyIdStr) {
+    public String getStudyDraftState(String studyIdStr, @Header(AmqpHeaders.REPLY_TO) String replyTo) {
+        LOG.warn("replyTo header: {}", replyTo);
+        LOG.warn("Listener called with studyId: {}", studyIdStr);
         try {
             Long studyId = Long.valueOf(studyIdStr);
             Study study = studyRepo.findById(studyId).orElse(null);
