@@ -135,11 +135,18 @@ export class DownloadSetupAltComponent implements OnInit, OnDestroy {
     // This method checks if the list of given datasets has dicom or not.
     private hasDicomInDatasets(datasets: Dataset[] | DatasetLight[]) {
         for (const dataset of datasets) {
-            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && dataset.type != DatasetType.Generic) {
+            if (!this.isNonDicomDatasetType(dataset.type)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private isNonDicomDatasetType(type: DatasetType | string): boolean {
+        const normalized = typeof type === 'string' ? type.toLowerCase() : String(type).toLowerCase();
+        return normalized === DatasetType.Eeg.toLowerCase()
+            || normalized === DatasetType.BIDS.toLowerCase()
+            || normalized === DatasetType.Generic.toLowerCase();
     }
 
     hasError(fieldName: string, errors: string[]) {
