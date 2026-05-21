@@ -31,9 +31,7 @@ import { AccessRequestService } from './access-request.service';
 })
 
 export class AccessRequestListComponent {
-
     accessRequests: AccessRequest[] = [];
-    accountCreations: AccessRequest[] = [];
 
     constructor(
             public userService: UserService,
@@ -43,23 +41,26 @@ export class AccessRequestListComponent {
             public keycloakService: KeycloakService) {
 
         userService.getAccessRequestsForAdmin().then(accessRequests => {
-            for (const accessRequest of accessRequests) {
-
-                if (accessRequest.motivation.includes("Associated email")) {
-                    this.accountCreations.push(accessRequest);
-                } else {
-                    this.accessRequests.push(accessRequest);
-                }
-            }
+            this.accessRequests = [...accessRequests];
         });
+
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = 'Access Requests';
         });
     }
 
-    decide(index: number, accept: boolean) {
-        this.accessRequestService.resolveRequest(this.accessRequests[index].id, accept);
+    get studyAccessRequests(): AccessRequest[] {
+        return this.accessRequests.filter(ar => !ar.user?.accountRequestDemand);
+    }
+
+    get accountCreationRequests(): AccessRequest[] {
+        return this.accessRequests.filter(ar => ar.user?.accountRequestDemand);
+    }
+
+    decide(request: AccessRequest, accept: boolean) {
+        this.accessRequestService.resolveRequest(request.id, accept);
+        const index = this.accessRequests.indexOf(request);
         this.accessRequests.splice(index, 1);
         this.userService.decreaseAccessRequests();
     }
