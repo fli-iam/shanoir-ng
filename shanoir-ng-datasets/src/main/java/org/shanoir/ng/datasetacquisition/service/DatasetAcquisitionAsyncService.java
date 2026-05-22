@@ -12,18 +12,19 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.studycard.model.condition;
+package org.shanoir.ng.datasetacquisition.service;
 
-import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 
-import jakarta.persistence.Entity;
+import java.io.IOException;
 
-@Entity
-public abstract class StudyCardMetadataCondition<T> extends CardCondition {
 
-    protected int shanoirField;
+public interface DatasetAcquisitionAsyncService {
 
-    abstract MetadataFieldInterface<T> getShanoirField();
+    public void deleteByIdAsync(DatasetAcquisition entity, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException;
 
-    abstract void setShanoirField(MetadataFieldInterface<T> field);
 }
