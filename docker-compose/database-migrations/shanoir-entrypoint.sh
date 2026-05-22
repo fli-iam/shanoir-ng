@@ -33,15 +33,56 @@
 DB_CHANGES_DIR="/opt/db-changes"
 DB_INIT_PROCEDURES_DIR="/opt/db-init-procedures"
 
-MIGRATION_DB=migrations
-MIGRATION_USER=migrations
-MIGRATION_PASSWORD=password
+# Configurable database names — defaults preserve backward compatibility.
+# Note: all six databases must reside on the same MariaDB server.
+: ${SHANOIR_DATASETS_DB_NAME:=datasets}
+: ${SHANOIR_STUDIES_DB_NAME:=studies}
+: ${SHANOIR_IMPORT_DB_NAME:=import}
+: ${SHANOIR_USERS_DB_NAME:=users}
+: ${SHANOIR_PRECLINICAL_DB_NAME:=preclinical}
+: ${SHANOIR_MIGRATIONS_DB_NAME:=migrations}
+
+MIGRATION_DB="$SHANOIR_MIGRATIONS_DB_NAME"
+MIGRATION_USER="${SHANOIR_MIGRATIONS_DB_USER:-migrations}"
+MIGRATION_PASSWORD="${SHANOIR_MIGRATIONS_DB_PASSWORD:-password}"
 MARIADB_HOST="${MARIADB_HOST:-database}"
 
 HEADER="[Shanoir Entrypoint]"
 
 MARIADB="mariadb            -h$MARIADB_HOST -u$MIGRATION_USER -p$MIGRATION_PASSWORD"
 MARIADBADMIN="mariadb-admin -h$MARIADB_HOST -u$MIGRATION_USER -p$MIGRATION_PASSWORD"
+
+# Map a db-changes directory name to the configured database name
+get_db_for_dir()
+{
+	case "$1" in
+		datasets)    echo "$SHANOIR_DATASETS_DB_NAME" ;;
+		studies)     echo "$SHANOIR_STUDIES_DB_NAME" ;;
+		import)      echo "$SHANOIR_IMPORT_DB_NAME" ;;
+		users)       echo "$SHANOIR_USERS_DB_NAME" ;;
+		preclinical) echo "$SHANOIR_PRECLINICAL_DB_NAME" ;;
+		migrations)  echo "$SHANOIR_MIGRATIONS_DB_NAME" ;;
+		*)           echo "$1" ;;
+	esac
+}
+
+# Substitute hardcoded database names in SQL content with configured names.
+# Database names must only contain alphanumeric characters and underscores.
+apply_db_name_substitutions()
+{
+	sed \
+		-e "s/\bdatasets\./${SHANOIR_DATASETS_DB_NAME}./g" \
+		-e "s/\bstudies\./${SHANOIR_STUDIES_DB_NAME}./g" \
+		-e "s/\bimport\./${SHANOIR_IMPORT_DB_NAME}./g" \
+		-e "s/\busers\./${SHANOIR_USERS_DB_NAME}./g" \
+		-e "s/\bpreclinical\./${SHANOIR_PRECLINICAL_DB_NAME}./g" \
+		-e "s/\bmigrations\./${SHANOIR_MIGRATIONS_DB_NAME}./g" \
+		-e "s/[Uu][Ss][Ee] \+datasets\b/USE ${SHANOIR_DATASETS_DB_NAME}/g" \
+		-e "s/[Uu][Ss][Ee] \+studies\b/USE ${SHANOIR_STUDIES_DB_NAME}/g" \
+		-e "s/[Uu][Ss][Ee] \+import\b/USE ${SHANOIR_IMPORT_DB_NAME}/g" \
+		-e "s/[Uu][Ss][Ee] \+users\b/USE ${SHANOIR_USERS_DB_NAME}/g" \
+		-e "s/[Uu][Ss][Ee] \+preclinical\b/USE ${SHANOIR_PRECLINICAL_DB_NAME}/g"
+}
 
 # wait until the mariadbd server is ready
 wait_mariadbd()
@@ -134,9 +175,9 @@ apply_migrations()
 			echo "    $migration..."
 
 			[[ "$migration" =~ ^([^/]+)/ ]] || return 1
-			db="${BASH_REMATCH[1]}"
+			db=$(get_db_for_dir "${BASH_REMATCH[1]}")
 
-			if $MARIADB "$db" <"$DB_CHANGES_DIR/$migration" &&
+			if apply_db_name_substitutions <"$DB_CHANGES_DIR/$migration" | $MARIADB "$db" &&
 			   $MARIADB "$MIGRATION_DB" -e "INSERT INTO migrations VALUES ('$migration');"
 			then
 				status=done
@@ -159,13 +200,14 @@ apply_init_procedures()
 
   for sql_file in $(find "$DB_INIT_PROCEDURES_DIR" -name "*.sql" | sort); do
     echo "    $sql_file..."
-    # extract the target DB from the USE statement in the file
-    db=$(grep -i '^\s*USE\s' "$sql_file" | head -1 | sed 's/[Uu][Ss][Ee]\s*//;s/;//;s/\s//g')
-    if [ -z "$db" ]; then
+    # extract the target DB from the USE statement in the file and map to configured name
+    db_dir=$(grep -i '^\s*USE\s' "$sql_file" | head -1 | sed 's/[Uu][Ss][Ee]\s*//;s/;//;s/\s//g')
+    if [ -z "$db_dir" ]; then
       echo "$HEADER error: could not determine target DB for $sql_file" >&2
       return 1
     fi
-    if ! $MARIADB "$db" < "$sql_file"; then
+    db=$(get_db_for_dir "$db_dir")
+    if ! apply_db_name_substitutions < "$sql_file" | $MARIADB "$db"; then
       echo "$HEADER error: failed to apply $sql_file" >&2
       return 1
     fi
