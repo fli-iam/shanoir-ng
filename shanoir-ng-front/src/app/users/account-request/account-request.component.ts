@@ -14,7 +14,14 @@
 
 import { Location } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
+import {
+    AbstractControl,
+    UntypedFormBuilder,
+    UntypedFormGroup,
+    ValidationErrors,
+    ValidatorFn,
+    Validators
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ConsoleService } from 'src/app/shared/console/console.service';
@@ -65,10 +72,10 @@ export class AccountRequestComponent implements OnInit {
     buildForm(): void {
         const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
         this.form = this.fb.group({
-            'firstName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-            'lastName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+            'firstName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
+            'lastName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
             'email': ['', [Validators.required, Validators.pattern(emailRegex)]],
-            'accountRequestInfo': [new AccountRequestInfo(), [this.validateARInfo]]
+            'accountRequestInfo': ['', [this.validateARInfo]]
         });
     }
 
@@ -137,5 +144,11 @@ export class AccountRequestComponent implements OnInit {
         return false;
     }
 
-
+    private nonSpecialCharsValidator(): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            if(control.value != undefined){
+                return /^[\p{L}\p{M}\s'-]+$/u.test(control.value) ? null : { invalidName: true };            }
+            return null;
+        };
+    }
 }
