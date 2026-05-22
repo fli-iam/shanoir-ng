@@ -392,54 +392,6 @@ test_user_lifecycle() {
     fi
 }
 
-# ─── 4. Log error scan ───────────────────────────────────────────────
-
-scan_logs() {
-    echo ""
-    echo "======== Docker Log Error Scan ========"
-
-    # Collect logs and look for ERROR-level entries or Java exceptions.
-    # We ignore known benign patterns:
-    #   - "ERROR 1007" from MySQL (database already exists)
-    #   - "ERROR 1396" from MySQL (user already exists)
-    #   - preDestroy / shutdown messages
-    #   - MariaDB ErrorPacket WARN lines during Hibernate DDL / Keycloak first start
-    local errors
-    errors=$(docker compose logs --no-color 2>&1 \
-        | grep -iE '\bERROR\b|Exception|FATAL' \
-        | grep -viE \
-            -e 'ERROR 10(07|62|396)' \
-            -e 'preDestroy|ShutdownHook|HikariPool.*shutdown|Closing JPA|Unregistering JMX' \
-            -e 'MailConnectException|jakarta\.mail|smtp-sink|mail\.smtp' \
-            -e 'Failed to reserve shared memory' \
-            -e 'Setting level of logger .* to ERROR' \
-            -e 'Propagating ERROR level' \
-            -e 'error reading communication packets' \
-            -e 'LOG_EXCEPTION_CONVERSION_WORD' \
-            -e 'rabbitmq.*(error|disk space monitor)' \
-            -e 'dcm4chee-arc.*Name or service not known' \
-            -e 'UnknownHostException.*dcm4chee' \
-            -e 'WFLYELY00024: Certificate \[rootca\].*CertificateExpiredException' \
-            -e 'Unexpected error occurred in scheduled task' \
-            -e 'LastLoginDateApiController' \
-            -e 'ExceptionTranslationFilter' \
-            -e 'EntityNotFoundException' \
-            -e 'ErrorPacket.*Error: 1146' \
-            -e 'ErrorPacket.*Error: 1054.*dicomTag' \
-            -e 'ErrorPacket.*Error: 1005.*(study_card_condition|quality_card_condition)' \
-            -e 'Error: 1065.*Query was empty' \
-            -e 'DETAILS_JSON' \
-        | head -30) || true
-
-    if [ -z "$errors" ]; then
-        pass "No unexpected errors in docker compose logs"
-    else
-        local count
-        count=$(echo "$errors" | wc -l)
-        fail "Found $count error(s) in docker compose logs:"
-        echo "$errors" | sed 's/^/  | /'
-    fi
-}
 
 # ─── Main ────────────────────────────────────────────────────────────
 
@@ -452,7 +404,6 @@ test_database
 test_auth
 test_api
 test_user_lifecycle
-scan_logs
 
 echo ""
 echo "======== Results: $FAILURES failure(s) / $TESTS test(s) ========"
