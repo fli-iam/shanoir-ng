@@ -17,6 +17,7 @@
 # CI bootstrap uses: bash ./bootstrap.sh --clean --no-build --no-dcm4chee
 # Local full stack with PACS: docker compose --profile dcm4chee up -d
 
+
 services:
   ldap:
     profiles: ["dcm4chee"]
