@@ -25,7 +25,7 @@ import {
 } from '@angular/core';
 import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
-import { firstValueFrom, Subject, Subscription } from 'rxjs';
+import { firstValueFrom, merge, Subject, Subscription } from 'rxjs';
 
 import { Selection, TreeService } from 'src/app/studies/study/tree.service';
 import { SuperPromise } from 'src/app/utils/super-promise';
@@ -303,15 +303,23 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         }
     }
 
+    private updateFooterState(): void {
+        if (!this.form || !this.footerState) return;
+        this.footerState.valid = this.form.status === 'VALID' && (this.form.dirty || this.mode === 'create');
+        this.footerState.dirty = this.form.dirty;
+    }
+
     private manageFormSubscriptions() {
         this.form = this.buildForm();
         this.form$.resolve();
         if (this.form) {
+            this.updateFooterState();
             this.subscriptions.push(
-                this.form.statusChanges.subscribe(status => {
-                    this.footerState.valid = status == 'VALID' && (this.form.dirty || this.mode == 'create');
-                    this.footerState.dirty = this.form.dirty;
-                }),
+                merge(
+                    this.form.statusChanges,
+                    this.form.valueChanges,
+                    this.form.events,
+                ).subscribe(() => this.updateFooterState()),
             );
             this.subscribeEntityPropsUpdatesFromForm(this.form, this._entity);
             if (this.mode != 'view') setTimeout(() => this.styleRequiredLabels());
@@ -565,7 +573,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 fieldControl.updateValueAndValidity({emitEvent: false});
                 if (!fieldControl.valid) fieldControl.markAsTouched();
             }
-            this.footerState.valid = this.form.status == 'VALID';
+            this.updateFooterState();
             return null;
         } else {
             throw reason;
