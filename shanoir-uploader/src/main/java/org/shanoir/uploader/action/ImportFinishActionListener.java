@@ -90,15 +90,15 @@ public class ImportFinishActionListener implements ActionListener {
             final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
             if (studyCard == null || studyCard.getName() == null) {
                 JOptionPane.showMessageDialog(mainWindow.frame,
-                        mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                    mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
+                    "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             equipment = studyCard.getAcquisitionEquipment();
             centerId = studyCard.getAcquisitionEquipment().getCenter().getId();
         } else {
             if (mainWindow.importDialog.mriCenterText.getText().isBlank()
-                    || mainWindow.importDialog.mriCenterAddressText.getText().isBlank()) {
+                || mainWindow.importDialog.mriCenterAddressText.getText().isBlank()) {
                 JOptionPane.showMessageDialog(mainWindow.frame,
                         mainWindow.resourceBundle
                                 .getString("shanoir.uploader.systemErrorDialog.error.import.institution"),
@@ -106,7 +106,7 @@ public class ImportFinishActionListener implements ActionListener {
                 return;
             }
             if (mainWindow.importDialog.mriManufacturerText.getText().isBlank()
-                    || mainWindow.importDialog.mriManufacturersModelNameText.getText().isBlank()
+                || mainWindow.importDialog.mriManufacturersModelNameText.getText().isBlank()
                     || mainWindow.importDialog.mriMagneticFieldStrengthText.getText().isBlank()
                     || mainWindow.importDialog.mriDeviceSerialNumberText.getText().isBlank()) {
                 JOptionPane.showMessageDialog(mainWindow.frame,
@@ -141,8 +141,7 @@ public class ImportFinishActionListener implements ActionListener {
                 centerId = center.getId();
                 EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
                 equipmentDicom.setManufacturer(mainWindow.importDialog.mriManufacturerText.getText());
-                equipmentDicom
-                        .setManufacturerModelName(mainWindow.importDialog.mriManufacturersModelNameText.getText());
+                equipmentDicom.setManufacturerModelName(mainWindow.importDialog.mriManufacturersModelNameText.getText());
                 equipmentDicom.setMagneticFieldStrength(mainWindow.importDialog.mriMagneticFieldStrengthText.getText());
                 equipmentDicom.setDeviceSerialNumber(mainWindow.importDialog.mriDeviceSerialNumberText.getText());
                 equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, center);
@@ -167,15 +166,12 @@ public class ImportFinishActionListener implements ActionListener {
         mainWindow.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
         /**
-         * In case of Neurinfo: the user can either enter a new common name to create a
-         * new subject
-         * or select an existing subject from the combo box. This is not possible for
-         * OFSEP profile.
+         * In case of Neurinfo: the user can either enter a new common name to create a new subject
+         * or select an existing subject from the combo box. This is not possible for OFSEP profile.
          */
         boolean useExistingSubjectInStudy = false;
         if (ShUpConfig.isModeSubjectNameManual()) {
-            // minimal length for subject common name is 1, same for subject study
-            // identifier
+            // minimal length for subject common name is 1, same for subject study identifier
             // if nothing is entered, use existing subject selected
             if (mainWindow.importDialog.existingSubjectsCB.isEnabled()) {
                 subjectREST = (Subject) mainWindow.importDialog.existingSubjectsCB.getSelectedItem();
@@ -185,8 +181,7 @@ public class ImportFinishActionListener implements ActionListener {
                     useExistingSubjectInStudy = true;
                 } else {
                     JOptionPane.showMessageDialog(mainWindow.frame,
-                            mainWindow.resourceBundle
-                                    .getString("shanoir.uploader.systemErrorDialog.error.subject.creation"),
+                            mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.subject.creation"),
                             "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
@@ -197,24 +192,20 @@ public class ImportFinishActionListener implements ActionListener {
         if (!useExistingSubjectInStudy) {
             // subject name: entered by the user in the GUI
             String subjectName = mainWindow.importDialog.subjectTextField.getText();
-            ImagedObjectCategory category = (ImagedObjectCategory) mainWindow.importDialog.subjectImageObjectCategoryCB
-                    .getSelectedItem();
-            String languageHemDom = (String) mainWindow.importDialog.subjectLanguageHemisphericDominanceCB
-                    .getSelectedItem();
-            String manualHemDom = (String) mainWindow.importDialog.subjectManualHemisphericDominanceCB
-                    .getSelectedItem();
+            ImagedObjectCategory category = (ImagedObjectCategory) mainWindow.importDialog.subjectImageObjectCategoryCB.getSelectedItem();
+            String languageHemDom = (String) mainWindow.importDialog.subjectLanguageHemisphericDominanceCB.getSelectedItem();
+            String manualHemDom = (String) mainWindow.importDialog.subjectManualHemisphericDominanceCB.getSelectedItem();
             String subjectStudyIdentifier = mainWindow.importDialog.subjectStudyIdentifierTF.getText();
             SubjectType subjectType = (SubjectType) mainWindow.importDialog.subjectTypeCB.getSelectedItem();
             boolean isPhysicallyInvolved = mainWindow.importDialog.subjectIsPhysicallyInvolvedCB.isSelected();
             subjectREST = ImportUtils.manageSubject(
-                    subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
-                    subjectType, useExistingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
-                    study, equipment);
+                subjectREST, importJob.getSubject(), subjectName, category, languageHemDom, manualHemDom,
+                subjectType, useExistingSubjectInStudy, isPhysicallyInvolved, subjectStudyIdentifier,
+                study, equipment);
             if (subjectREST == null) {
                 JOptionPane.showMessageDialog(mainWindow.frame,
-                        mainWindow.resourceBundle.getString(
-                                "shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                    mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.subjectcreator.createSubjectFromShup"),
+                "Error", JOptionPane.ERROR_MESSAGE);
                 mainWindow.setCursor(null); // turn off the wait cursor
                 ((JButton) event.getSource()).setEnabled(true);
                 return;
@@ -230,8 +221,7 @@ public class ImportFinishActionListener implements ActionListener {
             examination = ImportUtils.createExamination(study, subjectREST, examinationDate, examinationComment, centerId, agreeWithDataReuse);
             if (examination == null) {
                 JOptionPane.showMessageDialog(mainWindow.frame,
-                        mainWindow.resourceBundle
-                                .getString("shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination"),
+                        mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination"),
                         "Error", JOptionPane.ERROR_MESSAGE);
                 mainWindow.setCursor(null); // turn off the wait cursor
                 ((JButton) event.getSource()).setEnabled(true);
@@ -239,7 +229,7 @@ public class ImportFinishActionListener implements ActionListener {
             } else {
                 logger.info("Examination created on server with ID: " + examination.getId());
             }
-            // If the user wants to use an existing examination
+        // If the user wants to use an existing examination
         } else {
             examination = (Examination) mainWindow.importDialog.mrExaminationExistingExamCB.getSelectedItem();
             logger.info("Examination used on server with ID: " + examination.getId());
@@ -248,26 +238,18 @@ public class ImportFinishActionListener implements ActionListener {
         /**
          * 3. Fill importJob, check quality if needed, start pseudo and prepare upload
          */
-        ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examination.getId(),
-                examination.getStudyInstanceUID(),
-                (Study) mainWindow.importDialog.studyCB.getSelectedItem(),
-                (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem(), equipment);
+        ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examination.getId(), examination.getStudyInstanceUID(),
+            (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem(), equipment);
 
         // Quality Check if the Study selected has Quality Cards to be checked at import
         boolean seriesToBeImported = true;
         try {
-            QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob,
-                    mainWindow.isFromPACS);
-            
-            // If quality check resulted in errors, show a message and do not start the
-            // import
+            QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob, mainWindow.isFromPACS);
+            // If quality check resulted in errors, show a message and do not start the import
             if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError())) {
-
-                JOptionPane.showMessageDialog(mainWindow.frame,
-                        QualityUtils.getQualityControlreportScrollPane(qualityControlResult),
-                        ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"),
-                        JOptionPane.ERROR_MESSAGE);
-                // set status ERROR if all series were unselected from importJob due to Quality Control errors
+                JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult),
+                ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
+               // set status ERROR if all series were unselected from importJob due to Quality Control errors
                 if (importJob.getSelectedSeries().isEmpty()) {
                     seriesToBeImported = false;
                     ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder,
@@ -298,15 +280,12 @@ public class ImportFinishActionListener implements ActionListener {
                                 JOptionPane.WARNING_MESSAGE);
                     }
                 }
-                
             }
         } catch (Exception ex) {
             logger.error(ex.getMessage(), ex);
             JOptionPane.showMessageDialog(mainWindow.frame,
-                    ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.exception.message")
-                            + ex.getMessage(),
-                    ShUpConfig.resourceBundle.getString("shanoir.uploader.select.error.title"),
-                    JOptionPane.ERROR_MESSAGE);
+                ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.exception.message") + ex.getMessage(),
+                ShUpConfig.resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
         }
 
         // Import starts only if the quality check did not result in errors for all selected series
@@ -316,8 +295,8 @@ public class ImportFinishActionListener implements ActionListener {
                 thread.start();
 
                 JOptionPane.showMessageDialog(mainWindow.frame,
-                        ShUpConfig.resourceBundle.getString("shanoir.uploader.import.start.auto.import.message"),
-                        "Import", JOptionPane.INFORMATION_MESSAGE);
+                ShUpConfig.resourceBundle.getString("shanoir.uploader.import.start.auto.import.message"),
+                    "Import", JOptionPane.INFORMATION_MESSAGE);
         }
         
         mainWindow.importDialog.setVisible(false);

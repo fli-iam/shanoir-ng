@@ -39,7 +39,7 @@ import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
+import org.shanoir.ng.studycard.model.condition.CardCondition;
 import org.shanoir.ng.studycard.model.rule.QualityCardRule;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -65,20 +65,18 @@ public class CardsProcessingService {
     @Autowired
     private ShanoirEventService eventService;
 
+
     /**
      * Apply study card on given acquisitions
      *
      * @param studyCard
      * @param acquisitions
      * @throws PacsException
-     * @throws EntityNotFoundException
      */
-    public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions)
-            throws PacsException, EntityNotFoundException {
+    public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) throws PacsException, EntityNotFoundException {
         boolean changeInAtLeastOneAcquisition = false;
         for (DatasetAcquisition acquisition : acquisitions) {
-            if (CollectionUtils.isNotEmpty(acquisition.getDatasets())
-                    && CollectionUtils.isNotEmpty(studyCard.getRules())) {
+            if (CollectionUtils.isNotEmpty(acquisition.getDatasets()) && CollectionUtils.isNotEmpty(studyCard.getRules())) {
                 AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
                 changeInAtLeastOneAcquisition = studyCard.apply(acquisition, dicomAttributes);
             }
@@ -96,8 +94,7 @@ public class CardsProcessingService {
      * @param updateTags
      * @throws MicroServiceCommunicationException
      */
-    public QualityCardResult applyQualityCardOnDatasetAcquisition(QualityCard qualityCard,
-            DatasetAcquisition acquisition) throws MicroServiceCommunicationException, PacsException {
+    public QualityCardResult applyQualityCardOnDatasetAcquisition(QualityCard qualityCard, DatasetAcquisition acquisition) throws MicroServiceCommunicationException, PacsException {
         long startTs = new Date().getTime();
         if (qualityCard == null)
             throw new IllegalArgumentException("qualityCard can't be null");
@@ -108,7 +105,6 @@ public class CardsProcessingService {
         if (CollectionUtils.isEmpty(qualityCard.getRules())) {
             throw new RestClientException("Quality card used with empty rules.");
         }
-
         QualityCardResult result = new QualityCardResult();
 
         LOG.debug(qualityCard.getRules().size() + " rules found for quality card with id: " + qualityCard.getId()
@@ -142,11 +138,9 @@ public class CardsProcessingService {
         long startTs = new Date().getTime();
         if (qualityCard == null)
             throw new IllegalArgumentException("qualityCard can't be null");
-
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(),
                 "Quality check started on study " + qualityCard.getStudyId(), 4, qualityCard.getStudyId());
         eventService.publishEvent(event);
-
         Study study = studyService.findById(qualityCard.getStudyId());
         if (study == null)
             throw new IllegalArgumentException("study can't be null");
@@ -187,7 +181,6 @@ public class CardsProcessingService {
             if (updateTags) {
                 resetDatasetAcquisitions(datasetAcquisitions);
             }
-
             // We apply the quality card on DatasetAcquisitions in parallel for one
             // examination only
             List<DatasetAcquisition> updatedAcquisitions = new ArrayList<>();
@@ -211,7 +204,6 @@ public class CardsProcessingService {
             } catch (StreamExceptionWrapper e) {
                 throw (MicroServiceCommunicationException) e.getCause();
             }
-
             if (updateTags && !updatedAcquisitions.isEmpty()) {
                 try {
                     datasetAcquisitionService.update(updatedAcquisitions);
@@ -220,12 +212,10 @@ public class CardsProcessingService {
                             "Could not update dataset acquisitions for examination " + examination.getComment(), e);
                 }
             }
-
             datasetAcquisitions.clear();
             updatedAcquisitions.clear();
             examinationIndex.incrementAndGet();
         }
-
         event.setProgress(1f);
         event.setStatus(1);
         event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - startTs)
@@ -242,7 +232,7 @@ public class CardsProcessingService {
         if (rules != null) {
             for (QualityCardRule rule : rules) {
                 if (rule.getConditions() != null) {
-                    for (StudyCardCondition condition : rule.getConditions()) {
+                    for (CardCondition condition : rule.getConditions()) {
                         Hibernate.initialize(condition.getValues());
                     }
                 }
