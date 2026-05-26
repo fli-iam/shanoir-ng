@@ -18,6 +18,7 @@
 #   - SHANOIR_TEST_USER / SHANOIR_TEST_PASSWORD (or defaults from create-keycloak-user.sh)
 #   - SHANOIR_KEYCLOAK_USER / SHANOIR_KEYCLOAK_PASSWORD in .env (for user lifecycle kcadm step)
 
+
 set -euo pipefail
 
 FAILURES=0
