@@ -171,11 +171,11 @@ public class EmailServiceImpl implements EmailService {
             this.setFromAdministrator(messageHelper);
             messageHelper.setTo(adminEmails.toArray(new String[0]));
 
-            if (email.getAction() == "created") {
+            if ("created".equals(email.getAction())) {
                 messageHelper.setSubject("New draft study created");
-            } else if (email.getAction() == "edited") {
+            } else if ("edited".equals(email.getAction())) {
                 messageHelper.setSubject("A draft study got edited");
-            } else if (email.getAction() == "approved") {
+            } else if ("approved".equals(email.getAction())) {
                 messageHelper.setSubject("A study got approved");
             }
 
