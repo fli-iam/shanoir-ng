@@ -15,6 +15,7 @@
 package org.shanoir.ng.datasetacquisition.dto;
 
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.quality.QualityTag;
 
 /**
  * Simple dataset acquisition DTO with information for examination.
@@ -31,6 +32,8 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
     private Long examinationId;
 
     private Integer sortingIndex;
+
+    private QualityTag qualityTag;
 
     public String getType() {
         return type;
@@ -62,6 +65,14 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
 
     public void setExaminationId(Long examinationId) {
         this.examinationId = examinationId;
+    }
+
+    public QualityTag getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualityTag(QualityTag qualityTag) {
+        this.qualityTag = qualityTag;
     }
 
 }
