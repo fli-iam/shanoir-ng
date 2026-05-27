@@ -102,7 +102,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         //executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.VALID);
         VipExecutionDTO createdExecution = createVipExecution(candidates, executionMonitoring);
         //executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.SENT);
-        return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution, candidates.size());
+        return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution);
     }
 
     public List<Dataset> getDatasetsFromParams(List<DatasetParameterDTO> parameters) {
@@ -186,12 +186,12 @@ public class ExecutionServiceImpl implements ExecutionService {
     /**
      * Update monitoring with vip execution details and persist it in DB
      */
-    private IdName updateAndStartExecutionMonitoring(ExecutionMonitoring executionMonitoring, VipExecutionDTO execCreated, Integer jobsNumber) throws EntityNotFoundException, SecurityException {
+    private IdName updateAndStartExecutionMonitoring(ExecutionMonitoring executionMonitoring, VipExecutionDTO execCreated) throws EntityNotFoundException, SecurityException {
         executionMonitoring.setIdentifier(execCreated.getIdentifier());
         executionMonitoring.setStatus(execCreated.getStatus());
         executionMonitoring.setStartDate(execCreated.getStartDate());
         ExecutionMonitoring createdMonitoring = executionMonitoringService.update(executionMonitoring);
-        executionMonitoringService.startMonitoringJob(createdMonitoring, null, jobsNumber);
+        executionMonitoringService.startMonitoringJob(createdMonitoring, null, execCreated.getInputValues().values().stream().mapToInt(List::size).max().orElse(0));
         return new IdName(createdMonitoring.getId(), createdMonitoring.getName());
     }
 
@@ -209,10 +209,14 @@ public class ExecutionServiceImpl implements ExecutionService {
         dto.setResultsLocation(getResultsLocationUri(executionMonitoring.getResultsLocation(), sample));
         dto.setInputValues(getInputValues(executionMonitoring, candidates));
 
-        return createExecution(dto)
+        VipExecutionDTO vipExecutionDTO = createExecution(dto)
                 .onErrorMap(WebClientResponseException.BadRequest.class, ex ->
                         new RuntimeException("HTTP Error while communicating with VIP :  - " + ex.getResponseBodyAsString()))
                 .block();
+
+        vipExecutionDTO.setInputValues(dto.getInputValues());
+
+        return vipExecutionDTO;
     }
 
     /**
