@@ -58,6 +58,8 @@ public class DatasetAcquisitionDTO {
 
     private List<String> extraDataFilePathList;
 
+    private QualityTag qualityTag;
+
     public Long getId() {
         return id;
     }
@@ -192,5 +194,13 @@ public class DatasetAcquisitionDTO {
 
     public void setExtraDataFilePathList(List<String> extraDataFilePathList) {
         this.extraDataFilePathList = extraDataFilePathList;
+    }
+
+    public QualityTag getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualityTag(QualityTag qualityTag) {
+        this.qualityTag = qualityTag;
     }
 }
