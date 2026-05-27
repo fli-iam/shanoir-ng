@@ -15,9 +15,15 @@
 package org.shanoir.uploader.test;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,9 +35,19 @@ import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
+import org.shanoir.uploader.model.rest.Examination;
+import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdName;
+import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Manufacturer;
 import org.shanoir.uploader.model.rest.ManufacturerModel;
+import org.shanoir.uploader.model.rest.Sex;
+import org.shanoir.uploader.model.rest.Study;
+import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.StudyCenter;
+import org.shanoir.uploader.model.rest.StudyExtraDetails;
+import org.shanoir.uploader.model.rest.Subject;
+import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.utils.PropertiesUtil;
 import org.slf4j.Logger;
@@ -59,6 +75,8 @@ public abstract class AbstractTest {
 
     private static final String USER_PASSWORD = "user.password";
 
+    private static final String IN_PROGRESS = "IN_PROGRESS";
+
     protected static ShanoirUploaderServiceClient shUpClient;
 
     protected static Pseudonymizer pseudonymizer;
@@ -69,7 +87,8 @@ public abstract class AbstractTest {
     public static void setup() {
         ShanoirUploader.initShanoirUploaderFolders();
         PropertiesUtil.initPropertiesFromResourcePath(testProperties, TEST_PROPERTIES);
-        PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.profileProperties, ShUpConfig.PROFILE_DIR + testProperties.getProperty(PROFILE) + "/" + ShUpConfig.PROFILE_PROPERTIES);
+        PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.profileProperties,
+                ShUpConfig.PROFILE_DIR + testProperties.getProperty(PROFILE) + "/" + ShUpConfig.PROFILE_PROPERTIES);
         PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.endpointProperties, ShUpConfig.ENDPOINT_PROPERTIES);
         identifierCalculator = new IdentifierCalculator();
         shUpClient = new ShanoirUploaderServiceClient();
@@ -87,7 +106,8 @@ public abstract class AbstractTest {
                 Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
             }
             if (ShUpConfig.isModePseudonymus()) {
-                File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath() + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
+                File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath()
+                        + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
                 String pseudonymusKeyValue = shUpClient.findValueByKey(ShUpConfig.MODE_PSEUDONYMUS_KEY);
                 try {
                     pseudonymizer = new Pseudonymizer(pseudonymusKeyValue, pseudonymusFolder.getAbsolutePath());
@@ -135,6 +155,85 @@ public abstract class AbstractTest {
         equipment.setManufacturerModel(createdManufacturerModel);
         AcquisitionEquipment createdEquipment = shUpClient.createEquipment(equipment);
         return createdEquipment;
+    }
+
+    public static Study createStudyAndCenterAndStudyCard() {
+        StudyExtraDetails studyExtraDetails = new StudyExtraDetails();
+        studyExtraDetails.setExpectedNbOfSubjects(5L);
+        studyExtraDetails.setExpectedNbOfCenters(5L);
+        studyExtraDetails.setSponsor("sponsor");
+        studyExtraDetails.setPrincipalInvestigator("principal investigator");
+        org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
+        study.setExtraDetails(studyExtraDetails);
+        final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
+        study.setName(randomStudyName);
+        study.setIsDraft(Boolean.TRUE);
+        Date today = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(today);
+        calendar.add(Calendar.YEAR, 1);
+        Date todayPlusOneYear = calendar.getTime();
+        study.setStartDate(today);
+        study.setEndDate(todayPlusOneYear);
+        study.setStudyStatus(IN_PROGRESS);
+        study.setStudyCardPolicy(org.shanoir.uploader.model.rest.Study.SC_MANDATORY);
+        // add center to study
+        List<StudyCenter> studyCenterList = new ArrayList<StudyCenter>();
+        final StudyCenter studyCenter = new StudyCenter();
+        Center createdCenter = createCenter();
+        Assertions.assertNotNull(createdCenter);
+        studyCenter.setCenter(createdCenter);
+        studyCenterList.add(studyCenter);
+        study.setStudyCenterList(studyCenterList);
+        // create study
+        study = shUpClient.createStudy(study);
+        Assertions.assertNotNull(study);
+        // create equipment
+        AcquisitionEquipment createdEquipment = createEquipment(createdCenter);
+        Assertions.assertNotNull(createdEquipment);
+        // create study card and add to study
+        StudyCard studyCard = new StudyCard();
+        final String randomStudyCardName = "Study-Card-Name-" + UUID.randomUUID().toString();
+        studyCard.setName(randomStudyCardName);
+        studyCard.setAcquisitionEquipmentId(createdEquipment.getId());
+        studyCard.setAcquisitionEquipment(createdEquipment);
+        studyCard.setCenterId(createdCenter.getId());
+        studyCard.setStudyId(study.getId());
+        shUpClient.createStudyCard(studyCard);
+        Assertions.assertNotNull(studyCard);
+        List<StudyCard> studyCards = new ArrayList<>();
+        studyCards.add(studyCard);
+        study.setStudyCards(studyCards);
+        return study;
+    }
+
+    public Subject createSubject(Study study) {
+        Subject subject = new Subject();
+        String randomPatientName = UUID.randomUUID().toString().substring(0, 15);
+        randomPatientName = randomPatientName.replaceAll("-", "");
+        subject.setName(randomPatientName);
+        subject.setStudy(new IdName(study.getId(), study.getName()));
+        subject.setBirthDate(LocalDate.now());
+        subject.setSex(Sex.O);
+        subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
+        subject.setLanguageHemisphericDominance(HemisphericDominance.Left);
+        subject.setManualHemisphericDominance(HemisphericDominance.Left);
+        subject.setSubjectType(SubjectType.PATIENT);
+        subject.setPhysicallyInvolved(true);
+        subject.setTags(new ArrayList<>());
+        subject = shUpClient.createSubject(subject, true, null);
+        return subject;
+    }
+
+    public Examination createExamination(Long studyId, Long subjectId, Long centerId) {
+        Examination examination = new Examination();
+        examination.setStudyId(studyId);
+        examination.setSubjectId(subjectId);
+        examination.setCenterId(centerId);
+        examination.setExaminationDate(new Date());
+        examination.setComment("examinationComment");
+        examination = shUpClient.createExamination(examination);
+        return examination;
     }
 
 }
