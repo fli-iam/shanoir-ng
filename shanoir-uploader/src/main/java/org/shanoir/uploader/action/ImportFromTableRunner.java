@@ -352,9 +352,11 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         logger.info("Search existing examinations for subject: a) same date and comment: user has to finish import b) new date or comment: create examination.");
         line[4] = importJob.getSubjectName();
         line[5] = studyDate.format(DateTimeUtils.FORMATTER);
+        boolean tableExamCommentFound = false;
         // If column SHANOIR_EXAM_COMMENT is not empty we set the examination comment to this value
         if (importJob.getExaminationComment() != null && !importJob.getExaminationComment().isEmpty()) {
             studyDescription = importJob.getExaminationComment();
+            tableExamCommentFound = true;
         }
         try {
             List<Examination> examinations = shanoirUploaderServiceClientNG.findExaminationsBySubjectId(subjectREST.getId());
@@ -369,7 +371,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
                     LocalDate examinationLocalDate = examinationDate.toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate();
-                    if (examinationLocalDate.equals(studyDate) && ((examination.getComment() != null || studyDescription != null) && examination.getComment().equals(studyDescription))) {
+                        // We create a new examination only if dates are different or if column SHANOIR_EXAM_COMMENT is not empty and comments are different
+                    if (examinationLocalDate.equals(studyDate) && (!tableExamCommentFound || examination.getComment().equals(studyDescription))) {
                         logger.info("Import job only downloaded, manual user decision needed: existing examination with the same date and same comment.");
                         csvWriter.addExaminationLine(false, line);
                         return false;
