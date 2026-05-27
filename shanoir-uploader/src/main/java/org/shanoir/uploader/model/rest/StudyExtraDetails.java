@@ -12,7 +12,7 @@ public class StudyExtraDetails {
 
     private Long inclusionRate;
 
-    private Integer inclusionRateUnit;
+    private InclusionRateUnit inclusionRateUnit;
 
     private String sponsor;
 
@@ -60,11 +60,11 @@ public class StudyExtraDetails {
         this.inclusionRate = inclusionRate;
     }
 
-    public Integer getInclusionRateUnit() {
+    public InclusionRateUnit getInclusionRateUnit() {
         return inclusionRateUnit;
     }
 
-    public void setInclusionRateUnit(Integer inclusionRateUnit) {
+    public void setInclusionRateUnit(InclusionRateUnit inclusionRateUnit) {
         this.inclusionRateUnit = inclusionRateUnit;
     }
 
