@@ -17,7 +17,7 @@ services:
   #
   ninja:
     container_name: "${SHANOIR_PREFIX}ninja"
-    image: scireum/s3-ninja:8.7.0
+    image: scireum/s3-ninja:8.7.1
     ports:
       - "9444:9000"
     networks:
