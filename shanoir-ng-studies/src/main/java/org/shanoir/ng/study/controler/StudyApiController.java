@@ -493,7 +493,7 @@ public class StudyApiController implements StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "id of the userId", required = true) @PathVariable("userId") Long userId)
             throws IOException {
-        studyService.removeStudyUserFromStudy(studyId, userId);
+        studyService.removeUserFromStudy(studyId, userId);
         List<StudyUserRight> surList = studyUserService.getRightsForStudy(studyId);
         if (surList.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

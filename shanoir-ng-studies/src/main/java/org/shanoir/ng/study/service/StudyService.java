@@ -130,7 +130,7 @@ public interface StudyService {
      * @param studyId
      * @param userId
      */
-    void removeStudyUserFromStudy(Long studyId, Long userId);
+    void removeUserFromStudy(Long studyId, Long userId);
 
     /**
      * Links an examination to a study
