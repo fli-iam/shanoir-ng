@@ -240,9 +240,11 @@ export class TreeService {
             return Promise.all([studyLoaded]).then(() => {
                 return this.selectNode(this.selection)
             }).then(node => {
-                this.selectedNode = node;
-                this.treeAvailable = !!this.selectedNode;
-                return node;
+                if (node != null) {
+                    this.selectedNode = node;
+                    this.treeAvailable = !!this.selectedNode;
+                    return node;
+                }
             });
 
         }
@@ -269,6 +271,9 @@ export class TreeService {
         } else if (selection?.type == 'acquisition') {
             node = this.selectAcquisition(selection.entity as DatasetAcquisition);
         } else if (selection?.type == 'processing') {
+            if ((selection.entity as DatasetProcessing).parentId == null) {
+                return Promise.resolve(null);
+            }
             node = this.selectProcessing(selection.entity as DatasetProcessing);
         } else if (selection?.type == 'examination') {
             node = this.selectExamination(selection.entity as Examination);
