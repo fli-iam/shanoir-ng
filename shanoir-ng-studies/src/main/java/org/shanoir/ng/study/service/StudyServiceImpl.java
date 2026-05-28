@@ -918,16 +918,17 @@ public class StudyServiceImpl implements StudyService {
     }
 
     @Override
-    public void removeStudyUserFromStudy(Long studyId, Long userId) {
+    public void removeUserFromStudy(Long studyId, Long userId) {
         StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
+        Study study = studyRepository.findById(studyId).orElse(null);
+        study.getStudyUserList().removeIf(su -> su.getId().equals(studyUser.getId()));
+        studyRepository.save(study);
         try {
             List<StudyUserCommand> commands = new ArrayList<>();
             commands.add(new StudyUserCommand(CommandType.DELETE, studyUser.getId()));
             this.studyUserCom.broadcast(commands);
-            this.studyUserRepository.delete(studyUser);
-
         } catch (MicroServiceCommunicationException e) {
-            LOG.error("Failed to remove studyUser from study: ", e);
+            LOG.error("Failed to broadcast studyUser deletion for userId={} studyId={}: ", userId, studyId, e);
         }
     }
 

@@ -63,7 +63,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </span>
     </div>
 </form>
-<button type='button' (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
+<button type='button' *ngIf="executionForm" (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
 
 <div *ngIf="parametersApplied" class="block-div">
 <legend> List of datasets selected for the given parameters: </legend>
