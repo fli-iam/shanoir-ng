@@ -70,27 +70,27 @@ public class ExecutionApiControllerTest {
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void testCreateExecutionAsAdmin() throws Exception {
         ExecutionCandidateDTO candidate = createExecutionCandidateDTO();
-        assertAccessAuthorized(api::createExecution, candidate);
+        assertAccessAuthorized(api::createExecution, List.of(candidate));
     }
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
     public void testCreateExecutionAsExpert() throws Exception {
         ExecutionCandidateDTO candidate = createExecutionCandidateDTO();
-        assertAccessDenied(api::createExecution, candidate);
+        assertAccessDenied(api::createExecution, List.of(candidate));
     }
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_USER" })
     public void testCreateExecutionAsUser() throws Exception {
         ExecutionCandidateDTO candidate = createExecutionCandidateDTO();
-        assertAccessDenied(api::createExecution, candidate);
+        assertAccessDenied(api::createExecution, List.of(candidate));
     }
 
     @Test
     public void testCreateExecutionAsUnauthenticated() throws Exception {
         ExecutionCandidateDTO candidate = createExecutionCandidateDTO();
-        assertException(api::createExecution, candidate, AuthenticationCredentialsNotFoundException.class);
+        assertException(api::createExecution, List.of(candidate), AuthenticationCredentialsNotFoundException.class);
     }
 
 
