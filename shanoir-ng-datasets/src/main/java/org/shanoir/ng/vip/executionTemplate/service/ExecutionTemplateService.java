@@ -16,16 +16,14 @@ package org.shanoir.ng.vip.executionTemplate.service;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplate;
-import org.springframework.scheduling.annotation.Async;
 import java.util.List;
 
 public interface ExecutionTemplateService {
 
     /**
-     * This method is called asynchroneously at the end of the import to check if an execution template has to be done.
+     * This method is called at the start-up of Shanoir to create planned execution if relevant.
      * @param createdAcquisitions the list of acqusitions to check for execution templates
      */
-    @Async
     void createExecutionsFromExecutionTemplates(List<DatasetAcquisition> createdAcquisitions);
 
 

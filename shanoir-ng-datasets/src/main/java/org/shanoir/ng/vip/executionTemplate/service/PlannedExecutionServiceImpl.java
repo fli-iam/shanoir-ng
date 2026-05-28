@@ -15,6 +15,7 @@
 package org.shanoir.ng.vip.executionTemplate.service;
 
 import com.fasterxml.jackson.core.ObjectCodec;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.service.TransactionRunner;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -61,11 +62,15 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
     private DatasetAcquisitionRepository acquisitionRepository;
 
     @Autowired
+    private ExaminationRepository examinationRepository;
+
+    @Autowired
     private TransactionRunner transactionRunner;
 
     @Autowired
     @Lazy
     private PlannedExecutionManager plannedExecutionManager;
+
     @Autowired
     private ObjectCodec objectCodec;
 
@@ -112,25 +117,18 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
     }
 
     /**
-     * Create execution when it's one execution for all the newly imported data
+     * Create execution when it's one execution for all the newly imported data grouped by examination
      */
     private void createExecutionAtExaminationLevel(ExecutionTemplate template, List<Long> acquisitionIds) {
-        int attempt = 0;
-        DatasetAcquisition acquisition = acquisitionRepository.findById(acquisitionIds.getFirst()).orElse(null);
-        while (Objects.isNull(acquisition) && attempt < 5) {
-            try {
-                Thread.sleep(1000);
-            } catch (Exception ignored) { }
-            attempt++;
-            acquisition = acquisitionRepository.findById(acquisitionIds.getFirst()).orElse(null);
-        }
+        List<Long> involvedExamination = examinationRepository.findIdsByAcquisitionIds(acquisitionIds);
 
-        if (Objects.isNull(acquisition)) {
-            LOG.error("Did not achieve to get newly imported acquisitions for auto execution with template {}. Giving up.", template.getId());
+        if (Objects.isNull(involvedExamination) || involvedExamination.isEmpty()) {
+            LOG.error("Did not achieve to get newly imported acquisitions for auto execution with template {}. Aborting.", template.getId());
         } else {
-            Long examinationId = acquisition.getExamination().getId();
-            DatasetAcquisition finalAcquisition = acquisition;
-            plannedExecutionManager.addToExecutionsQueue(new ExecutionInQueue(template, examinationId, "examination", acquisitionIds));
+            for (Long examinationId : involvedExamination) {
+                List<Long> invovledAcquisitionIds =  acquisitionRepository.findIdsFromIdsListWithExamId(examinationId, acquisitionIds);
+                plannedExecutionManager.addToExecutionsQueue(new ExecutionInQueue(template, examinationId, "examination", invovledAcquisitionIds));
+            }
         }
     }
 

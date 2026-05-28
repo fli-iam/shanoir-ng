@@ -110,7 +110,7 @@ public class PlannedExecutionManager {
                     if (Collections.disjoint(candidateData, involvedDatasetIds)) {
                         next = candidate;
                         //Lock the datasets already involved in an execution to ensure that the current execution is ended before starting the next one
-                        // (ex: it would be an issue if the next issue use the current execution output as input)
+                        // (ex: it would be an issue if the next execution use the current execution output as input)
                         addToInvolvedDatasetIds(candidateData);
                         break;
                     }

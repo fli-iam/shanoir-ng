@@ -83,4 +83,8 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
      */
     List<DatasetAcquisition> findByIdGreaterThan(Long idThreshold);
 
+    @Query(value = "SELECT id FROM dataset_acquisition acq "
+            + "WHERE acq.examination_id = ?1 "
+            + "AND acq.id IN (?2)", nativeQuery = true)
+    List<Long> findIdsFromIdsListWithExamId(Long examId, List<Long> acqIdList);
 }

@@ -67,7 +67,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <span class="tags">Tags</span>
                 </li>
 
-                <li [class.active]="activeTab == 'executions'" [routerLink]="'.'" [fragment]="'executions'" replaceUrl="true">
+                <li *ngIf="keycloakService.isUserAdmin()" [class.active]="activeTab == 'executions'" [routerLink]="'.'" [fragment]="'executions'" replaceUrl="true">
                     <span class="executions">Executions</span>
                 </li>
 				<ng-container *ngIf="mode == 'view'">
@@ -567,7 +567,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                    [study]="study">
                 </study-history>
             </fieldset>
-            <fieldset [class.hidden-tab]="activeTab != 'executions'" tab="executions">
+            <fieldset *ngIf="keycloakService.isUserAdmin()" [class.hidden-tab]="activeTab != 'executions'" tab="executions">
                 <legend>Execution templates</legend>
                 <execution-template-list [studyId]="study.id" [studyName]="study.name"/>
             </fieldset>

@@ -65,23 +65,13 @@ export class ExecutionTemplateListComponent extends BrowserPaginEntityListCompon
     }
 
     getOptions() {
+        const adminRole = Promise.resolve(this.keycloakService.isUserAdmin());
         return {
-            new: this.hasAdminRightsOnStudy(),
+            new: adminRole,
             view: true,
-            edit: this.hasAdminRightsOnStudy(),
-            delete: this.hasAdminRightsOnStudy(),
+            edit: adminRole,
+            delete: adminRole,
             id: false
         };
     }
-
-    private hasAdminRightsOnStudy(): Promise<boolean> {
-        if (this.keycloakService.isUserAdmin()) {
-            return Promise.resolve(true);
-        } else {
-            return this.studyRightsService.getMyRightsForStudy(this.studyId).then(rights => {
-                return rights.includes(StudyUserRight.CAN_ADMINISTRATE);
-            });
-        }
-    }
-
 }
