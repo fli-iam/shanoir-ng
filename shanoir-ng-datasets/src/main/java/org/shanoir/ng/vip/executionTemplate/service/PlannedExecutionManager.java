@@ -190,6 +190,8 @@ public class PlannedExecutionManager {
             }
         } catch (RestServiceException | SecurityException | EntityNotFoundException | InterruptedException e) {
             LOG.error("Execution from template {} for {} {} failed.", template.getId(), executionLevel, objectId, e);
+        } catch (Exception e) {
+            LOG.error("Unexpected error during execution from template {} for {} {}.", template.getId(), executionLevel, objectId, e);
         }
     }
 
