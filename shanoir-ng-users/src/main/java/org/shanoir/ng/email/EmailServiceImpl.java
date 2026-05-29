@@ -170,14 +170,7 @@ public class EmailServiceImpl implements EmailService {
             final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             this.setFromAdministrator(messageHelper);
             messageHelper.setTo(adminEmails.toArray(new String[0]));
-
-            if (email.getAction() == "created") {
-                messageHelper.setSubject("New draft study created");
-            } else if (email.getAction() == "edited") {
-                messageHelper.setSubject("A draft study got edited");
-            } else if (email.getAction() == "approved") {
-                messageHelper.setSubject("A study got approved");
-            }
+            messageHelper.setSubject(String.format("Study draft %s: %s", email.getAction(), email.getStudyName()));
 
             final Map<String, Object> variables = buildStudyEmailVariables(user, email, shanoirServerAddress);
             final String content = build("notifyAdminDraftStudy", variables);
@@ -197,7 +190,7 @@ public class EmailServiceImpl implements EmailService {
                     final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
                     this.setFromAdministrator(messageHelper);
                     messageHelper.setTo(studyMember.getEmail());
-                    messageHelper.setSubject("Study approved");
+                    messageHelper.setSubject(String.format("Study draft approved: %s", email.getStudyName()));
                     final Map<String, Object> variables = new HashMap<>();
                     variables.put(FIRSTNAME, studyMember.getFirstName());
                     variables.put(LASTNAME, studyMember.getLastName());
