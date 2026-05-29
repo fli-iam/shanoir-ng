@@ -98,7 +98,7 @@
                         </ng-container>
                     </li>
                     <li>
-                        <label>Processing type</label>
+                        <label class="required-label">Processing type</label>
                         <span class="right-col">
                             <ng-container *ngIf="mode === 'view'; else processingTypeEdit">{{ pipelineParameters['processing_type'] }}</ng-container>
                             <ng-template #processingTypeEdit>
