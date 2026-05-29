@@ -55,7 +55,8 @@ public class FileSystemStorageService implements StorageService {
     public boolean existsStudyData(Long studyId, String fileName) throws StorageException {
         String directory = STUDY + studyId;
         try {
-            Path filePath = Paths.get(baseDirStudies, directory, fileName);
+            String decodedFileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8);
+            Path filePath = Paths.get(baseDirStudies, directory, decodedFileName);
             return Files.exists(filePath);
         } catch(InvalidPathException e) {
             return false;
@@ -66,7 +67,8 @@ public class FileSystemStorageService implements StorageService {
     public boolean existsExtraData(Long examinationId, String fileName) throws StorageException {
         String directory = EXAMINATION + examinationId;
         try {
-            Path filePath = Paths.get(baseDirDatasets, directory, fileName);
+            String decodedFileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8);
+            Path filePath = Paths.get(baseDirDatasets, directory, decodedFileName);
             return Files.exists(filePath);
         } catch (InvalidPathException e) {
             return false;
