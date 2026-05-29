@@ -74,7 +74,7 @@ public class ExecutionTemplateRunner implements ApplicationRunner {
         try {
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
-            //Get counter for exec to import
+            // Get counter for exec to import
             MiscellaneousParameter importExecParam = miscelleneousParamRepository.findById("import_exec_count").orElse(null);
             if (Objects.isNull(importExecParam)) {
                 LOG.info("import_exec_count not found — initializing to 0.");
@@ -85,18 +85,18 @@ public class ExecutionTemplateRunner implements ApplicationRunner {
             }
             long importExecCount = Long.parseLong(importExecParam.getValue());
 
-            //Get new acquisitions
+            // Get new acquisitions
             List<DatasetAcquisition> newAcquisitions = acquisitionRepository.findByIdGreaterThan(importExecCount);
             if (newAcquisitions.isEmpty()) {
                 LOG.info("No new acquisitions to check for executions template.");
                 return;
             }
 
-            //Set new counter value
+            // Set new counter value
             importExecParam.setValue(newAcquisitions.stream().map(DatasetAcquisition::getId).reduce(Long::max).get().toString());
             miscelleneousParamRepository.save(importExecParam);
 
-            //Check execution template for auto-exec for new acquisitions
+            // Check execution template for auto-exec for new acquisitions
             newAcquisitions.stream()
                     .collect(Collectors.groupingBy(a -> a.getExamination().getId()))
                     .values()
