@@ -30,8 +30,7 @@ import {Pipeline} from "../models/pipeline"
 import {PipelineService} from "../pipelines/pipeline/pipeline.service"
 
 import {ExecutionTemplateComponent} from "./execution-template.component"
-
-
+import {pipeline} from "stream";
 
 @Injectable()
 export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
@@ -200,7 +199,13 @@ export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
 
     getPipelinesFromVIP(template: ExecutionTemplateComponent) {
         this.pipelineService.listPipelines().then(
-            (pipelines :Pipeline[])=>{
+            (pipelines :Pipeline[])=> {
+                if (!pipelines || pipelines.length === 0) {
+                    template.pipelines = [];
+                    template.pipelineNames = [];
+                    this.consoleService.log("warn", "No pipelines available from the VIP");
+                    return
+                }
                 template.pipelines = pipelines
                 template.pipelineNames = pipelines.map(pipeline => pipeline.identifier)
             }
