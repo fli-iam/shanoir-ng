@@ -29,7 +29,6 @@ import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringService
 import org.shanoir.ng.vip.executionTemplate.model.ExecutionInQueue;
 import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplate;
 import org.shanoir.ng.vip.executionTemplate.repository.PlannedExecutionRepository;
-import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +41,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -166,7 +164,7 @@ public class PlannedExecutionManager {
         try {
             ExecutionCandidateDTO candidate = plannedExecutionServiceImpl.prepareExecutionCandidate(template, executionLevel, objectId);
             if (Objects.nonNull(candidate)) {
-                IdName monitoringIdName = executionService.createExecution(candidate, datasetRepository.findByIdIn(candidate.getDatasetParameters().stream().map(DatasetParameterDTO::getDatasetIds).flatMap(List::stream).collect(Collectors.toList())));
+                IdName monitoringIdName = executionService.createExecutions(List.of(candidate));
                 String vipIdentifier = executionMonitoringService.getVipIdentifierFromMonitoringId(monitoringIdName.getId());
                 for (Long acquisitionId : plannedExecutionToRemoveWithAcquisitionId) {
                     plannedExecutionRepository.deleteByAcquisitionIdAndTemplateId(acquisitionId, template.getId());

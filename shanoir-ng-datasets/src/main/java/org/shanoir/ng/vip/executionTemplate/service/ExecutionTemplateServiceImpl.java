@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.vip.executionTemplate.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplate;
 import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplateFilter;
