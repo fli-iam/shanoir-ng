@@ -79,8 +79,11 @@ public class ExecutionTemplateRunner implements ApplicationRunner {
             //Get counter for exec to import
             MiscellaneousParameter importExecParam = miscelleneousParamRepository.findById("import_exec_count").orElse(null);
             if (Objects.isNull(importExecParam)) {
-                LOG.error("import_exec_count not present in MiscellaneousParameter table. Aborting execution template runner ...");
-                return;
+                LOG.info("import_exec_count not found — initializing to 0.");
+                importExecParam = new MiscellaneousParameter();
+                importExecParam.setName("import_exec_count");
+                importExecParam.setValue("0");
+                miscelleneousParamRepository.save(importExecParam);
             }
             long importExecCount = Long.parseLong(importExecParam.getValue());
 
