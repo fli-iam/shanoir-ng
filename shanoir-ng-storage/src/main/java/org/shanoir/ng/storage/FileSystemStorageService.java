@@ -17,6 +17,8 @@ package org.shanoir.ng.storage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -211,7 +213,8 @@ public class FileSystemStorageService implements StorageService {
     }
 
     private Resource load(String baseDir, String directory, String fileName) throws StorageException {
-        Path filePath = Paths.get(baseDir, directory, fileName);
+        String decodedFileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8);
+        Path filePath = Paths.get(baseDir, directory, decodedFileName);
         Resource resource = new FileSystemResource(filePath);
         if (!resource.exists()) {
             throw new StorageException("File not found: " + filePath, null);
