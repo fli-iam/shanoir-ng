@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.vip.path;
 
+import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.HikariPoolMXBean;
 import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
@@ -31,6 +33,7 @@ import org.springframework.stereotype.Controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
 public class PathApiController implements PathApi {
@@ -43,6 +46,11 @@ public class PathApiController implements PathApi {
 
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
+
+    @Autowired
+    private HikariDataSource dataSource;
+
+    private static final AtomicInteger NUMBER_OF_DOWNLOAD = new AtomicInteger(0);
 
     @Override
     public ResponseEntity<?> getPath(String completePath, String action, final String format, Long converterId, String sorting, HttpServletResponse response)
@@ -57,8 +65,9 @@ public class PathApiController implements PathApi {
                 case "properties":
                     return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
                 case "content":
+                    printStats(completePath);
                     List<Dataset> datasets = processingResourceRepository.findDatasetsByResourceId(completePath);
-
+                    NUMBER_OF_DOWNLOAD.incrementAndGet();
                     if (datasets.isEmpty()) {
                         LOG.error("No dataset found for resource id [{}]", completePath);
                         return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
@@ -74,5 +83,21 @@ public class PathApiController implements PathApi {
             LOG.error("Error while VIP downloading data", e);
             throw e;
         }
+    }
+
+    public void printStats(String completePath) {
+        HikariPoolMXBean pool = dataSource.getHikariPoolMXBean();
+
+        int active = pool.getActiveConnections();
+        int idle = pool.getIdleConnections();
+        int total = pool.getTotalConnections();
+        int waiting = pool.getThreadsAwaitingConnection();
+
+        LOG.info("For path : " + completePath);
+        LOG.info("Active: " + active);
+        LOG.info("Idle (free): " + idle);
+        LOG.info("Total: " + total);
+        LOG.info("Waiting threads: " + waiting);
+        LOG.info("?umber of downloads : " + NUMBER_OF_DOWNLOAD);
     }
 }
