@@ -7,7 +7,6 @@ import { ColumnDefinition } from 'src/app/shared/components/table/column.definit
 import { TableComponent } from "../../shared/components/table/table.component";
 import { ExecutionTemplate } from "../models/execution-template";
 import { BrowserPaginEntityListComponent } from "../../shared/components/entity/entity-list.browser.component.abstract";
-import { StudyUserRight } from "../../studies/shared/study-user-right.enum";
 import { StudyRightsService } from "../../studies/shared/study-rights.service";
 
 import { ExecutionTemplateService } from "./execution-template.service";
