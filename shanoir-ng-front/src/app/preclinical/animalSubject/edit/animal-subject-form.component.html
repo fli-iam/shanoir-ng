@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <h2 class="header command-zone"i18n="Create subject|Title@@subjectDetailCreateTitle">Create subject</h2>
                 </ng-template>
             </span>
-            
+
             <!-- Subject properties group -->
             <fieldset formGroupName="subject">
                 <legend *ngIf="mode !== 'view'" i18n="Subject detail|Name label@@subjectDetailGeneral">General</legend>
@@ -226,19 +226,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </div>
                 </ol>
 			</fieldset>
-            
             <!-- Pathologies and therapies sections -->
-        </div>
-		<div *ngIf="displayPathologyTherapy">
-			<fieldset>
-				<legend i18n="AnimalSubjectDetail|Pathologies label@@animalSubjectDetailPathologies">Pathologies</legend>
+            <fieldset *ngIf="displayPathologyTherapy">
+                <legend i18n="AnimalSubjectDetail|Pathologies label@@animalSubjectDetailPathologies">Pathologies</legend>
                 <subject-pathology-list [mode]="mode" formControlName="subjectPathologies" (openCreationForm)="openCreateSubjectPathology()"></subject-pathology-list>
-			</fieldset>
+            </fieldset>
 
-			<fieldset>
-				<legend i18n="AnimalSubjectDetail|Therapies label@@animalSubjectDetailTherapies">Therapies</legend>
+            <fieldset *ngIf="displayPathologyTherapy">
+                <legend i18n="AnimalSubjectDetail|Therapies label@@animalSubjectDetailTherapies">Therapies</legend>
                 <subject-therapy-list [mode]="mode" formControlName="subjectTherapies" (openCreationForm)="openCreateSubjectTherapy()"></subject-therapy-list>
-			</fieldset>
-		</div>
+            </fieldset>
+        </div>
     </form>
 </div>

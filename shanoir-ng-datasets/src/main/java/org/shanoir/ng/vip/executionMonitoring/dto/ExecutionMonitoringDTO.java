@@ -32,9 +32,6 @@ public class ExecutionMonitoringDTO extends DatasetProcessingDTO {
 
     private String outputProcessing;
 
-    /**
-     * the status of the execution
-     */
     private ExecutionStatus status;
 
     private String resultsLocation;

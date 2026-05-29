@@ -75,7 +75,7 @@ export class AccountRequestComponent implements OnInit {
             'firstName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
             'lastName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
             'email': ['', [Validators.required, Validators.pattern(emailRegex)]],
-            'accountRequestInfo': ['', [this.validateARInfo]]
+            'accountRequestInfo': [new AccountRequestInfo(), [this.validateARInfo]]
         });
     }
 

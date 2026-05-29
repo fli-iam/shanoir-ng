@@ -61,3 +61,4 @@ shanoir-ng-tests/tests/pip-selfcheck.json
 # VIP Local
 /docker-compose/vip/
 /docker-compose/Dockerfile.vip
+docker-compose-vip.yml
