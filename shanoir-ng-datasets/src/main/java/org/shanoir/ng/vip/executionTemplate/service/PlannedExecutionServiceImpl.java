@@ -98,7 +98,6 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
                     case "dataset" ->
                             transactionRunner.runInTransaction(em -> createExecutionsAtDatasetLevel(template, createdAcquisitionsPerTemplateId.get(templateId)));
                     default -> { }
-
                 }
             }
         }
@@ -215,13 +214,14 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
         candidate.setClient("shanoir-uploader");
         candidate.setName(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "execution_name")).findFirst().get().getValue());
         candidate.setName(candidate.getName() + "_" + (Objects.isNull(examId) ? "" : examId + "_") + LocalDate.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE));
-        candidate.setConverterId(Long.valueOf(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "converter")).findFirst().get().getValue()));
+        String converterValue = template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "converter")).findFirst().map(ExecutionTemplateParameter::getValue).orElse(null);
+        if (converterValue != null) candidate.setConverterId(Long.valueOf(converterValue));
         candidate.setPipelineIdentifier(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "pipeline_identifier")).findFirst().get().getValue());
         candidate.setProcessingType(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "processing_type")).findFirst().get().getValue());
         candidate.setStudyIdentifier(studyId);
 
         candidate.setDatasetParameters(prepareDatasetParameters(template, objectId));
-        return Objects.isNull(candidate.getDatasetParameters()) ? null : candidate;
+        return (Objects.isNull(candidate.getDatasetParameters()) || candidate.getDatasetParameters().isEmpty()) ? null : candidate;
     }
 
     public List<Long> getInvolvedData(ExecutionInQueue execution) {
@@ -265,7 +265,6 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
                     if (dataset.getName().contains(parameterValue)) {
                         inputIds.add(dataset.getId());
                     }
-                    return null;
                 }
                 default -> { }
             }
@@ -273,7 +272,8 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
                 DatasetParameterDTO datasetParameterDTO = new DatasetParameterDTO();
                 datasetParameterDTO.setDatasetIds(inputIds);
                 datasetParameterDTO.setName(prefixe);
-                datasetParameterDTO.setConverterId(Long.valueOf(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "converter")).findFirst().get().getValue()));
+                String converterVal = template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "converter")).findFirst().map(ExecutionTemplateParameter::getValue).orElse(null);
+                if (converterVal != null) datasetParameterDTO.setConverterId(Long.valueOf(converterVal));
                 datasetParameterDTO.setExportFormat(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "export_format")).findFirst().get().getValue());
                 datasetParameterDTO.setGroupBy(GroupByEnum.valueOf(parameterGroup.toUpperCase()));
                 datasetParameters.add(datasetParameterDTO);
