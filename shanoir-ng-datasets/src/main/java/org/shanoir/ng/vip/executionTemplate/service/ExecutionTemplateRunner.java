@@ -73,8 +73,6 @@ public class ExecutionTemplateRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         try {
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-            LOG.info("print info test");
-            LOG.error("print error test");
 
             //Get counter for exec to import
             MiscellaneousParameter importExecParam = miscelleneousParamRepository.findById("import_exec_count").orElse(null);
