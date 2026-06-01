@@ -38,34 +38,34 @@ export class ExecutionService {
     if (execution === null || execution === undefined) {
       throw new Error('Required parameter execution was null or undefined when calling createExecution.');
     }
-    return this.httpClient.post<IdName>(`${this.executionUrl}/`,execution).toPromise();
+    return this.httpClient.post<IdName>(`${this.executionUrl}/`,[execution]).toPromise();
   }
 
   /**
-   * Get stderr of an execution
+   * Get stderr of a processing
    *
-   * @param executionIdentifier
+   * @param processingId
    */
-  public getStderr(executionIdentifier: string ): Observable<string> {
+  public getStderr(processingId: number ): Observable<string> {
 
-    if (executionIdentifier === null || executionIdentifier === undefined) {
-      throw new Error('Required parameter executionIdentifier was null or undefined when calling getStderr.');
+    if (processingId === null || processingId === undefined) {
+      throw new Error('Required parameter processingId was null or undefined when calling getStderr.');
     }
-    return this.httpClient.get(`${this.executionUrl}/${executionIdentifier}/stderr`, {responseType: 'text'});
+    return this.httpClient.get(`${this.executionUrl}/${processingId}/stderr`, {responseType: 'text'});
   }
 
   /**
-   * Get stdout of an execution
+   * Get stdout of a processing
    *
-   * @param executionIdentifier
+   * @param processingId
    *
    */
-  public getStdout(executionIdentifier: string ): Observable<string> {
+  public getStdout(processingId: number ): Observable<string> {
 
-    if (executionIdentifier === null || executionIdentifier === undefined) {
-      throw new Error('Required parameter executionIdentifier was null or undefined when calling getStdout.');
+    if (processingId === null || processingId === undefined) {
+      throw new Error('Required parameter processingId was null or undefined when calling getStdout.');
     }
-    return this.httpClient.get(`${this.executionUrl}/${executionIdentifier}/stdout`, {responseType: 'text'});
+    return this.httpClient.get(`${this.executionUrl}/${processingId}/stdout`, {responseType: 'text'});
   }
 
 }
