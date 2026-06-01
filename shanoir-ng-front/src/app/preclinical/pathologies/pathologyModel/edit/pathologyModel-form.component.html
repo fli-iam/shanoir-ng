@@ -21,6 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(edit)="goToEdit()"
 				(dismiss)="goToView()"
 				(back)="goBack()">
+            <button  *ngIf="mode == 'view' && hasDownloadRight" class="right-icon dl-button" type="button" (click)="downloadModelSpecifications()" [disabled]="downloadState.isActive()">Download<i class="fas fa-download"></i></button>
 		</form-footer>
 		<table class="layout">
 			<tr><td colspan="2">
@@ -45,7 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label i18n="Edit model|Name label">Name</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'">
-										{{model?.name}}
+										{{pathologyModel?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<input type="text" id="name" formControlName="name"/>
@@ -58,7 +59,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label i18n="Edit model|Pathology label">Pathology</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'">
-										{{model?.pathology?.name}}
+										{{pathologyModel?.pathology?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
                                     <select-box formControlName="pathology" [optionArr]="pathologies">
@@ -75,7 +76,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label i18n="Edit model|Comments label">Comment</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template [ngSwitchCase]="'view'">
-										{{model?.comment}}
+										{{pathologyModel?.comment}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
 									<textarea rows="4" id="comment" formControlName="comment"></textarea>
@@ -86,23 +87,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<label i18n="Edit model|Specifications label">Specifications</label>
 							<span class="right-col" [ngSwitch]="mode">
 								<ng-template  [ngSwitchCase]="'view'">
-									{{model?.filename}}
+									{{pathologyModel?.filename}}
 								</ng-template>
 								<ng-template  [ngSwitchCase]="'create'">
-									<input type="file" id="pathologyFile" name="pathologyFile" formControlName="filename" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+									<input type="file" id="pathologyFile" name="pathologyFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
 								</ng-template>
 								<ng-template  [ngSwitchCase]="'edit'">
-									{{model?.filename}}
-									<input type="file" id="pathologyFile" name="pathologyFile" formControlName="filename" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
+									{{pathologyModel?.filename}}
+									<input type="file" id="pathologyFile" name="pathologyFile" (change)="fileChangeEvent($event.target.files)" placeholder="Upload file..." />
 								</ng-template>
 							</span>
-
 						</li>
 					</ol>
 					</fieldset>
 				</td>
 			</tr>
-
 		</table>
     </form>
 </div>
