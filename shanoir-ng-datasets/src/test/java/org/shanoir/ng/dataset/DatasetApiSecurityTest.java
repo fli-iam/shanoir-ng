@@ -208,17 +208,18 @@ public class DatasetApiSecurityTest {
 
         //updateDataset(Long, Dataset, BindingResult)
         given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+        given(rightsRepository.findByUserId(LOGGED_USER_ID)).willReturn(Arrays.asList(new StudyUser[]{su1}));
         su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_SEE_ALL));
+        su1.setCenterIds(Arrays.asList(new Long[]{1L, 2L}));
+        Dataset ds = mockDataset(100L, 1L, 1L, 2L, 1L);
+        given(datasetRepository.findById(ds.getId())).willReturn(Optional.of(ds));
+        given(datasetRepository.findByDatasetAcquisitionExaminationStudy_IdIn(Arrays.asList(1L), PageRequest.of(0, 10).getSort())).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{ds}))));
+        drv = mockDatasetRightsDTO(100L, 2L, 1L);
+        given(datasetRepository.findRightsDtoBaseById(ds.getId())).willReturn(drv);
         if ("ROLE_USER".equals(role)) {
             assertAccessDenied(api::updateDataset, 1L, mockDataset(1L, 1L, 1L, 1L, 1L), mockBindingResult);
         } else if ("ROLE_EXPERT".equals(role)) {
             assertAccessAuthorized(api::updateDataset, 1L, mockDataset(1L, 1L, 1L, 1L, 1L), mockBindingResult);
-
-            Dataset ds = mockDataset(100L, 1L, 1L, 2L, 1L);
-            given(datasetRepository.findById(ds.getId())).willReturn(Optional.of(ds));
-            drv = mockDatasetRightsDTO(100L, 2L, 1L);
-            given(datasetRepository.findRightsDtoBaseById(ds.getId())).willReturn(drv);
-
             assertAccessDenied(api::updateDataset, 1L, ds, mockBindingResult);
         }
         assertAccessDenied(api::updateDataset, 1L, mockDataset(2L, 2L, 2L, 2L, 2L), mockBindingResult);

@@ -563,7 +563,7 @@ public class StudySecurityService {
      */
     public boolean studyUsersMatchStudy(Study study) {
         for (StudyUser su : study.getStudyUserList()) {
-            if (su.getStudy() != null && su.getStudy().getId() != null && su.getStudy().getId() != study.getId())
+            if (su.getStudy() != null && su.getStudy().getId() != null && !su.getStudy().getId().equals(study.getId()))
                 return false;
         }
         return true;

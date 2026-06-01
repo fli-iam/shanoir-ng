@@ -106,9 +106,7 @@ public class StudyRightsService {
             su.setCenterIds(centerIds);
             hasRight = hasRight || (
                 su.canAccessStudy() && (
-                    CollectionUtils.isEmpty(su.getCenterIds()) || su.getCenterIds().contains(centerId)
-                )
-            );
+                    CollectionUtils.isEmpty(su.getCenterIds()) || su.getCenterIds().contains(centerId)));
         }
         return hasRight;
     }

@@ -147,8 +147,11 @@ public class AccessRequestApiController implements AccessRequestApi {
 
         List<Long> studiesId;
         if (KeycloakUtil.isAdmin()) {
-            studiesId = Utils.toList(this.studyUserRightsRepository.findAll()).stream().map(StudyUser::getStudyId
-            ).collect(Collectors.toList());
+            studiesId = Utils.toList(this.studyUserRightsRepository.findAll())
+                .stream()
+                .filter(StudyUser::canAccessStudy)
+                .map(StudyUser::getStudyId)
+                .collect(Collectors.toList());
         } else {
             studiesId = (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, KeycloakUtil.getTokenUserId());
         }

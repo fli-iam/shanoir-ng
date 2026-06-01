@@ -148,8 +148,10 @@ public class StudyUser implements StudyUserInterface {
     @Override
     public List<StudyUserRight> getStudyUserRights() {
         List<StudyUserRight> list = new ArrayList<>();
-        for (Integer localId : studyUserRights) {
-            list.add(StudyUserRight.getType(localId));
+        if (studyUserRights != null) {
+            for (Integer localId : studyUserRights) {
+                list.add(StudyUserRight.getType(localId));
+            }
         }
         return list;
     }

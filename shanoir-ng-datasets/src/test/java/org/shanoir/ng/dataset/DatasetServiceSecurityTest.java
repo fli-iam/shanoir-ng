@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
 import static org.mockito.BDDMockito.given;
 import org.mockito.Mockito;
@@ -110,15 +110,6 @@ public class DatasetServiceSecurityTest {
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     private StudyUser su1 = new StudyUser();
-
-    @BeforeEach
-    public void setup() {
-        su1.setStudyId(1L);
-        su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
-        su1.setCenterIds(Arrays.asList(new Long[]{1L}));
-        given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
-        given(datasetRepository.findRelatedStudyIds(Mockito.anyLong())).willReturn(Set.of());
-    }
 
     @Test
     @WithAnonymousUser
@@ -465,14 +456,20 @@ public class DatasetServiceSecurityTest {
         exam4.setDatasetAcquisitions(Utils.toList(dsAcq4));
         dsAcq4.setDatasets(Arrays.asList(new Dataset[]{dataset4}));
 
-        StudyUser su1 = new StudyUser();
+        su1 = new StudyUser();
         su1.setStudyId(1L);
+        su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
         su1.setCenterIds(Arrays.asList(new Long[]{1L}));
+        given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
+        given(datasetRepository.findRelatedStudyIds(Mockito.anyLong())).willReturn(Set.of());
         given(rightsRepository.findByUserId(LOGGED_USER_ID)).willReturn(Arrays.asList(new StudyUser[]{su1}));
+        given(rightsRepository.findAllByUserId(LOGGED_USER_ID)).willReturn(Optional.of(Arrays.asList(new StudyUser[]{su1})));
+
         given(datasetRepository.findAll(Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Dataset[]{dataset1, dataset3})));
         given(datasetRepository.findAll()).willReturn(Utils.toList(dataset1, dataset2, dataset3, dataset4));
         given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L, 2L));
         given(datasetRepository.findByDatasetAcquisitionExaminationStudy_IdIn(Arrays.asList(1L, 2L), PageRequest.of(0, 10).getSort())).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{dataset1, dataset2, dataset3}))));
+        given(datasetRepository.findByDatasetAcquisitionExaminationStudy_IdIn(Arrays.asList(1L), PageRequest.of(0, 10).getSort())).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{dataset1}))));
         given(datasetRepository.findByDatasetAcquisition_Examination_Study_Id(1L)).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{dataset1, dataset3}))));
 
         given(datasetRepository.findAllById(Utils.toList(1L))).willReturn(Utils.toList(dataset1));
