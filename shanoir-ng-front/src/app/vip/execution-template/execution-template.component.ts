@@ -137,11 +137,11 @@ export class ExecutionTemplateComponent extends EntityComponent<ExecutionTemplat
         return Promise.resolve()
     }
 
-    save(): Promise<ExecutionTemplate> {
+    async save(): Promise<ExecutionTemplate> {
         this.templateService.checkOneDatasetGroup(this)
         this.templateService.cleanParameters(this)
         this.templateService.shapeParameterEntities(this)
-        this.templateService.updateEntityOnSave(this)
+        await this.templateService.updateEntityOnSave(this)
         super.save()
         return Promise.resolve(this.entity)
     }

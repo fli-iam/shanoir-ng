@@ -29,6 +29,7 @@ import { StudyService } from "../../studies/shared/study.service"
 import { ExecutionTemplateParameter } from "../models/execution-template-parameter"
 import { Pipeline } from "../models/pipeline"
 import { PipelineService } from "../pipelines/pipeline/pipeline.service"
+import { KeycloakService } from "../../shared/keycloak/keycloak.service"
 
 import { ExecutionTemplateComponent } from "./execution-template.component"
 
@@ -39,7 +40,8 @@ export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
 
     constructor(protected httpClient: HttpClient,
                 protected studyService: StudyService,
-                protected pipelineService: PipelineService) {
+                protected pipelineService: PipelineService,
+                protected keycloakService: KeycloakService) {
         super(httpClient)
     }
 
@@ -290,12 +292,13 @@ export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
         });
     }
 
-    updateEntityOnSave(template: ExecutionTemplateComponent) {
+    async updateEntityOnSave(template: ExecutionTemplateComponent): Promise<void> {
         const formValue = template.form.value
         template.entity.filterCombination = formValue.filterCombination
         template.entity.priority = formValue.priority
         template.entity.name = formValue.name
         template.entity.pipelineName = formValue.pipelineName
+        template.entity.offlineToken = await this.keycloakService.getRefreshToken()
     }
 
     updateFormValueAndPipelineParameters(name: string, value: any, template: ExecutionTemplateComponent){
