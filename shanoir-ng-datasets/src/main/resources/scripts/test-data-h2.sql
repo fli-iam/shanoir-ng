@@ -10,17 +10,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
--- Manually create this table
-CREATE TABLE `card_condition` (
-                                        `id` bigint(20) NOT NULL AUTO_INCREMENT,
-                                        `dicom_tag` int(11) DEFAULT NULL,
-                                        `operation` int(11) NOT NULL,
-                                        `shanoir_field` int(11) DEFAULT NULL,
-                                        `scope` varchar(47) DEFAULT NULL,
-                                        `cardinality` int(11) DEFAULT NULL,
-                                        PRIMARY KEY (`id`)
-);
-
 -- Populates database for test
 
 INSERT INTO study
