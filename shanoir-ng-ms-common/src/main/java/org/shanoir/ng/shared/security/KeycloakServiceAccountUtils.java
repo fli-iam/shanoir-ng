@@ -49,6 +49,8 @@ public class KeycloakServiceAccountUtils {
     private String clientId;
     @Value("${service-account.client.credential-secret:'SECRET'}")
     private String clientSecret;
+    @Value("${user-token.client.id:shanoir-ng-front}")
+    private String userTokenClientId;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -64,8 +66,7 @@ public class KeycloakServiceAccountUtils {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("client_id", this.clientId);
-        map.add("client_secret", this.clientSecret);
+        map.add("client_id", this.userTokenClientId);
         map.add("grant_type", "refresh_token");
         map.add("refresh_token", refreshToken);
 
