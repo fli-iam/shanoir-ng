@@ -50,6 +50,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (acquisitionDelete)="onAcquisitionDelete(i)"
                 [withMenu]="withMenu"
         >
+        <span *ngIf="datasetAcqNode.qualityTag" class="tag label dark" [style.background]="datasetAcqNode.qualityTag == 'ERROR' ? 'red' : (datasetAcqNode.qualityTag == 'WARNING' ? 'orange' : 'green')">
+        </span>
         </dataset-acquisition-node>
     </ng-container>
 
