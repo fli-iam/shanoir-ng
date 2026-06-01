@@ -14,12 +14,14 @@
 
 package org.shanoir.ng.vip.executionTemplate.service;
 
+import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.shared.service.TransactionRunner;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
@@ -86,6 +88,9 @@ public class PlannedExecutionManager {
 
     @Autowired
     private TransactionRunner transactionRunner;
+
+    @Autowired
+    private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
     public PlannedExecutionManager() {
         executor = Executors.newFixedThreadPool(maxThreads);
@@ -159,11 +164,24 @@ public class PlannedExecutionManager {
      * Thread the creation of monitoring and start of execution for the given template id and acquisition id
      */
     private void threadExecution(ExecutionTemplate template, Long objectId, String executionLevel, List<Long> plannedExecutionToRemoveWithAcquisitionId) {
-        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        String offlineToken = template.getOfflineToken();
+        if (offlineToken == null) {
+            LOG.error("No offline token stored for template {}. Cannot execute without user credentials.", template.getId());
+            return;
+        }
+
+        try {
+            AccessTokenResponse tokenResponse = keycloakServiceAccountUtils.refreshUserToken(offlineToken);
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN", tokenResponse.getToken());
+        } catch (SecurityException e) {
+            LOG.error("Failed to refresh user token for template {}. Execution aborted.", template.getId(), e);
+            return;
+        }
 
         try {
             ExecutionCandidateDTO candidate = plannedExecutionServiceImpl.prepareExecutionCandidate(template, executionLevel, objectId);
             if (Objects.nonNull(candidate)) {
+                candidate.setRefreshToken(offlineToken);
                 IdName monitoringIdName = executionService.createExecutions(List.of(candidate));
                 String vipIdentifier = executionMonitoringService.getVipIdentifierFromMonitoringId(monitoringIdName.getId());
                 for (Long acquisitionId : plannedExecutionToRemoveWithAcquisitionId) {
