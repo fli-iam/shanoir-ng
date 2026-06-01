@@ -24,4 +24,5 @@ export class ExecutionTemplate extends Entity {
     priority: number
     filterCombination: string
     parameters: ExecutionTemplateParameter[]
+    offlineToken?: string
 }
