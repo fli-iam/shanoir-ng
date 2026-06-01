@@ -47,15 +47,23 @@ public abstract class SecurityContextUtil {
      * @param role "ROLE_ADMIN" or "ROLE_EXPERT" or ...
      */
     public static void initAuthenticationContext(String role) {
-        initAuthenticationContext(role, 92233720L);
+        initAuthenticationContext(role, 92233720L, "mock-token-value");
+    }
+
+    public static void initAuthenticationContext(String role, String accessToken) {
+        initAuthenticationContext(role, 92233720L, accessToken);
     }
 
     public static void initAuthenticationContext(String role, Long userId) {
+        initAuthenticationContext(role, userId, "mock-token-value");
+    }
+
+    public static void initAuthenticationContext(String role, Long userId, String accessToken) {
         List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
         GrantedAuthority grantedAuth = new SimpleGrantedAuthority(role);
         grantedAuthorities.add(grantedAuth);
         Map<String, Object> claims = Map.of("preferred_username", "shanoir", "userId", userId, "realm_access", grantedAuthorities);
-        Jwt jwt = new Jwt("mock-token-value", Instant.now(), Instant.now().plusSeconds(300), Map.of("header", "mock"), claims);
+        Jwt jwt = new Jwt(accessToken, Instant.now(), Instant.now().plusSeconds(300), Map.of("header", "mock"), claims);
         Authentication authentication = new JwtAuthenticationToken(jwt, grantedAuthorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
