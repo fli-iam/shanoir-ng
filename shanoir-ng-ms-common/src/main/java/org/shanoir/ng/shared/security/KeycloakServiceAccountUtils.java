@@ -55,6 +55,35 @@ public class KeycloakServiceAccountUtils {
 
 
     /**
+     * Get a fresh access token by refreshing the given refresh/offline token.
+     *
+     * @return AccessTokenResponse containing a new access token (and rotated refresh token)
+     */
+    public AccessTokenResponse refreshUserToken(String refreshToken) throws SecurityException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        map.add("client_id", this.clientId);
+        map.add("client_secret", this.clientSecret);
+        map.add("grant_type", "refresh_token");
+        map.add("refresh_token", refreshToken);
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
+
+        try {
+            ResponseEntity<AccessTokenResponse> response = this.restTemplate.exchange(this.serverUrl, HttpMethod.POST, entity, AccessTokenResponse.class);
+            return response.getBody();
+        } catch (HttpStatusCodeException e) {
+            LOG.error("Unexpected error while refreshing user token.", e);
+            throw new SecurityException("Unexpected error while refreshing user token.", e);
+        } catch (RestClientException e) {
+            LOG.error("No response payload for user token refresh request.", e);
+            throw new SecurityException("No response payload for user token refresh request.", e);
+        }
+    }
+
+    /**
      * Get an access token using service account
      *
      * @return AccessTokenResponse
