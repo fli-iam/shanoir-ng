@@ -17,17 +17,12 @@ package org.shanoir.ng.importer.service;
 
 import java.util.List;
 
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
-import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.importer.dto.ImportJob;
-import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
-import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
-import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.slf4j.Logger;

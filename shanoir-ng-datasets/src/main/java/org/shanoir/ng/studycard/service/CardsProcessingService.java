@@ -96,7 +96,7 @@ public class CardsProcessingService {
      */
     public QualityCardResult applyQualityCardOnDatasetAcquisition(QualityCard qualityCard, DatasetAcquisition acquisition) throws MicroServiceCommunicationException, PacsException {
         long startTs = new Date().getTime();
-         if (qualityCard == null)
+        if (qualityCard == null)
             throw new IllegalArgumentException("qualityCard can't be null");
         if (acquisition == null)
             throw new IllegalArgumentException("dataset acquisition can't be null");
@@ -136,7 +136,7 @@ public class CardsProcessingService {
     public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start,
             Integer stop) throws MicroServiceCommunicationException, PacsException {
         long startTs = new Date().getTime();
-         if (qualityCard == null)
+        if (qualityCard == null)
             throw new IllegalArgumentException("qualityCard can't be null");
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(),
                 "Quality check started on study " + qualityCard.getStudyId(), 4, qualityCard.getStudyId());
@@ -191,7 +191,7 @@ public class CardsProcessingService {
                             + " in examination " + examination.getComment());
                     eventService.publishEvent(event);
                     try {
-                       QualityCardResult acquisitionResult = applyQualityCardOnDatasetAcquisition(
+                        QualityCardResult acquisitionResult = applyQualityCardOnDatasetAcquisition(
                                 qualityCard, datasetAcquisition);
                         result.merge(acquisitionResult);
                         synchronized (updatedAcquisitions) {

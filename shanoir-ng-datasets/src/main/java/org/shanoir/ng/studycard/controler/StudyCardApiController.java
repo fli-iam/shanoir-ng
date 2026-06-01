@@ -14,14 +14,22 @@
 
 package org.shanoir.ng.studycard.controler;
 
-import io.swagger.v3.oas.annotations.Parameter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.PacsException;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -39,9 +47,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class StudyCardApiController implements StudyCardApi {
@@ -202,7 +208,7 @@ public class StudyCardApiController implements StudyCardApi {
         StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
         LOG.debug("re-apply studycard n° " + studyCard.getId());
         List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
-         try {
+        try {
             cardProcessingService.applyStudyCard(studyCard, acquisitions);
         } catch (PacsException | EntityNotFoundException e) {
             // TODO : PR comment

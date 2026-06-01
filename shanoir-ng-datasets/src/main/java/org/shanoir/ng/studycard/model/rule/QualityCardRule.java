@@ -115,7 +115,7 @@ public class QualityCardRule extends AbstractEntity {
             result.add(resultEntry);
             result.addUpdatedDatasetAcquisition(setTagToDatasetAcquisition(datasetAcquisition));
         } else {
-             ConditionResult conditionResult = conditionsfulfilled(acquisitionDicomAttributes, datasetAcquisition, result);
+            ConditionResult conditionResult = conditionsfulfilled(acquisitionDicomAttributes, datasetAcquisition, result);
             if (conditionResult.isFulfilled()) {
                 result.addUpdatedDatasetAcquisition(setTagToDatasetAcquisition(datasetAcquisition));
             }
