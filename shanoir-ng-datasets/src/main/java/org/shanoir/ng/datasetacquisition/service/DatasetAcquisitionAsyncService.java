@@ -12,16 +12,19 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Field } from '../../shared/reflect/field.decorator';
-import { Entity } from '../../shared/components/entity/entity.abstract';
-import { User } from '../../users/shared/user.model';
+package org.shanoir.ng.datasetacquisition.service;
 
-export class AccessRequest extends Entity {
-    @Field() id: number;
-    @Field() studyId: number;
-    @Field() studyName: string;
-    @Field() user: User;
-    @Field() motivation: string;
-    @Field() status: number;
-    @Field() alreadyMember: boolean;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
+
+import java.io.IOException;
+
+
+public interface DatasetAcquisitionAsyncService {
+
+    public void deleteByIdAsync(DatasetAcquisition entity, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException;
+
 }

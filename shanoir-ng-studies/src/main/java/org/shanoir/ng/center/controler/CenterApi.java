@@ -64,6 +64,7 @@ public interface CenterApi {
     ResponseEntity<CenterDTO> findCenterById(
             @Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 
+    // Attention: this method is used by ShanoirUploader!!!
     @Operation(summary = "", description = "If exists, returns the center corresponding to the given InstitutionDicom or creates a new center")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "found center"),

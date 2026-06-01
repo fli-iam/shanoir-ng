@@ -286,11 +286,9 @@ public class DICOMWebService {
                     if (subjectName != null && !subjectName.trim().isEmpty()) {
                         dicomBytes = modifyDicomPatientInfo(dicomBytes, subjectName);
                     }
-                    ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
+                    ByteArrayResource byteArrayResource = new ByteArrayResource(dicomBytes);
                     HttpHeaders responseHeaders = new HttpHeaders();
-                    if (!entity.isChunked() && entity.getContentLength() >= 0) {
-                        responseHeaders.setContentLength(entity.getContentLength());
-                    }
+                    responseHeaders.setContentLength(dicomBytes.length);
                     return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
                 } else {
                     LOG.error("DICOMWeb: findInstance: empty response entity.");

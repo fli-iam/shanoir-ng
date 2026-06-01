@@ -616,8 +616,8 @@ public class ImportUtils {
         return patients;
     }
 
-    public static AcquisitionEquipment findOrCreateEquipmentWithEquipmentDicom(EquipmentDicom equipmentDicom, Center center) {
-        AcquisitionEquipment equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().findAcquisitionEquipmentsOrCreateByEquipmentDicom(equipmentDicom, center.getId()).get(0);
+    public static AcquisitionEquipment findOrCreateEquipmentWithEquipmentDicom(EquipmentDicom equipmentDicom, Long centerId) {
+        AcquisitionEquipment equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().findAcquisitionEquipmentsOrCreateByEquipmentDicom(equipmentDicom, centerId).get(0);
         if (equipment == null) {
             logger.error("Error: could not find or create equipment.");
         } else {

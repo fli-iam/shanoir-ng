@@ -62,6 +62,7 @@ public interface AcquisitionEquipmentApi {
     ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
             @Parameter(description = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
 
+    // Attention: this method is used by ShanoirUploader!!!
     @Operation(summary = "", description = "If exists, returns the acquisition equipments corresponding to the given serial number")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found acquisition equipment"),
@@ -74,6 +75,7 @@ public interface AcquisitionEquipmentApi {
     ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsBySerialNumber(
             @Parameter(description = "serial number of the acquisition equipment", required = true) @PathVariable("serialNumber") String serialNumber);
 
+    // Attention: this method is used by ShanoirUploader!!!
     @Operation(summary = "", description = "If exists, returns the acquisition equipment(s) corresponding to the equipment dicom or creates a new one")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found/created acquisition equipment(s)"),
