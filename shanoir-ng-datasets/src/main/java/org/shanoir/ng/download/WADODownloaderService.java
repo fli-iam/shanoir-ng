@@ -341,7 +341,8 @@ public class WADODownloaderService {
             try {
                 dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
             } catch (PacsException e) {
-                throw new RuntimeException("Could not get dataset [" + dataset.getId() + "] dicom attributes from pacs", e);
+                // TODO : modify to log error message in results - if possible do not impact study cards
+                LOG.warn("Could not get dataset [" + dataset.getId() + "] dicom attributes from pacs", e);
             }
         });
         LOG.debug("get DICOM attributes for acquisition [" + acquisition.getId() + "] : " + (new Date().getTime() - ts) + " ms");

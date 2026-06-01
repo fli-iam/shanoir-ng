@@ -56,7 +56,7 @@ public class ImporterMailService {
     private ObjectMapper objectMapper;
 
     /**
-     * Sens the import email through rabbitMQ to user MS
+     * Sends the import email through rabbitMQ to user MS
      * @param importJob the import job
      * @param userId the userID
      * @param examination the exam ID
