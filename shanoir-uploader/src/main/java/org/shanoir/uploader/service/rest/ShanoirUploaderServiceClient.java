@@ -129,6 +129,8 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";
 
+    private static final String SERVICE_EXAMINATIONS_DELETE = "service.examinations.delete";
+
     private static final String SERVICE_IMPORTER_CREATE_TEMP_DIR = "service.importer.create.temp.dir";
 
     private static final String SERVICE_IMPORTER_START_IMPORT_JOB = "service.importer.start.import.job";
@@ -192,6 +194,8 @@ public class ShanoirUploaderServiceClient {
     private String serviceURLDatasetsDicomWebStudies;
 
     private String serviceURLExaminationsCreate;
+
+    private String serviceURLExaminationsDelete;
 
     private String serviceURLImporterCreateTempDir;
 
@@ -265,6 +269,8 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_KEYS_FIND_VALUE);
         this.serviceURLExaminationsCreate = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
+        this.serviceURLExaminationsDelete = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_DELETE);
         this.serviceURLImporterCreateTempDir = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_CREATE_TEMP_DIR);
         this.serviceURLImporterStartImportJob = this.serverURL
@@ -1096,6 +1102,20 @@ public class ShanoirUploaderServiceClient {
         return null;
     }
 
+    public void deleteExamination(Long examinationUID) throws Exception {
+        try (CloseableHttpResponse response = httpService.delete(this.serviceURLExaminationsDelete + examinationUID)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_NO_CONTENT) {
+                LOG.info("Examination with UID " + examinationUID + " successfully deleted on server.");
+            } else {
+                LOG.error("Error in deleteExamination: with examinationUID " + examinationUID + " (status code: " + code
+                        + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                throw new Exception("Error in deleteExamination");
+            }
+        }
+    }
+
+
     public List<StudyCardOnStudyResultDTO> applyStudyCardOnStudy(Long studyCardId) throws Exception {
         LOG.info("Apply studycard on study, started on server.");
         try (CloseableHttpResponse response = httpService.get(this.serviceURLStudyCardsApplyOnStudy + studyCardId)) {
@@ -1125,6 +1145,9 @@ public class ShanoirUploaderServiceClient {
                 if (code == HttpStatus.SC_OK) {
                     List<QualityCard> qualityCards = Util.getMappedList(response, QualityCard.class);
                     return qualityCards;
+                } 
+                else if (code == HttpStatus.SC_NOT_FOUND) {
+                    LOG.info("No quality cards found for studyId : " + studyIdentifier);
                 } else {
                     LOG.error("Could not get quality cards for studyId : " + studyIdentifier + " (status code: " + code
                             + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
