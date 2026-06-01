@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { FormArray, FormGroup, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
@@ -40,7 +40,6 @@ import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.comp
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
-import { QualityCardRule } from '../shared/quality-card.model';
 
 @Component({
     selector: 'study-card',
