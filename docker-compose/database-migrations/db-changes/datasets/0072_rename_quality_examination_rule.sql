@@ -11,5 +11,4 @@
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 -- rename quality_examination_rule table to fit the new quality card concept
-DROP TABLE IF EXISTS quality_card_rule;
-RENAME TABLE quality_examination_rule TO quality_card_rule;
+RENAME TABLE IF EXISTS quality_examination_rule TO quality_card_rule;
