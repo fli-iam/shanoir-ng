@@ -41,13 +41,13 @@ public enum ExecutionStatus {
 
     @JsonCreator
     public static ExecutionStatus fromRestLabel(String restlabel) {
-        String label = restlabel.substring(0, 1).toUpperCase() + restlabel.substring(1).toLowerCase();
-        if (Objects.equals("Completed", label)) {
-            label = "Finished";
+        String label = restlabel.toLowerCase();
+        if (Objects.equals("completed", label)) {
+            label = "finished";
         }
 
         for (ExecutionStatus status : values()) {
-            if (status.restLabel.equals(label)) {
+            if (status.restLabel.toLowerCase().equals(label)) {
                 return status;
             }
         }
