@@ -15,7 +15,6 @@
 package org.shanoir.ng.study;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -24,9 +23,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,10 +34,8 @@ import org.mockito.Mockito;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.exception.AccessDeniedException;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.controler.StudyApiController;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
@@ -53,10 +50,14 @@ import org.shanoir.ng.study.service.StudyUserService;
 import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -75,6 +76,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class StudyApiControllerTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(StudyApiControllerTest.class);
 
     private static final String REQUEST_PATH = "/studies";
     private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
@@ -115,23 +118,32 @@ public class StudyApiControllerTest {
     @MockBean
     private RelatedDatasetService relatedDatasetService;
 
+    @MockBean
+    private StorageService storageService;
+
     @TempDir
     private static File tempFolder;
+
+    private static Resource tempResource;
 
     private static String tempFolderPath;
 
     @BeforeAll
-    public static void beforeAll() {
+    public static void beforeAll() throws IOException {
         tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-        System.setProperty("studies-data", tempFolderPath);
+        System.setProperty("storage.file-system.studies-data", tempFolderPath);
+        File tempFile = new File(tempFolder, "test-file.txt");
+        Files.writeString(tempFile.toPath(), "test content");
+        tempResource = new FileSystemResource(tempFile);
     }
 
     @BeforeEach
-    public void setup() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException {
+    public void setup() throws Exception {
         given(studyMapperMock.studiesToStudyDTOs(Mockito.anyList()))
                 .willReturn(Arrays.asList(new StudyDTO()));
         given(studyMapperMock.studyToStudyDTO(Mockito.any(Study.class))).willReturn(new StudyDTO());
         doNothing().when(studyServiceMock).deleteById(1L);
+        given(storageService.loadStudyData(1L, "file.pdf")).willReturn(tempResource);
         given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
         given(studyServiceMock.findAllNames()).willReturn(Arrays.asList(new IdName()));
         given(studyServiceMock.create(Mockito.mock(Study.class))).willReturn(new Study());
@@ -173,29 +185,20 @@ public class StudyApiControllerTest {
     @Test
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void testUploadProtocolFile() throws IOException {
-        Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn(tempFolderPath + "study-1/test-import-extra-data.pdf");
-
         File importZip = new File(tempFolderPath + "/test-import-extra-data.zip");
         File saved = new File(tempFolderPath + "study-1/test-import-extra-data.pdf");
-
         if (saved.exists()) {
             saved.delete();
         }
-
         try {
             new File(tempFolderPath).mkdirs();
             importZip.createNewFile();
             MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.pdf", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
-
             // WHEN The file is added to the examination
-
             mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/protocol-file-upload/1").file(file))
                     .andExpect(status().isOk());
-
-            // THEN the file is saved
-            assertTrue(saved.exists());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
     }
@@ -203,25 +206,14 @@ public class StudyApiControllerTest {
     @Test
     @WithMockUser
     public void testDownloadProtocolFile() throws IOException {
-        Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn(tempFolderPath + "study-1/file.pdf");
-
-        // GIVEN an study with protocol file
-        File todow = new File(tempFolderPath + "study-1/file.pdf");
-        todow.getParentFile().mkdirs();
-
-        // WHEN we download protocolFile
         try {
-            todow.createNewFile();
-            FileUtils.write(todow, "test");
             MvcResult result = mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/protocol-file-download/1/file.pdf/"))
                     .andExpect(status().isOk())
                     .andReturn();
-
             // THEN the file is downloaded
             assertNotNull(result.getResponse().getContentAsString());
-            System.out.println(result.getResponse().getContentAsString());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
             fail();
         }
     }

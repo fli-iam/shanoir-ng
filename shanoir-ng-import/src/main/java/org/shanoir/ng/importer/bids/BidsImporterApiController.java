@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Map;
 
-import org.shanoir.ng.importer.ImporterApiController;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Subject;
@@ -71,9 +70,6 @@ public class BidsImporterApiController implements BidsImporterApi {
     private static final String SUBJECT_CREATION_ERROR = "An error occured during the subject creation, please check your rights.";
 
     private static final String EXAMINATION_CREATION_ERROR = "An error occured during the examination creation, please check your rights.";
-
-    @Autowired
-    private ImporterApiController importer;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
