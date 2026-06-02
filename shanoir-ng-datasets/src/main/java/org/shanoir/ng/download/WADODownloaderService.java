@@ -322,7 +322,7 @@ public class WADODownloaderService {
                 LOG.error("Could not find dicom attributes for dataset [{}] : no pacs url for this dataset", dataset.getId());
             }
         } catch (IOException | MessagingException | RestClientException e) {
-            throw new PacsException("Can not get dicom attributes for dataset [" + dataset.getId() + "]", e);
+            throw new PacsException("Could not get dataset [" + dataset.getId() + "] dicom attributes from pacs", e);
         }
         return null;
     }
@@ -336,15 +336,13 @@ public class WADODownloaderService {
             }
         }
         AcquisitionAttributes<Long> dAcquisitionAttributes = new AcquisitionAttributes<>();
-        // remove this ?
-        datasets.forEach(dataset -> {
+        for (Dataset dataset : datasets) {
             try {
                 dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
             } catch (PacsException e) {
-                // TODO : modify to log error message in results - if possible do not impact study cards
-                LOG.warn("Could not get dataset [" + dataset.getId() + "] dicom attributes from pacs", e);
+                throw e;
             }
-        });
+        }
         LOG.debug("get DICOM attributes for acquisition [" + acquisition.getId() + "] : " + (new Date().getTime() - ts) + " ms");
         return dAcquisitionAttributes;
     }

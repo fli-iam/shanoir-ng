@@ -44,6 +44,8 @@ public class QualityCardApiController implements QualityCardApi {
 
     private static final String MICROSERVICE_COMMUNICATION_ERROR = "Microservice communication error";
 
+    private static final String PACS_COMMUNICATION_ERROR = "Error during PACS communication while applying quality card on study";
+
     private static final Logger LOG = LoggerFactory.getLogger(QualityCardApiController.class);
 
     @Autowired
@@ -163,6 +165,8 @@ public class QualityCardApiController implements QualityCardApi {
             results = cardProcessingService.applyQualityCardOnStudy(qualityCard, true);
         } catch (PacsException e) {
             LOG.error("Error during PACS communication while applying quality card on study", e);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, null));
         }
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
@@ -175,8 +179,15 @@ public class QualityCardApiController implements QualityCardApi {
         if (qualityCard == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        QualityCardResult results = null;
         LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
-        QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, false);
+        try {
+            results = cardProcessingService.applyQualityCardOnStudy(qualityCard, false);
+        } catch (PacsException e) {
+            LOG.error("Error during PACS communication while applying quality card on study", e);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, null));
+        }
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
@@ -191,7 +202,14 @@ public class QualityCardApiController implements QualityCardApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
-        QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, start, stop);
+        QualityCardResult results = null;
+        try {
+            results = cardProcessingService.applyQualityCardOnStudy(qualityCard, start, stop);
+        } catch (PacsException e) {
+            LOG.error("Error during PACS communication while applying quality card on study", e);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, null));
+        }
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
 }

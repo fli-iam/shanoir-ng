@@ -37,6 +37,7 @@ import org.shanoir.ng.shared.exception.StreamExceptionWrapper;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.condition.CardCondition;
@@ -74,11 +75,20 @@ public class CardsProcessingService {
      * @throws PacsException
      */
     public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) throws PacsException, EntityNotFoundException {
+
+        if (CollectionUtils.isEmpty(studyCard.getRules())) {
+            return;
+        }
+
         boolean changeInAtLeastOneAcquisition = false;
         for (DatasetAcquisition acquisition : acquisitions) {
-            if (CollectionUtils.isNotEmpty(acquisition.getDatasets()) && CollectionUtils.isNotEmpty(studyCard.getRules())) {
-                AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
-                changeInAtLeastOneAcquisition = studyCard.apply(acquisition, dicomAttributes);
+            if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
+                try {
+                    AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
+                    changeInAtLeastOneAcquisition |= studyCard.apply(acquisition, dicomAttributes);
+                } catch (PacsException e) {
+                    LOG.error("Error during PACS communication while applying study card on dataset acquisition " + acquisition.getId(), e);
+                }
             }
         }
         if (changeInAtLeastOneAcquisition) { // no need to update, if nothing happened
@@ -92,10 +102,13 @@ public class CardsProcessingService {
      * @param qualityCard
      * @param examination
      * @param updateTags
-     * @throws MicroServiceCommunicationException
+     * @throws PacsException
      */
-    public QualityCardResult applyQualityCardOnDatasetAcquisition(QualityCard qualityCard, DatasetAcquisition acquisition) throws MicroServiceCommunicationException, PacsException {
+    public QualityCardResult applyQualityCardOnDatasetAcquisition(QualityCard qualityCard, DatasetAcquisition acquisition) throws PacsException {
         long startTs = new Date().getTime();
+        AcquisitionAttributes<Long> dicomAttributes = null;
+        QualityCardResult result = new QualityCardResult();
+
         if (qualityCard == null)
             throw new IllegalArgumentException("qualityCard can't be null");
         if (acquisition == null)
@@ -105,13 +118,19 @@ public class CardsProcessingService {
         if (CollectionUtils.isEmpty(qualityCard.getRules())) {
             throw new RestClientException("Quality card used with empty rules.");
         }
-        QualityCardResult result = new QualityCardResult();
 
         LOG.debug(qualityCard.getRules().size() + " rules found for quality card with id: " + qualityCard.getId()
                 + " and name: " + qualityCard.getName());
 
         // We retrieve dicom attributes for this dataset acquisition/DICOM serie
-        AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
+        try {
+            dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
+        // in case of error during PACS communication, we log the error in the result entry and continue to apply quality card
+        } catch (PacsException e) {
+            LOG.error("Error during PACS communication while applying quality card on dataset acquisition " + acquisition.getId(), e);
+            addErrorEntryForAcquisition(acquisition, result, e);
+            return result;
+        }
 
         // We apply each rule of the quality card on the acquisition
         for (QualityCardRule rule : qualityCard.getRules()) {
@@ -131,10 +150,13 @@ public class CardsProcessingService {
      * @param updateTags
      * @param start
      * @param stop
-     * @throws MicroServiceCommunicationException
+     * @throws PacsException
+     * @throws IllegalStateException
+     * @throws IllegalArgumentException
+     * @throws RestClientException
      */
     public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start,
-            Integer stop) throws MicroServiceCommunicationException, PacsException {
+            Integer stop) throws PacsException, IllegalArgumentException, IllegalStateException, RestClientException {
         long startTs = new Date().getTime();
         if (qualityCard == null)
             throw new IllegalArgumentException("qualityCard can't be null");
@@ -181,7 +203,7 @@ public class CardsProcessingService {
             if (updateTags) {
                 resetDatasetAcquisitions(datasetAcquisitions);
             }
-            // We apply the quality card on DatasetAcquisitions in parallel for one
+            // We apply the quality card on DatasetAcquisitions for one
             // examination only
             List<DatasetAcquisition> updatedAcquisitions = new ArrayList<>();
             try {
@@ -194,15 +216,13 @@ public class CardsProcessingService {
                         QualityCardResult acquisitionResult = applyQualityCardOnDatasetAcquisition(
                                 qualityCard, datasetAcquisition);
                         result.merge(acquisitionResult);
-                        synchronized (updatedAcquisitions) {
-                            updatedAcquisitions.addAll(acquisitionResult.getUpdatedDatasetAcquisitions());
-                        }
-                    } catch (MicroServiceCommunicationException | PacsException e) {
+                        updatedAcquisitions.addAll(acquisitionResult.getUpdatedDatasetAcquisitions());
+                    } catch (PacsException e) {
                         throw new StreamExceptionWrapper(e);
                     }
                 });
             } catch (StreamExceptionWrapper e) {
-                throw (MicroServiceCommunicationException) (e.getCause());
+                throw (PacsException) (e.getCause());
             }
             if (updateTags && !updatedAcquisitions.isEmpty()) {
                 try {
@@ -268,6 +288,16 @@ public class CardsProcessingService {
                 datasetAcquisition.setQualityTag(null);
             }
         }
+    }
+
+    private void addErrorEntryForAcquisition(DatasetAcquisition acquisition, QualityCardResult result, Exception e) {
+        QualityCardResultEntry errorEntry = new QualityCardResultEntry();
+        errorEntry.setSubjectName(acquisition.getExamination().getSubject() != null ? acquisition.getExamination().getSubject().getName() : null);
+        errorEntry.setDatasetAcquisitionId(acquisition.getId());
+        errorEntry.setExaminationDate(acquisition.getExamination().getExaminationDate());
+        errorEntry.setExaminationComment(acquisition.getExamination().getComment());
+        errorEntry.setMessage("Error during PACS communication: " + e.getCause().getMessage());
+        result.add(errorEntry);
     }
 
 }

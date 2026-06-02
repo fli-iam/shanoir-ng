@@ -54,6 +54,8 @@ public class StudyCardApiController implements StudyCardApi {
 
     private static final String MICROSERVICE_COMMUNICATION_ERROR = "Microservice communication error";
 
+    private static final String PACS_COMMUNICATION_ERROR = "Error during PACS communication while applying quality card on study";
+
     private static final Logger LOG = LoggerFactory.getLogger(StudyCardApiController.class);
 
     @Autowired
@@ -198,7 +200,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> applyStudyCard(
-            @Parameter(description = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException, SolrServerException, IOException {
+            @Parameter(description = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException, SolrServerException, IOException, RestServiceException {
         if (studyCardApplyObject == null
                 || studyCardApplyObject.getDatasetAcquisitionIds() == null
                 || studyCardApplyObject.getDatasetAcquisitionIds().isEmpty()
@@ -211,8 +213,9 @@ public class StudyCardApiController implements StudyCardApi {
         try {
             cardProcessingService.applyStudyCard(studyCard, acquisitions);
         } catch (PacsException | EntityNotFoundException e) {
-            // TODO : PR comment
             LOG.error("Study card could not be applied for acquisitions {}", studyCardApplyObject.getDatasetAcquisitionIds(), e);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, null));
         }
 
         // Get all updated dataset ids
