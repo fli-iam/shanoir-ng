@@ -55,7 +55,7 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
         ).toPromise().then(response => {this.downloadIntoBrowser(response);});
     }
 
-     postFile(fileToUpload: File,  model_id: number): Observable<any> {
+    postFile(fileToUpload: File,  model_id: number): Observable<any> {
         const endpoint = this.getUploadUrl(model_id);
         const formData: FormData = new FormData();
         formData.append('files', fileToUpload, fileToUpload.name);
@@ -65,4 +65,10 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
     private downloadIntoBrowser(response: HttpResponse<Blob>){
         AppUtils.browserDownloadFileFromResponse(response);
     }
+
+    getPathologyModelFiles(): Promise<JSON> {
+        return this.http.get<JSON>(`${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/files`)
+            .toPromise();
+    }
+
 }
