@@ -32,6 +32,7 @@ import { DatasetListComponent } from './datasets/dataset-list/dataset-list.compo
 import { DatasetProcessingListComponent } from './datasets/dataset-processing-list/dataset-processing-list.component';
 import { DatasetProcessingComponent } from './datasets/dataset-processing/dataset-processing.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { FilesComponent } from './files/files.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
 import { DUAAssistantComponent } from './dua/dua-assistant.component';
@@ -134,6 +135,9 @@ const routes: Routes = [
     }, {
         path: 'solr-search',
         component: SolrSearchComponent
+    }, {
+        path: 'files',
+        component: FilesComponent
     }, {
         path: 'execution-monitoring',
         component: ExecutionMonitoringsComponent

@@ -15,10 +15,13 @@ package org.shanoir.ng.preclinical.pathologies.pathology_models;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.storage.StorageException;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -97,7 +100,7 @@ public interface PathologyModelApi {
             @Parameter(name = "Pathology model object that needs to be updated", required = true) @RequestBody PathologyModel model,
             final BindingResult result) throws RestServiceException;
 
-    @Operation(summary = "Upload model specifications", description = "")
+    @Operation(summary = "Upload model specifications file", description = "")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "success returns model"),
         @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
@@ -108,7 +111,7 @@ public interface PathologyModelApi {
     ResponseEntity<PathologyModel> uploadModelSpecifications(@Parameter(name = "Pathology model id", required = true) @PathVariable("id") Long id,
             @RequestParam("files") MultipartFile[] uploadfiles) throws RestServiceException;
 
-    @Operation(summary = "Download model specifications file file", description = "")
+    @Operation(summary = "Download model specifications file", description = "")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful operation"),
         @ApiResponse(responseCode = "400", description = "Invalid PathologyModel  id"),
@@ -116,5 +119,15 @@ public interface PathologyModelApi {
     @GetMapping(value = "/pathology/model/download/specs/{id}",
             produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE, "application/json"})
     ResponseEntity<Resource> downloadModelSpecifications(@Parameter(name = "pathology model id", required = true) @PathVariable("id") Long id) throws RestServiceException;
+
+    @Operation(summary = "", description = "Returns a JSON table of all files indexed by study ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "file list returned"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/pathology/model/files", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException;
 
 }

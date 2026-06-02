@@ -14,9 +14,21 @@
 
 package org.shanoir.ng.examination;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
+
 import org.apache.commons.io.FileUtils;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -33,21 +45,24 @@ import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -60,15 +75,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Arrays;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for examination controller.
@@ -84,6 +91,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class ExaminationApiControllerTest {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ExaminationApiControllerTest.class);
+
     @TempDir
     private File tempFolder;
 
@@ -98,7 +107,7 @@ public class ExaminationApiControllerTest {
     @BeforeEach
     public void beforeClass() {
         tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-        System.setProperty("datasets-data", tempFolderPath);
+        System.setProperty("storage.file-system.datasets-data", tempFolderPath);
     }
 
     private static final String REQUEST_PATH = "/examinations";
@@ -138,13 +147,20 @@ public class ExaminationApiControllerTest {
     @MockBean
     private ExaminationRepository examRepo;
 
+    @MockBean
+    private StorageService storageService;
+
     @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    public void setup() throws ShanoirException, SolrServerException, IOException, RestServiceException {
+    public void setup() throws Exception {
+        File tempFile = new File(tempFolder, "test-file.txt");
+        Files.writeString(tempFile.toPath(), "test content");
+        Resource tempResource = new FileSystemResource(tempFile);
         doNothing().when(examinationServiceMock).deleteById(1L, null);
         given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false), Mockito.eq(null), Mockito.eq(null))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
+        given(storageService.loadExtraData(1L, "file1.pdf")).willReturn(tempResource);
         Examination exam = new Examination();
         exam.setId(Long.valueOf(123));
         given(examinationServiceMock.save(Mockito.any(Examination.class))).willReturn(exam);
@@ -154,12 +170,8 @@ public class ExaminationApiControllerTest {
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void deleteExaminationTest() throws Exception {
         given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-        given(examinationServiceMock.getExtraDataFilePath(1L, "")).willReturn("nonExisting");
-
         mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
-
-        // Test event here
     }
 
     @Test
@@ -174,8 +186,6 @@ public class ExaminationApiControllerTest {
         // GIVEN an examination to delete with extra data files
         File extraData = new File(tempFolderPath + "examination-1");
         extraData.mkdirs();
-
-        given(examinationServiceMock.getExtraDataFilePath(1L, "")).willReturn(extraData.getPath());
 
         // WHEN we delete the examination
         try {
@@ -285,14 +295,13 @@ public class ExaminationApiControllerTest {
     public void testDownloadExtraDataNotExisting() throws IOException {
         // GIVEN an examination with no extra-data
         given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-        given(examinationServiceMock.getExtraDataFilePath(1L, "file.pdf")).willReturn("notExisting");
         // WHEN we download extra-data
         try {
             // THEN we have a "no content" answer.
             mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file.pdf/"))
                     .andExpect(status().isNoContent());
         } catch (Exception e) {
-            System.out.println(e);
+            LOG.error(e.getMessage(), e);
             fail();
         }
     }
@@ -307,8 +316,6 @@ public class ExaminationApiControllerTest {
         //File todow = new File("/var/datasets-data/examination-1/file.pdf");
         todow.getParentFile().mkdirs();
 
-        given(examinationServiceMock.getExtraDataFilePath(1L, "file1.pdf")).willReturn(todow.getPath());
-
         // WHEN we download extra-data
         try {
             todow.createNewFile();
@@ -319,9 +326,8 @@ public class ExaminationApiControllerTest {
 
             // THEN the file is downloaded
             assertNotNull(result.getResponse().getContentAsString());
-            System.out.println(result.getResponse().getContentAsString());
         } catch (Exception e) {
-            System.out.println(e);
+            LOG.error(e.getMessage(), e);
             fail();
         }
     }

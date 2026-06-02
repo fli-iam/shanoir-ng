@@ -387,11 +387,8 @@ public class RabbitMQStudiesService {
     public String getStudyDraftState(String studyIdStr) {
         try {
             Long studyId = Long.valueOf(studyIdStr);
-            Study study = studyRepo.findById(studyId).orElse(null);
-            if (study == null) {
-                return "NOT_FOUND";
-            }
-            return String.valueOf(study.getIsDraft());
+            String isDraft = studyRepo.findIsDraftById(studyId).map(String::valueOf).orElse("NOT_FOUND");
+            return isDraft;
         } catch (Exception e) {
             LOG.error("Error getting study draft state", e);
             return "ERROR";
