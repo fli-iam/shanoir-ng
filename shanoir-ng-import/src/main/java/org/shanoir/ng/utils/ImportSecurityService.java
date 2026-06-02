@@ -17,8 +17,6 @@ package org.shanoir.ng.utils;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.study.rights.StudyRightsService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,8 +30,6 @@ public class ImportSecurityService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
-
-    private static final Logger LOG = LoggerFactory.getLogger(ImportSecurityService.class);
 
     /**
      * Check that the connected user has the given right for the given study.
