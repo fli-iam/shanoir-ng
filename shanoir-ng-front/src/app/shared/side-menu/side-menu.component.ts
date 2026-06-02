@@ -95,7 +95,7 @@ export class SideMenuComponent {
 
     indexToSolr() {
         this.confirmDialogService.confirm('Index solr',
-            'Indexing solr can take some time, it won\'t be available during this time. Are you sure ?')
+            'Indexing Solr can take some time, it won\'t be available during this time. Are you sure ?')
             .then(userChoice => {
                 if (userChoice) {
                     this.solrService.indexAll().then(() => {

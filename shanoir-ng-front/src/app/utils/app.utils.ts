@@ -71,6 +71,7 @@ export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_UR
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/data';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/connected';
 export const BACKEND_API_STUDY_COPY_DATASETS: string = BACKEND_API_STUDY_URL + '/copyDatasets';
+export const BACKEND_API_STUDY_FILES: string = BACKEND_API_STUDY_URL + '/files';
 
 
 // Profile API
@@ -120,6 +121,7 @@ export const BACKEND_API_UPDATE_TASKS_URL: string = BACKEND_API_TASKS_URL + '/up
 
 // Examinations http api
 export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
+export const BACKEND_API_EXTRA_DATA_FILES_URL: string = BACKEND_API_EXAMINATION_URL + '/files';
 export const BACKEND_API_EXAMINATION_PRECLINICAL_URL: string = BACKEND_API_EXAMINATION_URL + '/preclinical';
 
 // Acquisition equipment http api
@@ -319,9 +321,10 @@ export function extractState(event: HttpEvent<any>): Promise<TaskState> {
 }
 
 export function getFilename(response: HttpResponse<any>): string {
-    const prefix = 'attachment;filename=';
     const contentDispHeader: string = response.headers.get('Content-Disposition');
-    return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    if (!contentDispHeader) return null;
+    const match = contentDispHeader.match(/filename="?([^"]+)"?/);
+    return match ? match[1].trim() : null;
 }
 
 export function pad(n, width, z?): string {
