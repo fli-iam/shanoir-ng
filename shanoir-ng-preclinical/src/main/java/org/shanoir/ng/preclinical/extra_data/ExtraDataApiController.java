@@ -14,29 +14,31 @@
 
 package org.shanoir.ng.preclinical.extra_data;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloogGasUniqueConstraintManager;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
 import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysioDataUniqueConstraintManager;
 import org.shanoir.ng.preclinical.extra_data.physiological_data.PhysiologicalData;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -52,9 +54,9 @@ import jakarta.servlet.http.HttpServletResponse;
 @Controller
 public class ExtraDataApiController implements ExtraDataApi {
 
-    private static final String BAD_ARGUMENTS = "Bad arguments";
-
     private static final Logger LOG = LoggerFactory.getLogger(ExtraDataApiController.class);
+
+    private static final String BAD_ARGUMENTS = "Bad arguments";
 
     @Autowired
     private ExtraDataService<ExaminationExtraData> extraDataService;
@@ -64,9 +66,6 @@ public class ExtraDataApiController implements ExtraDataApi {
 
     @Autowired
     private ExtraDataService<BloodGasData> bloodGasDataService;
-
-    @Value("${preclinical.uploadExtradataFolder}")
-    private String extraDataPath;
 
     private final HttpServletRequest request;
 
@@ -86,6 +85,9 @@ public class ExtraDataApiController implements ExtraDataApi {
 
     @Autowired
     private ExtraDataEditableByManager editableOnlyValidator;
+
+    @Autowired
+    private StorageService storageService;
 
     @Override
     public ResponseEntity<ExaminationExtraData> uploadExtraData(
@@ -212,11 +214,8 @@ public class ExtraDataApiController implements ExtraDataApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         try {
-            // Find and delete corresponding file
-            if (Paths.get(toDelete.getFilepath()).toFile().exists()) {
-                Files.delete(Paths.get(toDelete.getFilepath()));
-            }
-        } catch (Exception e) {
+            storageService.deletePreclinicalExtraData(toDelete.getExaminationId(), toDelete.getFilename());
+        } catch (StorageException e) {
             LOG.error("There was an error trying to delete files from " + toDelete.getFilepath()
                     + toDelete.getFilename() + " " + e.getMessage(), e);
         }
@@ -253,20 +252,23 @@ public class ExtraDataApiController implements ExtraDataApi {
     public void downloadExtraData(
             @Parameter(name = "ID of exam extra data file to download", required = true) @PathVariable("id") Long id,
             HttpServletResponse response)
-            throws RestServiceException {
-
-        final ExaminationExtraData extradata = extraDataService.findById(id);
-        if (extradata != null) {
+            throws RestServiceException, StorageException {
+        final ExaminationExtraData extraData = extraDataService.findById(id);
+        if (extraData != null) {
             try {
-                File toDownload = new File(extradata.getFilepath());
-
-                // Try to determine file's content type
-                String contentType = request.getServletContext().getMimeType(toDownload.getAbsolutePath());
-
-                try (InputStream is = new FileInputStream(toDownload);) {
-                    response.setHeader("Content-Disposition", "attachment;filename = " + toDownload.getName());
+                String contentType = request.getServletContext().getMimeType(extraData.getFilename());
+                if (contentType == null) {
+                    contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+                }
+                Resource resource = storageService.loadPreclinicalExtraData(extraData.getExaminationId(), extraData.getFilepath());
+                if (!resource.exists()) {
+                    response.sendError(HttpStatus.NO_CONTENT.value());
+                    return;
+                }
+                try (InputStream is = resource.getInputStream()) {
+                    response.setHeader("Content-Disposition", "attachment;filename=" + extraData.getFilename());
                     response.setContentType(contentType);
-                    response.setContentLengthLong(toDownload.length());
+                    response.setContentLengthLong(resource.contentLength());
                     org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
                     response.flushBuffer();
                 }
@@ -352,28 +354,40 @@ public class ExtraDataApiController implements ExtraDataApi {
         return editableOnlyValidator.validate(extraData);
     }
 
-    private ExaminationExtraData saveUploadedFile(ExaminationExtraData extradata, MultipartFile file) throws IOException {
-
-        File createdFolder = new File(extraDataPath + "/models/" + extradata.getId());
-        if (!createdFolder.mkdirs()) {
-            LOG.error("Could not create directory [{}]", createdFolder.getAbsolutePath());
-        }
-
-        // Path to file
-        File fileToGet = new File(createdFolder + "/" + file.getOriginalFilename());
+    private ExaminationExtraData saveUploadedFile(ExaminationExtraData examinationExtraData, MultipartFile file) throws IOException {
         try {
-            if (!fileToGet.createNewFile()) {
-                LOG.error("Could not create file [{}]", fileToGet.getAbsolutePath());
-            }
-            file.transferTo(fileToGet);
-        } catch (IOException e) {
-            LOG.error("Error while saving file [{}] to [{}].", file.getOriginalFilename(), fileToGet.getAbsolutePath());
-            throw e;
+            LOG.info("Saving file {} for examination: {}", file.getOriginalFilename(), examinationExtraData.getId());
+            String filePath = storageService.storePreclinicalExtraData(
+                    examinationExtraData.getId(),
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getContentType(),
+                    file.getSize());
+            examinationExtraData.setFilename(file.getOriginalFilename());
+            examinationExtraData.setFilepath(filePath);
+        } catch (Exception e) {
+            LOG.error("Error while uploading file {} for examination: {}. File not uploaded. {}",
+                    file.getOriginalFilename(), examinationExtraData.getId(), e);
+            return null;
         }
+        return examinationExtraData;
+    }
 
-        extradata.setFilename(file.getOriginalFilename());
-        extradata.setFilepath(fileToGet.getAbsolutePath());
-        return extradata;
+    @Override
+    public ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException {
+        List<ExaminationExtraData> allExtraData = extraDataService.findAll();
+        if (allExtraData == null || allExtraData.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        List<FileEntryDTO> fileEntries = allExtraData.stream()
+                .filter(extraData -> extraData.getFilepath() != null && extraData.getFilename() != null)
+                .map(extraData -> {
+                    boolean exists = Paths.get(extraData.getFilepath()).toFile().exists();
+                    return new FileEntryDTO(extraData.getId(),
+                            extraData.getFilename(), extraData.getExtraDataType(), exists);
+                })
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(fileEntries, HttpStatus.OK);
     }
 
 }
