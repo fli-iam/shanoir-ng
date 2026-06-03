@@ -30,10 +30,10 @@ import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.ExaminationData;
+import org.shanoir.ng.studycard.model.condition.CardCondition;
+import org.shanoir.ng.studycard.model.condition.ExamDICOMConditionOnDatasets;
 import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnAcq;
 import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnDatasets;
-import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
-import org.shanoir.ng.studycard.model.condition.StudyCardDICOMConditionOnDatasets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public class QualityExaminationRule extends AbstractEntity {
     // there is a join table because a rule_id fk would lead to an ambiguity and bugs
     // because it could refer to a study card or quality card rule
     @JoinTable(name = "quality_card_condition_join", joinColumns = {@JoinColumn(name = "quality_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
-    private List<StudyCardCondition> conditions;
+    private List<CardCondition> conditions;
 
     public QualityTag getQualityTag() {
         return QualityTag.get(tag);
@@ -68,11 +68,11 @@ public class QualityExaminationRule extends AbstractEntity {
         this.tag = tag != null ? tag.getId() : null;
     }
 
-    public List<StudyCardCondition> getConditions() {
+    public List<CardCondition> getConditions() {
         return conditions;
     }
 
-    public void setConditions(List<StudyCardCondition> conditions) {
+    public void setConditions(List<CardCondition> conditions) {
         this.conditions = conditions;
     }
 
@@ -169,14 +169,14 @@ public class QualityExaminationRule extends AbstractEntity {
             pilotedByDicomAttributes = false;
             examinationAttributesCache = new ExaminationAttributes<>(downloader.getWadoURLHandler());
         }
-        for (StudyCardCondition condition : getConditions()) {
+        for (CardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();
             boolean fulfilled = true;
-            if (condition instanceof StudyCardDICOMConditionOnDatasets) {
+            if (condition instanceof ExamDICOMConditionOnDatasets) {
                 if (pilotedByDicomAttributes) {
-                    fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
+                    fulfilled = ((ExamDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
                 } else {
-                    fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), examinationAttributesCache, downloader, msg);
+                    fulfilled = ((ExamDICOMConditionOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), examinationAttributesCache, downloader, msg);
                 }
             } else if (condition instanceof ExamMetadataCondOnAcq) {
                 fulfilled = ((ExamMetadataCondOnAcq) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
@@ -211,16 +211,16 @@ public class QualityExaminationRule extends AbstractEntity {
         return result;
     }
 
-    public class ConditionComparator implements Comparator<StudyCardCondition> {
+    public class ConditionComparator implements Comparator<CardCondition> {
         @Override
-        public int compare(StudyCardCondition cond1, StudyCardCondition cond2) {
+        public int compare(CardCondition cond1, CardCondition cond2) {
             return priority(cond1) - priority(cond2);
         }
         /**
          * the higher the priority, the higher is the returned number.
          */
-        private int priority(StudyCardCondition condition) {
-            if (condition instanceof StudyCardDICOMConditionOnDatasets) {
+        private int priority(CardCondition condition) {
+            if (condition instanceof ExamDICOMConditionOnDatasets) {
                 return 1;
             } else if (condition instanceof ExamMetadataCondOnAcq) {
                 return 3;
@@ -265,8 +265,8 @@ public class QualityExaminationRule extends AbstractEntity {
 
     public boolean hasDicomConditions() {
         if (getConditions() != null) {
-            for (StudyCardCondition condition: getConditions()) {
-                if (condition instanceof StudyCardDICOMConditionOnDatasets) {
+            for (CardCondition condition: getConditions()) {
+                if (condition instanceof ExamDICOMConditionOnDatasets) {
                     return true;
                 }
             }

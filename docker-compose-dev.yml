@@ -20,7 +20,9 @@ services:
       context: docker-compose
       target: keycloak-database
     environment:
-      - MYSQL_DATABASE=keycloak
+      - MARIADB_DATABASE=keycloak
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -29,6 +31,12 @@ services:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
       - shanoir_ng_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
@@ -62,7 +70,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - "keycloak-database"
+      keycloak-database:
+          condition: service_healthy
   #
   # RabbitMQ: inter-microservices communication
   #
@@ -85,8 +94,9 @@ services:
       context: docker-compose
       target: database
     command: --max_allowed_packet 20000000
-    env_file:
-      - ./docker-compose/database/variables.env
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -98,7 +108,7 @@ services:
     networks:
       - shanoir_ng_network
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
       interval: 3s
       timeout: 2s
       retries: 10
@@ -117,7 +127,7 @@ services:
       - shanoir_ng_network
     depends_on:
       database:
-        condition: service_healthy  # wait for MySQL to be ready
+        condition: service_healthy  # wait for MariaDB to be ready
     restart: "no" # don't restart after it exits cleanly
   #
   # Users microservice
@@ -170,12 +180,17 @@ services:
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
       - SHANOIR_MIGRATION
+      - SHANOIR_STORAGE_TYPE
+      - S3_ENDPOINT
+      - S3_REGION
+      - S3_ACCESS_KEY_ID
+      - S3_SECRET_ACCESS_KEY
+      - S3_BUCKET_STUDIES
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
-      - "studies-data:/var/studies-data"
-      # This is related to participants.tsv file
-      - "datasets-data:/var/datasets-data"
+      - "studies-data:/var/studies-data" # persistent
+      - "bids-data:/var/bids-data" # temporary, participants.tsv
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
@@ -241,14 +256,21 @@ services:
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_MIGRATION
+      - SHANOIR_STORAGE_TYPE
+      - S3_ENDPOINT
+      - S3_REGION
+      - S3_ACCESS_KEY_ID
+      - S3_SECRET_ACCESS_KEY
+      - S3_BUCKET_DATASETS
       - VIP_URL_SCHEME
       - VIP_URL_HOST
       - VIP_CLIENT_SECRET
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
+      - "datasets-data:/var/datasets-data" # persistent
+      - "bids-data:/var/bids-data" # temporary
       - "tmp:/tmp"
-      - "datasets-data:/var/datasets-data"
     networks:
       - shanoir_ng_network
     ports:
@@ -278,11 +300,17 @@ services:
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
       - SHANOIR_MIGRATION
+      - SHANOIR_STORAGE_TYPE
+      - S3_ENDPOINT
+      - S3_REGION
+      - S3_ACCESS_KEY_ID
+      - S3_SECRET_ACCESS_KEY
+      - S3_BUCKET_PRECLINICAL
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
+      - "preclinical-data:/var/preclinical-data" # persistent
       - "tmp:/tmp"
-      - "extra-data:/var/extra-data"
     networks:
       - shanoir_ng_network
     ports:
@@ -313,10 +341,11 @@ services:
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - "datasets-data:/var/datasets-data"
+      # NIfTI conversion writes into BIDS-tree
+      - "bids-data:/var/bids-data" # temporary
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
-
   #
   # Solr microservice for Shanoir-NG search
   #
@@ -437,9 +466,9 @@ services:
       - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
       - IN_QUEUE=bids.validate
       - OUT_QUEUE=bids.validated
-      - DATA_ROOT=/var/datasets-data/bids-data
+      - DATA_ROOT=/var/bids-data
     volumes:
-      - datasets-data:/var/datasets-data:ro
+      - "bids-data:/var/bids-data" # temporary
     depends_on:
       - rabbitmq
     networks:
@@ -449,14 +478,15 @@ volumes:
   keycloak-database-data:
   rabbitmq-data:
   database-data:
-  datasets-data:
-  extra-data:
   studies-data:
+  datasets-data:
+  preclinical-data:
   dcm4chee-ldap-data:
   dcm4chee-sldap-data:
   dcm4chee-database-data:
   dcm4chee-arc-wildfly-data:
   dcm4chee-arc-storage-data:
+  bids-data:
   solr-data:
   certificate-share-data:
   tmp:

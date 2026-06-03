@@ -302,6 +302,10 @@ export class StudyComponent extends EntityComponent<Study> {
 
         formGroup.setValidators(this.inclusionRatePairValidator.bind(this));
 
+        formGroup.get('startDate')?.valueChanges.subscribe(() => {
+            formGroup.get('endDate')?.updateValueAndValidity();
+        });
+
         return formGroup;
     }
 
@@ -340,11 +344,24 @@ export class StudyComponent extends EntityComponent<Study> {
         });
     }
 
-    private dateOrdervalidator = (): ValidationErrors | null => {
-        if (this.study.startDate && this.study.endDate && this.study.startDate >= this.study.endDate) {
-            return { order: true}
-        }
+    /** Uses form control values (not study entity) to avoid stale dates when the end date picker changes. */
+    private dateOrdervalidator = (control: AbstractControl): ValidationErrors | null => {
+        const form = control.parent;
+        if (!form) return null;
+        const start = form.get('startDate')?.value;
+        const end = control.value;
+        if (!start || !end || start === 'invalid' || end === 'invalid') return null;
+        const startDay = this.toDateOnlyTimestamp(start);
+        const endDay = this.toDateOnlyTimestamp(end);
+        if (startDay === null || endDay === null) return null;
+        if (endDay <= startDay) return { order: true };
         return null;
+    }
+
+    private toDateOnlyTimestamp(value: Date | string): number | null {
+        const date = value instanceof Date ? value : new Date(value);
+        if (isNaN(date.getTime())) return null;
+        return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
     }
 
     public async hasStudyAdminRight(): Promise<boolean> {
@@ -436,8 +453,10 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.studyCenterList = [...this.study.studyCenterList];
             this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         }
-        this.form.get('studyCenterList').markAsDirty();
-        this.form.get('studyCenterList').updateValueAndValidity();
+        const studyCenterListControl = this.form.get('studyCenterList');
+        studyCenterListControl.setValue([...this.study.studyCenterList]);
+        studyCenterListControl.markAsDirty();
+        studyCenterListControl.updateValueAndValidity();
     }
 
     onPrefixChange() {
@@ -456,8 +475,10 @@ export class StudyComponent extends EntityComponent<Study> {
         if (!this.study.studyCenterList) return;
         this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
         this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
-        this.form.get('studyCenterList').markAsDirty();
-        this.form.get('studyCenterList').updateValueAndValidity();
+        const studyCenterListControl = this.form.get('studyCenterList');
+        studyCenterListControl.setValue([...this.study.studyCenterList]);
+        studyCenterListControl.markAsDirty();
+        studyCenterListControl.updateValueAndValidity();
     }
 
     isMe(user: User): boolean {

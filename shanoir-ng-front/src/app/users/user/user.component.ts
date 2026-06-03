@@ -12,7 +12,10 @@
 * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 */
 import { Component } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+    AbstractControl, FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidationErrors,
+    ValidatorFn, Validators
+} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -22,17 +25,17 @@ import { Selection } from 'src/app/studies/study/tree.service';
 
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
+import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 import { Study } from "../../studies/shared/study.model";
 import { KEYCLOAK_BASE_URL } from "../../utils/app.utils";
+import { AccountRequestInfoComponent } from '../account-request-info/account-request-info.component';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
-import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
-import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
-import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
-import { AccountRequestInfoComponent } from '../account-request-info/account-request-info.component';
-import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
     selector: 'user-detail',
@@ -154,8 +157,8 @@ export class UserComponent extends EntityComponent<User> {
     buildForm(): UntypedFormGroup {
         const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
         const userForm = this.formBuilder.group({
-            'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-            'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+            'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
+            'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex), this.registerOnSubmitValidator('unique', 'email')]],
             'expirationDate': [this.user.expirationDate],
             'extensionMotivation': [this.user.extensionRequestInfo ? this.user.extensionRequestInfo.extensionMotivation : ''],
@@ -215,5 +218,13 @@ export class UserComponent extends EntityComponent<User> {
             "&response_type=code" +
             "&scope=openid" +
             "&kc_action=UPDATE_PASSWORD", "_self");
+    }
+
+    private nonSpecialCharsValidator(): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            if(control.value != undefined){
+                return /^[\p{L}\p{M}\s'-]+$/u.test(control.value) ? null : { invalidName: true };            }
+            return null;
+        };
     }
 }

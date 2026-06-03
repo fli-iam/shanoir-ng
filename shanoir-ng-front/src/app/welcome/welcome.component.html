@@ -13,29 +13,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="welcome-component">
-    <div class="header">
-        <img class="github-logo" title="Shanoir on GitHub" [src]="githubLogoUrl" (click)="toGithub()" alt="Shanoir on GitHub" />
-        <div class="buttons">
-            <button class="left-icon alt" type="button" (click)="login()">
-                <i class="fa-solid fa-right-to-bracket"></i>
-                Sign in
-            </button>
-            <button class="left-icon" type="button" (click)="toShanoir()">
-                <i class="fa-solid fa-circle-info"></i>
-                More info
-            </button>
-            <a href="mailto:developers_shanoir@inria.fr">
-                <button class="left-icon" type="button">
-                    <i class="fa-solid fa-paper-plane"></i>
-                    Contact
-                </button>
-            </a>
-        </div>
-    </div>
-    <div class="shanoir">
-        <img class="shanoir-logo" [src]="shanoirLogoUrl" alt="Shanoir logo" />
-        <div class="shanoir-text">SHAring iN vivO Imaging Resources</div>
-    </div>
+	<div class="header">
+		<img class="github-logo" title="Shanoir on GitHub" [src]="githubLogoUrl" (click)="toGithub()" alt="Shanoir on GitHub"/>
+		<div class="buttons">
+			<button class="left-icon alt" type="button" (click)="login()"><i class="fa-solid fa-right-to-bracket"></i>Sign in</button>
+			<button class="left-icon" type="button" (click)="toShanoir()"><i class="fa-solid fa-circle-info"></i>More info</button>
+			<a href="mailto:developers_shanoir@inria.fr">
+				<button class="left-icon" type="button"><i class="fa-solid fa-paper-plane"></i>Contact</button>
+			</a>
+		</div>
+	</div>
+	<div class="shanoir">
+		<img class="shanoir-logo" [src]="shanoirLogoUrl" alt="Shanoir logo"/>
+		<div class="shanoir-text">
+			<em>SHA</em>ring i<em>N</em> viv<em>O</em>&nbsp;<em>I</em>maging <em>R</em>esources
+		</div>
+	</div>
     <div class="stats">
         {{ welcomeIntroduction }}
         <br />

@@ -154,7 +154,7 @@ public class Examination extends HalEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
     private List<Examination> copies;
 
-    private Boolean dataReuseAgreement;
+    private Boolean dataReuseAgreement = Boolean.FALSE;
 
     public Examination() {
     }

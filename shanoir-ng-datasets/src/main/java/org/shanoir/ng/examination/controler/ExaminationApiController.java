@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.examination.controler;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -31,6 +29,7 @@ import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -43,14 +42,18 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -91,6 +94,9 @@ public class ExaminationApiController implements ExaminationApi {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private StorageService storageService;
 
     private final HttpServletRequest request;
 
@@ -201,7 +207,7 @@ public class ExaminationApiController implements ExaminationApi {
     public ResponseEntity<Void> updateExamination(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
             @Parameter(description = "the examination to update", required = true) @RequestBody @Valid final ExaminationDTO examination,
-            final BindingResult result) throws RestServiceException {
+            final BindingResult result) throws Exception {
         /* Update examination in db. */
         try {
             examinationService.update(examinationMapper.examinationDTOToExamination(examination));
@@ -298,21 +304,30 @@ public class ExaminationApiController implements ExaminationApi {
     @Override
     public void downloadExtraData(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
-        String filePath = this.examinationService.getExtraDataFilePath(examinationId, fileName);
-        LOG.info("Retrieving file : {}", filePath);
-        File fileToDownLoad = new File(filePath);
-        if (!fileToDownLoad.exists()) {
-            response.sendError(HttpStatus.NO_CONTENT.value());
-            return;
-        }
-        String contentType = request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath());
-        try (InputStream is = new FileInputStream(fileToDownLoad);) {
-            response.setHeader("Content-Disposition", "attachment;filename=" + fileToDownLoad.getName());
-            response.setContentType(contentType);
-            response.setContentLengthLong(fileToDownLoad.length());
-            org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
-            response.flushBuffer();
+            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
+            HttpServletResponse response) throws RestServiceException, IOException {
+        try {
+            Resource fileToDownload = storageService.loadExtraData(examinationId, fileName);
+            if (fileToDownload != null) {
+                String contentType = request.getServletContext().getMimeType(fileName);
+                if (contentType == null) {
+                    contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+                }
+                response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+                response.setContentType(contentType);
+                if (fileToDownload.isReadable() && fileToDownload.contentLength() > 0) {
+                    response.setContentLengthLong(fileToDownload.contentLength());
+                }
+                try (InputStream is = fileToDownload.getInputStream()) {
+                    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+                    response.flushBuffer();
+                }
+            } else {
+                response.sendError(HttpStatus.NO_CONTENT.value());
+                return;
+            }
+        } catch (StorageException e) {
+            LOG.error("Error downloading file {} for examination {}: {}", fileName, examinationId, e);
         }
     }
 
@@ -363,4 +378,25 @@ public class ExaminationApiController implements ExaminationApi {
         String newUID = generator.getNewUID();
         examination.setStudyInstanceUID(newUID);
     }
+
+    @Override
+    public ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException {
+        List<Examination> examinations = examinationService.findAll();
+        List<FileEntryDTO> entries = new ArrayList<>();
+        for (Examination examination : examinations) {
+            Long examinationId = examination.getId();
+            String directory = storageService.getDirectoryExtraData(examinationId);
+            if (examination.getExtraDataFilePathList() != null) {
+                for (String path : examination.getExtraDataFilePathList()) {
+                    boolean exists = storageService.existsExtraData(examinationId, path);
+                    entries.add(new FileEntryDTO(examination.getStudyId(), directory + path, "EXTRA-DATA", exists));
+                }
+            }
+        }
+        if (entries.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(entries, HttpStatus.OK);
+    }
+
 }

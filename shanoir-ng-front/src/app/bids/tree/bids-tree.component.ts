@@ -55,6 +55,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     protected truncatedReport: any; // JSON
     private subscriptions: Subscription[] = [];
     protected task: Task;
+    buildingReport: boolean = false;
 
     constructor(private globalService: GlobalService,
                 private elementRef: ElementRef,
@@ -204,12 +205,16 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     }
 
     protected callBidsValidator(): void {
+        this.buildingReport = true;
+        this.report = null;
         this.getBidsStructure().then(() => {
             // currently the list object always contains one element which is the root folder
-            this.studyService.validateStudyForBIDS(this.studyId, this.list[0]?.path).then(report => {
+            return this.studyService.validateStudyForBIDS(this.studyId, this.list[0]?.path).then(report => {
                 this.report = report.report;
                 this.truncateReportForDisplay();
             });
+        }).finally(() => {
+            this.buildingReport = false;
         });
     }
 

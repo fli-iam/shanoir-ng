@@ -58,4 +58,5 @@ public class FolderImport {
     public void setListOfSubjectsForStudy(List<Subject> listOfSubjectsForStudy) {
         this.listOfSubjectsForStudy = listOfSubjectsForStudy;
     }
+
 }

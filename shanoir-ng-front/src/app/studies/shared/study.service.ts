@@ -87,6 +87,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
       return firstValueFrom(this.http.get<Profile[]>(AppUtils.BACKEND_API_PROFILE_ALL_PROFILES_URL));
     }
 
+    getStudiesFiles(): Promise<JSON> {
+        return this.http.get<JSON>(AppUtils.BACKEND_API_STUDY_FILES)
+            .toPromise();
+    }
+
     getPublicStudiesData(): Promise<StudyLight[]> {
       return firstValueFrom(this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL))
         .then((typeResult: StudyLight[]) => {

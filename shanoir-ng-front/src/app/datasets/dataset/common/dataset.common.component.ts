@@ -39,6 +39,7 @@ export class CommonDatasetComponent implements OnChanges {
     @Input() mode: Mode;
     @Input() dataset: Dataset;
     @Input() parentFormGroup: UntypedFormGroup;
+    @Input() hasAdministrateRight: boolean = false;
     subjects: Subject[] = [];
     studies: Study[] = [];
 

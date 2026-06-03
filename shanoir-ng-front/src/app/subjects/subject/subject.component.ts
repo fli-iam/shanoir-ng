@@ -65,6 +65,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     importMode: string = "";
     isImporting: boolean = false;
     tags: Tag[] = [];
+    studyNameForSubject: string = "";
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -89,7 +90,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
                 private subjectService: SubjectService,
                 private studyService: StudyService,
                 private downloadService: MassDownloadService,
-                private studyRightsService: StudyRightsService) {
+                private studyRightsService: StudyRightsService,
+                private userRightsService: StudyRightsService) {
 
         super(route);
     }
@@ -172,7 +174,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         const subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [this.subject.isAlreadyAnonymized],
-            'name': [this.subject.name, this.nameValidators.concat([this.forbiddenNameValidator([this.subjectNamePrefix]), this.notEmptyValidator()]), this.uniqueSubjectNameValidatorOnName],
+            'name': [this.subject.name, this.nameValidators.concat([this.forbiddenNameValidator([this.subjectNamePrefix]), this.notEmptyValidator()]), this.mode == 'create' ? this.uniqueSubjectNameValidatorOnName : null],
             'firstName': [this.firstName],
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
@@ -287,12 +289,17 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
+                this.userRightsService.getMyRights().then(rights => {
+                    if (!this.keycloakService.isUserAdmin()) {
+                        // filter studies to only those with import or admin rights
+                        this.studies = this.studies.filter(study => {
+                            const studyRights = rights.get(study.id);
+                            return studyRights && (studyRights.includes(StudyUserRight.CAN_IMPORT) || studyRights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                        });
+                    }
+                    this.studyNameForSubject = this.studies?.filter(s => s.id == this.entity?.study?.id)?.[0]?.name || '';
+                });
             });
-    }
-
-    studyNameForSubject() {
-        this.studies = this.studies.filter(s => s.id == this.entity.study.id);
-        return this.studies[0] ? this.studies[0].name : "";
     }
 
     private generateSubjectIdentifier(): string {
