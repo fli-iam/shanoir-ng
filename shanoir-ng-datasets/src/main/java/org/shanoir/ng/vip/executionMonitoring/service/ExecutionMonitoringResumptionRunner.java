@@ -90,7 +90,6 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
                         LOG.info("Monitoring of VIP execution [{}] resumed", monitoring.getName());
                     } catch (Exception e) {
                         LOG.error("Monitoring resumption of VIP execution [" + monitoring.getName() + "," + monitoring.getIdentifier() + "] failed.");
-                        executionMonitoringRepository.delete(monitoring);
                     }
                 }
             }
