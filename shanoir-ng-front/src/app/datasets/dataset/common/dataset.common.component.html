@@ -161,63 +161,60 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
             </span>
         </li>
-		<li>
-			<label i18n="Dataset detail|Dataset subject@@datasetDetailSubject">Subject</label>
-			<span class="right-col">
-				<a [routerLink]="[getSubjectLink()]">
-					{{dataset.subject?.name}}
-				</a>
-			</span>
-		</li>
-		<li>
-			<label i18n="Dataset detail|Dataset study@@datasetDetailStudy">Study</label>
-			<span class="right-col">
-				<a [routerLink]="['/study/details/', dataset.study?.id]">
-					{{dataset.study?.name}}
-				</a>
-			</span>
-		</li>
-		<li>
-			<label i18n="Dataset detail|Dataset creation date@@datasetDetailCreation">Creation date</label>
-			<span class="right-col">
-@switch (mode) {
-				@case ('view') {
-{{dataset.creationDate | localDateFormatPipe}}
-}
-				@default {
-
-					<datepicker formControlName="creationDate"></datepicker>
-				
-}
-			}
-</span>
-		</li>
-		<li>
-			<label i18n="Dataset detail|Dataset type@@datasetDetailType">Modality type</label>
-			<span class="right-col">
-					{{dataset.type}}
-			</span>
-		</li>
-		@if (mode == 'view' && dataset.copies?.length > 0 && hasAdministrateRight) {
-			<li>
-				<label>This dataset has been copied :</label>
-				<span class="right-col">
-					@for (entityId of dataset.copies; track entityId) {
-<div>
-						<a [routerLink]="['/dataset/details/', entityId]"> [ {{ entityId }} ] </a>
-					</div>
-}
-				</span>
-			</li>
-		}
-		@if (mode == 'view' && dataset.source && hasAdministrateRight) {
-			<li>
-				<label>This dataset is the copy of :</label>
-				<span class="right-col">
-					<a [routerLink]="['/dataset/details/', dataset.source]"> [ {{ dataset.source }} ] </a>
-				</span>
-			</li>
-		}
-
+        <li>
+            <label i18n="Dataset detail|Dataset subject@@datasetDetailSubject">Subject</label>
+            <span class="right-col">
+                <a [routerLink]="[getSubjectLink()]">
+                    {{ dataset.subject?.name }}
+                </a>
+            </span>
+        </li>
+        <li>
+            <label i18n="Dataset detail|Dataset study@@datasetDetailStudy">Study</label>
+            <span class="right-col">
+                <a [routerLink]="['/study/details/', dataset.study?.id]">
+                    {{ dataset.study?.name }}
+                </a>
+            </span>
+        </li>
+        <li>
+            <label i18n="Dataset detail|Dataset creation date@@datasetDetailCreation">Creation date</label>
+            <span class="right-col">
+                @switch (mode) {
+                    @case ('view') {
+                        {{ dataset.creationDate | localDateFormatPipe }}
+                    }
+                    @default {
+                        <datepicker formControlName="creationDate"></datepicker>
+                    }
+                }
+            </span>
+        </li>
+        <li>
+            <label i18n="Dataset detail|Dataset type@@datasetDetailType">Modality type</label>
+            <span class="right-col">
+                {{ dataset.type }}
+            </span>
+        </li>
+        @if (mode == 'view' && dataset.copies?.length > 0 && hasAdministrateRight) {
+            <li>
+                <label>This dataset has been copied :</label>
+                <span class="right-col">
+                    @for (entityId of dataset.copies; track entityId) {
+                        <div>
+                            <a [routerLink]="['/dataset/details/', entityId]">[ {{ entityId }} ]</a>
+                        </div>
+                    }
+                </span>
+            </li>
+        }
+        @if (mode == 'view' && dataset.source && hasAdministrateRight) {
+            <li>
+                <label>This dataset is the copy of :</label>
+                <span class="right-col">
+                    <a [routerLink]="['/dataset/details/', dataset.source]">[ {{ dataset.source }} ]</a>
+                </span>
+            </li>
+        }
     </ol>
 </fieldset>

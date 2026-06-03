@@ -107,7 +107,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <input type="text" formControlName="name" />
                                         @if (hasError('name', ['required'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Name required error@@studyDetailNameRequiredError">
                                                 Name is required!
@@ -115,7 +116,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError('name', ['minlength', 'maxlength'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Name length error@@studyDetailNameLengthError">
                                                 Name length must be between 2 and 200!
@@ -123,7 +125,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError('name', ['unique'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Study detail|Name unique error@@studyDetailNameUniqueError">
                                                 Name should be unique!
@@ -374,7 +377,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <input type="number" formControlName="expectedNbOfSubjects" />
                                         @if (hasError('expectedNbOfSubjects', ['required'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Expected number of subjects required error@@studyDetailExpectedNbOfSubjectsRequiredError">
                                                 Expected number of subjects is required!
@@ -382,7 +386,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError('expectedNbOfSubjects', ['min'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Expected number of subjects value error@@studyDetailExpectedNbOfSubjectsValueError">
                                                 Expected number of subjects cannot be less than 1!
@@ -405,7 +410,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <input type="number" formControlName="averageExaminationSize" />
                                         @if (hasError('averageExaminationSize', ['min'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Average examination size value error@@studyDetailAverageExaminationSizeValueError">
                                                 Average examination size cannot be less than 1
@@ -428,7 +434,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <input type="number" formControlName="estimatedTotalVolume" />
                                         @if (hasError('estimatedTotalVolume', ['min'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Estimated total volume value error@@studyDetailEstimatedTotalVolumeValueError">
                                                 Estimated total volume cannot be less than 1
@@ -451,7 +458,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <input type="number" formControlName="expectedNbOfCenters" />
                                         @if (hasError('expectedNbOfCenters', ['required'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Expected number of centers required error@@studyDetailExpectedNbOfCentersRequiredError">
                                                 Expected number of centers is required!
@@ -459,7 +467,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError('expectedNbOfCenters', ['min'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Expected number of centers value error@@studyDetailExpectedNbOCentersValueError">
                                                 Expected number of centers cannot be less than 1
@@ -480,7 +489,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <input type="number" formControlName="inclusionRate" />
                                         @if (hasError('inclusionRate', ['min'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Inclusion rate value error@@studyDetailInclusionRateValueError">
                                                 Inclusion rate cannot be less than 1
@@ -523,7 +533,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <input type="text" formControlName="sponsor" />
                                         @if (hasError('sponsor', ['required'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Sponsor required error@@studyDetailSponsorRequiredError">
                                                 Sponsor is required!
@@ -531,7 +542,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError('sponsor', ['minlength', 'maxlength'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Sponsor length error@@studyDetailSponsorLengthError">
                                                 Sponsor length must be between 2 and 200!
@@ -554,7 +566,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <input type="text" formControlName="principalInvestigator" />
                                         @if (hasError('principalInvestigator', ['required'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Principal investigator required error@@studyDetailPrincipalInvestigatorRequiredError">
                                                 Principal investigator is required!
@@ -562,7 +575,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (hasError('principalInvestigator', ['minlength', 'maxlength'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Principal investigator length error@@studyDetailPrincipalInvestigatorLengthError">
                                                 Principal investigator length must be between 2 and 200!
@@ -585,7 +599,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <input type="text" formControlName="scientificAdvisor" />
                                         @if (hasError('scientificAdvisor', ['minlength', 'maxlength'])) {
                                             <label
-                                                animate.enter="slide-down-error" animate.leave="slide-up-error"
+                                                animate.enter="slide-down-error"
+                                                animate.leave="slide-up-error"
                                                 class="form-validation-alert"
                                                 i18n="Edit study|Scientific advisor length error@@studyDetailScientificAdvisorLengthError">
                                                 Scientific advisor length must be between 2 and 200!

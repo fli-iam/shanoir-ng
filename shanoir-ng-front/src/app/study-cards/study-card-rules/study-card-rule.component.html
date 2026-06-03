@@ -13,32 +13,37 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="conditions" [class.dataset]="rule.scope == 'Dataset'" [class.acquisition]="rule.scope == 'DatasetAcquisition'">
-	@for (condition of rule.conditions; track condition; let i = $index) {
-<div class="condition">	
-		<condition 
-				[ruleScope]="rule.scope"
-				[(condition)]="rule.conditions[i]" 
-				[mode]="mode"
-				[fieldOptions]="conditionFieldOptions" 
-				[fields]="conditionFields" 
-				[class.edit]="mode != 'view'" 
-				(conditionChange)="userChange.emit(rule)"
-				(delete)="deleteCondition(i)"
-				[showErrors]="showErrors"
-				[addSubForm]="addSubForm">
-		</condition>
-	</div>
-}
-	@if (rule.conditions?.length == 0) {
-<div>
-		<span class="always"><i class="fas fa-infinity"></i>Always</span>
-	</div>
-}
-	<div>
-		@if (mode != 'view') {
-<span class="add" (click)="addNewCondition(rule.scope)"><i class="fas fa-plus"></i>Add a condition</span>
-}
-	</div>
+    @for (condition of rule.conditions; track condition; let i = $index) {
+        <div class="condition">
+            <condition
+                [ruleScope]="rule.scope"
+                [(condition)]="rule.conditions[i]"
+                [mode]="mode"
+                [fieldOptions]="conditionFieldOptions"
+                [fields]="conditionFields"
+                [class.edit]="mode != 'view'"
+                (conditionChange)="userChange.emit(rule)"
+                (delete)="deleteCondition(i)"
+                [showErrors]="showErrors"
+                [addSubForm]="addSubForm"></condition>
+        </div>
+    }
+    @if (rule.conditions?.length == 0) {
+        <div>
+            <span class="always">
+                <i class="fas fa-infinity"></i>
+                Always
+            </span>
+        </div>
+    }
+    <div>
+        @if (mode != 'view') {
+            <span class="add" (click)="addNewCondition(rule.scope)">
+                <i class="fas fa-plus"></i>
+                Add a condition
+            </span>
+        }
+    </div>
 </div>
 
 <div class="separator">
