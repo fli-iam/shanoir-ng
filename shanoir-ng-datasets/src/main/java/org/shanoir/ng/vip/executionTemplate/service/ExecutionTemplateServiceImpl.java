@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -90,7 +90,7 @@ public class ExecutionTemplateServiceImpl implements ExecutionTemplateService {
                     filterCombination = fillCombinationWithComparisonResults(filterCombination, fieldPositionAndComparisonResults);
 
                     SpelExpressionParser parser = new SpelExpressionParser();
-                    StandardEvaluationContext context = new StandardEvaluationContext();
+                    SimpleEvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
                     if (parser.parseExpression(filterCombination).getValue(context, Boolean.class)) {
                         templateToApplyIds.add(acquisition.getId());
                     }
@@ -109,7 +109,7 @@ public class ExecutionTemplateServiceImpl implements ExecutionTemplateService {
         Map<Integer, Boolean> fieldPositionAndComparison = new HashMap<>();
 
         ExpressionParser parser = new SpelExpressionParser();
-        StandardEvaluationContext context = new StandardEvaluationContext();
+        SimpleEvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
 
         context.setVariable("acquisition", acquisition);
         context.setVariable("examination", acquisition.getExamination());
