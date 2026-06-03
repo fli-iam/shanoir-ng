@@ -66,8 +66,7 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
     }
 
     getPathologyModelFiles(): Promise<JSON> {
-        return this.http.get<JSON>(`${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/files`)
-            .toPromise();
+        return firstValueFrom(this.http.get<JSON>(`${PreclinicalUtils.PRECLINICAL_API_PATHOLOGY_MODELS_URL}/files`));
     }
 
 }

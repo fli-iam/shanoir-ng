@@ -48,8 +48,8 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
     }
 
     findByMonitoringId(monitoringId: number): Promise<DatasetProcessing[]> {
-        return this.http.get<DatasetProcessingInDTO[]>(this.API_URL + '/monitoring/' + monitoringId)
-            .toPromise().then(dtos => this.mapEntityList(dtos));
+        return firstValueFrom(this.http.get<DatasetProcessingInDTO[]>(this.API_URL + '/monitoring/' + monitoringId))
+            .then(dtos => this.mapEntityList(dtos));
     }
 
     getInputDatasets(datasetProcessingId: number): Promise<Dataset[]> {

@@ -89,8 +89,7 @@ export class ExtraDataService extends EntityService<ExtraData>{
     }
 
     getExtraDataFiles(): Promise<JSON> {
-        return this.http.get<JSON>(`${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/files`)
-            .toPromise();
+        return firstValueFrom(this.http.get<JSON>(`${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}/files`));
     }
 
 }
