@@ -221,4 +221,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     @Query("select d from Dataset d left join fetch d.datasetProcessing where d.id = :id")
     Dataset findWithDatasetProcessings(Long id);
+
+    @Query("select a from Dataset d left join d.datasetProcessing dp left join dp.inputDatasets a where d.id = :id")
+    List<Dataset> findProcessingAncestors(Long id);
 }

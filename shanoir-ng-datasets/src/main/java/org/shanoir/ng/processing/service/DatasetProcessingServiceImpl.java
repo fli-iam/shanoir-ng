@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.EntityManager;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
@@ -33,7 +35,6 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
-import org.shanoir.ng.vip.processingResource.service.ProcessingResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -55,9 +56,6 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     private ProcessingResourceRepository processingResourceRepository;
 
     @Autowired
-    private ProcessingResourceService processingResourceService;
-
-    @Autowired
     private DatasetService datasetService;
 
     @Autowired
@@ -65,6 +63,10 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 
     @Autowired
     private SolrService solrService;
+
+    @Autowired
+    private EntityManager em;
+
 
     protected DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
         to.setDatasetProcessingType(from.getDatasetProcessingType());
@@ -196,5 +198,25 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
                 throw new RestServiceException(error);
             }
         }
+    }
+
+    @Override
+    public List<Dataset> getInputDatasets(DatasetProcessing processing) {
+        if (em.contains(processing)) {
+            Hibernate.initialize(processing.getInputDatasets());
+            return processing.getInputDatasets();
+        }
+        processing = repository.findWithInputDatasets(processing.getId());
+        return processing.getInputDatasets();
+    }
+
+    @Override
+    public List<Dataset> getOutputDatasets(DatasetProcessing processing) {
+        if (em.contains(processing)) {
+            Hibernate.initialize(processing.getOutputDatasets());
+            return processing.getOutputDatasets();
+        }
+        processing = repository.findWithOutputDatasets(processing.getId());
+        return processing.getOutputDatasets();
     }
 }

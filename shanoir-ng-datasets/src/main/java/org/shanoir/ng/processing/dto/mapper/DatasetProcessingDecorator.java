@@ -14,8 +14,11 @@
 
 package org.shanoir.ng.processing.dto.mapper;
 
+import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.processing.service.DatasetProcessingService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -25,6 +28,13 @@ import java.util.stream.Collectors;
 @Component
 public abstract class DatasetProcessingDecorator implements DatasetProcessingMapper {
 
+
+    @Autowired
+    private DatasetProcessingService processingService;
+
+    @Autowired
+    private DatasetMapper datasetMapper;
+
     @Override
     public DatasetProcessingDTO datasetProcessingToDatasetProcessingDTO(DatasetProcessing processing) {
 
@@ -32,12 +42,22 @@ public abstract class DatasetProcessingDecorator implements DatasetProcessingMap
             return null;
         }
 
-        DatasetProcessingDTO dto = datasetProcessingToDatasetProcessingDTO(processing);
+        DatasetProcessingDTO datasetProcessingDTO = new DatasetProcessingDTO();
+
+        datasetProcessingDTO.setId(processing.getId());
+        datasetProcessingDTO.setComment(processing.getComment());
+        datasetProcessingDTO.setDatasetProcessingType(processing.getDatasetProcessingType());
+        datasetProcessingDTO.setInputDatasets(datasetMapper.mapCopiesFromDataset(processingService.getInputDatasets(processing)));
+        datasetProcessingDTO.setOutputDatasets(datasetMapper.mapCopiesFromDataset(processingService.getOutputDatasets(processing)));
+        datasetProcessingDTO.setProcessingDate(processing.getProcessingDate());
+        datasetProcessingDTO.setStudyId(processing.getStudyId());
+
         if (processing.getParent() != null) {
-            dto.setParentId(processing.getParent().getId());
+            datasetProcessingDTO.setParentId(processing.getParent().getId());
         }
-        return dto;
+        return datasetProcessingDTO;
     }
+
 
     @Override
     public List<DatasetProcessingDTO> datasetProcessingListToDatasetProcessingDTOList(List<DatasetProcessing> processings) {

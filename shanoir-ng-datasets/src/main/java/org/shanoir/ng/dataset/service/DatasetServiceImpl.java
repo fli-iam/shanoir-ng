@@ -152,6 +152,12 @@ public class DatasetServiceImpl implements DatasetService {
     @Autowired
     private EntityManager em;
 
+    @Autowired
+    private DatasetProcessingService datasetProcessingService;
+
+    @Autowired
+    private DatasetService datasetService; // To open transaction when called method is transactionnal and both parent and child are in this file
+
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
     private void delete(Dataset entity) throws ShanoirException, SolrServerException, IOException, RestServiceException {
@@ -328,7 +334,7 @@ public class DatasetServiceImpl implements DatasetService {
     private Dataset updateDatasetValues(final Dataset datasetDb, final Dataset dataset) {
         datasetDb.setCreationDate(dataset.getCreationDate());
         datasetDb.setId(dataset.getId());
-        datasetDb.setProcessings(dataset.getProcessings());
+        datasetDb.setProcessings(datasetService.getProcessings(dataset));
         datasetDb.setSubjectId(dataset.getSubjectId());
         if (dataset.getUpdatedMetadata().getId().equals(dataset.getOriginMetadata().getId())) {
             // Force creation of a new dataset metadata
@@ -633,6 +639,19 @@ public class DatasetServiceImpl implements DatasetService {
         }
         dataset = repository.findWithDatasetProcessings(dataset.getId());
         return dataset.getProcessings();
+    }
+
+    @Transactional(readOnly = true)
+    public Dataset getFirstRealInput(Dataset dataset) {
+        DatasetProcessing processing = dataset.getDatasetProcessing();
+        if (Objects.nonNull(processing)) {
+            if (em.contains(processing)) {
+                processingService.getInputDatasets(processing).get(0).getFirstRealInput();
+            }
+            dataset = repository.findById(dataset.getId()).orElseThrow();
+            return repository.findProcessingAncestors(dataset.getId()).get(0).getFirstRealInput();
+        }
+        return dataset;
     }
 
     @Transactional(readOnly = true)

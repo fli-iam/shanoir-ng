@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -113,4 +114,18 @@ public interface DatasetProcessingService {
     void deleteByParentId(Long id) throws RestServiceException, ShanoirException, SolrServerException, IOException;
 
     void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException;
+
+    /**
+     * @param processing the involved processing
+     *
+     * @return the datasets the involved processing have as input, even if not in persistence context
+     */
+    List<Dataset> getInputDatasets(DatasetProcessing processing);
+
+    /**
+     * @param processing the involved processing
+     *
+     * @return the datasets the involved processing have as output, even if not in persistence context
+     */
+    List<Dataset> getOutputDatasets(DatasetProcessing processing);
 }

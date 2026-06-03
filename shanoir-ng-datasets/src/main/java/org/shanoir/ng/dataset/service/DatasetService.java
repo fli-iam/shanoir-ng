@@ -205,4 +205,12 @@ public interface DatasetService {
      * @return the processings having the involved dataset as input, even if not in persistence context
      */
     List<DatasetProcessing> getProcessings(Dataset dataset);
+
+    /**
+     * @param dataset the involved dataset
+     *
+     * @return the first dataset not produced by a pipeline execution, in the order "this dataset -> parent processing -> inputDataset[0] -> parent processing -> ...", even if not in persistence context
+     */
+    Dataset getFirstRealInput(Dataset dataset);
 }
+

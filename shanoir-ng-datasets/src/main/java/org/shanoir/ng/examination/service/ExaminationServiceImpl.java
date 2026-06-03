@@ -30,6 +30,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
@@ -108,6 +109,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 
     @Autowired
     private DICOMWebService dicomWebService;
+
+    @Autowired
+    private DatasetService datasetService;
 
     @Override
     public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
@@ -308,7 +312,7 @@ public class ExaminationServiceImpl implements ExaminationService {
                 for (Dataset ds : acquisition.getDatasets()) {
                     ds.setSubjectId(examination.getSubject().getId());
                     // Processed datasets
-                    for (DatasetProcessing processing : ds.getProcessings()) {
+                    for (DatasetProcessing processing : datasetService.getProcessings(ds)) {
                         for (Dataset procDs : processing.getOutputDatasets()) {
                             procDs.setSubjectId(examination.getSubject().getId());
                         }

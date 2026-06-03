@@ -24,6 +24,7 @@ import org.apache.commons.collections4.IterableUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.repository.StudyTagRepository;
@@ -41,6 +42,9 @@ public class StudyTagService {
     private DatasetRepository datasetRepository;
 
     @Autowired
+    private DatasetService datasetService;
+
+    @Autowired
     private SolrService solrService;
 
     public List<StudyTag> findByIds(List<Long> ids) {
@@ -48,8 +52,8 @@ public class StudyTagService {
     }
 
     @Transactional
-    public void addStudyTagsToDataset(Dataset dataset, List<Long> studyTagIds) throws SolrServerException, IOException {
-        Set<StudyTag> datasetTags = new HashSet<>(dataset.getTags());
+    public void addStudyTagsToDataset(Dataset dataset, List<Long> studyTagIds) {
+        Set<StudyTag> datasetTags = new HashSet<>(datasetService.getTags(dataset));
 
         for (StudyTag tag : findByIds(studyTagIds)) {
             if (tag.getStudy().getId().equals(dataset.getStudyId())) {
@@ -62,8 +66,8 @@ public class StudyTagService {
     }
 
     @Transactional
-    public void removeStudyTagsFromDataset(Dataset dataset, List<Long> studyTagIds) throws SolrServerException, IOException {
-        Set<StudyTag> datasetTags = new HashSet<>(dataset.getTags());
+    public void removeStudyTagsFromDataset(Dataset dataset, List<Long> studyTagIds) {
+        Set<StudyTag> datasetTags = new HashSet<>(datasetService.getTags(dataset));
 
         for (StudyTag tag : findByIds(studyTagIds)) {
             if (tag.getStudy().getId().equals(dataset.getStudyId())) {
