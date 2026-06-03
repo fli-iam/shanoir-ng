@@ -42,12 +42,13 @@ import { ExecutionService } from "../../vip/execution/execution.service";
 import { DatasetProcessingService } from '../shared/dataset-processing.service';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetLight, DatasetService } from '../shared/dataset.service';
+import { DatasetProcessingListComponent } from "../dataset-processing-list/dataset-processing-list.component";
 
 @Component({
     selector: 'dataset-processing-detail',
     templateUrl: 'dataset-processing.component.html',
     styleUrls: ['dataset-processing.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, TooltipComponent, MultiSelectTableComponent, LocalDateFormatPipe]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, TooltipComponent, MultiSelectTableComponent, LocalDateFormatPipe, DatasetProcessingListComponent]
 })
 
 export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> {

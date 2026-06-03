@@ -13,7 +13,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <h2>Access Requests</h2>
-<form *ngFor="let request of studyAccessRequests" @disapearUp>
+@for (request of studyAccessRequests; track request) {
+<form @disapearUp>
     <ul>
         <li>
             <label i18n="access request|user label@@user">User</label>
@@ -51,12 +52,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i class="fa-solid fa-thumbs-down"></i>
     </button>
 </form>
-<p *ngIf="!(studyAccessRequests?.length > 0)">
+}
+@if (!(studyAccessRequests?.length > 0)) {
+<p>
     No pending access request.
 </p>
+}
 
 <h2>Account Requests</h2>
-<form *ngFor="let request of accountCreationRequests" @disapearUp>
+@for (request of accountCreationRequests; track request) {
+<form @disapearUp>
     <ul>
         <li>
             <label i18n="access request|name label@@name">Name</label>
@@ -78,7 +83,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
             </span>
         </li>
-        <li *ngIf="request.user.accountRequestInfo?.studyName">
+        @if (request.user.accountRequestInfo?.studyName) {
+<li>
             <label i18n="access request|study label@@study">Study</label>
             <span class="right-col">
                 <a [routerLink]="['/study/details/', request.studyId]">
@@ -86,24 +92,31 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </a>
             </span>
         </li>
+}
         <li>
             <label i18n="access request|motivation label@@motivation" class="required-label">Motivation</label>
             <span class="right-col">
                 {{request.motivation}}
             </span>
         </li>
-        <li *ngIf="request.user.accountRequestInfo?.institution">
+        @if (request.user.accountRequestInfo?.institution) {
+<li>
             <label i18n="access request|institution label@@institution">Institution</label>
             <span class="right-col">{{request.user.accountRequestInfo.institution}}</span>
         </li>
-        <li *ngIf="request.user.accountRequestInfo?.function">
+}
+        @if (request.user.accountRequestInfo?.function) {
+<li>
             <label i18n="access request|function label@@function">Function</label>
             <span class="right-col">{{request.user.accountRequestInfo.function}}</span>
         </li>
-        <li *ngIf="request.user.accountRequestInfo?.contact">
+}
+        @if (request.user.accountRequestInfo?.contact) {
+<li>
             <label i18n="access request|invitationIssuer label@@invitationIssuer">Invitation issuer</label>
             <span class="right-col">{{request.user.accountRequestInfo.contact}}</span>
         </li>
+}
     </ul>
     <button type="button" (click)="decide(request, true)" class="accept right-icon">
         Accept
@@ -114,6 +127,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i class="fa-solid fa-thumbs-down"></i>
     </button>
 </form>
-<p *ngIf="!(accountCreationRequests?.length > 0)">
+}
+@if (!(accountCreationRequests?.length > 0)) {
+<p>
     No pending account creation.
 </p>
+}

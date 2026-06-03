@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { CardinalityOfRelatedSubjects } from "../../../enum/cardinality-of-related-subjects.enum";
@@ -20,19 +20,19 @@ import { ExploredEntity } from '../../../enum/explored-entity.enum';
 import { ProcessedDatasetType } from '../../../enum/processed-dataset-type.enum';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
-import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
+import { LocalDateFormatPipe } from '../../../shared/localLanguage/localDateFormat.pipe';
+import { Option } from '../../../shared/select/select.component';
 import { Study } from '../../../studies/shared/study.model';
 import { StudyService } from '../../../studies/shared/study.service';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
 import { DatasetType } from '../../shared/dataset-type.model';
 import { Dataset } from '../../shared/dataset.model';
-import { LocalDateFormatPipe } from '../../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
     selector: 'common-dataset-details',
     templateUrl: 'dataset.common.component.html',
-    imports: [FormsModule, ReactiveFormsModule, RouterLink, DatepickerComponent, SelectBoxComponent, LocalDateFormatPipe]
+    imports: [FormsModule, ReactiveFormsModule, RouterLink, DatepickerComponent, LocalDateFormatPipe]
 })
 export class CommonDatasetComponent implements OnChanges {
 

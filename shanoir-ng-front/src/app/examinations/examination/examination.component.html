@@ -26,28 +26,32 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <button *ngIf="mode == 'view'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openViewer()">View DICOM<i class="fa fa-eye"></i></button>
                 <button *ngIf="mode == 'view'" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openSegmentationViewer()">View for segmentation<i class="fa fa-eye"></i></button>
 			</form-footer>
-			<span [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
-					<h2 class="header command-zone"i18n="View examination|Title@@examinationDetailViewTitle">Details on examination</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'edit'">
-					<h2 class="header command-zone"i18n="Edit examination|Title@@examinationDetailEditTitle">Edit examination</h2>
-				</ng-template>
-				<ng-template [ngSwitchCase]="'create'">
-					<h2 class="header command-zone"i18n="Create examination|Title@@examinationDetailCreateTitle">Create examination</h2>
-				</ng-template>
-			</span>
+            <span>
+                @switch(mode) {
+                    @case('view') {
+                        <h2 class="header command-zone"i18n="View examination|Title@@examinationDetailViewTitle">Details on examination</h2>
+                    }
+                    @case('edit') {
+                        <h2 class="header command-zone"i18n="Edit examination|Title@@examinationDetailEditTitle">Edit examination</h2>
+                    }
+                    @case('create') {
+                        <h2 class="header command-zone"i18n="Create examination|Title@@examinationDetailCreateTitle">Create examination</h2>
+                    }   
+                }
+            </span>
 			<fieldset>
 				<ol>
 					<li *ngIf="mode != 'create'">
 						<label i18n="Examination detail|Id label@@examinationDetailId">Id</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{examination?.id}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="examId" [(ngModel)]="examination.id" [ngModelOptions]="{standalone: true}" readonly/>
-							</ng-template>
+						<span class="right-col">
+                            @switch (mode) {
+                                @case ('view') {
+                                    {{examination?.id}}
+                                }
+                                @default {
+                                    <input type="text" id="examId" [(ngModel)]="examination.id" [ngModelOptions]="{standalone: true}" readonly/>
+                                }
+                            }
 						</span>
 					</li>
 					<li>
@@ -97,26 +101,30 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 					<li>
 						<label i18n="Examination detail|Examination date label@@examinationDetailExaminationDate">Examination date</label>
-                                                <span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{examination?.examinationDate | localDateFormatPipe}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<datepicker formControlName="examinationDate" required></datepicker>
-								<label *ngIf="hasError('examinationDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid ! Date format: {{ dateDisplay }}</label>
-								<label *ngIf="hasError('examinationDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">Required</label>
-							</ng-template>
+                         <span class="right-col">
+                            @switch (mode) {
+                                @case ('view') {
+                                    {{examination?.examinationDate | localDateFormatPipe}}
+                                }
+                                @default {
+                                    <datepicker formControlName="examinationDate" required></datepicker>
+                                    <label *ngIf="hasError('examinationDate', ['format'])" class="form-validation-alert" i18n="Subject detail|Date valid error@@dateValidError">Date should be valid ! Date format: {{ dateDisplay }}</label>
+                                    <label *ngIf="hasError('examinationDate', ['required'])" class="form-validation-alert" i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">Required</label>
+                                }
+                            }
 						</span>
 					</li>
 					<li>
 						<label i18n="Examination detail|Comment label@@examinationDetailComment">Comment</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{examination?.comment}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="comment" formControlName="comment"/>
-							</ng-template>
+						<span class="right-col">
+                            @switch (mode) {
+                                @case ('view') {
+                                    {{examination?.comment}}
+                                }
+                                @default {
+                                    <input type="text" id="comment" formControlName="comment"/>
+                                }
+                            }
 						</span>
 					</li>
                     <li>
@@ -127,25 +135,28 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </li>
 					<li *ngIf="!inImport" >
 						<label i18n="Examination detail|Note label@@examinationDetailNote">Note</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{examination?.note}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="text" id="note" formControlName="note"/>
-							</ng-template>
+						<span class="right-col">
+                            @switch (mode) {
+                                @case ('view') {
+                                    {{examination?.note}}
+                                }
+                                @default {
+                                    <input type="text" id="note" formControlName="note"/>
+                                }
+                            }
 						</span>
 					</li>
 					<li *ngIf="!inImport">
 						<label i18n="Examination detail|Subject weight label@@examinationDetailSubjectWeight">Subject weight ({{getUnit(examination.weightUnitOfMeasure.toString())}})</label>
-						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-								{{examination?.subjectWeight}}
-							</ng-template>
-							<ng-template ngSwitchDefault>
-								<input type="number" min="0" id="subjectWeight" formControlName="subjectWeight"/>
-							</ng-template>
-
+						<span class="right-col">
+                            @switch (mode) {
+                                @case ('view') {
+                                    {{examination?.subjectWeight}}
+                                }
+                                @default {
+                                    <input type="number" min="0" id="subjectWeight" formControlName="subjectWeight"/>
+                                }
+                            }
                             <span class="right-col" *ngIf="mode != 'view'">
                                 <input id="{{unit.KG}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" value="{{unit.KG}}" />{{getUnit(unit.KG.toString())}}
                                 <input id="{{unit.G}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" value="{{unit.G}}" />{{getUnit(unit.G.toString())}}
@@ -155,7 +166,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
                     <li *ngIf="!inImport">
                         <label i18n="Examination detail|Assessments label@@examinationDetailAssessments">Assessments</label>
-                        <span class="right-col" [ngSwitch]="mode">
+                        <span class="right-col">
                             <ng-template ngFor let-instrumentBased [ngForOf]="examination.instrumentBasedAssessmentList">
 								<instrument-assessment-detail [instrumentBasedAssesment]="instrumentBased">
                                 </instrument-assessment-detail>
@@ -164,21 +175,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </li>
                     <li>
                         <label i18n="Examination detail|Attached files label@@examinationDetailAttachedFiles">Extra data</label>
-                        <span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">
-                                <ul>
-                                    <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button type="button" class="dl-button" (click)="downloadFile(file)"><i class="fas fa-download"></i></button>
-                                    </li>
-                                </ul>
-							</ng-template>
-							<ng-template ngSwitchDefault>
-                                <input #input hidden type="file" (change)="attachNewFile($event)"/>
-                                <button (click)="setFile()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
-                                <ul>
-                                    <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
-                                    </li>
-                                </ul>
-                            </ng-template>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ('view') {
+                                    <ul>
+                                        <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button type="button" class="dl-button" (click)="downloadFile(file)"><i class="fas fa-download"></i></button>
+                                        </li>
+                                    </ul>
+                                }
+                                @default {
+                                    <input #input hidden type="file" (change)="attachNewFile($event)"/>
+                                    <button (click)="setFile()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
+                                    <ul>
+                                        <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
+                                        </li>
+                                    </ul>
+                                }
+                            }
 						</span>
                     </li>
 					@if (mode == 'view' && examination.copies?.length > 0 && hasAdministrateRight) {

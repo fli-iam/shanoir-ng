@@ -57,13 +57,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <ol>
             <li>
                 <label i18n="Edit user|First name label@@editUserFirstName">First Name</label>
-                <span class="right-col" [ngSwitch]="mode">
-                    <ng-template [ngSwitchCase]="'view'">
-                        {{user.firstName}}
-                    </ng-template>
-                    <ng-template ngSwitchDefault>
-                        <input type="text" id="firstName" formControlName="firstName"/>
-                    </ng-template>
+                <span class="right-col">
+                    @switch (mode) {
+                        @case ('view') {
+                            {{user.firstName}}
+                        }
+                        @default {
+                            <input type="text" id="firstName" formControlName="firstName"/>
+                        }
+                    }
                     <label *ngIf="hasError('firstName', ['required'])" class="form-validation-alert" i18n="Edit user|First name required error@@editUserFirstNameRequiredError">First Name is required!</label>
                     <label *ngIf="hasError('firstName', ['minlength'])" class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">First Name length must be greater than 2 !</label>
                     <label *ngIf="hasError('firstName', ['maxlength'])" class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">First Name length must be lower than 50 !</label>
@@ -72,13 +74,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </li>
             <li>
                 <label i18n="Edit user|Last name label@@editUserLastName">Last Name</label>
-                <span class="right-col" [ngSwitch]="mode">
-                    <ng-template [ngSwitchCase]="'view'">
-                        {{user.lastName}}
-                    </ng-template>
-                    <ng-template ngSwitchDefault>
-                        <input type="text" id="lastName" formControlName="lastName"/>
-                    </ng-template>
+                <span class="right-col">
+                    @switch (mode) {
+                        @case ('view') {
+                            {{user.lastName}}
+                        }
+                        @default {
+                            <input type="text" id="lastName" formControlName="lastName"/>
+                        }
+                    }
                     <label *ngIf="hasError('lastName', ['required'])" class="form-validation-alert" i18n="Edit user|Last name required error@@editUserLastNameRequiredError">Last Name is required!</label>
                     <label *ngIf="hasError('lastName', ['minlength'])" class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">First Name length must be greater than 2 !</label>
                     <label *ngIf="hasError('lastName', ['maxlength'])" class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">First Name length must be lower than 50 !</label>
@@ -93,16 +97,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </li>
             <li>
             <label i18n="Edit user|Email label@@editUserEmail">Email</label>
-            <span class="right-col" [ngSwitch]="mode">
-                    <ng-template [ngSwitchCase]="'view'">
+            <span class="right-col">
+                @switch (mode) {
+                    @case ('view') {
                         {{user.email}}
-                    </ng-template>
-                    <ng-template ngSwitchDefault>
+                    }
+                    @default {
                         <input type="email" id="email" formControlName="email"/>
-                    </ng-template>
-                    <label *ngIf="hasError('email', ['required'])" class="form-validation-alert" i18n="Edit user|Email required error@@editUserEmailRequiredError">Email is required!</label>
-                    <label *ngIf="hasError('email', ['pattern'])" class="form-validation-alert" i18n="Edit user|Email pattern error@@editUserEmailPatternError">Email should be valid!</label>
-                    <label *ngIf="hasError('email', ['unique'])" class="form-validation-alert" i18n="Edit user|Email unique error@@editUserEmailUniqueError">Email should be unique!</label>
+                    }
+                }
+                <label *ngIf="hasError('email', ['required'])" class="form-validation-alert" i18n="Edit user|Email required error@@editUserEmailRequiredError">Email is required!</label>
+                <label *ngIf="hasError('email', ['pattern'])" class="form-validation-alert" i18n="Edit user|Email pattern error@@editUserEmailPatternError">Email should be valid!</label>
+                <label *ngIf="hasError('email', ['unique'])" class="form-validation-alert" i18n="Edit user|Email unique error@@editUserEmailUniqueError">Email should be unique!</label>
                 </span>
             </li>
         </ol>
@@ -138,7 +144,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </li>
             <li>
                 <label i18n="Edit user|CanAccess to Dicom association label@@editUserCanAccessToDicomAssociation">Can import from PACS</label>
-                <span class="right-col" [ngSwitch]="mode">
+                <span class="right-col">
                     <ng-container *ngIf="mode == 'view' || !isUserAdmin()">
                         <span *ngIf="user.canAccessToDicomAssociation" class="bool-true"><i class="fas fa-check"></i></span>
                         <span *ngIf="!user.canAccessToDicomAssociation" class="bool-false"><i class="fas fa-times"></i></span>
@@ -157,7 +163,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <li *ngFor="let study of studies; let index = index" class="userStudies">
                     <span class="studyName">{{study?.name + ' (' + study?.id + ')'}}</span>
                     <span *ngIf="mode == 'edit'">
-                        <span class="right-col" [ngSwitch]="mode">
+                        <span class="right-col">
                             <button type="button" class="deleteButton" (click)="removeStudyFromUser(study, index)">
                             <i class="fas fa-trash"></i>
                             </button>

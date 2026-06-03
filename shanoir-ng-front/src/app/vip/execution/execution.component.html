@@ -12,7 +12,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<form *ngIf="pipeline" [formGroup]="executionForm" (ngSubmit)="onSubmitExecutionForm()"
+@if (pipeline) {
+<form [formGroup]="executionForm" (ngSubmit)="onSubmitExecutionForm()"
       xmlns="http://www.w3.org/1999/html">
     <legend>{{pipeline.name}}</legend>
 
@@ -26,21 +27,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     Please note that for file parameters, the text box is used for regular expression if you want to organize dataset in different arguments
     </div>
 
-    <div *ngFor="let parameter of pipeline.parameters">
-        <div *ngIf="parameter.name != 'executable'">
+    @for (parameter of pipeline.parameters; track parameter) {
+<div>
+        @if (parameter.name != 'executable') {
+<div>
              <label>{{parameter.name}}{{!parameter.isOptional && parameter.type != 'Boolean' ? '*' : ''}}
                  <tool-tip> {{isAFile(parameter) ? 'Regular expression to filter among the selected datasets. ' + parameter.description : parameter.description}} </tool-tip></label>
-             <input *ngIf="!isAFile(parameter) && parameter.type != 'Boolean'" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
-             <span *ngIf="parameter.type == 'Boolean'">
+             @if (!isAFile(parameter) && parameter.type != 'Boolean') {
+<input formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+}
+             @if (parameter.type == 'Boolean') {
+<span>
                  <checkbox formControlName="{{parameter.name}}" id="{{parameter.name}}"></checkbox>
              </span>
-             <span *ngIf="isAFile(parameter)">
-                 <input *ngIf="isAFile(parameter)"
+}
+             @if (isAFile(parameter)) {
+<span>
+                 @if (isAFile(parameter)) {
+<input
                     formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+}
                  <ng-template #loading>Loading datasets...</ng-template>
              </span>
+}
 	   </div>
+}
     </div>
+}
     <div>
         <label>Group by <tool-tip>Selected datasets will be grouped by the chosen entity. Choose what the selected pipeline expect.</tool-tip></label>
         <span class="right-col">
@@ -56,18 +69,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <input id="dcm" type="radio" formControlName="export_format" name="export_format" [(ngModel)]="exportFormat" value="dcm" />DICOM
     </span>
     </div>
-    <div *ngIf="exportFormat=='nii'">
+    @if (exportFormat=='nii') {
+<div>
         <label>Nifti converter <tool-tip>Nifti converter used to convert dicom to nifti.</tool-tip></label>
         <span class="right-col">
             <select-box formControlName="converter" [(ngModel)]="converterId" [options]="niftiConverters"></select-box>
         </span>
     </div>
+}
 </form>
-<button type='button' *ngIf="executionForm" (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
+}
+@if (executionForm) {
+<button type='button' (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
+}
 
-<div *ngIf="parametersApplied" class="block-div">
+@if (parametersApplied) {
+<div class="block-div">
 <legend> List of datasets selected for the given parameters: </legend>
-    <div *ngFor="let parameter of fileInputs" class="parent-div">
+    @for (parameter of fileInputs; track parameter) {
+<div class="parent-div">
         <input type="hidden" [(ngModel)]="datasetsByParam[parameter.name]"/>
         <b>{{parameter.name}} :</b>
            <select-box placeholder="Available datasets" (addClick)="addDatasetFromParam($event, parameter.name)" [options]="datasetsOptions">
@@ -87,26 +107,36 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                  Subject
                  </th>
             </tr>
-            <tr *ngIf="isLoading">
+            @if (isLoading) {
+<tr>
                 <td [attr.colspan]="4" class="empty">
                     The data is loading
                     <span class="refresh"><i class="fas fa-sync-alt fa-spin"></i></span>
                 </td>
             </tr>
-                <tr *ngFor="let dataset of datasetsByParam[parameter.name]; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
+}
+                @for (dataset of datasetsByParam[parameter.name]; track dataset; let i = $index; let even = $even; let odd = $odd) {
+<tr [class.even]="even" [class.odd]="odd">
                     <td>{{dataset.name}} ({{dataset.id}})</td>
-                    <td>{{dataset.datasetAcquisition?.id}}</td>
-                    <td>{{dataset.datasetAcquisition?.examination?.id}}</td>
+                    <td></td>
+                    <td></td>
                     <td>{{dataset.subject?.name}}</td>
-                    <td *ngIf="datasetsByParam[parameter.name].length > 1" class="icon icon-clickable" (click)="removeDatasetFromParam(dataset, parameter.name)">
+                    @if (datasetsByParam[parameter.name].length > 1) {
+<td class="icon icon-clickable" (click)="removeDatasetFromParam(dataset, parameter.name)">
                         <i class="fas fa-times"></i>
                     </td>
+}
                 </tr>
+}
         </table>
         <br/>
     </div>
+}
 </div>
+}
 
-<div *ngIf="parametersApplied">
+@if (parametersApplied) {
+<div>
     <button type="button" [disabled]="isSubmitted" (click)="onSubmitExecutionForm()">Run all</button>
 </div>
+}

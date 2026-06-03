@@ -289,9 +289,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <li>
                                 <label i18n="Examination detail|Copied entities label@@examinationCopiedEntitiesLabel">This examination has been copied :</label>
                                 <span class="right-col">
-                                    <div *ngFor="let entityId of examination.copies">
+                                    @for (entityId of examination.copies; track entityId) {
+<div>
                                         <a [routerLink]="['/examination/details/', entityId]"> [ {{ entityId }} ] </a>
                                     </div>
+}
                                 </span>
                             </li>
                         }

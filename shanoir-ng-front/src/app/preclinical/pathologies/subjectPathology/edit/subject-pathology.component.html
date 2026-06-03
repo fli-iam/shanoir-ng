@@ -13,7 +13,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component">
-	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+	@if (form) {
+<form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<div class="layout">
 			<form-footer
 				[state]="footerState"
@@ -52,7 +53,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								}
 								@default {
 									<select-box formControlName="pathologyModel" [optionArr]="displayedModels" (newOption)="isUserAdmin() ? goToAddPathologyModel() : null"></select-box>
-									<label *ngIf="hasError('pathologyModel', ['required'])" [@slideDown]="hasError('pathologyModel', ['required'])" class="form-validation-alert">Pathology model is required!</label>
+									@if (hasError('pathologyModel', ['required'])) {
+<label [@slideDown]="hasError('pathologyModel', ['required'])" class="form-validation-alert">Pathology model is required!</label>
+}
 								}
 							}
 						</span>
@@ -66,7 +69,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								}
 								@default {
 									<select-box formControlName="location" [optionArr]="locations" (newClick)="goToAddLocation()"></select-box>
-									<label *ngIf="hasError('location', ['required'])" [@slideDown]="hasError('location', ['required'])" class="form-validation-alert">Location is required!</label>
+									@if (hasError('location', ['required'])) {
+<label [@slideDown]="hasError('location', ['required'])" class="form-validation-alert">Location is required!</label>
+}
 								}
 							}
 						</span>
@@ -80,7 +85,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								}
 								@default {
 									<datepicker formControlName="startDate"></datepicker>
-									<label *ngIf="hasError('startDate', ['date-format'])" [@slideDown]="hasError('startDate', ['date-format'])" class="form-validation-alert">Start date is required!</label>
+									@if (hasError('startDate', ['date-format'])) {
+<label [@slideDown]="hasError('startDate', ['date-format'])" class="form-validation-alert">Start date is required!</label>
+}
 								}
 							}
 						</span>
@@ -94,7 +101,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								}
 								@default {
 									<datepicker formControlName="endDate"></datepicker>
-									<label *ngIf="hasError('endDate', ['date-format'])" [@slideDown]="hasError('endDate', ['date-format'])" class="form-validation-alert">End date is required!</label>
+									@if (hasError('endDate', ['date-format'])) {
+<label [@slideDown]="hasError('endDate', ['date-format'])" class="form-validation-alert">End date is required!</label>
+}
 								}
 							}
 						</span>
@@ -103,4 +112,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 		</div>
 	</form>
+}
 </div>

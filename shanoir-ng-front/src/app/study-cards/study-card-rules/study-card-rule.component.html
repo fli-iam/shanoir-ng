@@ -13,7 +13,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="conditions" [class.dataset]="rule.scope == 'Dataset'" [class.acquisition]="rule.scope == 'DatasetAcquisition'">
-	<div *ngFor="let condition of rule.conditions; let i = index" class="condition">	
+	@for (condition of rule.conditions; track condition; let i = $index) {
+<div class="condition">	
 		<condition 
 				[ruleScope]="rule.scope"
 				[(condition)]="rule.conditions[i]" 
@@ -27,11 +28,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				[addSubForm]="addSubForm">
 		</condition>
 	</div>
-	<div *ngIf="rule.conditions?.length == 0">
+}
+	@if (rule.conditions?.length == 0) {
+<div>
 		<span class="always"><i class="fas fa-infinity"></i>Always</span>
 	</div>
+}
 	<div>
-		<span *ngIf="mode != 'view'" class="add" (click)="addNewCondition(rule.scope)"><i class="fas fa-plus"></i>Add a condition</span>
+		@if (mode != 'view') {
+<span class="add" (click)="addNewCondition(rule.scope)"><i class="fas fa-plus"></i>Add a condition</span>
+}
 	</div>
 </div>
 
