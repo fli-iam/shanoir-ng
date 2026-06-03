@@ -81,7 +81,8 @@ apply_db_name_substitutions()
 		-e "s/[Uu][Ss][Ee] \+studies\b/USE ${SHANOIR_STUDIES_DB_NAME}/g" \
 		-e "s/[Uu][Ss][Ee] \+import\b/USE ${SHANOIR_IMPORT_DB_NAME}/g" \
 		-e "s/[Uu][Ss][Ee] \+users\b/USE ${SHANOIR_USERS_DB_NAME}/g" \
-		-e "s/[Uu][Ss][Ee] \+preclinical\b/USE ${SHANOIR_PRECLINICAL_DB_NAME}/g"
+		-e "s/[Uu][Ss][Ee] \+preclinical\b/USE ${SHANOIR_PRECLINICAL_DB_NAME}/g" \
+		-e "s/[Uu][Ss][Ee] \+migrations\b/USE ${SHANOIR_MIGRATIONS_DB_NAME}/g"
 }
 
 # wait until the mariadbd server is ready
