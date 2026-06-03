@@ -98,14 +98,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 @default {
                                     <datepicker formControlName="processingDate"></datepicker>
                                     @if (hasError('processingDate', ['format'])) {
-                                        <label class="form-validation-alert" i18n="Processing detail|Date valid error@@dateValidError">
+                                        <label class="form-validation-alert" i18n="Processing detail|Date valid error@@dateValidError"
+                                            animate.enter="slide-down-error" animate.leave="slide-up-error">
                                             Invalid date, it must follow the format: {{ dateDisplay }}
                                         </label>
                                     }
                                     @if (hasError('processingDate', ['required'])) {
                                         <label
                                             class="form-validation-alert"
-                                            i18n="Processing detail|BirthDate required error@@processingDetailBirthDateRequiredError">
+                                            i18n="Processing detail|BirthDate required error@@processingDetailBirthDateRequiredError"
+                                            animate.enter="slide-down-error" animate.leave="slide-up-error">
                                             Required
                                         </label>
                                     }

@@ -83,22 +83,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label
                             *ngIf="hasError('firstName', ['required'])"
                             class="form-validation-alert"
+                            animate.enter="slide-down-error" animate.leave="slide-up-error"
                             i18n="Edit user|First name required error@@editUserFirstNameRequiredError">
                             First Name is required!
                         </label>
                         <label
                             *ngIf="hasError('firstName', ['minlength'])"
                             class="form-validation-alert"
+                            animate.enter="slide-down-error" animate.leave="slide-up-error"
                             i18n="Edit user|First name length error@@editUserFirstNameLengthError">
                             First Name length must be greater than 2 !
                         </label>
                         <label
                             *ngIf="hasError('firstName', ['maxlength'])"
                             class="form-validation-alert"
+                            animate.enter="slide-down-error" animate.leave="slide-up-error"
                             i18n="Edit user|First name length error@@editUserFirstNameLengthError">
                             First Name length must be lower than 50 !
                         </label>
-                        <label *ngIf="hasError('firstName', ['invalidName'])" class="form-validation-alert">
+                        <label *ngIf="hasError('firstName', ['invalidName'])" class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error">
                             Please, do not us special characters, except - and '
                         </label>
                     </span>
@@ -117,22 +120,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label
                             *ngIf="hasError('lastName', ['required'])"
                             class="form-validation-alert"
+                            animate.enter="slide-down-error" animate.leave="slide-up-error"
                             i18n="Edit user|Last name required error@@editUserLastNameRequiredError">
                             Last Name is required!
                         </label>
                         <label
                             *ngIf="hasError('lastName', ['minlength'])"
                             class="form-validation-alert"
+                            animate.enter="slide-down-error" animate.leave="slide-up-error"
                             i18n="Edit user|First name length error@@editUserFirstNameLengthError">
                             First Name length must be greater than 2 !
                         </label>
                         <label
                             *ngIf="hasError('lastName', ['maxlength'])"
                             class="form-validation-alert"
+                            animate.enter="slide-down-error" animate.leave="slide-up-error"
                             i18n="Edit user|First name length error@@editUserFirstNameLengthError">
                             First Name length must be lower than 50 !
                         </label>
-                        <label *ngIf="hasError('lastName', ['invalidName'])" class="form-validation-alert">
+                        <label *ngIf="hasError('lastName', ['invalidName'])" class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error">
                             Please, do not us special characters, except - and '
                         </label>
                     </span>
@@ -157,18 +163,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <label
                             *ngIf="hasError('email', ['required'])"
                             class="form-validation-alert"
+                            animate.enter="slide-down-error" animate.leave="slide-up-error"
                             i18n="Edit user|Email required error@@editUserEmailRequiredError">
                             Email is required!
                         </label>
                         <label
                             *ngIf="hasError('email', ['pattern'])"
                             class="form-validation-alert"
+                            animate.enter="slide-down-error" animate.leave="slide-up-error"
                             i18n="Edit user|Email pattern error@@editUserEmailPatternError">
                             Email should be valid!
                         </label>
                         <label
                             *ngIf="hasError('email', ['unique'])"
                             class="form-validation-alert"
+                            animate.enter="slide-down-error" animate.leave="slide-up-error"
                             i18n="Edit user|Email unique error@@editUserEmailUniqueError">
                             Email should be unique!
                         </label>
@@ -189,12 +198,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label
                                 *ngIf="hasError('expirationDate', ['format'])"
                                 class="form-validation-alert"
+                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                 i18n="Edit user|Date valid error@@editUserDateValidError">
                                 Date should be valid! Date format: {{ dateDisplay }}
                             </label>
                             <label
                                 *ngIf="hasError('expirationDate', ['future'])"
                                 class="form-validation-alert"
+                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                 i18n="Edit user|Date valid error@@editUserDateFutureError">
                                 This date should be in the future!
                             </label>
@@ -214,6 +225,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <label
                                 *ngIf="hasError('role', ['required'])"
                                 class="form-validation-alert"
+                                animate.enter="slide-down-error" animate.leave="slide-up-error"
                                 i18n="Edit user|Role required error@@editUserRoleRequiredError">
                                 Role is required!
                             </label>

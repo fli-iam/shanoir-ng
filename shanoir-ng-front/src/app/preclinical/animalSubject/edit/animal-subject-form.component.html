@@ -64,7 +64,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         @if (hasError('subject.imagedObjectCategory', ['required'])) {
                                             <label
                                                 class="form-validation-alert"
-                                                i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError">
+                                                i18n="Subject detail|ImagedObjectCategory required error@@subjectDetailImagedObjectCategoryRequiredError"
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error">
                                                 Imaged object category is required!
                                             </label>
                                         }
@@ -79,17 +80,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     @case ('create') {
                                         <input type="text" id="name" formControlName="name" />
                                         @if (hasError('subject.name', ['required'])) {
-                                            <label class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">
+                                            <label class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError"
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error">
                                                 Common Name is required !
                                             </label>
                                         }
                                         @if (hasError('subject.name', ['minlength', 'maxlength'])) {
-                                            <label class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">
+                                            <label class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError" 
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error">
                                                 Length must be between 2 and 64 !
                                             </label>
                                         }
                                         @if (hasError('subject.name', ['unique'])) {
-                                            <label class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">
+                                            <label class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError" 
+                                                animate.enter="slide-down-error" animate.leave="slide-up-error">
                                                 This name is already taken !
                                             </label>
                                         }
@@ -151,8 +155,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 [optionArr]="species"></select-box>
                                             @if (hasError('animalSubject.specie', ['required'])) {
                                                 <label
-                                                    [@slideDown]="hasError('animalSubject.specie', ['required'])"
                                                     class="form-validation-alert"
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     i18n="Edit subjectSpecie|Specie required error@@animalSubjectDetailSpecieRequiredError">
                                                     Species is required!
                                                 </label>
@@ -175,8 +179,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 [optionArr]="strains"></select-box>
                                             @if (hasError('animalSubject.strain', ['required'])) {
                                                 <label
-                                                    [@slideDown]="hasError('animalSubject.strain', ['required'])"
                                                     class="form-validation-alert"
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     i18n="Edit subjectStrain|Strain required error@@animalSubjectDetailStrainRequiredError">
                                                     Strain is required!
                                                 </label>
@@ -199,8 +203,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 [optionArr]="biotypes"></select-box>
                                             @if (hasError('animalSubject.biotype', ['required'])) {
                                                 <label
-                                                    [@slideDown]="hasError('animalSubject.biotype', ['required'])"
                                                     class="form-validation-alert"
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     i18n="Edit subjectBiotype|Biotype required error@@animalSubjectDetailBiotypeRequiredError">
                                                     Biological type is required!
                                                 </label>
@@ -223,8 +227,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 [optionArr]="providers"></select-box>
                                             @if (hasError('animalSubject.provider', ['required'])) {
                                                 <label
-                                                    [@slideDown]="hasError('animalSubject.provider', ['required'])"
                                                     class="form-validation-alert"
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     i18n="Edit subjectProvider|Provider required error@@animalSubjectDetailProviderRequiredError">
                                                     Provider is required!
                                                 </label>
@@ -247,8 +251,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 [optionArr]="stabulations"></select-box>
                                             @if (hasError('animalSubject.stabulation', ['required'])) {
                                                 <label
-                                                    [@slideDown]="hasError('animalSubject.stabulation', ['required'])"
                                                     class="form-validation-alert"
+                                                    animate.enter="slide-down-error" animate.leave="slide-up-error"
                                                     i18n="Edit subjectStabulation|Stabulation required error@@animalSubjectDetailStabulationRequiredError">
                                                     Stabulation is required!
                                                 </label>

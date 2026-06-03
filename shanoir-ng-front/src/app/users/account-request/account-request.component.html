@@ -73,22 +73,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col">
                             <input type="text" id="firstName" formControlName="firstName" />
                             @if (hasError('firstName', ['required'])) {
-                                <label class="form-validation-alert" i18n="Edit user|First name required error@@editUserFirstNameRequiredError">
+                                <label class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error" i18n="Edit user|First name required error@@editUserFirstNameRequiredError">
                                     First Name is required!
                                 </label>
                             }
                             @if (hasError('firstName', ['minlength'])) {
-                                <label class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">
+                                <label class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error" i18n="Edit user|First name length error@@editUserFirstNameLengthError">
                                     First Name length must be greater than 2 !
                                 </label>
                             }
                             @if (hasError('firstName', ['maxlength'])) {
-                                <label class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">
+                                <label class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error" i18n="Edit user|First name length error@@editUserFirstNameLengthError">
                                     First Name length must be lower than 50 !
                                 </label>
                             }
                             @if (hasError('firstName', ['invalidName'])) {
-                                <label class="form-validation-alert">Please, do not us special characters, except - and '</label>
+                                <label class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error">Please, do not us special characters, except - and '</label>
                             }
                         </span>
                     </li>
@@ -97,22 +97,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col">
                             <input type="text" id="lastName" formControlName="lastName" />
                             @if (hasError('lastName', ['required'])) {
-                                <label class="form-validation-alert" i18n="Edit user|Last name required error@@editUserLastNameRequiredError">
+                                <label class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error" i18n="Edit user|Last name required error@@editUserLastNameRequiredError">
                                     Last Name is required!
                                 </label>
                             }
                             @if (hasError('lastName', ['minlength'])) {
-                                <label class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">
-                                    First Name length must be greater than 2 !
+                                <label class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error" i18n="Edit user|Last name length error@@editUserLastNameLengthError">
+                                    Last Name length must be greater than 2 !
                                 </label>
                             }
                             @if (hasError('lastName', ['maxlength'])) {
-                                <label class="form-validation-alert" i18n="Edit user|First name length error@@editUserFirstNameLengthError">
-                                    First Name length must be lower than 50 !
+                                <label class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error" i18n="Edit user|Last name length error@@editUserLastNameLengthError">
+                                    Last Name length must be lower than 50 !
                                 </label>
                             }
                             @if (hasError('lastName', ['invalidName'])) {
-                                <label class="form-validation-alert">Please, do not us special characters, except - and '</label>
+                                <label class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error">Please, do not us special characters, except - and '</label>
                             }
                         </span>
                     </li>
@@ -121,17 +121,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col">
                             <input type="email" id="email" formControlName="email" />
                             @if (hasError('email', ['required'])) {
-                                <label class="form-validation-alert" i18n="Edit user|Email required error@@editUserEmailRequiredError">
+                                <label class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error" i18n="Edit user|Email required error@@editUserEmailRequiredError">
                                     Email is required!
                                 </label>
                             }
                             @if (hasError('email', ['pattern'])) {
-                                <label class="form-validation-alert" i18n="Edit user|Email pattern error@@editUserEmailPatternError">
+                                <label class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error" i18n="Edit user|Email pattern error@@editUserEmailPatternError">
                                     Email should be valid!
                                 </label>
                             }
                             @if (hasError('email', ['unique'])) {
-                                <label class="form-validation-alert" i18n="Edit user|Email unique error@@editUserEmailUniqueError">
+                                <label class="form-validation-alert" animate.enter="slide-down-error" animate.leave="slide-up-error"i18n="Edit user|Email unique error@@editUserEmailUniqueError">
                                     Email should be unique!
                                 </label>
                             }

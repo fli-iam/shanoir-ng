@@ -80,7 +80,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <label
                                     *ngIf="hasError('study', ['required'])"
                                     class="form-validation-alert"
-                                    i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError">
+                                    i18n="Examination detail|Study required error@@examinationDetailStudyRequiredError"
+                                    animate.enter="slide-down-error" animate.leave="slide-up-error">
                                     Study is required!
                                 </label>
                             </ng-template>
@@ -99,7 +100,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <label
                                     *ngIf="hasError('subject', ['required'])"
                                     class="form-validation-alert"
-                                    i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError">
+                                    i18n="Examination detail|Subject required error@@examinationDetailSubjectRequiredError"
+                                    animate.enter="slide-down-error" animate.leave="slide-up-error">
                                     Subject is required!
                                 </label>
                             </ng-template>
@@ -118,7 +120,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <label
                                     *ngIf="hasError('center', ['required'])"
                                     class="form-validation-alert"
-                                    i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError">
+                                    i18n="Examination detail|Center required error@@examinationDetailCenterRequiredError"
+                                    animate.enter="slide-down-error" animate.leave="slide-up-error">
                                     Center is required!
                                 </label>
                             </ng-template>
@@ -136,13 +139,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <label
                                         *ngIf="hasError('examinationDate', ['format'])"
                                         class="form-validation-alert"
-                                        i18n="Subject detail|Date valid error@@dateValidError">
+                                        i18n="Subject detail|Date valid error@@dateValidError"
+                                        animate.enter="slide-down-error" animate.leave="slide-up-error">
                                         Date should be valid ! Date format: {{ dateDisplay }}
                                     </label>
                                     <label
                                         *ngIf="hasError('examinationDate', ['required'])"
                                         class="form-validation-alert"
-                                        i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError">
+                                        i18n="Subject detail|BirthDate required error@@subjectDetailBirthDateRequiredError"
+                                        animate.enter="slide-down-error" animate.leave="slide-up-error">
                                         Required
                                     </label>
                                 }
