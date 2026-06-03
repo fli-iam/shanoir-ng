@@ -68,6 +68,8 @@ get_db_for_dir()
 
 # Substitute hardcoded database names in SQL content with configured names.
 # Database names must only contain alphanumeric characters and underscores.
+# Limitation: plain text substitution — also rewrites names inside comments and
+# string literals, and won't match backtick-quoted identifiers (`datasets`.table).
 apply_db_name_substitutions()
 {
 	sed \
