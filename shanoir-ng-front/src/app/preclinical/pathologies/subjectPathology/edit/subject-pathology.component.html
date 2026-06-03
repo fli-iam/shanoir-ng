@@ -71,7 +71,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     @default {
                                         <select-box formControlName="location" [optionArr]="locations" (newClick)="goToAddLocation()"></select-box>
                                         @if (hasError('location', ['required'])) {
-                                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">Location is required!</label>
+                                            <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">
+                                                Location is required!
+                                            </label>
                                         }
                                     }
                                 }
