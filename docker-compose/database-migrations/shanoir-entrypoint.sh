@@ -62,7 +62,7 @@ get_db_for_dir()
 		users)       echo "$SHANOIR_USERS_DB_NAME" ;;
 		preclinical) echo "$SHANOIR_PRECLINICAL_DB_NAME" ;;
 		migrations)  echo "$SHANOIR_MIGRATIONS_DB_NAME" ;;
-		*)           echo "$1" ;;
+		*)           echo "ERROR: no DB name mapping for directory '$1'" >&2; return 1 ;;
 	esac
 }
 
@@ -175,7 +175,7 @@ apply_migrations()
 			echo "    $migration..."
 
 			[[ "$migration" =~ ^([^/]+)/ ]] || return 1
-			db=$(get_db_for_dir "${BASH_REMATCH[1]}")
+			db=$(get_db_for_dir "${BASH_REMATCH[1]}") || return 1
 
 			if apply_db_name_substitutions <"$DB_CHANGES_DIR/$migration" | $MARIADB "$db" &&
 			   $MARIADB "$MIGRATION_DB" -e "INSERT INTO migrations VALUES ('$migration');"
@@ -206,7 +206,7 @@ apply_init_procedures()
       echo "$HEADER error: could not determine target DB for $sql_file" >&2
       return 1
     fi
-    db=$(get_db_for_dir "$db_dir")
+    db=$(get_db_for_dir "$db_dir") || return 1
     if ! apply_db_name_substitutions < "$sql_file" | $MARIADB "$db"; then
       echo "$HEADER error: failed to apply $sql_file" >&2
       return 1
