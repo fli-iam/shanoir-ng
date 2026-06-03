@@ -13,24 +13,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div #formContainer class="content-component detail">
-    @if (form) {
-        <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
-            <form-footer [state]="footerState" (save)="save()" (edit)="goToEdit()" (delete)="delete()" (dismiss)="goToView()" (back)="goBack()"></form-footer>
-            <span>
-                @switch (mode) {
-                    @case ('view') {
-                        <h2 class="header command-zone" i18n="View datasetProcessing|Title@@datasetProcessingDetailViewTitle">
-                            {{ isExecutionMonitoring ? 'VIP execution monitoring' : 'Details on dataset processing' }}
-                        </h2>
-                    }
-                    @case ('edit') {
-                        <h2 class="header command-zone" i18n="Edit datasetProcessing|Title@@datasetProcessingDetailEditTitle">Edit dataset processing</h2>
-                    }
-                    @case ('create') {
-                        <h2 class="header command-zone" i18n="Create datasetProcessing|Title@@datasetProcessingDetailCreateTitle">Create dataset processing</h2>
-                    }
-                }
-            </span>
+	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
+		<form-footer
+			[state]="footerState"
+			(save)="save()"
+			(edit)="goToEdit()"
+            (delete) = "delete()"
+			(dismiss)="goToView()"
+			(back)="goBack()"
+		></form-footer>
+		<span [ngSwitch]="mode">
+			<ng-template [ngSwitchCase]="'view'">
+				<h2 class="header command-zone"i18n="View datasetProcessing|Title@@datasetProcessingDetailViewTitle">{{isExecutionMonitoring ? 'VIP execution monitoring' : 'Details on dataset processing'}}</h2>
+			</ng-template>
+			<ng-template [ngSwitchCase]="'edit'">
+				<h2 class="header command-zone"i18n="Edit datasetProcessing|Title@@datasetProcessingDetailEditTitle">Edit dataset processing</h2>
+			</ng-template>
+			<ng-template [ngSwitchCase]="'create'">
+				<h2 class="header command-zone"i18n="Create datasetProcessing|Title@@datasetProcessingDetailCreateTitle">Create dataset processing</h2>
+			</ng-template>
+		</span>
 
 		<fieldset>
 			<ol>
@@ -138,23 +140,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
 				</li>
 
-                        @if (executionMonitoring.endDate) {
-                            <li>
-                                <label class="right-col">End date</label>
-                                <span class="right-col">
-                                    {{ formatDate(executionMonitoring.endDate) }}
-                                </span>
-                            </li>
-                        }
+                <li *ngIf="executionMonitoring.startDate">
+                    <label class="right-col">Start date</label>
+                    <span class="right-col">
+						{{ formatDate(executionMonitoring.startDate) }}
+					</span>
+                </li>
 
-                        @if (getDuration()) {
-                            <li>
-                                <label class="right-col">Duration</label>
-                                <span class="right-col">
-                                    {{ getDuration() }}
-                                </span>
-                            </li>
-                        }
+                <li *ngIf="executionMonitoring.endDate">
+                    <label class="right-col">End date</label>
+                    <span class="right-col">
+						{{ formatDate(executionMonitoring.endDate) }}
+					</span>
+                </li>
 
                 <li *ngIf="getDuration()">
                     <label class="right-col">Duration</label>

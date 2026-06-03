@@ -12,9 +12,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-@if (pipeline) {
-    <form [formGroup]="executionForm" (ngSubmit)="onSubmitExecutionForm()" xmlns="http://www.w3.org/1999/html">
-        <legend>{{ pipeline.name }}</legend>
+<form *ngIf="pipeline" [formGroup]="executionForm" (ngSubmit)="onSubmitExecutionForm()"
+      xmlns="http://www.w3.org/1999/html">
+    <legend>{{pipeline.name}}</legend>
 
     <div>
         <label for="execution_name">Execution Name *</label>
@@ -110,11 +110,3 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div *ngIf="parametersApplied">
     <button type="button" [disabled]="isSubmitted" (click)="onSubmitExecutionForm()">Run all</button>
 </div>
-
-        @if (parametersApplied) {
-            <div>
-                <button type="button" [disabled]="isSubmitted" (click)="onSubmitExecutionForm()">Run all</button>
-            </div>
-        }
-    </form>
-}

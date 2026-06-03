@@ -414,7 +414,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <select-box formControlName="study" [optionArr]="studies" (userChange)="onSelectStudy()"></select-box>
                                     }
                                     @default {
-                                        {{ studyNameForSubject() }}
+                                        {{ studyNameForSubject }}
                                         @if (hasError('study', ['required'])) {
                                             <label
                                                 animate.enter="slide-down-error"

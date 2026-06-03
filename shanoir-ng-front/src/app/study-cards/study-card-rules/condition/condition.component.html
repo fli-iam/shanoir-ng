@@ -94,9 +94,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             class="var auto-width" 
             [class.error]="tagError"
             [(ngModel)]="condition.dicomTag"
-            (userChange)="onDicomFieldChange($event)"
-            [options]="tagOptions"
-            placeholder="select dicom tag"
+            (userChange)="onDicomFieldChange($event)" 
+            [options]="tagOptions" 
+            placeholder="select dicom tag" 
             (focusout)="tagTouched = true"
             [clear]="false">
     </select-box>
@@ -104,24 +104,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             *ngIf="!condition.scope?.includes('DICOMCondition')"
             class="var auto-width" 
             [class.error]="shanoirFieldError"
-            [(ngModel)]="condition.shanoirField"
-            (userChange)="onFieldChange()"
-            [options]="fieldOptions"
-            placeholder="select shanoir metadata field"
+            [(ngModel)]="condition.shanoirField" 
+            (userChange)="onFieldChange()" 
+            [options]="fieldOptions" 
+            placeholder="select shanoir metadata field" 
             (focusout)="shanoirFieldTouched = true"
-            [clear]="false"></select-box>
-    }
-    <select-box
-        [readOnly]="condition.shanoirField && shanoirFieldOptions?.length > 0"
-        class="method auto-width"
-        [class.error]="operationError"
-        [(ngModel)]="condition.operation"
-        (userChange)="onOperationChange()"
-        [options]="operations"
-        placeholder="select operation"
-        (focusout)="operationTouched = true"
-        [clear]="false"></select-box>
-    @if (condition?.operation != 'PRESENT' && condition?.operation != 'ABSENT') {
+            [clear]="false">
+    </select-box>
+    <select-box 
+            [readOnly]="condition.shanoirField && shanoirFieldOptions?.length > 0"
+            class="method auto-width"
+            [class.error]="operationError"
+            [(ngModel)]="condition.operation" 
+            (userChange)="onOperationChange()" 
+            [options]="operations" 
+            placeholder="select operation" 
+            (focusout)="operationTouched = true"
+            [clear]="false">
+    </select-box>
+    <ng-container *ngIf="condition?.operation != 'PRESENT' && condition?.operation != 'ABSENT'"> 
         <form [formGroup]="form">
             <span *ngIf="condition.scope?.includes('DICOMCondition') || !(shanoirFieldOptions?.length > 0)" formArrayName="values" class="multi-value edit">
                 <span *ngFor="let value of condition.values; let i  = index; trackBy: trackByFn" class="one-value">
@@ -161,8 +162,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </div>
             </span>
         </form>
-    }
-}
-@if (mode != 'view') {
-    <span class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>
-}
+    </ng-container>
+</ng-container>
+<span *ngIf="mode != 'view'" class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>
