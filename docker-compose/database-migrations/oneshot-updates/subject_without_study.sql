@@ -10,11 +10,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
----- Datasets DB
--- Subject with null study but existing exam management
-update datasets.subject as sub set sub.study_id = (select distinct e.study_id from datasets.examination e where subject_id = sub.id) where sub.study_id is null;
-
--- Dataset from those subject (the only one is the second processed_dataset ever)
+-- Dataset from those subject (the only one is the second processed_dataset ever) !!! ONLY FOR OFSEP
 DELIMITER //
 begin -- As it only exists in OFSEP
     if exists (select 1 from datasets.subject s join datasets.dataset d on d.subject_id = s.id where d.id = 5602 and s.study_id is null) then
@@ -27,13 +23,3 @@ begin -- As it only exists in OFSEP
 end//
 
 DELIMITER ;
--- Subject with null study
-delete from datasets.subject where study_id is null;
-
----- Studies DB
--- Subject with null study but existing exam management
-update studies.subject as sub set sub.study_id = (select distinct e.study_id from studies.study_examination e where subject_id = sub.id) where sub.study_id is null;
-
---
--- Subject with null study
-delete from studies.subject where study_id is null;
