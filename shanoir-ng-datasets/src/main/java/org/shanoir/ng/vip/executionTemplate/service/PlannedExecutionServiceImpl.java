@@ -85,7 +85,7 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
             ExecutionTemplate template = executionTemplateRepository.findById(templateId).orElse(null);
             if (Objects.isNull(template)) {
                 //If the template has been removed for some reason
-                createdAcquisitionsPerTemplateId.get(templateId).forEach(acqId -> plannedExecutionRepository.deleteByAcquisitionIdAndTemplateId(templateId, acqId));
+                createdAcquisitionsPerTemplateId.get(templateId).forEach(acqId -> plannedExecutionRepository.deleteByAcquisitionIdAndTemplateId(acqId, templateId));
             }  else {
                 //Manage the executions according to the group scale
                 // (one exec per examination, one per acquisition or one per dataset)
@@ -169,7 +169,7 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
                     Thread.sleep(1000);
                 } catch (Exception ignored) { }
                 attempt++;
-                acquisition = acquisitionRepository.findById(acquisitionIds.getFirst()).orElse(null);
+                acquisition = acquisitionRepository.findById(acquisitionId).orElse(null);
             }
 
             if (Objects.nonNull(acquisition)) {
@@ -177,13 +177,8 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
                 for (int i = 0; i < datasetList.size(); i++) {
                     Dataset dataset = datasetList.get(i);
 
-                    //For the execution submission, the list needs to be final, so the plannedExecutionToRemove list has to be managed that way.
-                    List<Long> plannedExecutionToRemove;
-                    if (Objects.equals(i, datasetList.size() - 1)) {
-                        plannedExecutionToRemove = List.of(acquisitionId);
-                    } else {
-                        plannedExecutionToRemove = List.of(acquisitionId);
-                    }
+                    // Delete the planned execution record only after the last dataset of this acquisition is submitted.
+                    List<Long> plannedExecutionToRemove = (i == datasetList.size() - 1) ? List.of(acquisitionId) : List.of();
                     plannedExecutionManager.addToExecutionsQueue(new ExecutionInQueue(template, dataset.getId(), "dataset", plannedExecutionToRemove));
                     try {
                         Thread.sleep(1000); // Delay between submissions, VIP needs it
