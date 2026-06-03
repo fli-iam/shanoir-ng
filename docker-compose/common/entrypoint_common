@@ -107,6 +107,13 @@ require()
             SHANOIR_DB_PORT)            match "$name" '^([0-9]+)$' ;;
             SHANOIR_DB_NAME)            match "$name" '^([a-z0-9._-]+)$' ;;
 
+            SHANOIR_DATASETS_DB_NAME)    match "$name" '^([a-z0-9._-]+)$' ;;
+            SHANOIR_STUDIES_DB_NAME)     match "$name" '^([a-z0-9._-]+)$' ;;
+            SHANOIR_IMPORT_DB_NAME)      match "$name" '^([a-z0-9._-]+)$' ;;
+            SHANOIR_USERS_DB_NAME)       match "$name" '^([a-z0-9._-]+)$' ;;
+            SHANOIR_PRECLINICAL_DB_NAME) match "$name" '^([a-z0-9._-]+)$' ;;
+            SHANOIR_MIGRATIONS_DB_NAME)  match "$name" '^([a-z0-9._-]+)$' ;;
+
             *)
                 error "unknown var: $name"
                 ;;
