@@ -117,12 +117,8 @@ if [ -n "$build" ] ; then
 
 	# 2. run the maven build
 	mkdir -p /tmp/home
-	# -t/-i require a TTY; skip in CI and other non-interactive shells
-	docker_run_flags="--rm"
-	if [ -t 1 ]; then
-		docker_run_flags="$docker_run_flags -t -i"
-	fi
-	docker run $docker_run_flags -v "$PWD:/src" -u "`id -u`:`id -g`" -e HOME="/src/tmp/home" \
+	# Maven is non-interactive; never pass -t/-i (breaks in CI where stdin has no TTY).
+	docker run --rm -v "$PWD:/src" -u "`id -u`:`id -g`" -e HOME="/src/tmp/home" \
 		-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository"	\
 		-w /src "$DEV_IMG" sh -c 'cd shanoir-ng-parent  && git config --global --add safe.directory /src && mvn clean install -DskipTests'
 
