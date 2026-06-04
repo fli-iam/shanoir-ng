@@ -41,9 +41,21 @@ on:
           published tag such as NG_v2.10.0. Development builds, when published,
           are tagged by commit SHA rather than by the develop branch name. Do
           not rely on latest; it is not a complete stack tag.
+          Ignored when build_from_source is true.
         required: false
         default: "auto"
         type: string
+      build_from_source:
+        description: >
+          Build images from the checked-out branch (docker-compose-dev.yml)
+          instead of pulling pre-built GHCR images. Use this to validate the
+          deployment of code that is not yet published as an image set (e.g. a
+          fix that is on develop but has no release/dev image yet). Slower
+          (~60+ min) and does NOT exercise the published-image drift path, so it
+          is opt-in only and never used by scheduled or pull_request runs.
+        required: false
+        default: false
+        type: boolean
   pull_request:
     branches: [develop, master]
     paths:
@@ -62,14 +74,18 @@ concurrency:
 jobs:
   deployment-test:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    # Generous ceiling: the pull path finishes in ~10-30 min, but the opt-in
+    # build_from_source path also has to compile the full Java stack.
+    timeout-minutes: 120
 
     permissions:
       contents: read
       packages: read
 
     env:
-      COMPOSE_FILE: "docker-compose.yml:docker-compose.ci.yml"
+      # Build path uses docker-compose-dev.yml (has build: directives); the
+      # default pull path uses docker-compose.yml (pulls pre-built GHCR images).
+      COMPOSE_FILE: ${{ github.event.inputs.build_from_source == 'true' && 'docker-compose-dev.yml:docker-compose.ci.yml' || 'docker-compose.yml:docker-compose.ci.yml' }}
       # Tracked .env uses SHANOIR_MIGRATION=dev, which skips database-migrations
       # init procedures (stored procedures, etc.). CI must run like a real deploy.
       SHANOIR_MIGRATION: auto
@@ -83,6 +99,7 @@ jobs:
 
       # Manifest inspect / pulls to ghcr.io are more reliable authenticated.
       - name: Log in to GitHub Container Registry
+        if: ${{ github.event.inputs.build_from_source != 'true' }}
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -90,6 +107,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Resolve SHANOIR_IMAGE_TAG
+        if: ${{ github.event.inputs.build_from_source != 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -152,6 +170,7 @@ jobs:
           sudo sh -c 'echo "127.0.0.1 shanoir-ng-nginx viewer" >> /etc/hosts'
 
       - name: Validate image tag availability
+        if: ${{ github.event.inputs.build_from_source != 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -189,6 +208,7 @@ jobs:
           fi
 
       - name: Pull published images
+        if: ${{ github.event.inputs.build_from_source != 'true' }}
         run: |
           set -euo pipefail
           # Skip dcm4chee (profile in docker-compose.ci.yml); Wildfly/PACS images are large and OOM runners.
@@ -209,7 +229,43 @@ jobs:
 
 
       - name: Bootstrap installation
-        run: bash ./bootstrap.sh --clean --no-build --no-dcm4chee
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event.inputs.build_from_source }}" = "true" ]; then
+            echo "Building images from the checked-out branch (docker-compose-dev.yml)."
+            bash ./bootstrap.sh --clean --no-dcm4chee
+          else
+            echo "Using pre-built GHCR images (${SHANOIR_IMAGE_TAG:-latest})."
+            bash ./bootstrap.sh --clean --no-build --no-dcm4chee
+          fi
+
+      # Fail fast on schema/DDL drift. Hibernate does NOT halt on DDL errors
+      # during ddl-auto=create (the init oneshot), so a failed CREATE TABLE is
+      # silent and the service later dies on ddl-auto=validate. Without this
+      # check the job only fails ~5 min later at "Wait for microservices" with
+      # an opaque timeout. This converts that into an immediate, clear error
+      # (this is exactly the failure mode of the CardCondition / issue#3538 bug:
+      # the published image expects card_condition but its broken @Check made
+      # the CREATE fail at init).
+      - name: Assert no schema/DDL drift
+        run: |
+          set -uo pipefail
+          fail=0
+          for ms in users studies datasets import preclinical; do
+            logs="$(docker logs "$ms" 2>&1 || true)"
+            if echo "$logs" | grep -Eiq "Schema-validation: missing (table|column)|GenerationTarget encountered exception|Unknown column .* in '(CHECK|FUNCTION)'"; then
+              echo "::error::${ms}: schema/DDL drift detected — deployed image and DB schema are out of sync."
+              echo "--- offending lines in ${ms} ---"
+              echo "$logs" | grep -Ei "Schema-validation|GenerationTarget|Unknown column" | head -20
+              fail=1
+            fi
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo "One or more services cannot validate their schema against the deployed image."
+            echo "If using pre-built images, the published image set likely predates the schema fix."
+            exit 1
+          fi
+          echo "No schema/DDL drift detected."
 
       - name: Debug container state
         if: failure()
