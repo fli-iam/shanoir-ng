@@ -116,7 +116,7 @@ if [ -n "$build" ] ; then
 	docker build -t "$DEV_IMG" --target=jdk docker-compose
 
 	# 2. run the maven build
-	mkdir -p /tmp/home
+	mkdir -p tmp/home
 	# Maven is non-interactive; never pass -t/-i (breaks in CI where stdin has no TTY).
 	docker run --rm -v "$PWD:/src" -u "`id -u`:`id -g`" -e HOME="/src/tmp/home" \
 		-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository"	\
