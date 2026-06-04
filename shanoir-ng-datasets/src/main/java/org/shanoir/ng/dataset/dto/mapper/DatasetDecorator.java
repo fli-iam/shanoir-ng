@@ -27,6 +27,7 @@ import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
@@ -70,6 +71,9 @@ public abstract class DatasetDecorator implements DatasetMapper {
     @Autowired
     protected StudyTagMapper studyTagMapper;
 
+    @Autowired
+    protected DatasetRepository datasetRepository;
+
     @Override
     public List<IdName> datasetsToIdNameDTOs(final List<Dataset> datasets) {
         final List<IdName> datasetDTOs = new ArrayList<>();
@@ -104,8 +108,7 @@ public abstract class DatasetDecorator implements DatasetMapper {
         }
 
         //Manage Lazy loadings
-        dataset.setDatasetExpressions(datasetService.getDatasetExpressions(dataset));
-        dataset.setTags(datasetService.getTags(dataset));
+        Dataset datasetWithLazyRelations = datasetRepository.findWithLazyRelations(dataset.getId());
 
         DatasetDTO datasetDTO = new DatasetDTO();
 
@@ -122,9 +125,9 @@ public abstract class DatasetDecorator implements DatasetMapper {
         }
         datasetDTO.setCenterId(datasetService.getCenterId(dataset));
         datasetDTO.setInPacs(dataset.getInPacs());
-        datasetDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(dataset.getTags()));
-        datasetDTO.setSource(mapSourceFromDataset(dataset.getSource()));
-        datasetDTO.setCopies(mapCopiesFromDataset(dataset.getCopies()));
+        datasetDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(datasetWithLazyRelations.getTags()));
+        datasetDTO.setSource(mapSourceFromDataset(datasetWithLazyRelations.getSource()));
+        datasetDTO.setCopies(mapCopiesFromDataset(datasetWithLazyRelations.getCopies()));
 
         return datasetDTO;
     }
@@ -137,9 +140,7 @@ public abstract class DatasetDecorator implements DatasetMapper {
         }
 
         //Manage Lazy loadings
-        dataset.setDatasetExpressions(datasetService.getDatasetExpressions(dataset));
-        dataset.setTags(datasetService.getTags(dataset));
-        dataset.setProcessings(datasetService.getProcessings(dataset));
+        Dataset datasetWithLazyRelations = datasetRepository.findWithLazyRelations(dataset.getId());
 
         DatasetWithDependenciesDTO datasetWithDependenciesDTO = new DatasetWithDependenciesDTO();
 
@@ -156,18 +157,13 @@ public abstract class DatasetDecorator implements DatasetMapper {
         }
         datasetWithDependenciesDTO.setCenterId(datasetService.getCenterId(dataset));
         datasetWithDependenciesDTO.setInPacs(dataset.getInPacs());
-        datasetWithDependenciesDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(dataset.getTags()));
-        datasetWithDependenciesDTO.setProcessings(datasetProcessingMapper.datasetProcessingListToDatasetProcessingDTOList(dataset.getProcessings()));
+        datasetWithDependenciesDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(datasetWithLazyRelations.getTags()));
+        datasetWithDependenciesDTO.setProcessings(datasetProcessingMapper.datasetProcessingListToDatasetProcessingDTOList(datasetWithLazyRelations.getProcessings()));
         datasetWithDependenciesDTO.setDatasetAcquisition(datasetAcquisitionMapper.datasetAcquisitionToDatasetAcquisitionDTO(dataset.getDatasetAcquisition()));
         datasetWithDependenciesDTO.setDatasetProcessing(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(dataset.getDatasetProcessing()));
+        datasetWithDependenciesDTO.setCopies(mapCopiesFromDataset(datasetWithLazyRelations.getCopies()));
+        datasetWithDependenciesDTO.setSource(mapSourceFromDataset(datasetWithLazyRelations.getSource()));
 
-        datasetWithDependenciesDTO.setCopies(mapCopiesFromDataset(dataset.getCopies()));
-        datasetWithDependenciesDTO.setSource(mapSourceFromDataset(dataset.getSource()));
-
-        Hibernate.initialize(dataset.getCopies());
-        datasetWithDependenciesDTO.setCopies(dataset.getCopies().stream()
-                .map(Dataset::getId)
-                .collect(Collectors.toList()));
         return datasetWithDependenciesDTO;
     }
 

@@ -214,7 +214,7 @@ public class DatasetDownloaderServiceImpl {
             Dataset relevantDataset = dataset;
 
             if (Objects.nonNull(dataset.getDatasetProcessing())) {
-                relevantDataset = dataset.getFirstRealInput();
+                relevantDataset = datasetService.getFirstRealInput(dataset);
             }
 
             if (sorting.contains("study")) {

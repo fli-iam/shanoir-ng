@@ -480,7 +480,7 @@ public class DatasetSecurityService {
 
         Set<Long> studies = new HashSet<>();
         studies.add(studyId);
-        CollectionUtils.emptyIfNull(dataset.getRelatedStudies()).forEach(s -> studies.add(s.getId()));
+        CollectionUtils.emptyIfNull(datasetService.getRelatedStudies(dataset)).forEach(s -> studies.add(s.getId()));
         return hasRightOnStudiesCenter(datasetService.getCenterId(dataset), studies, rightStr);
     }
 

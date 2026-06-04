@@ -32,6 +32,7 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -181,30 +182,51 @@ public interface DatasetService {
     /**
      * @param dataset the involved dataset
      *
-     * @return the centerId, even if not in persistence context
+     * @return the corresponding centerId
      */
     Long getCenterId(Dataset dataset);
 
     /**
      * @param dataset the involved dataset
      *
-     * @return the datasetExpression, even if not in persistence context
+     * @return the related datasetExpression
      */
     List<DatasetExpression> getDatasetExpressions(Dataset dataset);
 
     /**
      * @param dataset the involved dataset
      *
-     * @return the studyTags, even if not in persistence context
+     * @return the related studyTags
      */
     List<StudyTag> getTags(Dataset dataset);
 
     /**
      * @param dataset the involved dataset
      *
-     * @return the processings having the involved dataset as input, even if not in persistence context
+     * @return the processings having the involved dataset as input
      */
     List<DatasetProcessing> getProcessings(Dataset dataset);
+
+    /**
+     * @param dataset the involved dataset
+     *
+     * @return the source from which the involved dataset is copied
+     */
+    Dataset getSource(Dataset dataset);
+
+    /**
+     * @param dataset the involved dataset
+     *
+     * @return the copies of the involved dataset
+     */
+    List<Dataset> getCopies(Dataset dataset);
+
+    /**
+     * @param dataset the involved dataset
+     *
+     * @return the studies in which the involved dataset appears
+     */
+    List<Study> getRelatedStudies(Dataset dataset);
 
     /**
      * @param dataset the involved dataset

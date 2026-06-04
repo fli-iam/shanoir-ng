@@ -44,6 +44,7 @@ import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.dicom.WADOURLHandler;
@@ -133,8 +134,7 @@ public class WADODownloaderService {
     private WADOURLHandler wadoURLHandler;
 
     @Autowired
-    @Lazy
-    private DatasetRepository datasetRepository;
+    private DatasetService datasetService;
 
     private WebClient webClient;
 
@@ -176,7 +176,7 @@ public class WADODownloaderService {
                 // Download and zip
                 try {
                     String zipedFile = null;
-                    if (dataset.getSource() != null) {
+                    if (datasetService.getSource(dataset) != null) {
                         zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name, subjectName);
                     } else {
                         zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name, null);
@@ -201,7 +201,7 @@ public class WADODownloaderService {
     private String buildFileName(String subjectName, Dataset dataset, String datasetFilePath, String instanceUID) {
         String serieDescription = dataset.getUpdatedMetadata().getName();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-        dataset = dataset.getFirstRealInput();
+        dataset = datasetService.getFirstRealInput(dataset);
         String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
         String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
         // Replace all forbidden characters.
@@ -262,7 +262,7 @@ public class WADODownloaderService {
                 if (indexInstanceUID > 0) {
                     sopInstanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
                     byte[] responseBody = downloadFileFromPACS(url);
-                    if (dataset.getSource() != null) {
+                    if (datasetService.getSource(dataset) != null) {
                         extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder, subjectName);
                     } else {
                         extractDICOMFilesFromMHTMLFile(responseBody, sopInstanceUID, workFolder, null);

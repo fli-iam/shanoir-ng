@@ -376,7 +376,7 @@ public class DatasetApiController implements DatasetApi {
                 DatasetExpressionFormat.DICOM);
         if (firstWADOURL.isPresent()) {
             String dicomJson = downloader.downloadDicomMetadataForURL(firstWADOURL.orElseThrow());
-            if (dataset.getSource() != null) {
+            if (datasetService.getSource(dataset) != null) {
                 Optional<Subject> subjectOpt = subjectService.findById(dataset.getSubjectId());
                 String subjectName = subjectOpt.get().getName();
                 JsonNode root = objectMapper.readTree(dicomJson);

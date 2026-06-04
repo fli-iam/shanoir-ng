@@ -60,6 +60,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
@@ -637,8 +638,38 @@ public class DatasetServiceImpl implements DatasetService {
             Hibernate.initialize(dataset.getProcessings());
             return dataset.getProcessings();
         }
-        dataset = repository.findWithDatasetProcessings(dataset.getId());
+        dataset = repository.findWithProcessings(dataset.getId());
         return dataset.getProcessings();
+    }
+
+    @Transactional(readOnly = true)
+    public Dataset getSource(Dataset dataset) {
+        if (em.contains(dataset)) {
+            Hibernate.initialize(dataset.getSource());
+            return dataset.getSource();
+        }
+        dataset = repository.findWithSource(dataset.getId());
+        return dataset.getSource();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Dataset> getCopies(Dataset dataset) {
+        if (em.contains(dataset)) {
+            Hibernate.initialize(dataset.getCopies());
+            return dataset.getCopies();
+        }
+        dataset = repository.findWithCopies(dataset.getId());
+        return dataset.getCopies();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Study> getRelatedStudies(Dataset dataset) {
+        if (em.contains(dataset)) {
+            Hibernate.initialize(dataset.getRelatedStudies());
+            return dataset.getRelatedStudies();
+        }
+        dataset = repository.findWithRelatedStudies(dataset.getId());
+        return dataset.getRelatedStudies();
     }
 
     @Transactional(readOnly = true)
@@ -646,10 +677,10 @@ public class DatasetServiceImpl implements DatasetService {
         DatasetProcessing processing = dataset.getDatasetProcessing();
         if (Objects.nonNull(processing)) {
             if (em.contains(processing)) {
-                processingService.getInputDatasets(processing).get(0).getFirstRealInput();
+                datasetService.getFirstRealInput(processingService.getInputDatasets(processing).get(0));
             }
             dataset = repository.findById(dataset.getId()).orElseThrow();
-            return repository.findProcessingAncestors(dataset.getId()).get(0).getFirstRealInput();
+            return datasetService.getFirstRealInput(repository.findProcessingAncestors(dataset.getId()).get(0));
         }
         return dataset;
     }

@@ -20,6 +20,8 @@ import java.util.function.Function;
 
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.eeg.model.Channel;
@@ -63,6 +65,9 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
     @Autowired
     protected DatasetMapper datasetMapper;
 
+    @Autowired
+    protected DatasetRepository datasetRepository;
+
     @Override
     public List<IdName> datasetsToIdNameDTOs(final List<EegDataset> datasets) {
         final List<IdName> datasetDTOs = new ArrayList<>();
@@ -96,8 +101,7 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
         }
 
         //Manage Lazy loadings
-        dataset.setDatasetExpressions(datasetService.getDatasetExpressions(dataset));
-        dataset.setTags(datasetService.getTags(dataset));
+        Dataset datasetWithLazyRelations = datasetRepository.findWithLazyRelations(dataset.getId());
 
         EegDatasetDTO eegDatasetDTO = new EegDatasetDTO();
 
@@ -114,8 +118,8 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
         }
         eegDatasetDTO.setCenterId(datasetService.getCenterId(dataset));
         eegDatasetDTO.setInPacs(dataset.getInPacs());
-        eegDatasetDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(dataset.getTags()));
-        eegDatasetDTO.setSource(datasetMapper.mapSourceFromDataset(dataset.getSource()));
+        eegDatasetDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(datasetWithLazyRelations.getTags()));
+        eegDatasetDTO.setSource(datasetMapper.mapSourceFromDataset(datasetWithLazyRelations.getSource()));
         eegDatasetDTO.setCopies(datasetMapper.mapCopiesFromDataset(dataset.getCopies()));
         eegDatasetDTO.setCoordinatesSystem(dataset.getCoordinatesSystem());
         eegDatasetDTO.setSamplingFrequency(dataset.getSamplingFrequency());
@@ -140,9 +144,7 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
         }
 
         //Manage Lazy loadings
-        dataset.setDatasetExpressions(datasetService.getDatasetExpressions(dataset));
-        dataset.setTags(datasetService.getTags(dataset));
-        dataset.setProcessings(datasetService.getProcessings(dataset));
+        Dataset datasetWithLazyRelations = datasetRepository.findWithLazyRelations(dataset.getId());
 
         EegDatasetWithDependenciesDTO eegDatasetWithDependenciesDTO = new EegDatasetWithDependenciesDTO();
 
@@ -159,9 +161,9 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
         }
         eegDatasetWithDependenciesDTO.setCenterId(datasetService.getCenterId(dataset));
         eegDatasetWithDependenciesDTO.setInPacs(dataset.getInPacs());
-        eegDatasetWithDependenciesDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(dataset.getTags()));
-        eegDatasetWithDependenciesDTO.setSource(datasetMapper.mapSourceFromDataset(dataset.getSource()));
-        eegDatasetWithDependenciesDTO.setCopies(datasetMapper.mapCopiesFromDataset(dataset.getCopies()));
+        eegDatasetWithDependenciesDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(datasetWithLazyRelations.getTags()));
+        eegDatasetWithDependenciesDTO.setSource(datasetMapper.mapSourceFromDataset(datasetWithLazyRelations.getSource()));
+        eegDatasetWithDependenciesDTO.setCopies(datasetMapper.mapCopiesFromDataset(datasetWithLazyRelations.getCopies()));
         eegDatasetWithDependenciesDTO.setCoordinatesSystem(dataset.getCoordinatesSystem());
         eegDatasetWithDependenciesDTO.setSamplingFrequency(dataset.getSamplingFrequency());
         eegDatasetWithDependenciesDTO.setChannelCount(dataset.getChannelCount());
@@ -173,7 +175,7 @@ public abstract class EegDatasetDecorator implements EegDatasetMapper {
         if (list3 != null) {
             eegDatasetWithDependenciesDTO.setEvents(new ArrayList<Event>(list3));
         }
-        eegDatasetWithDependenciesDTO.setProcessings(datasetProcessingMapper.datasetProcessingListToDatasetProcessingDTOList(dataset.getProcessings()));
+        eegDatasetWithDependenciesDTO.setProcessings(datasetProcessingMapper.datasetProcessingListToDatasetProcessingDTOList(datasetWithLazyRelations.getProcessings()));
         eegDatasetWithDependenciesDTO.setDatasetAcquisition(datasetAcquisitionMapper.datasetAcquisitionToDatasetAcquisitionDTO(dataset.getDatasetAcquisition()));
         eegDatasetWithDependenciesDTO.setDatasetProcessing(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(dataset.getDatasetProcessing()));
 

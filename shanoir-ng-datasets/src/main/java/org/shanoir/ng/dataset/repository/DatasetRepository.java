@@ -26,6 +26,7 @@ import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -213,14 +214,26 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             """)
     Set<Long> findRelatedStudyIds(@Param("id") Long id);
 
-    @Query("select d from Dataset d left join fetch d.tags where d.id = :id")
+    @EntityGraph(attributePaths = {"copies", "datasetExpression", "processing", "relatedStudies", "source", "tags"})
+    Dataset findWithLazyRelations(Long id);
+
+    @EntityGraph(attributePaths = {"tags"})
     Dataset findWithTags(Long id);
 
-    @Query("select d from Dataset d left join fetch d.datasetExpressions where d.id = :id")
+    @EntityGraph(attributePaths = {"datasetExpression"})
     Dataset findWithDatasetExpressions(Long id);
 
-    @Query("select d from Dataset d left join fetch d.datasetProcessing where d.id = :id")
-    Dataset findWithDatasetProcessings(Long id);
+    @EntityGraph(attributePaths = {"processings"})
+    Dataset findWithProcessings(Long id);
+
+    @EntityGraph(attributePaths = {"source"})
+    Dataset findWithSource(Long id);
+
+    @EntityGraph(attributePaths = {"copies"})
+    Dataset findWithCopies(Long id);
+
+    @EntityGraph(attributePaths = {"relatedStudies"})
+    Dataset  findWithRelatedStudies(Long id);
 
     @Query("select a from Dataset d left join d.datasetProcessing dp left join dp.inputDatasets a where d.id = :id")
     List<Dataset> findProcessingAncestors(Long id);
