@@ -46,6 +46,42 @@ wait_for_log() {
 	return $TIMEOUT_EXIT
 }
 
+# Like wait_for_log, but only considers log lines emitted after `since` (ISO 8601 or
+# relative e.g. 2m). Use after `docker compose restart` so old "Started …" lines
+# are ignored while services are still booting.
+# Usage: wait_for_log_since <container> <pattern> <since> [timeout_seconds]
+wait_for_log_since() {
+	local container="$1"
+	local pattern="$2"
+	local since="$3"
+	local timeout="${4:-300}"
+	local elapsed=0
+
+	echo "Waiting for pattern '$pattern' in '$container' logs since ${since} (timeout: ${timeout}s)..."
+	while [ "$elapsed" -lt "$timeout" ]; do
+		if ( set +o pipefail
+		     docker logs --since "$since" "$container" 2>&1 | grep -aqE "$pattern" ); then
+			echo "Pattern matched in '$container' logs (after ${elapsed}s)"
+			return 0
+		fi
+		if [ $((elapsed % 30)) -eq 0 ] && [ "$elapsed" -gt 0 ]; then
+			local status
+			status=$(docker inspect --format='{{.State.Status}}' "$container" 2>/dev/null || echo "unknown")
+			echo "  ... still waiting ($container: status=$status, ${elapsed}s elapsed)"
+			echo "  ... last log: $(docker logs --tail=1 "$container" 2>&1)"
+		fi
+		sleep 5
+		elapsed=$((elapsed + 5))
+	done
+
+	echo "Timed out waiting for pattern in '$container' logs since ${since}"
+	echo "--- last 30 lines of '$container' ---"
+	docker logs --tail=30 "$container" 2>&1
+	echo "--- container status ---"
+	docker inspect --format='{{.State.Status}} (exit={{.State.ExitCode}})' "$container" 2>/dev/null || echo "container not found"
+	return $TIMEOUT_EXIT
+}
+
 wait_for_url() {
 	local url="$1"
 	local timeout="${2:-120}"
@@ -192,7 +228,7 @@ smoke_tests() {
 
 if [ $# -eq 0 ]; then
 	echo "Usage: $0 <function> [args...]"
-	echo "Functions: wait_for_log, wait_for_url, wait_for_shanoir_password_token, smoke_tests"
+	echo "Functions: wait_for_log, wait_for_log_since, wait_for_url, wait_for_shanoir_password_token, smoke_tests"
 	exit 1
 fi
 

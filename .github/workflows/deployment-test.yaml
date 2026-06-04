@@ -307,9 +307,10 @@ jobs:
 
       - name: Restart stack and validate persistence
         run: |
+          set -euo pipefail
+          restart_since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           docker compose restart
-          sleep 30
-          bash .github/scripts/post-restart-validation.sh
+          RESTART_SINCE="$restart_since" bash .github/scripts/post-restart-validation.sh
 
       - name: Dump logs on failure
         if: failure()

@@ -4,13 +4,13 @@
 # Requires a prior successful functional-tests.sh user lifecycle that wrote
 # CI_LIFECYCLE_STATE_FILE (default /tmp/shanoir-ci-lifecycle.env).
 #
-# Usage (from repo root, after "docker compose restart"):
-#   bash .github/scripts/helpers.sh wait_for_shanoir_password_token 240
-#   bash .github/scripts/helpers.sh wait_for_url https://shanoir-ng-nginx/ 180
-#   bash .github/scripts/post-restart-validation.sh
+# Usage (from repo root):
+#   restart_since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+#   docker compose restart
+#   RESTART_SINCE="$restart_since" bash .github/scripts/post-restart-validation.sh
 #
-# Or rely on the built-in readiness waits below (do not use wait_for_log after restart:
-# Docker keeps pre-restart log lines and matches while services are still booting).
+# When RESTART_SINCE is set, waits for microservices to log a fresh "Started … in"
+# (via wait_for_log_since), then restarts nginx so upstream hostnames are re-resolved.
 
 set -euo pipefail
 
@@ -45,6 +45,21 @@ echo "---- Waiting for stack readiness after restart ----"
 bash "$SCRIPT_DIR/helpers.sh" wait_for_shanoir_password_token "${POST_RESTART_TOKEN_TIMEOUT:-240}"
 bash "$SCRIPT_DIR/helpers.sh" wait_for_url https://shanoir-ng-nginx/ "${POST_RESTART_URL_TIMEOUT:-180}"
 
+if [ -n "${RESTART_SINCE:-}" ]; then
+    echo ""
+    echo "---- Waiting for microservices after restart ----"
+    ms_timeout="${POST_RESTART_MS_TIMEOUT:-300}"
+    for ms in users studies datasets import preclinical; do
+        bash "$SCRIPT_DIR/helpers.sh" wait_for_log_since "$ms" 'Started .* in' "$RESTART_SINCE" "$ms_timeout"
+    done
+    # Nginx often starts before Java microservices finish booting; restart it so
+    # upstream resolution picks up the running containers (avoids persistent 502).
+    echo ""
+    echo "---- Restarting nginx (refresh upstream resolution) ----"
+    docker compose restart nginx
+    bash "$SCRIPT_DIR/helpers.sh" wait_for_url https://shanoir-ng-nginx/ "${POST_RESTART_URL_TIMEOUT:-180}"
+fi
+
 if [ ! -f "$CI_LIFECYCLE_STATE_FILE" ]; then
     echo "No lifecycle state file at $CI_LIFECYCLE_STATE_FILE — skipping CI user checks."
 fi
@@ -72,7 +87,7 @@ if [ -n "$TOKEN" ]; then
     echo ""
     echo "---- GET /users after restart ----"
     users_tmp=$(mktemp)
-    users_timeout="${POST_RESTART_USERS_TIMEOUT:-180}"
+    users_timeout="${POST_RESTART_USERS_TIMEOUT:-300}"
     users_elapsed=0
     code="000"
     while [ "$users_elapsed" -lt "$users_timeout" ]; do
