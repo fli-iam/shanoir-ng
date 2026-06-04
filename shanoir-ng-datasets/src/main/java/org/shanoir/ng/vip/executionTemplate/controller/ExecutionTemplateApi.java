@@ -22,7 +22,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.shanoir.ng.vip.executionTemplate.dto.ExecutionTemplateDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,7 +43,7 @@ public interface ExecutionTemplateApi {
             @ApiResponse(responseCode = "503", description = "Internal error")})
     @GetMapping(value = "/byStudy/{studyId}",
             produces = {"application/json", "application/octet-stream"})
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<ExecutionTemplateDTO>> getExecutionTemplatesByStudyId(@Parameter(description = "The study Id", required = true) @PathVariable("studyId") Long studyId);
 
     @Operation(summary = "Create a new ExecutionTemplate entity", description = "Creates a new execution template", tags = {})
@@ -54,7 +53,7 @@ public interface ExecutionTemplateApi {
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "Internal error")})
     @PostMapping(value = "", consumes = "application/json", produces = "application/json")
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#executionTemplateDTO.getStudyId(), 'CAN_ADMINISTRATE'))")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<ExecutionTemplateDTO> saveNewExecutionTemplate(@Parameter(description = "execution template dto to create", required = true) @RequestBody ExecutionTemplateDTO executionTemplateDTO);
 
     @Operation(summary = "Delete an ExecutionTemplate entity", description = "Deletes the execution template by its ID", tags = {})
@@ -65,6 +64,7 @@ public interface ExecutionTemplateApi {
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "Internal error")})
     @DeleteMapping(value = "/{executionTemplateId}", produces = {"application/json"})
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<Void> deleteExecutionTemplate(@Parameter(description = "The ExecutionTemplate Id", required = true) @PathVariable("executionTemplateId") Long executionTemplateId);
 
     @Operation(summary = "Get an ExecutionTemplate entity by Id", description = "Returns a execution template by its ID", tags = {})
@@ -75,7 +75,7 @@ public interface ExecutionTemplateApi {
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "Internal error")})
     @GetMapping(value = "/{executionTemplateId}", produces = "application/json")
-    @PostAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_SEE_ALL'))")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<ExecutionTemplateDTO> getExecutionTemplateById(@Parameter(description = "The ExecutionTemplate Id", required = true) @PathVariable("executionTemplateId") Long executionTemplateId);
 
     @Operation(summary = "Update an ExecutionTemplate entity by Id", description = "Updates the existing execution template by its Id", tags = {  })
@@ -86,7 +86,7 @@ public interface ExecutionTemplateApi {
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "Internal error")})
     @PutMapping(value = "/{parameterId}", consumes = "application/json", produces = "application/json")
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#executionTemplateDTO.getStudyId(), 'CAN_ADMINISTRATE'))")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<ExecutionTemplateDTO> updateExecutionTemplate(
             @Parameter(description = "execution template updated", required = true) @RequestBody ExecutionTemplateDTO executionTemplateDTO,
             @Parameter(description = "id of the execution template", required = true) @PathVariable("parameterId") Long parameterId);

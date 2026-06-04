@@ -25,7 +25,6 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.vip.executionTemplate.dto.ExecutionTemplateFilterDTO;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +46,7 @@ public interface ExecutionTemplateFilterApi {
             @ApiResponse(responseCode = "503", description = "Internal error")})
     @GetMapping(value = "/byExecutionTemplate/{executionTemplateId}",
             produces = { "application/json", "application/octet-stream" })
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<ExecutionTemplateFilterDTO>> getExecutionTemplateFiltersByExecutionTemplateId(@Parameter(description = "The execution template Id", required = true) @PathVariable("executionTemplateId") Long executionTemplateId);
 
     @Operation(summary = "Create a new ExecutionTemplateFilter entity", description = "Creates a new execution template filter", tags = {  })
@@ -57,7 +56,7 @@ public interface ExecutionTemplateFilterApi {
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "Internal error")})
     @PostMapping(value = "", consumes = "application/json", produces = "application/json")
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#executionTemplate.getStudy(), 'CAN_ADMINISTRATE'))")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<ExecutionTemplateFilterDTO> saveNewExecutionTemplateFilter(@Parameter(description = "execution template filter to create", required = true) @RequestBody ExecutionTemplateFilterDTO executionTemplateFilterDTO);
 
     @Operation(summary = "Delete a ExecutionTemplateFilter entity", description = "Deletes the execution template filter by its ID", tags = {  })
@@ -68,6 +67,7 @@ public interface ExecutionTemplateFilterApi {
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "Internal error")})
     @DeleteMapping(value = "/{executionTemplateFilterId}", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<Void> deleteExecutionTemplateFilter(@Parameter(description = "The ExecutionTemplateFilter Id", required = true) @PathVariable("executionTemplateFilterId") Long executionTemplateFilterId);
 
     @Operation(summary = "Get a ExecutionTemplateFilter entity by ID", description = "Returns a execution template filter by its ID", tags = {  })
@@ -78,7 +78,7 @@ public interface ExecutionTemplateFilterApi {
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "Internal error")})
     @GetMapping(value = "/{executionTemplateFilterId}", produces = "application/json")
-    @PostAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudy(), 'CAN_SEE_ALL'))")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<ExecutionTemplateFilterDTO> getExecutionTemplateFilterById(@Parameter(description = "The ExecutionTemplateFilter Id", required = true) @PathVariable("executionTemplateFilterId") Long executionTemplateFilterId);
 
     @Operation(summary = "Update a ExecutionTemplateFilter entity", description = "Updates the existing execution template filter by its ID", tags = {  })
@@ -89,7 +89,7 @@ public interface ExecutionTemplateFilterApi {
             @ApiResponse(responseCode = "500", description = "unexpected error"),
             @ApiResponse(responseCode = "503", description = "Internal error")})
     @PutMapping(value = "/{executionTemplateFilterId}", consumes = "application/json", produces = "application/json")
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#executionTemplate.getStudy(), 'CAN_ADMINISTRATE'))")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<ExecutionTemplateFilterDTO> updateExecutionTemplateFilter(
             @Parameter(description = "id of the execution template filter", required = true) @PathVariable("executionTemplateFilterId") Long executionTemplateFilterId,
             @Parameter(description = "execution template filter updated", required = true) @RequestBody ExecutionTemplateFilterDTO executionTemplateFilter)
