@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
@@ -29,6 +30,7 @@ import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -161,6 +163,8 @@ public interface DatasetService {
 
     boolean existsById(Long id);
 
+    void updateEvent(float progress, ShanoirEvent event);
+
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.id, 'CAN_SEE_ALL'))")
     Long getStudyId(Dataset dataset);
 
@@ -178,6 +182,8 @@ public interface DatasetService {
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
     File extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws Exception;
+
+    Future<Void> deletePartitionOfNiftis(List<Long> partition, float total, ShanoirEvent event);
 
     /**
      * @param dataset the involved dataset

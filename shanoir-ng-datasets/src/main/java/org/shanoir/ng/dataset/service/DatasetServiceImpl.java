@@ -18,18 +18,17 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.EntityManager;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
@@ -41,6 +40,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.OverallStatistics;
+import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -91,6 +91,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Dataset service implementation.
@@ -130,9 +131,6 @@ public class DatasetServiceImpl implements DatasetService {
     private DatasetProcessingService processingService;
 
     @Autowired
-    private DatasetTransactionalServiceImpl datasetTransactionalService;
-
-    @Autowired
     private DatasetAsyncService datasetAsyncService;
 
     @Autowired
@@ -154,7 +152,7 @@ public class DatasetServiceImpl implements DatasetService {
     private EntityManager em;
 
     @Autowired
-    private DatasetProcessingService datasetProcessingService;
+    private DatasetExpressionRepository datasetExpressionRepository;
 
     @Autowired
     private DatasetService datasetService; // To open transaction when called method is transactionnal and both parent and child are in this file
@@ -466,7 +464,7 @@ public class DatasetServiceImpl implements DatasetService {
             int total = datasets.size();
             updateEvent(0f, event, studyId);
             for (List<Long> partition : ListUtils.partition(datasets, 1000)) {
-                datasetTransactionalService.deletePartitionOfNiftis(partition, total, event).get();
+                datasetService.deletePartitionOfNiftis(partition, total, event).get();
             }
             updateEvent(1f, event, studyId);
         } catch (Exception e) {
@@ -474,7 +472,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
     }
 
-    protected void updateEvent(float progress, ShanoirEvent event) {
+    public void updateEvent(float progress, ShanoirEvent event) {
         updateEvent(progress, event, null, null);
     }
 
@@ -596,6 +594,16 @@ public class DatasetServiceImpl implements DatasetService {
         File metadataFile = createMetadataFile(metadataKeys);
         fillMetadataFile(metadataFile, datasetIds, metadataKeys);
         return metadataFile;
+    }
+
+    public Future<Void> deletePartitionOfNiftis(List<Long> partition, float total, ShanoirEvent event) {
+        float progress = event.getProgress();
+        for (Dataset dataset : repository.findAllById(partition)) {
+            progress += 1f / total;
+            datasetService.updateEvent(progress, event);
+            deleteNifti(dataset);
+        }
+        return CompletableFuture.completedFuture(null);
     }
 
     @Transactional(readOnly = true)
@@ -763,5 +771,44 @@ public class DatasetServiceImpl implements DatasetService {
         }
         LOG.info("Metadata file created");
         return metadataFile;
+    }
+
+    /**
+     * Deletes nifti on file server
+     * @param dataset
+     */
+    private void deleteNifti(Dataset dataset) {
+        Set<DatasetExpression> expressionsToDelete = new HashSet<>();
+
+        for (Iterator<DatasetExpression> iterex = dataset.getDatasetExpressions().iterator(); iterex.hasNext();) {
+            DatasetExpression expression = iterex.next();
+            if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
+                continue;
+            }
+            for (Iterator<DatasetFile> iter = expression.getDatasetFiles().iterator(); iter.hasNext();) {
+                DatasetFile file = iter.next();
+                URL url = null;
+                try {
+                    url = new URL(file.getPath().replaceAll("%20", " "));
+                    File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
+                    if (srcFile.exists()) {
+                        LOG.error("Deleting: " + srcFile.getAbsolutePath());
+                        FileUtils.delete(srcFile);
+                    }
+                    // We are forced to detach elements here to be able to delete them from DB
+                    file.setDatasetExpression(null);
+                    iter.remove();
+                } catch (Exception e) {
+                    LOG.error("Could not delete nifti file: {}", file.getPath(), e);
+                }
+            }
+            expression.setDataset(null);
+            iterex.remove();
+            expressionsToDelete.add(expression);
+        }
+        if (expressionsToDelete.isEmpty()) {
+            return;
+        }
+        datasetExpressionRepository.deleteAll(expressionsToDelete);
     }
 }
