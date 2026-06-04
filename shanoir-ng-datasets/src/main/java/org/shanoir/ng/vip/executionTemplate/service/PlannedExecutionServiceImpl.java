@@ -164,14 +164,6 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
 
         for (Long acquisitionId : acquisitionIds) {
             DatasetAcquisition acquisition = acquisitionRepository.findById(acquisitionId).orElse(null);
-            while (Objects.isNull(acquisition) && attempt < 5) {
-                try {
-                    Thread.sleep(1000);
-                } catch (Exception ignored) { }
-                attempt++;
-                acquisition = acquisitionRepository.findById(acquisitionId).orElse(null);
-            }
-
             if (Objects.nonNull(acquisition)) {
                 List<Dataset> datasetList = acquisition.getDatasets();
                 for (int i = 0; i < datasetList.size(); i++) {
