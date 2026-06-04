@@ -30,7 +30,6 @@ import {Pipeline} from "../models/pipeline"
 import {PipelineService} from "../pipelines/pipeline/pipeline.service"
 
 import {ExecutionTemplateComponent} from "./execution-template.component"
-import {pipeline} from "stream";
 
 @Injectable()
 export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
