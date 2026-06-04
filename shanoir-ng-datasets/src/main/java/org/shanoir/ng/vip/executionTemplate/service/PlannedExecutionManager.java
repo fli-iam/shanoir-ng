@@ -172,7 +172,11 @@ public class PlannedExecutionManager {
 
         try {
             AccessTokenResponse tokenResponse = keycloakServiceAccountUtils.refreshUserToken(offlineToken);
-            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN", tokenResponse.getToken());
+            Map<String, Object> claims = SecurityContextUtil.decodeJwtClaims(tokenResponse.getToken());
+            String username = (String) claims.getOrDefault("preferred_username", "shanoir");
+            Object userIdRaw = claims.get("userId");
+            Long userId = userIdRaw != null ? Long.valueOf(userIdRaw.toString()) : 92233720L;
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN", username, userId, tokenResponse.getToken());
         } catch (SecurityException e) {
             LOG.error("Failed to refresh user token for template {}. Execution aborted.", template.getId(), e);
             return;
