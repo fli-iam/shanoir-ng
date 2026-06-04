@@ -45,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 			<!-- TODO : other types -->
 
-			<fieldset *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg' && dataset.type != 'BIDS' && dataset.type != 'Measurement'">
+			<fieldset *ngIf="mode=='view' && !isMRS && hasDownloadRight && dataset.type != 'Eeg' && dataset.type != 'Measurement'">
 				<legend>Preview</legend>
 				<papaya [loadingCallback]="papayaLoadCallback"></papaya>
 			</fieldset>
