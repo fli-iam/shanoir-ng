@@ -16,6 +16,7 @@ package org.shanoir.ng.utils;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +53,29 @@ public abstract class SecurityContextUtil {
 
     public static void initAuthenticationContext(String role, String accessToken) {
         initAuthenticationContext(role, 92233720L, accessToken);
+    }
+
+    public static void initAuthenticationContext(String role, String username, Long userId, String accessToken) {
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+        GrantedAuthority grantedAuth = new SimpleGrantedAuthority(role);
+        grantedAuthorities.add(grantedAuth);
+        Map<String, Object> claims = Map.of("preferred_username", username, "userId", userId, "realm_access", grantedAuthorities);
+        Jwt jwt = new Jwt(accessToken, Instant.now(), Instant.now().plusSeconds(300), Map.of("header", "mock"), claims);
+        Authentication authentication = new JwtAuthenticationToken(jwt, grantedAuthorities);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> decodeJwtClaims(String accessToken) {
+        try {
+            String[] parts = accessToken.split("\\.");
+            byte[] decoded = Base64.getUrlDecoder().decode(parts[1]);
+            String payload = new String(decoded);
+            // Minimal JSON parsing using Jackson which is always on the Spring Boot classpath
+            return new com.fasterxml.jackson.databind.ObjectMapper().readValue(payload, Map.class);
+        } catch (Exception e) {
+            return Map.of();
+        }
     }
 
     public static void initAuthenticationContext(String role, Long userId) {
