@@ -149,6 +149,7 @@ public class CardsProcessingService {
      * @param studyCard
      * @throws MicroServiceCommunicationException
      */
+    @Transactional(readOnly = true)
     public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException {
         long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");

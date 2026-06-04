@@ -132,7 +132,8 @@ public class Event extends HalEntity {
     /**
      * @return the dataset
      */
-    public EegDataset getDataset() {
+    public EegDataset
+    getDataset() {
         return dataset;
     }
 
