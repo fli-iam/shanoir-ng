@@ -31,6 +31,7 @@ import org.shanoir.ng.preclinical.pathologies.PathologyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.PathologyModelUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,6 +85,9 @@ public class PathologyModelApiControllerTest {
     @MockBean
     private PathologyModelEditableByManager editableOnlyValidator;
 
+    @MockBean
+    private StorageService storageService;
+
     @TempDir
     private File tempFolder;
 
@@ -91,7 +95,7 @@ public class PathologyModelApiControllerTest {
     public void setup() throws ShanoirException {
         File tmpFolder = new File(tempFolder, "/tmp/");
         tmpFolder.mkdirs();
-        System.setProperty("preclinical.uploadExtradataFolder", tmpFolder.getAbsolutePath());
+        System.setProperty("storage.file-system.datasets-data", tmpFolder.getAbsolutePath());
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
         doNothing().when(modelServiceMock).deleteById(1L);

@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Service
 public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
 
-    @Value("${vip-data-folder}")
+    @Value("${storage.file-system.vip-data}")
     private String trackingFilePrefixe;
 
     private static final int MAX_LAST_LINES_TO_CHECK = 10;
