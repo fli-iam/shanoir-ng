@@ -55,8 +55,6 @@ public class PathologyModel extends HalEntity {
     private String filepath;
 
     @ManyToOne
-    //fetch = FetchType.LAZY, optional = false)
-    //@JoinColumn(name = "building_id")
     @NotNull
     @JsonProperty("pathology")
     private Pathology pathology;

@@ -19,6 +19,7 @@ import java.util.Set;
 import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetRightsDTO;
 import org.shanoir.ng.dataset.model.OverallStatistics;
@@ -214,11 +215,14 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             """)
     Set<Long> findRelatedStudyIds(@Param("id") Long id);
 
+
+    ////// Lazy relation getters
+
     @EntityGraph(attributePaths = {"copies", "datasetExpression", "processing", "relatedStudies", "source", "tags"})
     Dataset findWithLazyRelations(Long id);
 
-    @EntityGraph(attributePaths = {"tags"})
-    Dataset findWithTags(Long id);
+    @EntityGraph(attributePaths = {"copies"})
+    Dataset findWithCopies(Long id);
 
     @EntityGraph(attributePaths = {"datasetExpression"})
     Dataset findWithDatasetExpressions(Long id);
@@ -226,15 +230,34 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @EntityGraph(attributePaths = {"processings"})
     Dataset findWithProcessings(Long id);
 
-    @EntityGraph(attributePaths = {"source"})
-    Dataset findWithSource(Long id);
-
-    @EntityGraph(attributePaths = {"copies"})
-    Dataset findWithCopies(Long id);
-
     @EntityGraph(attributePaths = {"relatedStudies"})
     Dataset  findWithRelatedStudies(Long id);
 
+    @EntityGraph(attributePaths = {"source"})
+    Dataset findWithSource(Long id);
+
+    @EntityGraph(attributePaths = {"tags"})
+    Dataset findWithTags(Long id);
+
     @Query("select a from Dataset d left join d.datasetProcessing dp left join dp.inputDatasets a where d.id = :id")
     List<Dataset> findProcessingAncestors(Long id);
+
+    ////// MrDataset lazy relation getters
+    @EntityGraph(attributePaths = {"copies", "datasetExpression", "diffusionGradients", "echoTime", "flipAngle", "inversionTime", "processing", "relatedStudies", "repetitionTime", "source", "tags"})
+    MrDataset findMrDatasetWithLazyRelations(Long id);
+
+    @EntityGraph(attributePaths = {"diffusionGradients"})
+    MrDataset findWithDiffusionGradients(Long id);
+
+    @EntityGraph(attributePaths = {"echoTime"})
+    MrDataset findWithEchoTime(Long id);
+
+    @EntityGraph(attributePaths = {"flipAngle"})
+    MrDataset findWithFlipAngle(Long id);
+
+    @EntityGraph(attributePaths = {"inversionTime"})
+    MrDataset findWithInversionTime(Long id);
+
+    @EntityGraph(attributePaths = {"repetitionTime"})
+    MrDataset findWithRepetitionTime(Long id);
 }

@@ -103,7 +103,7 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
         }
 
         //Manage Lazy loadings
-        Dataset datasetWithLazyRelations = datasetRepository.findWithLazyRelations(dataset.getId());
+        MrDataset datasetWithLazyRelations = datasetRepository.findMrDatasetWithLazyRelations(dataset.getId());
 
         MrDatasetDTO mrDatasetDTO = new MrDatasetDTO();
 
@@ -123,19 +123,19 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
         mrDatasetDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(datasetWithLazyRelations.getTags()));
         mrDatasetDTO.setSource(datasetMapper.mapSourceFromDataset(datasetWithLazyRelations.getSource()));
         mrDatasetDTO.setCopies(datasetMapper.mapCopiesFromDataset(datasetWithLazyRelations.getCopies()));
-        List<EchoTime> list1 = dataset.getEchoTime();
+        List<EchoTime> list1 = datasetWithLazyRelations.getEchoTime();
         if (list1 != null) {
             mrDatasetDTO.setEchoTime(new ArrayList<EchoTime>(list1));
         }
-        List<FlipAngle> list2 = dataset.getFlipAngle();
+        List<FlipAngle> list2 = datasetWithLazyRelations.getFlipAngle();
         if (list2 != null) {
             mrDatasetDTO.setFlipAngle(new ArrayList<FlipAngle>(list2));
         }
-        List<InversionTime> list3 = dataset.getInversionTime();
+        List<InversionTime> list3 = datasetWithLazyRelations.getInversionTime();
         if (list3 != null) {
             mrDatasetDTO.setInversionTime(new ArrayList<InversionTime>(list3));
         }
-        List<RepetitionTime> list4 = dataset.getRepetitionTime();
+        List<RepetitionTime> list4 = datasetWithLazyRelations.getRepetitionTime();
         if (list4 != null) {
             mrDatasetDTO.setRepetitionTime(new ArrayList<RepetitionTime>(list4));
         }
@@ -153,7 +153,7 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
         }
 
         //Manage Lazy loadings
-        Dataset datasetWithLazyRelations = datasetRepository.findWithLazyRelations(dataset.getId());
+        MrDataset datasetWithLazyRelations = datasetRepository.findMrDatasetWithLazyRelations(dataset.getId());
 
         MrDatasetWithDependenciesDTO mrDatasetWithDependenciesDTO = new MrDatasetWithDependenciesDTO();
 
@@ -171,19 +171,19 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
         mrDatasetWithDependenciesDTO.setCenterId(datasetService.getCenterId(dataset));
         mrDatasetWithDependenciesDTO.setInPacs(dataset.getInPacs());
         mrDatasetWithDependenciesDTO.setTags(studyTagMapper.studyTagListToStudyTagDTOLightList(datasetWithLazyRelations.getTags()));
-        List<EchoTime> list1 = dataset.getEchoTime();
+        List<EchoTime> list1 = datasetWithLazyRelations.getEchoTime();
         if (list1 != null) {
             mrDatasetWithDependenciesDTO.setEchoTime(new ArrayList<EchoTime>(list1));
         }
-        List<FlipAngle> list2 = dataset.getFlipAngle();
+        List<FlipAngle> list2 = datasetWithLazyRelations.getFlipAngle();
         if (list2 != null) {
             mrDatasetWithDependenciesDTO.setFlipAngle(new ArrayList<FlipAngle>(list2));
         }
-        List<InversionTime> list3 = dataset.getInversionTime();
+        List<InversionTime> list3 = datasetWithLazyRelations.getInversionTime();
         if (list3 != null) {
             mrDatasetWithDependenciesDTO.setInversionTime(new ArrayList<InversionTime>(list3));
         }
-        List<RepetitionTime> list4 = dataset.getRepetitionTime();
+        List<RepetitionTime> list4 = datasetWithLazyRelations.getRepetitionTime();
         if (list4 != null) {
             mrDatasetWithDependenciesDTO.setRepetitionTime(new ArrayList<RepetitionTime>(list4));
         }
