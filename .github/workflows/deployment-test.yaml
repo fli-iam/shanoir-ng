@@ -10,28 +10,50 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-# Test that the Shanoir NG docker-compose deployment starts correctly.
+# Deployment smoke test — fresh-install validation of the docker-compose stack.
 #
-# This workflow uses pre-built images from GHCR through docker-compose.yml
-# and follows the bootstrap.sh initialization sequence without building
-# application images from source.
+# WHAT IT DOES
+#   - Brings up the full stack via bootstrap.sh like a real deploy
+#     (SHANOIR_MIGRATION=auto, not the 'dev' shortcut).
+#   - Two modes:
+#       * default (pull): pre-built GHCR images (docker-compose.yml) -> validates
+#         a PUBLISHED release image set.
+#       * build_from_source=true (manual only): builds from the checked-out branch
+#         (docker-compose-dev.yml) -> validates code not yet published as images.
+#   - Verifies: services start, NO schema/DDL drift, smoke + functional tests
+#     pass, and the stack survives a restart (persistence).
 #
-# It is a fresh-install smoke test only. It does not validate upgrades,
-# backup/restore, production hardening, or hospital-specific configuration.
+# WHAT IT DOES NOT DO
+#   - No UPGRADE testing. On fresh install, migrations are recorded as applied
+#     WITHOUT running, so rename/upgrade migrations (e.g. study_card_condition ->
+#     card_condition) are never exercised here. Upgrade tests belong downstream
+#     (institutional pipeline), against an existing/restored database.
+#   - No real data, no backup/restore, no production hardening.
+#   - CI-only stack (docker-compose.ci.yml: Mailhog, internal JWT issuer) — this
+#     is NOT a production or hospital reference configuration.
 #
-# CI-only stack: see docker-compose.ci.yml (Mailhog, internal JWT issuer, etc.).
-# This is not a production or hospital reference configuration.
-#
-# Triggers: weekly schedule (limits Actions minutes), manual workflow_dispatch,
-# and pull requests that touch deployment-related paths only. For other PRs,
-# run this workflow manually from the branch (Actions → Deployment smoke test).
+# HOW TO USE
+#   - PR touching deployment files: runs automatically (pull path).
+#   - New release: runs automatically after "Publish Docker images" succeeds, and
+#     can be re-run manually with image_tag=NG_vX.Y.Z.
+#   - Unpublished fix on a branch: dispatch manually with build_from_source=true.
+#   - Scheduled (monthly): environmental-drift backstop only — all images are
+#     pinned, so it otherwise re-validates an unchanged stack.
 
 name: Deployment smoke test
 
 on:
   schedule:
-    # Weekly Monday 03:00 UTC — adjust time/day as needed.
-    - cron: "0 3 * * 1"
+    # Monthly, 1st at 03:00 UTC. All images are pinned, so a more frequent run
+    # would just re-validate an unchanged stack; this is a drift backstop only.
+    # Per-release validation is handled by the workflow_run trigger below.
+    - cron: "0 3 1 * *"
+  # Validate a release as soon as its images are published. Runs the default
+  # (pull) path with image_tag=auto, which resolves to the newest complete
+  # NG_vX.Y.Z set — i.e. the release that was just published.
+  workflow_run:
+    workflows: ["Publish Docker images"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       image_tag:
@@ -73,6 +95,9 @@ concurrency:
 
 jobs:
   deployment-test:
+    # For workflow_run (after "Publish Docker images"), only proceed if the
+    # publish succeeded. All other triggers run unconditionally.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     # Generous ceiling: the pull path finishes in ~10-30 min, but the opt-in
     # build_from_source path also has to compile the full Java stack.
