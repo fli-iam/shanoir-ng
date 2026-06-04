@@ -115,7 +115,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             </span>
                         </li>
                         @if (animalSelected()) {
-                            <li [@slideDown]="animalSelected()">
+                            <li>
                                 <label i18n="Subject detail|Sex label@@subjectDetailSex">Sex</label>
                                 <span class="right-col">
                                     @switch (mode) {
@@ -146,8 +146,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                 <!-- Animal subject properties group -->
                 @if (animalSelected()) {
-                    <fieldset [@slideDown]="animalSelected()">
-                        @if (mode !== 'view') {
+                        <fieldset>
+                            @if (mode !== 'view') {
                             <legend i18n="Animal subject detail|Animal properties@@animalSubjectDetailAnimal">Animal Properties</legend>
                         }
                         <ol>

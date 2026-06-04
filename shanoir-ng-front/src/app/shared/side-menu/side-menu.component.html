@@ -77,31 +77,29 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="chevron"><i class="fas fa-chevron-down"></i></span>
         </li>
     }
-    @if (state.notifOpened && studiesToApprove() > 0 && isUserAdmin()) {
-        <div class="sub-menu" [@slideDown]="state.notifOpened">
-            <li routerLink="/draft" routerLinkActive="active">
-                <i class="fas fa-file"></i>
-                Draft Studies
-                <span class="counter">{{ studiesToApprove() }}</span>
-            </li>
-        </div>
-    }
-    @if (state.notifOpened && duasToSign() > 0) {
-        <div class="sub-menu" [@slideDown]="state.notifOpened">
-            <li routerLink="/dua" routerLinkActive="active">
-                <i class="fas fa-pen-alt"></i>
-                Data User Agreement
-                <span class="counter">{{ duasToSign() }}</span>
-            </li>
-        </div>
-    }
-    @if (state.notifOpened && accessRequestsToValidate > 0) {
-        <div class="sub-menu" [@slideDown]="state.notifOpened">
-            <li routerLink="/access-request/list" routerLinkActive="active">
-                <i class="fa-solid fa-user-lock"></i>
-                Access Requests
-                <span class="counter">{{ accessRequestsToValidate }}</span>
-            </li>
+    @if (state.notifOpened) {
+        <div class="sub-menu" animate.enter="slide-down-menu" animate.leave="slide-up-menu">
+            @if (studiesToApprove() > 0 && isUserAdmin()) {
+                <li routerLink="/draft" routerLinkActive="active">
+                    <i class="fas fa-file"></i>
+                    Draft Studies
+                    <span class="counter">{{ studiesToApprove() }}</span>
+                </li>
+            }
+            @if (duasToSign() > 0) {
+                <li routerLink="/dua" routerLinkActive="active">
+                    <i class="fas fa-pen-alt"></i>
+                    Data User Agreement
+                    <span class="counter">{{ duasToSign() }}</span>
+                </li>
+            }
+            @if (accessRequestsToValidate > 0) {
+                <li routerLink="/access-request/list" routerLinkActive="active">
+                    <i class="fa-solid fa-user-lock"></i>
+                    Access Requests
+                    <span class="counter">{{ accessRequestsToValidate }}</span>
+                </li>
+            }
         </div>
     }
     <li class="jobs-menu">
@@ -138,7 +136,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <!-- <span *ngIf="notificationsService.tasksInProgress.length > 0" (click)="state.jobsOpened = !state.jobsOpened; saveState();" class="chevron"><i class="fas fa-chevron-down"></i></span> -->
     </li>
     <!-- *ngIf="state.jobsOpened" -->
-    <div class="sub-menu jobs" [@slideDown]="state.jobsOpened" [@disapearUp]>
+    <div class="sub-menu jobs" animate.enter="slide-down-menu" animate.leave="slide-up-menu">
         @for (
             task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress).concat(notificationsService.tasksInWait);
             track task
@@ -217,7 +215,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <span class="chevron"><i class="fas fa-chevron-down"></i></span>
     </li>
     @if (state.dataOpened) {
-        <div class="sub-menu" [@slideDown]="state.dataOpened">
+        <div class="sub-menu" animate.enter="slide-down-menu" animate.leave="slide-up-menu">
             <li routerLink="/study/list" routerLinkActive="active">
                 <i class="fa-regular fa-folder-open"></i>
                 Studies
@@ -244,7 +242,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <span class="chevron"><i class="fas fa-chevron-down"></i></span>
     </li>
     @if (state.eqOpened) {
-        <div class="sub-menu" [@slideDown]="state.eqOpened">
+        <div class="sub-menu" animate.enter="slide-down-menu" animate.leave="slide-up-menu">
             <li routerLink="/center/list" routerLinkActive="active">
                 <i class="fa-regular fa-hospital"></i>
                 Acquisition centers
@@ -274,7 +272,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <span class="chevron"><i class="fas fa-chevron-down"></i></span>
     </li>
     @if (state.precOpened) {
-        <div class="sub-menu" [@slideDown]="state.precOpened">
+        <div class="sub-menu" animate.enter="slide-down-menu" animate.leave="slide-up-menu">
             <li routerLink="/preclinical-subject/list" routerLinkActive="active">
                 <i class="fas fa-hippo"></i>
                 Preclinical subjects
@@ -304,7 +302,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <span class="chevron"><i class="fas fa-chevron-down"></i></span>
     </li>
     @if (state.uploadOpened) {
-        <div class="sub-menu" [@slideDown]="state.uploadOpened">
+        <div class="sub-menu" animate.enter="slide-down-menu" animate.leave="slide-up-menu">
             <li routerLink="/imports/upload" routerLinkActive="active">
                 <i class="fas fa-compact-disc"></i>
                 DICOM
@@ -343,7 +341,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
     }
     @if (isUserAdmin() && state.adminOpened) {
-        <div class="sub-menu" [@slideDown]="state.adminOpened">
+        <div class="sub-menu" animate.enter="slide-down-menu" animate.leave="slide-up-menu">
             <li routerLink="/user" routerLinkActive="active">
                 <i class="fas fa-users"></i>
                 Manage users
