@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, DestroyRef } from '@angular/core';
+import { AnimationCallbackEvent, Component, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -44,7 +44,8 @@ export class SideMenuComponent {
     public state: SideMenuState;
     public VERSION = VERSION;
     private sessionKey: string = KeycloakService.auth.userId + 'menuState';
-    accessRequestsToValidate: number;
+    protected accessRequestsToValidate: number;
+
 
 
     constructor(
@@ -116,6 +117,11 @@ export class SideMenuComponent {
 
     saveState() {
         sessionStorage.setItem(this.sessionKey, JSON.stringify(this.state));
+    }
+
+    setSubmenuHeight(event: AnimationCallbackEvent) {
+        const el = event.target as HTMLElement;
+        el.style.setProperty('--submenu-height', `${el.scrollHeight}px`);
     }
 }
 

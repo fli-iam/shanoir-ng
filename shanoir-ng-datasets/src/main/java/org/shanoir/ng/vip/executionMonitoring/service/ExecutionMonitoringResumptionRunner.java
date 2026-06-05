@@ -71,7 +71,7 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) throws EntityNotFoundException, SecurityException, JsonProcessingException {
-        try {
+        try { // Execution resumption
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             List<ExecutionMonitoring> runningMonitorings = executionMonitoringRepository.findByStatus(ExecutionStatus.RUNNING);
             for (ExecutionMonitoring monitoring : runningMonitorings) {
@@ -94,7 +94,7 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
                 }
             }
         } catch (Exception ignored) {
-            //Try-catch is only for dodging container shutdown if exception is raised (due to @Component state)
+             //Try-catch is only for dodging container shutdown if exception is raised (due to @Component state)
         }
     }
 }

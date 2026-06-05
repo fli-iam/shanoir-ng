@@ -1,0 +1,102 @@
+import {Component} from '@angular/core'
+import {ActivatedRoute} from "@angular/router"
+import {FormGroup, ReactiveFormsModule, UntypedFormGroup, Validators} from "@angular/forms"
+import { CommonModule } from '@angular/common'
+
+import { FormFooterComponent } from 'src/app/shared/components/form-footer/form-footer.component'
+import { TooltipComponent } from 'src/app/shared/components/tooltip/tooltip.component'
+
+import {EntityComponent} from "../../../shared/components/entity/entity.component.abstract"
+import {EntityService} from "../../../shared/components/entity/entity.abstract.service"
+import {ExecutionTemplateFilter} from "../../models/execution-template-filter"
+
+import {ExecutionTemplateFilterService} from "./execution-template-filter.service"
+
+
+@Component({
+    selector: 'execution-template-filter',
+    templateUrl: './execution-template-filter.component.html',
+    styleUrls: ['./execution-template-filter.component.css'],
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormFooterComponent,
+        TooltipComponent
+    ]
+})
+
+export class ExecutionTemplateFilterComponent extends EntityComponent<ExecutionTemplateFilter> {
+
+    templateId: number
+    templateName: string
+    fieldName: string
+    comparedRegex: string
+    identifier: number
+    executionFilterForm: UntypedFormGroup
+    existingIdentifiers: number[]
+
+    constructor(
+        private route: ActivatedRoute,
+        private filterService: ExecutionTemplateFilterService) {
+        super(route)
+        if (this.breadcrumbsService.currentStep && this.mode == "create") {
+            Promise.all([
+                this.breadcrumbsService.currentStep.getPrefilledValue("templateId"),
+                this.breadcrumbsService.currentStep.getPrefilledValue("templateName")
+            ]).then(([templateId, templateName]) => {
+                this.entity.executionTemplateId = templateId;
+                this.templateId = templateId;
+                this.templateName = templateName;
+
+                this.filterService.getExistingIdentifiers(this)
+            });
+        }
+    }
+
+    get executionTemplateFilter(): ExecutionTemplateFilter { return this.entity }
+    set executionTemplateFilter(et: ExecutionTemplateFilter) { this.entity= et }
+
+    protected getRoutingName(): string {
+        return 'execution-template-filter';
+    }
+
+    buildForm(): FormGroup {
+        this.executionFilterForm = this.formBuilder.group({
+            'fieldName': [this.entity.fieldName, [Validators.required, this.filterService.fieldNameFormatControl()]],
+            'comparedRegex': [this.entity.comparedRegex, [Validators.required, this.filterService.comparedRegexFormatControl()]],
+            'identifier': [this.entity.identifier, [Validators.required, this.filterService.uniqueInTemplateControl(this)]],
+            'excluded': [this.entity.excluded]
+        })
+        return this.executionFilterForm
+    }
+
+    getService(): EntityService<ExecutionTemplateFilter> {
+        return this.filterService
+    }
+
+    initCreate(): Promise<void> {
+        this.entity = new ExecutionTemplateFilter()
+        return Promise.resolve()
+    }
+
+    initEdit(): Promise<void> {
+        this.templateId = this.entity.executionTemplateId
+        this.filterService.getTemplateName(this)
+        this.filterService.getExistingIdentifiers(this)
+        return Promise.resolve()}
+
+    initView(): Promise<void> {
+        this.filterService.getTemplateName(this)
+        return Promise.resolve()
+    }
+
+    save(): Promise<ExecutionTemplateFilter> {
+        this.filterService.updateEntityOnSave(this)
+        super.save().then(() => this.router.navigate(['execution-template/details/' + this.entity.executionTemplateId]))
+        return Promise.resolve(this.entity)
+    }
+
+    goBack(): void{
+        this.router.navigate(['execution-template/details/' + this.entity.executionTemplateId])
+    }
+}

@@ -70,6 +70,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <li class="tags" [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">
                         <span class="tags">Tags</span>
                     </li>
+                    @if (keycloakService.isUserAdmin()) {
+                        <li [class.active]="activeTab == 'executions'" [routerLink]="'.'" [fragment]="'executions'" replaceUrl="true">
+                            <span class="executions">Executions</span>
+                        </li>
+                    }
                     @if (mode == 'view') {
                         @if (isStudyAdmin) {
                             <li [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>
@@ -884,6 +889,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <fieldset [class.hidden-tab]="activeTab != 'history'" tab="history">
                         <legend>History</legend>
                         <study-history #studyHistory [eventHistory]="openHistory" [study]="study"></study-history>
+                    </fieldset>
+                }
+                @if (keycloakService.isUserAdmin()) {
+                    <fieldset *ngIf="keycloakService.isUserAdmin()" [class.hidden-tab]="activeTab != 'executions'" tab="executions">
+                        <legend>Execution templates</legend>
+                        <execution-template-list [studyId]="study.id" [studyName]="study.name"/>
                     </fieldset>
                 }
             </form>
