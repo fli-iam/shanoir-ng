@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <h2>Access Requests</h2>
 @for (request of studyAccessRequests; track request) {
-    <form @disapearUp>
+    <form animate.leave="slide-up" class="access-request">
         <ul>
             <li>
                 <label i18n="access request|user label@@user">User</label>
@@ -59,7 +59,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <h2>Account Requests</h2>
 @for (request of accountCreationRequests; track request) {
-    <form @disapearUp>
+    <form animate.leave="slide-up" class="account-request">
         <ul>
             <li>
                 <label i18n="access request|name label@@name">Name</label>

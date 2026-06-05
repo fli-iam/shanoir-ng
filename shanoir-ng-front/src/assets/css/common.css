@@ -205,6 +205,20 @@ node node { margin-left: 18px; }
     animation: 300ms ease-in-out both slideUpError;
 }
 
+.counter { margin: 0 6px;
+    background-color: var(--color-c);
+    border-radius: 21px;
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    text-align: center;
+    font-size: 10px;
+    vertical-align: middle;
+    padding: 0;
+    line-height: 15px;
+    color: var(--very-light-grey);
+}
+
 @keyframes slideDownError {
     from { max-height: 0; }
     to   { max-height: 20px; }

@@ -148,7 +148,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress).concat(notificationsService.tasksInWait);
             track task
         ) {
-            <li [@.disabled]="task.status == 2 || task.status == 5">
+            <li>
                 @if ([1, -1].includes(task.status)) {
                     <span class="remove-task" (click)="notificationsService.removeTaskFromFresh(task)">
                         <i class="fa-regular fa-circle-xmark"></i>

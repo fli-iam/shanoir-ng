@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div #formContainer class="content-component detail" [@preventInitialChildAnimations]>
+<div #formContainer class="content-component detail">
     @if (form) {
         <form [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
             <div class="layout" [ngClass]="{ left: mode == 'view' }">
