@@ -201,7 +201,7 @@ public class StudyCardApiController implements StudyCardApi {
         }
         StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
         LOG.debug("re-apply studycard n° " + studyCard.getId());
-        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
+        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findByIdsWithDatasets(studyCardApplyObject.getDatasetAcquisitionIds());
         cardProcessingService.applyStudyCard(studyCard, acquisitions);
 
         // Get all updated dataset ids

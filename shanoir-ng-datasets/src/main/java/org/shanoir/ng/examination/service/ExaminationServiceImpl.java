@@ -114,6 +114,7 @@ public class ExaminationServiceImpl implements ExaminationService {
     private DatasetService datasetService;
 
     @Override
+    @Transactional(readOnly = true)
     public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         Optional<Examination> examinationOpt = examinationRepository.findById(id);
         if (!examinationOpt.isPresent()) {
@@ -267,7 +268,8 @@ public class ExaminationServiceImpl implements ExaminationService {
     }
 
     @Override
-    public Examination update(final Examination examination) throws EntityNotFoundException, ShanoirException {
+    @Transactional(readOnly = true)
+    public Examination update(final Examination examination) throws ShanoirException {
         final Examination examinationDb = examinationRepository.findById(examination.getId()).orElse(null);
         if (examinationDb == null) {
             throw new EntityNotFoundException(Examination.class, examination.getId());

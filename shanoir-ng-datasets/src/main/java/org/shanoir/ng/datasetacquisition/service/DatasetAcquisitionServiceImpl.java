@@ -27,11 +27,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import jakarta.persistence.EntityManager;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.hibernate.Hibernate;
+import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
@@ -88,6 +93,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Autowired
     private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
+    @Autowired
+    private EntityManager em;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
 
@@ -158,6 +166,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
         Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
         result.forEach(a -> indexDatasets(a));
@@ -165,6 +174,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DatasetAcquisition create(DatasetAcquisition entity, boolean indexDatasetsToSolr) {
         DatasetAcquisition savedEntity = repository.save(entity);
         if (indexDatasetsToSolr) {
@@ -192,7 +202,13 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return repository.findByIdWithDatasets(id).orElseThrow();
     }
 
+    @Transactional(readOnly = true)
+    public List<DatasetAcquisition> findByIdsWithDatasets(List<Long> ids) {
+        return repository.findByIdsWithDatasets(ids);
+    }
+
     @Override
+    @Transactional(readOnly = true)
     public DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException {
         final DatasetAcquisition entityDb = repository.findById(entity.getId()).orElse(null);
         if (entityDb == null) {
@@ -325,4 +341,29 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return repository.existsByStudyCard_Id(studyCardId);
     }
 
+    @Transactional(readOnly = true)
+    public List<Dataset> getDatasets(DatasetAcquisition acquisition) {
+
+        if (em.contains(acquisition)) {
+            Hibernate.initialize(acquisition.getDatasets());
+            return acquisition.getDatasets();
+        }
+        acquisition = repository.findWithDatasets(acquisition.getId());
+        return acquisition.getDatasets();
+    }
+
+    @Transactional(readOnly = true)
+    public List<BidsDataset> getDatasetsAsBids(DatasetAcquisition acquisition) {
+
+
+        if (!em.contains(acquisition)) {
+            acquisition = repository.findWithDatasets(acquisition.getId());
+        }
+
+        return acquisition.getDatasets().stream()
+                .filter(BidsDataset.class::isInstance)
+                .map(BidsDataset.class::cast)
+                .peek(bids -> Hibernate.initialize(bids.getBidsDataType()))
+                .toList();
+    }
 }

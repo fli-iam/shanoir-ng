@@ -19,6 +19,7 @@ import org.dcm4che3.data.StandardElementDictionary;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -55,6 +56,9 @@ public class StudyCardServiceImpl implements StudyCardService {
 
     @Autowired
     private StudyCardRepository studyCardRepository;
+
+    @Autowired
+    private DatasetAcquisitionRuleService datasetAcquisitionRuleService;
 
     @Override
     public void deleteById(final Long id) throws EntityNotFoundException, MicroServiceCommunicationException {
@@ -171,7 +175,7 @@ public class StudyCardServiceImpl implements StudyCardService {
             for (StudyCardRule<?> rule : card.getRules()) {
                 if (rule instanceof DatasetAcquisitionRule) {
                     changeInAtLeastOneAcquisition = true;
-                    ((DatasetAcquisitionRule) rule).apply(acquisition, dicomAttributes);
+                    datasetAcquisitionRuleService.apply((DatasetAcquisitionRule) rule, acquisition, dicomAttributes);
                 } else if (rule instanceof DatasetRule && acquisition.getDatasets() != null) {
                     for (Dataset dataset : acquisition.getDatasets()) {
                         changeInAtLeastOneAcquisition = true;

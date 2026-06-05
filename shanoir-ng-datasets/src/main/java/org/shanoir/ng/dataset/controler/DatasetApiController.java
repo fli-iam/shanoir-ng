@@ -327,30 +327,15 @@ public class DatasetApiController implements DatasetApi {
     public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
             Long subjectId,
             Long studyId) {
-        List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
+        List<Dataset> datasets = datasetService.getBySubjectStudy(subjectId, studyId);
         return new ResponseEntity<>(datasets.stream().map(Dataset::getId).collect(Collectors.toList()), HttpStatus.OK);
     }
 
     public ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectIdStudyId(
             Long subjectId,
             Long studyId) {
-        List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
+        List<Dataset> datasets = datasetService.getBySubjectStudy(subjectId, studyId);
         return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetListToDatasetDTOList(datasets), HttpStatus.OK);
-    }
-
-    private List<Dataset> getBySubjectStudy(Long subjectId, Long studyId) {
-        final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
-
-        List<Dataset> datasets = new ArrayList<>();
-        for (Examination examination : examinations) {
-            List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
-            for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-                for (Dataset dataset : datasetAcquisition.getDatasets()) {
-                    datasets.add(dataset);
-                }
-            }
-        }
-        return datasets;
     }
 
     @Override

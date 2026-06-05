@@ -23,6 +23,7 @@ import org.shanoir.ng.dataset.model.DatasetType;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -39,6 +40,9 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 
     @Autowired
     private ExaminationDatasetAcquisitionMapper delegate;
+
+    @Autowired
+    private DatasetAcquisitionService datasetAcquisitionService;
 
     @Override
     public List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
@@ -78,11 +82,12 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
         final List<String> datasetCommentSet = new ArrayList<>();
         if (datasetAcquisition instanceof BidsDatasetAcquisition) {
             BidsDatasetAcquisition bidsDataAcq = (BidsDatasetAcquisition) datasetAcquisition;
-            if (!CollectionUtils.isEmpty(bidsDataAcq.getDatasets())) {
-                datasetNameSet.add(((BidsDataset) bidsDataAcq.getDatasets().get(0)).getBidsDataType());
+            List<BidsDataset> bidsDatasets = datasetAcquisitionService.getDatasetsAsBids(bidsDataAcq);
+            if (!CollectionUtils.isEmpty(bidsDatasets)) {
+                datasetNameSet.add((bidsDatasets.get(0)).getBidsDataType());
             }
-        } else if (datasetAcquisition.getDatasets() != null) {
-            for (final Dataset dataset : datasetAcquisition.getDatasets()) {
+        } else if (datasetAcquisitionService.getDatasets(datasetAcquisition) != null) {
+            for (final Dataset dataset : datasetAcquisitionService.getDatasets(datasetAcquisition)) {
                 if (!DatasetType.MEASUREMENT.equals(dataset.getType())) {
                     final String datasetName = dataset.getName();
                     if (!StringUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {

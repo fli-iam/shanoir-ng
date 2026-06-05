@@ -21,11 +21,13 @@ import org.mapstruct.Mapper;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.web.dto.InstanceDTO;
 import org.shanoir.ng.dicom.web.dto.MetadataDTO;
 import org.shanoir.ng.dicom.web.dto.SerieDTO;
 import org.shanoir.ng.dicom.web.dto.StudyDTO;
 import org.shanoir.ng.examination.model.Examination;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This class maps the Examination objects from the Shanoir-NG database
@@ -36,6 +38,9 @@ import org.shanoir.ng.examination.model.Examination;
  */
 @Mapper(componentModel = "spring")
 public abstract class ExaminationToStudyDTOMapper {
+
+    @Autowired
+    private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
     public StudyDTO examinationToStudyDTO(Examination examination) {
         StudyDTO studyDTO = new StudyDTO();
@@ -76,6 +81,7 @@ public abstract class ExaminationToStudyDTOMapper {
         List<SerieDTO> series = new ArrayList<SerieDTO>();
         List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
         for (DatasetAcquisition datasetAcquisition : acquisitions) {
+            datasetAcquisition = datasetAcquisitionRepository.findWithDatasets(datasetAcquisition.getId());
             SerieDTO serie = new SerieDTO();
             final String serieInstanceUID = UIDGeneration.ROOT + ".2." + datasetAcquisition.getId();
             serie.setSerieInstanceUID(serieInstanceUID);

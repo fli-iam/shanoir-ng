@@ -185,6 +185,8 @@ public interface DatasetService {
 
     Future<Void> deletePartitionOfNiftis(List<Long> partition, float total, ShanoirEvent event);
 
+    List<Dataset> getBySubjectStudy(Long subjectId, Long studyId);
+
     /**
      * @param dataset the involved dataset
      *

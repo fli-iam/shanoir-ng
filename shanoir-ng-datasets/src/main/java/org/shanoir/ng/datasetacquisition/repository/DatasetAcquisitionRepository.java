@@ -17,10 +17,12 @@ package org.shanoir.ng.datasetacquisition.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRightsProjection;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -71,4 +73,16 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             + "WHERE da.id = :id")
     Optional<DatasetAcquisition> findByIdWithDatasets(Long id);
 
+    @Query("SELECT da FROM DatasetAcquisition da "
+            + "LEFT JOIN FETCH da.datasets "
+            + "WHERE da.id in :id")
+    List<DatasetAcquisition> findByIdsWithDatasets(List<Long> ids);
+
+    ////// Lazy relation getters
+
+    @EntityGraph(attributePaths = {"datasets"})
+    DatasetAcquisition findWithLazyRelations(Long id);
+
+    @EntityGraph(attributePaths = {"datasets"})
+    DatasetAcquisition findWithDatasets(Long id);
 }

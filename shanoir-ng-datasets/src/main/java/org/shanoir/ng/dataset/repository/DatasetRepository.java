@@ -243,6 +243,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     List<Dataset> findProcessingAncestors(Long id);
 
     ////// MrDataset lazy relation getters
+
     @EntityGraph(attributePaths = {"copies", "datasetExpression", "diffusionGradients", "echoTime", "flipAngle", "inversionTime", "processing", "relatedStudies", "repetitionTime", "source", "tags"})
     MrDataset findMrDatasetWithLazyRelations(Long id);
 

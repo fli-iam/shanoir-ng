@@ -48,6 +48,7 @@ import org.shanoir.ng.datasetfile.DatasetFileRepository;
 import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
@@ -156,6 +157,10 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Autowired
     private DatasetService datasetService; // To open transaction when called method is transactionnal and both parent and child are in this file
+
+    @Autowired
+    @Lazy
+    private ExaminationService examinationService; // To open transaction when called method is transactionnal and both parent and child are in this file
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -691,6 +696,22 @@ public class DatasetServiceImpl implements DatasetService {
             return datasetService.getFirstRealInput(repository.findProcessingAncestors(dataset.getId()).get(0));
         }
         return dataset;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Dataset> getBySubjectStudy(Long subjectId, Long studyId) {
+        final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
+
+        List<Dataset> datasets = new ArrayList<>();
+        for (Examination examination : examinations) {
+            List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
+            for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+                for (Dataset dataset : datasetAcquisition.getDatasets()) {
+                    datasets.add(dataset);
+                }
+            }
+        }
+        return datasets;
     }
 
     @Transactional(readOnly = true)

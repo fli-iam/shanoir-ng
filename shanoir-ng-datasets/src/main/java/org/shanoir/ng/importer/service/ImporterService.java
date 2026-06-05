@@ -46,6 +46,7 @@ import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityException;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
@@ -55,6 +56,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import ch.qos.logback.core.util.StringUtil;
@@ -99,6 +101,9 @@ public class ImporterService {
     @Autowired
     private QualityService qualityService;
 
+    @Autowired
+    private StudyCardService studyCardService;
+
     //This constructor will be called everytime a new bean instance is created
     public ImporterService() {
         LOG.info("New server-instance created of ImporterService.");
@@ -109,6 +114,7 @@ public class ImporterService {
         return ImporterService.instancesCreated;
     }
 
+    @Transactional(readOnly = true)
     public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
         LOG.info("createAllDatasetAcquisition: " + this + " ImporterService-instances created: " + getInstancesCreated());
         ShanoirEvent event = importJob.getShanoirEvent();
@@ -257,7 +263,7 @@ public class ImporterService {
                     // apply study card if needed
                     if (studyCard != null) {
                         importJob.setStudyCardName(studyCard.getName());
-                        studyCard.apply(acquisition, dicomAttributes);
+                        studyCardService.apply(studyCard, acquisition, dicomAttributes);
                     }
 
                     // add acq to collection

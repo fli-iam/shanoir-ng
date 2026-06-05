@@ -335,7 +335,7 @@ public class WADODownloaderService {
         return null;
     }
 
-    public AcquisitionAttributes<Long> getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
+    public AcquisitionAttributes<Long> getDicomAttributesForAcquisition(DatasetAcquisition acquisition) {
         long ts = new Date().getTime();
         List<Dataset> datasets = new ArrayList<>();
         if (acquisition.getDatasets() != null) {

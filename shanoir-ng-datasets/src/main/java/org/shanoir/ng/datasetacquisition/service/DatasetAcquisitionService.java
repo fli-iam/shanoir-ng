@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.modality.BidsDataset;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -41,11 +43,14 @@ public interface DatasetAcquisitionService {
             String seriesInstanceUID);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    public DatasetAcquisition findByIdWithDatasets(Long id);
+    DatasetAcquisition findByIdWithDatasets(Long id);
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    List<DatasetAcquisition> findByIdsWithDatasets(List<Long> ids);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionPage(returnObject, 'CAN_SEE_ALL')")
-    public Page<DatasetAcquisition> findPage(final Pageable pageable);
+    Page<DatasetAcquisition> findPage(final Pageable pageable);
 
     @PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#entity.getExamination().getId(), 'CAN_IMPORT')))")
     DatasetAcquisition create(DatasetAcquisition entity, boolean indexDatasetsToSolr);
@@ -81,4 +86,17 @@ public interface DatasetAcquisitionService {
 
     Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);
 
+    /**
+     * @param acquisition the involved acquisition
+     *
+     * @return the datasets linked to that acquisiton
+     */
+    List<Dataset> getDatasets(DatasetAcquisition acquisition);
+
+    /**
+     * @param acquisition the involved acquisition
+     *
+     * @return the datasets with specific BidsDataset field linked to that acquisiton
+     */
+    List<BidsDataset> getDatasetsAsBids(DatasetAcquisition acquisition);
 }

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.mapstruct.Mapping;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -26,6 +27,7 @@ import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
+import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,7 +41,10 @@ import org.springframework.data.domain.Page;
 public abstract class DatasetAcquisitionDatasetsDecorator implements DatasetAcquisitionDatasetsMapper {
 
     @Autowired
-    private DatasetAcquisitionDatasetsMapper delegate;
+    private ExaminationMapper examinationMapper;
+
+    @Autowired
+    private DatasetMapper datasetMapper;
 
     @Override
     public List<DatasetAcquisitionDatasetsDTO> datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(
@@ -74,10 +79,24 @@ public abstract class DatasetAcquisitionDatasetsDecorator implements DatasetAcqu
         if (datasetAcquisition == null) {
             return null;
         }
-        final DatasetAcquisitionDatasetsDTO datasetAcquisitionDTO = delegate
-                .datasetAcquisitionToDatasetAcquisitionDatasetsDTO(datasetAcquisition);
-        setType(datasetAcquisitionDTO, datasetAcquisition);
-        return datasetAcquisitionDTO;
+
+        DatasetAcquisitionDatasetsDTO datasetAcquisitionDatasetsDTO = new DatasetAcquisitionDatasetsDTO();
+
+        datasetAcquisitionDatasetsDTO.setId( datasetAcquisition.getId() );
+        datasetAcquisitionDatasetsDTO.setAcquisitionEquipmentId( datasetAcquisition.getAcquisitionEquipmentId() );
+        datasetAcquisitionDatasetsDTO.setExamination( examinationMapper.examinationToExaminationDTO( datasetAcquisition.getExamination() ) );
+        datasetAcquisitionDatasetsDTO.setStudyCard( datasetAcquisition.getStudyCard() );
+        datasetAcquisitionDatasetsDTO.setStudyCardTimestamp( datasetAcquisition.getStudyCardTimestamp() );
+        datasetAcquisitionDatasetsDTO.setRank( datasetAcquisition.getRank() );
+        datasetAcquisitionDatasetsDTO.setSoftwareRelease( datasetAcquisition.getSoftwareRelease() );
+        datasetAcquisitionDatasetsDTO.setSortingIndex( datasetAcquisition.getSortingIndex() );
+        datasetAcquisitionDatasetsDTO.setType( datasetAcquisition.getType() );
+        datasetAcquisitionDatasetsDTO.setImportDate( datasetAcquisition.getImportDate() );
+        datasetAcquisitionDatasetsDTO.setUsername( datasetAcquisition.getUsername() );
+        datasetAcquisitionDatasetsDTO.setAcquisitionStartTime( datasetAcquisition.getAcquisitionStartTime() );
+        datasetAcquisitionDatasetsDTO.setDatasets( datasetMapper.datasetListToDatasetDTOList( datasetAcquisition.getDatasets() ) );
+        setType(datasetAcquisitionDatasetsDTO, datasetAcquisition);
+        return datasetAcquisitionDatasetsDTO;
     }
 
     private void setType(DatasetAcquisitionDTO datasetAcquisitionDTO, DatasetAcquisition datasetAcquisition) {
