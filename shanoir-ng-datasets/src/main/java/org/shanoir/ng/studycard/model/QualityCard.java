@@ -98,84 +98,11 @@ public class QualityCard extends HalEntity implements Card {
         this.rules = rules;
     }
 
-    /**
-    * Application during import, when dicoms are present in tmp directory.
-    * @param examination
-    * @param studyCard
-    * @param dicomAttributes
-    */
-    public QualityCardResult apply(Examination examination, ExaminationAttributes<?> dicomAttributes, WADODownloaderService downloader) {
-        QualityCardResult result = new QualityCardResult();
-        if (this.getRules() != null) {
-            for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, dicomAttributes, result, downloader);
-            }
-        }
-        return result;
-    }
-
-    /**
-    * Application during import, when dicoms are present in tmp directory.
-    * @param examination
-    * @param studyCard
-    * @param dicomAttributes
-    */
-    public QualityCardResult apply(ExaminationData examination, ExaminationAttributes<?> dicomAttributes, WADODownloaderService downloader) {
-        QualityCardResult result = new QualityCardResult();
-        if (this.getRules() != null) {
-            for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, dicomAttributes, result, downloader);
-            }
-        }
-        return result;
-    }
-
-    /**
-    * Application during import, when dicoms are present in tmp directory.
-    * @param examination
-    * @param studyCard
-    */
-    public QualityCardResult apply(Examination examination, WADODownloaderService downloader) {
-        QualityCardResult result = new QualityCardResult();
-        if (this.getRules() != null) {
-            for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, result, downloader);
-            }
-        }
-        return result;
-    }
-
-    /**
-    * Application during import, when dicoms are present in tmp directory.
-    * @param examination
-    * @param studyCard
-    */
-    public QualityCardResult apply(ExaminationData examination, WADODownloaderService downloader) {
-        QualityCardResult result = new QualityCardResult();
-        if (this.getRules() != null) {
-            for (QualityExaminationRule rule : this.getRules()) {
-                rule.apply(examination, result, downloader);
-            }
-        }
-        return result;
-    }
-
     public boolean isToCheckAtImport() {
         return toCheckAtImport;
     }
 
     public void setToCheckAtImport(boolean toCheckAtImport) {
         this.toCheckAtImport = toCheckAtImport;
-    }
-
-    public boolean hasDicomConditions() {
-        if (getRules() != null) {
-            for (QualityExaminationRule rule : getRules()) {
-                if (rule.hasDicomConditions()) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }

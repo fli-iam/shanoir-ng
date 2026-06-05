@@ -16,6 +16,8 @@ package org.shanoir.ng.studycard.service;
 
 import java.util.List;
 
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -35,4 +37,13 @@ public interface StudyCardService extends CardService<StudyCard> {
     void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
 
     List<DicomTag> findDicomTags() throws RestServiceException;
+
+    /**
+     * Application during import, when dicoms are present in tmp directory.
+     * @param card
+     * @param acquisition
+     * @param dicomAttributes
+     * @return true if the application had any effect on acquisitions
+     */
+    boolean apply(StudyCard card, DatasetAcquisition acquisition, AcquisitionAttributes<?> dicomAttributes);
 }

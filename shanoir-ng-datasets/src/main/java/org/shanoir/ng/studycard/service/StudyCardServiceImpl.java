@@ -14,9 +14,13 @@
 
 package org.shanoir.ng.studycard.service;
 
+import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.StandardElementDictionary;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -25,6 +29,8 @@ import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.VM;
+import org.shanoir.ng.studycard.model.rule.DatasetAcquisitionRule;
+import org.shanoir.ng.studycard.model.rule.DatasetRule;
 import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.Utils;
@@ -99,27 +105,6 @@ public class StudyCardServiceImpl implements StudyCardService {
         return studyCardDb;
     }
 
-
-    /**
-     * Update some values of template to save them in database.
-     *
-     * @param templateDb template found in database.
-     * @param template template with new values.
-     * @return database template with new values.
-     */
-    private StudyCard updateStudyCardValues(final StudyCard studyCardDb, final StudyCard studyCard) {
-        studyCardDb.setName(studyCard.getName());
-        studyCardDb.setDisabled(studyCard.isDisabled());
-        studyCardDb.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
-        studyCardDb.setId(studyCard.getId());
-        studyCardDb.setNiftiConverterId(studyCard.getNiftiConverterId());
-        studyCardDb.setStudyId(studyCard.getStudyId());
-        if (studyCardDb.getRules() == null) studyCardDb.setRules(new ArrayList<StudyCardRule<?>>());
-        else studyCardDb.getRules().clear();
-        if (studyCard.getRules() != null) studyCardDb.getRules().addAll(studyCard.getRules());
-        return studyCardDb;
-    }
-
     @Override
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
@@ -172,5 +157,60 @@ public class StudyCardServiceImpl implements StudyCardService {
             throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Cannot parse the dcm4che lib Tag class static fields", e));
         }
         return dicomTags;
+    }
+
+    /**
+     * Application during import, when dicoms are present in tmp directory.
+     * @param acquisition
+     * @param dicomAttributes
+     * @return true if the application had any effect on acquisitions
+     */
+    public boolean apply(StudyCard card, DatasetAcquisition acquisition, AcquisitionAttributes<?> dicomAttributes) {
+        boolean changeInAtLeastOneAcquisition = false;
+        if (card.getRules() != null) {
+            for (StudyCardRule<?> rule : card.getRules()) {
+                if (rule instanceof DatasetAcquisitionRule) {
+                    changeInAtLeastOneAcquisition = true;
+                    ((DatasetAcquisitionRule) rule).apply(acquisition, dicomAttributes);
+                } else if (rule instanceof DatasetRule && acquisition.getDatasets() != null) {
+                    for (Dataset dataset : acquisition.getDatasets()) {
+                        changeInAtLeastOneAcquisition = true;
+                        Attributes attributes;
+                        if (String.class.equals(dicomAttributes.getParametrizedType())) {
+                            // @SuppressWarnings("unchecked") doesn't work ...
+                            attributes = ((AcquisitionAttributes<String>) dicomAttributes).getDatasetAttributes(dataset.getSOPInstanceUID());
+                        } else if (Long.class.equals(dicomAttributes.getParametrizedType())) {
+                            attributes = ((AcquisitionAttributes<Long>) dicomAttributes).getDatasetAttributes(dataset.getId());
+                        } else {
+                            throw new IllegalStateException("the parametrized type of AcquisitionAttributes is not implemented, use String or Long");
+                        }
+                        ((DatasetRule) rule).apply(dataset, attributes);
+                    }
+                } else {
+                    throw new IllegalStateException("unknown type of rule");
+                }
+            }
+        }
+        acquisition.setStudyCard(card);
+        acquisition.setStudyCardTimestamp(card.getLastEditTimestamp());
+        return changeInAtLeastOneAcquisition;
+    }
+
+    /**
+     * Update some values of template to save them in database.
+     *
+     * @return database template with new values.
+     */
+    private StudyCard updateStudyCardValues(final StudyCard studyCardDb, final StudyCard studyCard) {
+        studyCardDb.setName(studyCard.getName());
+        studyCardDb.setDisabled(studyCard.isDisabled());
+        studyCardDb.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+        studyCardDb.setId(studyCard.getId());
+        studyCardDb.setNiftiConverterId(studyCard.getNiftiConverterId());
+        studyCardDb.setStudyId(studyCard.getStudyId());
+        if (studyCardDb.getRules() == null) studyCardDb.setRules(new ArrayList<StudyCardRule<?>>());
+        else studyCardDb.getRules().clear();
+        if (studyCard.getRules() != null) studyCardDb.getRules().addAll(studyCard.getRules());
+        return studyCardDb;
     }
 }

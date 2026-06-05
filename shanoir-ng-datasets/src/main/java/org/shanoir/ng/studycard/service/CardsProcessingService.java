@@ -75,6 +75,12 @@ public class CardsProcessingService {
     @Autowired
     private DatasetAcquisitionRepository acquisitionRepository;
 
+    @Autowired
+    private QualityExaminationRuleService ruleService;
+
+    @Autowired
+    private StudyCardService studyCardService;
+
 
     /**
      * Apply study card on given acquisitions
@@ -84,13 +90,13 @@ public class CardsProcessingService {
      * @throws PacsException
      */
     @Transactional(readOnly = true)
-    public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) throws PacsException {
+    public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) {
         boolean changeInAtLeastOneAcquisition = false;
         for (DatasetAcquisition acquisition : acquisitions) {
             if (CollectionUtils.isNotEmpty(acquisition.getDatasets()) && CollectionUtils.isNotEmpty(studyCard.getRules())) {
                 acquisition = acquisitionRepository.findById(acquisition.getId()).orElse(null);
                 AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
-                changeInAtLeastOneAcquisition = studyCard.apply(acquisition, dicomAttributes);
+                changeInAtLeastOneAcquisition = studyCardService.apply(studyCard, acquisition, dicomAttributes);
             }
         }
         if (changeInAtLeastOneAcquisition) { // no need to update, if nothing happened
@@ -101,7 +107,6 @@ public class CardsProcessingService {
     /**
      * Study cards for quality control: apply on entire exam.
      *
-     * @param studyCard
      * @throws MicroServiceCommunicationException
      */
     public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Examination examination, boolean updateTags) throws MicroServiceCommunicationException {
@@ -125,7 +130,7 @@ public class CardsProcessingService {
                 LOG.debug(qualityCard.getRules().size() + " rules found for study card with id: " + qualityCard.getId() + " and name: " + qualityCard.getName());
                 long rulesStartTs = new Date().getTime();
                 for (QualityExaminationRule rule : qualityCard.getRules()) {
-                    rule.apply(examination, result, downloader);
+                    ruleService.apply(rule, examination, null, result, downloader);
                 }
                 LOG.debug("Quality check for examination " + examination.getId() + " : rules application took " + (new Date().getTime() - rulesStartTs) + "ms");
             }
@@ -146,7 +151,6 @@ public class CardsProcessingService {
     /**
      * Study cards for quality control: apply on entire study.
      *
-     * @param studyCard
      * @throws MicroServiceCommunicationException
      */
     @Transactional(readOnly = true)
@@ -267,7 +271,6 @@ public class CardsProcessingService {
     /**
      * Study cards for quality control: apply on entire study.
      *
-     * @param studyCard
      * @throws MicroServiceCommunicationException
      */
     public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags) throws MicroServiceCommunicationException {
@@ -277,7 +280,6 @@ public class CardsProcessingService {
         /**
      * Study cards for quality control: apply on entire study.
      *
-     * @param studyCard
      * @throws MicroServiceCommunicationException
      */
     public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, Integer start, Integer stop) throws MicroServiceCommunicationException {

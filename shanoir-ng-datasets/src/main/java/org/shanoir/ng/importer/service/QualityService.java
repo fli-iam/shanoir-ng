@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class QualityService {
@@ -45,6 +46,7 @@ public class QualityService {
     private WADODownloaderService downloader;
 
 
+    @Transactional(readOnly = true)
     public QualityCardResult checkQuality(ExaminationData examination, ImportJob importJob, List<QualityCard> qualityCards) throws ShanoirException {
         LOG.info("Checking quality at import for examination : " + importJob.getExaminationId());
 
@@ -67,7 +69,7 @@ public class QualityService {
         for (QualityCard qualityCard : qualityCards) {
             // In case multiple quality cards are used with different roles, we check them all
             if (qualityCard.isToCheckAtImport()) {
-                qualityResult.merge(qualityCard.apply(examination, dicomAttributes, downloader));
+                qualityResult.merge(qualityCardService.apply(qualityCard, examination, dicomAttributes, downloader));
             }
         }
         return qualityResult;

@@ -50,10 +50,6 @@ public class ExamMetadataCondOnDatasets extends StudyCardMetadataCondition<Datas
         shanoirField = field.getId();
     }
 
-    public boolean fulfilled(List<DatasetAcquisition> acquisitions) {
-        return fulfilled(acquisitions, null);
-    }
-
     public boolean fulfilled(List<DatasetAcquisition> acquisitions, StringBuffer errorMsg) {
         if (acquisitions == null) throw new IllegalArgumentException("datasets can not be null");
         DatasetMetadataField field = this.getShanoirField();

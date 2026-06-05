@@ -14,8 +14,12 @@
 
 package org.shanoir.ng.studycard.service;
 
+import org.shanoir.ng.download.ExaminationAttributes;
+import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -24,4 +28,11 @@ public interface QualityCardService extends CardService<QualityCard> {
     @Override
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#id, 'CAN_ADMINISTRATE'))")
     void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
+
+    /**
+     * Application during import, when dicoms are present in tmp directory.
+     * @param examination
+     * @param dicomAttributes
+     */
+    QualityCardResult apply(QualityCard card, ExaminationData examination, ExaminationAttributes<?> dicomAttributes, WADODownloaderService downloader);
 }

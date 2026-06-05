@@ -36,39 +36,4 @@ import jakarta.persistence.Entity;
 @Entity
 @DiscriminatorValue("DatasetAcquisition")
 @JsonTypeName("DatasetAcquisition")
-public class DatasetAcquisitionRule extends StudyCardRule<DatasetAcquisition> {
-
-    public void apply(DatasetAcquisition acquisition, AcquisitionAttributes<?> dicomAttributes) {
-        if (this.getConditions() == null || this.getConditions().isEmpty() || conditionsfulfilled(dicomAttributes, acquisition)) {
-            if (this.getAssignments() != null) applyAssignments(acquisition);
-        }
-    }
-
-    private boolean conditionsfulfilled(AcquisitionAttributes<?> dicomAttributes, DatasetAcquisition acquisition) {
-        boolean fulfilled = true;
-        for (StudyCardCondition condition : getConditions()) {
-            if (condition instanceof StudyCardDICOMConditionOnDatasets) {
-                fulfilled &= ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes);
-            } else if (condition instanceof AcqMetadataCondOnAcq) {
-                fulfilled &= ((AcqMetadataCondOnAcq) condition).fulfilled(acquisition);
-            } else if (condition instanceof AcqMetadataCondOnDatasets) {
-                fulfilled &= ((AcqMetadataCondOnDatasets) condition).fulfilled(acquisition.getDatasets());
-            } else {
-                throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
-            }
-        }
-        return fulfilled;
-    }
-
-    private void applyAssignments(DatasetAcquisition acquisition) {
-        for (StudyCardAssignment<?> assignment : getAssignments()) {
-            if (assignment instanceof DatasetAssignment) {
-                for (Dataset dataset : acquisition.getDatasets()) {
-                    ((DatasetAssignment) assignment).apply(dataset);
-                }
-            } else if (assignment instanceof DatasetAcquisitionAssignment) {
-                ((DatasetAcquisitionAssignment) assignment).apply(acquisition);
-            } else throw new IllegalArgumentException("Unimplemented assignment type");
-        }
-    }
-}
+public class DatasetAcquisitionRule extends StudyCardRule<DatasetAcquisition> { }

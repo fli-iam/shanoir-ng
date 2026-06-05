@@ -14,8 +14,12 @@
 
 package org.shanoir.ng.studycard.service;
 
+import org.shanoir.ng.download.ExaminationAttributes;
+import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
@@ -39,6 +43,9 @@ public class QualityCardServiceImpl implements QualityCardService {
 
     @Autowired
     private QualityCardRepository qualityCardRepository;
+
+    @Autowired
+    private QualityExaminationRuleService qualityExaminationRuleService;
 
     @Override
     public void deleteById(final Long id) throws EntityNotFoundException, MicroServiceCommunicationException {
@@ -91,8 +98,6 @@ public class QualityCardServiceImpl implements QualityCardService {
     /**
      * Update some values of template to save them in database.
      *
-     * @param templateDb template found in database.
-     * @param template template with new values.
      * @return database template with new values.
      */
     private QualityCard updateQualityCardValues(final QualityCard qualityCardDb, final QualityCard qualityCard) {
@@ -119,4 +124,18 @@ public class QualityCardServiceImpl implements QualityCardService {
         return qualityCardRepository.findByName(name);
     }
 
+    /**
+     * Application during import, when dicoms are present in tmp directory.
+     * @param examination
+     * @param dicomAttributes
+     */
+    public QualityCardResult apply(QualityCard card, ExaminationData examination, ExaminationAttributes<?> dicomAttributes, WADODownloaderService downloader) {
+        QualityCardResult result = new QualityCardResult();
+        if (card.getRules() != null) {
+            for (QualityExaminationRule rule : card.getRules()) {
+                qualityExaminationRuleService.apply(rule, examination, dicomAttributes, result, downloader);
+            }
+        }
+        return result;
+    }
 }
