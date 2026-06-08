@@ -30,6 +30,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.user.model.TwoFactorStatus;
 import org.shanoir.ng.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +40,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.validation.Valid;
 
@@ -193,6 +195,32 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 
         } catch (final EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Override
+    public ResponseEntity<TwoFactorStatus> getTwoFactorAuth(@PathVariable("userId") final Long userId)
+            throws RestServiceException {
+        try {
+            return new ResponseEntity<>(getUserService().getTwoFactorAuth(userId), HttpStatus.OK);
+        } catch (final EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (final SecurityException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while reading the two-factor status from Keycloak"));
+        }
+    }
+
+    @Override
+    public ResponseEntity<TwoFactorStatus> setTwoFactorAuth(@PathVariable("userId") final Long userId,
+            @RequestParam("enabled") final boolean enabled) throws RestServiceException {
+        try {
+            return new ResponseEntity<>(getUserService().setTwoFactorAuth(userId, enabled), HttpStatus.OK);
+        } catch (final EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (final SecurityException e) {
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while updating the two-factor status in Keycloak"));
         }
     }
 

@@ -20,6 +20,7 @@ import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ForbiddenException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.user.model.TwoFactorStatus;
 import org.shanoir.ng.user.model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -154,6 +156,31 @@ public interface UserApi {
     ResponseEntity<Void> updateUser(
             @Parameter(name = "id of the user", required = true) @PathVariable("userId") Long userId,
             @Parameter(name = "user to update", required = true) @RequestBody User user, BindingResult result)
+            throws RestServiceException;
+
+    @Operation(summary = "", description = "Returns the Keycloak two-factor authentication status of a user")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "two-factor status"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no user found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/{userId}/2fa", produces = { "application/json" }, method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<TwoFactorStatus> getTwoFactorAuth(
+            @Parameter(name = "id of the user", required = true) @PathVariable("userId") Long userId)
+            throws RestServiceException;
+
+    @Operation(summary = "", description = "Enables or disables Keycloak two-factor authentication for a user")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "resulting two-factor status"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no user found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/{userId}/2fa", produces = { "application/json" }, method = RequestMethod.PUT)
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<TwoFactorStatus> setTwoFactorAuth(
+            @Parameter(name = "id of the user", required = true) @PathVariable("userId") Long userId,
+            @Parameter(name = "enable or disable two-factor authentication", required = true) @RequestParam("enabled") boolean enabled)
             throws RestServiceException;
 
 }
