@@ -18,6 +18,7 @@ import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
 import { Tag } from 'src/app/tags/tag.model';
+import { DownloadUtilsService } from 'src/app/shared/mass-download/download.utils.service';
 
 import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -49,8 +50,12 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     fileUploads: Map<number, Promise<void>> = new Map(); // current uploads
     private studyVolumesCache: Map<number, StudyStorageVolumeDTO> = new Map();
 
-    constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService,
-            private downloadService: SingleDownloadService) {
+    constructor(
+            protected http: HttpClient, 
+            private keycloakService: KeycloakService, 
+            private studyDTOService: StudyDTOService,
+            private downloadService: SingleDownloadService,
+            private downloadUtilsService: DownloadUtilsService) {
         super(http);
     }
 
@@ -227,7 +232,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     downloadDuaBlob(fileName: string, studyId: number): Promise<Blob> {
         const endpoint = this.API_URL + '/dua-download/' + studyId + "/" + fileName + "/";
-        return AppUtils.downloadBlob(endpoint);
+        return this.downloadUtilsService.downloadBlob(endpoint);
     }
 
     getMyDUA(): Promise<DataUserAgreement[]> {

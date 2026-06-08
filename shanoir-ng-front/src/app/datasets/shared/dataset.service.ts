@@ -16,6 +16,7 @@ import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
+import { DownloadUtilsService } from 'src/app/shared/mass-download/download.utils.service';
 
 import { BidsElement } from "../../bids/model/bidsElement.model";
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -47,7 +48,7 @@ export class DatasetService extends EntityService<Dataset> {
     httpOptions = {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     };
-    constructor(protected http: HttpClient) {
+    constructor(protected http: HttpClient, private downloadUtilsService: DownloadUtilsService) {
         super(http);
     }
 
@@ -129,7 +130,7 @@ export class DatasetService extends EntityService<Dataset> {
             formData.set("converterId", "" + converter);
         }
         const url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload';
-        return AppUtils.downloadWithStatusPOST(url, formData, state);
+        return this.downloadUtilsService.downloadWithStatusPOST(url, formData, state);
     }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {

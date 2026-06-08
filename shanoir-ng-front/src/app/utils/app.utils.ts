@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { inject, Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, HttpResponse } from '@angular/common/http';
 import { Observable, firstValueFrom } from 'rxjs';
 import { last, map, mergeMap, shareReplay } from 'rxjs/operators';
@@ -202,113 +202,6 @@ export function browserDownloadFileFromResponse(response: HttpResponse<any>) {
         browserDownloadFile(response.body, getFilename(response));
     } else {
         throw new Error('can\'t download, server response is empty');
-    }
-}
-
-export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
-    const http: HttpClient = inject(HttpClient);
-    return firstValueFrom(http.get(
-        url,
-        {
-            reportProgress: true,
-            responseType: 'blob',
-            params: params
-        }
-    )
-    .pipe(map(response => {
-        return response;
-    })));
-}
-
-export function downloadWithStatusGET(url: string, params?: HttpParams, state?: TaskState): Observable<TaskState> {
-    const http: HttpClient = inject(HttpClient);
-    const obs: Observable<HttpEvent<Blob>> = http.get(
-        url,
-        {
-            reportProgress: true,
-            observe: 'events',
-            responseType: 'blob',
-            params: params
-        }
-    ).pipe(shareReplay());
-    obs.pipe(last()).subscribe(response => {
-        browserDownloadFileFromResponse(response as HttpResponse<Blob>)
-    });
-    return obs.pipe(mergeMap(event => {
-        return extractState(event).then(s => {
-            if (state) {
-                state.errors = s.errors;
-                state.progress = s.progress;
-                state.status = s.status;
-            }
-            return s;
-        });
-    }));
-}
-
-export function downloadWithStatusPOST(url: string, formData: FormData, state?: TaskState): Observable<TaskState> {
-    const http: HttpClient = inject(HttpClient);
-    const obs: Observable<HttpEvent<Blob>> = http.post(
-        url,
-        formData,
-        {
-            reportProgress: true,
-            observe: 'events',
-            responseType: 'blob'
-        }
-    ).pipe(shareReplay());
-    obs.pipe(last()).subscribe(response => {
-        browserDownloadFileFromResponse(response as HttpResponse<Blob>)
-    });
-    return obs.pipe(mergeMap(event => {
-        return extractState(event).then(s => {
-            if (state) {
-                state.errors = s.errors;
-                state.progress = s.progress;
-                state.status = s.status;
-            }
-            return s;
-        });
-    }));
-}
-
-export function extractState(event: HttpEvent<any>): Promise<TaskState> {
-    let task: TaskState;
-    switch (event.type) {
-        case HttpEventType.Sent:
-        case HttpEventType.ResponseHeader: {
-            task = new TaskState(TaskStatus.QUEUED, 0);
-            return Promise.resolve(task);
-        }
-        case HttpEventType.DownloadProgress: {
-            const total: number = (event as HttpProgressEvent).total;
-            task = new TaskState(TaskStatus.IN_PROGRESS, (event as HttpProgressEvent).loaded);
-            if (total) task.progress /= total;
-            return Promise.resolve(task);
-        }
-        case HttpEventType.Response: {
-            task = new TaskState(TaskStatus.DONE);
-            const blob: Blob = (event as HttpResponse<Blob>).body;
-            if (blob && event.headers.get('Content-Type') == 'application/zip') {
-                //report.list[id].zipSize = getSizeStr(blob?.size);
-                // Check ERRORS file in zip
-                const zip: any = new JSZip();
-                return zip.loadAsync(blob).then(dataFiles => {
-                    if (dataFiles.files['ERRORS.json']) {
-                        return dataFiles.files['ERRORS.json'].async('string').then(content => {
-                            const errorsJson: any = JSON.parse(content);
-                            task.errors = JSON.stringify(errorsJson, null, 4);
-                            task.status = TaskStatus.DONE_BUT_WARNING;
-                            return task;
-                        });
-                    }
-                    return task;
-                });
-            } else {
-                return Promise.resolve(task);
-            }
-        }
-        default: return Promise.resolve(task);
     }
 }
 
