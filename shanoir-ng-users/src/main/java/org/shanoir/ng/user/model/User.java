@@ -77,6 +77,14 @@ public class User extends HalEntity implements UserDetails {
     @Transient
     private Boolean twoFactorEnabled;
 
+    /**
+     * Keycloak account enabled (activated) flag. Not persisted in database:
+     * the state lives in Keycloak and is read/applied through it. Only meaningful for admins.
+     */
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @Transient
+    private Boolean keycloakEnabled;
+
     @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
     @LocalDateAnnotations
     private LocalDate creationDate;
@@ -198,6 +206,21 @@ public class User extends HalEntity implements UserDetails {
      */
     public void setTwoFactorEnabled(final Boolean twoFactorEnabled) {
         this.twoFactorEnabled = twoFactorEnabled;
+    }
+
+    /**
+     * @return whether the user is enabled (activated) in Keycloak
+     */
+    public Boolean getKeycloakEnabled() {
+        return keycloakEnabled;
+    }
+
+    /**
+     * @param keycloakEnabled
+     *            the Keycloak enabled (activated) flag to set
+     */
+    public void setKeycloakEnabled(final Boolean keycloakEnabled) {
+        this.keycloakEnabled = keycloakEnabled;
     }
 
     /**
