@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.user.model.TwoFactorStatus;
 import org.shanoir.ng.user.model.User;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -229,5 +230,28 @@ public interface UserService {
      * @return the number of active users
      */
     Long countActiveUsers();
+
+    /**
+     * Get the Keycloak two-factor (TOTP) authentication status of a user.
+     *
+     * @param userId the user id.
+     * @return the current two-factor authentication status.
+     * @throws EntityNotFoundException if this user id doesn't exist in the database.
+     * @throws SecurityException if the status could not be read from Keycloak.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    TwoFactorStatus getTwoFactorAuth(Long userId) throws EntityNotFoundException, SecurityException;
+
+    /**
+     * Enable or disable Keycloak two-factor (TOTP) authentication for a user.
+     *
+     * @param userId the user id.
+     * @param enabled true to enable two-factor authentication, false to disable it.
+     * @return the resulting two-factor authentication status.
+     * @throws EntityNotFoundException if this user id doesn't exist in the database.
+     * @throws SecurityException if the change could not be applied in Keycloak.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    TwoFactorStatus setTwoFactorAuth(Long userId, boolean enabled) throws EntityNotFoundException, SecurityException;
 
 }

@@ -36,6 +36,7 @@ import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.user.model.TwoFactorStatus;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.utils.KeycloakClient;
@@ -196,6 +197,29 @@ public class UserServiceImpl implements UserService {
     @Override
     public Long countActiveUsers() {
         return userRepository.countActiveUsers();
+    }
+
+    @Override
+    public TwoFactorStatus getTwoFactorAuth(final Long userId) throws EntityNotFoundException, SecurityException {
+        final User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            throw new EntityNotFoundException(User.class, userId);
+        }
+        return keycloakClient.getTotpStatus(user.getKeycloakId());
+    }
+
+    @Override
+    public TwoFactorStatus setTwoFactorAuth(final Long userId, final boolean enabled) throws EntityNotFoundException, SecurityException {
+        final User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            throw new EntityNotFoundException(User.class, userId);
+        }
+        if (enabled) {
+            keycloakClient.enableTotp(user.getKeycloakId());
+        } else {
+            keycloakClient.disableTotp(user.getKeycloakId());
+        }
+        return keycloakClient.getTotpStatus(user.getKeycloakId());
     }
 
     @Override
