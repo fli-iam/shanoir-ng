@@ -95,6 +95,7 @@ import { environment } from './environments/environment';
 import { DatasetCopyDialogService } from './app/shared/components/dataset-copy-dialog/dataset-copy-dialog.service';
 import { CopyDataService } from './app/studies/shared/copy-data.service';
 import { DownloadUtilsService } from './app/shared/mass-download/download.utils.service';
+import { ExecutionTemplateService } from './app/vip/execution-template/execution-template.service';
 
 registerLocaleData(localeFr);
 registerLocaleData(localeDe);
@@ -196,6 +197,7 @@ const options = {
         DatasetCopyDialogService,
         CopyDataService,
         DownloadUtilsService,
+        ExecutionTemplateService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi()),
     ]

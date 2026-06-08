@@ -1,6 +1,6 @@
 import {Component, Input, ViewChild} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
@@ -15,7 +15,7 @@ import { ExecutionTemplateService } from "./execution-template.service";
 @Component({
     selector: 'execution-template-list',
     templateUrl: './execution-template-list.component.html',
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, TableComponent]
+    imports: [FormsModule, ReactiveFormsModule, TableComponent]
     
 })
 export class ExecutionTemplateListComponent extends BrowserPaginEntityListComponent<ExecutionTemplate> {
