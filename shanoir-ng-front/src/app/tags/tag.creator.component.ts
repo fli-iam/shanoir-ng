@@ -90,7 +90,7 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
     }
 
     protected tagUsed(tag: Tag) {
-        return !!this.tagsInUse?.find(ssTag => ssTag.equals(tag));
+        return !!this.tagsInUse?.find(ssTag => ssTag.equals?.(tag));
     }
 
     writeValue(obj: any): void {
