@@ -37,7 +37,7 @@ import { SubjectPathology } from '../shared/subjectPathology.model';
 export class SubjectPathologyComponent extends EntityComponent<SubjectPathology> {
 
     private allModels: PathologyModel[] = [];
-    protected displayedModels: PathologyModel[] = []; 
+    protected displayedModels: PathologyModel[] = [];
     protected locations: Reference[] = [];
     protected pathologies: Pathology[] = [];
 
@@ -106,7 +106,7 @@ export class SubjectPathologyComponent extends EntityComponent<SubjectPathology>
     }
 
     protected goToAddLocation() {
-        this.navigateToAttributeCreateStep('/location/create', 'location');
+        this.navigateToAttributeCreateStep('/preclinical-reference/create', 'anatomy.location', null, { queryParams: {category: 'anatomy', reftype: 'location'} });
     }
 
     protected loadPathologies() {

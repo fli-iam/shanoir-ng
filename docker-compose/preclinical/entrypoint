@@ -11,6 +11,7 @@ optional SHANOIR_DB_NAME
 require  SHANOIR_MIGRATION
 require  SHANOIR_URL_HOST
 require  SHANOIR_URL_SCHEME
+require  SHANOIR_STORAGE_TYPE
 
 # Rabbit MQ default environnement variable to set
 export SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
