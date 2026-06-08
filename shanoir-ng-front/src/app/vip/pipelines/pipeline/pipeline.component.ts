@@ -26,11 +26,11 @@ import { ImagesUrlUtil } from 'src/app/shared/utils/images-url.util';
 })
 export class PipelineComponent implements OnInit {
 
-  @Input() pipeline:Pipeline;
+  @Input() pipeline: Pipeline;
   readonly ImagesUrlUtil = ImagesUrlUtil;
 
   ngOnInit(): void {
-    console.log(this.pipeline);
+      return;
   }
 
 }
