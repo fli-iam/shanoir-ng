@@ -15,14 +15,7 @@
 package org.shanoir.ng.dataset.repository;
 
 import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.CrudRepository;
 
-public interface DatasetExpressionRepository  extends CrudRepository<DatasetExpression, Long> {
 
-
-    ////// Lazy relation getters
-
-    @EntityGraph(attributePaths = {"datasetFiles"})
-    DatasetExpression findWithDatasetFiles(Long id);
-}
+public interface DatasetExpressionRepository extends CrudRepository<DatasetExpression, Long>, DatasetExpressionRepositoryCustom { }

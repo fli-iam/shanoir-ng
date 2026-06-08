@@ -16,11 +16,9 @@ package org.shanoir.ng.dataset.service;
 
 import java.util.*;
 
-import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -60,9 +58,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
     @Autowired
     private SubjectRepository subjectRepository;
-
-    @Autowired
-    private DatasetExpressionRepository datasetExpressionRepository;
 
     @Autowired
     private DatasetFileRepository datasetFileRepository;
@@ -152,21 +147,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         } catch (Exception e) {
             LOG.error("[CopyDatasets] Error during the copy of dataset [" + dsId + "] to study [" + studyId + "].");
             throw e;
-        }
-    }
-
-    // Save dataset and dataset files in batch to avoid memory overflow
-    @Transactional
-    public void saveDatasetWithDatasetFileBatch(Dataset dataset) {
-        Hibernate.initialize(dataset.getDatasetExpressions());
-        List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions(); // save list
-        dataset.setDatasetExpressions(List.of()); // empty it
-        Dataset savedDataset = datasetRepository.save(dataset); // save dataset without dataset expressions
-        for (DatasetExpression dexp : datasetExpressions) { // for each dataset expression
-            dexp.setDataset(savedDataset); // attach the saved dataset to the dataset expression
-            dexp.setDatasetFiles(List.of()); // empty the list of dataset files
-            DatasetExpression savedDexp = datasetExpressionRepository.save(dexp); // save the dataset expression without dataset files
-            datasetFileRepository.copyDatasetFiles(dexp.getId(), savedDexp.getId()); // copy dataset files in a super fast single query
         }
     }
 
