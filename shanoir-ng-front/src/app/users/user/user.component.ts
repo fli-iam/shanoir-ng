@@ -165,6 +165,7 @@ export class UserComponent extends EntityComponent<User> {
             'role': [this.user.role, [Validators.required]],
             'canAccessToDicomAssociation': new UntypedFormControl('false'),
             'twoFactorEnabled': new UntypedFormControl(this.user.twoFactorEnabled),
+            'keycloakEnabled': new UntypedFormControl(this.user.keycloakEnabled),
             'accountRequestInfo': [this.user.accountRequestInfo]
         });
         if (this.user.extensionRequestDemand) {

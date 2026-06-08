@@ -25,6 +25,7 @@ export class User extends Entity {
     @Field() accountRequestInfo: AccountRequestInfo;
     @Field() canAccessToDicomAssociation: boolean;
     @Field() twoFactorEnabled: boolean;
+    @Field() keycloakEnabled: boolean;
     @Field() creationDate: Date;
     @Field() email: string;
     @Field() expirationDate: Date;
