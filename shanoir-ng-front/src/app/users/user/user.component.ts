@@ -33,6 +33,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { Study } from "../../studies/shared/study.model";
 import { KEYCLOAK_BASE_URL } from "../../utils/app.utils";
+import { TwoFactorStatus } from '../shared/two-factor-status.model';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
@@ -53,6 +54,9 @@ export class UserComponent extends EntityComponent<User> {
     public studyToDelete = [];
     protected showTreeByDefault: boolean = false;
     public dateDisplay = dateDisplay;
+    public twoFactorStatus: TwoFactorStatus;
+    public twoFactorEnabled: boolean = false;
+    public twoFactorLoading: boolean = false;
 
     constructor(
             private route: ActivatedRoute,
@@ -119,7 +123,54 @@ export class UserComponent extends EntityComponent<User> {
         const rolesPromise = this.getRoles().then(() => {
             user.role = this.getRoleById(user.role.id);
         });
-        return Promise.all([studyUsersPromise, rolesPromise]).then();
+        const promises: Promise<void>[] = [studyUsersPromise, rolesPromise];
+        if (this.isUserAdmin() && user.id) {
+            promises.push(this.loadTwoFactorStatus(user.id));
+        }
+        return Promise.all(promises).then();
+    }
+
+    private loadTwoFactorStatus(userId: number): Promise<void> {
+        return this.userService.getTwoFactorAuth(userId).then(status => {
+            this.setTwoFactorState(status);
+        });
+    }
+
+    private setTwoFactorState(status: TwoFactorStatus) {
+        this.twoFactorStatus = status;
+        this.twoFactorEnabled = status != 'OFF';
+    }
+
+    get twoFactorLabel(): string {
+        switch (this.twoFactorStatus) {
+            case 'PENDING': return 'Enabled — awaiting user setup';
+            case 'ACTIVE': return 'Active';
+            default: return 'Disabled';
+        }
+    }
+
+    onTwoFactorToggle(enabled: boolean): void {
+        const previous: boolean = !enabled;
+        const title: string = enabled ? 'Enable two-factor authentication' : 'Disable two-factor authentication';
+        const message: string = enabled
+            ? 'The user will be required to set up an authenticator app at next login. Continue?'
+            : 'This will remove the user\'s two-factor authentication. Continue?';
+        this.confirmDialogService.confirm(title, message).then(confirmed => {
+            if (!confirmed) {
+                this.twoFactorEnabled = previous;
+                return;
+            }
+            this.twoFactorLoading = true;
+            this.userService.setTwoFactorAuth(this.user.id, enabled).then(status => {
+                this.setTwoFactorState(status);
+                this.twoFactorLoading = false;
+                this.consoleService.log('info', 'Two-factor authentication ' + (enabled ? 'enabled' : 'disabled') + ' for user "' + this.user.username + '"');
+            }).catch(reason => {
+                this.twoFactorEnabled = previous;
+                this.twoFactorLoading = false;
+                throw reason;
+            });
+        });
     }
 
     getRoles(): Promise<void> {
