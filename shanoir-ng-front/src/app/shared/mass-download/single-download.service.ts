@@ -18,7 +18,6 @@ import { Observable } from 'rxjs';
 
 import { Task, TaskState } from 'src/app/async-tasks/task.model';
 
-import * as AppUtils from '../../utils/app.utils';
 import { NotificationsService } from '../notifications/notifications.service';
 import { SessionService } from '../services/session.service';
 

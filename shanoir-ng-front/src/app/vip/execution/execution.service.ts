@@ -47,7 +47,7 @@ export class ExecutionService {
     * @param study_id the study id we want the automatic executions from
     */
     public getAutomaticExecutions(study_id: number): Promise<ExecutionTemplate[]> {
-        return this.httpClient.get<ExecutionTemplate[]>(`${this.executionUrl}/automatic/` + study_id).toPromise();
+        return firstValueFrom(this.httpClient.get<ExecutionTemplate[]>(`${this.executionUrl}/automatic/` + study_id));
     }
 
   /**

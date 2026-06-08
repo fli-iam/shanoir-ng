@@ -12,12 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { HttpResponse } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
-import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, HttpResponse } from '@angular/common/http';
-import { Observable, firstValueFrom } from 'rxjs';
-import { last, map, mergeMap, shareReplay } from 'rxjs/operators';
 
-import { TaskState, TaskStatus } from '../async-tasks/task.model';
 
 // Base urls
 const url = window.location;
@@ -165,8 +162,6 @@ export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_M
 
 // Custom sentence to introduce the Shanoir instance on welcome page
 export const FRONTEND_WELCOME_INTRODUCTION: string = "This is an instance of the Shanoir database.";
-
-declare let JSZip: any;
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;

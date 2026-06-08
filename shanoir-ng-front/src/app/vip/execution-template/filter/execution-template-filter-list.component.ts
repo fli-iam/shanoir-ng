@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -32,7 +32,7 @@ import { ExecutionTemplateFilterService } from "./execution-template-filter.serv
     ]
 
 })
-export class ExecutionTemplateFilterListComponent extends BrowserPaginEntityListComponent<ExecutionTemplateFilter> {
+export class ExecutionTemplateFilterListComponent extends BrowserPaginEntityListComponent<ExecutionTemplateFilter> implements OnInit {
 
     @Input() templateId: number
     @Input() templateName: string

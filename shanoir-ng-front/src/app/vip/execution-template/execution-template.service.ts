@@ -12,24 +12,25 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Injectable} from "@angular/core"
-import {HttpClient} from "@angular/common/http"
+import { Injectable } from "@angular/core"
+import { HttpClient } from "@angular/common/http"
 import {
     AbstractControl,
     UntypedFormControl, ValidationErrors,
     ValidatorFn,
     Validators
 } from "@angular/forms"
+import { firstValueFrom } from "rxjs"
 
 import * as AppUtils from "../../utils/app.utils"
-import {ExecutionTemplate} from "../models/execution-template"
-import {EntityService} from "../../shared/components/entity/entity.abstract.service"
-import {StudyService} from "../../studies/shared/study.service"
-import {ExecutionTemplateParameter} from "../models/execution-template-parameter"
-import {Pipeline} from "../models/pipeline"
-import {PipelineService} from "../pipelines/pipeline/pipeline.service"
+import { ExecutionTemplate } from "../models/execution-template"
+import { EntityService } from "../../shared/components/entity/entity.abstract.service"
+import { StudyService } from "../../studies/shared/study.service"
+import { ExecutionTemplateParameter } from "../models/execution-template-parameter"
+import { Pipeline } from "../models/pipeline"
+import { PipelineService } from "../pipelines/pipeline/pipeline.service"
 
-import {ExecutionTemplateComponent} from "./execution-template.component"
+import { ExecutionTemplateComponent } from "./execution-template.component"
 
 @Injectable()
 export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
@@ -45,7 +46,7 @@ export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
     getEntityInstance(entity: ExecutionTemplate | undefined): ExecutionTemplate {return entity}
 
     getExecutionTemplatesByStudy(study_id: number): Promise<ExecutionTemplate[]> {
-        return this.httpClient.get<ExecutionTemplate[]>(this.API_URL + "/byStudy/" + study_id).toPromise()
+        return firstValueFrom(this.httpClient.get<ExecutionTemplate[]>(this.API_URL + "/byStudy/" + study_id));
     }
 
     getStudyName(template: ExecutionTemplateComponent) {
@@ -53,8 +54,7 @@ export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
     }
 
     get(id: number): Promise<ExecutionTemplate> {
-        return this.http.get<any>(this.API_URL + '/' + id)
-            .toPromise()
+        return firstValueFrom(this.httpClient.get<any>(this.API_URL + '/' + id))
             .then(eheh => this.mapEntity(eheh))
     }
 
