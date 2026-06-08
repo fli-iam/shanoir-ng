@@ -148,7 +148,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </ng-container>
                 </span>
             </li>
-            <li *ngIf="mode != 'create' && isUserAdmin()">
+            <li *ngIf="isUserAdmin()">
                 <label i18n="Edit user|Two-factor authentication label@@editUserTwoFactor">Two-factor authentication</label>
                 <span class="right-col" [ngSwitch]="mode">
                     <ng-container *ngIf="mode == 'view'">

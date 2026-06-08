@@ -282,6 +282,18 @@ public class UserServiceImpl implements UserService {
         final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
         savedUser.setKeycloakId(keycloakUserId); // Save keycloak id
         userRepository.save(savedUser);
+
+        // Two-factor authentication is managed in Keycloak. create() is admin-only (see @PreAuthorize),
+        // so honour the flag at creation time too. A new user has no OTP credential yet, so only
+        // enabling is meaningful.
+        if (Boolean.TRUE.equals(user.getTwoFactorEnabled())) {
+            try {
+                keycloakClient.enableTotp(keycloakUserId);
+            } catch (SecurityException e) {
+                LOG.error("Could not enable two-factor authentication for newly created user {}", savedUser.getId(), e);
+            }
+        }
+
         emailService.notifyCreateUser(savedUser, newPassword); // Send email to user
         return savedUser;
     }
