@@ -244,6 +244,43 @@ public class KeycloakClient {
         }
     }
 
+    /**
+     * Enable or disable a user in Keycloak (the account {@code enabled} flag).
+     *
+     * @param keycloakId
+     *            the keycloak id of the user.
+     * @param enabled
+     *            {@code true} to activate the user, {@code false} to deactivate it.
+     * @throws SecurityException
+     */
+    public void setUserEnabled(final String keycloakId, final boolean enabled) throws SecurityException {
+        try {
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+            final UserRepresentation userRepresentation = userResource.toRepresentation();
+            userRepresentation.setEnabled(enabled);
+            userResource.update(userRepresentation);
+        } catch (Exception e) {
+            throw new SecurityException("Could not update the enabled status for user with keycloak id " + keycloakId, e);
+        }
+    }
+
+    /**
+     * Tell whether a user is enabled (activated) in Keycloak.
+     *
+     * @param keycloakId
+     *            the keycloak id of the user.
+     * @return {@code true} if the user is enabled in Keycloak, {@code false} otherwise.
+     * @throws SecurityException
+     */
+    public boolean isUserEnabled(final String keycloakId) throws SecurityException {
+        try {
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+            return Boolean.TRUE.equals(userResource.toRepresentation().isEnabled());
+        } catch (Exception e) {
+            throw new SecurityException("Could not read the enabled status for user with keycloak id " + keycloakId, e);
+        }
+    }
+
 
     /**
      * Delete a user.
