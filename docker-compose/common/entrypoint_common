@@ -126,10 +126,10 @@ require()
 }
 
 # set default values for the keycloak urls
-: ${SHANOIR_KEYCLOAK_URL:=$SHANOIR_URL_SCHEME://$SHANOIR_URL_HOST/auth}
-: ${SHANOIR_KEYCLOAK_INTERNAL_URL:=${SHANOIR_KEYCLOAK_URL}}
-export SHANOIR_KEYCLOAK_URL
-export SHANOIR_KEYCLOAK_INTERNAL_URL
+keycloak_url="$SHANOIR_URL_SCHEME://$SHANOIR_URL_HOST/auth"
+
+env_setdefault SHANOIR_KEYCLOAK_URL "$keycloak_url"
+env_setdefault SHANOIR_KEYCLOAK_INTERNAL_URL "$keycloak_url"
 
 
 # For each listed environment variable:
