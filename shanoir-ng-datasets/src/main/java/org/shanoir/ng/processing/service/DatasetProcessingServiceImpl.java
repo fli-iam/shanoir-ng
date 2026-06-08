@@ -206,7 +206,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
             Hibernate.initialize(processing.getInputDatasets());
             return processing.getInputDatasets();
         }
-        processing = repository.findWithInputDatasets(processing.getId());
+        processing = repository.findWithSpecificRelations(processing.getId(), List.of("inputDatasets"));
         return processing.getInputDatasets();
     }
 
@@ -216,7 +216,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
             Hibernate.initialize(processing.getOutputDatasets());
             return processing.getOutputDatasets();
         }
-        processing = repository.findWithOutputDatasets(processing.getId());
+        processing = repository.findWithSpecificRelations(processing.getId(), List.of("outputDatasets"));
         return processing.getOutputDatasets();
     }
 }

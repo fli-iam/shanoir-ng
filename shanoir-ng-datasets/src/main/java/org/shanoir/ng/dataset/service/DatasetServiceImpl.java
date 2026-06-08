@@ -615,7 +615,7 @@ public class DatasetServiceImpl implements DatasetService {
     public Long getCenterId(Dataset dataset) {
         DatasetAcquisition acq = dataset.getDatasetAcquisition();
         if (acq == null || acq.getExamination() == null) {
-            DatasetProcessing dp = processingRepository.findById(dataset.getDatasetProcessing().getId()).orElse(null);
+            DatasetProcessing dp = processingRepository.findWithSpecificSubRelations(dataset.getDatasetProcessing().getId(), List.of("inputDataset.datasetAcquisition"));
             if (dp != null && dp.getInputDatasets() != null) {
                 return getCenterId(dp.getInputDatasets().get(0));
             }

@@ -26,7 +26,7 @@ import org.springframework.data.repository.CrudRepository;
  *
  * @author msimon
  */
-public interface DatasetProcessingRepository extends CrudRepository<DatasetProcessing, Long> {
+public interface DatasetProcessingRepository extends CrudRepository<DatasetProcessing, Long>, DatasetProcessingRepositoryCustom {
 
     Optional<DatasetProcessing> findByComment(String comment);
 
@@ -40,10 +40,4 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id "
             + "WHERE acquisition.examination_id IN (:examinationIds)", nativeQuery = true)
     List<Long> findAllIdsByExaminationIds(List<Long> examinationIds);
-
-    @Query("select dp from DatasetProcessing dp left join fetch dp.inputDatasets where dp.id = :id")
-    DatasetProcessing findWithInputDatasets(Long id);
-
-    @Query("select dp from DatasetProcessing dp left join fetch dp.outputDatasets where dp.id = :id")
-    DatasetProcessing findWithOutputDatasets(Long id);
 }
