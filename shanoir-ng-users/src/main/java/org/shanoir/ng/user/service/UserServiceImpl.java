@@ -36,7 +36,6 @@ import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.user.model.TwoFactorStatus;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.utils.KeycloakClient;
@@ -200,29 +199,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public TwoFactorStatus getTwoFactorAuth(final Long userId) throws EntityNotFoundException, SecurityException {
-        final User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            throw new EntityNotFoundException(User.class, userId);
-        }
-        return keycloakClient.getTotpStatus(user.getKeycloakId());
-    }
-
-    @Override
-    public TwoFactorStatus setTwoFactorAuth(final Long userId, final boolean enabled) throws EntityNotFoundException, SecurityException {
-        final User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            throw new EntityNotFoundException(User.class, userId);
-        }
-        if (enabled) {
-            keycloakClient.enableTotp(user.getKeycloakId());
-        } else {
-            keycloakClient.disableTotp(user.getKeycloakId());
-        }
-        return keycloakClient.getTotpStatus(user.getKeycloakId());
-    }
-
-    @Override
     public List<User> findAccountRequests() {
         return Utils.toList(userRepository.findByAccountRequestDemandTrueOrExtensionRequestDemandTrue());
     }
@@ -239,7 +215,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findById(final Long id) {
-        return userRepository.findById(id).orElse(null);
+        final User user = userRepository.findById(id).orElse(null);
+        // Two-factor state lives in Keycloak; expose it to admins so the form can display it.
+        if (user != null && KeycloakUtil.isAdmin()) {
+            try {
+                user.setTwoFactorEnabled(keycloakClient.isTotpEnabled(user.getKeycloakId()));
+            } catch (SecurityException e) {
+                LOG.error("Could not read two-factor authentication status for user {}", id, e);
+            }
+        }
+        return user;
     }
 
     @Override
@@ -362,6 +347,19 @@ public class UserServiceImpl implements UserService {
         }
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.UPDATE_USER_EVENT, user.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS);
         eventService.publishEvent(event);
+
+        // Two-factor authentication is managed in Keycloak and only by admins.
+        if (KeycloakUtil.isAdmin() && user.getTwoFactorEnabled() != null) {
+            try {
+                if (user.getTwoFactorEnabled()) {
+                    keycloakClient.enableTotp(userDb.getKeycloakId());
+                } else {
+                    keycloakClient.disableTotp(userDb.getKeycloakId());
+                }
+            } catch (SecurityException e) {
+                LOG.error("Could not update two-factor authentication status for user {}", user.getId(), e);
+            }
+        }
 
         return updateUserOnAllSystems(userDb, user);
     }

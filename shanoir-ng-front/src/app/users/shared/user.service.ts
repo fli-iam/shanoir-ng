@@ -21,7 +21,6 @@ import * as AppUtils from '../../utils/app.utils';
 import { ExtensionRequestInfo } from '../extension-request/extension-request-info.model';
 import { AccessRequest } from '../../users/access-request/access-request.model'
 
-import { TwoFactorStatus } from './two-factor-status.model';
 import { User } from './user.model';
 
 
@@ -109,14 +108,4 @@ export class UserService extends EntityService<User> implements OnDestroy {
             });
     }
 
-    getTwoFactorAuth(id: number): Promise<TwoFactorStatus> {
-        return this.http.get<TwoFactorStatus>(this.API_URL + '/' + id + '/2fa')
-            .toPromise();
-    }
-
-    setTwoFactorAuth(id: number, enabled: boolean): Promise<TwoFactorStatus> {
-        const params = new HttpParams().set('enabled', enabled);
-        return this.http.put<TwoFactorStatus>(this.API_URL + '/' + id + '/2fa', null, { params: params })
-            .toPromise();
-    }
 }

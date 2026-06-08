@@ -30,7 +30,6 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.user.model.TwoFactorStatus;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.utils.KeycloakShanoirUtil;
 import org.shanoir.ng.utils.PasswordUtils;
@@ -222,28 +221,24 @@ public class KeycloakClient {
     }
 
     /**
-     * Get the current Keycloak two-factor (TOTP) authentication status of a user.
+     * Tell whether Keycloak two-factor (TOTP) authentication is enabled for a user.
      *
      * @param keycloakId
      *            the keycloak id of the user.
-     * @return {@link TwoFactorStatus#ACTIVE} if an OTP credential exists,
-     *         {@link TwoFactorStatus#PENDING} if the {@code CONFIGURE_TOTP} required action is set,
-     *         {@link TwoFactorStatus#OFF} otherwise.
+     * @return {@code true} if an OTP credential exists or the {@code CONFIGURE_TOTP} required
+     *         action is set, {@code false} otherwise.
      * @throws SecurityException
      */
-    public TwoFactorStatus getTotpStatus(final String keycloakId) throws SecurityException {
+    public boolean isTotpEnabled(final String keycloakId) throws SecurityException {
         try {
             final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
             for (CredentialRepresentation credential : userResource.credentials()) {
                 if (OTP_CREDENTIAL_TYPE.equals(credential.getType())) {
-                    return TwoFactorStatus.ACTIVE;
+                    return true;
                 }
             }
             final List<String> requiredActions = userResource.toRepresentation().getRequiredActions();
-            if (requiredActions != null && requiredActions.contains(CONFIGURE_TOTP_ACTION)) {
-                return TwoFactorStatus.PENDING;
-            }
-            return TwoFactorStatus.OFF;
+            return requiredActions != null && requiredActions.contains(CONFIGURE_TOTP_ACTION);
         } catch (Exception e) {
             throw new SecurityException("Could not read two-factor authentication status for user with keycloak id " + keycloakId, e);
         }
