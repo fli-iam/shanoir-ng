@@ -35,9 +35,9 @@ public class ShanoirRepositoryImpl<T> {
         return em.find(entityClass, id, hints);
     }
 
-    public T findWithSpecificRelationIds(Long id, List<String> relationNames) {
+    public T findWithSpecificSubRelations(Long id, List<String> relationNames) {
         EntityGraph<T> graph = em.createEntityGraph(entityClass);
-        addRelationIdsToGraph(graph, relationNames);
+        addSubRelationsToGraph(graph, relationNames);
 
         Map<String, Object> hints = new HashMap<>();
         hints.put("jakarta.persistence.fetchgraph", graph);
@@ -58,9 +58,9 @@ public class ShanoirRepositoryImpl<T> {
                 .getResultList();
     }
 
-    public List<T> findListWithSpecificRelationIds(List<Long> ids, List<String> relationNames) {
+    public List<T> findListWithSpecificSubRelation(List<Long> ids, List<String> relationNames) {
         EntityGraph<DatasetExpression> graph = em.createEntityGraph(DatasetExpression.class);
-        addRelationIdsToGraph(graph, relationNames);
+        addSubRelationsToGraph(graph, relationNames);
 
         return em.createQuery(
                         "select d from " + entityClass + " d where d.id in :ids",
@@ -77,10 +77,15 @@ public class ShanoirRepositoryImpl<T> {
         }
     }
 
-    protected void addRelationIdsToGraph(EntityGraph graph, List<String> relationNames) {
+    protected void addSubRelationsToGraph(EntityGraph graph, List<String> relationNames) {
         for (String relationName : relationNames) {
-            Subgraph<?> subGraph = graph.addSubgraph(relationName);
-            subGraph.addAttributeNodes("id");
+            if (relationName.contains(".")) {
+                Subgraph<?> subGraph = graph.addSubgraph(relationName.substring(0, relationName.indexOf(".")));
+                subGraph.addAttributeNodes(relationName.substring(relationName.indexOf(".") + 1));
+            } else {
+                Subgraph<?> subGraph = graph.addSubgraph(relationName);
+                subGraph.addAttributeNodes("id");
+            }
         }
     }
 }

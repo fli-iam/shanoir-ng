@@ -12,16 +12,16 @@ public class DatasetExpressionRepositoryImpl extends ShanoirRepositoryImpl<Datas
         return super.findWithSpecificRelations(id, relationNames);
     }
 
-    public DatasetExpression findWithSpecificRelationIds(Long id, List<String> relationNames) {
-        return super.findWithSpecificRelationIds(id, relationNames);
+    public DatasetExpression findWithSpecificSubRelations(Long id, List<String> relationNames) {
+        return super.findWithSpecificSubRelations(id, relationNames);
     }
 
     public List<DatasetExpression> findListWithSpecificRelations(List<Long> ids, List<String> relationNames) {
         return super.findListWithSpecificRelations(ids, relationNames);
     }
 
-    public List<DatasetExpression> findListWithSpecificRelationIds(List<Long> ids, List<String> relationNames) {
-        return super.findListWithSpecificRelationIds(ids, relationNames);
+    public List<DatasetExpression> findListWithSpecificSubRelations(List<Long> ids, List<String> relationNames) {
+        return super.findListWithSpecificSubRelation(ids, relationNames);
     }
 
 }
