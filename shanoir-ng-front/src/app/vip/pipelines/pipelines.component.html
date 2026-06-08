@@ -31,7 +31,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div class="row">
             <div class="pipeline-list">
                 <div class="pipelines">
-                    <app-pipeline *ngFor="let pipeline of pipelines" [pipeline]="pipeline" (click)="selectPipeline(pipeline)"></app-pipeline>
+                    @for (pipeline of pipelines; track pipelines) {
+                        <app-pipeline [pipeline]="pipeline" (click)="selectPipeline(pipeline)"></app-pipeline>
+                    }
                 </div>
             </div>
         </div>
