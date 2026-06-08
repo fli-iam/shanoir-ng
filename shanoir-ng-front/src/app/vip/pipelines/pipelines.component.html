@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <h2>Processing</h2>
-@if (!isSelectedDatasets) {
+@if (!isSelectedDatasets()) {
     <div>
         <p>
             <strong class="warning">
@@ -24,17 +24,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <p>You should select datasets first</p>
         <button type="button" (click)="navigateToSolr()">Select Datasets</button>
     </div>
-}
-@if (isSelectedDatasets) {
+} @else {
     <div>
         <p>Please choose one of the pipelines available :</p>
         <hr />
         <div class="row">
             <div class="pipeline-list">
                 <div class="pipelines">
-                    @for (pipeline of pipelines; track pipeline) {
-                        <app-pipeline [pipeline]="pipeline" (click)="selectPipeline(pipeline)"></app-pipeline>
-                    }
+                    <app-pipeline *ngFor="let pipeline of pipelines" [pipeline]="pipeline" (click)="selectPipeline(pipeline)"></app-pipeline>
                 </div>
             </div>
         </div>
@@ -50,15 +47,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <hr />
                     <h3>Parameters :</h3>
                     <ul>
-                        @for (parameter of selectedPipeline.parameters; track parameter) {
-                            <li class="parameter">
-                                <p>
-                                    <strong>{{ parameter.name }}</strong>
-                                    : {{ parameter.description }}
-                                </p>
-                                <p>{{ parameter.isOptional ? 'Optional' : 'Mandatory' }}</p>
-                            </li>
-                        }
+                        <li *ngFor="let parameter of selectedPipeline.parameters" class="parameter">
+                            <p>
+                                <strong>{{ parameter.name }}</strong>
+                                : {{ parameter.description }}
+                            </p>
+                            <p>{{ parameter.isOptional ? 'Optional' : 'Mandatory' }}</p>
+                        </li>
                     </ul>
                     <hr />
                     <button class="execute" type="button" (click)="choosePipeLine()">Run this pipeline</button>
@@ -66,8 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             } @else {
                 @if (descriptionLoading) {
                     <p>Loading...</p>
-                }
-                @if (!descriptionLoading) {
+                } @else {
                     <div>
                         <h3>Pipeline description :</h3>
                         <hr />
