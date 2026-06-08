@@ -47,13 +47,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <hr />
                     <h3>Parameters :</h3>
                     <ul>
-                        <li *ngFor="let parameter of selectedPipeline.parameters" class="parameter">
-                            <p>
-                                <strong>{{ parameter.name }}</strong>
-                                : {{ parameter.description }}
-                            </p>
-                            <p>{{ parameter.isOptional ? 'Optional' : 'Mandatory' }}</p>
-                        </li>
+                        @for (parameter of selectedPipeline.parameters; track parameter) {
+                            <li class="parameter">
+                                <p>
+                                    <strong>{{ parameter.name }}</strong>
+                                    : {{ parameter.description }}
+                                </p>
+                                <p>{{ parameter.isOptional ? 'Optional' : 'Mandatory' }}</p>
+                            </li>
+                        }
                     </ul>
                     <hr />
                     <button class="execute" type="button" (click)="choosePipeLine()">Run this pipeline</button>
