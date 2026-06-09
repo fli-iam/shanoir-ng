@@ -127,6 +127,36 @@ export class KeycloakService {
         return this.tokenPromise;
     }
 
+    /**
+     * Obtain a Keycloak OFFLINE refresh token for the current user, without disrupting the
+     * active session.
+     *
+     * Unlike {@link getRefreshToken}, which returns the session-bound refresh token (invalid
+     * once the user logs out), this requests a token with the 'offline_access' scope. Offline
+     * tokens survive logout and SSO session expiry, so they can be persisted to run executions
+     * on the user's behalf long after they have left (see execution templates / auto-exec).
+     *
+     * A throwaway adapter instance performs a silent check-sso (hidden iframe, no redirect)
+     * reusing the existing SSO session; only its offline refresh token is returned.
+     */
+    getOfflineToken(): Promise<string> {
+        const offlineKeycloak: any = new Keycloak({
+            url: AppUtils.KEYCLOAK_BASE_URL,
+            realm: 'shanoir-ng',
+            clientId: KeycloakService.clientId,
+        });
+        return offlineKeycloak.init({
+            onLoad: 'check-sso',
+            silentCheckSsoRedirectUri: AppUtils.SILENT_CHECK_SSO_URL,
+            scope: 'offline_access',
+        }).then((authenticated: boolean) => {
+            if (!authenticated || !offlineKeycloak.refreshToken) {
+                throw new Error('Could not obtain an offline token for the current user.');
+            }
+            return offlineKeycloak.refreshToken as string;
+        });
+    }
+
 
     isUserAdmin(): boolean {
         return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_ADMIN");
