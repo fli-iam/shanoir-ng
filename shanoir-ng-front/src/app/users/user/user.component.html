@@ -294,6 +294,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             }
                         </span>
                     </li>
+                    @if (isUserAdmin()) {
+                        <label i18n="Edit user|Two-factor authentication label@@editUserTwoFactor">Two-factor authentication</label>
+                        <span class="right-col">
+                            @if (mode == 'view') {
+                                @if (user.twoFactorEnabled) {
+                                    <span class="bool-true"><i class="fas fa-check"></i></span>
+                                } @else {
+                                    <span class="bool-false"><i class="fas fa-times"></i></span>
+                                }
+                            } @else {
+                                <checkbox formControlName="twoFactorEnabled"></checkbox>
+                            }
+                        </span>
+                    }
                 </ol>
             </fieldset>
             @if (isUserAdmin()) {

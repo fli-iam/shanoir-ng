@@ -53,6 +53,16 @@ public class KeycloakClient {
      */
     private static final Logger LOG = LoggerFactory.getLogger(KeycloakClient.class);
 
+    /**
+     * Keycloak required action that forces a user to register a TOTP authenticator at next login.
+     */
+    private static final String CONFIGURE_TOTP_ACTION = "CONFIGURE_TOTP";
+
+    /**
+     * Keycloak credential type stored once a user has registered an authenticator.
+     */
+    private static final String OTP_CREDENTIAL_TYPE = "otp";
+
     @Value("${kc.admin.client.server.url}")
     private String kcAdminClientServerUrl;
 
@@ -153,6 +163,85 @@ public class KeycloakClient {
      */
     public String createUserWithPassword(final User user) throws SecurityException {
         return createUserWithPassword(user, user.getPassword());
+    }
+
+    /**
+     * Enable Keycloak two-factor (TOTP) authentication for a user by adding the
+     * {@code CONFIGURE_TOTP} required action. The user is then forced to register an
+     * authenticator at next login.
+     *
+     * @param keycloakId
+     *            the keycloak id of the user.
+     * @throws SecurityException
+     */
+    public void enableTotp(final String keycloakId) throws SecurityException {
+        try {
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+            final UserRepresentation userRepresentation = userResource.toRepresentation();
+            final List<String> requiredActions = userRepresentation.getRequiredActions() == null
+                    ? new ArrayList<>() : new ArrayList<>(userRepresentation.getRequiredActions());
+            if (!requiredActions.contains(CONFIGURE_TOTP_ACTION)) {
+                requiredActions.add(CONFIGURE_TOTP_ACTION);
+                userRepresentation.setRequiredActions(requiredActions);
+                userResource.update(userRepresentation);
+            }
+        } catch (Exception e) {
+            throw new SecurityException("Could not enable two-factor authentication for user with keycloak id " + keycloakId, e);
+        }
+    }
+
+    /**
+     * Disable Keycloak two-factor (TOTP) authentication for a user. Removes the
+     * {@code CONFIGURE_TOTP} required action (if pending) and deletes any existing OTP
+     * credential so the user is no longer prompted for a second factor.
+     *
+     * @param keycloakId
+     *            the keycloak id of the user.
+     * @throws SecurityException
+     */
+    public void disableTotp(final String keycloakId) throws SecurityException {
+        try {
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+            final UserRepresentation userRepresentation = userResource.toRepresentation();
+            final List<String> requiredActions = userRepresentation.getRequiredActions();
+            if (requiredActions != null && requiredActions.contains(CONFIGURE_TOTP_ACTION)) {
+                final List<String> updatedActions = new ArrayList<>(requiredActions);
+                updatedActions.remove(CONFIGURE_TOTP_ACTION);
+                userRepresentation.setRequiredActions(updatedActions);
+                userResource.update(userRepresentation);
+            }
+            for (CredentialRepresentation credential : userResource.credentials()) {
+                if (OTP_CREDENTIAL_TYPE.equals(credential.getType())) {
+                    userResource.removeCredential(credential.getId());
+                }
+            }
+        } catch (Exception e) {
+            throw new SecurityException("Could not disable two-factor authentication for user with keycloak id " + keycloakId, e);
+        }
+    }
+
+    /**
+     * Tell whether Keycloak two-factor (TOTP) authentication is enabled for a user.
+     *
+     * @param keycloakId
+     *            the keycloak id of the user.
+     * @return {@code true} if an OTP credential exists or the {@code CONFIGURE_TOTP} required
+     *         action is set, {@code false} otherwise.
+     * @throws SecurityException
+     */
+    public boolean isTotpEnabled(final String keycloakId) throws SecurityException {
+        try {
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+            for (CredentialRepresentation credential : userResource.credentials()) {
+                if (OTP_CREDENTIAL_TYPE.equals(credential.getType())) {
+                    return true;
+                }
+            }
+            final List<String> requiredActions = userResource.toRepresentation().getRequiredActions();
+            return requiredActions != null && requiredActions.contains(CONFIGURE_TOTP_ACTION);
+        } catch (Exception e) {
+            throw new SecurityException("Could not read two-factor authentication status for user with keycloak id " + keycloakId, e);
+        }
     }
 
 

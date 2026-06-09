@@ -164,6 +164,7 @@ export class UserComponent extends EntityComponent<User> {
             'extensionMotivation': [this.user.extensionRequestInfo ? this.user.extensionRequestInfo.extensionMotivation : ''],
             'role': [this.user.role, [Validators.required]],
             'canAccessToDicomAssociation': new UntypedFormControl('false'),
+            'twoFactorEnabled': new UntypedFormControl(this.user.twoFactorEnabled),
             'accountRequestInfo': [this.user.accountRequestInfo]
         });
         if (this.user.extensionRequestDemand) {
