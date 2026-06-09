@@ -33,6 +33,7 @@ import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,6 +74,14 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
 
     @Autowired
     private ObjectCodec objectCodec;
+
+    /**
+     * Client the auto-exec offline/refresh token was issued to. Must match the client used by
+     * {@link org.shanoir.ng.shared.security.KeycloakServiceAccountUtils#refreshUserToken} and the one
+     * VIP uses for its own background token refresh, otherwise Keycloak rejects the refresh with invalid_grant.
+     */
+    @Value("${user-token.client.id:shanoir-ng-front}")
+    private String userTokenClientId;
 
     //A call is corresponding to all or a part of an examination acquisitions. If various examination imported, then multiple calls will be done
     public void applyExecution(Map<Long, List<Long>> createdAcquisitionsPerTemplateId) {
@@ -211,7 +220,7 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
 
         ExecutionCandidateDTO candidate = new ExecutionCandidateDTO();
         candidate.setInputParameters(new HashMap<>());
-        candidate.setClient("shanoir-uploader");
+        candidate.setClient(userTokenClientId);
         candidate.setName(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "execution_name")).findFirst().get().getValue());
         candidate.setName(candidate.getName() + "_" + (Objects.isNull(examId) ? "" : examId + "_") + LocalDate.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE));
         String converterValue = template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "converter")).findFirst().map(ExecutionTemplateParameter::getValue).orElse(null);
