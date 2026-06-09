@@ -128,10 +128,12 @@ public class PlannedExecutionManager {
                     //Execution in executor submission has to be final
                     ExecutionInQueue execution = next;
 
-                    // Submit execution
+                    // Submit execution.
+                    // NB: threadExecution manages its own (short) transaction internally; the VIP status
+                    // polling must run OUTSIDE any transaction so the processing resources are committed and
+                    // visible to VIP's /carmin-data/path download callback while the execution is RUNNING.
                     executor.submit(() -> {
-                        transactionRunner.runInTransaction(em ->
-                                threadExecution(execution.getTemplate(), execution.getObjectId(), execution.getType(), execution.getPlannedExecutionToRemove()));
+                        threadExecution(execution.getTemplate(), execution.getObjectId(), execution.getType(), execution.getPlannedExecutionToRemove());
                         involvedDatasetIds.removeAll(candidateData);
                     });
                 } else {
@@ -182,38 +184,59 @@ public class PlannedExecutionManager {
             return;
         }
 
+        // Create the monitoring, processing resources and submit to VIP in a SHORT transaction that commits
+        // before VIP starts downloading. The processing resources (resourceId -> datasets mapping) must be
+        // committed and visible to VIP's /carmin-data/path callback, otherwise the download fails with HTTP 400.
+        final String[] vipIdentifierHolder = new String[1];
         try {
-            ExecutionCandidateDTO candidate = plannedExecutionServiceImpl.prepareExecutionCandidate(template, executionLevel, objectId);
-            if (Objects.nonNull(candidate)) {
-                candidate.setRefreshToken(offlineToken);
-                IdName monitoringIdName = executionService.createExecutions(List.of(candidate));
-                String vipIdentifier = executionMonitoringService.getVipIdentifierFromMonitoringId(monitoringIdName.getId());
-                for (Long acquisitionId : plannedExecutionToRemoveWithAcquisitionId) {
-                    plannedExecutionRepository.deleteByAcquisitionIdAndTemplateId(acquisitionId, template.getId());
-                }
-
-                ExecutionStatus status = ExecutionStatus.RUNNING;
-
-                while (Objects.equals(status, ExecutionStatus.RUNNING)) {
-                    TimeUnit.SECONDS.sleep(statusSleepSeconds);
-
-                    for (int attempt = 1; attempt <= maxStatusRetries; attempt++) {
-                        try {
-                            status = executionService.getExecutionStatusFromVipIdentifier(vipIdentifier);
-                            break;
-                        } catch (Exception e) {
-                            if (attempt == maxStatusRetries) {
-                                break;
-                            }
-                            TimeUnit.SECONDS.sleep(1);
+            transactionRunner.runInTransaction(em -> {
+                try {
+                    ExecutionCandidateDTO candidate = plannedExecutionServiceImpl.prepareExecutionCandidate(template, executionLevel, objectId);
+                    if (Objects.nonNull(candidate)) {
+                        candidate.setRefreshToken(offlineToken);
+                        IdName monitoringIdName = executionService.createExecutions(List.of(candidate));
+                        vipIdentifierHolder[0] = executionMonitoringService.getVipIdentifierFromMonitoringId(monitoringIdName.getId());
+                        for (Long acquisitionId : plannedExecutionToRemoveWithAcquisitionId) {
+                            plannedExecutionRepository.deleteByAcquisitionIdAndTemplateId(acquisitionId, template.getId());
                         }
+                    }
+                } catch (RestServiceException | SecurityException | EntityNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (RuntimeException e) {
+            Throwable cause = e.getCause() != null ? e.getCause() : e;
+            LOG.error("Execution from template {} for {} {} failed.", template.getId(), executionLevel, objectId, cause);
+            return;
+        }
+
+        // Transaction committed: processing resources are now visible to VIP. Poll status OUTSIDE the transaction
+        // so the dataset lock (involvedDatasetIds) is held until the execution finishes, serializing dependent runs.
+        String vipIdentifier = vipIdentifierHolder[0];
+        if (vipIdentifier == null) {
+            return;
+        }
+
+        try {
+            ExecutionStatus status = ExecutionStatus.RUNNING;
+            while (Objects.equals(status, ExecutionStatus.RUNNING)) {
+                TimeUnit.SECONDS.sleep(statusSleepSeconds);
+
+                for (int attempt = 1; attempt <= maxStatusRetries; attempt++) {
+                    try {
+                        status = executionService.getExecutionStatusFromVipIdentifier(vipIdentifier);
+                        break;
+                    } catch (Exception e) {
+                        if (attempt == maxStatusRetries) {
+                            break;
+                        }
+                        TimeUnit.SECONDS.sleep(1);
                     }
                 }
             }
-        } catch (RestServiceException | SecurityException | EntityNotFoundException | InterruptedException e) {
-            LOG.error("Execution from template {} for {} {} failed.", template.getId(), executionLevel, objectId, e);
-        } catch (Exception e) {
-            LOG.error("Unexpected error during execution from template {} for {} {}.", template.getId(), executionLevel, objectId, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.error("Status polling interrupted for execution from template {} ({} {}).", template.getId(), executionLevel, objectId, e);
         }
     }
 
