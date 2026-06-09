@@ -225,6 +225,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </fieldset>
             <fieldset>
                 <ol>
+                    @if (mode != 'create' || !isUserAdmin()) {
+                        <li>
+                            <label i18n="Edit user|Account activated label@@editUserKeycloakEnabled">Account activated</label>
+                            <span class="right-col">
+                                @if (mode == 'view') {
+                                    @if (user.keycloakEnabled) {
+                                        <span class="bool-true"><i class="fas fa-check"></i></span>
+                                    } @else {
+                                        <span class="bool-false"><i class="fas fa-times"></i></span>
+                                    }
+                                } @else {
+                                    <checkbox formControlName="keycloakEnabled"></checkbox>
+                                }
+                            </span>
+                        </li>
+                    }
                     <li>
                         <label i18n="Edit user|Expiration date label@@editUserExpirationDate">Expiration Date</label>
                         <span class="right-col">
@@ -295,18 +311,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
                     </li>
                     @if (isUserAdmin()) {
-                        <label i18n="Edit user|Two-factor authentication label@@editUserTwoFactor">Two-factor authentication</label>
-                        <span class="right-col">
-                            @if (mode == 'view') {
-                                @if (user.twoFactorEnabled) {
-                                    <span class="bool-true"><i class="fas fa-check"></i></span>
+                        <li>
+                            <label i18n="Edit user|Two-factor authentication label@@editUserTwoFactor">Two-factor authentication</label>
+                            <span class="right-col">
+                                @if (mode == 'view') {
+                                    @if (user.twoFactorEnabled) {
+                                        <span class="bool-true"><i class="fas fa-check"></i></span>
+                                    } @else {
+                                        <span class="bool-false"><i class="fas fa-times"></i></span>
+                                    }
                                 } @else {
-                                    <span class="bool-false"><i class="fas fa-times"></i></span>
+                                    <checkbox formControlName="twoFactorEnabled"></checkbox>
                                 }
-                            } @else {
-                                <checkbox formControlName="twoFactorEnabled"></checkbox>
-                            }
-                        </span>
+                            </span>
+                        </li>
                     }
                 </ol>
             </fieldset>

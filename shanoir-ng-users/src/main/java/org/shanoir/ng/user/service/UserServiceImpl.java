@@ -216,12 +216,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findById(final Long id) {
         final User user = userRepository.findById(id).orElse(null);
-        // Two-factor state lives in Keycloak; expose it to admins so the form can display it.
+        // Two-factor and enabled state live in Keycloak; expose them to admins so the form can display them.
         if (user != null && KeycloakUtil.isAdmin()) {
             try {
                 user.setTwoFactorEnabled(keycloakClient.isTotpEnabled(user.getKeycloakId()));
             } catch (SecurityException e) {
                 LOG.error("Could not read two-factor authentication status for user {}", id, e);
+            }
+            try {
+                user.setKeycloakEnabled(keycloakClient.isUserEnabled(user.getKeycloakId()));
+            } catch (SecurityException e) {
+                LOG.error("Could not read the enabled status for user {}", id, e);
             }
         }
         return user;
@@ -373,7 +378,19 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        return updateUserOnAllSystems(userDb, user);
+        final User updatedUser = updateUserOnAllSystems(userDb, user);
+
+        // The Keycloak enabled flag is rewritten by updateUserOnAllSystems, so apply the admin's
+        // activation choice afterwards to make it the final state. Only admins may change it.
+        if (KeycloakUtil.isAdmin() && user.getKeycloakEnabled() != null) {
+            try {
+                keycloakClient.setUserEnabled(userDb.getKeycloakId(), user.getKeycloakEnabled());
+            } catch (SecurityException e) {
+                LOG.error("Could not update the enabled status for user {}", user.getId(), e);
+            }
+        }
+
+        return updatedUser;
     }
 
     @Override
