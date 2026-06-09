@@ -18,10 +18,7 @@ import { IdName } from "../../shared/models/id-name.model";
 
 import { SubjectStudy } from "./subject-study.model";
 
-@Pipe({
-    name: "studyNamePipe",
-    standalone: false
-})
+@Pipe({ name: "studyNamePipe" })
 export class StudyNamePipe implements PipeTransform {
 
     transform(subjectStudy: SubjectStudy, studies: IdName[]) {

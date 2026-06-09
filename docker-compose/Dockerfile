@@ -347,7 +347,7 @@ FROM node:lts-alpine3.21 AS front-dev
 
 WORKDIR /app
 
-RUN npm install -g @angular/cli@20.3.7
+RUN npm install -g @angular/cli@21.2.8
 
 
 

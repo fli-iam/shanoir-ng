@@ -12,23 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, forwardRef, Output, SimpleChanges, OnChanges } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
-import { slideDown } from '../../shared/animations/animations';
+import { ToggleSwitchComponent } from '../../shared/switch/switch.component';
+
 
 
 @Component({
     selector: 'solr-text-search-mode',
     templateUrl: 'solr.text-search-mode.component.html',
     styleUrls: ['solr.text-search.component.css'],
-    animations: [slideDown],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => SolrTextSearchModeComponent),
-          multi: true,
-        }],
-    standalone: false
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SolrTextSearchModeComponent),
+            multi: true,
+        }
+    ],
+    imports: [ToggleSwitchComponent, FormsModule]
 })
 
 export class SolrTextSearchModeComponent implements ControlValueAccessor, OnChanges {

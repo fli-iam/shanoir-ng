@@ -12,16 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
-import {AbstractControl, ValidationErrors, ValidatorFn} from "@angular/forms";
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { AbstractControl, ValidationErrors, ValidatorFn } from "@angular/forms";
+import { firstValueFrom } from "rxjs";
 
 import * as AppUtils from "../../../utils/app.utils";
-import {EntityService} from "../../../shared/components/entity/entity.abstract.service";
-import {ExecutionTemplateFilter} from "../../models/execution-template-filter";
-import {ExecutionTemplateService} from "../execution-template.service";
+import { EntityService } from "../../../shared/components/entity/entity.abstract.service";
+import { ExecutionTemplateFilter } from "../../models/execution-template-filter";
+import { ExecutionTemplateService } from "../execution-template.service";
 
-import {ExecutionTemplateFilterComponent} from "./execution-template-filter.component";
+import { ExecutionTemplateFilterComponent } from "./execution-template-filter.component";
 
 @Injectable()
 export class ExecutionTemplateFilterService extends EntityService<ExecutionTemplateFilter> {
@@ -34,7 +35,7 @@ export class ExecutionTemplateFilterService extends EntityService<ExecutionTempl
     getEntityInstance(entity: ExecutionTemplateFilter | undefined): ExecutionTemplateFilter {return entity;}
 
     getExecutionTemplateFiltersByExecutionTemplate(execution_template_id: number): Promise<ExecutionTemplateFilter[]> {
-        return this.httpClient.get<ExecutionTemplateFilter[]>(this.API_URL + "/byExecutionTemplate/" + execution_template_id).toPromise();
+        return firstValueFrom(this.httpClient.get<ExecutionTemplateFilter[]>(this.API_URL + "/byExecutionTemplate/" + execution_template_id));
     }
 
     getTemplateName(filter: ExecutionTemplateFilterComponent) {

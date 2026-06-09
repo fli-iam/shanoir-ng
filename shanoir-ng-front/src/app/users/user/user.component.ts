@@ -13,12 +13,8 @@
 */
 import { Component } from '@angular/core';
 import {
-    AbstractControl,
-    UntypedFormControl,
-    UntypedFormGroup,
-    ValidationErrors,
-    ValidatorFn,
-    Validators
+    AbstractControl, FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidationErrors,
+    ValidatorFn, Validators
 } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -29,19 +25,23 @@ import { Selection } from 'src/app/studies/study/tree.service';
 
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
+import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 import { Study } from "../../studies/shared/study.model";
 import { KEYCLOAK_BASE_URL } from "../../utils/app.utils";
+import { AccountRequestInfoComponent } from '../account-request-info/account-request-info.component';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
-import {dateDisplay} from "../../shared/./localLanguage/localDate.abstract";
 
 @Component({
     selector: 'user-detail',
     templateUrl: 'user.component.html',
     styleUrls: ['user.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, DatepickerComponent, CheckboxComponent, AccountRequestInfoComponent, LocalDateFormatPipe]
 })
 
 export class UserComponent extends EntityComponent<User> {
