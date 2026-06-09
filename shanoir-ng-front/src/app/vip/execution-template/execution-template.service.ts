@@ -298,7 +298,7 @@ export class ExecutionTemplateService extends EntityService<ExecutionTemplate> {
         template.entity.priority = formValue.priority
         template.entity.name = formValue.name
         template.entity.pipelineName = formValue.pipelineName
-        template.entity.offlineToken = await this.keycloakService.getRefreshToken()
+        template.entity.offlineToken = await this.keycloakService.getOfflineToken()
     }
 
     updateFormValueAndPipelineParameters(name: string, value: any, template: ExecutionTemplateComponent){
