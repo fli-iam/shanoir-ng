@@ -148,6 +148,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </ng-container>
                 </span>
             </li>
+            <li *ngIf="isUserAdmin()">
+                <label i18n="Edit user|Two-factor authentication label@@editUserTwoFactor">Two-factor authentication</label>
+                <span class="right-col" [ngSwitch]="mode">
+                    <ng-container *ngIf="mode == 'view'">
+                        <span *ngIf="user.twoFactorEnabled" class="bool-true"><i class="fas fa-check"></i></span>
+                        <span *ngIf="!user.twoFactorEnabled" class="bool-false"><i class="fas fa-times"></i></span>
+                    </ng-container>
+                    <ng-container *ngIf="mode != 'view'">
+                        <checkbox formControlName="twoFactorEnabled"></checkbox>
+                    </ng-container>
+                </span>
+            </li>
         </ol>
         </fieldset>
         <fieldset *ngIf="isUserAdmin()">

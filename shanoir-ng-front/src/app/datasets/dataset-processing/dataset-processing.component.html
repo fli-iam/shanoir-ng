@@ -75,7 +75,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</ng-template>
 					</span>
 				</li>
-
 				<li>
 					<label i18n="Processing detail|Processing date label@@processingDetailProcessingDate">Processing date</label>
 											<span class="right-col" [ngSwitch]="mode">
@@ -89,7 +88,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</ng-template>
 					</span>
 				</li>
-
 				<li>
 					<label i18n="Processing detail|Comment label@@processingDetailComment">Comment</label>
 					<span class="right-col" [ngSwitch]="mode">
@@ -101,8 +99,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</ng-template>
 					</span>
 				</li>
-
+                <li *ngIf="!isExecutionMonitoring">
+                    <label i18n="Processing status|Status label@@processingDetailStatus">Status</label>
+                    <span class="right-col">
+                        {{datasetProcessing.processingStatus}}
+					</span>
+                </li>
 			</ol>
+            <ol *ngIf="!isExecutionMonitoring">
+                <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="downloadStdout()">Download stdout logs<i class="fas fa-download"></i></button>
+                <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="downloadStderr()" [hidden]="datasetProcessing.processingStatus === 'Finished' || datasetProcessing.processingStatus === 'Running'">Download stderr logs<i class="fas fa-download"></i></button>
+            </ol>
 			<ol *ngIf="isExecutionMonitoring">
 				<legend>
 					VIP execution details
@@ -153,12 +160,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						{{ getDuration() }}
 					</span>
                 </li>
-
-                <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="downloadStdout()">Download stdout logs<i class="fas fa-download"></i></button>
-                <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="downloadStderr()">Download stderr logs<i class="fas fa-download"></i></button>
-
             </ol>
-            <ol *ngIf="!isExecutionMonitoring || datasetProcessing">
+            <ol *ngIf="!isExecutionMonitoring">
 				<legend>
 					Input datasets
 					<tool-tip>Datasets given as input of this dataset processing.</tool-tip>
@@ -170,6 +173,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[readOnly]="mode == 'view'">
 				</multi-select-table>
 			</ol>
+            <ol *ngIf="isExecutionMonitoring">
+                <dataset-processing-list *ngIf="childrenProcessings" [processings]="childrenProcessings"/>
+            </ol>
 		</fieldset>
 	</form>
 </div>
