@@ -14,14 +14,8 @@
 
 import { HttpResponse } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
-import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { last, map, mergeMap, shareReplay } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
-import { TaskState, TaskStatus } from '../async-tasks/task.model';
-
-import { ServiceLocator } from './locator.service';
 
 
 // Base urls
