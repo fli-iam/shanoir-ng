@@ -42,11 +42,11 @@ public class LocalDateDeserializer extends StdDeserializer<LocalDate> {
             jp.nextToken();
             int day = jp.getIntValue();
             if (jp.nextToken() != JsonToken.END_ARRAY) {
-                throw ctxt.wrongTokenException(jp, JsonToken.END_ARRAY, "after LocalDate ints");
+                throw ctxt.wrongTokenException(jp, _valueClass, JsonToken.END_ARRAY, "after LocalDate ints");
             }
             return LocalDate.of(year, month, day);
         }
-        throw ctxt.wrongTokenException(jp, JsonToken.END_ARRAY, "non array LocalDate");
+        throw ctxt.wrongTokenException(jp, _valueClass, JsonToken.END_ARRAY, "non array LocalDate");
     }
 
 }
