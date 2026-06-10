@@ -16,11 +16,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 import { FooterState } from './footer-state.model';
 
+
 @Component({
     selector: 'form-footer',
     templateUrl: 'form-footer.component.html',
     styleUrls: ['./form-footer.component.css'],
-    standalone: false
+    imports: []
 })
 
 export class FormFooterComponent {
