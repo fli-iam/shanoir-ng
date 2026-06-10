@@ -89,7 +89,7 @@ export class QueryPacsComponent{
             patientName: this.formBuilder.control(this.dicomQuery.patientName, {
                 validators: [Validators.maxLength(64), Validators.pattern(noWildcardPattern)]
             }),
-            patientId: this.formBuilder.control(this.dicomQuery.patientID, {
+            patientID: this.formBuilder.control(this.dicomQuery.patientID, {
                 validators: [Validators.maxLength(64), Validators.pattern(noWildcardPattern)]
             }),
             patientBirthDate: this.formBuilder.control(this.dicomQuery.patientBirthDate, {
