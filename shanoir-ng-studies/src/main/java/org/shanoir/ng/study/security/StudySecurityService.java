@@ -388,6 +388,10 @@ public class StudySecurityService {
      */
     public boolean hasRightOnSubject(SubjectDTO subjectDto, String rightStr) {
         Subject subject = subjectRepository.findById(subjectDto.getId()).orElse(null);
+        if (subject == null || subject.getSubjectStudyList() == null) {
+            return false;
+        }
+
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         if (subject != null && subject.getStudy() != null) {
             return hasPrivilege(subject.getStudy(), right);
