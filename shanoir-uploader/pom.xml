@@ -16,6 +16,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<parent>
+        <groupId>org.shanoir-ng</groupId>
+        <artifactId>shanoir-ng</artifactId>
+        <version>3.4.0</version>
+        <relativePath>../shanoir-ng-parent/pom.xml</relativePath>
+    </parent>
+
 	<groupId>org.shanoir.uploader</groupId>
 	<artifactId>shanoir-uploader</artifactId>
 	<version>2.7.2</version> <!-- Version to be modified when pushing a release, if not will be updated anyway for the release with last NG_ tag version-->
@@ -103,10 +110,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+            <!-- <version>3.4.0</version> -->
+        </dependency>
 
 		<dependency>
 		    <groupId>ch.qos.logback</groupId>
@@ -201,7 +208,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
-			<version>5.1</version>
+			<!-- <version>5.1</version> -->
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -228,44 +235,44 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.17.0</version>
+			<!-- <version>3.17.0</version> -->
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.17.1</version>
+			<!-- <version>1.17.1</version> -->
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
+			<!-- <version>${jackson.version}</version> -->
 		</dependency>
 		<dependency>
 		    <groupId>com.fasterxml.jackson.datatype</groupId>
     		<artifactId>jackson-datatype-jsr310</artifactId>
-    		<version>${jackson.version}</version>
+    		<!-- <version>${jackson.version}</version> -->
 		</dependency>
 		<dependency>
 		    <groupId>com.fasterxml.jackson.datatype</groupId>
 		    <artifactId>jackson-datatype-jdk8</artifactId>
-		    <version>${jackson.version}</version>
+		    <!-- <version>${jackson.version}</version> -->
 		</dependency>
 		<dependency>
 		    <groupId>jakarta.xml.bind</groupId>
 		    <artifactId>jakarta.xml.bind-api</artifactId>
-		    <version>4.0.0</version>
+		    <!-- <version>4.0.0</version> -->
 		</dependency>
 		<dependency>
 		    <groupId>com.sun.xml.bind</groupId>
 		    <artifactId>jaxb-impl</artifactId>
-		    <version>4.0.0</version>
+		    <!-- <version>4.0.0</version> -->
 		    <scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
+			<!-- <version>${lombok.version}</version> -->
 			<scope>provided</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
@@ -295,25 +302,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.jupiter.version}</version>
+            <!-- <version>${junit.jupiter.version}</version> -->
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.jupiter.version}</version>
+            <!-- <version>${junit.jupiter.version}</version> -->
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit.jupiter.version}</version>
+            <!-- <version>${junit.jupiter.version}</version> -->
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite</artifactId>
-            <version>${junit.platform.version}</version>
+            <!-- <version>${junit.platform.version}</version> -->
             <scope>test</scope>
         </dependency>
 		<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
