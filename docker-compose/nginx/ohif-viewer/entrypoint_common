@@ -54,7 +54,7 @@ require()
     do
         local value="${!name}"
 
-        if [ -z "$value" ]; then
+        if [ -z "$value" ] ; then
             error "env var '$name' must not be blank"
             return
         fi
@@ -70,52 +70,10 @@ require()
             SHANOIR_X_FORWARDED)    match "$name" '^(generate|trust)$'			;;
             SHANOIR_INSTANCE_NAME)  match "$name" '^[^"\\]*$'				;;
             SHANOIR_INSTANCE_COLOR) match "$name" '^([A-Za-z]*|#[0-9a-fA-F]{3,6})$'	;;
-            SHANOIR_KEYCLOAK_ADAPTER_MODE) match "$name" '^(login-required|check-sso)$'	;;
-            SHANOIR_ADMIN_EMAIL)  ;;
+
+            SHANOIR_ADMIN_EMAIL)    ;;
             SHANOIR_ADMIN_NAME)     ;;
-            SHANOIR_SMTP_HOST) ;;
-            SHANOIR_SMTP_PORT) ;;
-            SHANOIR_SMTP_AUTH) match "$name" '^(true|false)$' ;;
-            SHANOIR_SMTP_USERNAME) ;;
-            SHANOIR_SMTP_PASSWORD) ;;
-            SHANOIR_SMTP_STARTTLS_ENABLE) match "$name" '^(true|false)$' ;;
-            SHANOIR_SMTP_STARTTLS_REQUIRED) match "$name" '^(true|false)$' ;;
-            SHANOIR_SMTP_FROM) ;;
-            SHANOIR_STORAGE_TYPE) match "$name" '^(file-system|s3)$' ;;
-            S3_ENDPOINT) ;;
-            S3_REGION) ;;
-            S3_ACCESS_KEY_ID) ;;
-            S3_SECRET_ACCESS_KEY) ;;
-            S3_BUCKET_STUDIES) ;;
-            S3_BUCKET_DATASETS) ;;
-            S3_BUCKET_PRECLINICAL) ;;
-            SHANOIR_CERTIFICATE_PEM_CRT) ;;
-            SHANOIR_CERTIFICATE_PEM_KEY) ;;
-            VIP_URL_SCHEME)         match "$name" '^(http|https)$'                      ;;
-            VIP_URL_HOST)           match "$name" '^([a-z0-9.:-]+)$'                     ;;
-            VIP_CLIENT_SECRET)      ;;
-            SHANOIR_SHUTDOWN_HOUR)      ;;
-            SHANOIR_CONTINUANCE_HOUR)      ;;
-
-            SHANOIR_KEYCLOAK_HOST)      match "$name" '^([a-z0-9.-]+)$' ;;
-            SHANOIR_USERS_HOST)         match "$name" '^([a-z0-9.-]+)$' ;;
-            SHANOIR_STUDIES_HOST)       match "$name" '^([a-z0-9.-]+)$' ;;
-            SHANOIR_IMPORT_HOST)        match "$name" '^([a-z0-9.-]+)$' ;;
-            SHANOIR_DATASETS_HOST)      match "$name" '^([a-z0-9.-]+)$' ;;
-            SHANOIR_PRECLINICAL_HOST)   match "$name" '^([a-z0-9.-]+)$' ;;
-            SHANOIR_SOLR_HOST)          match "$name" '^([a-z0-9.-]+)$' ;;
-
-            SHANOIR_DB_HOST)            match "$name" '^([a-z0-9.-]+)$' ;;
-            SHANOIR_DB_PORT)            match "$name" '^([0-9]+)$' ;;
-            SHANOIR_DB_NAME)            match "$name" '^([a-z0-9._-]+)$' ;;
-
-            SHANOIR_DATASETS_DB_NAME)    match "$name" '^([a-z0-9._-]+)$' ;;
-            SHANOIR_STUDIES_DB_NAME)     match "$name" '^([a-z0-9._-]+)$' ;;
-            SHANOIR_IMPORT_DB_NAME)      match "$name" '^([a-z0-9._-]+)$' ;;
-            SHANOIR_USERS_DB_NAME)       match "$name" '^([a-z0-9._-]+)$' ;;
-            SHANOIR_PRECLINICAL_DB_NAME) match "$name" '^([a-z0-9._-]+)$' ;;
-            SHANOIR_MIGRATIONS_DB_NAME)  match "$name" '^([a-z0-9._-]+)$' ;;
-
+            SHANOIR_SMTP_HOST)      ;;
             *)
                 error "unknown var: $name"
                 ;;
@@ -181,12 +139,12 @@ handle_microservice_migration()
 {
 	case "$SHANOIR_MIGRATION" in
 		dev)
-			env_setdefault	spring.sql.init.mode	never
+			env_setdefault	spring.datasource.initialization-mode	never
 			env_setdefault	spring.jpa.generate-ddl	true
 			env_setdefault	spring.jpa.hibernate.ddl-auto	update
 			;;
 		init)
-			env_setdefault	spring.sql.init.mode	always
+			env_setdefault	spring.datasource.initialization-mode	always
 			env_setdefault	spring.jpa.generate-ddl	true
 			env_setdefault	spring.jpa.hibernate.ddl-auto	create
 
@@ -198,7 +156,7 @@ handle_microservice_migration()
 			env_setdefault	"logging.level.org.shanoir"			INFO
 			;;
 		never|auto)
-			env_setdefault	spring.sql.init.mode	never
+			env_setdefault	spring.datasource.initialization-mode	never
 			env_setdefault	spring.jpa.generate-ddl	false
 			env_setdefault	spring.jpa.hibernate.ddl-auto	validate
 			;;

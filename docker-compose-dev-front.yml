@@ -16,7 +16,6 @@ services:
   nginx:
     environment:
       - SHANOIR_DEV=TRUE
-      - SHANOIR_KEYCLOAK_INTERNAL_URL
     depends_on:
       - "front-dev"
 
