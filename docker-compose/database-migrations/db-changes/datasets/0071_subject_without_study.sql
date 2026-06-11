@@ -14,6 +14,16 @@
 -- Removing stuff related to examinations without subject_id or subject without study_id
 -- I'm deleting because from what I see, the related dataset/acquisition below are kinda broken
 -- (and in all cases, those data were difficulty accessible)
+
+-- Reconstruct some data if we can
+INSERT INTO studies.study_examination (examination_id, center_id, study_id, subject_id)
+SELECT e.id, e.center_id, e.study_id, MIN(d.subject_id) AS subject_id FROM examination e JOIN dataset_acquisition acq ON acq.examination_id = e.id JOIN dataset d ON d.dataset_acquisition_id = acq.id
+WHERE e.subject_id IS NULL AND NOT EXISTS (SELECT 1 FROM studies.study_examination se WHERE se.examination_id = e.id) GROUP BY e.id, e.center_id, e.study_id;
+
+update datasets.examination e set subject_id = (select se.subject_id from studies.study_examination se where se.id = e.id) where e.id in
+                                                                                                                                 (select se.examination_id from studies.study_examination se join datasets.examination as e on se.examination_id = e.id where se.subject_id is not null and e.subject_id is null);
+
+-- Start clean
 create temporary table garbage_datasets as (select d.id from datasets.dataset d join datasets.dataset_acquisition acq on d.dataset_acquisition_id = acq.id join datasets.examination e on e.id = acq.examination_id where e.subject_id is null); -- 2 on neurinfo / 0 on ofsep
 insert into garbage_datasets (id) select  id from dataset where subject_id is null; -- 3 new on neurinfo / 0 on ofsep
 create temporary table duplicate_subjects as (select sub.id from datasets.subject sub join datasets.examination e on e.subject_id = sub.id where sub.study_id is null and e.study_id is not null and exists (select 1 from datasets.subject where name = sub.name and study_id = e.study_id)); -- 27 on neurinfo / 0 on ofsep
