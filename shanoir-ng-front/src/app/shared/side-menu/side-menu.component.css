@@ -72,3 +72,21 @@ progress-bar ::ng-deep .text, progress-bar ::ng-deep .left-text { line-height: 1
 
 .menu-link { display: inline-block; width: 100%; }
 .remove-task { position: absolute; left: 7px; padding-top: 1px; }
+
+.slide-down-menu {
+    animation: 200ms ease-in-out both slideDown;
+}
+
+.slide-up-menu {
+    animation: 200ms ease-out both slideUp;
+}
+
+@keyframes slideDown {
+    from { max-height: 0; }
+    to   { max-height: var(--submenu-height); }
+}
+
+@keyframes slideUp {
+    from { max-height: var(--submenu-height); }
+    to   { max-height: 0; }
+}

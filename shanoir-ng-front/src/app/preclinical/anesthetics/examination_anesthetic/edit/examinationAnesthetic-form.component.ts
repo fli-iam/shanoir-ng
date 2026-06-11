@@ -14,12 +14,13 @@
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { UntypedFormGroup } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { InjectionInterval } from 'src/app/preclinical/shared/enum/injectionInterval';
 import { InjectionSite } from 'src/app/preclinical/shared/enum/injectionSite';
 import { InjectionType } from 'src/app/preclinical/shared/enum/injectionType';
+import { SelectBoxComponent } from 'src/app/shared/select/select.component';
 
 import { ExaminationAnesthetic }    from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
@@ -29,11 +30,13 @@ import { Anesthetic }   from '../../anesthetic/shared/anesthetic.model';
 import { AnestheticService } from '../../anesthetic/shared/anesthetic.service';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
+import { CamelPipe } from '../../../../utils/app.utils';
 
 @Component({
     selector: 'examination-anesthetic-form',
     templateUrl: 'examinationAnesthetic-form.component.html',
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, CamelPipe, SelectBoxComponent]
 })
 export class ExaminationAnestheticFormComponent extends EntityComponent<ExaminationAnesthetic> {
     @Input() isStandalone: boolean = false;

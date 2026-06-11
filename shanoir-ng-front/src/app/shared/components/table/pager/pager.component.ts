@@ -14,11 +14,12 @@
 
 import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 
+
 @Component({
     selector: 'shanoir-pager',
     templateUrl: 'pager.component.html',
     styleUrls: ['pager.component.css'],
-    standalone: false
+    imports: []
 })
 
 export class PagerComponent implements OnChanges {

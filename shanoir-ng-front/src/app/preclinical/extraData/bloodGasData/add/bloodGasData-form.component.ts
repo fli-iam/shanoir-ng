@@ -13,24 +13,24 @@
  */
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { UploaderComponent } from 'src/app/shared/components/uploader/uploader.component';
 
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
 import { BloodGasDataFile } from '../shared/bloodGasDataFile.model';
-import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { ExtraData } from '../../extraData/shared/extradata.model';
+import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 
 
 @Component({
     selector: 'bloodgas-data-upload-form',
     templateUrl: 'bloodGasData-form.component.html',
-    animations: [slideDown],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, UploaderComponent]
 })
 export class BloodGasDataFormComponent extends EntityComponent<BloodGasDataFile> {
 

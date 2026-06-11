@@ -13,8 +13,8 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { Selection } from 'src/app/studies/study/tree.service';
@@ -27,12 +27,14 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { CoilType } from '../shared/coil-type.enum';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
 
 @Component({
     selector: 'coil',
     templateUrl: 'coil.component.html',
     styleUrls: ['coil.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, RouterLink, ManufacturerModelPipe]
 })
 export class CoilComponent extends EntityComponent<Coil> {
 
