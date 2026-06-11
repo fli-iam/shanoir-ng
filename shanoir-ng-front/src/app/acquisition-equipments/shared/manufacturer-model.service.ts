@@ -14,6 +14,7 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
@@ -42,12 +43,10 @@ export class ManufacturerModelService extends EntityService<ManufacturerModel> {
     }
 
     getManufacturerModelsNames(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_MANUF_MODEL_NAMES_URL)
-            .toPromise();
+        return firstValueFrom(this.http.get<IdName[]>(AppUtils.BACKEND_API_MANUF_MODEL_NAMES_URL));
     }
 
     getCenterManufacturerModelsNames(centerId:number): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_MANUF_MODEL_NAMES_URL+ '/' + centerId)
-            .toPromise();
+        return firstValueFrom(this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_MANUF_MODEL_NAMES_URL+ '/' + centerId));
     }
 }

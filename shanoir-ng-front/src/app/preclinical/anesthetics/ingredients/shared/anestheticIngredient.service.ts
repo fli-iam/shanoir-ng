@@ -14,7 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import { Anesthetic } from '../../anesthetic/shared/anesthetic.model';
@@ -34,15 +34,13 @@ export class AnestheticIngredientService extends EntityService<AnestheticIngredi
     
     getIngredients(anesthetic:Anesthetic): Promise<AnestheticIngredient[]>{
         const url = `${PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL}/${anesthetic.id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
-        return this.http.get<AnestheticIngredient[]>(url)
-            .toPromise()
+        return firstValueFrom(this.http.get<AnestheticIngredient[]>(url))
             .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
     
         
     getIngredient(anesthetic_id:number,ingredient_id: number): Promise<AnestheticIngredient>{
-        return this.http.get<AnestheticIngredient>(PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL+"/"+anesthetic_id+"/"+PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT+"/"+ingredient_id)
-            .toPromise()
+        return firstValueFrom(this.http.get<AnestheticIngredient>(PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL+"/"+anesthetic_id+"/"+PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT+"/"+ingredient_id))
             .then((entity) => this.toRealObject(entity));
     }
      
@@ -60,8 +58,7 @@ export class AnestheticIngredientService extends EntityService<AnestheticIngredi
         
     deleteAnestheticIngredient(anesthetic_id:number,ingredient_id: number): Promise<void> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL}/${anesthetic_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT}/${ingredient_id}`;
-        return this.http.delete<void>(url)
-            	.toPromise();
+        return firstValueFrom(this.http.delete<void>(url));
     }
     
 }

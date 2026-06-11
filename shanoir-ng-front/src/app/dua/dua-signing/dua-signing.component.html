@@ -12,14 +12,21 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h3>{{dua.studyName}}</h3>
-<iframe [src]="pdfUrl"
-    *ngIf="pdfUrl"
-    class="embed-pdf"
-></iframe>
+<h3>{{ dua.studyName }}</h3>
+@if (pdfUrl) {
+    <iframe [src]="pdfUrl" class="embed-pdf"></iframe>
+}
 <div>
-    <div class="dl-pdf"><a (click)="dlDua()"><i class="fas fa-file-pdf"></i>Download the dua file {{dua.path}}</a></div>
-    <checkbox [(ngModel)]="checked"></checkbox> I have read the data user agreement contract for the study <span class="study-name">{{dua.studyName}}</span> and I fully accept it.
+    <div class="dl-pdf">
+        <a (click)="dlDua()">
+            <i class="fas fa-file-pdf"></i>
+            Download the dua file {{ dua.path }}
+        </a>
+    </div>
+    <checkbox [(ngModel)]="checked"></checkbox>
+    I have read the data user agreement contract for the study
+    <span class="study-name">{{ dua.studyName }}</span>
+    and I fully accept it.
     <div class="buttons">
         <button class="accept" [disabled]="!checked" (click)="accept()">Accept</button>
         <!-- <button class="refuse" (click)="refuse()">Refuse</button> -->

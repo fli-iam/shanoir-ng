@@ -13,19 +13,21 @@
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { browserDownloadFile } from '../../utils/app.utils';
 import { DataUserAgreement } from '../shared/dua.model';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 
 
 @Component({
     selector: 'dua-signing',
     templateUrl: 'dua-signing.component.html',
     styleUrls: ['dua-signing.component.css'],
-    standalone: false
+    imports: [CheckboxComponent, FormsModule]
 })
 
 export class DUASigningComponent implements OnChanges {
