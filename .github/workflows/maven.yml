@@ -55,8 +55,6 @@ jobs:
       run: mvn -f ./shanoir-ng-parent/pom.xml install -Dcheckstyle.skip=true
       env:
         SHANOIR_URL_HOST: localhost
-        SHANOIR_KEYCLOAK_INTERNAL_URL: http://localhost/auth
-        SHANOIR_KEYCLOAK_URL: http://localhost/auth
         SHANOIR_URL_SCHEME: http
         SHANOIR_PREFIX: github
         SHANOIR_ADMIN_EMAIL: nobody@inria.fr
