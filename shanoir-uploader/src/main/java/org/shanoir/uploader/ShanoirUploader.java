@@ -17,6 +17,8 @@ package org.shanoir.uploader;
 import java.io.File;
 
 import org.shanoir.uploader.action.init.StartupStateContext;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -28,6 +30,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  * @author mkain
  *
  */
+@SpringBootApplication
 public class ShanoirUploader {
 
     public static ShUpOnloadConfig shUpOnloadConfig = ShUpOnloadConfig.getInstance();
@@ -38,6 +41,9 @@ public class ShanoirUploader {
      * @param args
      */
     public static void main(String[] args) {
+        // Allow SpringBoot to instantiate JavaSwing components lazily
+        System.setProperty("java.awt.headless", "false");
+        SpringApplication.run(ShanoirUploader.class, args);
         initShanoirUploaderFolders();
         ApplicationContext ctx = new AnnotationConfigApplicationContext(ShanoirUploaderSpringConfig.class);
         displayAllBeans(ctx);

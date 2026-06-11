@@ -53,6 +53,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
   		<maven.build.timestamp.format>yyyy-MM-dd'T'HH-mm-ss'Z'</maven.build.timestamp.format>
 	</properties>
 
+	<dependencyManagement>
+    	<dependencies>
+        	<dependency>
+            	<groupId>ch.qos.logback</groupId>
+            	<artifactId>logback-classic</artifactId>
+            	<version>1.5.12</version>
+        	</dependency>
+        	<dependency>
+            	<groupId>ch.qos.logback</groupId>
+            	<artifactId>logback-core</artifactId>
+            	<version>1.5.12</version>
+        	</dependency>
+    	</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
@@ -109,16 +124,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			    </exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
+            <artifactId>spring-boot-starter-webflux</artifactId> -->
             <!-- <version>3.4.0</version> -->
-        </dependency>
+        <!-- </dependency> -->
+		<dependency>
+    		<groupId>org.springframework.boot</groupId>
+    		<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
 
 		<dependency>
 		    <groupId>ch.qos.logback</groupId>
 		    <artifactId>logback-classic</artifactId>
-		    <version>${logback.version}</version>
+		    <!-- <version>${logback.version}</version> -->
 		</dependency>
 
 		<!-- DCM4CHE dependencies -->
