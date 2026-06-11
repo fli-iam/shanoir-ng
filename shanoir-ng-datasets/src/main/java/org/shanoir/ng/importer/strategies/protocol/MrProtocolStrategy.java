@@ -26,6 +26,7 @@ import java.util.TreeSet;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.UID;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.shanoir.ng.datasetacquisition.model.mr.AcquisitionContrast;
 import org.shanoir.ng.datasetacquisition.model.mr.ContrastAgentUsed;
@@ -51,9 +52,15 @@ public class MrProtocolStrategy {
     public MrProtocol generateProtocolForSerie(Attributes attributes, Serie serie) throws IOException {
         // dcm4che3 does not support MultiframeExtraction for MRS
         if (Boolean.TRUE.equals(serie.getIsEnhanced()) && !serie.getIsSpectroscopy()) {
-            // MultiFrameExtractor is only used in case of EnhancedMR MRI.
-            MultiframeExtractor emf = new MultiframeExtractor();
-            attributes = emf.extract(attributes, 0);
+            // Align with 5 EnhancedXXXImageStorage types supported by dcm4che
+            if (UID.EnhancedMRImageStorage.equals(serie.getSopClassUID())
+                    || UID.EnhancedCTImageStorage.equals(serie.getSopClassUID())
+                    || UID.EnhancedPETImageStorage.equals(serie.getSopClassUID())
+                    || UID.EnhancedXAImageStorage.equals(serie.getSopClassUID())
+                    || UID.EnhancedXRFImageStorage.equals(serie.getSopClassUID())) {
+                MultiframeExtractor emf = new MultiframeExtractor();
+                attributes = emf.extract(attributes, 0);
+            }
         }
 
         MrProtocol mrProtocol = new MrProtocol();
