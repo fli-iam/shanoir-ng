@@ -18,6 +18,13 @@ window.config = {
 	modes: [],
 	experimentalStudyBrowserSort: true,
 	showStudyList: false,
+	// Maximum number of requests allowed in parallel.
+	// See https://docs.ohif.org/configuration/configurationfiles/
+	maxNumRequests: {
+		interaction: SHANOIR_VIEWER_OHIF_MAX_NUM_REQUESTS,
+		thumbnail: 75,
+		prefetch: 25,
+	},
 	dataSources: [ 
 		{ 
 			namespace: '@ohif/extension-default.dataSourcesModule.dicomweb', 
