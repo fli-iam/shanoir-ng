@@ -60,10 +60,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             <i class="{{ vars.cellGraphics.awesome }}"></i>
                                         }
                                         {{ vars.render.text ? vars.render.text : vars.render }}
-                                        @if (col.download) {
+                                        @if (col.download && col.downloadCondition?.(item)) {
                                             <!-- download -->
                                             <span (click)="col.download(item)" class="download-link">
                                                 <i class="fas fa-download"></i>
+                                            </span>
+                                        }
+                                        @if (col.link?.(item)) {
+                                            <span class="download-link">
+                                                <a [routerLink]="col.link(item)">
+                                                    <i class="fas fa-link"></i>
+                                                </a>
                                             </span>
                                         }
                                     </span>

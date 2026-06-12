@@ -894,7 +894,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 @if (keycloakService.isUserAdmin()) {
                     <fieldset [class.hidden-tab]="activeTab != 'executions'" tab="executions">
                         <legend>Execution templates</legend>
-                        <execution-template-list [studyId]="study.id" [studyName]="study.name"/>
+                        <execution-template-list [studyId]="study.id" [studyName]="study.name" [embedded]="true"></execution-template-list>
                     </fieldset>
                 }
             </form>
