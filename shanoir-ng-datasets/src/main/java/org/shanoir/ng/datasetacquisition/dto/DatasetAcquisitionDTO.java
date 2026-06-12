@@ -53,6 +53,8 @@ public class DatasetAcquisitionDTO {
 
     private LocalDateTime acquisitionStartTime;
 
+    private List<String> extraDataFilePathList;
+
     public Long getId() {
         return id;
     }
@@ -171,5 +173,13 @@ public class DatasetAcquisitionDTO {
 
     public void setAcquisitionStartTime(LocalDateTime acquisitionStartTime) {
         this.acquisitionStartTime = acquisitionStartTime;
+    }
+
+    public List<String> getExtraDataFilePathList() {
+        return extraDataFilePathList;
+    }
+
+    public void setExtraDataFilePathList(List<String> extraDataFilePathList) {
+        this.extraDataFilePathList = extraDataFilePathList;
     }
 }
