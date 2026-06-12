@@ -46,6 +46,8 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -58,6 +60,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
@@ -91,6 +94,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Autowired
     private DatasetAcquisitionAsyncService datasetAcquisitionAsyncService;
+
+    @Autowired
+    private StorageService storageService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
 
@@ -135,6 +141,19 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         to.setSortingIndex(from.getSortingIndex());
         to.setStudyCard(from.getStudyCard());
         to.setAcquisitionStartTime(from.getAcquisitionStartTime()); // immutable
+        // Update extra data paths => delete files not present in the new list anymore
+        if (to.getExtraDataFilePathList() != null) {
+            for (String filePath : to.getExtraDataFilePathList()) {
+                if (from.getExtraDataFilePathList() == null || !from.getExtraDataFilePathList().contains(filePath)) {
+                    try {
+                        storageService.deleteAcquisitionExtraData(to.getId(), filePath);
+                    } catch (StorageException e) {
+                        LOG.warn("Could not delete extra-data file {} for dataset acquisition {}", filePath, to.getId(), e);
+                    }
+                }
+            }
+        }
+        to.setExtraDataFilePathList(from.getExtraDataFilePathList());
         return to;
     }
 
@@ -256,6 +275,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                             "This datasetAcquisition is linked to another datasetAcquisition that was copied."
                     ));
         } else {
+            // Delete the extra-data files attached to this acquisition
+            try {
+                storageService.deleteDirectoryAcquisitionExtraData(entity.getId());
+            } catch (StorageException e) {
+                LOG.warn("Could not delete extra-data directory for dataset acquisition {}", entity.getId(), e);
+            }
             List<Dataset> datasets = entity.getDatasets();
             if (datasets != null) {
                 List<Long> datasetIds = new ArrayList<>();
@@ -331,6 +356,23 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     public boolean existsByStudyCardId(Long studyCardId) {
         return repository.existsByStudyCard_Id(studyCardId);
+    }
+
+    @Override
+    public String addExtraData(final Long acquisitionId, final MultipartFile file) {
+        try {
+            LOG.info("Saving file {} for dataset acquisition: {}", file.getOriginalFilename(), acquisitionId);
+            return storageService.storeAcquisitionExtraData(
+                    acquisitionId,
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getContentType(),
+                    file.getSize());
+        } catch (Exception e) {
+            LOG.error("Error while uploading file {} for dataset acquisition: {}. File not uploaded. {}",
+                    file.getOriginalFilename(), acquisitionId, e);
+            return null;
+        }
     }
 
 }
