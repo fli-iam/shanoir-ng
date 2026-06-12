@@ -18,6 +18,11 @@ window.config = {
 	modes: [],
 	experimentalStudyBrowserSort: true,
 	showStudyList: false,
+	maxNumRequests: {
+		interaction: SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS,
+		thumbnail: SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS,
+		prefetch: SHANOIR_VIEWER_OHIF_PREFETCH_NUM_REQUESTS,
+	},
 	dataSources: [
 		{
 			namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
@@ -35,12 +40,7 @@ window.config = {
 				enableStudyLazyLoad: true,
 				supportsFuzzyMatching: true,
 				supportsWildcard: true,
-				omitQuotationForMultipartRequest: false,
-				maxNumRequests: {
-					interaction: SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS,
-					thumbnail: SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS,
-					prefetch: SHANOIR_VIEWER_OHIF_PREFETCH_NUM_REQUESTS,
-				}
+				omitQuotationForMultipartRequest: false
 			},
 		},
 	],
