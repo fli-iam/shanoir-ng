@@ -26,7 +26,6 @@ import java.util.TreeSet;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.dcm4che3.data.UID;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.shanoir.ng.datasetacquisition.model.mr.AcquisitionContrast;
 import org.shanoir.ng.datasetacquisition.model.mr.ContrastAgentUsed;
