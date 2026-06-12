@@ -15,6 +15,7 @@
 package org.shanoir.ng.datasetacquisition.controler;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Comparator;
 import java.util.List;
 
@@ -41,6 +42,8 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -52,18 +55,24 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @Controller
@@ -97,6 +106,16 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private StorageService storageService;
+
+    private final HttpServletRequest request;
+
+    @Autowired
+    public DatasetAcquisitionApiController(final HttpServletRequest request) {
+        this.request = request;
+    }
 
     @Override
     public ResponseEntity<Void> createNewDatasetAcquisition(
@@ -269,6 +288,46 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         }
     }
 
+
+    @Override
+    public ResponseEntity<Void> addExtraData(
+            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+            @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+        if (datasetAcquisitionService.addExtraData(datasetAcquisitionId, file) != null) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @Override
+    public void downloadExtraData(
+            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
+            HttpServletResponse response) throws RestServiceException, IOException {
+        try {
+            Resource fileToDownload = storageService.loadAcquisitionExtraData(datasetAcquisitionId, fileName);
+            if (fileToDownload != null) {
+                String contentType = request.getServletContext().getMimeType(fileName);
+                if (contentType == null) {
+                    contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+                }
+                response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+                response.setContentType(contentType);
+                if (fileToDownload.isReadable() && fileToDownload.contentLength() > 0) {
+                    response.setContentLengthLong(fileToDownload.contentLength());
+                }
+                try (InputStream is = fileToDownload.getInputStream()) {
+                    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+                    response.flushBuffer();
+                }
+            } else {
+                response.sendError(HttpStatus.NO_CONTENT.value());
+                return;
+            }
+        } catch (StorageException e) {
+            LOG.error("Error downloading file {} for dataset acquisition {}: {}", fileName, datasetAcquisitionId, e);
+        }
+    }
 
     private void validate(BindingResult result) throws RestServiceException {
         final FieldErrorMap errors = new FieldErrorMap(result);
