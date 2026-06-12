@@ -208,6 +208,7 @@ export class ExaminationDatasetAcquisitionDTO {
     name: string;
     type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS';
     datasets: any;
+    extraDataFilePathList: string[];
 }
 
 export class DatasetAcquisitionDatasetsDTO extends DatasetAcquisitionDTO {
