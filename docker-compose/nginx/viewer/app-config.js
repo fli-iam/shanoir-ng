@@ -37,9 +37,9 @@ window.config = {
 				supportsWildcard: true,
 				omitQuotationForMultipartRequest: false,
 				maxNumRequests: {
-					interaction: SHANOIR_VIEWER_OHIF_MAX_NUM_REQUESTS,
-					thumbnail: 75,
-					prefetch: 25,
+					interaction: SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS,
+					thumbnail: SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS,
+					prefetch: SHANOIR_VIEWER_OHIF_PREFETCH_NUM_REQUESTS,
 				}
 			},
 		},
