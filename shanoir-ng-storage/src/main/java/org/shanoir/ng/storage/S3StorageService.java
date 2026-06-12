@@ -165,6 +165,16 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
+    public boolean existsAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
+        String key = datasetsPrefix + ACQUISITION + acquisitionId + SLASH + fileName;
+        try {
+            return s3Template.objectExists(datasetsBucket, key);
+        } catch (Exception e) {
+            throw new StorageException("S3 existence check failed for: " + fileName, e);
+        }
+    }
+
+    @Override
     public String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
@@ -205,6 +215,30 @@ public class S3StorageService implements StorageService {
                         ObjectMetadata.builder().contentType(contentType).build());
             }
             LOG.info("Stored datasets extra-data file to S3: s3://{}/{}", datasetsBucket, key);
+            return getPublicLocationDatasets(directory, fileName);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw new StorageException("S3 upload failed for: " + fileName, e);
+        }
+    }
+
+    @Override
+    public String storeAcquisitionExtraData(Long acquisitionId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        if (datasetsBucket.equals(UNUSED)) {
+            throw new StorageException("Missing datasets bucket configuration.", null);
+        }
+        String directory = datasetsPrefix + ACQUISITION + acquisitionId;
+        String key = directory + SLASH + fileName;
+        try {
+            if (size > MULTIPART_THRESHOLD) {
+                uploadMultipart(datasetsBucket, key, inputStream, contentType, size);
+            } else {
+                s3Template.upload(datasetsBucket, key, inputStream,
+                        ObjectMetadata.builder().contentType(contentType).build());
+            }
+            LOG.info("Stored datasets acquisition extra-data file to S3: s3://{}/{}", datasetsBucket, key);
             return getPublicLocationDatasets(directory, fileName);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -390,6 +424,16 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
+    public Resource loadAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
+        try {
+            String key = datasetsPrefix + ACQUISITION + acquisitionId + SLASH + fileName;
+            return s3Template.download(datasetsBucket, key);
+        } catch (Exception e) {
+            throw new StorageException("S3 download failed for: " + fileName, e);
+        }
+    }
+
+    @Override
     public Resource loadDatasetsData(String path) throws StorageException {
         try {
             String[] parts = path.replaceFirst("^/", "").split(SLASH, 2);
@@ -435,8 +479,34 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
+    public String getDirectoryAcquisitionExtraData(Long acquisitionId)
+            throws StorageException {
+        if (datasetsBucket.equals(UNUSED)) {
+            throw new StorageException("Missing datasets bucket configuration.", null);
+        }
+        String directory = datasetsPrefix + ACQUISITION + acquisitionId;
+        return directory + SLASH;
+    }
+
+    @Override
     public long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException {
         String key = datasetsPrefix + EXAMINATION + examinationId + SLASH + fileName;
+        try {
+            HeadObjectResponse metadata = s3Client.headObject(HeadObjectRequest.builder()
+                    .bucket(datasetsBucket)
+                    .key(key)
+                    .build());
+            return metadata.contentLength();
+        } catch (NoSuchKeyException e) {
+            return 0L;
+        } catch (Exception e) {
+            throw new StorageException("Failed to get S3 object size for: " + key, e);
+        }
+    }
+
+    @Override
+    public long getFileSizeAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
+        String key = datasetsPrefix + ACQUISITION + acquisitionId + SLASH + fileName;
         try {
             HeadObjectResponse metadata = s3Client.headObject(HeadObjectRequest.builder()
                     .bucket(datasetsBucket)
@@ -487,6 +557,20 @@ public class S3StorageService implements StorageService {
     }
 
     @Override
+    public void deleteAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
+        try {
+            String key = datasetsPrefix
+                            + ACQUISITION + acquisitionId + SLASH + fileName;
+            s3Client.deleteObject(DeleteObjectRequest.builder()
+                    .bucket(datasetsBucket)
+                    .key(key)
+                    .build());
+        } catch (Exception e) {
+            throw new StorageException("Failed to delete dataset S3 object: " + fileName, e);
+        }
+    }
+
+    @Override
     public void deletePreclinicalExtraData(Long examinationId, String fileName) throws StorageException {
         try {
             String key = preclinicalPrefix
@@ -527,6 +611,11 @@ public class S3StorageService implements StorageService {
     @Override
     public void deleteDirectoryExtraData(Long examinationId) throws StorageException {
         deleteDirectoryFromBucket(datasetsBucket, datasetsPrefix + EXAMINATION + examinationId);
+    }
+
+    @Override
+    public void deleteDirectoryAcquisitionExtraData(Long acquisitionId) throws StorageException {
+        deleteDirectoryFromBucket(datasetsBucket, datasetsPrefix + ACQUISITION + acquisitionId);
     }
 
     @Override
