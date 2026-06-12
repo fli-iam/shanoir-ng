@@ -109,6 +109,7 @@ export class DatasetAcquisitionDTOService {
         entity.copies = dto.copies;
         entity.importDate = dto.importDate;
         entity.username = dto.username;
+        entity.extraDataFilePathList = dto.extraDataFilePathList;
         if (dto.acquisitionEquipmentId) {
             entity.acquisitionEquipment = new AcquisitionEquipment();
             entity.acquisitionEquipment.id = dto.acquisitionEquipmentId;
@@ -163,6 +164,7 @@ export class DatasetAcquisitionDTO {
         this.username = dsAcq.username;
         this.source = dsAcq.source;
         this.copies = dsAcq.copies;
+        this.extraDataFilePathList = dsAcq.extraDataFilePathList;
     }
 
     id: number;
@@ -178,6 +180,7 @@ export class DatasetAcquisitionDTO {
     username: string;
     copies: number[];
     source: number;
+    extraDataFilePathList: string[] = [];
 }
 
 export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
