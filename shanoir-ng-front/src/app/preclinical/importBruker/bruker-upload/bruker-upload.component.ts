@@ -17,10 +17,11 @@ import { Router } from '@angular/router';
 
 import { ImportJob } from '../../../import/shared/dicom-data.model';
 import { ImagesUrlUtil } from '../../../shared/utils/images-url.util';
-import { slideDown } from '../../../shared/animations/animations';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { ImportDataService } from '../../../import/shared/import.data-service';
 import { ImportBrukerService } from '../importBruker.service';
+import { UploaderComponent } from '../../../shared/components/uploader/uploader.component';
+import { CheckboxComponent } from '../../../shared/checkbox/checkbox.component';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -28,8 +29,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'bruker-upload',
     templateUrl: 'bruker-upload.component.html',
     styleUrls: ['bruker-upload.component.css', '../../..//import/shared/import.step.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [UploaderComponent, CheckboxComponent]
 })
 export class BrukerUploadComponent {
 
@@ -112,7 +112,7 @@ export class BrukerUploadComponent {
     public storeArchiveChanged(event: boolean) {
         // Get the name of the file to get
         if (event) {
-            const archiveFileName = this.archive.substr(0, this.archive.lastIndexOf('.'));
+            const archiveFileName = this.archive.substring(0, this.archive.lastIndexOf('.'));
             const archiveName  = '/tmp/bruker/convert/' + archiveFileName + '/' + this.archiveFolder + '/' + this.archive;
             this.importDataService.archiveUploaded.archive = archiveName;
         } else {

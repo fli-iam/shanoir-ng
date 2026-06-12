@@ -20,12 +20,17 @@ import { TreeService } from 'src/app/studies/study/tree.service';
 import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetProcessing } from '../shared/dataset-processing.model';
 import { DatasetProcessingService } from "../shared/dataset-processing.service";
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+
+import { SimpleDatasetNodeComponent } from './simple-dataset-node.component';
 
 
 @Component({
     selector: 'processing-node',
     templateUrl: 'processing-node.component.html',
-    standalone: false
+    imports: [TreeNodeComponent, DropdownMenuComponent, MenuItemComponent, SimpleDatasetNodeComponent]
 })
 
 export class ProcessingNodeComponent extends TreeNodeAbstractComponent<ProcessingNode> implements OnChanges {

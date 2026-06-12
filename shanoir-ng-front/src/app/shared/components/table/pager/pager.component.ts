@@ -14,11 +14,12 @@
 
 import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 
+
 @Component({
     selector: 'shanoir-pager',
     templateUrl: 'pager.component.html',
     styleUrls: ['pager.component.css'],
-    standalone: false
+    imports: []
 })
 
 export class PagerComponent implements OnChanges {
@@ -27,7 +28,7 @@ export class PagerComponent implements OnChanges {
     @Input() nbPages: number;
     @Output() pageChange: EventEmitter<number> = new EventEmitter<number>();
 
-    pagerList: number [] = [];
+    pagerList: (number | null)[] = [];
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes['currentPage'] || changes['nbPages'] && this.currentPage && this.nbPages) {
@@ -39,7 +40,15 @@ export class PagerComponent implements OnChanges {
     private refreshPagerList() {
         const nbLinks = 7; // Must be odd
         const half = (Math.floor(nbLinks / 2));
-        const list: number[] = [];
+        const list: (number | null)[] = [];
+        if (this.nbPages <= nbLinks) {
+        for (let i = 1; i <= this.nbPages; i++) {
+                list.push(i);
+            }
+
+            this.pagerList = list;
+            return;
+        }
         if (this.currentPage < half + 2) {
             if (this.nbPages < nbLinks) {
                 for (let i = 1; i < nbLinks && i <= this.nbPages; i++) {

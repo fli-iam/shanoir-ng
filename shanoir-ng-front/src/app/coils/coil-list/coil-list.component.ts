@@ -26,7 +26,7 @@ import { CoilService } from '../shared/coil.service';
     selector: 'coil-list',
     templateUrl: 'coil-list.component.html',
     styleUrls: ['coil-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
 

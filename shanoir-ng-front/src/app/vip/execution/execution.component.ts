@@ -13,8 +13,10 @@
  */
 
 import { formatDate } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
+    FormsModule,
+    ReactiveFormsModule,
     UntypedFormControl,
     UntypedFormGroup,
     ValidatorFn,
@@ -32,10 +34,10 @@ import { ExecutionService } from 'src/app/vip/execution/execution.service';
 import { Execution } from 'src/app/vip/models/execution';
 import { ParameterType } from 'src/app/vip/models/parameterType';
 import { Pipeline } from 'src/app/vip/models/pipeline';
+import { TooltipComponent } from 'src/app/shared/components/tooltip/tooltip.component';
 
 import { ConsoleService } from "../../shared/console/console.service";
-import { Option } from '../../shared/select/select.component';
-import { ServiceLocator } from "../../utils/locator.service";
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { ExecutionDataService } from '../execution.data-service';
 import { DatasetParameterDTO } from "../models/dataset-parameter.dto";
 import { ExecutionCandidateDto } from "../models/execution-candidate.dto";
@@ -46,11 +48,11 @@ import { PipelineParameter } from "../models/pipelineParameter";
     selector: 'app-execution',
     templateUrl: './execution.component.html',
     styleUrls: ['./execution.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent, TooltipComponent]
 })
 export class ExecutionComponent implements OnInit {
 
-    protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    protected consoleService = inject(ConsoleService);
     pipeline: Pipeline;
     executionForm: UntypedFormGroup;
     private selectedDatasets: Set<DatasetLight>;
