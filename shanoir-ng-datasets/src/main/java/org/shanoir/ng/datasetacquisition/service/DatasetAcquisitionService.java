@@ -29,6 +29,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface DatasetAcquisitionService {
 
@@ -83,5 +84,7 @@ public interface DatasetAcquisitionService {
     boolean existsByStudyCardId(Long studyCardId);
 
     Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);
+
+    String addExtraData(Long acquisitionId, MultipartFile file);
 
 }
