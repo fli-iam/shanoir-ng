@@ -50,17 +50,9 @@ public class MrProtocolStrategy {
     private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 
     public MrProtocol generateProtocolForSerie(Attributes attributes, Serie serie) throws IOException {
-        // dcm4che3 does not support MultiframeExtraction for MRS
-        if (Boolean.TRUE.equals(serie.getIsEnhanced()) && !serie.getIsSpectroscopy()) {
-            // Align with 5 EnhancedXXXImageStorage types supported by dcm4che
-            if (UID.EnhancedMRImageStorage.equals(serie.getSopClassUID())
-                    || UID.EnhancedCTImageStorage.equals(serie.getSopClassUID())
-                    || UID.EnhancedPETImageStorage.equals(serie.getSopClassUID())
-                    || UID.EnhancedXAImageStorage.equals(serie.getSopClassUID())
-                    || UID.EnhancedXRFImageStorage.equals(serie.getSopClassUID())) {
-                MultiframeExtractor emf = new MultiframeExtractor();
-                attributes = emf.extract(attributes, 0);
-            }
+        if (MultiframeExtractor.isSupportedSOPClass(serie.getSopClassUID())) {
+            MultiframeExtractor emf = new MultiframeExtractor();
+            attributes = emf.extract(attributes, 0);
         }
 
         MrProtocol mrProtocol = new MrProtocol();

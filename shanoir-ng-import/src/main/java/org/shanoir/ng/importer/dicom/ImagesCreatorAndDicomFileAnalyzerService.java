@@ -293,12 +293,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      */
     private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
         final String sopClassUID = attributes.getString(Tag.SOPClassUID);
-        // Align with 5 EnhancedXXXImageStorage types supported by dcm4che
-        if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-                || UID.EnhancedCTImageStorage.equals(sopClassUID)
-                || UID.EnhancedPETImageStorage.equals(sopClassUID)
-                || UID.EnhancedXAImageStorage.equals(sopClassUID)
-                || UID.EnhancedXRFImageStorage.equals(sopClassUID)) {
+        if (MultiframeExtractor.isSupportedSOPClass(sopClassUID)) {
             MultiframeExtractor emf = new MultiframeExtractor();
             attributes = emf.extract(attributes, 0);
         }
