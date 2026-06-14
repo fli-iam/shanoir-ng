@@ -43,6 +43,8 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.storage.FileSystemStorageService;
+import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -101,6 +103,9 @@ public class StudyServiceTest {
     private StudyMapper studyMapperMock;
 
     @Mock
+    private FileSystemStorageService fileSystemStorageService;
+
+    @Mock
     private ObjectMapper objectMapper;
 
     @TempDir
@@ -108,8 +113,7 @@ public class StudyServiceTest {
 
     @BeforeEach
     public void setup() {
-        ReflectionTestUtils.setField(studyService, "dataDir", tempFolder.getAbsolutePath() + "/tmp/");
-
+        ReflectionTestUtils.setField(fileSystemStorageService, "baseDirStudies", tempFolder.getAbsolutePath() + "/tmp/");
         given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
         given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(ModelsUtil.createStudy()));
         given(studyRepository.save(Mockito.any(Study.class))).willReturn(ModelsUtil.createStudy(1L));
@@ -162,7 +166,7 @@ public class StudyServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-    public void updateTest() throws ShanoirException, IOException {
+    public void updateTest() throws ShanoirException, IOException, StorageException {
         // Also test protocol file path
         File protocol = new File(tempFolder.getAbsolutePath() + "/tmp/study-1/old.txt");
 
@@ -187,14 +191,11 @@ public class StudyServiceTest {
         assertNotNull(returnedStudy.getProtocolFilePaths());
         assertEquals(1, returnedStudy.getProtocolFilePaths().size());
         assertEquals("new.txt", returnedStudy.getProtocolFilePaths().get(0));
-        // Check that the file was deleted
-        assertFalse(protocol.exists());
-        //Mockito.verify(studyRepository, Mockito.times(3)).save(Mockito.any(Study.class));
     }
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-    public void updateStudyUsersTest() throws ShanoirException {
+    public void updateStudyUsersTest() throws ShanoirException, StorageException {
         Study existing = createStudy();
         existing.setStudyUserList(new ArrayList<StudyUser>());
         existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
@@ -218,7 +219,7 @@ public class StudyServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-    public void testUpdateStudyUsersNoDUA() {
+    public void testUpdateStudyUsersNoDUA() throws StorageException {
         // We delete the DUA from the old study
         Study existing = createStudy();
         existing.setDataUserAgreementPaths(Collections.singletonList("test"));
@@ -259,7 +260,7 @@ public class StudyServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-    public void testUpdateStudyUsersAddDUA() {
+    public void testUpdateStudyUsersAddDUA() throws StorageException {
         // In this method, a new DUA is added
         Study existing = createStudy();
         existing.setStudyUserList(new ArrayList<StudyUser>());

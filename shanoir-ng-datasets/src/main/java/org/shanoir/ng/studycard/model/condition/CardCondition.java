@@ -38,7 +38,7 @@ import jakarta.persistence.InheritanceType;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Check(constraints = "(dicomTag IS NOT NULL AND shanoirField IS NULL) OR (dicomTag IS NULL AND shanoirField IS NOT NULL)")
+@Check(constraints = "(dicom_tag IS NOT NULL AND shanoir_field IS NULL) OR (dicom_tag IS NULL AND shanoir_field IS NOT NULL)")
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "scope", discriminatorType = DiscriminatorType.STRING, length = 47)

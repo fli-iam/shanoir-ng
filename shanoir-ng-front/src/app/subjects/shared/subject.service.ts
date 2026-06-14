@@ -37,36 +37,32 @@ export class SubjectService extends EntityService<Subject> {
     getEntityInstance() { return new Subject(); }
 
     getAllSubjectsNames(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_SUBJECT_NAMES_URL)
-            .toPromise();
+        return firstValueFrom(this.http.get<IdName[]>(AppUtils.BACKEND_API_SUBJECT_NAMES_URL));
     }
 
     getSubjectsNames(subjectIds: Set<number>): Promise<IdName[]> {
         const formData: FormData = new FormData();
         formData.set('subjectIds', Array.from(subjectIds).join(","));
-        return this.http.post<IdName[]>(AppUtils.BACKEND_API_SUBJECT_NAMES_URL, formData)
-        .toPromise();
+        return firstValueFrom(this.http.post<IdName[]>(AppUtils.BACKEND_API_SUBJECT_NAMES_URL, formData));
     }
 
     getClinicalSubjects(): Promise<Subject[]> {
-        return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL + '?preclinical=false')
-            .toPromise();
+        return firstValueFrom(this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL + '?preclinical=false'));
     }
 
     getPreclinicalSubjects(): Promise<Subject[]> {
-        return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL + '?clinical=false')
-            .toPromise();
+        return firstValueFrom(this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL + '?clinical=false'));
     }
 
     getPage(pageable: Pageable, name: string):  Promise<Page<Subject>> {
         const params = { 'params': pageable.toParams() };
         params['params']['name'] = name;
-        return this.http.get<Page<Subject>>(AppUtils.BACKEND_API_SUBJECT_FILTER_URL, params).toPromise();
+        return firstValueFrom(this.http.get<Page<Subject>>(AppUtils.BACKEND_API_SUBJECT_FILTER_URL, params));
     }
 
     findSubjectByIdentifier(identifier: string): Promise<Subject> {
-        return this.http.get<SubjectDTO>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier)
-            .toPromise().then(dto => this.mapEntity(dto));
+        return firstValueFrom(this.http.get<SubjectDTO>(AppUtils.BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER + '/' + identifier))
+            .then(dto => this.mapEntity(dto));
     }
 
     isSubjectNameExistForStudy(name: string, studyId: number): Promise<boolean> {
