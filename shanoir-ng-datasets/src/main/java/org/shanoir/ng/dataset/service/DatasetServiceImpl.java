@@ -597,11 +597,11 @@ public class DatasetServiceImpl implements DatasetService {
         }
 
         for (String metadataKey : metadataKeys) {
-            if (Objects.nonNull(metadatas) && metadatas.has(metadataKey) && metadatas.get(metadataKey).has("Value")) {
+
+            if (Objects.nonNull(metadatas) && metadatas.has(metadataKey) && metadatas.get(metadataKey).has("Value") && metadatas.get(metadataKey).get("Value").get(0).asText() != null) {
                 results.put(metadataKey, metadatas.get(metadataKey).get("Value").get(0).asText());
             }
         }
-        LOG.info("TEMPO : " + results);
         return results;
     }
 
