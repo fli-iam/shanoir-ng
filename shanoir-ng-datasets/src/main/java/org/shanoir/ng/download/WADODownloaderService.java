@@ -337,11 +337,7 @@ public class WADODownloaderService {
         }
         AcquisitionAttributes<Long> dAcquisitionAttributes = new AcquisitionAttributes<>();
         for (Dataset dataset : datasets) {
-            try {
-                dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
-            } catch (PacsException e) {
-                throw e;
-            }
+            dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
         }
         LOG.debug("get DICOM attributes for acquisition [" + acquisition.getId() + "] : " + (new Date().getTime() - ts) + " ms");
         return dAcquisitionAttributes;

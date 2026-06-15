@@ -12,3 +12,11 @@
 
 -- rename quality_examination_rule table to fit the new quality card concept
 RENAME TABLE IF EXISTS quality_examination_rule TO quality_card_rule;
+
+ALTER TABLE quality_card_condition_join 
+DROP FOREIGN KEY IF EXISTS FKahmgub56cris7hca5ya5rj8m6;
+
+ALTER TABLE quality_card_condition_join
+ADD CONSTRAINT FKahmgub56cris7hca5ya5rj8m6
+FOREIGN KEY (quality_card_rule_id)
+REFERENCES quality_card_rule(id);

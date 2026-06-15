@@ -215,7 +215,7 @@ public class StudyCardApiController implements StudyCardApi {
         } catch (PacsException | EntityNotFoundException e) {
             LOG.error("Study card could not be applied for acquisitions {}", studyCardApplyObject.getDatasetAcquisitionIds(), e);
             throw new RestServiceException(
-                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, null));
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, e));
         }
 
         // Get all updated dataset ids

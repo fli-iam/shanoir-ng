@@ -186,7 +186,7 @@ public class QualityCardApiController implements QualityCardApi {
         } catch (PacsException e) {
             LOG.error("Error during PACS communication while applying quality card on study", e);
             throw new RestServiceException(
-                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, null));
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, e));
         }
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
@@ -208,7 +208,7 @@ public class QualityCardApiController implements QualityCardApi {
         } catch (PacsException e) {
             LOG.error("Error during PACS communication while applying quality card on study", e);
             throw new RestServiceException(
-                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, null));
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, e));
         }
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
