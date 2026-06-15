@@ -227,22 +227,18 @@ public class DatasetDownloaderServiceImpl {
                 path += "/Exam_" + relevantDataset.getDatasetAcquisition().getExamination().getComment() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getId();
             }
 
-            if (sorting.contains("acquisition")) {
-                path += "/Acq_id_" + relevantDataset.getDatasetAcquisition().getId();
-            }
-
             if (sorting.contains("acquisitionDate")) {
                 String dateTime;
                 if (relevantDataset.getDatasetAcquisition().getAcquisitionStartTime() == null) {
-                    Map<String, String> dateTimeMap = datasetService.getSpecificDicomMetadataValues(relevantDataset, List.of("AcquisitionDate", "AcquisitionTime"));
-                    if (dateTimeMap.containsKey("AcquisitionDate")) {
-                        dateTime = LocalDate.parse(dateTimeMap.get("AcquisitionDate"), DateTimeFormatter.ofPattern("yyyyMMdd")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    Map<String, String> dateTimeMap = datasetService.getSpecificDicomMetadataValues(relevantDataset, List.of("00080022", "00080032"));
+                    if (dateTimeMap.containsKey("00080022")) {
+                        dateTime = LocalDate.parse(dateTimeMap.get("00080022"), DateTimeFormatter.ofPattern("yyyyMMdd")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
                     } else {
                         dateTime = "NoDate";
                     }
 
-                    if (dateTimeMap.containsKey("AcquisitionTime") && dateTimeMap.get("AcquisitionTime").length() > 4) {
-                        dateTime += "_" + dateTimeMap.get("AcquisitionTime").substring(0, 2) + "-" + dateTimeMap.get("AcquisitionTime").substring(2, 4);
+                    if (dateTimeMap.containsKey("00080032") && dateTimeMap.get("00080032").length() > 4) {
+                        dateTime += "_" + dateTimeMap.get("00080032").substring(0, 2) + "-" + dateTimeMap.get("00080032").substring(2, 4);
                     } else {
                         dateTime += "_NoTime";
                     }
@@ -250,6 +246,8 @@ public class DatasetDownloaderServiceImpl {
                     dateTime = relevantDataset.getDatasetAcquisition().getAcquisitionStartTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm"));
                 }
                 path += "/Acq_date_" + dateTime + "_acq_id_" + relevantDataset.getDatasetAcquisition().getId();
+            } else if (sorting.contains("acquisition")) {
+                path += "/Acq_id_" + relevantDataset.getDatasetAcquisition().getId();
             }
             datasetDownloadPath.put(dataset.getId(), path);
         }
