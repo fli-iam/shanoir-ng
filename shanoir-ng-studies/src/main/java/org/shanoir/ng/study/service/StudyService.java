@@ -18,11 +18,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dto.StudyExaminationsDTO.StudyExaminationDTO;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.study.dto.StudyStatisticsDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.model.Study;
@@ -93,6 +95,16 @@ public interface StudyService {
     Study create(Study study) throws MicroServiceCommunicationException;
 
     /**
+     * approve a draft study (or convert it back to draft)
+     *
+     * @param studyId
+     * @return created Study
+     * @throws ShanoirStudiesException
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    public Study approveDraftStudy(Long studyId) throws ShanoirException;
+
+    /**
      * Update a study
      *
      * @param study
@@ -102,7 +114,7 @@ public interface StudyService {
      * @throws AccessDeniedException
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#study.id, 'CAN_ADMINISTRATE') and @studySecurityService.studyUsersMatchStudy(#study)")
-    Study update(Study study) throws ShanoirException;
+    Study update(Study study) throws ShanoirException, StorageException;
 
     /**
      * Adds one studyUser to a study.
@@ -118,16 +130,24 @@ public interface StudyService {
      * @param studyId
      * @param userId
      */
-    void removeStudyUserFromStudy(Long studyId, Long userId);
+    void removeUserFromStudy(Long studyId, Long userId);
 
     /**
      * Links an examination to a study
      *
      * @param examinationId an examination ID
-     * @param studyId       the lionked study ID
+     * @param studyId       the linked study ID
      * @param centerId
      */
     void addExaminationToStudy(Long examinationId, Long studyId, Long centerId, Long subjectId);
+
+    /**
+     * Links multiple examinations to a study
+     *
+     * @param studyExaminationDTOList a list of examination IDs and center IDs
+     * @param studyId                 the linked study ID
+     */
+    void addExaminationsToStudy(List<StudyExaminationDTO> studyExaminationDTOList, Long studyId);
 
     /**
      * Deletes an examination from a study
@@ -138,20 +158,15 @@ public interface StudyService {
     void deleteExamination(Long examinationId, Long studyId);
 
     /**
-     * Gets the protocol or data user agreement file path
-     *
-     * @param studyId
-     *                 id of the study
-     * @param fileName
-     *                 name of the file
-     * @return the file path of the file
-     */
-    String getStudyFilePath(Long studyId, String fileName);
-
-    /**
      * Returns all publicly available studies;
      */
     List<Study> findPublicStudies();
+
+    /**
+     * Returns all draft studies the user can access;
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    List<Study> findDraftStudies();
 
     StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId);
 

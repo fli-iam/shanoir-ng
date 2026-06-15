@@ -29,7 +29,7 @@ import { IdName } from "../../shared/models/id-name.model";
     selector: 'subject-list',
     templateUrl: 'subject-list.component.html',
     styleUrls: ['subject-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 
 export class SubjectListComponent extends EntityListComponent<Subject> {
@@ -81,7 +81,7 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
 
     getOptions() {
         return {
-            new: this.keycloakService.isUserAdminOrExpert(),
+            new: true,
             view: true,
             edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()

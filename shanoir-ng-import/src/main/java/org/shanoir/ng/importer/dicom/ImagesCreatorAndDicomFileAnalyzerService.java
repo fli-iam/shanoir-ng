@@ -26,7 +26,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.dcm4che3.data.UID;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
@@ -293,10 +292,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      */
     private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
         final String sopClassUID = attributes.getString(Tag.SOPClassUID);
-        if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-                || UID.EnhancedMRColorImageStorage.equals(sopClassUID)
-                || UID.EnhancedCTImageStorage.equals(sopClassUID)
-                || UID.EnhancedPETImageStorage.equals(sopClassUID)) {
+        if (MultiframeExtractor.isSupportedSOPClass(sopClassUID)) {
             MultiframeExtractor emf = new MultiframeExtractor();
             attributes = emf.extract(attributes, 0);
         }

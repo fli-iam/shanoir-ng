@@ -93,6 +93,18 @@ public interface DatasetProcessingApi {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByInputDataset(@Parameter(description = "id of the input dataset", required = true) @PathVariable("datasetId") Long datasetId);
 
+    @Operation(summary = "", description = "Returns the processings of a monitoring")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "found dataset processings"),
+            @ApiResponse(responseCode = "204", description = "no dataset processing found"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @GetMapping(value = "/monitoring/{monitoringId}", produces = {"application/json"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByMonitoring(@Parameter(description = "id of the monitoring", required = true) @PathVariable("monitoringId") Long monitoringId);
+
+
     @Operation(summary = "", description = "Returns the input datasets of a processing")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found dataset processings"),
@@ -123,7 +135,7 @@ public interface DatasetProcessingApi {
             @ApiResponse(responseCode = "500", description = "unexpected error")})
     @PostMapping(value = "", produces = {"application/json"}, consumes = {
             "application/json"})
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and !@datasetSecurityService.isDraftStudy(#datasetProcessing.getStudyId())")
     ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(@Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
                                                                   BindingResult result) throws RestServiceException;
 

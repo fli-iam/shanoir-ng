@@ -33,7 +33,7 @@ import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -81,13 +81,16 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private DatasetService datasetService;
 
     @Autowired
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Autowired
     private DICOMWebService dicomWebService;
 
     @Autowired
     private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
+    @Autowired
+    private DatasetAcquisitionAsyncService datasetAcquisitionAsyncService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
 
@@ -243,7 +246,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
      * @throws IOException
      * @throws RestServiceException
      */
-    private void delete(DatasetAcquisition entity, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+    public void delete(DatasetAcquisition entity, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         // Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
         List<DatasetAcquisition> childDsAc = repository.findBySourceId(entity.getId());
         if (!CollectionUtils.isEmpty(childDsAc)) {
@@ -258,7 +261,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                 List<Long> datasetIds = new ArrayList<>();
                 for (Dataset ds : datasets) {
                     if (event != null) {
-                        event.setMessage("Delete examination - dataset with id : " + ds.getId());
                         float progressMax = Float.valueOf(event.getEventProperties().get("progressMax"));
                         event.setProgress(event.getProgress() + (1f / progressMax));
                         shanoirEventService.publishEvent(event);
@@ -288,7 +290,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         if (acquisition == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
-        delete(acquisition, event);
+
+        Map<String, String> eventProperties = new HashMap<>();
+        eventProperties.put("progressMax", String.valueOf(acquisition.getDatasets().size()));
+        event.setEventProperties(eventProperties);
+        event.setMessage("Delete DatasetAcquisition with id : " + id);
+        shanoirEventService.publishEvent(event);
 
         String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(acquisition.getExamination());
         String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(acquisition);
@@ -296,8 +303,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         if (acquisition.getSource() == null)
             dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
 
-        repository.deleteById(id);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, acquisition.getExamination().getStudyId()));
+        datasetAcquisitionAsyncService.deleteByIdAsync(acquisition, event);
     }
 
     /**
@@ -314,6 +320,8 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
+        event.setMessage("Delete examination - datasetAcquisition with id : " + id);
+        shanoirEventService.publishEvent(event);
         delete(entity, event);
 
         repository.deleteById(id);

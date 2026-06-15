@@ -41,7 +41,7 @@ import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.STOWRSMultipartRequestFilter;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -88,7 +88,7 @@ public class DicomSEGAndSRImporterService {
     private SubjectRepository subjectRepository;
 
     @Autowired
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Autowired
     private DicomImporterService dicomImporterService;
@@ -139,9 +139,9 @@ public class DicomSEGAndSRImporterService {
     private Examination modifyDicom(Attributes datasetAttributes) {
         String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
         Examination examination = null;
-        if (studyInstanceUID.contains(StudyInstanceUIDHandler.PREFIX)) {
+        if (studyInstanceUID.contains(StudyInstanceUIDAndSubjectNameHandler.PREFIX)) {
             try {
-                Long examinationID = Long.valueOf(studyInstanceUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
+                Long examinationID = Long.valueOf(studyInstanceUID.substring(StudyInstanceUIDAndSubjectNameHandler.PREFIX.length()));
                 examination = examinationRepository.findById(examinationID).orElseThrow();
                 // replace artificial examinationUID with real StudyInstanceUID in DICOM server
                 String studyInstanceUIDPACS = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(studyInstanceUID);

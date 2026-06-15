@@ -16,14 +16,17 @@ package org.shanoir.ng.dataset.service;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -35,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +60,7 @@ public class CreateStatisticsService {
     private EntityManager entityManager;
     private static final String ZIP = ".zip";
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    public static final String TSV_FILE_PREFIX = "shanoirExportStatistics";
     private static final Logger LOG = LoggerFactory.getLogger(CreateStatisticsService.class);
 
     private File recreateFile(final String fileName) throws IOException {
@@ -73,7 +78,7 @@ public class CreateStatisticsService {
         float progress = 0;
         String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
         File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-        File zipFile = recreateFile(userDir + File.separator + "shanoirExportStatistics_" + event.getId() + ZIP);
+        File zipFile = recreateFile(userDir + File.separator + TSV_FILE_PREFIX + "_" + event.getId() + ZIP);
         int startRow = 0;
         int blocSize = 50000;
 
@@ -91,7 +96,7 @@ public class CreateStatisticsService {
             try (FileOutputStream fos = new FileOutputStream(zipFile);
                     ZipOutputStream zos = new ZipOutputStream(fos)) {
 
-                ZipEntry zipEntry = new ZipEntry("shanoirExportStatistics_" + event.getId() + ".tsv");
+                ZipEntry zipEntry = new ZipEntry(TSV_FILE_PREFIX + "_" + event.getId() + ".tsv");
                 zos.putNextEntry(zipEntry);
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(zos);
 
@@ -188,29 +193,6 @@ public class CreateStatisticsService {
     }
 
     /**
-     * Zip a single file
-     *
-     * @param sourceFile
-     * @param zipFile
-     * @throws IOException
-     */
-    private void zipSingleFile(final File sourceFile, final File zipFile) throws IOException {
-        byte[] buffer = new byte[1024];
-        try (FileOutputStream fos = new FileOutputStream(zipFile);
-                ZipOutputStream zos = new ZipOutputStream(fos);
-                FileInputStream fis = new FileInputStream(sourceFile);
-        ) {
-            // begin writing a new ZIP entry, positions the stream to the start of the entry data
-            zos.putNextEntry(new ZipEntry(sourceFile.getName()));
-            int length;
-            while ((length = fis.read(buffer)) > 0) {
-                zos.write(buffer, 0, length);
-            }
-            zos.closeEntry();
-        }
-    }
-
-    /**
      * Compute overall statistics by calling the corresponding stored procedure.
      * Used to insert daily stats into the overall_statistics table.
      *
@@ -225,5 +207,42 @@ public class CreateStatisticsService {
 
         //update overall_statistics table with total storage volume for current date
         datasetRepository.addTotalStorageVolume(totalStorageVolume);
+    }
+
+    // cron every 5 minutes to delete old tsv files (older than 6 hours)
+    @Scheduled(cron = "0 0/5 * * * ?")
+    public void deleteOldTsvFiles() {
+        LOG.info("CRON - delete old tsv files");
+
+        String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+        long expirationTime = System.currentTimeMillis() - 6 * 60 * 60 * 1000;
+
+        try (Stream<Path> paths = Files.walk(Paths.get(tmpDir), 2)) {
+            paths
+                .filter(Files::isRegularFile)
+                .filter(path -> path.getFileName().toString().startsWith(TSV_FILE_PREFIX))
+                .filter(path -> isOlderThan(path, expirationTime))
+                    .forEach(this::deleteFileSafely);
+        } catch (IOException e) {
+            LOG.error("Error while listing user directories", e);
+        }
+    }
+
+    private boolean isOlderThan(Path path, long expirationTime) {
+        try {
+            return Files.getLastModifiedTime(path).toMillis() < expirationTime;
+        } catch (IOException e) {
+            LOG.error("Error while checking age for {}", path, e);
+            return false;
+        }
+    }
+
+    private void deleteFileSafely(Path path) {
+        try {
+            Files.delete(path);
+            LOG.info("Deleted old TSV file {}", path);
+        } catch (IOException e) {
+            LOG.error("Error while deleting {}", path, e);
+        }
     }
 }

@@ -189,6 +189,8 @@ public class SubjectApiSecurityTest {
         given(subjectStudyRepository.findByStudyId(subjectStudyMock.getStudy().getId())).willReturn(Arrays.asList(subjectStudyMock));
         given(subjectStudyRepository.findByStudyIdAndStudy_StudyUserList_UserId(subjectStudyMock.getStudy().getId(), LOGGED_USER_ID)).willReturn(Arrays.asList(subjectStudyMock));
         given(studyRepository.findStudyWithTagsById(1L)).willReturn(buildStudyMock(1L));
+        given(studyRepository.findById(1L)).willReturn(Optional.of(subjectStudyMock.getStudy()));
+        given(repository.findById(1L)).willReturn(Optional.of(subjectMockNoRights));
         assertAccessDenied(api::findSubjectsByStudyId, 1L, "null");
 
         // Wrong Rights
@@ -234,11 +236,12 @@ public class SubjectApiSecurityTest {
         assertAccessAuthorized(api::findSubjectsNames, List.of(ENTITY_ID));
         //assertEquals(1, api.findSubjectsNames().getBody().size());
         subjectStudyMock = new SubjectStudy();
-        subjectStudyMock.setStudy(buildStudyMock(1L));
+        subjectStudyMock.setStudy(buildStudyMock(1L, StudyUserRight.CAN_SEE_ALL));
         subjectStudyMock.setSubject(subjectMockRightRights);
         given(subjectStudyRepository.findByStudyId(subjectStudyMock.getStudy().getId())).willReturn(Arrays.asList(subjectStudyMock));
         given(subjectStudyRepository.findByStudyIdAndStudy_StudyUserList_UserId(subjectStudyMock.getStudy().getId(), LOGGED_USER_ID)).willReturn(Arrays.asList(subjectStudyMock));
         given(studyRepository.findById(1L)).willReturn(Optional.of(subjectStudyMock.getStudy()));
+        given(repository.findById(1L)).willReturn(Optional.of(subjectMockNoRights));
         assertAccessAuthorized(api::findSubjectsByStudyId, 1L, null);
         assertNotNull(api.findSubjectsByStudyId(1L, null).getBody());
         assertEquals(1, api.findSubjectsByStudyId(1L, null).getBody().size());

@@ -109,6 +109,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
                     // find the correct equipment for each study card and add it
                     if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
                         studyCard.setAcquisitionEquipment(acquisitionEquipment);
+                        studyCard.setCenterId(acquisitionEquipment.getCenter().getId());
                     }
                 }
             }
@@ -255,12 +256,15 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
 
         // With or without study card: we might require the creation of
         // a center and/or an acquisition equipment
-        Long centerId = null;
+        Long centerId = importJob.getCenterId();
         AcquisitionEquipment equipment = null;
         if (studyCard == null) {
-            Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(importJob.getFirstSelectedSerie().getInstitution(), studyREST.getId());
-            centerId = center.getId();
-            equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, center);
+            if (centerId == null) {
+                Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(
+                        importJob.getFirstSelectedSerie().getInstitution(), studyREST.getId());
+                centerId = center.getId();
+            }
+            equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, centerId);
             if (equipment != null) {
                 acquisitionEquipments.add(equipment);
             } else {
@@ -345,9 +349,15 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         }
         importJob.setSubjectName(subjectREST.getName());
 
-        logger.info("Search existing examinations for subject: a) same date: user has to finish import b) new date: create examination.");
+        logger.info("Search existing examinations for subject: a) same date and comment: user has to finish import b) new date or comment: create examination.");
         line[4] = importJob.getSubjectName();
         line[5] = studyDate.format(DateTimeUtils.FORMATTER);
+        boolean tableExamCommentFound = false;
+        // If column SHANOIR_EXAM_COMMENT is not empty we set the examination comment to this value
+        if (importJob.getExaminationComment() != null && !importJob.getExaminationComment().isEmpty()) {
+            studyDescription = importJob.getExaminationComment();
+            tableExamCommentFound = true;
+        }
         try {
             List<Examination> examinations = shanoirUploaderServiceClientNG.findExaminationsBySubjectId(subjectREST.getId());
             if (examinations != null && !examinations.isEmpty()) {
@@ -356,13 +366,14 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
                     .collect(Collectors.toList());
                 for (Iterator<Examination> iterator = examinationsFilteredByStudy.iterator(); iterator.hasNext();) {
                     Examination examination = (Examination) iterator.next();
-                    // Existing exam found with the same study date: stop importJob and take next one
+                    // Existing exam found with the same study date and comment: stop importJob and take next one
                     Date examinationDate = examination.getExaminationDate();
                     LocalDate examinationLocalDate = examinationDate.toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDate();
-                    if (examinationLocalDate.equals(studyDate)) {
-                        logger.info("Import job only downloaded, manual user decision needed: existing examination with the same date.");
+                        // We create a new examination only if dates are different or if column SHANOIR_EXAM_COMMENT is not empty and comments are different
+                    if (examinationLocalDate.equals(studyDate) && (!tableExamCommentFound || examination.getComment().equals(studyDescription))) {
+                        logger.info("Import job only downloaded, manual user decision needed: existing examination with the same date and same comment.");
                         csvWriter.addExaminationLine(false, line);
                         return false;
                     }
@@ -377,11 +388,8 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         logger.info("Create examination.");
         Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
         Date studyDateDate = Date.from(studyDateInstant);
-        // If column SHANOIR_EXAM_COMMENT is not empty we set the examination comment to this value
-        if (importJob.getExaminationComment() != null || !importJob.getExaminationComment().isEmpty()) {
-            studyDescription = importJob.getExaminationComment();
-        }
-        Examination examination = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId);
+        boolean agreeWithDataReuse = importJob.getExaminationDataReuseAgreement();
+        Examination examination = ImportUtils.createExamination(studyREST, subjectREST, studyDateDate, studyDescription, centerId, agreeWithDataReuse);
         if (examination == null) {
             importJob.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.table.error.examination"));
             line[6] = resourceBundle.getString("shanoir.uploader.import.table.error.examination");

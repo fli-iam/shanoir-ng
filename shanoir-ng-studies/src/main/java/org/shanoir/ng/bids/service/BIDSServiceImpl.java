@@ -14,13 +14,17 @@
 
 package org.shanoir.ng.bids.service;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
+
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DurationFieldType;
 import org.joda.time.LocalDate;
 import org.joda.time.Years;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.dto.DatasetDescription;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
@@ -36,30 +40,25 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class BIDSServiceImpl implements BIDSService {
 
     private static final Logger LOG = LoggerFactory.getLogger(BIDSServiceImpl.class);
+
     @Autowired
     private SubjectRepository subjectRepository;
 
     @Autowired
     private StudyRepository studyRepository;
 
-    @Value("${bids-data-folder}")
+    @Value("${storage.file-system.bids-data}")
     private String bidsStorageDir;
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    private static final String STUDY_PREFIX = "stud-";
-
-    private static final String SUBJECT_PREFIX = "sub-";
 
     private static final String SUBJECT_IDENTIFIER = "subject_identifier";
 
@@ -84,7 +83,6 @@ public class BIDSServiceImpl implements BIDSService {
 
     private static final String README_FILE = "README";
 
-
     public ResponseEntity<ByteArrayResource> generateParticipantsTsv(final Long studyId) throws IOException {
         List<Subject> subjs = getSubjectsForStudy(studyId);
         StringBuilder data = participantsSerializer(subjs);
@@ -102,7 +100,7 @@ public class BIDSServiceImpl implements BIDSService {
     @Override
     public String generateParticipantsTsvFile(Long studyId) throws IOException {
         Study study = studyRepository.findById(studyId).orElse(null);
-        File workFolder = getBidsFolderpath(studyId, study.getName());
+        File workFolder = getBidsFolderPath(studyId);
         File baseDir = createBaseBidsFolder(workFolder, study.getName());
         File csvFile = new File(baseDir.getAbsolutePath() + File.separator + "participants.tsv");
 
@@ -122,8 +120,7 @@ public class BIDSServiceImpl implements BIDSService {
         return buffer.toString();
     }
 
-    public StringBuilder participantsSerializer(List<Subject> subjs) {
-        int index = 1;
+    public StringBuilder participantsSerializer(List<Subject> subjects) {
         StringBuilder buffer =  new StringBuilder();
         // Headers
         for (String columnHeader : CSV_PARTICIPANTS_HEADER) {
@@ -131,13 +128,11 @@ public class BIDSServiceImpl implements BIDSService {
         }
         buffer.append(CSV_SPLITTER);
 
-        for (Subject subject : subjs) {
-            String subjectName = subject.getName();
+        for (Subject subject : subjects) {
             String subjectAge = ageCalculation(subject);
             String subjectSex = subject.getSex() != null ? subject.getSex().name() : "O";
-            subjectName = this.formatLabel(subjectName);
             // Write in the file the values
-            buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subjectName).append(CSV_SEPARATOR)
+            buffer.append(StorageService.SUBJECT).append(subject.getId()).append(CSV_SEPARATOR)
                     .append(subject.getId()).append(CSV_SEPARATOR)
                     .append(subjectAge).append(CSV_SEPARATOR)
                     .append(subjectSex).append(CSV_SEPARATOR)
@@ -147,25 +142,19 @@ public class BIDSServiceImpl implements BIDSService {
         return buffer;
     }
 
-    private String formatLabel(String label) {
-        return label.replaceAll("[^a-zA-Z0-9]+", "");
-    }
-
     private List<Subject> getSubjectsForStudy(final Long studyId) throws JsonParseException, JsonMappingException, IOException {
         // Get the list of subjects
         List<Subject> subjects = subjectRepository.findByStudy_Id(studyId);
         return subjects;
     }
 
-    public File getBidsFolderpath(final Long studyId, String studyName) {
-        studyName = this.formatLabel(studyName);
-        String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName;
+    public File getBidsFolderPath(final Long studyId) {
+        String tmpFilePath = bidsStorageDir + File.separator + StorageService.STUDY + studyId;
         return new File(tmpFilePath);
     }
 
     private File createBaseBidsFolder(File workFolder, String studyName) {
         workFolder.mkdirs();
-
         // 2. Create dataset_description.json and README
         DatasetDescription datasetDescription = new DatasetDescription();
         datasetDescription.setName(studyName);
@@ -175,12 +164,14 @@ public class BIDSServiceImpl implements BIDSService {
         } catch (IOException e) {
             LOG.error(e.getMessage());
         }
-
         return workFolder;
     }
 
     private String ageCalculation(Subject subject) {
         java.time.LocalDate bd = subject.getBirthDate();
+        if (bd == null) {
+            return "n/a";
+        }
         LocalDate birthDate = new LocalDate(bd.getYear(), bd.getMonthValue(), bd.getDayOfMonth());
         LocalDate now = new LocalDate();
         Years age = Years.yearsBetween(birthDate, now);

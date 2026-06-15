@@ -40,7 +40,6 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,22 +71,27 @@ public class OutputService {
     public void process(ExecutionMonitoring monitoring) throws ResultHandlerException, EntityNotFoundException {
         File userImportDir = new File(this.importDir + File.separator + monitoring.getResultsLocation());
 
-        for (File archive : getArchivesToProcess(userImportDir)) {
-            File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
-            List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
 
-            for (OutputHandler outputHandler : outputHandlers) {
-                if (outputHandler.canProcess(monitoring)) {
-                    LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
-                    outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring);
+        if (userImportDir.exists()) {
+            for (File archive : getArchivesToProcess(userImportDir)) {
+                File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
+                try {
+                    String resourceId = archive.getName().split("\\+")[1];
+                    List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
+                    for (OutputHandler outputHandler : outputHandlers) {
+                        if (outputHandler.canProcess(monitoring)) {
+                            LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
+                            outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring, resourceId);
+                        }
+                    }
+                } finally {
+                    System.gc();
+                    deleteTemporaryDirectory(cacheFolder);
                 }
             }
-            deleteTemporaryDirectory(cacheFolder);
         }
 
-        // Remove processed datasets from current execution monitoring
-        monitoring.setInputDatasets(Collections.emptyList());
-        datasetProcessingService.update(monitoring);
+        // Remove processing resources
         processingResourceRepository.deleteByProcessingId(monitoring.getId());
     }
 
@@ -96,6 +100,7 @@ public class OutputService {
             FileUtils.deleteDirectory(userImportDir);
         } catch (IOException e) {
             LOG.error("I/O error while deleting cache dir [{}]", userImportDir.getAbsolutePath());
+            LOG.error(e.getCause().getMessage(), e);
         }
     }
 

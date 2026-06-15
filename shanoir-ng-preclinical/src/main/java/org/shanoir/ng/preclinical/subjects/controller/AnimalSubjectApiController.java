@@ -115,7 +115,8 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
         } catch (JsonProcessingException | ShanoirException ex) {
             String msg = "Failed to create subject. Animal subject can't be created.";
             LOG.error(msg, ex);
-            throw new ShanoirException(msg, ex);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.FORBIDDEN.value(), ex.getMessage(), null));
         }
         dto.setId(id);
         return dto;

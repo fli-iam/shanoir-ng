@@ -111,7 +111,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 throw new ShanoirError({error: {message: 'the study list failed loading', details: error}});
             });
         } else {
-            this.fetchStudies(true).then( () => {
+            this.fetchStudies(true).then(() => {
                 this.getStudyCardPolicy(this.study).then(policy => {
                     this.study.studyCardPolicy = policy;
                 })

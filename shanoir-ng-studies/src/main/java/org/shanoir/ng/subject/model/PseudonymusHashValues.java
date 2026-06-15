@@ -66,6 +66,23 @@ public class PseudonymusHashValues  extends HalEntity implements Serializable {
 
     private String birthDateHash;
 
+    public PseudonymusHashValues() { }
+
+    public PseudonymusHashValues(PseudonymusHashValues other) {
+        if (other == null) {
+            return;
+        }
+        this.birthNameHash1 = other.birthNameHash1;
+        this.birthNameHash2 = other.birthNameHash2;
+        this.birthNameHash3 = other.birthNameHash3;
+        this.lastNameHash1 = other.lastNameHash1;
+        this.lastNameHash2 = other.lastNameHash2;
+        this.lastNameHash3 = other.lastNameHash3;
+        this.firstNameHash1 = other.firstNameHash1;
+        this.firstNameHash2 = other.firstNameHash2;
+        this.firstNameHash3 = other.firstNameHash3;
+        this.birthDateHash = other.birthDateHash;
+    }
 
     /*
      * (non-Javadoc)

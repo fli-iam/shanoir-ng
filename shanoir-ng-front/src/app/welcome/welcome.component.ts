@@ -10,6 +10,7 @@ import {
   ViewEncapsulation,
   DOCUMENT
 } from '@angular/core';
+import { SlicePipe, TitleCasePipe } from '@angular/common';
 
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { ImagesUrlUtil } from "../shared/utils/images-url.util";
@@ -26,7 +27,7 @@ import { isDarkColor } from "../utils/app.utils";
     templateUrl: './welcome.component.html',
     styleUrls: ['./welcome.component.css'],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [SlicePipe, TitleCasePipe]
 })
 export class WelcomeComponent implements OnInit {
 
@@ -352,13 +353,14 @@ export class WelcomeComponent implements OnInit {
     }
 
     private fetchOverallStats() {
+        // get public studies data
+        this.fetchPublicStudies();
         // get the latest overall statistics
         this.datasetService.getOverallStatistics().then(stats => {
             this.studiesCount = stats.studiesCount;
             this.subjectsCount = stats.subjectsCount;
             this.datasetAcquisitionsCount = stats.datasetAcquisitionsCount;
             this.storageSize = stats.storageSize;
-            this.fetchPublicStudies();
             this.fetchUsersCount();
             this.fetchEventsCount();
             this.addSchemaToDOM();

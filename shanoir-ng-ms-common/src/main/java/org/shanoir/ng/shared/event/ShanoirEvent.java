@@ -14,11 +14,12 @@
 
 package org.shanoir.ng.shared.event;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Transient;
-
 import java.util.Map;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Transient;
 
 public class ShanoirEvent {
 
@@ -54,7 +55,7 @@ public class ShanoirEvent {
     public ShanoirEvent() {
     }
 
-    public ShanoirEvent(String eventType, String objectId, Long userId, String message,    int status) {
+    public ShanoirEvent(String eventType, String objectId, Long userId, String message, int status) {
         this.eventType = eventType;
         setObjectId(objectId);
         this.userId = userId;
@@ -64,7 +65,7 @@ public class ShanoirEvent {
         this.id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
     }
 
-    public ShanoirEvent(String eventType, String objectId, Long userId, String message,    int status, Long studyId) {
+    public ShanoirEvent(String eventType, String objectId, Long userId, String message, int status, Long studyId) {
         this.eventType = eventType;
         setObjectId(objectId);
         this.userId = userId;
@@ -75,12 +76,12 @@ public class ShanoirEvent {
         this.id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
     }
 
-    public ShanoirEvent(String eventType, String objectId, Long userId, String message,    int status, float progress) {
+    public ShanoirEvent(String eventType, String objectId, Long userId, String message, int status, float progress) {
         this(eventType, objectId, userId, message, status);
         this.progress = Float.valueOf(progress);
     }
 
-    public ShanoirEvent(String eventType, String objectId, Long userId, String message,    int status, float progress, Long studyId) {
+    public ShanoirEvent(String eventType, String objectId, Long userId, String message, int status, float progress, Long studyId) {
         this(eventType, objectId, userId, message, status, studyId);
         this.progress = Float.valueOf(progress);
     }

@@ -15,7 +15,7 @@
 import { formatDate } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
 import { ComponentRef, EventEmitter, Injectable } from '@angular/core';
-import { AbstractControl, ValidatorFn } from "@angular/forms";
+import { AbstractControl, ValidationErrors, ValidatorFn } from "@angular/forms";
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Observable, race, Subscription } from 'rxjs';
 import { last, map, take } from 'rxjs/operators';
@@ -187,28 +187,34 @@ export class MassDownloadService {
                     endPromise.reject(error);
                 }
 
-                const flowSubscription: Subscription = downloadObs.subscribe(state => {
-                    task.lastUpdate = new Date();
-                    task.progress = state?.progress;
-                    if (downloadState) {
-                        downloadState.progress = task?.progress;
-                    }
-                    task.status = state?.status;
-                    this.notificationService.pushLocalTask(task);
-                }, errorFunction);
+                const flowSubscription: Subscription = downloadObs.subscribe({
+                    next: state => {
+                        task.lastUpdate = new Date();
+                        task.progress = state?.progress;
+                        if (downloadState) {
+                            downloadState.progress = task?.progress;
+                        }
+                        task.status = state?.status;
+                        this.notificationService.pushLocalTask(task);
+                    },
+                    error: errorFunction
+                });
 
-                const endSubscription: Subscription = downloadObs.pipe(last()).subscribe(state => {
-                    flowSubscription.unsubscribe();
-                    const duration: number = Date.now() - start;
-                    task.message = 'download completed in ' + duration + 'ms for ' + datasetIds.length + ' datasets';
-                    task.lastUpdate = new Date();
-                    task.status = state.status;
-                    task.progress = 1;
-                    task.report = state.errors;
-                    downloadState.progress = task.progress;
-                    this.notificationService.pushLocalTask(task);
-                    endPromise.resolve();
-                }, errorFunction);
+                const endSubscription: Subscription = downloadObs.pipe(last()).subscribe({
+                    next: state => {
+                        flowSubscription.unsubscribe();
+                        const duration: number = Date.now() - start;
+                        task.message = 'download completed in ' + duration + 'ms for ' + datasetIds.length + ' datasets';
+                        task.lastUpdate = new Date();
+                        task.status = state.status;
+                        task.progress = 1;
+                        task.report = state.errors;
+                        downloadState.progress = task.progress;
+                        this.notificationService.pushLocalTask(task);
+                        endPromise.resolve();
+                    },
+                    error: errorFunction
+                });
 
                 return endPromise.finally(() => {
                     flowSubscription.unsubscribe();
@@ -567,7 +573,7 @@ export class MassDownloadService {
 
     private openModal(inputIds: DownloadInputIds, totalSize?: number): Promise<DownloadSetup | 'cancel'> {
         if ((window as any).showDirectoryPicker) { // test compatibility
-            const modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
+            const modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.createComponent(DownloadSetupComponent);
             modalRef.instance.inputIds = inputIds;
             modalRef.instance.totalSize = totalSize;
             return this.waitForEnd(modalRef);
@@ -577,7 +583,7 @@ export class MassDownloadService {
     }
 
     private openAltModal(inputIds: DownloadInputIds): Promise<DownloadSetup | 'cancel'> {
-        const modalRef: ComponentRef<DownloadSetupAltComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupAltComponent);
+        const modalRef: ComponentRef<DownloadSetupAltComponent> = ServiceLocator.createComponent(DownloadSetupAltComponent);
         modalRef.instance.inputIds = inputIds;
         return this.waitForEnd(modalRef);
     }
@@ -588,12 +594,15 @@ export class MassDownloadService {
             modalRef.instance.go,
             modalRef.instance.closeModal.pipe(map(() => 'cancel'))
         ]);
-        result.pipe(take(1)).subscribe(ret => {
-            modalRef.destroy();
-            resPromise.resolve(ret);
-        }, error => {
-            modalRef.destroy();
-            resPromise.reject(error);
+        result.pipe(take(1)).subscribe({
+            next: ret => {
+                modalRef.destroy();
+                resPromise.resolve(ret);
+            }, 
+            error: error => {
+                modalRef.destroy();
+                resPromise.reject(error);
+            }
         });
         return resPromise;
     }
@@ -656,15 +665,12 @@ export class MassDownloadService {
     }
 
     requiredIfTypeIsNii(): ValidatorFn {
-        return (control: AbstractControl) => {
+        return (control: AbstractControl): ValidationErrors | null => {
             const format = control?.parent?.get('format')?.value
             const isRequired = format === 'nii'
             const value = control?.value
 
-            if (isRequired && !value) {
-                return {requiredIfTypeIsNii: true}
-            }
-            return null
+            return isRequired && !value ? {requiredIfTypeIsNii: true} : null;
         }
     }
 }

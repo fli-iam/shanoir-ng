@@ -13,17 +13,18 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
+import { CopyData, CopyDataService } from 'src/app/studies/shared/copy-data.service';
 import { StudyService } from 'src/app/studies/shared/study.service';
 
 import { StudyRightsService } from "../../../studies/shared/study-rights.service";
 import { StudyUserRight } from "../../../studies/shared/study-user-right.enum";
-import * as AppUtils from "../../../utils/app.utils";
-import { ServiceLocator } from "../../../utils/locator.service";
 import { ConsoleService } from "../../console/console.service";
 import { KeycloakService } from "../../keycloak/keycloak.service";
 import { IdName } from '../../models/id-name.model';
+import { SelectBoxComponent } from '../../select/select.component';
 
 
 export type InputDataset = {
@@ -37,7 +38,7 @@ export type InputDataset = {
     selector: 'user-action-dialog',
     templateUrl: 'dataset-copy-dialog.component.html',
     styleUrls: ['dataset-copy-dialog.component.css'],
-    standalone: false
+    imports: [SelectBoxComponent, FormsModule]
 })
 export class DatasetCopyDialogComponent {
 
@@ -45,32 +46,33 @@ export class DatasetCopyDialogComponent {
     protected inputDatasets: InputDataset[] = [];
     protected ownRef: any;
     protected selectedStudy: IdName;
+    protected subjectName: string = '';
     protected statusMessage: string;
     protected hasRight: boolean = false;
     protected isDatasetInStudy: boolean = false;
     protected canCopy: boolean = true;
     protected centerIds: number[] = [];
     protected subjectIds: number[] = [];
-    protected subjectIdStudyIds: string[] = [];
-    protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    protected consoleService = inject(ConsoleService);
 
     constructor(private http: HttpClient,
         private studyRightsService: StudyRightsService,
         private studyService: StudyService,
-        private keycloakService: KeycloakService) {
+        private keycloakService: KeycloakService,
+        private copyDataService: CopyDataService) {
     }
 
     public setUp(inputDatasets: InputDataset[], modalRef: any) {
         this.fetchStudies().then(() => {
             this.sortStudies();
-            this.checkAdminRightsOnDatasets();
+            this.checkImportRightsOnDatasets();
         });
         this.ownRef = modalRef;
         this.inputDatasets = inputDatasets;
     }
 
     private fetchStudies(): Promise<void> {
-        return this.studyService.findStudyIdNamesIcanAdmin().then(studies => {
+        return this.studyService.findStudyIdNamesCanImport().then(studies => {
             this.studies = studies;
         });
     }
@@ -82,25 +84,24 @@ export class DatasetCopyDialogComponent {
             if (!this.centerIds.includes(line.centerId)) {
                 this.centerIds.push(line.centerId);
             }
-            if (!this.subjectIds.includes(line.subjectId) && line.subjectId != null) {
-                this.subjectIds.push(line.subjectId);
-            } else if (line.subjectId == null) {
+            if (line.subjectId != null) {
+                if (!this.subjectIds.includes(line.subjectId)) {
+                    this.subjectIds.push(line.subjectId);
+                }
+            } else {
                 ids.push(line.datasetId);
                 this.statusMessage = "Some of the selected datasets (id = " + ids.join(", ") + ") have no subject, can't proceed with the copy.";
                 this.canCopy = false;
             }
-            if (!this.subjectIdStudyIds.includes(line.subjectId + "/" + line.studyId)) {
-                this.subjectIdStudyIds.push(line.subjectId + "/" + line.studyId);
-            }
         }
     }
 
-    private checkAdminRightsOnDatasets() {
+    private checkImportRightsOnDatasets() {
         const hasEveryForAll: boolean = this.inputDatasets.every(ds => {
             return this.studies.find(s => s.id === ds.studyId);
         });
         if (!hasEveryForAll) {
-            this.statusMessage = "You must have ADMIN right on all the studies of the selected datasets to proceed with the copy.";
+            this.statusMessage = "You must have IMPORT right on all the studies of the selected datasets to proceed with the copy.";
             this.canCopy = false;
         }
     }
@@ -111,28 +112,39 @@ export class DatasetCopyDialogComponent {
             this.isDatasetInStudy = this.checkDatasetBelongToStudy(this.inputDatasets, this.selectedStudy.id);
 
             if (!this.hasRight) {
-                this.statusMessage = 'Missing rights for study ' + this.selectedStudy.name + ' please make sure you have ADMIN right.';
+                this.statusMessage = 'Missing rights for study ' + this.selectedStudy.name + ' please make sure you have IMPORT right.';
             } else if (this.isDatasetInStudy) {
                 this.statusMessage = 'Selected dataset(s) already belong to selected study.';
             } else {
-                const formData: FormData = new FormData();
-                formData.set('datasetIds', Array.from(this.inputDatasets.map(d => d.datasetId)).join(","));
-                formData.set('studyId', this.selectedStudy.id.toString());
-                formData.set('centerIds', Array.from(this.centerIds).join(","));
-                formData.set('subjectIdStudyIds', Array.from(this.subjectIdStudyIds).join(","));
-                return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json' })
-                    .toPromise()
-                    .then(() => {
+                return this.copyDataService.copy(this.buildCopyData()).then(() => {
+                    this.close();
+                }).catch(reason => {
+                    this.canCopy = false;
+                    if (reason.status == 403) {
+                        this.statusMessage = "You must have IMPORT right.";
+                    } else {
                         this.close();
-                        this.consoleService.log('info', 'The copy of ' + this.inputDatasets.length + ' datasets towards study ' + this.selectedStudy.name + ' has started.');
-                    }).catch(reason => {
-                        this.canCopy = true;
-                        if (reason.status == 403) {
-                            this.statusMessage = "You must be admin or expert.";
-                        } else throw Error(reason);
-                    });
+                        throw Error(reason);
+                    }
+                });
             }
         });
+    }
+
+    private buildCopyData(): CopyData {
+        return {
+            datasets: this.inputDatasets.map(d => ({
+                datasetId: d.datasetId,
+                centerId: d.centerId,
+                subjectId: d.subjectId
+            })),
+            targetStudyId: this.selectedStudy.id,
+            subjects: this.subjectIds
+                .map(s => ({
+                    id: s,
+                    newName: this.subjectIds.length == 1 ? this.subjectName : null
+                }))
+        };
     }
 
     public checkDatasetBelongToStudy(lines: InputDataset[], studyId: number) {
@@ -152,7 +164,7 @@ export class DatasetCopyDialogComponent {
             return Promise.resolve(true);
         } else {
             return this.studyRightsService.getMyRightsForStudy(studyId).then(rights => {
-                return (rights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                return (rights.includes(StudyUserRight.CAN_IMPORT));
             });
         }
     }
@@ -164,4 +176,5 @@ export class DatasetCopyDialogComponent {
     close() {
         this.ownRef.destroy();
     }
+
 }

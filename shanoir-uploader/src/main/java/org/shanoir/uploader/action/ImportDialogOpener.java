@@ -17,12 +17,7 @@ package org.shanoir.uploader.action;
 import java.awt.Color;
 import java.io.File;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
@@ -90,7 +85,7 @@ public class ImportDialogOpener {
                     importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
             // Update import dialog with items from server
             updateImportDialogForSubject(subject); // this has to be done after init of the dialog
-            updateImportDialogForNewExamFields(studyDate, importJob.getStudy().getStudyDescription());
+            updateImportDialogForNewExamFields(studyDate, importJob.getStudy().getStudyDescription(), importJob.getExaminationDataReuseAgreement());
             updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
             importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
             importDialog.mrExaminationExamExecutiveCB.setVisible(false);
@@ -270,10 +265,11 @@ public class ImportDialogOpener {
         }
     }
 
-    private void updateImportDialogForNewExamFields(Date studyDate, String studyDescription)
+    private void updateImportDialogForNewExamFields(Date studyDate, String studyDescription, Boolean examinationDataReuseAgreement)
             throws ParseException {
         importDialog.mrExaminationNewDateModel.setValue(studyDate);
         importDialog.mrExaminationCommentTF.setText(studyDescription);
+        importDialog.mrExaminationDataReuseAgreementCB.setSelected(Objects.nonNull(examinationDataReuseAgreement) && examinationDataReuseAgreement);
     }
 
 }

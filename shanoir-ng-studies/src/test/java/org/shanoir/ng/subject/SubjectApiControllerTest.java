@@ -31,7 +31,6 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
-import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.controler.SubjectApiController;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
@@ -62,7 +61,7 @@ import org.springframework.web.client.RestTemplate;
  */
 
 @WebMvcTest(controllers = SubjectApiController.class)
-@ContextConfiguration(classes = {SubjectApiController.class, RestTemplate.class, MicroserviceRequestsService.class})
+@ContextConfiguration(classes = {SubjectApiController.class, RestTemplate.class})
 @AutoConfigureMockMvc(addFilters = false)
 public class SubjectApiControllerTest {
 

@@ -38,4 +38,5 @@ export class Examination extends Entity {
     @Field() hasStudyCenterData: boolean = false;
     @Field() copies: number[];
     @Field() source: number;
+    @Field() dataReuseAgreement: boolean;
 }

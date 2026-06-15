@@ -12,8 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {Component, OnDestroy} from '@angular/core';
-import { AbstractControl, AsyncValidatorFn, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule, AsyncValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { NgClass } from '@angular/common';
 import shajs from 'sha.js';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -23,26 +24,28 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
 
-import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
-import { Tag} from "../../tags/tag.model";
+import { Tag } from "../../tags/tag.model";
 import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
 import { isDarkColor } from "../../utils/app.utils";
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
+import { TagInputComponent } from '../../tags/tag.input.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
     selector: 'subject-detail',
     templateUrl: 'subject.component.html',
     styleUrls: ['subject.component.css'],
-    animations: [slideDown, preventInitialChildAnimations],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, SelectBoxComponent, DatepickerComponent, CheckboxComponent, TagInputComponent, LocalDateFormatPipe]
 })
 
 export class SubjectComponent extends EntityComponent<Subject> implements OnDestroy {
@@ -62,6 +65,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     importMode: string = "";
     isImporting: boolean = false;
     tags: Tag[] = [];
+    studyNameForSubject: string = "";
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -86,7 +90,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
                 private subjectService: SubjectService,
                 private studyService: StudyService,
                 private downloadService: MassDownloadService,
-                private studyRightsService: StudyRightsService) {
+                private studyRightsService: StudyRightsService,
+                private userRightsService: StudyRightsService) {
 
         super(route);
     }
@@ -169,7 +174,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         const subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [this.subject.isAlreadyAnonymized],
-            'name': [this.subject.name, this.nameValidators.concat([this.forbiddenNameValidator([this.subjectNamePrefix]), this.notEmptyValidator()]), this.uniqueSubjectNameValidatorOnName],
+            'name': [this.subject.name, this.nameValidators.concat([this.forbiddenNameValidator([this.subjectNamePrefix]), this.notEmptyValidator()]), this.mode == 'create' ? this.uniqueSubjectNameValidatorOnName : null],
             'firstName': [this.firstName],
             'lastName': [this.lastName],
             'birthDate': [this.subject.birthDate],
@@ -272,7 +277,11 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
         this.subject = { ...this.subject, study: { id: this.subject.study.id } as Study };
         return super.save()
             .then(() => { if (savedDate) this.subject.birthDate = savedDate; return this.subject; })
-            .catch(reason => { if (savedDate) this.subject.birthDate = savedDate; throw reason; })
+            .catch(reason => {
+                if (savedDate) this.subject.birthDate = savedDate;
+                this.consoleService.log('error', reason.error.message);
+                throw reason;
+            })
     }
 
     loadAllStudies(): void {
@@ -280,12 +289,17 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
+                this.userRightsService.getMyRights().then(rights => {
+                    if (!this.keycloakService.isUserAdmin()) {
+                        // filter studies to only those with import or admin rights
+                        this.studies = this.studies.filter(study => {
+                            const studyRights = rights.get(study.id);
+                            return studyRights && (studyRights.includes(StudyUserRight.CAN_IMPORT) || studyRights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                        });
+                    }
+                    this.studyNameForSubject = this.studies?.filter(s => s.id == this.entity?.study?.id)?.[0]?.name || '';
+                });
             });
-    }
-
-    studyNameForSubject() {
-        this.studies = this.studies.filter(s => s.id == this.entity.study.id);
-        return this.studies[0] ? this.studies[0].name : "";
     }
 
     private generateSubjectIdentifier(): string {

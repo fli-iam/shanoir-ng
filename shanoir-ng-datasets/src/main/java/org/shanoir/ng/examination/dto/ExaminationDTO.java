@@ -36,6 +36,8 @@ public class ExaminationDTO {
 
     private String comment;
 
+    private boolean dataReuseAgreement;
+
     @LocalDateAnnotations
     private LocalDate examinationDate;
 
@@ -220,4 +222,11 @@ public class ExaminationDTO {
         this.studyInstanceUID = studyInstanceUID;
     }
 
+    public boolean getDataReuseAgreement() {
+        return dataReuseAgreement;
+    }
+
+    public void setDataReuseAgreement(boolean dataReuseAgreement) {
+        this.dataReuseAgreement = dataReuseAgreement;
+    }
 }

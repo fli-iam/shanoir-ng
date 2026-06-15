@@ -47,10 +47,14 @@ public abstract class SecurityContextUtil {
      * @param role "ROLE_ADMIN" or "ROLE_EXPERT" or ...
      */
     public static void initAuthenticationContext(String role) {
+        initAuthenticationContext(role, 92233720L);
+    }
+
+    public static void initAuthenticationContext(String role, Long userId) {
         List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
         GrantedAuthority grantedAuth = new SimpleGrantedAuthority(role);
         grantedAuthorities.add(grantedAuth);
-        Map<String, Object> claims = Map.of("preferred_username", "shanoir", "userId", 92233720L, "realm_access", grantedAuthorities);
+        Map<String, Object> claims = Map.of("preferred_username", "shanoir", "userId", userId, "realm_access", grantedAuthorities);
         Jwt jwt = new Jwt("mock-token-value", Instant.now(), Instant.now().plusSeconds(300), Map.of("header", "mock"), claims);
         Authentication authentication = new JwtAuthenticationToken(jwt, grantedAuthorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);

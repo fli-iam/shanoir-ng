@@ -41,7 +41,7 @@ import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
+import org.shanoir.ng.studycard.model.condition.CardCondition;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -247,7 +247,7 @@ public class CardsProcessingService {
         if (rules != null) {
             for (QualityExaminationRule rule : rules) {
                 if (rule.getConditions() != null) {
-                    for (StudyCardCondition condition : rule.getConditions()) {
+                    for (CardCondition condition : rule.getConditions()) {
                         Hibernate.initialize(condition.getValues());
                     }
                 }

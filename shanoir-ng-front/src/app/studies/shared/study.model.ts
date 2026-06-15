@@ -56,6 +56,16 @@ export class Study extends Entity {
     @Field() studyTags: Tag[];
     @Field() description: string;
     @Field() license: string;
+    @Field() isDraft: boolean = false;
+    @Field() expectedNbOfSubjects: number = null;
+    @Field() averageExaminationSize: number = null;
+    @Field() estimatedTotalVolume: number = null;
+    @Field() expectedNbOfCenters: number = null;
+    @Field() inclusionRate: number = null;
+    @Field() inclusionRateUnit: null | 'PER_DAY' | 'PER_WEEK' | 'PER_MONTH' | 'PER_YEAR' = null;
+    @Field() sponsor: string = null;
+    @Field() principalInvestigator: string = null;
+    @Field() scientificAdvisor: string = null;
     accessRequestedByCurrentUser: boolean = false;
     locked: boolean = false; // current user has no access
 

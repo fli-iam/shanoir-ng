@@ -12,14 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { HttpResponse } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
-import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { last, map, mergeMap, shareReplay } from 'rxjs/operators';
-
-import { TaskState, TaskStatus } from '../async-tasks/task.model';
-
-import { ServiceLocator } from './locator.service';
 
 
 // Base urls
@@ -71,6 +65,7 @@ export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_UR
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/data';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/connected';
 export const BACKEND_API_STUDY_COPY_DATASETS: string = BACKEND_API_STUDY_URL + '/copyDatasets';
+export const BACKEND_API_STUDY_FILES: string = BACKEND_API_STUDY_URL + '/files';
 
 
 // Profile API
@@ -120,6 +115,7 @@ export const BACKEND_API_UPDATE_TASKS_URL: string = BACKEND_API_TASKS_URL + '/up
 
 // Examinations http api
 export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
+export const BACKEND_API_EXTRA_DATA_FILES_URL: string = BACKEND_API_EXAMINATION_URL + '/files';
 export const BACKEND_API_EXAMINATION_PRECLINICAL_URL: string = BACKEND_API_EXAMINATION_URL + '/preclinical';
 
 // Acquisition equipment http api
@@ -160,13 +156,12 @@ export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/precli
 export const BACKEND_API_VIP_URL: string = BACKEND_API_DATASET_MS_URL + '/vip';
 export const BACKEND_API_VIP_EXEC_URL : string = BACKEND_API_VIP_URL + "/execution";
 export const BACKEND_API_VIP_PIPE_URL : string = BACKEND_API_VIP_URL + "/pipeline";
-
+export const BACKEND_API_VIP_EXEC_TEMPLATE_URL : string = BACKEND_API_DATASET_MS_URL + "/execution-template";
+export const BACKEND_API_VIP_EXEC_TEMPLATE_FILTER_URL : string = BACKEND_API_DATASET_MS_URL + "/execution-template-filter";
 export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/execution-monitoring';
 
 // Custom sentence to introduce the Shanoir instance on welcome page
 export const FRONTEND_WELCOME_INTRODUCTION: string = "This is an instance of the Shanoir database.";
-
-declare let JSZip: any;
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
@@ -184,21 +179,16 @@ export function hasUniqueError(error: any, fieldName: string): boolean {
 }
 
 export function browserDownloadFile(blob: Blob, filename: string) {
-    if (window.navigator.msSaveBlob) {
-        // IE 10+
-        window.navigator.msSaveBlob(blob, filename);
-    } else {
-        const link = document.createElement('a');
-        // Browsers that support HTML5 download attribute
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+    const link = document.createElement('a');
+    // Browsers that support HTML5 download attribute
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 }
 
@@ -210,118 +200,11 @@ export function browserDownloadFileFromResponse(response: HttpResponse<any>) {
     }
 }
 
-export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
-    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
-    return http.get(
-        url,
-        {
-            reportProgress: true,
-            responseType: 'blob',
-            params: params
-        }
-    )
-    .pipe(map(response => {
-        return response;
-    }))
-    .toPromise();
-}
-
-export function downloadWithStatusGET(url: string, params?: HttpParams, state?: TaskState): Observable<TaskState> {
-    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
-    const obs: Observable<HttpEvent<Blob>> = http.get(
-        url,
-        {
-            reportProgress: true,
-            observe: 'events',
-            responseType: 'blob',
-            params: params
-        }
-    ).pipe(shareReplay());
-    obs.pipe(last()).subscribe(response => {
-        browserDownloadFileFromResponse(response as HttpResponse<Blob>)
-    });
-    return obs.pipe(mergeMap(event => {
-        return extractState(event).then(s => {
-            if (state) {
-                state.errors = s.errors;
-                state.progress = s.progress;
-                state.status = s.status;
-            }
-            return s;
-        });
-    }));
-}
-
-export function downloadWithStatusPOST(url: string, formData: FormData, state?: TaskState): Observable<TaskState> {
-    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
-    const obs: Observable<HttpEvent<Blob>> = http.post(
-        url,
-        formData,
-        {
-            reportProgress: true,
-            observe: 'events',
-            responseType: 'blob'
-        }
-    ).pipe(shareReplay());
-    obs.pipe(last()).subscribe(response => {
-        browserDownloadFileFromResponse(response as HttpResponse<Blob>)
-    });
-    return obs.pipe(mergeMap(event => {
-        return extractState(event).then(s => {
-            if (state) {
-                state.errors = s.errors;
-                state.progress = s.progress;
-                state.status = s.status;
-            }
-            return s;
-        });
-    }));
-}
-
-export function extractState(event: HttpEvent<any>): Promise<TaskState> {
-    let task: TaskState;
-    switch (event.type) {
-        case HttpEventType.Sent:
-        case HttpEventType.ResponseHeader: {
-            task = new TaskState(TaskStatus.QUEUED, 0);
-            return Promise.resolve(task);
-        }
-        case HttpEventType.DownloadProgress: {
-            const total: number = (event as HttpProgressEvent).total;
-            task = new TaskState(TaskStatus.IN_PROGRESS, (event as HttpProgressEvent).loaded);
-            if (total) task.progress /= total;
-            return Promise.resolve(task);
-        }
-        case HttpEventType.Response: {
-            task = new TaskState(TaskStatus.DONE);
-            const blob: Blob = (event as HttpResponse<Blob>).body;
-            if (blob && event.headers.get('Content-Type') == 'application/zip') {
-                //report.list[id].zipSize = getSizeStr(blob?.size);
-                // Check ERRORS file in zip
-                const zip: any = new JSZip();
-                return zip.loadAsync(blob).then(dataFiles => {
-                    if (dataFiles.files['ERRORS.json']) {
-                        return dataFiles.files['ERRORS.json'].async('string').then(content => {
-                            const errorsJson: any = JSON.parse(content);
-                            task.errors = JSON.stringify(errorsJson, null, 4);
-                            task.status = TaskStatus.DONE_BUT_WARNING;
-                            return task;
-                        });
-                    }
-                    return task;
-                });
-            } else {
-                return Promise.resolve(task);
-            }
-        }
-        default: return Promise.resolve(task);
-    }
-}
-
 export function getFilename(response: HttpResponse<any>): string {
-    const prefix = 'attachment;filename=';
     const contentDispHeader: string = response.headers.get('Content-Disposition');
-    return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    if (!contentDispHeader) return null;
+    const match = contentDispHeader.match(/filename="?([^"]+)"?/);
+    return match ? match[1].trim() : null;
 }
 
 export function pad(n, width, z?): string {
@@ -349,10 +232,7 @@ export function findLastIndex<T>(array: T[], predicate: (value: T, index: number
 }
 
 
-@Pipe({
-    name: 'times',
-    standalone: false
-})
+@Pipe({ name: 'times' })
 export class TimesPipe implements PipeTransform {
     transform(value: number): any {
         const iterable = {};
@@ -366,10 +246,7 @@ export class TimesPipe implements PipeTransform {
     }
 }
 
-@Pipe({
-    name: 'getValues',
-    standalone: false
-})
+@Pipe({ name: 'getValues' })
 export class GetValuesPipe implements PipeTransform {
     transform(map: Map<any, any>): any[] {
         const ret = [];
@@ -401,10 +278,7 @@ export function capitalsAndUnderscoresToDisplayable(str: string) {
     return capitalizeFirstLetter(str.replace(new RegExp('_', 'g'), ' ').toLowerCase());
 }
 
-@Pipe({
-    name: 'camel',
-    standalone: false
-})
+@Pipe({ name: 'camel' })
 export class CamelPipe implements PipeTransform {
     transform(value: string): any {
         return capitalsAndUnderscoresToDisplayable(value);
@@ -471,6 +345,7 @@ export function arraysEqual(array1: any[], array2: any[]) {
 }
 
 export function isDarkColor(colorInp: string): boolean {
+    if (!colorInp) return false;
     colorInp = colorInp?.replace('#', '');
     const r = parseInt(colorInp.substring(0, 2), 16); // hexToR
     const g = parseInt(colorInp.substring(2, 4), 16); // hexToG
@@ -496,3 +371,14 @@ export function getSizeStr(size: number): string {
 type UnionKeys<T> = T extends T ? keyof T : never;
 type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never;
 export type StrictUnion<T> = StrictUnionHelper<T, T>
+
+const INVALID_FILENAME_CHARS = /[<>:"/\\|?*\n\r\t]/g
+
+export function sanitizeFilename(name) {
+  return name
+    .replace(INVALID_FILENAME_CHARS, '_')
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/\.+$/, '')
+}

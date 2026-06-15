@@ -18,9 +18,9 @@ import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.studycard.model.assignment.DatasetAssignment;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
+import org.shanoir.ng.studycard.model.condition.CardCondition;
+import org.shanoir.ng.studycard.model.condition.DatasetDICOMConditionOnDataset;
 import org.shanoir.ng.studycard.model.condition.DatasetMetadataCondOnDataset;
-import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
-import org.shanoir.ng.studycard.model.condition.StudyCardDICOMConditionOnDatasets;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -43,9 +43,9 @@ public class DatasetRule extends StudyCardRule<Dataset> {
 
     private boolean conditionsfulfilled(Attributes dicomAttributes, Dataset dataset) {
         boolean fulfilled = true;
-        for (StudyCardCondition condition : getConditions()) {
-            if (condition instanceof StudyCardDICOMConditionOnDatasets) {
-                fulfilled &= ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes);
+        for (CardCondition condition : getConditions()) {
+            if (condition instanceof DatasetDICOMConditionOnDataset) {
+                fulfilled &= ((DatasetDICOMConditionOnDataset) condition).fulfilled(dicomAttributes);
             } else if (condition instanceof DatasetMetadataCondOnDataset) {
                 fulfilled &= ((DatasetMetadataCondOnDataset) condition).fulfilled(dataset);
             } else {

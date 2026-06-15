@@ -1,12 +1,12 @@
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -18,15 +18,27 @@ server:
   error:
     whitelabel:
       enabled: false
+  shanoir-hours:
+    shutdown: ${SHANOIR_SHUTDOWN_HOUR}
+    continuance: ${SHANOIR_CONTINUANCE_HOUR}
 ##### Database #####
 spring:
+  cloud:
+    aws:
+      s3:
+        endpoint: ${S3_ENDPOINT:http://ninja:9000}
+        path-style-access-enabled: true
+        region: ${S3_REGION:eu-west-1}
+      credentials:
+        access-key: ${S3_ACCESS_KEY_ID}
+        secret-key: ${S3_SECRET_ACCESS_KEY}
   config:
     import: "classpath:/shanoir-shared.yml"
   datasource:
-    url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:datasets}?characterEncoding=utf-8
     username: datasets
     password: password
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.mariadb.jdbc.Driver
     hikari.maximum-pool-size: 70
     hikari.minimum-idle:  70
   jpa:
@@ -65,7 +77,7 @@ spring:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
   jooq:
-    sql-dialect: Mysql
+    sql-dialect: MariaDB
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
@@ -98,15 +110,21 @@ front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
-# Solr
-solr.host: http://${SHANOIR_PREFIX}solr:8983/solr/shanoir
-# microservices url
-ms.url:
-  shanoir-ng-studies: http://${SHANOIR_PREFIX}studies:9902/
-# Data folder configuration
-datasets-data: /var/datasets-data
-vip-data-folder: /var/datasets-data/vip-data
-bids-data-folder: /var/datasets-data/bids-data
+solr.host: http://${SHANOIR_SOLR_HOST:${SHANOIR_PREFIX}solr}:8983/solr/shanoir
+
+storage:
+  type: ${SHANOIR_STORAGE_TYPE:file-system} # "file-system" or "s3"
+  file-system:
+    datasets-data: /var/datasets-data
+    # file-system only (by design, e.g. validator) and temporary data: no S3
+    bids-data: /var/bids-data
+    # file-system only: temporary data: no S3
+    vip-data: /var/vip-data
+  s3:
+    datasets:
+      bucket: ${S3_BUCKET_DATASETS:datasets}
+      prefix: datasets/
+
 # logging configuration
 logging:
   pattern:
@@ -169,6 +187,9 @@ service-account:
 ######################################
 server:
   port: 9914
+  shanoir-hours:
+    shutdown: ${SHANOIR_SHUTDOWN_HOUR}
+    continuance: ${SHANOIR_CONTINUANCE_HOUR}
 spring:
   config.activate.on-profile: dev
   datasource:
@@ -200,15 +221,8 @@ keycloak:
   auth-server-url: https://shanoir-ng-nginx/auth
 dcm4chee-arc:
   host: dcm4chee-arc
-# Solr
-spring.data.solr.host: http://solr:8983/solr/shanoir/
-# microservices url
-ms.url:
-  shanoir-ng-studies: http://studies:9902/
-# Data folder configuration
-datasets-data: /var/datasets-data
-vip-data-folder: /var/datasets-data/vip-data
-bids-data-folder: /var/datasets-data/bids-data
+
+
 # logging configuration
 logging:
   file:

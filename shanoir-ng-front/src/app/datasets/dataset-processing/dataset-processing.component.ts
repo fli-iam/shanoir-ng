@@ -14,21 +14,27 @@
 
 import { formatDate } from "@angular/common";
 import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { distinctUntilChanged, takeUntil } from 'rxjs';
+import { FormsModule, ReactiveFormsModule, UntypedFormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { distinctUntilChanged, firstValueFrom, takeUntil } from 'rxjs';
 
 import { Selection } from 'src/app/studies/study/tree.service';
 import { ExecutionMonitoringService } from 'src/app/vip/execution-monitorings/execution-monitoring.service';
 import { ExecutionMonitoring } from 'src/app/vip/models/execution-monitoring.model';
+import { Study } from "src/app/studies/shared/study.model";
 
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { FormFooterComponent } from "../../shared/components/form-footer/form-footer.component";
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { TooltipComponent } from "../../shared/components/tooltip/tooltip.component";
+import { DatepickerComponent } from "../../shared/date-picker/date-picker.component";
 import { dateDisplay } from "../../shared/localLanguage/localDate.abstract";
-import { Option } from '../../shared/select/select.component';
+import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.pipe";
+import { MultiSelectTableComponent } from "../../shared/multi-select-table/multi-select-table.component";
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
 import * as AppUtils from "../../utils/app.utils";
@@ -36,13 +42,13 @@ import { ExecutionService } from "../../vip/execution/execution.service";
 import { DatasetProcessingService } from '../shared/dataset-processing.service';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetLight, DatasetService } from '../shared/dataset.service';
-import { Study } from "../../studies/shared/study.model";
+import { DatasetProcessingListComponent } from "../dataset-processing-list/dataset-processing-list.component";
 
 @Component({
     selector: 'dataset-processing-detail',
     templateUrl: 'dataset-processing.component.html',
     styleUrls: ['dataset-processing.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, TooltipComponent, MultiSelectTableComponent, LocalDateFormatPipe, DatasetProcessingListComponent]
 })
 
 export class DatasetProcessingComponent extends EntityComponent<DatasetProcessing> {
@@ -52,11 +58,10 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     protected studyOptions: Option<number>[] = [];
     protected subjectOptions: Option<Subject>[] = [];
     protected inputDatasetOptions: Option<Dataset>[] = [];
-    protected outputDatasetOptions: Option<Dataset>[] = [];
     protected inputDatasetsColumnDefs: ColumnDefinition[];
-    protected outputDatasetsColumnDefs: ColumnDefinition[];
     protected isExecutionMonitoring: boolean = false;
     protected executionMonitoring: ExecutionMonitoring;
+    protected childrenProcessings: DatasetProcessing[];
 
 
     constructor(
@@ -77,8 +82,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     get subject(): Subject { return this._subject; }
-    
-    set subject(subject: Subject) { 
+
+    set subject(subject: Subject) {
         this._subject = subject;
         this.form.get('subject').setValue(subject);
     }
@@ -98,17 +103,20 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.studyService.get(this.datasetProcessing.studyId, "lazy").then(study => {
             this.studyOptions = [new Option<number>(study.id, study.name)];
         });
-        this.completeDatasetsDetails();
+        if (this.datasetProcessing.outputDatasets.length > 0 || this.datasetProcessing.inputDatasets.length > 0) {
+            this.completeDatasetsDetails();
+        }
+
         // checking if the datasetProcessing is not execution monitoring
         this.subscriptions.push(
-            this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe(
-                (executionMonitoring: ExecutionMonitoring) => {
+            this.executionMonitoringService.getExecutionMonitoring(this.datasetProcessing.id).subscribe({
+                next: (executionMonitoring: ExecutionMonitoring) => {
                     this.setExecutionMonitoring(executionMonitoring);
-                }, () => {
+                }, error: () => {
                     // 404 : if it's not found then it's not execution monitoring !
                     this.resetExecutionMonitoring();
                 }
-            )
+            })
         );
         return Promise.resolve();
     }
@@ -125,7 +133,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
                         const subjectId = dataset.subject?.id;
                         this.fetchDatasets();
                         this.subject = this.subjectOptions?.find(opt => opt.value.id == subjectId)?.value;
-                    }   
+                    }
                 });
 
             }
@@ -152,7 +160,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.datasetProcessing.inputDatasets = [];
         this.datasetProcessing.outputDatasets = [];
         this.inputDatasetOptions = [];
-        this.outputDatasetOptions = [];
         if (newValue) {
             this.fetchDatasets();
         }
@@ -177,6 +184,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     setExecutionMonitoring(executionMonitoring: ExecutionMonitoring){
         this.isExecutionMonitoring = true;
         this.executionMonitoring = executionMonitoring;
+        this.datasetProcessingService.findByMonitoringId(executionMonitoring.id).then(list => this.childrenProcessings = list);
     }
 
     resetExecutionMonitoring(){
@@ -218,7 +226,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         return this.datasetService.getByStudyIdAndSubjectId(this.datasetProcessing.studyId, this.subject.id).then(datasets => {
             for (const dataset of datasets) {
                 this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
-                this.outputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
             }
         });
     }
@@ -249,6 +256,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         ds.subject.name = dsLight.subject.name;
         ds.subject.id = dsLight.subject.id;
         ds.creationDate = dsLight.creationDate;
+        ds.name = dsLight.name;
     }
 
     buildForm(): UntypedFormGroup {
@@ -313,32 +321,24 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             {headerName: "Subject", field: "subject.name"},
             {headerName: "Creation date", field: "creationDate", type: "date"}
         ];
-        this.outputDatasetsColumnDefs = [
-            {headerName: "ID", field: "id", type: "number"},
-            {headerName: "Name", field: "name", route: (dataset : Dataset)=>{
-                return `/dataset/details/${dataset.id}`
-            }},
-            {headerName: "Dataset type", field: "type"},
-            {headerName: "Creation date", field: "creationDate", type: "date"}
-        ];
     }
 
     public downloadStdout() {
-        if(!this.executionMonitoring){
+        if(this.isExecutionMonitoring){
             return;
         }
-        const filename = this.executionMonitoring.name + ".stdout.log";
-        this.vipClientService.getStdout(this.executionMonitoring.identifier).toPromise().then(response => {
+        const filename = this.datasetProcessing.id + ".stdout.log";
+        firstValueFrom(this.vipClientService.getStdout(this.datasetProcessing.id)).then(response => {
             this.downloadLogIntoBrowser(response, filename );
         });
     }
 
     public downloadStderr() {
-        if(!this.executionMonitoring){
+        if(this.isExecutionMonitoring){
             return;
         }
-        const filename = this.executionMonitoring.name + ".stderr.log";
-        this.vipClientService.getStderr(this.executionMonitoring.identifier).toPromise().then(response => {
+        const filename = this.datasetProcessing.id + ".stderr.log";
+        firstValueFrom(this.vipClientService.getStderr(this.datasetProcessing.id)).then(response => {
             this.downloadLogIntoBrowser(response, filename );
         });
     }

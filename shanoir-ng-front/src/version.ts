@@ -13,6 +13,9 @@ const gitInfo = gitDescribeSync({
 });
 
 gitInfo.version = version;
+if (gitInfo.hash.startsWith('g'))  {
+    gitInfo.hash = gitInfo.hash.substring(1);
+}
 
 const file = resolve(__dirname, '..', 'src', 'environments', 'version.ts');
 writeFileSync(file,

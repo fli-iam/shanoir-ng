@@ -39,11 +39,13 @@ public class ImportCreateNewExamCBItemListener implements ItemListener {
             importDialog.mrExaminationExamExecutiveCB.setEnabled(true);
             ((Container) importDialog.mrExaminationDateDP).getComponent(1).setEnabled(true);
             importDialog.mrExaminationCommentTF.setEnabled(true);
+            importDialog.mrExaminationDataReuseAgreementCB.setEnabled(true);
         } else {
             importDialog.mrExaminationExistingExamCB.setEnabled(true);
             importDialog.mrExaminationExamExecutiveCB.setEnabled(false);
             ((Container) importDialog.mrExaminationDateDP).getComponent(1).setEnabled(false);
             importDialog.mrExaminationCommentTF.setEnabled(false);
+            importDialog.mrExaminationDataReuseAgreementCB.setEnabled(false);
         }
     }
 

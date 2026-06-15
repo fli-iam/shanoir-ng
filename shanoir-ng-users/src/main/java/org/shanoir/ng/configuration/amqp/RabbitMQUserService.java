@@ -24,6 +24,7 @@ import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
@@ -129,6 +130,32 @@ public class RabbitMQUserService {
             this.emailService.notifyStudyManagerStudyUsersAdded(mail);
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the import event.", e);
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
+        }
+    }
+
+    @RabbitListener(queues = RabbitMQConfiguration.DRAFT_STUDY_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    public void receiveStudyCreated(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            EmailStudy mail = mapper.readValue(generatedMailAsString, EmailStudy.class);
+            this.emailService.notifyAdminStudyEvent(mail);
+        } catch (Exception e) {
+            LOG.error("Something went wrong deserializing the study event.", e);
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
+        }
+    }
+
+    @RabbitListener(queues = RabbitMQConfiguration.APPROVE_STUDY_MAIL_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    public void receiveStudyApproval(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            EmailStudy mail = mapper.readValue(generatedMailAsString, EmailStudy.class);
+            this.emailService.notifyStudyMembersStudyApproval(mail);
+        } catch (Exception e) {
+            LOG.error("Something went wrong deserializing the study created event.", e);
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
         }
     }

@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -32,7 +32,6 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -63,9 +62,6 @@ public class ExaminationServiceTest {
     @Mock
     private ExaminationRepository examinationRepository;
 
-    @Mock
-    private MicroserviceRequestsService microservicesRequestsService;
-
     @InjectMocks
     private ExaminationServiceImpl examinationService;
 
@@ -85,7 +81,7 @@ public class ExaminationServiceTest {
     private ObjectMapper mapper;
 
     @Mock
-    private StudyInstanceUIDHandler studyInstanceUIDHandler;
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Mock
     private DICOMWebService dicomWebService;
@@ -125,7 +121,7 @@ public class ExaminationServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-    public void updateTest() throws ShanoirException {
+    public void updateTest() throws Exception {
         final Examination updatedExamination = examinationService.update(createExamination());
         Assertions.assertNotNull(updatedExamination);
         Assertions.assertTrue(UPDATED_EXAMINATION_COMMENT.equals(updatedExamination.getComment()));
@@ -135,7 +131,7 @@ public class ExaminationServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-    public void updateAsAdminTest() throws ShanoirException {
+    public void updateAsAdminTest() throws Exception {
         // We update the subject -> admin -> SUCCESS
         Examination updatedExam = createExamination();
         updatedExam.setSubject(new Subject(5L, "new name"));

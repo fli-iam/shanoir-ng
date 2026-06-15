@@ -19,7 +19,6 @@ import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +34,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RabbitMQPreclinicalService {
 
     private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the event.";
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private AnimalSubjectService animalSubjectService;
@@ -48,9 +45,12 @@ public class RabbitMQPreclinicalService {
     private SubjectTherapyService subjectTherapyService;
 
     @Autowired
-    private ShanoirEventService eventService;
+    private ObjectMapper objectMapper;
+
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQPreclinicalService.class);
+
+    public record CopyRequest(Long sourceId, Long targetId) { }
 
     /**
      * Receives a shanoirEvent as a json object, concerning a subject deletion
@@ -75,6 +75,27 @@ public class RabbitMQPreclinicalService {
             animalSubjectService.deleteById(subjectId);
 
             LOG.info("Animal subject [{}] has been deleted following deletion of subject [{}]", id, subjectId);
+
+        } catch (Exception e) {
+            LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
+            throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
+        }
+    }
+
+
+    @RabbitListener(queues = RabbitMQConfiguration.COPY_ANIMAL_SUBJECT_QUEUE)
+    @Transactional
+    public void createAnimalSubject(String copyRequestStr) throws AmqpRejectAndDontRequeueException {
+        SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+        try {
+            CopyRequest copyRequest = objectMapper.readValue(copyRequestStr, CopyRequest.class);
+            AnimalSubject sourceAnimalSubject = animalSubjectService.getById(copyRequest.sourceId());
+            if (sourceAnimalSubject == null) {
+                return;
+            }
+            AnimalSubject newAnimalSubject = new AnimalSubject(sourceAnimalSubject);
+            newAnimalSubject.setId(copyRequest.targetId());
+            animalSubjectService.save(newAnimalSubject);
 
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the event. {}", e.getMessage());

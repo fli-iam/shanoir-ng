@@ -25,7 +25,7 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.util.TagUtils;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -118,7 +118,7 @@ public class ExaminationConsistencyServiceJob {
                         long timestamp = importJob.getTimestamp();
                         long currentTime = System.currentTimeMillis();
                         if (currentTime - timestamp >= ONE_HOUR_IN_MILLIS) {
-                            String examinationUID = StudyInstanceUIDHandler.PREFIX + importJob.getExaminationId();
+                            String examinationUID = StudyInstanceUIDAndSubjectNameHandler.PREFIX + importJob.getExaminationId();
                             try {
                                 boolean check = checkImportJob(importJob, importJobFolder, examinationUID);
                                 if (check) {

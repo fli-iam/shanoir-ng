@@ -152,17 +152,11 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 
     @Override
     public Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException {
-        Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, mapper.writeValueAsString(dto));
+        Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, mapper.writeValueAsString(dto));
         if (subjectId == null) {
             throw new ShanoirException("Created subject id is null.");
         }
-
         dto.setId(subjectId);
-        boolean updateSuccess = (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_UPDATE_QUEUE, mapper.writeValueAsString(dto));
-        if (!updateSuccess) {
-            throw new ShanoirException("Subject creation in datasets MS failed.");
-        }
-
         return subjectId;
     }
 

@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.processing.model.DatasetProcessingType;
+import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 
 
 /**
@@ -43,6 +44,10 @@ public class DatasetProcessingDTO {
     private Long studyId;
 
     private Long parentId;
+
+    private ExecutionStatus processingStatus;
+
+    private Long monitoringIndex;
 
     public Long getId() {
         return id;
@@ -106,5 +111,21 @@ public class DatasetProcessingDTO {
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
+    }
+
+    public ExecutionStatus getProcessingStatus() {
+        return processingStatus;
+    }
+
+    public void setProcessingStatus(ExecutionStatus processingStatus) {
+        this.processingStatus = processingStatus;
+    }
+
+    public Long getMonitoringIndex() {
+        return monitoringIndex;
+    }
+
+    public void setMonitoringIndex(Long monitoringIndex) {
+        this.monitoringIndex = monitoringIndex;
     }
 }

@@ -26,7 +26,7 @@ import { Study } from "../shared/study.model";
     selector: 'study-history',
     templateUrl: './study-history.component.html',
     styleUrls: ['./study-history.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class StudyHistoryComponent implements OnInit {
 

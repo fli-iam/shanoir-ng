@@ -28,16 +28,17 @@ import { FormGroup } from '@angular/forms';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
 import { SuperPromise } from '../../utils/super-promise';
-import { StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
+import { MetadataFieldScope, StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
 
 import { ShanoirMetadataField, StudyCardActionComponent } from './action/action.component';
+import { StudyCardConditionComponent } from './condition/condition.component';
 
 
 @Component({
     selector: 'study-card-rule',
     templateUrl: 'study-card-rule.component.html',
     styleUrls: ['study-card-rule.component.css'],
-    standalone: false
+    imports: [StudyCardConditionComponent, StudyCardActionComponent]
 })
 export class StudyCardRuleComponent implements OnChanges {
 
@@ -88,8 +89,18 @@ export class StudyCardRuleComponent implements OnChanges {
         }
     }
 
-    addNewCondition() {
-        const cond = new StudyCardCondition('StudyCardDICOMConditionOnDatasets');
+    addNewCondition(metadataFieldScope: MetadataFieldScope) {
+        let cond: StudyCardCondition;
+        switch (metadataFieldScope) {
+            case 'Dataset':
+                cond = new StudyCardCondition('DatasetDICOMConditionOnDataset');
+                break;
+            case 'DatasetAcquisition':
+                cond = new StudyCardCondition('AcqMetadataCondOnAcq');
+                break;
+            default:
+                throw new Error('Unsupported metadata field scope: ' + metadataFieldScope);
+        }
         cond.values = [null];
         this.rule.conditions.push(cond);
         this.userChange.emit(this.rule);

@@ -11,10 +11,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { KeyValue } from "@angular/common";
+import { KeyValue, NgClass, KeyValuePipe } from "@angular/common";
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
@@ -23,19 +23,19 @@ import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.
 import { Tag } from 'src/app/tags/tag.model';
 import { AccessRequest } from 'src/app/users/access-request/access-request.model';
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
+import { ExecutionTemplateListComponent } from "src/app/vip/execution-template/execution-template-list.component";
 
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
-import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from "../../shared/models/profile.model";
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { Subject } from '../../subjects/shared/subject.model';
@@ -49,15 +49,28 @@ import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
+import { FormFooterComponent } from "../../shared/components/form-footer/form-footer.component";
+import { CheckboxComponent } from "../../shared/checkbox/checkbox.component";
+import { TooltipComponent } from "../../shared/components/tooltip/tooltip.component";
+import { LoadingBarComponent } from "../../shared/components/loading-bar/loading-bar.component";
+import { TagCreatorComponent } from "../../tags/tag.creator.component";
+import { SubjectStudyListComponent } from "../../shared/components/subject-study-list/subject-study-list.component";
+import { StudyUserListComponent } from "../studyuser/studyuser-list.component";
+import { QualityControlComponent } from "../../quality-control/quality-control.component";
+import { BidsTreeComponent } from "../../bids/tree/bids-tree.component";
+import { StudyHistoryComponent } from "../study-history/study-history.component";
+import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.pipe";
+import { SizePipe } from "../../shared/utils/size.pipe";
 
 import { Selection } from './tree.service';
+import { CopyFromCsvComponent } from "./copy-csv.component";
 
 @Component({
     selector: 'study-detail',
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent, 
+        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent]
 })
 
 export class StudyComponent extends EntityComponent<Study> {
@@ -78,6 +91,7 @@ export class StudyComponent extends EntityComponent<Study> {
     openHistory: SuperPromise<void> = new SuperPromise<void>();
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
+    protected hasCopyRight: boolean;
     accessRequests: AccessRequest[];
     isStudyAdmin: boolean;
     subjectTagsInUse: Tag[] = [];
@@ -89,6 +103,13 @@ export class StudyComponent extends EntityComponent<Study> {
     studyStatusOptions: Option<string>[] = [
         new Option<string>('IN_PROGRESS', 'In Progress'),
         new Option<string>('FINISHED', 'Finished')
+    ];
+    inclusionRateOptions: Option<string>[] = [
+        new Option<string>(null, ''),
+        new Option<string>('PER_DAY', 'Per day'),
+        new Option<string>('PER_WEEK', 'Per week'),
+        new Option<string>('PER_MONTH', 'Per month'),
+        new Option<string>('PER_YEAR', 'Per year')
     ];
 
     valueDescOrder = (a: KeyValue<string, number>, b: KeyValue<string, number>): number => {
@@ -157,10 +178,16 @@ export class StudyComponent extends EntityComponent<Study> {
         return this.idPromise.then(() => this.studyService.get(this.id, null));
     }
 
+    isAdmin(): boolean {
+         return this.keycloakService.isUserAdmin();
+    }
+
     initView(): Promise<void> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin()
                 || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_DOWNLOAD));
+            this.hasCopyRight = this.keycloakService.isUserAdmin()
+                || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
         })
 
         this.setLabeledSizes(this.study);
@@ -195,19 +222,14 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initEdit(): Promise<void> {
-
         if (this.study.profile == null) {
             const profile = new Profile();
             profile.profileName = "Profile Neurinfo";
             this.study.profile = profile;
         }
-
         this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
-
         this.getAllSubjects();
-
         this.protocolFiles = [];
-
         this.fetchUsers().then(users => {
             Study.completeMembers(this.study, users);
         });
@@ -249,8 +271,8 @@ export class StudyComponent extends EntityComponent<Study> {
     buildForm(): UntypedFormGroup {
         const formGroup = this.formBuilder.group({
             'name': [this.study.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
-            'startDate': [this.study.startDate, [DatepickerComponent.validator]],
-            'endDate': [this.study.endDate, [DatepickerComponent.validator, this.dateOrdervalidator]],
+            'startDate': [this.study.startDate, [Validators.required, DatepickerComponent.validator]],
+            'endDate': [this.study.endDate, [Validators.required, DatepickerComponent.validator, this.dateOrdervalidator]],
             'studyStatus': [this.study.studyStatus, [Validators.required]],
             'profile': [this.study.profile, [Validators.required]],
             'withExamination': [this.study.withExamination],
@@ -260,18 +282,43 @@ export class StudyComponent extends EntityComponent<Study> {
             'license': [this.study.license],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
-            'studyCenterList': [{value: this.study.studyCenterList}, [this.validateCenter]],
+            'studyCenterList': [{value: this.study.studyCenterList}, [Validators.required, this.validateCenter]],
             'subjects': [this.study.subjects],
             'tags': [this.study.tags],
             'studyTags': [this.study.studyTags],
             'challenge': [this.study.challenge],
             'protocolFile': [],
             'dataUserAgreement': [],
-            'studyUserList': [this.study.studyUserList]
+            'studyUserList': [this.study.studyUserList],
+            'expectedNbOfSubjects': [this.study.expectedNbOfSubjects, [Validators.required, Validators.min(1)]],
+            'averageExaminationSize': [this.study.averageExaminationSize, [Validators.min(1)]],
+            'estimatedTotalVolume': [this.study.estimatedTotalVolume, [Validators.min(1)]],
+            'expectedNbOfCenters': [this.study.expectedNbOfCenters, [Validators.required, Validators.min(1)]],
+            'inclusionRate': [this.study.inclusionRate, [Validators.min(1)]],
+            'inclusionRateUnit': [this.study.inclusionRateUnit],
+            'sponsor': [this.study.sponsor, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+            'principalInvestigator': [this.study.principalInvestigator, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+            'scientificAdvisor': [this.study.scientificAdvisor, [Validators.minLength(2), Validators.maxLength(200)]]
+        });
+
+        formGroup.setValidators(this.inclusionRatePairValidator.bind(this));
+
+        formGroup.get('startDate')?.valueChanges.subscribe(() => {
+            formGroup.get('endDate')?.updateValueAndValidity();
         });
 
         return formGroup;
     }
+
+    private inclusionRatePairValidator(group: UntypedFormGroup) {
+        const rate = group.get('inclusionRate')?.value;
+        const unit = group.get('inclusionRateUnit')?.value;
+
+        if ((rate && !unit) || (!rate && unit)) return { inclusionRatePair: true };
+
+        return null;
+    }
+
     private setLabeledSizes(study: Study): Promise<void> {
         const waitUploads: Promise<void> = this.studyService.fileUploads.has(study.id)
             ? this.studyService.fileUploads.get(study.id)
@@ -298,11 +345,24 @@ export class StudyComponent extends EntityComponent<Study> {
         });
     }
 
-    private dateOrdervalidator = (): ValidationErrors | null => {
-        if (this.study.startDate && this.study.endDate && this.study.startDate >= this.study.endDate) {
-            return { order: true}
-        }
+    /** Uses form control values (not study entity) to avoid stale dates when the end date picker changes. */
+    private dateOrdervalidator = (control: AbstractControl): ValidationErrors | null => {
+        const form = control.parent;
+        if (!form) return null;
+        const start = form.get('startDate')?.value;
+        const end = control.value;
+        if (!start || !end || start === 'invalid' || end === 'invalid') return null;
+        const startDay = this.toDateOnlyTimestamp(start);
+        const endDay = this.toDateOnlyTimestamp(end);
+        if (startDay === null || endDay === null) return null;
+        if (endDay <= startDay) return { order: true };
         return null;
+    }
+
+    private toDateOnlyTimestamp(value: Date | string): number | null {
+        const date = value instanceof Date ? value : new Date(value);
+        if (isNaN(date.getTime())) return null;
+        return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
     }
 
     public async hasStudyAdminRight(): Promise<boolean> {
@@ -311,6 +371,14 @@ export class StudyComponent extends EntityComponent<Study> {
         const studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    }
+
+    public async hasStudyImportRight(): Promise<boolean> {
+        if (this.keycloakService.isUserAdmin()) return true;
+        if (!this.study?.studyUserList) return false;
+        const studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
+        if (!studyUser) return false;
+        return studyUser.studyUserRights && (studyUser.studyUserRights.includes(StudyUserRight.CAN_IMPORT) || studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE));
     }
 
     public async hasEditRight(): Promise<boolean> {
@@ -386,8 +454,10 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.studyCenterList = [...this.study.studyCenterList];
             this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         }
-        this.form.get('studyCenterList').markAsDirty();
-        this.form.get('studyCenterList').updateValueAndValidity();
+        const studyCenterListControl = this.form.get('studyCenterList');
+        studyCenterListControl.setValue([...this.study.studyCenterList]);
+        studyCenterListControl.markAsDirty();
+        studyCenterListControl.updateValueAndValidity();
     }
 
     onPrefixChange() {
@@ -406,8 +476,10 @@ export class StudyComponent extends EntityComponent<Study> {
         if (!this.study.studyCenterList) return;
         this.study.studyCenterList = this.study.studyCenterList.filter(item => item.center.id !== centerId);
         this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
-        this.form.get('studyCenterList').markAsDirty();
-        this.form.get('studyCenterList').updateValueAndValidity();
+        const studyCenterListControl = this.form.get('studyCenterList');
+        studyCenterListControl.setValue([...this.study.studyCenterList]);
+        studyCenterListControl.markAsDirty();
+        studyCenterListControl.updateValueAndValidity();
     }
 
     isMe(user: User): boolean {
@@ -425,7 +497,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.study.studyUserList.unshift(studyUser);
     }
 
-    studyStatusStr(studyStatus: string) {
+    enumStrToStr(studyStatus: string) {
       return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 
@@ -479,6 +551,17 @@ export class StudyComponent extends EntityComponent<Study> {
 
     downloadAll() {
         this.downloadService.downloadAllByStudyId(this.study?.id, this.study.totalSize, this.downloadState);
+    }
+
+    approveStudy() {
+        this.studyService.approveStudyById(this.study?.id).then((approved) => {
+            if (!approved) return;
+            this.entity.isDraft = false;
+            this.consoleService.log('info', `Study ${this.entity.name} has been approved successfully.`);
+        }).catch(err => {
+            this.consoleService.log('error', 'Error while approving the study', err);
+            throw err;
+        });
     }
 
     public attachNewFile(event: any) {
@@ -568,6 +651,8 @@ export class StudyComponent extends EntityComponent<Study> {
             } else if (newStudy) {
                 DUAAssistantComponent.openCreateDialog(study.id, this.confirmDialogService, this.router);
             }
+            if (this.keycloakService.isUserAdmin())
+                this.studyService.findDraftStudies();
             return study;
         });
     }

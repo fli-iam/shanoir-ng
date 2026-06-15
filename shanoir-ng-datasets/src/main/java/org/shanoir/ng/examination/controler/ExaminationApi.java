@@ -19,7 +19,9 @@ import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.storage.StorageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -143,7 +145,10 @@ public interface ExaminationApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PostMapping(value = {"", "/"}, produces = { "application/json" }, consumes = {
             "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT'))")
+    @PreAuthorize("!@datasetSecurityService.isDraftStudy(#examinationDTO.getStudyId()) and "
+              + "(hasRole('ADMIN') or "
+              + "(hasAnyRole('EXPERT', 'USER') and "
+              + "@datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT')))")
     ResponseEntity<ExaminationDTO> saveNewExamination(
             @Parameter(description = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
             final BindingResult result) throws RestServiceException;
@@ -160,7 +165,7 @@ public interface ExaminationApi {
     ResponseEntity<Void> updateExamination(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
             @Parameter(description = "examination to update", required = true) @Valid @RequestBody ExaminationDTO examination,
-            final BindingResult result) throws RestServiceException;
+            final BindingResult result) throws Exception;
 
     @Operation(summary = "", description = "Add extra data to an examination")
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "examination updated"),
@@ -191,6 +196,19 @@ public interface ExaminationApi {
             @Parameter(description = "id of the center", required = true) @PathVariable("centerId") Long centerId,
             @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
 
+    @Operation(summary = "", description = "Retrieves the DICOM StudyInstanceUID from the backup PACS for the given examination and updates it in the database")
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study instance UID synced from PACS and updated"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no examination found"),
+            @ApiResponse(responseCode = "422", description = "study instance UID not resolvable or not found in PACS"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PutMapping(value = "/{examinationId}/studyInstanceUID", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
+    ResponseEntity<Void> syncStudyInstanceUIDFromPacs(
+            @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
+            throws RestServiceException;
+
     @Operation(summary = "", description = "Download extra data from an examination", tags = {})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "examination updated"),
@@ -203,5 +221,15 @@ public interface ExaminationApi {
     void downloadExtraData(
             @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
+
+    @Operation(summary = "", description = "Returns a JSON table of all extra-data files indexed by study ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "file list returned"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/files", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException;
 
 }

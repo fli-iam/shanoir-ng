@@ -98,6 +98,10 @@ public class StudyDTO {
 
     private StudyStorageVolumeDTO storageVolume;
 
+    private boolean isDraft;
+
+    private StudyExtraDetailsDTO extraDetails;
+
     /**
      * Default constructor.
      */
@@ -503,4 +507,19 @@ public class StudyDTO {
                 + ", storageVolume=" + storageVolume + "]";
     }
 
+    public boolean getIsDraft() {
+        return isDraft;
+    }
+
+    public void setIsDraft(boolean isDraft) {
+        this.isDraft = isDraft;
+    }
+
+    public StudyExtraDetailsDTO getExtraDetails() {
+        return extraDetails;
+    }
+
+    public void setExtraDetails(StudyExtraDetailsDTO extraDetails) {
+        this.extraDetails = extraDetails;
+    }
 }

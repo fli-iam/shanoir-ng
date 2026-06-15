@@ -14,15 +14,18 @@
 
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
-import { slideDown } from '../../shared/animations/animations';
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { ImportService } from '../shared/import.service';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+import { UploaderComponent } from '../../shared/components/uploader/uploader.component';
+
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -30,8 +33,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'bids-upload',
     templateUrl: 'bids-upload.component.html',
     styleUrls: ['bids-upload.component.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [TooltipComponent, SelectBoxComponent, FormsModule, UploaderComponent]
 })
 export class BidsUploadComponent {
 
@@ -51,25 +53,25 @@ export class BidsUploadComponent {
             private studyService: StudyService) {
 
     Promise.all([this.studyService.getAll(), this.centerService.getAll()])
-            .then(([allStudies, allCenters]) => {
-                this.studyOptions = [];
-                for (const study of allStudies) {
-                    const studyOption: Option<Study> = new Option(study, study.name);
-                    if (study.studyCenterList) {
-                        for (const studyCenter of study.studyCenterList) {
-                            const center: Center = allCenters.find(center => center.id === studyCenter.center.id);
-                            if (center) {
-                                studyCenter.center = center;
-                            }
-                        }
-                        this.studyOptions.push(studyOption);
-                        // update the selected study as well
-                        if (this.study && this.study.id == study.id) {
-                            this.study.studyCenterList = study.studyCenterList;
+        .then(([allStudies, allCenters]) => {
+            this.studyOptions = [];
+            for (const study of allStudies) {
+                const studyOption: Option<Study> = new Option(study, study.name);
+                if (study.studyCenterList) {
+                    for (const studyCenter of study.studyCenterList) {
+                        const center: Center = allCenters.find(center => center.id === studyCenter.center.id);
+                        if (center) {
+                            studyCenter.center = center;
                         }
                     }
+                    this.studyOptions.push(studyOption);
+                    // update the selected study as well
+                    if (this.study && this.study.id == study.id) {
+                        this.study.studyCenterList = study.studyCenterList;
+                    }
                 }
-            });
+            }
+        });
 
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();

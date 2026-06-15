@@ -13,23 +13,25 @@
  */
 
 import { Location } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { Component, inject, OnInit } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { ConsoleService } from 'src/app/shared/console/console.service';
-import { ServiceLocator } from 'src/app/utils/locator.service';
 
 import * as AppUtils from '../../utils/app.utils';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import { HeaderComponent } from '../../shared/header/header.component';
+import { AccountRequestInfoComponent } from '../account-request-info/account-request-info.component';
+import { ConsoleComponent } from '../../shared/console/console.component';
 
 @Component({
     selector: 'accountRequest',
     templateUrl: 'account-request.component.html',
     styleUrls: ['account-request.component.css'],
-    standalone: false
+    imports: [HeaderComponent, FormsModule, ReactiveFormsModule, AccountRequestInfoComponent, ConsoleComponent]
 })
 
 export class AccountRequestComponent implements OnInit {
@@ -52,7 +54,7 @@ export class AccountRequestComponent implements OnInit {
             private location: Location,
             private route: ActivatedRoute,
             private consoleService: ConsoleService) {
-                this.router = ServiceLocator.injector.get(Router)
+                this.router = inject(Router)
                 this.studyName = this.route.snapshot.queryParams['study'];
                 this.invitationIssuer = this.route.snapshot.queryParams['from'];
                 this.function = this.route.snapshot.queryParams['function'];
@@ -65,8 +67,8 @@ export class AccountRequestComponent implements OnInit {
     buildForm(): void {
         const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
         this.form = this.fb.group({
-            'firstName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-            'lastName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+            'firstName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
+            'lastName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
             'email': ['', [Validators.required, Validators.pattern(emailRegex)]],
             'accountRequestInfo': [new AccountRequestInfo(), [this.validateARInfo]]
         });
@@ -137,5 +139,11 @@ export class AccountRequestComponent implements OnInit {
         return false;
     }
 
-
+    private nonSpecialCharsValidator(): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            if(control.value != undefined){
+                return /^[\p{L}\p{M}\s'-]+$/u.test(control.value) ? null : { invalidName: true };            }
+            return null;
+        };
+    }
 }

@@ -79,12 +79,16 @@ jobs:
         run: |
           jlink \
             --module-path $JAVA_HOME/jmods \
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets \
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.crypto.ec,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets \
             --output shanoir-uploader/target/custom-runtime \
             --compress zip-6 \
             --strip-debug \
             --no-header-files \
             --no-man-pages
+
+      - name: Copy default Java truststore into custom runtime
+        run: |
+          cp $JAVA_HOME/lib/security/cacerts shanoir-uploader/target/custom-runtime/lib/security/cacerts
 
       - name: Package .deb
         run: |
@@ -144,12 +148,17 @@ jobs:
         run: |
           jlink `
             --module-path $Env:JAVA_HOME\jmods `
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets `
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.crypto.ec,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets `
             --output shanoir-uploader/target/custom-runtime `
             --compress zip-6 `
             --strip-debug `
             --no-header-files `
             --no-man-pages
+
+      - name: Copy default Java truststore into custom runtime
+        run: |
+          cp $Env:JAVA_HOME\lib\security\cacerts shanoir-uploader/target/custom-runtime/lib/security/cacerts
+
 
       - name: Package .exe
         run: |
@@ -208,12 +217,16 @@ jobs:
         run: |
           jlink \
             --module-path $JAVA_HOME/jmods \
-            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets \
+            --add-modules java.base,java.compiler,java.desktop,java.instrument,java.management,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.security.jgss,java.sql,java.xml.crypto,jdk.crypto.ec,jdk.jfr,jdk.unsupported,java.logging,jdk.charsets \
             --output shanoir-uploader/target/custom-runtime \
             --compress zip-6 \
             --strip-debug \
             --no-header-files \
             --no-man-pages
+
+      - name: Copy default Java truststore into custom runtime
+        run: |
+          cp $JAVA_HOME/lib/security/cacerts shanoir-uploader/target/custom-runtime/lib/security/cacerts
 
       - name: Package .dmg
         run: |
