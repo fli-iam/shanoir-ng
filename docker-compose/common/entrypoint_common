@@ -25,7 +25,7 @@ abort_if_error()
 }
 
 # create a temporary fifo
-# 
+#
 # usage: fifo="`tmp_fifo`"
 tmp_fifo()
 {
@@ -45,7 +45,7 @@ match()
 
 # Ensure that the listed environment variables are set and ensure that their
 # value is well-formatted.
-# 
+#
 # usage:  require VARNAME [VARNAME...]
 require()
 {
@@ -65,6 +65,9 @@ require()
             SHANOIR_URL_HOST)       match "$name" '^([a-z0-9.-]+)$'                     ;;
             SHANOIR_VIEWER_OHIF_URL_SCHEME)      match "$name" '^(http|https)$'                      ;;
             SHANOIR_VIEWER_OHIF_URL_HOST)        match "$name" '^([a-z0-9.-]+)$'                     ;;
+            SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS) match "$name" '^([0-9]+)$'                         ;;
+            SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS) match "$name" '^([0-9]+)$'                   ;;
+            SHANOIR_VIEWER_OHIF_PREFETCH_NUM_REQUESTS) match "$name" '^([0-9]+)$'                    ;;
             SHANOIR_CERTIFICATE)    match "$name" '^(auto|manual)$'                     ;;
             SHANOIR_MIGRATION)      match "$name" '^(auto|init|never|dev|import|export)$' ;;
             SHANOIR_X_FORWARDED)    match "$name" '^(generate|trust)$'			;;
@@ -73,19 +76,29 @@ require()
             SHANOIR_KEYCLOAK_ADAPTER_MODE) match "$name" '^(login-required|check-sso)$'	;;
             SHANOIR_ADMIN_EMAIL)  ;;
             SHANOIR_ADMIN_NAME)     ;;
-			SHANOIR_SMTP_HOST) ;;
-			SHANOIR_SMTP_PORT) ;;
-			SHANOIR_SMTP_AUTH) match "$name" '^(true|false)$' ;;
-			SHANOIR_SMTP_USERNAME) ;;
-			SHANOIR_SMTP_PASSWORD) ;;
-			SHANOIR_SMTP_STARTTLS_ENABLE) match "$name" '^(true|false)$' ;;
-			SHANOIR_SMTP_STARTTLS_REQUIRED) match "$name" '^(true|false)$' ;;
-			SHANOIR_SMTP_FROM) ;;
+            SHANOIR_SMTP_HOST) ;;
+            SHANOIR_SMTP_PORT) ;;
+            SHANOIR_SMTP_AUTH) match "$name" '^(true|false)$' ;;
+            SHANOIR_SMTP_USERNAME) ;;
+            SHANOIR_SMTP_PASSWORD) ;;
+            SHANOIR_SMTP_STARTTLS_ENABLE) match "$name" '^(true|false)$' ;;
+            SHANOIR_SMTP_STARTTLS_REQUIRED) match "$name" '^(true|false)$' ;;
+            SHANOIR_SMTP_FROM) ;;
+            SHANOIR_STORAGE_TYPE) match "$name" '^(file-system|s3)$' ;;
+            S3_ENDPOINT) ;;
+            S3_REGION) ;;
+            S3_ACCESS_KEY_ID) ;;
+            S3_SECRET_ACCESS_KEY) ;;
+            S3_BUCKET_STUDIES) ;;
+            S3_BUCKET_DATASETS) ;;
+            S3_BUCKET_PRECLINICAL) ;;
             SHANOIR_CERTIFICATE_PEM_CRT) ;;
             SHANOIR_CERTIFICATE_PEM_KEY) ;;
             VIP_URL_SCHEME)         match "$name" '^(http|https)$'                      ;;
             VIP_URL_HOST)           match "$name" '^([a-z0-9.:-]+)$'                     ;;
             VIP_CLIENT_SECRET)      ;;
+            SHANOIR_SHUTDOWN_HOUR)      ;;
+            SHANOIR_CONTINUANCE_HOUR)      ;;
 
             SHANOIR_KEYCLOAK_HOST)      match "$name" '^([a-z0-9.-]+)$' ;;
             SHANOIR_USERS_HOST)         match "$name" '^([a-z0-9.-]+)$' ;;
@@ -99,6 +112,13 @@ require()
             SHANOIR_DB_PORT)            match "$name" '^([0-9]+)$' ;;
             SHANOIR_DB_NAME)            match "$name" '^([a-z0-9._-]+)$' ;;
 
+            SHANOIR_DATASETS_DB_NAME)    match "$name" '^([a-z0-9._-]+)$' ;;
+            SHANOIR_STUDIES_DB_NAME)     match "$name" '^([a-z0-9._-]+)$' ;;
+            SHANOIR_IMPORT_DB_NAME)      match "$name" '^([a-z0-9._-]+)$' ;;
+            SHANOIR_USERS_DB_NAME)       match "$name" '^([a-z0-9._-]+)$' ;;
+            SHANOIR_PRECLINICAL_DB_NAME) match "$name" '^([a-z0-9._-]+)$' ;;
+            SHANOIR_MIGRATIONS_DB_NAME)  match "$name" '^([a-z0-9._-]+)$' ;;
+
             *)
                 error "unknown var: $name"
                 ;;
@@ -108,7 +128,7 @@ require()
 
 # Ensure that the value of the listed environment variables is well-formatted
 # or blank.
-# 
+#
 # usage:  require VARNAME [VARNAME...]
 optional()
 {
@@ -118,8 +138,6 @@ optional()
         [ -z "${!name}" ] || require "$name"
     done
 }
-
-
 
 #############################################################################
 # Environment variables override
@@ -139,7 +157,7 @@ env=()
 
 
 # Set the default value for an environment variable
-# 
+#
 # usage: env_setdefault NAME VALUE
 #
 # If the 'NAME' environment variable is blank, then this function adds a
@@ -160,7 +178,7 @@ env_setdefault()
 }
 
 # Process the 'SHANOIR_MIGRATION' env var and adjust the spring config
-# accordingly. 
+# accordingly.
 _ms_oneshot=
 handle_microservice_migration()
 {

@@ -148,9 +148,9 @@ export class StudyDTOService {
         }
 
         if (dto.studyTags) {
-          entity.studyTags = dto.studyTags.map(this.tagDTOToTag);
+            entity.studyTags = dto.studyTags.map(this.tagDTOToTag);
         } else {
-          entity.studyTags = [];
+            entity.studyTags = [];
         }
 
         if(dto.storageVolume){
@@ -209,7 +209,7 @@ export class StudyDTOService {
         subject.physicallyInvolved = dtoSubject.physicallyInvolved;
         subject.isAlreadyAnonymized = dtoSubject.isAlreadyAnonymized;
         subject.studyIdentifier = dtoSubject.studyIdentifier;
-        subject.tags = dtoSubject.tags;
+        subject.tags = dtoSubject.tags?.map(tagDTO => this.tagDTOToTag(tagDTO));
         subject.qualityTag = dtoSubject.qualityTag;
         subject.studyId = dtoSubject.studyId;
         subject.languageHemisphericDominance = dtoSubject.languageHemisphericDominance;
@@ -247,7 +247,7 @@ export class StudyDTOService {
             study.studyCenterList = [];
         }
         if (dto.tags) {
-          study.tags = dto.tags.map(this.tagDTOToTag);
+          study.tags = dto.tags.map(tagDTO => this.tagDTOToTag(tagDTO));
         } else {
           study.tags = [];
         }

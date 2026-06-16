@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -27,15 +27,21 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { PapayaComponent } from '../../shared/components/papaya/papaya.component';
 
 import { MrDataset } from './mr/dataset.mr.model';
+import { CommonDatasetComponent } from './common/dataset.common.component';
+import { MrDatasetComponent } from './mr/dataset.mr.component';
+import { EegDatasetComponent } from './eeg/dataset.eeg.component';
+
 
 
 @Component({
     selector: 'dataset-detail',
     templateUrl: 'dataset.component.html',
     styleUrls: ['dataset.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, CommonDatasetComponent, MrDatasetComponent, EegDatasetComponent, PapayaComponent]
 })
 
 export class DatasetComponent extends EntityComponent<Dataset> {

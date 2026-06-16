@@ -14,11 +14,12 @@
 
 import {Injectable} from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import {Observable} from "rxjs";
+import {Observable, firstValueFrom} from "rxjs";
 
 import * as AppUtils from "../../utils/app.utils";
 import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
 import {IdName} from "../../shared/models/id-name.model";
+import {ExecutionTemplate} from "../models/execution-template";
 
 @Injectable()
 export class ExecutionService {
@@ -38,8 +39,16 @@ export class ExecutionService {
     if (execution === null || execution === undefined) {
       throw new Error('Required parameter execution was null or undefined when calling createExecution.');
     }
-    return this.httpClient.post<IdName>(`${this.executionUrl}/`,[execution]).toPromise();
+    return firstValueFrom(this.httpClient.post<IdName>(`${this.executionUrl}/`,[execution]));
   }
+
+    /**
+    * Get all automatic executions linked to a study
+    * @param study_id the study id we want the automatic executions from
+    */
+    public getAutomaticExecutions(study_id: number): Promise<ExecutionTemplate[]> {
+        return firstValueFrom(this.httpClient.get<ExecutionTemplate[]>(`${this.executionUrl}/automatic/` + study_id));
+    }
 
   /**
    * Get stderr of a processing

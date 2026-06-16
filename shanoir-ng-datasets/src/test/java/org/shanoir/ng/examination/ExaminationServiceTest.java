@@ -121,7 +121,7 @@ public class ExaminationServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-    public void updateTest() throws ShanoirException {
+    public void updateTest() throws Exception {
         final Examination updatedExamination = examinationService.update(createExamination());
         Assertions.assertNotNull(updatedExamination);
         Assertions.assertTrue(UPDATED_EXAMINATION_COMMENT.equals(updatedExamination.getComment()));
@@ -131,7 +131,7 @@ public class ExaminationServiceTest {
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-    public void updateAsAdminTest() throws ShanoirException {
+    public void updateAsAdminTest() throws Exception {
         // We update the subject -> admin -> SUCCESS
         Examination updatedExam = createExamination();
         updatedExam.setSubject(new Subject(5L, "new name"));

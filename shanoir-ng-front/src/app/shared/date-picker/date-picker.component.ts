@@ -11,8 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { DatePipe } from '@angular/common';
 import { Component, forwardRef, Input } from '@angular/core';
-import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors, FormsModule } from '@angular/forms';
 
 
 @Component({
@@ -39,7 +40,7 @@ import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErr
             multi: true,
         }
     ],
-    standalone: false
+    imports: [FormsModule, DatePipe]
 })
 export class DatepickerComponent implements ControlValueAccessor {
 
