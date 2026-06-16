@@ -117,6 +117,7 @@ export class StudyComponent extends EntityComponent<Study> {
             protected downloadService: MassDownloadService) {
         super(route);
         this.activeTab = 'general';
+        
     }
 
     protected getRoutingName(): string {

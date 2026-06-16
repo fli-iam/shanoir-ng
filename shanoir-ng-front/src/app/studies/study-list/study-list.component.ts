@@ -42,6 +42,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     hasDUA: boolean;
     isSuConfirmed: boolean;
     private studyIdsForCurrentUser: number[];
+    private requestDates: Map<number, Date>;
 
     constructor(
         private studyService: StudyService,
@@ -50,6 +51,9 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
         super('study');
         this.studyService.getStudiesByRight(StudyUserRight.CAN_ADMINISTRATE).then( studies => this.studyIdsForCurrentUser = studies);
+        this.studyService.fetchCurrentUserStudyDates().then(requestDates => {
+            this.requestDates = requestDates;
+        });
     }
 
     getService(): EntityService<Study> {
@@ -83,10 +87,10 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     return study;
                 }));
             return studies;
-        })
+        });
         const allPromise: Promise<Study[]> = Promise.all([
             earlyResult,
-            this.userService.getAccessRequests(),
+            this.userService.getAccessRequests()
         ]).then(([studies, accessRequests]) => {
             if (accessRequests?.length > 0) {
                 for (const accessRequest of accessRequests) {
@@ -198,6 +202,23 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                         return tip;
                     } else {
                         return "Calculating the detailed study storage volume, this may take up to a minute"
+                    }
+                }
+            }, {
+                headerName: "Access end", type: "date", 
+                cellRenderer: (params: any) => {
+                    return this.requestDates?.get(params.data?.id);
+                },
+                cellGraphics: (data: any) => {
+                    const maxDate = this.requestDates?.get(data.id);
+                    if (maxDate && maxDate > new Date()) {
+                        if (maxDate && maxDate < new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)) {
+                            return {color: 'orange'};
+                        } else {
+                            return {color: 'green'};
+                        }
+                    } else {
+                        return {color: 'red'};
                     }
                 }
             }

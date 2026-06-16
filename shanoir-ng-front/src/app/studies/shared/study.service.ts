@@ -119,6 +119,22 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             });
     }
 
+    fetchCurrentUserStudyDates(): Promise<Map<number, Date>> {
+        // return firstValueFrom(this.http.get<{id: number, maxAccessDate: Date}[]>(AppUtils.BACKEND_API_STUDY_URL + '/studyUser/allMyDates')).then(dtos => {
+        //     const result: Map<number, Date> = new Map();
+        //     dtos?.forEach(dto => {
+        //         result.set(dto.id, dto.maxAccessDate);
+        //     });
+        //     return result;
+        // });
+        const map: Map<number, Date> = new Map();
+        map.set(2, new Date(new Date().getTime() + 24 * 60 * 60 * 1000)); // tomorrow
+        map.set(12, new Date(new Date().getTime() + 60 * 24 * 60 * 60 * 1000));
+        map.set(15, new Date(new Date().getTime() - 24 * 60 * 60 * 1000));
+        map.set(16, new Date(new Date().getTime() + 24 * 60 * 60 * 1000));
+        return Promise.resolve(map);
+    }
+
     findSubjectsByStudyId(studyId: number): Promise<Subject[]> {
         return this.http.get<SubjectDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
             .toPromise().then(this.mapSubjectList);
