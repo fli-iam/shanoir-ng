@@ -130,7 +130,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             dtos?.forEach(dto => {
                 result.set(dto.id, new Date(dto.date));
             });
-            console.log("fetchCurrentUserStudyDates: ", result);
             return result;
         });
     }
