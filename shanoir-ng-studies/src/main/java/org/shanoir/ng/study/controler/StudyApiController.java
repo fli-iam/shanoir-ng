@@ -38,6 +38,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.study.dto.CopyData;
+import org.shanoir.ng.study.dto.IdDate;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
@@ -526,6 +527,15 @@ public class StudyApiController implements StudyApi {
             return new ResponseEntity<>(studyUserList, HttpStatus.OK);
         }
 
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Override
+    public ResponseEntity<List<IdDate>> getUserExpirationDates() {
+        List<IdDate> expirationDates = this.studyUserService.getUserExpirationDates();
+        if (!expirationDates.isEmpty()) {
+            return new ResponseEntity<>(expirationDates, HttpStatus.OK);
+        }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

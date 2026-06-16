@@ -213,7 +213,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     const maxDate = this.requestDates?.get(data.id);
                     if (maxDate && maxDate > new Date()) {
                         if (maxDate && maxDate < new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)) {
-                            return {color: 'orange'};
+                            return {color: 'darkorange'};
                         } else {
                             return {color: 'green'};
                         }

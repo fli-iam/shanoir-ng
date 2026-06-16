@@ -23,6 +23,7 @@ import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.IdDate;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.study.rights.command.CommandType;
@@ -99,6 +100,19 @@ public class StudyUserServiceImpl implements StudyUserService {
         // two bags contraint on EntityGraph expression in findByStudy_Id: load centers manually
         studyUsers.stream().forEach(su -> su.setCenters(studyUserRepository.findDistinctCentersByStudyId(studyId)));
         return studyUsers;
+    }
+
+    @Override
+    public List<IdDate> getUserExpirationDates() {
+        Long userId = KeycloakUtil.getTokenUserId();
+        List<StudyUser> studyUsers = studyUserRepository.findByUserId(userId);
+        List<IdDate> expirationDates = new ArrayList<>();
+        for (StudyUser studyUser : studyUsers) {
+            if (studyUser.getExpiration() != null) {
+                expirationDates.add(new IdDate(studyUser.getStudyId(), studyUser.getExpiration()));
+            }
+        }
+        return expirationDates;
     }
 
     @RabbitListener(queues = RabbitMQConfiguration.DELETE_USER_QUEUE, containerFactory = "singleConsumerFactory")

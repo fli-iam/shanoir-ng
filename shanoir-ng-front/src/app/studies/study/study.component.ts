@@ -95,7 +95,8 @@ export class StudyComponent extends EntityComponent<Study> {
     accessRequests: AccessRequest[];
     isStudyAdmin: boolean;
     subjectTagsInUse: Tag[] = [];
-
+    protected userExpiration: Date;
+    protected userExpirationColor: string;
     public openPrefix: boolean = false;
 
     centerOptions: Option<IdName>[];
@@ -153,10 +154,11 @@ export class StudyComponent extends EntityComponent<Study> {
     public set study(study: Study) {
         this.entity = study;
     }
-
+    
     public set entity(study: Study) {
         super.entity = study;
         this.updateSubjectTagsInUse();
+        this.computeExpirationDate(study);
     }
 
     public get entity(): Study {
@@ -358,6 +360,19 @@ export class StudyComponent extends EntityComponent<Study> {
         if (startDay === null || endDay === null) return null;
         if (endDay <= startDay) return { order: true };
         return null;
+    }
+
+    private computeExpirationDate(study: Study) {
+        this.userExpiration = study?.studyUserList?.find(su => su.userId == KeycloakService.auth.userId)?.expiration;
+        if (this.userExpiration && this.userExpiration > new Date()) {
+            if (this.userExpiration && this.userExpiration < new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)) {
+                this.userExpirationColor = 'darkorange';
+            } else {
+                this.userExpirationColor = 'green';
+            }
+        } else {
+            this.userExpirationColor = 'red';
+        }
     }
 
     private toDateOnlyTimestamp(value: Date | string): number | null {
