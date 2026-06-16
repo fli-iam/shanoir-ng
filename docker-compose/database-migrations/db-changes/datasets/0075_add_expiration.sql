@@ -10,4 +10,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-ALTER TABLE study_user ADD COLUMN expiration DATE DEFAULT NULL;
+alter table study_user add COLUMN expiration DATE NOT NULL;
+update study_user
+set expiration = current_date + interval 6 month;
