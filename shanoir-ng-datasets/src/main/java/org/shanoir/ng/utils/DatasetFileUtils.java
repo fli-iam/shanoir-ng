@@ -103,7 +103,7 @@ public final class DatasetFileUtils {
             DatasetFile file,
             List<URL> pathURLs,
             DatasetDownloadError downloadResult) {
-        String normalizedPath = file.getPath().replace("%20", " ");
+        String normalizedPath = file.getPath().replace(" ", "%20");
         try {
             pathURLs.add(toURL(normalizedPath));
         } catch (MalformedURLException e) {
