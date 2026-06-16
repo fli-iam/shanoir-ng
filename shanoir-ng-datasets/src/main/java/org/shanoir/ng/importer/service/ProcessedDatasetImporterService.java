@@ -54,8 +54,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import javax.smartcardio.ATR;
-
 @Service
 @Scope("prototype")
 public class ProcessedDatasetImporterService {
@@ -153,7 +151,7 @@ public class ProcessedDatasetImporterService {
                 if (processedDatasetFile.getName().toLowerCase().endsWith(".zip")) {
                     firstSlice = getFirstSlice(processedDatasetFile);
                 }
-            } catch (Exception ignored){
+            } catch (Exception ignored) {
                 LOG.error("Processed dataset file is not a dataset : {}", processedDatasetFile.getAbsolutePath());
                 return null;
             }
@@ -161,9 +159,9 @@ public class ProcessedDatasetImporterService {
             // We pass here by using DicomInputStream,
             // in case processed dataset file does not end with .dcm
             try (DicomInputStream dIS = new DicomInputStream(firstSlice)) {
-                Attributes attributes = dIS.readDataset();// we close InputStream and use Attributes
+                Attributes attributes = dIS.readDataset(); // we close InputStream and use Attributes
 
-                if(!Objects.equals(firstSlice.getName(), processedDatasetFile.getName())) {
+                if (!Objects.equals(firstSlice.getName(), processedDatasetFile.getName())) {
                     firstSlice.delete();
                 }
                 return attributes;
