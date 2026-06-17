@@ -23,25 +23,25 @@ public class DicomApiController {
 
     @GetMapping
     public ConfigDTO getDicomConfiguration() {
-        Integer pacsPort = null;
-        Integer localPort = null;
+        Integer pacsDicomPort = null;
+        Integer localDicomPort = null;
 
-        if (ShUpConfig.dicomServerProperties.getProperty("pacs.port") != null && ShUpConfig.dicomServerProperties.getProperty("local.port") != null) {
+        if (ShUpConfig.dicomServerProperties.getProperty("dicom.server.port") != null && ShUpConfig.dicomServerProperties.getProperty("local.dicom.server.port") != null) {
             try {
-                pacsPort = Integer.parseInt(ShUpConfig.dicomServerProperties.getProperty("pacs.port"));
-                localPort = Integer.parseInt(ShUpConfig.dicomServerProperties.getProperty("local.port"));
+                pacsDicomPort = Integer.valueOf(ShUpConfig.dicomServerProperties.getProperty("dicom.server.port"));
+                localDicomPort = Integer.valueOf(ShUpConfig.dicomServerProperties.getProperty("local.dicom.server.port"));
             } catch (NumberFormatException e) {
                 logger.error("Error parsing Dicom port numbers", e);
                 return null;
             }
         }
         return new ConfigDTO(
-            ShUpConfig.dicomServerProperties.getProperty("pacs.host"),
-            pacsPort,
-            ShUpConfig.dicomServerProperties.getProperty("pacs.aet.title"),
-            ShUpConfig.dicomServerProperties.getProperty("local.host"),
-            localPort,
-            ShUpConfig.dicomServerProperties.getProperty("local.aet.title")
+            ShUpConfig.dicomServerProperties.getProperty("dicom.server.host"),
+            pacsDicomPort,
+            ShUpConfig.dicomServerProperties.getProperty("dicom.server.aet.called"),
+            ShUpConfig.dicomServerProperties.getProperty("local.dicom.server.host"),
+            localDicomPort,
+            ShUpConfig.dicomServerProperties.getProperty("local.dicom.server.aet.calling")
             );
     }
 
