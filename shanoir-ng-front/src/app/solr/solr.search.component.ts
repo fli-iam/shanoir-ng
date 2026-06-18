@@ -409,6 +409,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         return map;
     }
 
+    private addAllToSelection() {
+        this.solrService.getAllIds(this.solrRequest).then(ids => {
+            ids.forEach(id => this.selectedDatasetIds.add(id));
+            this.onSelectionChange(this.selectedDatasetIds);
+        });
+    }
+
     protected openDeleteConfirmDialog = (solrDocument: SolrDocument) => {
         this.confirmDialogService
             .confirm(
@@ -560,6 +567,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getCustomActionsDefs(): any[] {
         const customActionDefs:any = [];
         customActionDefs.push(
+            {title: "Add all", awesome: "fa-solid fa-square-check", action: () => this.addAllToSelection(), disabledIfNoSelected: false},
             {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
@@ -596,8 +604,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         }
     }
 
-    onSelectionChange (selection: Set<any>) {
-
+    onSelectionChange(selection: Set<any>) {
         let downloadable = true;
         selection.forEach((datasetid) => {
             const selected: any = this.table?.page?.content?.find((element: any) => element.id == datasetid);
@@ -614,7 +621,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         });
         this.canDownload = downloadable;
 
-        this.selectedDatasetIds = selection;
+        this.selectedDatasetIds = new Set(selection);
         this.prepareForCopy();
     }
 
