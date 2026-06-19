@@ -64,7 +64,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <strong>
             {{ subjectsCount || 'no' }} subject@if (subjectsCount > 1) {s}
         </strong>, for a total of
-        <strong>{{ storageSize }} GB</strong>.
+        <strong>{{ formattedStorageSize }}</strong>.
         <br />
         There
         @if (usersCount < 2) {
