@@ -87,8 +87,9 @@ public abstract class AbstractTest {
     public static void setup() {
         ShanoirUploader.initShanoirUploaderFolders();
         PropertiesUtil.initPropertiesFromResourcePath(testProperties, TEST_PROPERTIES);
+        String profile = testProperties.getProperty(PROFILE);
         PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.profileProperties,
-                ShUpConfig.PROFILE_DIR + testProperties.getProperty(PROFILE) + "/" + ShUpConfig.PROFILE_PROPERTIES);
+                ShUpConfig.PROFILE_DIR + profile + "/" + ShUpConfig.PROFILE_PROPERTIES);
         PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.endpointProperties, ShUpConfig.ENDPOINT_PROPERTIES);
         identifierCalculator = new IdentifierCalculator();
         shUpClient = new ShanoirUploaderServiceClient();
@@ -96,13 +97,14 @@ public abstract class AbstractTest {
         ShUpOnloadConfig.setShanoirUploaderServiceClient(shUpClient);
         String user = testProperties.getProperty(USER_NAME);
         String password = testProperties.getProperty(USER_PASSWORD);
+        LOG.info("Testing profile {} with user {}.", profile, user);
         String token;
         try {
             token = shUpClient.loginWithKeycloakForToken(user, password);
             if (token != null) {
                 ShUpOnloadConfig.setTokenString(token);
             } else {
-                LOG.error("ERROR: login not successful.");
+                LOG.error("Login error. Server down, wrong profile or credentials error.");
                 Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
             }
             if (ShUpConfig.isModePseudonymus()) {
