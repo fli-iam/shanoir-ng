@@ -428,8 +428,10 @@ public class ShanoirUploaderServiceClient {
                 List<Study> studies = Util.getMappedList(response, Study.class);
                 return studies;
             } else {
-                LOG.error("Could not get study public data (status code: " + code + ", message: "
-                        + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                if (code != HttpStatus.SC_NO_CONTENT) {
+                    LOG.error("Could not get study public data (status code: " + code + ", message: "
+                            + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                }
                 return null;
             }
         }
