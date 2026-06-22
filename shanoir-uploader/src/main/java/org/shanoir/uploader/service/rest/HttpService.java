@@ -140,7 +140,7 @@ public class HttpService {
             CloseableHttpResponse response = httpClient.execute(httpPost, context);
             return response;
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error(e.getMessage());
             throw e;
         }
     }

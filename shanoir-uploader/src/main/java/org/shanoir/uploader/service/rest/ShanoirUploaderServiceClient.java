@@ -336,10 +336,10 @@ public class ShanoirUploaderServiceClient {
                     }
                 }
             } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error(e.getMessage());
             }
         } catch (UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error(e.getMessage());
         }
         return null;
     }
