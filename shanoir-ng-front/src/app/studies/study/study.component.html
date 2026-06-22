@@ -674,6 +674,58 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [tagsInUse]="subjectTagsInUse"
                         (userChange)="onTagListChange()"
                         formControlName="tags"></tag-creator>
+                    <fieldset class="pattern-fieldset">
+                        <legend>Subject Name Pattern</legend>
+                        <div class="pattern-builder">
+                            <div class="pattern-field">
+                                Subject name prefix :
+                                <select id="namePrefix" name="namePrefix">
+                                    <option value="study_name">Study name</option>
+                                    <option value="random_name">Random name</option>
+                                </select>
+                            </div>
+
+                            <span class="pattern-separator-label">+</span>
+
+                            <div class="pattern-field">
+                                Separator :
+                                <select id="separator" name="separator">
+                                    <option value="-">-</option>
+                                    <option value="_">_</option>
+                                    <option value=".">.</option>
+                                </select>
+                            </div>
+
+                            <span class="pattern-separator-label">+</span>
+
+                            <div class="pattern-field">
+                                Subject name identifier length :
+                                <select id="idLength" name="idLength">
+                                    <option value="4">3 chars</option>
+                                    <option value="6">4 chars</option>
+                                    <option value="8">6 chars</option>
+                                    <option value="10">8 chars</option>
+                                </select>
+                            </div>
+
+                            <span class="pattern-separator-label">+</span>
+
+                            <div class="pattern-field">
+                                Subject name identifier type :
+                                <select id="idType" name="idType">
+                                    <option value="string">String value</option>
+                                    <option value="numeric">Numeric value</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="pattern-preview">
+                            <span class="pattern-preview-label">Preview :</span>
+                            <code class="pattern-preview-value">StudyName-A8f2</code>
+                        </div>
+                    </fieldset>
                     <subject-study-list
                         [allowRemove]="false"
                         [study]="study"
