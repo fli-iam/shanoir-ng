@@ -13,9 +13,11 @@
  */
 import {Component, forwardRef, Input} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
+
 import {Mode} from '../../../shared/components/entity/entity.component.abstract';
-import {XaProtocol} from './xa-protocol.model';
 import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
+
+import {XaProtocol} from './xa-protocol.model';
 
 
 @Component({
@@ -27,16 +29,15 @@ import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
             useExisting: forwardRef(() => XaProtocolComponent),
             multi: true,
         }
-    ],
-    standalone: false
+    ]
 })
 export class XaProtocolComponent implements ControlValueAccessor {
 
     public protocol: XaProtocol;
     @Input() private mode: Mode;
     protected disabled: boolean = false;
-    protected propagateChange = (_: any) => {};
-    protected propagateTouched = () => {};
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
 
     writeValue(obj: any): void {
         this.protocol = obj;

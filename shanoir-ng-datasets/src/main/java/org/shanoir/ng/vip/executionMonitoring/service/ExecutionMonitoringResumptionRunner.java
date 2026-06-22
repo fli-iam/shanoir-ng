@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.vip.executionMonitoring.service;
 
 import java.util.List;
@@ -57,7 +71,7 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) throws EntityNotFoundException, SecurityException, JsonProcessingException {
-        try {
+        try { // Execution resumption
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             List<ExecutionMonitoring> runningMonitorings = executionMonitoringRepository.findByStatus(ExecutionStatus.RUNNING);
             for (ExecutionMonitoring monitoring : runningMonitorings) {
@@ -72,7 +86,7 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
                 for (ShanoirEvent event : events) {
                     try {
                         executionService.getExecutionAsServiceAccount(1, monitoring.getIdentifier()).block();
-                        executionMonitoringService.startMonitoringJob(monitoring, event);
+                        executionMonitoringService.startMonitoringJob(monitoring, event, null);
                         LOG.info("Monitoring of VIP execution [{}] resumed", monitoring.getName());
                     } catch (Exception e) {
                         LOG.error("Monitoring resumption of VIP execution [" + monitoring.getName() + "," + monitoring.getIdentifier() + "] failed.");
@@ -80,7 +94,7 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
                 }
             }
         } catch (Exception ignored) {
-            //Try-catch is only for dodging container shutdown if exception is raised (due to @Component state)
+             //Try-catch is only for dodging container shutdown if exception is raised (due to @Component state)
         }
     }
 }

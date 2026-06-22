@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -39,45 +39,45 @@ import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class SubjectStudyApiController implements SubjectStudyApi {
-	
-	@Autowired
-	private SubjectStudyService subjectStudyService;
 
-	@Autowired
-	private SubjectService subjectService;
+    @Autowired
+    private SubjectStudyService subjectStudyService;
 
-	@Autowired
-	private SubjectMapper subjectMapper;
+    @Autowired
+    private SubjectService subjectService;
 
-	private static final Logger LOG = LoggerFactory.getLogger(SubjectStudyApiController.class);
+    @Autowired
+    private SubjectMapper subjectMapper;
 
-	@Override
-	public ResponseEntity<Void> updateSubjectStudy(
-			@Parameter(description = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
-			@Parameter(description = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
-			final BindingResult result) throws RestServiceException {
+    private static final Logger LOG = LoggerFactory.getLogger(SubjectStudyApiController.class);
 
-		final FieldErrorMap errors = new FieldErrorMap(result);
-		if (!errors.isEmpty()) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-			throw new RestServiceException(error);
-		}
+    @Override
+    public ResponseEntity<Void> updateSubjectStudy(
+            @Parameter(description = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
+            @Parameter(description = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
+            final BindingResult result) throws RestServiceException {
 
-		try {
-			subjectStudyService.update(subjectStudy);
+        final FieldErrorMap errors = new FieldErrorMap(result);
+        if (!errors.isEmpty()) {
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+            throw new RestServiceException(error);
+        }
 
-			Subject subject = subjectService.findById(subjectStudy.getSubject().getId());
-			
-			// Update datasets side
-			subjectService.updateSubjectName(subjectMapper.subjectToSubjectDTO(subject));
-			
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not save subject study to dataset microservice", e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+        try {
+            subjectStudyService.update(subjectStudy);
+
+            Subject subject = subjectService.findById(subjectStudy.getSubject().getId());
+
+            // Update datasets side
+            subjectService.updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subject));
+
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (MicroServiceCommunicationException e) {
+            LOG.error("Could not save subject study to dataset microservice", e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

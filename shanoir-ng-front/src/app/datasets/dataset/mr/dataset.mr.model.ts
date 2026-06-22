@@ -87,7 +87,7 @@ export enum MrDatasetNature {
 
 } export namespace MrDatasetNature {
 
-    export function all(): Array<MrDatasetNature> {
+    export function all(): MrDatasetNature[] {
         return allOfEnum<MrDatasetNature>(MrDatasetNature);
     }
 
@@ -95,7 +95,7 @@ export enum MrDatasetNature {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export var options: Option<MrDatasetNature>[] = all().map(prop => new Option<MrDatasetNature>(prop, getLabel(prop)));
+    export const options: Option<MrDatasetNature>[] = all().map(prop => new Option<MrDatasetNature>(prop, getLabel(prop)));
 }
 
 export enum MrQualityProcedureType {
@@ -105,7 +105,7 @@ export enum MrQualityProcedureType {
 
 } export namespace MrQualityProcedureType {
 
-    export function all(): Array<MrQualityProcedureType> {
+    export function all(): MrQualityProcedureType[] {
         return allOfEnum<MrQualityProcedureType>(MrQualityProcedureType);
     }
 
@@ -113,5 +113,5 @@ export enum MrQualityProcedureType {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export var options: Option<MrQualityProcedureType>[] = all().map(prop => new Option<MrQualityProcedureType>(prop, getLabel(prop)));
+    export const options: Option<MrQualityProcedureType>[] = all().map(prop => new Option<MrQualityProcedureType>(prop, getLabel(prop)));
 }

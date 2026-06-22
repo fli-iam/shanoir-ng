@@ -14,17 +14,17 @@
 
 import {Injectable} from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import {Observable} from "rxjs";
+import {Observable, firstValueFrom} from "rxjs";
+
 import * as AppUtils from "../../utils/app.utils";
-import {Execution} from "../models/execution";
 import {ExecutionCandidateDto} from "../models/execution-candidate.dto";
 import {IdName} from "../../shared/models/id-name.model";
-import {Id} from "../../shared/models/id.model";
+import {ExecutionTemplate} from "../models/execution-template";
 
 @Injectable()
 export class ExecutionService {
 
-  executionUrl: String = AppUtils.BACKEND_API_VIP_EXEC_URL;
+  executionUrl: string = AppUtils.BACKEND_API_VIP_EXEC_URL;
 
   constructor(protected httpClient: HttpClient) {}
 
@@ -39,34 +39,42 @@ export class ExecutionService {
     if (execution === null || execution === undefined) {
       throw new Error('Required parameter execution was null or undefined when calling createExecution.');
     }
-    return this.httpClient.post<IdName>(`${this.executionUrl}/`,execution).toPromise();
+    return firstValueFrom(this.httpClient.post<IdName>(`${this.executionUrl}/`,[execution]));
+  }
+
+    /**
+    * Get all automatic executions linked to a study
+    * @param study_id the study id we want the automatic executions from
+    */
+    public getAutomaticExecutions(study_id: number): Promise<ExecutionTemplate[]> {
+        return firstValueFrom(this.httpClient.get<ExecutionTemplate[]>(`${this.executionUrl}/automatic/` + study_id));
+    }
+
+  /**
+   * Get stderr of a processing
+   *
+   * @param processingId
+   */
+  public getStderr(processingId: number ): Observable<string> {
+
+    if (processingId === null || processingId === undefined) {
+      throw new Error('Required parameter processingId was null or undefined when calling getStderr.');
+    }
+    return this.httpClient.get(`${this.executionUrl}/${processingId}/stderr`, {responseType: 'text'});
   }
 
   /**
-   * Get stderr of an execution
+   * Get stdout of a processing
    *
-   * @param executionIdentifier
-   */
-  public getStderr(executionIdentifier: string ): Observable<string> {
-
-    if (executionIdentifier === null || executionIdentifier === undefined) {
-      throw new Error('Required parameter executionIdentifier was null or undefined when calling getStderr.');
-    }
-    return this.httpClient.get(`${this.executionUrl}/${executionIdentifier}/stderr`, {responseType: 'text'});
-  }
-
-  /**
-   * Get stdout of an execution
-   *
-   * @param executionIdentifier
+   * @param processingId
    *
    */
-  public getStdout(executionIdentifier: string ): Observable<string> {
+  public getStdout(processingId: number ): Observable<string> {
 
-    if (executionIdentifier === null || executionIdentifier === undefined) {
-      throw new Error('Required parameter executionIdentifier was null or undefined when calling getStdout.');
+    if (processingId === null || processingId === undefined) {
+      throw new Error('Required parameter processingId was null or undefined when calling getStdout.');
     }
-    return this.httpClient.get(`${this.executionUrl}/${executionIdentifier}/stdout`, {responseType: 'text'});
+    return this.httpClient.get(`${this.executionUrl}/${processingId}/stdout`, {responseType: 'text'});
   }
 
 }

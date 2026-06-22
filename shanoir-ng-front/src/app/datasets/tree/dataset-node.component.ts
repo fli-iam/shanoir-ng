@@ -12,21 +12,29 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
 import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { DatasetProcessingService } from '../shared/dataset-processing.service';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+
+import { MetadataNodeComponent } from './metadata-node.component';
+import { ProcessingNodeComponent } from './processing-node.component';
 
 
 @Component({
     selector: 'dataset-node',
     templateUrl: 'dataset-node.component.html',
-    standalone: false
+    imports: [TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, MetadataNodeComponent, ProcessingNodeComponent]
 })
 
 export class DatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode> implements OnChanges {
@@ -34,7 +42,7 @@ export class DatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode>
     @Input() input: DatasetNode | Dataset;
     @Input() related: boolean = false;
     detailsPath: string = '/dataset/details/';
-    @Output() onDatasetDelete: EventEmitter<void> = new EventEmitter();
+    @Output() datasetDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
             private router: Router,
@@ -85,7 +93,7 @@ export class DatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode>
         this.datasetService.get(this.node.id).then(entity => {
             this.datasetService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onDatasetDelete.emit();
+                    this.datasetDelete.emit();
                 }
             });
         })

@@ -1,12 +1,12 @@
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -20,12 +20,22 @@ server:
       enabled: false
 ##### Database #####
 spring:
+  cloud:
+    aws:
+      s3:
+        endpoint: ${S3_ENDPOINT:http://ninja:9000}
+        path-style-access-enabled: true
+        region: ${S3_REGION:eu-west-1}
+      credentials:
+        access-key: ${S3_ACCESS_KEY_ID}
+        secret-key: ${S3_SECRET_ACCESS_KEY}
   datasource:
-    url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:studies}?characterEncoding=utf-8
     username: studies
     password: password
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.mariadb.jdbc.Driver
   jpa:
+    show-sql: false
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
@@ -57,7 +67,7 @@ spring:
     mapper:
       use-getters-as-setters: false
   jooq:
-    sql-dialect: Mysql
+    sql-dialect: MariaDB
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
@@ -94,15 +104,19 @@ front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
-# microservices url
-ms.url:
-  shanoir-ng-users: http://${SHANOIR_PREFIX}users:9901/users
-  shanoir-ng-import: http://${SHANOIR_PREFIX}import:9903/niftiConverter
-  shanoir-ng-studycards: http://${SHANOIR_PREFIX}datasets:9904/studycards
-  shanoir-ng-examinations: http://${SHANOIR_PREFIX}datasets:9904/examinations
-  shanoir-ng-bids: http://${SHANOIR_PREFIX}datasets:9904/bids
-# data paths
-studies-data: /var/studies-data
+storage:
+  type: ${SHANOIR_STORAGE_TYPE:file-system} # "file-system" or "s3"
+  file-system:
+    studies-data: /var/studies-data
+    # file-system only (by design, e.g. validator) and temporary data: no S3
+    bids-data: /var/bids-data
+    # file-system only: temporary data: no S3
+    vip-data: /var/vip-data
+  s3:
+    studies:
+      bucket: ${S3_BUCKET_STUDIES:studies}
+      prefix: studies/
+
 # logging configuration
 logging:
   pattern:
@@ -110,7 +124,7 @@ logging:
   file:
     name: /var/log/shanoir-ng-logs/shanoir-ng-studies.log
   level:
-    org.shanoir: WARN
+    org.shanoir: INFO
     org.springframework.web: ERROR
     org.hibernate: ERROR
 
@@ -149,14 +163,9 @@ front.server:
   url: https://shanoir-ng-nginx
 keycloak:
   auth-server-url: https://shanoir-ng-nginx/auth
-ms.url:
-  shanoir-ng-users: http://localhost:9901/users
-  shanoir-ng-import: http://localhost:9903/niftiConverter
-  shanoir-ng-studycards: http://localhost:9904/studycards
-  shanoir-ng-examinations: http://localhost:9904/examinations
-  shanoir-ng-bids: http://localhost:9904/bids
 # data paths
 studies-data: /tmp
+
 # logging configuration
 logging:
   file:
@@ -166,8 +175,8 @@ logging:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
     org.springframework.amqp: OFF
-    
-    
+
+
 ---
 spring:
   config.activate.on-profile: test
@@ -190,7 +199,7 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
-  sql: 
+  sql:
     init:
       data-locations: classpath:/scripts/test-data-h2.sql
       mode: always

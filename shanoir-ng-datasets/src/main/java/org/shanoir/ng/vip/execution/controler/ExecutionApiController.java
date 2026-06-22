@@ -1,5 +1,4 @@
 /**
-
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
@@ -16,18 +15,14 @@
 package org.shanoir.ng.vip.execution.controler;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.vip.execution.service.ExecutionServiceImpl;
-import org.shanoir.ng.vip.pipeline.service.PipelineServiceImpl;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,31 +38,32 @@ public class ExecutionApiController implements ExecutionApi {
     @Autowired
     private ExecutionServiceImpl executionService;
 
+    @Override
     public ResponseEntity<IdName> createExecution(
-            @Parameter(description = "execution", required = true) @RequestBody final ExecutionCandidateDTO candidate) throws EntityNotFoundException, SecurityException, RestServiceException {
+            @Parameter(description = "execution", required = true) @RequestBody final List<ExecutionCandidateDTO> candidates) throws EntityNotFoundException, SecurityException, RestServiceException {
+        if (candidates == null || candidates.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }
+        IdName createdMonitoring = executionService.createExecutions(candidates);
 
-        List<Dataset> inputDatasets = executionService.getDatasetsFromParams(candidate.getDatasetParameters());
-        executionService.checkRightsForExecution(inputDatasets);
-        IdName createdMonitoring = executionService.createExecution(candidate, inputDatasets);
-
-        return new ResponseEntity<>(createdMonitoring, HttpStatus.OK);
+        return ResponseEntity.ok(createdMonitoring);
     }
 
-    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+    public ResponseEntity<VipExecutionDTO> getExecution(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {
         return ResponseEntity.ok(executionService.getExecution(identifier).block());
     }
 
 
-    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required=true) @PathVariable("identifier") String identifier) {
+    public ResponseEntity<ExecutionStatus> getExecutionStatus(@Parameter(description = "The execution identifier", required = true) @PathVariable("identifier") String identifier) {
         return ResponseEntity.ok(executionService.getExecution(identifier).map(VipExecutionDTO::getStatus).block());
     }
 
-    public ResponseEntity<String> getExecutionStderr(String identifier) {
-        return ResponseEntity.ok(executionService.getExecutionStderr(identifier).block());
+    public ResponseEntity<String> getExecutionStderr(Long processingId) {
+        return ResponseEntity.ok(executionService.getExecutionStderr(processingId).block());
 
     }
 
-    public ResponseEntity<String> getExecutionStdout(String identifier) {
-        return ResponseEntity.ok(executionService.getExecutionStdout(identifier).block());
+    public ResponseEntity<String> getExecutionStdout(Long processingId) {
+        return ResponseEntity.ok(executionService.getExecutionStdout(processingId).block());
     }
 }

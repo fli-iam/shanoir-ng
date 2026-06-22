@@ -1,12 +1,12 @@
 # Shanoir NG - Import, manage and share neuroimaging data
 # Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 # Contact us on https://project.inria.fr/shanoir/
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -20,11 +20,20 @@ server:
       enabled: false
 ##### Database #####
 spring:
+  cloud:
+    aws:
+      s3:
+        endpoint: ${S3_ENDPOINT:http://ninja:9000}
+        path-style-access-enabled: true
+        region: ${S3_REGION:eu-west-1}
+      credentials:
+        access-key: ${S3_ACCESS_KEY_ID}
+        secret-key: ${S3_SECRET_ACCESS_KEY}
   datasource:
-    url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/preclinical?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:preclinical}?characterEncoding=utf-8
     username: preclinical
     password: password
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
@@ -56,7 +65,7 @@ spring:
     mapper:
       use-getters-as-setters: false
   jooq:
-    sql-dialect: Mysql
+    sql-dialect: MariaDB
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
@@ -87,14 +96,6 @@ front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
-# microservices url
-ms.url:
-  shanoir-ng-users: http://${SHANOIR_PREFIX}users:9901/users
-  shanoir-ng-studies: http://${SHANOIR_PREFIX}shanoir-ng-studies/
-  shanoir-ng-import: http://${SHANOIR_PREFIX}import:9903/niftiConverter
-  shanoir-ng-studycards: http://${SHANOIR_PREFIX}datasets:9904/studycards
-  shanoir-ng-examinations: http://${SHANOIR_PREFIX}datasets:9904/examinations
-  bruker2dicom: http://${SHANOIR_PREFIX}preclinical-bruker2dicom:5000/bruker2dicom
 # logging configuration
 logging:
   pattern:
@@ -104,11 +105,17 @@ logging:
   level:
     org.springframework.web: ERROR
     org.hibernate: ERROR
-#Upload Extradata
-preclinical:
-  uploadExtradataFolder: /var/extra-data
-  uploadBrukerFolder: /tmp/
-  separator: /
+
+storage:
+  type: ${SHANOIR_STORAGE_TYPE:file-system} # "file-system" or "s3"
+  file-system:
+    preclinical-data: /var/preclinical-data
+    uploadBrukerFolder: /tmp/
+    separator: /
+  s3:
+    preclinical:
+      bucket: ${S3_BUCKET_PRECLINICAL:preclinical}
+      prefix: preclinical/
 
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #

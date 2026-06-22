@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -42,6 +42,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -53,373 +54,419 @@ import jakarta.validation.constraints.NotNull;
 @ExtensionWithMotivation
 public class User extends HalEntity implements UserDetails {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -5277815428510293236L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -5277815428510293236L;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	private Boolean accountRequestDemand;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    private Boolean accountRequestDemand;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@OneToOne(orphanRemoval = true)
-	private AccountRequestInfo accountRequestInfo;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @OneToOne(orphanRemoval = true)
+    private AccountRequestInfo accountRequestInfo;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	private Boolean canAccessToDicomAssociation;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    private Boolean canAccessToDicomAssociation;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@LocalDateAnnotations
-	private LocalDate creationDate;
+    /**
+     * Keycloak two-factor (TOTP) authentication enabled flag. Not persisted in database:
+     * the state lives in Keycloak and is read/applied through it. Only meaningful for admins.
+     */
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @Transient
+    private Boolean twoFactorEnabled;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@NotBlank
-	@Column(unique = true)
-	@Unique
-	private String email;
-	
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
-	@LocalDateAnnotations
-	private LocalDate expirationDate;
+    /**
+     * Keycloak account enabled (activated) flag. Not persisted in database:
+     * the state lives in Keycloak and is read/applied through it. Only meaningful for admins.
+     */
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @Transient
+    private Boolean keycloakEnabled;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@Embedded
-	private ExtensionRequestInfo extensionRequestInfo;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @LocalDateAnnotations
+    private LocalDate creationDate;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@NotNull
-	private Boolean extensionRequestDemand = Boolean.FALSE;
-	
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@NotNull
-	private Boolean firstExpirationNotificationSent = Boolean.FALSE;
-	
-	@NotBlank
-	private String firstName;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @NotBlank
+    @Column(unique = true)
+    @Unique
+    private String email;
 
-	private String keycloakId;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @EditableOnlyBy(roles = { "ROLE_ADMIN" })
+    @LocalDateAnnotations
+    private LocalDate expirationDate;
 
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@LocalDateAnnotations
-	private LocalDate lastLogin;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @Embedded
+    private ExtensionRequestInfo extensionRequestInfo;
 
-	@NotNull
-	private String lastName;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @NotNull
+    private Boolean extensionRequestDemand = Boolean.FALSE;
 
-	@ManyToOne
-	@NotNull
-	@EditableOnlyBy(roles = { "ROLE_ADMIN" })
-	private Role role;
-	
-	@VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-	@NotNull
-	private Boolean secondExpirationNotificationSent = Boolean.FALSE;
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @NotNull
+    private Boolean firstExpirationNotificationSent = Boolean.FALSE;
 
-	@NotBlank
-	@Column(unique = true)
-	@Unique
-	private String username;
+    @NotBlank
+    private String firstName;
 
-	private String teamName;
+    private String keycloakId;
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "user/" + getId());
-	}
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @LocalDateAnnotations
+    private LocalDate lastLogin;
 
-	/**
-	 * @return the accountRequestDemand
-	 */
-	public Boolean isAccountRequestDemand() {
-		return accountRequestDemand;
-	}
+    @NotNull
+    private String lastName;
 
-	/**
-	 * @param accountRequestDemand
-	 *            the accountRequestDemand to set
-	 */
-	public void setAccountRequestDemand(final Boolean accountRequestDemand) {
-		this.accountRequestDemand = accountRequestDemand;
-	}
+    @ManyToOne
+    @NotNull
+    @EditableOnlyBy(roles = { "ROLE_ADMIN" })
+    private Role role;
 
-	/**
-	 * @return the accountRequestInfo
-	 */
-	public AccountRequestInfo getAccountRequestInfo() {
-		return accountRequestInfo;
-	}
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @NotNull
+    private Boolean secondExpirationNotificationSent = Boolean.FALSE;
 
-	/**
-	 * @param accountRequestInfo
-	 *            the accountRequestInfo to set
-	 */
-	public void setAccountRequestInfo(final AccountRequestInfo accountRequestInfo) {
-		this.accountRequestInfo = accountRequestInfo;
-	}
+    @NotBlank
+    @Column(unique = true)
+    @Unique
+    private String username;
 
-	/**
-	 * @return the canAccessToDicomAssociation
-	 */
-	public Boolean isCanAccessToDicomAssociation() {
-		return canAccessToDicomAssociation;
-	}
+    private String teamName;
 
-	/**
-	 * @param canAccessToDicomAssociation
-	 *            the canAccessToDicomAssociation to set
-	 */
-	public void setCanAccessToDicomAssociation(final Boolean canAccessToDicomAssociation) {
-		this.canAccessToDicomAssociation = canAccessToDicomAssociation;
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "user/" + getId());
+    }
 
-	/**
-	 * @return the creationDate
-	 */
-	public LocalDate getCreationDate() {
-		return creationDate;
-	}
+    /**
+     * @return the accountRequestDemand
+     */
+    public Boolean isAccountRequestDemand() {
+        return accountRequestDemand;
+    }
 
-	/**
-	 * @param creationDate
-	 *            the creationDate to set
-	 */
-	public void setCreationDate(final LocalDate creationDate) {
-		this.creationDate = creationDate;
-	}
+    /**
+     * @param accountRequestDemand
+     *            the accountRequestDemand to set
+     */
+    public void setAccountRequestDemand(final Boolean accountRequestDemand) {
+        this.accountRequestDemand = accountRequestDemand;
+    }
 
-	/**
-	 * @return the email
-	 */
-	public String getEmail() {
-		return email;
-	}
+    /**
+     * @return the accountRequestInfo
+     */
+    public AccountRequestInfo getAccountRequestInfo() {
+        return accountRequestInfo;
+    }
 
-	/**
-	 * @param email
-	 *            the email to set
-	 */
-	public void setEmail(final String email) {
-		this.email = email;
-	}
+    /**
+     * @param accountRequestInfo
+     *            the accountRequestInfo to set
+     */
+    public void setAccountRequestInfo(final AccountRequestInfo accountRequestInfo) {
+        this.accountRequestInfo = accountRequestInfo;
+    }
 
-	/**
-	 * @return the expirationDate
-	 */
-	public LocalDate getExpirationDate() {
-		return expirationDate;
-	}
+    /**
+     * @return the canAccessToDicomAssociation
+     */
+    public Boolean isCanAccessToDicomAssociation() {
+        return canAccessToDicomAssociation;
+    }
 
-	/**
-	 * @param expirationDate
-	 *            the expirationDate to set
-	 */
-	public void setExpirationDate(final LocalDate expirationDate) {
-		this.expirationDate = expirationDate;
-	}
+    /**
+     * @param canAccessToDicomAssociation
+     *            the canAccessToDicomAssociation to set
+     */
+    public void setCanAccessToDicomAssociation(final Boolean canAccessToDicomAssociation) {
+        this.canAccessToDicomAssociation = canAccessToDicomAssociation;
+    }
 
-	/**
-	 * @return the extensionRequestInfo
-	 */
-	public ExtensionRequestInfo getExtensionRequestInfo() {
-		return extensionRequestInfo;
-	}
+    /**
+     * @return whether Keycloak two-factor authentication is enabled
+     */
+    public Boolean getTwoFactorEnabled() {
+        return twoFactorEnabled;
+    }
 
-	/**
-	 * @param extensionRequestInfo the extensionRequestInfo to set
-	 */
-	public void setExtensionRequestInfo(ExtensionRequestInfo extensionRequestInfo) {
-		this.extensionRequestInfo = extensionRequestInfo;
-	}
+    /**
+     * @param twoFactorEnabled
+     *            the two-factor authentication enabled flag to set
+     */
+    public void setTwoFactorEnabled(final Boolean twoFactorEnabled) {
+        this.twoFactorEnabled = twoFactorEnabled;
+    }
 
-	/**
-	 * @return the extensionRequestDemand
-	 */
-	public Boolean isExtensionRequestDemand() {
-		return extensionRequestDemand;
-	}
-	
-	/**
-	 * @param extensionRequestDemand
-	 *            the extensionRequestDemand to set
-	 */
-	public void setExtensionRequestDemand(Boolean extensionRequestDemand) {
-		this.extensionRequestDemand = extensionRequestDemand;
-	}
-	
-	/**
-	 * @return the firstExpirationNotificationSent
-	 */
-	public Boolean isFirstExpirationNotificationSent() {
-		return firstExpirationNotificationSent;
-	}
+    /**
+     * @return whether the user is enabled (activated) in Keycloak
+     */
+    public Boolean getKeycloakEnabled() {
+        return keycloakEnabled;
+    }
 
-	/**
-	 * @param firstExpirationNotificationSent
-	 *            the firstExpirationNotificationSent to set
-	 */
-	public void setFirstExpirationNotificationSent(final Boolean firstExpirationNotificationSent) {
-		this.firstExpirationNotificationSent = firstExpirationNotificationSent;
-	}
+    /**
+     * @param keycloakEnabled
+     *            the Keycloak enabled (activated) flag to set
+     */
+    public void setKeycloakEnabled(final Boolean keycloakEnabled) {
+        this.keycloakEnabled = keycloakEnabled;
+    }
 
-	/**
-	 * @return the firstName
-	 */
-	public String getFirstName() {
-		return firstName;
-	}
+    /**
+     * @return the creationDate
+     */
+    public LocalDate getCreationDate() {
+        return creationDate;
+    }
 
-	/**
-	 * @param firstName
-	 *            the firstName to set
-	 */
-	public void setFirstName(final String firstName) {
-		this.firstName = firstName;
-	}
+    /**
+     * @param creationDate
+     *            the creationDate to set
+     */
+    public void setCreationDate(final LocalDate creationDate) {
+        this.creationDate = creationDate;
+    }
 
-	/**
-	 * @return the keycloakId
-	 */
-	@JsonIgnore
-	public String getKeycloakId() {
-		return keycloakId;
-	}
+    /**
+     * @return the email
+     */
+    public String getEmail() {
+        return email;
+    }
 
-	/**
-	 * @param keycloakId
-	 *            the keycloakId to set
-	 */
-	public void setKeycloakId(String keycloakId) {
-		this.keycloakId = keycloakId;
-	}
+    /**
+     * @param email
+     *            the email to set
+     */
+    public void setEmail(final String email) {
+        this.email = email;
+    }
 
-	/**
-	 * @return the lastLogin
-	 */
-	public LocalDate getLastLogin() {
-		return lastLogin;
-	}
+    /**
+     * @return the expirationDate
+     */
+    public LocalDate getExpirationDate() {
+        return expirationDate;
+    }
 
-	/**
-	 * @param lastLogin
-	 *            the lastLogin to set
-	 */
-	public void setLastLogin(final LocalDate lastLogin) {
-		this.lastLogin = lastLogin;
-	}
+    /**
+     * @param expirationDate
+     *            the expirationDate to set
+     */
+    public void setExpirationDate(final LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
+    }
 
-	/**
-	 * @return the lastName
-	 */
-	public String getLastName() {
-		return lastName;
-	}
+    /**
+     * @return the extensionRequestInfo
+     */
+    public ExtensionRequestInfo getExtensionRequestInfo() {
+        return extensionRequestInfo;
+    }
 
-	/**
-	 * @param lastName
-	 *            the lastName to set
-	 */
-	public void setLastName(final String lastName) {
-		this.lastName = lastName;
-	}
+    /**
+     * @param extensionRequestInfo the extensionRequestInfo to set
+     */
+    public void setExtensionRequestInfo(ExtensionRequestInfo extensionRequestInfo) {
+        this.extensionRequestInfo = extensionRequestInfo;
+    }
 
-	/**
-	 * @return the role
-	 */
-	public Role getRole() {
-		return role;
-	}
+    /**
+     * @return the extensionRequestDemand
+     */
+    public Boolean isExtensionRequestDemand() {
+        return extensionRequestDemand;
+    }
 
-	/**
-	 * @param role
-	 *            the role to set
-	 */
-	public void setRole(final Role role) {
-		this.role = role;
-	}
+    /**
+     * @param extensionRequestDemand
+     *            the extensionRequestDemand to set
+     */
+    public void setExtensionRequestDemand(Boolean extensionRequestDemand) {
+        this.extensionRequestDemand = extensionRequestDemand;
+    }
 
-	/**
-	 * @return the secondExpirationNotificationSent
-	 */
-	public Boolean isSecondExpirationNotificationSent() {
-		return secondExpirationNotificationSent;
-	}
+    /**
+     * @return the firstExpirationNotificationSent
+     */
+    public Boolean isFirstExpirationNotificationSent() {
+        return firstExpirationNotificationSent;
+    }
 
-	/**
-	 * @param secondExpirationNotificationSent
-	 *            the secondExpirationNotificationSent to set
-	 */
-	public void setSecondExpirationNotificationSent(final Boolean secondExpirationNotificationSent) {
-		this.secondExpirationNotificationSent = secondExpirationNotificationSent;
-	}
+    /**
+     * @param firstExpirationNotificationSent
+     *            the firstExpirationNotificationSent to set
+     */
+    public void setFirstExpirationNotificationSent(final Boolean firstExpirationNotificationSent) {
+        this.firstExpirationNotificationSent = firstExpirationNotificationSent;
+    }
 
-	/**
-	 * @return the teamName
-	 */
-	public String getTeamName() {
-		return teamName;
-	}
+    /**
+     * @return the firstName
+     */
+    public String getFirstName() {
+        return firstName;
+    }
 
-	/**
-	 * @param teamName
-	 *            the teamName to set
-	 */
-	public void setTeamName(final String teamName) {
-		this.teamName = teamName;
-	}
+    /**
+     * @param firstName
+     *            the firstName to set
+     */
+    public void setFirstName(final String firstName) {
+        this.firstName = firstName;
+    }
 
-	/**
-	 * @return the username
-	 */
-	public String getUsername() {
-		return username;
-	}
+    /**
+     * @return the keycloakId
+     */
+    @JsonIgnore
+    public String getKeycloakId() {
+        return keycloakId;
+    }
 
-	/**
-	 * @param username
-	 *            the username to set
-	 */
-	public void setUsername(final String username) {
-		this.username = username;
-	}
+    /**
+     * @param keycloakId
+     *            the keycloakId to set
+     */
+    public void setKeycloakId(String keycloakId) {
+        this.keycloakId = keycloakId;
+    }
 
-	@Override
-	@JsonIgnore
-	public Collection<GrantedAuthority> getAuthorities() {
-		return Arrays.asList(role);
-	}
+    /**
+     * @return the lastLogin
+     */
+    public LocalDate getLastLogin() {
+        return lastLogin;
+    }
 
-	@Override
-	@JsonIgnore
-	public String getPassword() {
-		return null;
-	}
+    /**
+     * @param lastLogin
+     *            the lastLogin to set
+     */
+    public void setLastLogin(final LocalDate lastLogin) {
+        this.lastLogin = lastLogin;
+    }
 
-	@Override
-	@JsonIgnore
-	public boolean isAccountNonExpired() {
-		return true;
-	}
+    /**
+     * @return the lastName
+     */
+    public String getLastName() {
+        return lastName;
+    }
 
-	@Override
-	@JsonIgnore
-	public boolean isAccountNonLocked() {
-		return true;
-	}
+    /**
+     * @param lastName
+     *            the lastName to set
+     */
+    public void setLastName(final String lastName) {
+        this.lastName = lastName;
+    }
 
-	@Override
-	@JsonIgnore
-	public boolean isCredentialsNonExpired() {
-		return true;
-	}
+    /**
+     * @return the role
+     */
+    public Role getRole() {
+        return role;
+    }
 
-	@Override
-	@JsonIgnore
-	public boolean isEnabled() {
-		return expirationDate == null || expirationDate.isAfter(LocalDate.now());
-	}
+    /**
+     * @param role
+     *            the role to set
+     */
+    public void setRole(final Role role) {
+        this.role = role;
+    }
+
+    /**
+     * @return the secondExpirationNotificationSent
+     */
+    public Boolean isSecondExpirationNotificationSent() {
+        return secondExpirationNotificationSent;
+    }
+
+    /**
+     * @param secondExpirationNotificationSent
+     *            the secondExpirationNotificationSent to set
+     */
+    public void setSecondExpirationNotificationSent(final Boolean secondExpirationNotificationSent) {
+        this.secondExpirationNotificationSent = secondExpirationNotificationSent;
+    }
+
+    /**
+     * @return the teamName
+     */
+    public String getTeamName() {
+        return teamName;
+    }
+
+    /**
+     * @param teamName
+     *            the teamName to set
+     */
+    public void setTeamName(final String teamName) {
+        this.teamName = teamName;
+    }
+
+    /**
+     * @return the username
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * @param username
+     *            the username to set
+     */
+    public void setUsername(final String username) {
+        this.username = username;
+    }
+
+    @Override
+    @JsonIgnore
+    public Collection<GrantedAuthority> getAuthorities() {
+        return Arrays.asList(role);
+    }
+
+    @Override
+    @JsonIgnore
+    public String getPassword() {
+        return null;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isEnabled() {
+        return expirationDate == null || expirationDate.isAfter(LocalDate.now());
+    }
 
 }

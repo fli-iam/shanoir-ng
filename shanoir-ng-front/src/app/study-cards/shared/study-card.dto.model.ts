@@ -12,6 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Coil } from '../../coils/shared/coil.model';
+
 import { MetadataFieldScope, ConditionScope, Operation, StudyCard, StudyCardAssignment, StudyCardCondition, StudyCardRule } from './study-card.model';
 
 

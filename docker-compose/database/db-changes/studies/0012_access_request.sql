@@ -1,1 +1,0 @@
-ALTER TABLE study ADD COLUMN public_description varchar(255) DEFAULT NULL;

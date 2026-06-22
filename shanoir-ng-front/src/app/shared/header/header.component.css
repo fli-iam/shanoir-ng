@@ -1,7 +1,7 @@
 :host { z-index: 1000; position: relative; overflow: hidden; }
 .header-component { background-color: var(--color-a); height: 64px; }
 .header-component .logo { margin: 10px; float: left; }
-.header-component .logo img { height: 108px; position: absolute; top: -17px; opacity: 0.3; 
+.header-component .logo img { margin-left: 10px; height: 80px; position: absolute; top: 0; opacity: 0.3; 
 	-webkit-filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9)); 
 	filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9)); 
 }

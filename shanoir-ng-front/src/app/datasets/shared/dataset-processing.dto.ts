@@ -15,16 +15,16 @@ import { Injectable } from '@angular/core';
 
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 import { MrDataset } from '../dataset/mr/dataset.mr.model';
+import {StatusEnum} from "../../vip/models/execution";
+
 import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetProcessingService } from './dataset-processing.service';
-import { DatasetDTO } from './dataset.dto';
 
 @Injectable()
 export class DatasetProcessingDTOService {
 
     private datasetProcessingService: DatasetProcessingService;
 
-    constructor() {}
 
     setDatasetProcessingService(datasetProcessingService: DatasetProcessingService) {
         this.datasetProcessingService = datasetProcessingService;
@@ -38,8 +38,8 @@ export class DatasetProcessingDTOService {
     public toEntity(dto: DatasetProcessingInDTO, result?: DatasetProcessing): Promise<DatasetProcessing> {
         if (!result) result = new DatasetProcessing();
         DatasetProcessingDTOService.mapSyncFields(dto, result);
-        let promises: Promise<any>[] = [];
-        return Promise.all(promises).then(([]) => {
+        const promises: Promise<any>[] = [];
+        return Promise.all(promises).then(() => {
             return result;
         });
     }
@@ -50,10 +50,10 @@ export class DatasetProcessingDTOService {
      */
     public toEntityList(dtos: DatasetProcessingInDTO[], result?: DatasetProcessing[]): Promise<DatasetProcessing[]>{
         if (!result) result = [];
-        let promises: Promise<any>[] = [];
+        const promises: Promise<any>[] = [];
         if (dtos) {
-            for (let dto of dtos ? dtos : []) {
-                let entity = new DatasetProcessing();
+            for (const dto of dtos ? dtos : []) {
+                const entity = new DatasetProcessing();
                 DatasetProcessingDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
@@ -68,15 +68,15 @@ export class DatasetProcessingDTOService {
         entity.comment = dto.comment;
         entity.datasetProcessingType = dto.datasetProcessingType;
         if(dto.inputDatasets) {
-            entity.inputDatasets = dto.inputDatasets.map(id => { 
-                let dataset = new MrDataset();
+            entity.inputDatasets = dto.inputDatasets.map(id => {
+                const dataset = new MrDataset();
                 dataset.id = id;
                 return dataset;
             })
         }
         if(dto.outputDatasets) {
             entity.outputDatasets = dto.outputDatasets.map(id => {
-                let dataset = new MrDataset();
+                const dataset = new MrDataset();
                 dataset.id = id;
                 return dataset;
             })
@@ -84,6 +84,8 @@ export class DatasetProcessingDTOService {
         entity.processingDate = new Date(dto.processingDate);
         entity.studyId = dto.studyId;
         entity.parentId = dto.parentId;
+        entity.processingStatus = dto.processingStatus;
+        entity.monitoringIndex = dto.monitoringIndex;
         return entity;
     }
 
@@ -99,6 +101,9 @@ export class DatasetProcessingInDTO {
 	processingDate: Date;
     studyId: number;
     parentId: number;
+    processingStatus:  StatusEnum;
+    monitoringIndex: number;
+
 }
 
 export class DatasetProcessingOutDTO {

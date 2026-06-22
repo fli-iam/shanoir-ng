@@ -11,25 +11,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, HostListener, ViewChild} from '@angular/core';
+import { Component, ViewChild} from '@angular/core';
+import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { slideDown } from '../../shared/animations/animations';
-import * as AppUtils from '../../utils/app.utils';
-import { EegDataset } from '../../datasets/dataset/eeg/dataset.eeg.model';
 import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { Router } from '@angular/router';
 import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
+
 
 @Component({
     selector: 'eeg-select-series',
     templateUrl: 'eeg-select-series.component.html',
     styleUrls: ['eeg-select-series.component.css', '../shared/import.step.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [TreeNodeComponent, FormsModule]
 })
 export class EegSelectSeriesComponent {
 
@@ -56,7 +54,7 @@ export class EegSelectSeriesComponent {
     }
 
     changeDataset(datasetToMove: EegDatasetDTO) {
-      let index = this.selectedDatasets.indexOf(datasetToMove);
+      const index = this.selectedDatasets.indexOf(datasetToMove);
         if (index != -1) {
             this.selectedDatasets.splice(index, 1);
             datasetToMove.selected = false;

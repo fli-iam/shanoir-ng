@@ -16,12 +16,12 @@ import { Injectable } from '@angular/core';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { StudyCenter, StudyCenterDTO } from '../../studies/shared/study-center.model';
 import { Study } from '../../studies/shared/study.model';
+
 import { Center } from './center.model';
 
 @Injectable()
 export class CenterDTOService {
 
-    constructor() {}
 
     /**
      * Convert from DTO to Entity
@@ -42,8 +42,8 @@ export class CenterDTOService {
         if (!result) result = [];
         if (dtos) {
             if (dtos) {
-                for (let dto of dtos ? dtos : []) {
-                    let entity = new Center();
+                for (const dto of dtos ? dtos : []) {
+                    const entity = new Center();
                     CenterDTOService.mapSyncFields(dto, entity);
                     result.push(entity);
                 }
@@ -64,8 +64,8 @@ export class CenterDTOService {
         entity.website = dto.website;
 
         entity.studyCenterList = [];
-        for (let scDto of dto.studyCenterList) {
-            let studyCenter: StudyCenter = new StudyCenter();
+        for (const scDto of dto.studyCenterList) {
+            const studyCenter: StudyCenter = new StudyCenter();
             studyCenter.id = scDto.id;
             studyCenter.center = entity;
             //studyCenter.center.id = dto.id;
@@ -103,7 +103,7 @@ export class CenterDTO {
         this.street = center.street;
         this.website = center.website;
         this.studyCenterList = [];
-        for (let sc of center.studyCenterList) {
+        for (const sc of center.studyCenterList) {
             this.studyCenterList.push(new StudyCenterDTO(sc));
         }
     }

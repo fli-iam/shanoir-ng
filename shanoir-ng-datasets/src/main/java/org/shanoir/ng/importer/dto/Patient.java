@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -26,18 +26,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 public class Patient {
-	
+
     @JsonProperty("subject")
     private Subject subject;
-    
+
     @JsonProperty("patientID")
     private String patientID;
 
     @JsonProperty("patientName")
     private String patientName;
-    
-	@JsonProperty("patientBirthName")
-	private String patientBirthName;
+
+    @JsonProperty("patientBirthName")
+    private String patientBirthName;
 
     @JsonProperty("patientBirthDate")
     @LocalDateAnnotations
@@ -51,72 +51,72 @@ public class Patient {
 
     @JsonProperty("frontExperimentalGroupOfSubjectId")
     private Long frontExperimentalGroupOfSubjectId;
-    
-	// Keep this empty constructor to avoid Jackson deserialization exceptions
-	public Patient() {}
-    
-	public String getPatientID() {
-		return patientID;
-	}
 
-	public void setPatientID(String patientID) {
-		this.patientID = patientID;
-	}
+    // Keep this empty constructor to avoid Jackson deserialization exceptions
+    public Patient() { }
 
-	public String getPatientName() {
-		return patientName;
-	}
+    public String getPatientID() {
+        return patientID;
+    }
 
-	public void setPatientName(String patientName) {
-		this.patientName = patientName;
-	}
+    public void setPatientID(String patientID) {
+        this.patientID = patientID;
+    }
 
-	public String getPatientBirthName() {
-		return patientBirthName;
-	}
+    public String getPatientName() {
+        return patientName;
+    }
 
-	public void setPatientBirthName(String patientBirthName) {
-		this.patientBirthName = patientBirthName;
-	}
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
 
-	public LocalDate getPatientBirthDate() {
-		return patientBirthDate;
-	}
+    public String getPatientBirthName() {
+        return patientBirthName;
+    }
 
-	public void setPatientBirthDate(LocalDate patientBirthDate) {	
-		this.patientBirthDate = patientBirthDate;
-	}
+    public void setPatientBirthName(String patientBirthName) {
+        this.patientBirthName = patientBirthName;
+    }
 
-	public String getPatientSex() {
-		return patientSex;
-	}
+    public LocalDate getPatientBirthDate() {
+        return patientBirthDate;
+    }
 
-	public void setPatientSex(String patientSex) {
-		this.patientSex = patientSex;
-	}
+    public void setPatientBirthDate(LocalDate patientBirthDate) {
+        this.patientBirthDate = patientBirthDate;
+    }
 
-	public List<Study> getStudies() {
-		return studies;
-	}
+    public String getPatientSex() {
+        return patientSex;
+    }
 
-	public void setStudies(List<Study> studies) {
-		this.studies = studies;
-	}
+    public void setPatientSex(String patientSex) {
+        this.patientSex = patientSex;
+    }
 
-	public Subject getSubject() {
-		return subject;
-	}
+    public List<Study> getStudies() {
+        return studies;
+    }
 
-	public void setSubject(Subject subject) {
-		this.subject = subject;
-	}
+    public void setStudies(List<Study> studies) {
+        this.studies = studies;
+    }
 
-	public Long getFrontExperimentalGroupOfSubjectId() {
-		return frontExperimentalGroupOfSubjectId;
-	}
+    public Subject getSubject() {
+        return subject;
+    }
 
-	public void setFrontExperimentalGroupOfSubjectId(Long frontExperimentalGroupOfSubjectId) {
-		this.frontExperimentalGroupOfSubjectId = frontExperimentalGroupOfSubjectId;
-	}
+    public void setSubject(Subject subject) {
+        this.subject = subject;
+    }
+
+    public Long getFrontExperimentalGroupOfSubjectId() {
+        return frontExperimentalGroupOfSubjectId;
+    }
+
+    public void setFrontExperimentalGroupOfSubjectId(Long frontExperimentalGroupOfSubjectId) {
+        this.frontExperimentalGroupOfSubjectId = frontExperimentalGroupOfSubjectId;
+    }
 
 }

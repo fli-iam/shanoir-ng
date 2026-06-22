@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.dicom.query;
 
 import java.util.Properties;
@@ -7,272 +21,272 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author mkain
  *
  */
 public class ConfigBean {
 
-	private static final Logger logger = LoggerFactory.getLogger(ConfigBean.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ConfigBean.class);
 
-	public static final String DICOM_SERVER_HOST = "dicom.server.host";
+    public static final String DICOM_SERVER_HOST = "dicom.server.host";
 
-	public static final String DICOM_SERVER_PORT = "dicom.server.port";
+    public static final String DICOM_SERVER_PORT = "dicom.server.port";
 
-	public static final String DICOM_SERVER_AET_CALLED = "dicom.server.aet.called";
+    public static final String DICOM_SERVER_AET_CALLED = "dicom.server.aet.called";
 
-	public static final String LOCAL_DICOM_SERVER_HOST = "local.dicom.server.host";
+    public static final String LOCAL_DICOM_SERVER_HOST = "local.dicom.server.host";
 
-	public static final String LOCAL_DICOM_SERVER_PORT = "local.dicom.server.port";
+    public static final String LOCAL_DICOM_SERVER_PORT = "local.dicom.server.port";
 
-	public static final String LOCAL_DICOM_SERVER_AET_CALLING = "local.dicom.server.aet.calling";
+    public static final String LOCAL_DICOM_SERVER_AET_CALLING = "local.dicom.server.aet.calling";
 
-	/** The AET of the Q/R SCP. */
-	private String dicomServerAETCalled;
+    /** The AET of the Q/R SCP. */
+    private String dicomServerAETCalled;
 
-	/** True if ciphering and certificate TLS/3DES enabled. */
-	private boolean dicomServerEnableTLS3DES;
+    /** True if ciphering and certificate TLS/3DES enabled. */
+    private boolean dicomServerEnableTLS3DES;
 
-	/** IP of the Q/R SCP. */
-	private String dicomServerHost;
+    /** IP of the Q/R SCP. */
+    private String dicomServerHost;
 
-	/** Key store password of the Q/R SCP. */
-	private String dicomServerKeystorePassword;
+    /** Key store password of the Q/R SCP. */
+    private String dicomServerKeystorePassword;
 
-	/** Key store url of the Q/R SCP. */
-	private String dicomServerKeystoreURL;
+    /** Key store url of the Q/R SCP. */
+    private String dicomServerKeystoreURL;
 
-	/** Port of the Q/R SCP. */
-	private int dicomServerPort;
+    /** Port of the Q/R SCP. */
+    private int dicomServerPort;
 
-	/** The protocol of the Q/R SCP. */
-	private String dicomServerProtocol;
+    /** The protocol of the Q/R SCP. */
+    private String dicomServerProtocol;
 
-	/** Trust store password of the Q/R SCP. */
-	private String dicomServerTruststorePassword;
+    /** Trust store password of the Q/R SCP. */
+    private String dicomServerTruststorePassword;
 
-	/** Trust store url of the Q/R SCP. */
-	private String dicomServerTruststoreURL;
+    /** Trust store url of the Q/R SCP. */
+    private String dicomServerTruststoreURL;
 
-	/** The web port of the remote Pacs server. */
-	private int dicomServerWebPort;
+    /** The web port of the remote Pacs server. */
+    private int dicomServerWebPort;
 
-	/** The local AET of the Q/R SCP. */
-	private String localDicomServerAETCalling;
+    /** The local AET of the Q/R SCP. */
+    private String localDicomServerAETCalling;
 
-	/** IP of the local Q/R SCP. */
-	private String localDicomServerHost;
+    /** IP of the local Q/R SCP. */
+    private String localDicomServerHost;
 
-	/** Port of the local Q/R SCP. */
-	private int localDicomServerPort;
+    /** Port of the local Q/R SCP. */
+    private int localDicomServerPort;
 
-	public String getDicomServerAETCalled() {
-		return dicomServerAETCalled;
-	}
+    public String getDicomServerAETCalled() {
+        return dicomServerAETCalled;
+    }
 
-	public String getDicomServerHost() {
-		return dicomServerHost;
-	}
+    public String getDicomServerHost() {
+        return dicomServerHost;
+    }
 
-	public String getDicomServerKeystorePassword() {
-		return dicomServerKeystorePassword;
-	}
+    public String getDicomServerKeystorePassword() {
+        return dicomServerKeystorePassword;
+    }
 
-	public String getDicomServerKeystoreURL() {
-		return dicomServerKeystoreURL;
-	}
+    public String getDicomServerKeystoreURL() {
+        return dicomServerKeystoreURL;
+    }
 
-	public int getDicomServerPort() {
-		return dicomServerPort;
-	}
+    public int getDicomServerPort() {
+        return dicomServerPort;
+    }
 
-	public String getDicomServerProtocol() {
-		return dicomServerProtocol;
-	}
+    public String getDicomServerProtocol() {
+        return dicomServerProtocol;
+    }
 
-	public String getDicomServerTruststorePassword() {
-		return dicomServerTruststorePassword;
-	}
+    public String getDicomServerTruststorePassword() {
+        return dicomServerTruststorePassword;
+    }
 
-	public String getDicomServerTruststoreURL() {
-		return dicomServerTruststoreURL;
-	}
+    public String getDicomServerTruststoreURL() {
+        return dicomServerTruststoreURL;
+    }
 
-	public int getDicomServerWebPort() {
-		return dicomServerWebPort;
-	}
+    public int getDicomServerWebPort() {
+        return dicomServerWebPort;
+    }
 
-	public String getLocalDicomServerAETCalling() {
-		return localDicomServerAETCalling;
-	}
+    public String getLocalDicomServerAETCalling() {
+        return localDicomServerAETCalling;
+    }
 
-	public String getLocalDicomServerHost() {
-		return localDicomServerHost;
-	}
+    public String getLocalDicomServerHost() {
+        return localDicomServerHost;
+    }
 
-	public int getLocalDicomServerPort() {
-		return localDicomServerPort;
-	}
+    public int getLocalDicomServerPort() {
+        return localDicomServerPort;
+    }
 
-	public void initWithShanoirConfigBean(final IShanoirConfigBean configBean) {
-		final String host = configBean.getBackupDicomServerHost();
-		final int port = configBean.getBackupDicomServerPort();
-		final String aetCalled = configBean.getBackupDicomServerCalledAET();
-		final int webPort = configBean.getBackupDicomServerWebPort();
-		final String protocol = configBean.getBackupDicomServerProtocol();
+    public void initWithShanoirConfigBean(final IShanoirConfigBean configBean) {
+        final String host = configBean.getBackupDicomServerHost();
+        final int port = configBean.getBackupDicomServerPort();
+        final String aetCalled = configBean.getBackupDicomServerCalledAET();
+        final int webPort = configBean.getBackupDicomServerWebPort();
+        final String protocol = configBean.getBackupDicomServerProtocol();
 
-		final boolean isTLS3DESEnabled = configBean.isBackupDicomServerEnableTls3des();
-		final String keystoreURL = configBean.getBackupDicomServerKeyStoreURL();
-		final String keystorePassword = configBean.getBackupDicomServerKeyStorePassword();
-		final String truststoreURL = configBean.getBackupDicomServerTrustStoreURL();
-		final String truststorePassword = configBean.getBackupDicomServerTrustStorePassword();
+        final boolean isTLS3DESEnabled = configBean.isBackupDicomServerEnableTls3des();
+        final String keystoreURL = configBean.getBackupDicomServerKeyStoreURL();
+        final String keystorePassword = configBean.getBackupDicomServerKeyStorePassword();
+        final String truststoreURL = configBean.getBackupDicomServerTrustStoreURL();
+        final String truststorePassword = configBean.getBackupDicomServerTrustStorePassword();
 
-		logger.info("initWithDefaultValues : host=" + host);
-		logger.info("initWithDefaultValues : port=" + port);
-		logger.info("initWithDefaultValues : aetCalled=" + aetCalled);
-		logger.info("initWithDefaultValues : webPort=" + webPort);
-		logger.info("initWithDefaultValues : protocol=" + protocol);
+        LOG.info("initWithDefaultValues : host=" + host);
+        LOG.info("initWithDefaultValues : port=" + port);
+        LOG.info("initWithDefaultValues : aetCalled=" + aetCalled);
+        LOG.info("initWithDefaultValues : webPort=" + webPort);
+        LOG.info("initWithDefaultValues : protocol=" + protocol);
 
-		logger.info("initWithDefaultValues : isTLS3DESEnabled=" + isTLS3DESEnabled);
-		logger.info("initWithDefaultValues : keystoreURL=" + keystoreURL);
-		logger.info("initWithDefaultValues : keystorePassword=" + keystorePassword);
-		logger.info("initWithDefaultValues : truststoreURL=" + truststoreURL);
-		logger.info("initWithDefaultValues : truststorePassword=" + truststorePassword);
+        LOG.info("initWithDefaultValues : isTLS3DESEnabled=" + isTLS3DESEnabled);
+        LOG.info("initWithDefaultValues : keystoreURL=" + keystoreURL);
+        LOG.info("initWithDefaultValues : keystorePassword=" + keystorePassword);
+        LOG.info("initWithDefaultValues : truststoreURL=" + truststoreURL);
+        LOG.info("initWithDefaultValues : truststorePassword=" + truststorePassword);
 
-		setDicomServerHost(host);
-		setDicomServerPort(port);
-		setDicomServerAETCalled(aetCalled);
-		setDicomServerProtocol(protocol);
-		setDicomServerWebPort(webPort);
-		setDicomServerEnableTLS3DES(isTLS3DESEnabled);
-		setDicomServerKeystorePassword(keystorePassword);
-		setDicomServerKeystoreURL(keystoreURL);
-		setDicomServerTruststorePassword(truststorePassword);
-		setDicomServerTruststoreURL(truststoreURL);
-	}
+        setDicomServerHost(host);
+        setDicomServerPort(port);
+        setDicomServerAETCalled(aetCalled);
+        setDicomServerProtocol(protocol);
+        setDicomServerWebPort(webPort);
+        setDicomServerEnableTLS3DES(isTLS3DESEnabled);
+        setDicomServerKeystorePassword(keystorePassword);
+        setDicomServerKeystoreURL(keystoreURL);
+        setDicomServerTruststorePassword(truststorePassword);
+        setDicomServerTruststoreURL(truststoreURL);
+    }
 
-	public void initWithPropertiesFile(final Properties properties) {
-		final String host = properties.getProperty(DICOM_SERVER_HOST);
-		final int port = toInt(properties.getProperty(DICOM_SERVER_PORT));
-		final String aetCalled = properties.getProperty(DICOM_SERVER_AET_CALLED);
-		final String protocol = properties.getProperty("dicom.server.protocol");
-		final int webPort = toInt(properties.getProperty("dicom.server.web.port"));
+    public void initWithPropertiesFile(final Properties properties) {
+        final String host = properties.getProperty(DICOM_SERVER_HOST);
+        final int port = toInt(properties.getProperty(DICOM_SERVER_PORT));
+        final String aetCalled = properties.getProperty(DICOM_SERVER_AET_CALLED);
+        final String protocol = properties.getProperty("dicom.server.protocol");
+        final int webPort = toInt(properties.getProperty("dicom.server.web.port"));
 
-		final boolean isTLS3DESEnabled = toBol(properties.getProperty("dicom.server.enableTLS3DES"));
-		final String keystoreURL = properties.getProperty("dicom.server.keystore.url");
-		final String keystorePassword = properties.getProperty("dicom.server.keystore.password");
-		final String truststoreURL = properties.getProperty("dicom.server.truststore.url");
-		final String truststorePassword = properties.getProperty("dicom.server.truststore.password");
+        final boolean isTLS3DESEnabled = toBol(properties.getProperty("dicom.server.enableTLS3DES"));
+        final String keystoreURL = properties.getProperty("dicom.server.keystore.url");
+        final String keystorePassword = properties.getProperty("dicom.server.keystore.password");
+        final String truststoreURL = properties.getProperty("dicom.server.truststore.url");
+        final String truststorePassword = properties.getProperty("dicom.server.truststore.password");
 
-		setDicomServerHost(host);
-		setDicomServerPort(port);
-		setDicomServerAETCalled(aetCalled);
-		setDicomServerProtocol(protocol);
-		setDicomServerWebPort(webPort);
+        setDicomServerHost(host);
+        setDicomServerPort(port);
+        setDicomServerAETCalled(aetCalled);
+        setDicomServerProtocol(protocol);
+        setDicomServerWebPort(webPort);
 
-		setDicomServerEnableTLS3DES(isTLS3DESEnabled);
-		setDicomServerKeystoreURL(keystoreURL);
-		setDicomServerKeystorePassword(keystorePassword);
-		setDicomServerTruststoreURL(truststoreURL);
-		setDicomServerTruststorePassword(truststorePassword);
+        setDicomServerEnableTLS3DES(isTLS3DESEnabled);
+        setDicomServerKeystoreURL(keystoreURL);
+        setDicomServerKeystorePassword(keystorePassword);
+        setDicomServerTruststoreURL(truststoreURL);
+        setDicomServerTruststorePassword(truststorePassword);
 
-		logger.info("initWithValues : host=" + host);
-		logger.info("initWithValues : port=" + port);
-		logger.info("initWithValues : aetCalled=" + aetCalled);
-		logger.info("initWithValues : webPort=" + webPort);
-		logger.info("initWithValues : protocol=" + protocol);
+        LOG.info("initWithValues : host=" + host);
+        LOG.info("initWithValues : port=" + port);
+        LOG.info("initWithValues : aetCalled=" + aetCalled);
+        LOG.info("initWithValues : webPort=" + webPort);
+        LOG.info("initWithValues : protocol=" + protocol);
 
-		logger.info("initWithValues : isTLS3DESEnabled=" + isTLS3DESEnabled);
-		logger.info("initWithValues : keystoreURL=" + keystoreURL);
-		logger.info("initWithValues : keystorePassword=" + keystorePassword);
-		logger.info("initWithValues : truststoreURL=" + truststoreURL);
-		logger.info("initWithValues : truststorePassword=" + truststorePassword);
+        LOG.info("initWithValues : isTLS3DESEnabled=" + isTLS3DESEnabled);
+        LOG.info("initWithValues : keystoreURL=" + keystoreURL);
+        LOG.info("initWithValues : keystorePassword=" + keystorePassword);
+        LOG.info("initWithValues : truststoreURL=" + truststoreURL);
+        LOG.info("initWithValues : truststorePassword=" + truststorePassword);
 
 
-		// Init calling PACS (Shanoir)
-		final String localHost = properties.getProperty(LOCAL_DICOM_SERVER_HOST);
-		final int localPort = toInt(properties.getProperty(LOCAL_DICOM_SERVER_PORT));
-		final String localAETCalling = properties.getProperty(LOCAL_DICOM_SERVER_AET_CALLING);
+        // Init calling PACS (Shanoir)
+        final String localHost = properties.getProperty(LOCAL_DICOM_SERVER_HOST);
+        final int localPort = toInt(properties.getProperty(LOCAL_DICOM_SERVER_PORT));
+        final String localAETCalling = properties.getProperty(LOCAL_DICOM_SERVER_AET_CALLING);
 
-		setLocalDicomServerHost(localHost);
-		setLocalDicomServerPort(localPort);
-		setLocalDicomServerAETCalling(localAETCalling);
-		
-		logger.info("initWithValues : localHost=" + localHost);
-		logger.info("initWithValues : localPort=" + localPort);
-		logger.info("initWithValues : localAETCalling=" + localAETCalling);
-	}
+        setLocalDicomServerHost(localHost);
+        setLocalDicomServerPort(localPort);
+        setLocalDicomServerAETCalling(localAETCalling);
 
-	private boolean toBol(final String string) {
-		boolean result = false;
-		if (string != null && !"".equals(string)) {
-			result = Boolean.valueOf(string);
-		}
-		return result;
-	}
+        LOG.info("initWithValues : localHost=" + localHost);
+        LOG.info("initWithValues : localPort=" + localPort);
+        LOG.info("initWithValues : localAETCalling=" + localAETCalling);
+    }
 
-	private int toInt(final String string) {
-		if (string != null && !"".equals(string)) {
-			return Integer.parseInt(string);
-		} else {
-			return 0;
-		}
-	}
+    private boolean toBol(final String string) {
+        boolean result = false;
+        if (string != null && !"".equals(string)) {
+            result = Boolean.valueOf(string);
+        }
+        return result;
+    }
 
-	public boolean isDicomServerEnableTLS3DES() {
-		return dicomServerEnableTLS3DES;
-	}
+    private int toInt(final String string) {
+        if (string != null && !"".equals(string)) {
+            return Integer.parseInt(string);
+        } else {
+            return 0;
+        }
+    }
 
-	public void setDicomServerAETCalled(final String dicomServerAETCalled) {
-		this.dicomServerAETCalled = dicomServerAETCalled;
-	}
+    public boolean isDicomServerEnableTLS3DES() {
+        return dicomServerEnableTLS3DES;
+    }
 
-	public void setDicomServerEnableTLS3DES(final boolean dicomServerEnableTLS3DES) {
-		this.dicomServerEnableTLS3DES = dicomServerEnableTLS3DES;
-	}
+    public void setDicomServerAETCalled(final String dicomServerAETCalled) {
+        this.dicomServerAETCalled = dicomServerAETCalled;
+    }
 
-	public void setDicomServerHost(final String dicomServerHost) {
-		this.dicomServerHost = dicomServerHost;
-	}
+    public void setDicomServerEnableTLS3DES(final boolean dicomServerEnableTLS3DES) {
+        this.dicomServerEnableTLS3DES = dicomServerEnableTLS3DES;
+    }
 
-	public void setDicomServerKeystorePassword(final String dicomServerKeystorePassword) {
-		this.dicomServerKeystorePassword = dicomServerKeystorePassword;
-	}
+    public void setDicomServerHost(final String dicomServerHost) {
+        this.dicomServerHost = dicomServerHost;
+    }
 
-	public void setDicomServerKeystoreURL(final String dicomServerKeystoreURL) {
-		this.dicomServerKeystoreURL = dicomServerKeystoreURL;
-	}
+    public void setDicomServerKeystorePassword(final String dicomServerKeystorePassword) {
+        this.dicomServerKeystorePassword = dicomServerKeystorePassword;
+    }
 
-	public void setDicomServerPort(final int dicomServerPort) {
-		this.dicomServerPort = dicomServerPort;
-	}
+    public void setDicomServerKeystoreURL(final String dicomServerKeystoreURL) {
+        this.dicomServerKeystoreURL = dicomServerKeystoreURL;
+    }
 
-	public void setDicomServerProtocol(final String dicomServerProtocol) {
-		this.dicomServerProtocol = dicomServerProtocol;
-	}
+    public void setDicomServerPort(final int dicomServerPort) {
+        this.dicomServerPort = dicomServerPort;
+    }
 
-	public void setDicomServerTruststorePassword(final String dicomServerTruststorePassword) {
-		this.dicomServerTruststorePassword = dicomServerTruststorePassword;
-	}
+    public void setDicomServerProtocol(final String dicomServerProtocol) {
+        this.dicomServerProtocol = dicomServerProtocol;
+    }
 
-	public void setDicomServerTruststoreURL(final String dicomServerTruststoreURL) {
-		this.dicomServerTruststoreURL = dicomServerTruststoreURL;
-	}
+    public void setDicomServerTruststorePassword(final String dicomServerTruststorePassword) {
+        this.dicomServerTruststorePassword = dicomServerTruststorePassword;
+    }
 
-	public void setDicomServerWebPort(final int dicomServerWebPort) {
-		this.dicomServerWebPort = dicomServerWebPort;
-	}
+    public void setDicomServerTruststoreURL(final String dicomServerTruststoreURL) {
+        this.dicomServerTruststoreURL = dicomServerTruststoreURL;
+    }
 
-	public void setLocalDicomServerAETCalling(String localDicomServerAETCalling) {
-		this.localDicomServerAETCalling = localDicomServerAETCalling;
-	}
+    public void setDicomServerWebPort(final int dicomServerWebPort) {
+        this.dicomServerWebPort = dicomServerWebPort;
+    }
 
-	public void setLocalDicomServerHost(String localDicomServerHost) {
-		this.localDicomServerHost = localDicomServerHost;
-	}
+    public void setLocalDicomServerAETCalling(String localDicomServerAETCalling) {
+        this.localDicomServerAETCalling = localDicomServerAETCalling;
+    }
 
-	public void setLocalDicomServerPort(int localDicomServerPort) {
-		this.localDicomServerPort = localDicomServerPort;
-	}
+    public void setLocalDicomServerHost(String localDicomServerHost) {
+        this.localDicomServerHost = localDicomServerHost;
+    }
+
+    public void setLocalDicomServerPort(int localDicomServerPort) {
+        this.localDicomServerPort = localDicomServerPort;
+    }
 
 }

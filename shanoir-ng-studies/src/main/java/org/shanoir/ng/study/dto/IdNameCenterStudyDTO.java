@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -24,70 +24,70 @@ import org.shanoir.ng.tag.model.TagDTO;
 
 /**
  * Simple DTO for studies.
- * 
+ *
  * @author msimon
  *
  */
 public class IdNameCenterStudyDTO extends IdName {
-	
-	private List<StudyCenterDTO> studyCenterList;
-	
-	private List<TagDTO> tags;
 
-	private Profile profile;
+    private List<StudyCenterDTO> studyCenterList;
 
-	private Integer studyCardPolicy;
+    private List<TagDTO> tags;
 
-	/**
-	 * Simple constructor.
-	 */
-	public IdNameCenterStudyDTO() {
-	}
+    private Profile profile;
 
-	/**
-	 * Constructor.
-	 */
-	public IdNameCenterStudyDTO(final Long id, final String name) {
-		super(id, name);
-		this.setStudyCenterList(new ArrayList<>());
-	}
+    private Integer studyCardPolicy;
 
-	/**
-	 * @return the studyCenterList
-	 */
-	public List<StudyCenterDTO> getStudyCenterList() {
-		return studyCenterList;
-	}
+    /**
+     * Simple constructor.
+     */
+    public IdNameCenterStudyDTO() {
+    }
 
-	/**
-	 * @param studyCenterList the studyCenterList to set
-	 */
-	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
-		this.studyCenterList = studyCenterList;
-	}
+    /**
+     * Constructor.
+     */
+    public IdNameCenterStudyDTO(final Long id, final String name) {
+        super(id, name);
+        this.setStudyCenterList(new ArrayList<>());
+    }
 
-	public List<TagDTO> getTags() {
-		return tags;
-	}
+    /**
+     * @return the studyCenterList
+     */
+    public List<StudyCenterDTO> getStudyCenterList() {
+        return studyCenterList;
+    }
 
-	public void setTags(List<TagDTO> tags) {
-		this.tags = tags;
-	}
+    /**
+     * @param studyCenterList the studyCenterList to set
+     */
+    public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+        this.studyCenterList = studyCenterList;
+    }
 
-	public Profile getProfile() {
-		return profile;
-	}
+    public List<TagDTO> getTags() {
+        return tags;
+    }
 
-	public void setProfile(Profile profile) {
-		this.profile = profile;
-	}
+    public void setTags(List<TagDTO> tags) {
+        this.tags = tags;
+    }
 
-	public Integer getStudyCardPolicy() {
-		return studyCardPolicy;
-	}
+    public Profile getProfile() {
+        return profile;
+    }
 
-	public void setStudyCardPolicy(Integer studyCardPolicy) {
-		this.studyCardPolicy = studyCardPolicy;
-	}
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
+
+    public Integer getStudyCardPolicy() {
+        return studyCardPolicy;
+    }
+
+    public void setStudyCardPolicy(Integer studyCardPolicy) {
+        this.studyCardPolicy = studyCardPolicy;
+    }
 
 }

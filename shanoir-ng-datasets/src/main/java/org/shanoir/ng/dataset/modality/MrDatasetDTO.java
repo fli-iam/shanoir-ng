@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -24,18 +24,18 @@ import org.shanoir.ng.shared.model.RepetitionTime;
 
 
 public class MrDatasetDTO extends DatasetDTO {
-    
+
     private List<EchoTime> echoTime;
-    
+
     private List<FlipAngle> flipAngle;
-    
+
     private List<InversionTime> inversionTime;
-    
+
     private List<RepetitionTime> repetitionTime;
-    
-	private MrDatasetMetadata originMrMetadata;
-    
-	private MrDatasetMetadata updatedMrMetadata;
+
+    private MrDatasetMetadata originMrMetadata;
+
+    private MrDatasetMetadata updatedMrMetadata;
 
 
     public List<EchoTime> getEchoTime() {
@@ -70,19 +70,19 @@ public class MrDatasetDTO extends DatasetDTO {
         this.repetitionTime = repetitionTime;
     }
 
-	public MrDatasetMetadata getOriginMrMetadata() {
-		return originMrMetadata;
-	}
+    public MrDatasetMetadata getOriginMrMetadata() {
+        return originMrMetadata;
+    }
 
-	public void setOriginMrMetadata(MrDatasetMetadata originMrMetadata) {
-		this.originMrMetadata = originMrMetadata;
-	}
+    public void setOriginMrMetadata(MrDatasetMetadata originMrMetadata) {
+        this.originMrMetadata = originMrMetadata;
+    }
 
-	public MrDatasetMetadata getUpdatedMrMetadata() {
-		return updatedMrMetadata;
-	}
+    public MrDatasetMetadata getUpdatedMrMetadata() {
+        return updatedMrMetadata;
+    }
 
-	public void setUpdatedMrMetadata(MrDatasetMetadata updatedMrMetadata) {
-		this.updatedMrMetadata = updatedMrMetadata;
-	}
+    public void setUpdatedMrMetadata(MrDatasetMetadata updatedMrMetadata) {
+        this.updatedMrMetadata = updatedMrMetadata;
+    }
 }

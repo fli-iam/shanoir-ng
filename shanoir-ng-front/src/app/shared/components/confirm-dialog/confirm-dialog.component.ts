@@ -13,13 +13,15 @@
  */
 
 import { Component } from '@angular/core';
+
 import { SuperPromise } from 'src/app/utils/super-promise';
+
 
 @Component({
     selector: 'confirm-dialog',
     templateUrl: 'confirm-dialog.component.html',
     styleUrls: ['confirm-dialog.component.css'],
-    standalone: false
+    imports: []
 })
 export class ConfirmDialogComponent {
 
@@ -27,7 +29,7 @@ export class ConfirmDialogComponent {
     mode: 'confirm' | 'choose' | 'info' | 'error';
     private _message: string;
     link: string;
-    buttons: {yes: string, no?: string, cancel: string};
+    buttons: {yes: string, no?: string, cancel?: string};
     private closePromise: SuperPromise<any> = new SuperPromise();
 
     public get message(): string {
@@ -46,7 +48,7 @@ export class ConfirmDialogComponent {
         return this.closePromise;
     }
 
-    public openChoose(title: string, message?: string, buttons?: {yes: string, no: string, cancel: string}): Promise<'yes' | 'no' | false> {
+    public openChoose(title: string, message?: string, buttons?: {yes: string, no: string, cancel?: string}): Promise<'yes' | 'no' | false> {
         this.title = title;
         this.message = message;
         this.buttons = buttons;

@@ -12,16 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
 import { CoilNode } from 'src/app/tree/tree.model';
+
+import { TreeNodeComponent } from '../../../shared/components/tree/tree-node.component';
 
 
 @Component({
     selector: 'coil-node',
     templateUrl: 'coil-node.component.html',
-    standalone: false
+    imports: [TreeNodeComponent]
 })
 
 export class CoilNodeComponent extends TreeNodeAbstractComponent<CoilNode> implements OnChanges {

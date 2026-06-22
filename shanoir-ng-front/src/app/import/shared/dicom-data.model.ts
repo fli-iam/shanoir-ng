@@ -24,19 +24,20 @@ export class ImportJob {
     workFolder: string;
     patients: PatientDicom[];
     examinationId: number;
+    studyInstanceUID: string;
     studyId: number;
     studyCardId: number;
     acquisitionEquipmentId: number;
     archive: string;
-    subjectName: String;
-    studyName: String;
+    subjectName: string;
+    studyName: string;
     userId: number;
     centerId: number;
     anonymisationProfileToUse: string;
+    useStudyCard: boolean;
 }
 
 export class PatientDicom {
-
     subject: SimpleSubject;
     patientID: string;
     patientName: string;
@@ -52,7 +53,6 @@ export class StudyDicom {
     studyDescription: string;
     studyDate: Date;
     series: SerieDicom[];
-
     selected: boolean;
 }
 

@@ -12,17 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Reference } from '../../../reference/shared/reference.model';
-import { Pathology } from '../../pathology/shared/pathology.model';
-import { PathologyModel } from '../../pathologyModel/shared/pathologyModel.model';
+import { Field } from '../../../../shared/reflect/field.decorator';
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
+import { Reference } from '../../../reference/shared/reference.model';
+import { PathologyModel } from '../../pathologyModel/shared/pathologyModel.model';
 
 export class SubjectPathology  extends Entity{
-  id: number;
-  pathology: Pathology;
-  pathologyModel: PathologyModel;
-  location: Reference;
-  startDate: Date;
-  endDate : Date;
+    @Field() id: number;
+    @Field() pathologyModel: PathologyModel;
+    @Field() location: Reference;
+    @Field() startDate: Date;
+    @Field() endDate : Date;
 }
 

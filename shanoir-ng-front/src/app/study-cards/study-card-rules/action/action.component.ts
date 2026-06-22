@@ -12,19 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription , of } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
-import { Option } from '../../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
 import { MetadataFieldScope, StudyCardAssignment } from '../../shared/study-card.model';
-import { of } from 'rxjs';
+import { AutoAdjustInputComponent } from '../../../shared/auto-ajust-input/auto-ajust-input.component';
 
 
 @Component({
     selector: 'action',
     templateUrl: 'action.component.html',
     styleUrls: ['action.component.css'],
-    standalone: false
+    imports: [SelectBoxComponent, FormsModule, AutoAdjustInputComponent]
 })
 export class StudyCardActionComponent implements OnChanges, OnDestroy {
     @Input() assignment: StudyCardAssignment;
@@ -46,7 +47,7 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
     private computeAssignmentOptionsSubscription: Subscription;
     private assignmentChangeSubscription: Subscription;
 
-    onChangeField(field: string) {
+    onChangeField() {
         this.computeAssignmentOptions();
         this.assignment.value = null;
         this.valueTouched = false;
@@ -63,13 +64,13 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                 this.assignmentChangeSubscription.unsubscribe();
                 this.assignmentChangeSubscription = null;
             }
-            let assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
+            const assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
             if (this.mode == 'view') {
                 this.fieldLabel = assignmentField?.label;
                 if (assignmentField && assignmentField.options) {
                     this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
                         if (opts && opts.length > 0) {
-                            let valueOption: Option<any> = opts.find(opt => {
+                            const valueOption: Option<any> = opts.find(opt => {
                                 return opt.value == this.assignment.value 
                                     || (opt.value.id && this.assignment.value['id'] && opt.value.id == this.assignment.value['id'])
                             });
@@ -90,7 +91,7 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                     this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
                         this.assigmentOptions = opts;
                         if (opts && opts.length > 0) {
-                            let valueOption: Option<any> = opts.find(opt => {
+                            const valueOption: Option<any> = opts.find(opt => {
                                 return opt.value == this.assignment.value 
                                     || (opt.value.id && this.assignment.value['id'] && opt.value.id == this.assignment.value['id'])
                             });
@@ -115,7 +116,7 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
             this.computeAssignmentOptionsSubscription.unsubscribe();
             this.computeAssignmentOptionsSubscription = null;
         }
-        let assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
+        const assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
         if (assignmentField && assignmentField.options) {
             this.computeAssignmentOptionsSubscription = assignmentField.options.subscribe(opts => {
                 this.assigmentOptions = opts;

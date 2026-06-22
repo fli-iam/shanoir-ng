@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, forwardRef, Input } from '@angular/core';
-import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors, FormsModule } from '@angular/forms';
 
 
 @Component({
@@ -38,7 +38,7 @@ import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErr
             multi: true,
         }
     ],
-    standalone: false
+    imports: [FormsModule]
 })
 export class DatepickerComponent implements ControlValueAccessor {
 
@@ -46,8 +46,6 @@ export class DatepickerComponent implements ControlValueAccessor {
     onTouch: () => void;
     private onChange: (value) => void;
     @Input() disabled: boolean = false;
-
-    constructor() { }
 
     onModelChange(dateStr: string) {
         if (this.dateString == dateStr) return;
@@ -82,7 +80,7 @@ export class DatepickerComponent implements ControlValueAccessor {
 
     public static inFutureValidator = (control: AbstractControl): ValidationErrors | null => {
         if (control.value != 'invalid') {
-            let date: Date = control.value;
+            const date: Date = control.value;
             if (date && date.getTime && date.getTime() < Date.now()) return { future: true }
         }
         return null;

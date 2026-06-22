@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -41,189 +41,314 @@ import org.springframework.stereotype.Component;
 
 /**
  * Keycloak client. Used to execute requests to Keycloak server.
- * 
+ *
  * @author msimon
  *
  */
 @Component
 public class KeycloakClient {
 
-	/**
-	 * Logger
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(KeycloakClient.class);
+    /**
+     * Logger
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(KeycloakClient.class);
 
-	@Value("${kc.admin.client.server.url}")
-	private String kcAdminClientServerUrl;
+    /**
+     * Keycloak required action that forces a user to register a TOTP authenticator at next login.
+     */
+    private static final String CONFIGURE_TOTP_ACTION = "CONFIGURE_TOTP";
 
-	@Value("${kc.admin.client.realm}")
-	private String kcAdminClientRealm;
+    /**
+     * Keycloak credential type stored once a user has registered an authenticator.
+     */
+    private static final String OTP_CREDENTIAL_TYPE = "otp";
 
-	@Value("${kc.admin.client.client.id}")
-	private String kcAdminClientClientId;
+    @Value("${kc.admin.client.server.url}")
+    private String kcAdminClientServerUrl;
 
-	@Value("${SHANOIR_KEYCLOAK_USER}")
-	private String kcAdminClientUsername;
+    @Value("${kc.admin.client.realm}")
+    private String kcAdminClientRealm;
 
-	@Value("${SHANOIR_KEYCLOAK_PASSWORD}")
-	private String kcAdminClientPassword;
-	
-	@Value("${kc.admin.client.realm.users}")
-	private String keycloakRealm;
+    @Value("${kc.admin.client.client.id}")
+    private String kcAdminClientClientId;
 
-	private Keycloak keycloak;
+    @Value("${SHANOIR_KEYCLOAK_USER}")
+    private String kcAdminClientUsername;
 
-	@Autowired
-	private RoleRepository roleRepository;
+    @Value("${SHANOIR_KEYCLOAK_PASSWORD}")
+    private String kcAdminClientPassword;
 
-	protected Keycloak getKeycloak() {
-		if (keycloak == null) {
-			keycloak = Keycloak.getInstance(kcAdminClientServerUrl, kcAdminClientRealm,
-					kcAdminClientUsername, kcAdminClientPassword, kcAdminClientClientId);
-		}
-		return keycloak;
-	}
+    @Value("${kc.admin.client.realm.users}")
+    private String keycloakRealm;
 
-	/**
-	 * Create a user with a password.
-	 * 
-	 * @param user
-	 *            user to create.
-	 * @param password
-	 *            user password.
-	 * @return keycloak user id.
-	 * @throws SecurityException
-	 */
-	public String createUserWithPassword(final User user, final String password) throws SecurityException {
-		try {
-			final String keycloakId = KeycloakShanoirUtil
-					.getCreatedUserId(getKeycloak().realm(keycloakRealm).users().create(getUserRepresentation(user)));
+    private Keycloak keycloak;
 
-			final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
-			// Reset user password
-			final CredentialRepresentation credential = new CredentialRepresentation();
-			credential.setType(CredentialRepresentation.PASSWORD);
-			credential.setValue(password);
-			credential.setTemporary(Boolean.TRUE);
-			userResource.resetPassword(credential);
+    @Autowired
+    private RoleRepository roleRepository;
 
-			// Get user role
-			Optional<Role> roleOpt = roleRepository.findById(user.getRole().getId());
-			if (roleOpt.isPresent()) {
-				final String userRoleName = roleOpt.get().getName();
-				// Add realm role
-				userResource.roles().realmLevel().add(Arrays
-						.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
-				return keycloakId;
-			} else {
-				throw new NoSuchElementException("Role not found in roleRepository.");
-			}
-		} catch (Exception e) {
-			throw new SecurityException("Could not register the new user into Keycloak.", e);
-		}
-	}
+    protected Keycloak getKeycloak() {
+        if (keycloak == null) {
+            keycloak = Keycloak.getInstance(kcAdminClientServerUrl, kcAdminClientRealm,
+                    kcAdminClientUsername, kcAdminClientPassword, kcAdminClientClientId);
+        }
+        return keycloak;
+    }
 
-	/**
-	 * This methods resets the password of th given user and sets a temporary password.
-	 * @param keycloakId the keycloak ID of the user to update.
-	 * @return the password newly created
-	 */
-	public String resetPassword(String keycloakId) {
-		// Create new temporary password
-		String newPassword = PasswordUtils.generatePassword();
+    /**
+     * Create a user with a password.
+     *
+     * @param user
+     *            user to create.
+     * @param password
+     *            user password.
+     * @return keycloak user id.
+     * @throws SecurityException
+     */
+    public String createUserWithPassword(final User user, final String password) throws SecurityException {
+        try {
+            final String keycloakId = KeycloakShanoirUtil
+                    .getCreatedUserId(getKeycloak().realm(keycloakRealm).users().create(getUserRepresentation(user)));
 
-		final CredentialRepresentation credential = new CredentialRepresentation();
-		credential.setType(CredentialRepresentation.PASSWORD);
-		credential.setTemporary(Boolean.TRUE);
-		credential.setValue(newPassword);
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+            // Reset user password
+            final CredentialRepresentation credential = new CredentialRepresentation();
+            credential.setType(CredentialRepresentation.PASSWORD);
+            credential.setValue(password);
+            credential.setTemporary(Boolean.TRUE);
+            userResource.resetPassword(credential);
 
-		final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
-		userResource.resetPassword(credential);
-		
-		return newPassword;
-	}
-	
-	/**
-	 * Create a user with a password.
-	 * 
-	 * @param user
-	 *            user to create.
-	 * @return keycloak user id.
-	 * @throws SecurityException
-	 */
-	public String createUserWithPassword(final User user) throws SecurityException {
-		return createUserWithPassword(user, user.getPassword());
-	}
-	
+            // Get user role
+            Optional<Role> roleOpt = roleRepository.findById(user.getRole().getId());
+            if (roleOpt.isPresent()) {
+                final String userRoleName = roleOpt.get().getName();
+                // Add realm role
+                userResource.roles().realmLevel().add(Arrays
+                        .asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
+                return keycloakId;
+            } else {
+                throw new NoSuchElementException("Role not found in roleRepository.");
+            }
+        } catch (Exception e) {
+            throw new SecurityException("Could not register the new user into Keycloak.", e);
+        }
+    }
 
-	/**
-	 * Delete a user.
-	 * 
-	 * @param username
-	 *            user name.
-	 */
-	public void deleteUser(final String keycloakId) {
-		try {
-			getKeycloak().realm(keycloakRealm).users().delete(keycloakId);
-		} catch (Exception e) {
-			LOG.error("Error while deleting user with keycloak id " + keycloakId + " on Keycloak server", e);
-		}
-	}
+    /**
+     * This methods resets the password of th given user and sets a temporary password.
+     * @param keycloakId the keycloak ID of the user to update.
+     * @return the password newly created
+     */
+    public String resetPassword(String keycloakId) {
+        // Create new temporary password
+        String newPassword = PasswordUtils.generatePassword();
 
-	/**
-	 * Update a user.
-	 * 
-	 * @param user
-	 *            user to update.
-	 */
-	public void updateUser(final User user) {
-		try {
-			final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(user.getKeycloakId());
-			userResource.update(getUserRepresentation(user));
+        final CredentialRepresentation credential = new CredentialRepresentation();
+        credential.setType(CredentialRepresentation.PASSWORD);
+        credential.setTemporary(Boolean.TRUE);
+        credential.setValue(newPassword);
 
-			// Remove old realm role
-			final List<String> roleNames = roleRepository.getAllNames();
-			final List<RoleRepresentation> roleRepresentations = new ArrayList<>(
-					userResource.roles().realmLevel().listAll());
-			for (RoleRepresentation roleRepresentation : roleRepresentations) {
-				if (roleNames.contains(roleRepresentation.getName())) {
-					userResource.roles().realmLevel().remove(Arrays.asList(roleRepresentation));
-				}
-			}
-			// Get user role
-			final String userRoleName = roleRepository.findById(user.getRole().getId()).orElse(null).getName();
-			// Add realm role
-			userResource.roles().realmLevel().add(Arrays
-					.asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
-		} catch (Exception e) {
-			LOG.error("Error while updating user with keycloak id " + user.getKeycloakId() + " on Keycloak server", e);
-		}
-	}
+        final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
+        userResource.resetPassword(credential);
 
-	/*
-	 * Parse user to keycloak user representation.
-	 * 
-	 * @param user user.
-	 * 
-	 * @return keycloak user representation.
-	 */
-	private UserRepresentation getUserRepresentation(final User user) {
-		final Map<String, List<String>> attributes = new HashMap<>();
-		attributes.put("userId", Arrays.asList(user.getId().toString()));
-		attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
-		if (user.getExpirationDate() != null) {
-			attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
-		}
+        return newPassword;
+    }
 
-		final UserRepresentation userRepresentation = new UserRepresentation();
-		userRepresentation.setAttributes(attributes);
-		userRepresentation.setEmail(user.getEmail());
-		userRepresentation.setEnabled(user.isEnabled() && (user.isAccountRequestDemand() == null || !user.isAccountRequestDemand()));
-		userRepresentation.setFirstName(user.getFirstName());
-		userRepresentation.setLastName(user.getLastName());
-		userRepresentation.setUsername(user.getUsername());
+    /**
+     * Create a user with a password.
+     *
+     * @param user
+     *            user to create.
+     * @return keycloak user id.
+     * @throws SecurityException
+     */
+    public String createUserWithPassword(final User user) throws SecurityException {
+        return createUserWithPassword(user, user.getPassword());
+    }
 
-		return userRepresentation;
-	}
+    /**
+     * Enable Keycloak two-factor (TOTP) authentication for a user by adding the
+     * {@code CONFIGURE_TOTP} required action. The user is then forced to register an
+     * authenticator at next login.
+     *
+     * @param keycloakId
+     *            the keycloak id of the user.
+     * @throws SecurityException
+     */
+    public void enableTotp(final String keycloakId) throws SecurityException {
+        try {
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+            final UserRepresentation userRepresentation = userResource.toRepresentation();
+            final List<String> requiredActions = userRepresentation.getRequiredActions() == null
+                    ? new ArrayList<>() : new ArrayList<>(userRepresentation.getRequiredActions());
+            if (!requiredActions.contains(CONFIGURE_TOTP_ACTION)) {
+                requiredActions.add(CONFIGURE_TOTP_ACTION);
+                userRepresentation.setRequiredActions(requiredActions);
+                userResource.update(userRepresentation);
+            }
+        } catch (Exception e) {
+            throw new SecurityException("Could not enable two-factor authentication for user with keycloak id " + keycloakId, e);
+        }
+    }
 
+    /**
+     * Disable Keycloak two-factor (TOTP) authentication for a user. Removes the
+     * {@code CONFIGURE_TOTP} required action (if pending) and deletes any existing OTP
+     * credential so the user is no longer prompted for a second factor.
+     *
+     * @param keycloakId
+     *            the keycloak id of the user.
+     * @throws SecurityException
+     */
+    public void disableTotp(final String keycloakId) throws SecurityException {
+        try {
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+            final UserRepresentation userRepresentation = userResource.toRepresentation();
+            final List<String> requiredActions = userRepresentation.getRequiredActions();
+            if (requiredActions != null && requiredActions.contains(CONFIGURE_TOTP_ACTION)) {
+                final List<String> updatedActions = new ArrayList<>(requiredActions);
+                updatedActions.remove(CONFIGURE_TOTP_ACTION);
+                userRepresentation.setRequiredActions(updatedActions);
+                userResource.update(userRepresentation);
+            }
+            for (CredentialRepresentation credential : userResource.credentials()) {
+                if (OTP_CREDENTIAL_TYPE.equals(credential.getType())) {
+                    userResource.removeCredential(credential.getId());
+                }
+            }
+        } catch (Exception e) {
+            throw new SecurityException("Could not disable two-factor authentication for user with keycloak id " + keycloakId, e);
+        }
+    }
+
+    /**
+     * Tell whether Keycloak two-factor (TOTP) authentication is enabled for a user.
+     *
+     * @param keycloakId
+     *            the keycloak id of the user.
+     * @return {@code true} if an OTP credential exists or the {@code CONFIGURE_TOTP} required
+     *         action is set, {@code false} otherwise.
+     * @throws SecurityException
+     */
+    public boolean isTotpEnabled(final String keycloakId) throws SecurityException {
+        try {
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+            for (CredentialRepresentation credential : userResource.credentials()) {
+                if (OTP_CREDENTIAL_TYPE.equals(credential.getType())) {
+                    return true;
+                }
+            }
+            final List<String> requiredActions = userResource.toRepresentation().getRequiredActions();
+            return requiredActions != null && requiredActions.contains(CONFIGURE_TOTP_ACTION);
+        } catch (Exception e) {
+            throw new SecurityException("Could not read two-factor authentication status for user with keycloak id " + keycloakId, e);
+        }
+    }
+
+    /**
+     * Enable or disable a user in Keycloak (the account {@code enabled} flag).
+     *
+     * @param keycloakId
+     *            the keycloak id of the user.
+     * @param enabled
+     *            {@code true} to activate the user, {@code false} to deactivate it.
+     * @throws SecurityException
+     */
+    public void setUserEnabled(final String keycloakId, final boolean enabled) throws SecurityException {
+        try {
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+            final UserRepresentation userRepresentation = userResource.toRepresentation();
+            userRepresentation.setEnabled(enabled);
+            userResource.update(userRepresentation);
+        } catch (Exception e) {
+            throw new SecurityException("Could not update the enabled status for user with keycloak id " + keycloakId, e);
+        }
+    }
+
+    /**
+     * Tell whether a user is enabled (activated) in Keycloak.
+     *
+     * @param keycloakId
+     *            the keycloak id of the user.
+     * @return {@code true} if the user is enabled in Keycloak, {@code false} otherwise.
+     * @throws SecurityException
+     */
+    public boolean isUserEnabled(final String keycloakId) throws SecurityException {
+        try {
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
+            return Boolean.TRUE.equals(userResource.toRepresentation().isEnabled());
+        } catch (Exception e) {
+            throw new SecurityException("Could not read the enabled status for user with keycloak id " + keycloakId, e);
+        }
+    }
+
+
+    /**
+     * Delete a user.
+     *
+     * @param username
+     *            user name.
+     */
+    public void deleteUser(final String keycloakId) {
+        try {
+            getKeycloak().realm(keycloakRealm).users().delete(keycloakId);
+        } catch (Exception e) {
+            LOG.error("Error while deleting user with keycloak id " + keycloakId + " on Keycloak server", e);
+        }
+    }
+
+    /**
+     * Update a user.
+     *
+     * @param user
+     *            user to update.
+     */
+    public void updateUser(final User user) {
+        try {
+            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(user.getKeycloakId());
+            userResource.update(getUserRepresentation(user));
+
+            // Remove old realm role
+            final List<String> roleNames = roleRepository.getAllNames();
+            final List<RoleRepresentation> roleRepresentations = new ArrayList<>(
+                    userResource.roles().realmLevel().listAll());
+            for (RoleRepresentation roleRepresentation : roleRepresentations) {
+                if (roleNames.contains(roleRepresentation.getName())) {
+                    userResource.roles().realmLevel().remove(Arrays.asList(roleRepresentation));
+                }
+            }
+            // Get user role
+            final String userRoleName = roleRepository.findById(user.getRole().getId()).orElse(null).getName();
+            // Add realm role
+            userResource.roles().realmLevel().add(Arrays
+                    .asList(getKeycloak().realm(keycloakRealm).roles().get(userRoleName).toRepresentation()));
+        } catch (Exception e) {
+            LOG.error("Error while updating user with keycloak id " + user.getKeycloakId() + " on Keycloak server", e);
+        }
+    }
+
+    /*
+     * Parse user to keycloak user representation.
+     *
+     * @param user user.
+     *
+     * @return keycloak user representation.
+     */
+    private UserRepresentation getUserRepresentation(final User user) {
+        final Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("userId", Arrays.asList(user.getId().toString()));
+        attributes.put("canImportFromPACS", Arrays.asList("" + user.isCanAccessToDicomAssociation()));
+        if (user.getExpirationDate() != null) {
+            attributes.put("expirationDate", Arrays.asList("" + user.getExpirationDate()));
+        }
+
+        final UserRepresentation userRepresentation = new UserRepresentation();
+        userRepresentation.setAttributes(attributes);
+        userRepresentation.setEmail(user.getEmail());
+        userRepresentation.setEnabled(user.isEnabled() && (user.isAccountRequestDemand() == null || !user.isAccountRequestDemand()));
+        userRepresentation.setFirstName(user.getFirstName().replaceAll("[^\\p{L}\\p{M}\\s'-]", ""));
+        userRepresentation.setLastName(user.getLastName().replaceAll("[^\\p{L}\\p{M}\\s'-]", ""));
+        userRepresentation.setUsername(user.getUsername());
+
+        return userRepresentation;
+    }
 }

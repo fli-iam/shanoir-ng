@@ -1,8 +1,11 @@
 package org.shanoir.uploader.model.rest;
 
+import java.util.Date;
 import java.util.List;
 
 import org.shanoir.uploader.ShUpConfig;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 /**
  * Light implementation of Study object from ms studies.
  * ShUp has no dependency to ms studies, what is wanted
@@ -11,102 +14,144 @@ import org.shanoir.uploader.ShUpConfig;
  */
 public class Study implements Comparable<Study> {
 
-	private static final Integer SC_MANDATORY = Integer.valueOf(1);
+    public static final String SC_MANDATORY = "1";
 
-	private static final Integer SC_DISABLED = Integer.valueOf(2);
+    public static final String SC_DISABLED = "2";
 
-	private Long id;
+    private Long id;
 
-	private String name;
+    private String name;
 
-	private String studyStatus;
-	
-	private List<StudyCard> studyCards;
+    private String studyStatus;
 
-	private List<StudyCenter> studyCenterList;
+    private List<StudyCard> studyCards;
 
-	private Boolean compatible;
+    private List<StudyCenter> studyCenterList;
 
-	private Integer studyCardPolicy;
+    private Boolean compatible;
 
-	public Long getId() {
-		return id;
-	}
+    private Boolean isDraft;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    private String studyCardPolicy;
 
-	public String getName() {
-		return name;
-	}
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
+    private Date startDate;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
+    private Date endDate;
 
-	public String getStudyStatus() {
-		return studyStatus;
-	}
+    private StudyExtraDetails extraDetails;
 
-	public void setStudyStatus(String studyStatus) {
-		this.studyStatus = studyStatus;
-	}
+    public StudyExtraDetails getExtraDetails() {
+        return extraDetails;
+    }
 
-	public List<StudyCard> getStudyCards() {
-		return studyCards;
-	}
+    public void setExtraDetails(StudyExtraDetails extraDetails) {
+        this.extraDetails = extraDetails;
+    }
 
-	public void setStudyCards(List<StudyCard> studyCards) {
-		this.studyCards = studyCards;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public List<StudyCenter> getStudyCenterList() {
-		return studyCenterList;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setStudyCenterList(List<StudyCenter> studyCenterList) {
-		this.studyCenterList = studyCenterList;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public Boolean getCompatible() {
-		return compatible;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setCompatible(Boolean compatible) {
-		this.compatible = compatible;
-	}
+    public String getStudyStatus() {
+        return studyStatus;
+    }
 
-	public Integer getStudyCardPolicy() {
-		return studyCardPolicy;
-	}
+    public void setStudyStatus(String studyStatus) {
+        this.studyStatus = studyStatus;
+    }
 
-	public void setStudyCardPolicy(Integer studyCardPolicy) {
-		this.studyCardPolicy = studyCardPolicy;
-	}
+    public List<StudyCard> getStudyCards() {
+        return studyCards;
+    }
 
-	public String toString() {
-		if (this.getStudyCards() != null && !this.getStudyCards().isEmpty()) {
-			if (compatible) {
-				return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + " " + this.getName();
-			} else {
-				return this.getName();			
-			}
-		} else {
-			return this.getName() + ", 0 study card.";
-		}
-	}
+    public void setStudyCards(List<StudyCard> studyCards) {
+        this.studyCards = studyCards;
+    }
 
-	public int compareTo(Study o) {
-		return Long.compare(this.getId(), o.getId());
-	}
+    public List<StudyCenter> getStudyCenterList() {
+        return studyCenterList;
+    }
 
-	public boolean isWithStudyCards() {
-		if(SC_MANDATORY.equals(studyCardPolicy)) {
-			return true;
-		} else if(SC_DISABLED.equals(studyCardPolicy)) {
-			return false;
-		} else { return true; }
-	}
+    public void setStudyCenterList(List<StudyCenter> studyCenterList) {
+        this.studyCenterList = studyCenterList;
+    }
+
+    public Boolean getCompatible() {
+        return compatible;
+    }
+
+    public void setCompatible(Boolean compatible) {
+        this.compatible = compatible;
+    }
+
+    public String getStudyCardPolicy() {
+        return studyCardPolicy;
+    }
+
+    public void setStudyCardPolicy(String studyCardPolicy) {
+        this.studyCardPolicy = studyCardPolicy;
+    }
+
+    public String toString() {
+        if (this.getStudyCards() != null && !this.getStudyCards().isEmpty()) {
+            if (compatible) {
+                return ShUpConfig.resourceBundle.getString("shanoir.uploader.import.compatible") + " " + this.getName();
+            } else {
+                return this.getName();
+            }
+        } else {
+            return this.getName() + ", 0 study card.";
+        }
+    }
+
+    public int compareTo(Study o) {
+        return Long.compare(this.getId(), o.getId());
+    }
+
+    public boolean isWithStudyCards() {
+        if(SC_MANDATORY.equals(studyCardPolicy)) {
+            return true;
+        } else if(SC_DISABLED.equals(studyCardPolicy)) {
+            return false;
+        } else { return true; }
+    }
+
+    public Boolean getIsDraft() {
+        return isDraft;
+    }
+
+    public void setIsDraft(Boolean isDraft) {
+        this.isDraft = isDraft;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
 
 }

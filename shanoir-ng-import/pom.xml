@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- Shanoir NG - Import, manage and share neuroimaging data Copyright (C) 
-	2009-2019 Inria - https://www.inria.fr/ Contact us on https://project.inria.fr/shanoir/ 
-	This program is free software: you can redistribute it and/or modify it under 
-	the terms of the GNU General Public License as published by the Free Software 
-	Foundation, either version 3 of the License, or (at your option) any later 
-	version. You should have received a copy of the GNU General Public License 
+<!-- Shanoir NG - Import, manage and share neuroimaging data Copyright (C)
+	2009-2019 Inria - https://www.inria.fr/ Contact us on https://project.inria.fr/shanoir/
+	This program is free software: you can redistribute it and/or modify it under
+	the terms of the GNU General Public License as published by the Free Software
+	Foundation, either version 3 of the License, or (at your option) any later
+	version. You should have received a copy of the GNU General Public License
 	along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -24,10 +24,10 @@
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-import</name>
-	<description>Shanoir-NG Import Microservice</description>
+	<description>Import microservice</description>
 
 	<dependencies>
-		<!-- Shanoir-NG dependencies -->
+		<!-- Shanoir dependencies -->
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
@@ -67,46 +67,13 @@
 			</exclusions>
 		</dependency>
 
-		<!-- DCM4CHE dependencies -->
-		<dependency>
-			<groupId>org.dcm4che</groupId>
-			<artifactId>dcm4che-core</artifactId>
-			<version>${dcm4che.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.dcm4che</groupId>
-			<artifactId>dcm4che-dcmr</artifactId>
-			<version>${dcm4che.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.dcm4che</groupId>
-			<artifactId>dcm4che-emf</artifactId>
-			<version>${dcm4che.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.dcm4che.tool</groupId>
-			<artifactId>dcm4che-tool-storescu</artifactId>
-			<version>${dcm4che.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 		<!-- mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
 			<version>4.5.14</version>
 		</dependency>
-		
+
 		<dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-csv</artifactId>
@@ -124,7 +91,7 @@
 					</classpathDependencyExcludes>
 				</configuration>
 			</plugin>
-			<!-- Package shanoir-ng-import.jar as Spring Boot executable: Avoid error: 
+			<!-- Package shanoir-ng-import.jar as Spring Boot executable: Avoid error:
 				no main manifest attribute, in /shanoir-ng-import.jar -->
 			<!-- Used here for ShanoirUploader: create an additional single jar to be used by ShUp -->
 	        <plugin>

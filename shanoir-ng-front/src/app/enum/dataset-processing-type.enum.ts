@@ -102,7 +102,7 @@ export enum DatasetProcessingType {
 
 } export namespace DatasetProcessingType {
 
-    export function all(): Array<DatasetProcessingType> {
+    export function all(): DatasetProcessingType[] {
         return allOfEnum<DatasetProcessingType>(DatasetProcessingType);
     }
 
@@ -111,6 +111,6 @@ export enum DatasetProcessingType {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export var options: Option<DatasetProcessingType>[] = all().map(prop => new Option<DatasetProcessingType>(prop, getLabel(prop)));
+    export const options: Option<DatasetProcessingType>[] = all().map(prop => new Option<DatasetProcessingType>(prop, getLabel(prop)));
 }
 

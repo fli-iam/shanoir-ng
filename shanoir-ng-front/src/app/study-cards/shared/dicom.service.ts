@@ -12,10 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+
+import { BACKEND_API_STUDY_CARD_URL } from '../../utils/app.utils';
 
 import { DicomTag } from './study-card.model';
-import { HttpClient } from '@angular/common/http';
-import { BACKEND_API_STUDY_CARD_URL } from '../../utils/app.utils';
 
 
 @Injectable()
@@ -23,15 +25,14 @@ export class DicomService {
 
     private tagRequested: boolean = false;
     private tagPromiseResolve: (value?: DicomTag[] | PromiseLike<DicomTag[]>) => void;
-    private tagPromise: Promise<DicomTag[]> = new Promise((resolve, reject) => this.tagPromiseResolve = resolve);
+    private tagPromise: Promise<DicomTag[]> = new Promise(resolve => this.tagPromiseResolve = resolve);
 
     constructor(private http: HttpClient) {}
 
     getDicomTags(): Promise<DicomTag[]> {
         if (!this.tagRequested) {
             this.tagRequested = true;
-            this.http.get<DicomTag[]>(BACKEND_API_STUDY_CARD_URL + '/dicomTags')
-                .toPromise()
+            firstValueFrom(this.http.get<DicomTag[]>(BACKEND_API_STUDY_CARD_URL + '/dicomTags'))
                 .then(tags => {
                     this.tagPromiseResolve(tags);
                 });

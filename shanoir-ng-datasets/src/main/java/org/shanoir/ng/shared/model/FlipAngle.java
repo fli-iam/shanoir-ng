@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -18,10 +18,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.examination.model.UnitOfMeasure;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
@@ -34,54 +32,54 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 @Entity
 public class FlipAngle extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 7894925972778553896L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 7894925972778553896L;
 
-	/** MR dataset. */
-	@ManyToOne
-	@JoinColumn(name = "mr_dataset_id")
-	@JsonIgnore
-	private MrDataset mrDataset;
-	
-	/**
-	 * Comes from the dicom tag (0018,1314) VR=DS, VM=1 Flip Angle. The unit of
-	 * measure must be in degrees.
-	 */
-	@NotNull
-	private String flipAngleValue;
+    /** MR dataset. */
+    @ManyToOne
+    @JoinColumn(name = "mr_dataset_id")
+    @JsonIgnore
+    private MrDataset mrDataset;
 
-	public FlipAngle() {
+    /**
+     * Comes from the dicom tag (0018,1314) VR=DS, VM=1 Flip Angle. The unit of
+     * measure must be in degrees.
+     */
+    @NotNull
+    private String flipAngleValue;
 
-	}
+    public FlipAngle() {
 
-	public FlipAngle(FlipAngle other, MrDataset mr) {
-		this.mrDataset = mr;
-		this.flipAngleValue = other.flipAngleValue;
-	}
+    }
 
-	/**
-	 * @return the flipAngleValue
-	 */
-	public String getFlipAngleValue() {
-		return flipAngleValue;
-	}
+    public FlipAngle(FlipAngle other, MrDataset mr) {
+        this.mrDataset = mr;
+        this.flipAngleValue = other.flipAngleValue;
+    }
 
-	/**
-	 * @param flipAngleValue
-	 *            the flipAngleValue to set
-	 */
-	public void setFlipAngleValue(String flipAngleValue) {
-		this.flipAngleValue = flipAngleValue;
-	}
+    /**
+     * @return the flipAngleValue
+     */
+    public String getFlipAngleValue() {
+        return flipAngleValue;
+    }
 
-	public MrDataset getMrDataset() {
-		return mrDataset;
-	}
+    /**
+     * @param flipAngleValue
+     *            the flipAngleValue to set
+     */
+    public void setFlipAngleValue(String flipAngleValue) {
+        this.flipAngleValue = flipAngleValue;
+    }
 
-	public void setMrDataset(MrDataset mrDataset) {
-		this.mrDataset = mrDataset;
-	}
-  
+    public MrDataset getMrDataset() {
+        return mrDataset;
+    }
+
+    public void setMrDataset(MrDataset mrDataset) {
+        this.mrDataset = mrDataset;
+    }
+
 }

@@ -12,6 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { RouterLinkActive, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { Coil } from '../coils/shared/coil.model';
 import { CoilService } from '../coils/shared/coil.service';
@@ -23,13 +25,15 @@ import { TableComponent } from '../shared/components/table/table.component';
 import { QualityCard } from '../study-cards/shared/quality-card.model';
 import { QualityCardService } from '../study-cards/shared/quality-card.service';
 import * as AppUtils from '../utils/app.utils';
+import { StudyCardRulesComponent } from '../study-cards/study-card-rules/study-card-rules.component';
+import { CheckboxComponent } from '../shared/checkbox/checkbox.component';
 
 
 @Component({
     selector: 'quality-control',
     templateUrl: 'quality-control.component.html',
     styleUrls: ['quality-control.component.css'],
-    standalone: false
+    imports: [RouterLinkActive, RouterLink, StudyCardRulesComponent, FormsModule, CheckboxComponent, TableComponent]
 })
 
 export class QualityControlComponent implements OnChanges {
@@ -86,7 +90,7 @@ export class QualityControlComponent implements OnChanges {
         });
     }
 
-    onMouseOverNbRules(qualityCard: QualityCard, event: any) {
+    onMouseOverNbRules(qualityCard: QualityCard) {
         if (qualityCard.id != this.timeoutId) {
             this.timeoutId = qualityCard.id;
             clearTimeout(this.overTimeout);
@@ -105,10 +109,10 @@ export class QualityControlComponent implements OnChanges {
     }
 
     downloadReport(qualityCard: QualityCard) {
-        let browserPaging: BrowserPaging<any> = this.pagings.get(qualityCard?.id);
+        const browserPaging: BrowserPaging<any> = this.pagings.get(qualityCard?.id);
         let csvStr: string = '';
         csvStr += browserPaging.columnDefs.map(col => col.headerName).join(',');
-        for (let entry of browserPaging.items) {
+        for (const entry of browserPaging.items) {
             csvStr += '\n' + browserPaging.columnDefs.map(col => '"' + TableComponent.getCellValue(entry, col) + '"').join(',');
         }
         const csvBlob = new Blob([csvStr], {

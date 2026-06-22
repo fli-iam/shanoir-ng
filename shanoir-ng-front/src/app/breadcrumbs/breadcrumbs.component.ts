@@ -12,18 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, Input, OnDestroy } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { BreadcrumbsService, Step } from './breadcrumbs.service';
-import { Subject, Subscription } from 'rxjs';
-import { WaitBurstEnd } from '../utils/wait-burst-end';
+import { Subject, Subscription, firstValueFrom } from 'rxjs';
 import { take } from 'rxjs/operators';
+
+import { WaitBurstEnd } from '../utils/wait-burst-end';
+
+import { BreadcrumbsService, Step } from './breadcrumbs.service';
+
 
 @Component({
     selector: 'breadcrumbs',
     templateUrl: 'breadcrumbs.component.html',
     styleUrls: ['breadcrumbs.component.css'],
-    standalone: false
+    imports: []
 })
 
 export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterViewChecked {
@@ -90,8 +93,8 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
         this.router.navigate(['/home']);
     }
 
-    @HostListener('window:resize', ['$event'])
-    onResize(event) {
+    @HostListener('window:resize')
+    onResize() {
         this.onResizeEnd.fire();
     }
 
@@ -100,9 +103,9 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
     }
 
     private _checkWidth() {
-        let componentWidth: number = this.elementRef.nativeElement.offsetWidth;
-        let listWidth: number = this.elementRef.nativeElement.scrollWidth;
-        let nbSteps: number = this.steps.filter(s => !s.disabled)?.length;
+        const componentWidth: number = this.elementRef.nativeElement.offsetWidth;
+        const listWidth: number = this.elementRef.nativeElement.scrollWidth;
+        const nbSteps: number = this.steps.filter(s => !s.disabled)?.length;
         if (!this.nbDisplayedSteps) this.nbDisplayedSteps = nbSteps;
         let end: Promise<void>;
         if (listWidth > componentWidth) { // if overflow, reduce
@@ -120,12 +123,12 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
     private tryToExpand(): Promise<void> {
         if (this.nbDisplayedSteps >= this.steps.filter(s => !s.disabled)?.length) return Promise.resolve();
         this.nbDisplayedSteps++;
-        return this.onViewChecked.pipe(take(1)).toPromise().then(() => {
-            let componentWidth: number = this.elementRef.nativeElement.offsetWidth;
-            let listWidth: number = this.elementRef.nativeElement.scrollWidth;
+        return firstValueFrom(this.onViewChecked.pipe(take(1))).then(() => {
+            const componentWidth: number = this.elementRef.nativeElement.offsetWidth;
+            const listWidth: number = this.elementRef.nativeElement.scrollWidth;
             if (listWidth > componentWidth) { // if overflow, finally reduce
                 this.nbDisplayedSteps--;
-                return this.onViewChecked.pipe(take(1)).toPromise();
+                return firstValueFrom(this.onViewChecked.pipe(take(1)));
             } else { // else continue
                 return this.tryToExpand();
             }
@@ -135,9 +138,9 @@ export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterView
     private reduceUntilFit(): Promise<void> {
         if (this.nbDisplayedSteps <= 0) return Promise.resolve();
         this.nbDisplayedSteps--;
-        return this.onViewChecked.pipe(take(1)).toPromise().then(() => {
-            let componentWidth: number = this.elementRef.nativeElement.offsetWidth;
-            let listWidth: number = this.elementRef.nativeElement.scrollWidth;
+        return firstValueFrom(this.onViewChecked.pipe(take(1))).then(() => {
+            const componentWidth: number = this.elementRef.nativeElement.offsetWidth;
+            const listWidth: number = this.elementRef.nativeElement.scrollWidth;
             if (listWidth > componentWidth) { // if overflow, reduce again
                 return this.reduceUntilFit();
             } else {

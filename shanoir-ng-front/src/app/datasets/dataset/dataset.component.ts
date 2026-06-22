@@ -13,33 +13,42 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection } from 'src/app/studies/study/tree.service';
+
 import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { PapayaComponent } from '../../shared/components/papaya/papaya.component';
+
 import { MrDataset } from './mr/dataset.mr.model';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { CommonDatasetComponent } from './common/dataset.common.component';
+import { MrDatasetComponent } from './mr/dataset.mr.component';
+import { EegDatasetComponent } from './eeg/dataset.eeg.component';
+
 
 
 @Component({
     selector: 'dataset-detail',
     templateUrl: 'dataset.component.html',
     styleUrls: ['dataset.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, CommonDatasetComponent, MrDatasetComponent, EegDatasetComponent, PapayaComponent]
 })
 
 export class DatasetComponent extends EntityComponent<Dataset> {
 
     papayaParams: any;
     hasDownloadRight: boolean = false;
-    private hasAdministrateRight: boolean = false;
+    hasAdministrateRight: boolean = false;
     public downloadState: TaskState = new TaskState();
     isMRS: boolean = false; // MR Spectroscopy
     papayaLoadCallback: () => Promise<any[]>;
@@ -50,7 +59,11 @@ export class DatasetComponent extends EntityComponent<Dataset> {
             private dicomArchiveService: DicomArchiveService,
             private studyRightsService: StudyRightsService,
             private downloadService: MassDownloadService) {
-        super(route, 'dataset');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'dataset';
     }
 
     get dataset(): Dataset { return this.entity; }
@@ -117,7 +130,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         return this.datasetService.downloadToBlob(this.id, 'dcm').then(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
             return this.dicomArchiveService.importFromZip(blobReponse.body)
-                .then(response => {
+                .then(() => {
                     return this.dicomArchiveService.extractFileDirectoryStructure()
                         .then(response => {
                             return this.initPapaya(response);
@@ -127,13 +140,13 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     private initPapaya(dataFiles: any): Promise<any[]> {
-        let buffs = [];
+        const buffs = [];
         Object.keys(dataFiles.files).forEach((key) => {
             buffs.push(dataFiles.files[key].async("arraybuffer"));
         });
-        let promiseOfList = Promise.all(buffs);
+        const promiseOfList = Promise.all(buffs);
         return promiseOfList.then((values) => {
-            let params: object[] = [];
+            const params: object[] = [];
             params['binaryImages'] = [values];
             return params;
         });

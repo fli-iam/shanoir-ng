@@ -1,7 +1,22 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.vip.execution.dto;
 
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,15 +28,17 @@ public class VipExecutionDTO {
     private String pipelineIdentifier;
     private int timeout;
     private ExecutionStatus status;
-    private Map<String, java.lang.Object> inputValues;
+    private Map<String, List<String>> inputValues;
     private Map<String, List<java.lang.Object>> returnedFiles;
     private String studyIdentifier;
     private Integer errorCode;
     private Long startDate;
     private Long endDate;
-    private String resultsLocation;
+    private List<String> resultsLocation;
+    private String sorting;
+    private LinkedHashMap<String, LinkedHashMap<String, Object>> jobs;
 
-    public VipExecutionDTO() {}
+    public VipExecutionDTO() { }
 
     public VipExecutionDTO(String identifier, ExecutionStatus status) {
         this.identifier = identifier;
@@ -68,11 +85,11 @@ public class VipExecutionDTO {
         this.status = status;
     }
 
-    public Map<String, java.lang.Object> getInputValues() {
+    public Map<String, List<String>> getInputValues() {
         return inputValues;
     }
 
-    public void setInputValues(Map<String, java.lang.Object> inputValues) {
+    public void setInputValues(Map<String, List<String>> inputValues) {
         this.inputValues = inputValues;
     }
 
@@ -116,12 +133,27 @@ public class VipExecutionDTO {
         this.endDate = endDate;
     }
 
-    public String getResultsLocation() {
+    public List<String> getResultsLocation() {
         return resultsLocation;
     }
 
-    public void setResultsLocation(String resultsLocation) {
+    public void setResultsLocation(List<String> resultsLocation) {
         this.resultsLocation = resultsLocation;
     }
-    
+
+    public String getSorting() {
+        return sorting;
+    }
+
+    public void setSorting(String sorting) {
+        this.sorting = sorting;
+    }
+
+    public LinkedHashMap<String, LinkedHashMap<String, Object>> getJobs() {
+        return jobs;
+    }
+
+    public void setJobs(LinkedHashMap<String, LinkedHashMap<String, Object>> jobs) {
+        this.jobs = jobs;
+    }
 }

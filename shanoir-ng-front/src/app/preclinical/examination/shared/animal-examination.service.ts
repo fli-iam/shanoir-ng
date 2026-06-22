@@ -14,13 +14,13 @@
 
 import { Injectable } from '@angular/core';
 import { HttpResponse, HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 
 import { Examination } from '../../../examinations/shared/examination.model';
 import * as AppUtils from '../../../utils/app.utils';
 import { EntityService } from '../../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../../shared/components/table/pageable.model';
-import { ExaminationDTO, ExaminationDTOService } from '../../../examinations/shared/examination.dto';
+import { ExaminationDTO } from '../../../examinations/shared/examination.dto';
 
 @Injectable()
 export class AnimalExaminationService extends EntityService<Examination>{
@@ -33,17 +33,17 @@ export class AnimalExaminationService extends EntityService<Examination>{
     getEntityInstance() { return new Examination(); }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
-        return this.http.get<Page<Examination>>(
+        return firstValueFrom(this.http.get<Page<Examination>>(
             AppUtils.BACKEND_API_EXAMINATION_PRECLINICAL_URL+'/1', 
             { 'params': pageable.toParams() }
-        ).toPromise();
+        ));
     }
 
     getBrukerArchive(examinationId): Promise<HttpResponse<Blob>> {
-        return this.http.get(
+        return firstValueFrom(this.http.get(
             AppUtils.BACKEND_API_EXAMINATION_PRECLINICAL_URL+'/examinationId/' + examinationId  + '/export',
             { observe: 'response', responseType: 'blob' }
-        ).toPromise();
+        ));
     }
     
     postFile(fileToUpload: File, examId: number): Observable<any> {
@@ -54,9 +54,7 @@ export class AnimalExaminationService extends EntityService<Examination>{
     }
 
     public stringify(entity: Examination) {
-        let dto = new ExaminationDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        const dto = new ExaminationDTO(entity);
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

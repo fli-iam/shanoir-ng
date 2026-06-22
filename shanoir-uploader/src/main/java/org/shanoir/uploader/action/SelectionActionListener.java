@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.action;
 
 import java.time.LocalDate;
@@ -31,181 +45,181 @@ import org.slf4j.LoggerFactory;
  * This class implements the logic when a node is selected in a DicomTree.
  * The SelectionActionListener creates the multi-exam import jobs map, that
  * is used afterwards to know, what studies/series to import.
- * 
+ *
  * The SelectionActionListener is already prepared to allow multi-patient,
  * multi-exam (DICOM study) selections, to be ready for the future and not
  * have to refactor again this component.
- * 
+ *
  * @author yyao
  * @author mkain
  *
  */
 public class SelectionActionListener implements TreeSelectionListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(SelectionActionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SelectionActionListener.class);
 
-	private MainWindow mainWindow;
+    private MainWindow mainWindow;
 
-	private ResourceBundle resourceBundle;
+    private ResourceBundle resourceBundle;
 
-	private Map<String, ImportJob> importJobs;
+    private Map<String, ImportJob> importJobs;
 
-	public SelectionActionListener(final MainWindow mainWindow, final ResourceBundle resourceBundle) {
-		this.mainWindow = mainWindow;
-		this.resourceBundle = resourceBundle;
-	}
+    public SelectionActionListener(final MainWindow mainWindow, final ResourceBundle resourceBundle) {
+        this.mainWindow = mainWindow;
+        this.resourceBundle = resourceBundle;
+    }
 
-	/**
-	 * This method contains all the logic which is performed when a node is selected
-	 * in a DicomTree.
-	 */
-	public void valueChanged(TreeSelectionEvent event) {
+    /**
+     * This method contains all the logic which is performed when a node is selected
+     * in a DicomTree.
+     */
+    public void valueChanged(TreeSelectionEvent event) {
 
-		// clean up editPanel when value changed
-		mainWindow.lastNameTF.setEnabled(false);
-		mainWindow.birthNameCopyButton.setEnabled(false);
-		mainWindow.firstNameTF.setEnabled(false);
-		mainWindow.birthNameTF.setEnabled(false);
-		mainWindow.birthDateTF.setEnabled(false);
-		mainWindow.fSexR.setEnabled(false);
-		mainWindow.mSexR.setEnabled(false);
-		mainWindow.oSexR.setEnabled(false);
-		mainWindow.lastNameTF.setText("");
-		mainWindow.firstNameTF.setText("");
-		mainWindow.birthNameTF.setText("");
-		mainWindow.birthDateTF.setText("");
+        // clean up editPanel when value changed
+        mainWindow.lastNameTF.setEnabled(false);
+        mainWindow.birthNameCopyButton.setEnabled(false);
+        mainWindow.firstNameTF.setEnabled(false);
+        mainWindow.birthNameTF.setEnabled(false);
+        mainWindow.birthDateTF.setEnabled(false);
+        mainWindow.fSexR.setEnabled(false);
+        mainWindow.mSexR.setEnabled(false);
+        mainWindow.oSexR.setEnabled(false);
+        mainWindow.lastNameTF.setText("");
+        mainWindow.firstNameTF.setText("");
+        mainWindow.birthNameTF.setText("");
+        mainWindow.birthDateTF.setText("");
 
-		mainWindow.isDicomObjectSelected = true;
-		importJobs = new LinkedHashMap<String, ImportJob>();
+        mainWindow.isDicomObjectSelected = true;
+        importJobs = new LinkedHashMap<String, ImportJob>();
 
-		try {
-			// returns all selected paths, which can be patients, studies and/or series
-			TreePath[] paths = mainWindow.dicomTree.getSelectionModel().getSelectionPaths();
-			if (paths != null && paths.length > 0) {
-				for (int i = 0; i < paths.length; i++) {
-					TreePath tp = paths[i];
-					Object o = tp.getLastPathComponent();
-					// handle if patient in paths has been found
-					// implies: select all studies + series below
-					if (o instanceof PatientTreeNode) {
-						PatientTreeNode patientTreeNode = (PatientTreeNode) o;
-						Collection<DicomTreeNode> studies = patientTreeNode.getTreeNodes();
-						for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-							StudyTreeNode studyTreeNode = (StudyTreeNode) studiesIt.next();
-							handleStudyTreeNode(patientTreeNode, studyTreeNode, true);
-						}
-					}
-					// handle if study in paths has been found
-					// implies: select all series below
-					if (o instanceof StudyTreeNode) {
-						StudyTreeNode studyTreeNode = (StudyTreeNode) o;
-						PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getLastPathComponent();
-						handleStudyTreeNode(patientTreeNode, studyTreeNode, true);
-					}
-					// handle if serie in paths has been found
-					if (o instanceof SerieTreeNode) {
-						SerieTreeNode serieTreeNode = (SerieTreeNode) o;
-						StudyTreeNode studyTreeNode = (StudyTreeNode) tp.getParentPath().getLastPathComponent();
-						PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getParentPath().getLastPathComponent();
-						handleStudyTreeNode(patientTreeNode, studyTreeNode, false);
-						ImportJob importJob = importJobs.get(studyTreeNode.getStudy().getStudyInstanceUID());
-						Serie serie = (Serie) serieTreeNode.getSerie();
-						if (!serie.isIgnored() && !serie.isErroneous()) {
-							importJob.getSelectedSeries().add((Serie)serie.clone());
-						}
-					}
-				}
-			}
-		} catch (CloneNotSupportedException e) {
-			logger.error(e.getMessage(), e);
-		}
+        try {
+            // returns all selected paths, which can be patients, studies and/or series
+            TreePath[] paths = mainWindow.dicomTree.getSelectionModel().getSelectionPaths();
+            if (paths != null && paths.length > 0) {
+                for (int i = 0; i < paths.length; i++) {
+                    TreePath tp = paths[i];
+                    Object o = tp.getLastPathComponent();
+                    // handle if patient in paths has been found
+                    // implies: select all studies + series below
+                    if (o instanceof PatientTreeNode) {
+                        PatientTreeNode patientTreeNode = (PatientTreeNode) o;
+                        Collection<DicomTreeNode> studies = patientTreeNode.getTreeNodes();
+                        for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
+                            StudyTreeNode studyTreeNode = (StudyTreeNode) studiesIt.next();
+                            handleStudyTreeNode(patientTreeNode, studyTreeNode, true);
+                        }
+                    }
+                    // handle if study in paths has been found
+                    // implies: select all series below
+                    if (o instanceof StudyTreeNode) {
+                        StudyTreeNode studyTreeNode = (StudyTreeNode) o;
+                        PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getLastPathComponent();
+                        handleStudyTreeNode(patientTreeNode, studyTreeNode, true);
+                    }
+                    // handle if serie in paths has been found
+                    if (o instanceof SerieTreeNode) {
+                        SerieTreeNode serieTreeNode = (SerieTreeNode) o;
+                        StudyTreeNode studyTreeNode = (StudyTreeNode) tp.getParentPath().getLastPathComponent();
+                        PatientTreeNode patientTreeNode = (PatientTreeNode) tp.getParentPath().getParentPath().getLastPathComponent();
+                        handleStudyTreeNode(patientTreeNode, studyTreeNode, false);
+                        ImportJob importJob = importJobs.get(studyTreeNode.getStudy().getStudyInstanceUID());
+                        Serie serie = (Serie) serieTreeNode.getSerie();
+                        if (!serie.isIgnored() && !serie.isErroneous()) {
+                            importJob.getSelectedSeries().add((Serie) serie.clone());
+                        }
+                    }
+                }
+            }
+        } catch (CloneNotSupportedException e) {
+            LOG.error(e.getMessage(), e);
+        }
 
-		if (!importJobs.isEmpty()) {
-			displayPatientVerification();
-		}
-	}
+        if (!importJobs.isEmpty()) {
+            displayPatientVerification();
+        }
+    }
 
-	private void displayPatientVerification() {
-		// for the moment use always first patient
-		// idea: the selection listener is already multi-patient ready, but for
-		// the moment we provide only one patient into the verification box
-		ImportJob importJob = importJobs.values().iterator().next();
-		Patient patient = importJob.getPatient();
-		final String name = patient.getPatientName();
-		String lastName = Util.computeLastName(name);
-		String firstName = Util.computeFirstName(name);
-		String sex = patient.getPatientSex();
-		LocalDate birthDate = patient.getPatientBirthDate();
-		mainWindow.lastNameTF.setText(lastName);
-		mainWindow.lastNameTF.setEnabled(true);
-		mainWindow.birthNameCopyButton.setEnabled(true);
-		mainWindow.firstNameTF.setText(firstName);
-		mainWindow.firstNameTF.setEnabled(true);
-		mainWindow.birthNameTF.setText("");
-		mainWindow.birthNameTF.setEnabled(true);
-		mainWindow.birthDateTF.setEnabled(true);
-		// add this exception here for damaged DICOMDIRs without birth date set
-		if (birthDate != null) {
-			String birthDateText = Util.convertLocalDateToString(birthDate);
-			mainWindow.birthDateTF.setText(birthDateText);
-		}
-		if (sex != null) {
-			if (sex.equals("F")) {
-				mainWindow.fSexR.setSelected(true);
-			}
-			if (sex.equals("M")) {
-				mainWindow.mSexR.setSelected(true);
-			}
-			if (sex.equals("O")) {
-				mainWindow.oSexR.setSelected(true);
-			}
-		}
-	}
+    private void displayPatientVerification() {
+        // for the moment use always first patient
+        // idea: the selection listener is already multi-patient ready, but for
+        // the moment we provide only one patient into the verification box
+        ImportJob importJob = importJobs.values().iterator().next();
+        Patient patient = importJob.getPatient();
+        final String name = patient.getPatientName();
+        String lastName = Util.computeLastName(name);
+        String firstName = Util.computeFirstName(name);
+        String sex = patient.getPatientSex();
+        LocalDate birthDate = patient.getPatientBirthDate();
+        mainWindow.lastNameTF.setText(lastName);
+        mainWindow.lastNameTF.setEnabled(true);
+        mainWindow.birthNameCopyButton.setEnabled(true);
+        mainWindow.firstNameTF.setText(firstName);
+        mainWindow.firstNameTF.setEnabled(true);
+        mainWindow.birthNameTF.setText("");
+        mainWindow.birthNameTF.setEnabled(true);
+        mainWindow.birthDateTF.setEnabled(true);
+        // add this exception here for damaged DICOMDIRs without birth date set
+        if (birthDate != null) {
+            String birthDateText = Util.convertLocalDateToString(birthDate);
+            mainWindow.birthDateTF.setText(birthDateText);
+        }
+        if (sex != null) {
+            if (sex.equals("F")) {
+                mainWindow.fSexR.setSelected(true);
+            }
+            if (sex.equals("M")) {
+                mainWindow.mSexR.setSelected(true);
+            }
+            if (sex.equals("O")) {
+                mainWindow.oSexR.setSelected(true);
+            }
+        }
+    }
 
-	private void handleStudyTreeNode(PatientTreeNode patientTreeNode, StudyTreeNode studyTreeNode, boolean addAllSeries) throws CloneNotSupportedException {
-		Patient patient = patientTreeNode.getPatient();
-		Study study = studyTreeNode.getStudy();
-		LocalDate studyDate = study.getStudyDate();
-		if (studyDate == null) {			
-			logger.error("Study date could not be used for import, study: " + study.getStudyDescription());
-			if(mainWindow != null) {
-				JOptionPane.showMessageDialog(mainWindow.frame,
-				    "Study date could not be used for import: " + study.getStudyDescription(),
-				    "Data error",
-				    JOptionPane.ERROR_MESSAGE);
-			}
-			return;
-		}
-		String studyInstanceUID = study.getStudyInstanceUID();
-		ImportJob importJob = importJobs.get(studyInstanceUID);
-		if (importJob == null) {
-			importJob = ImportUtils.createNewImportJob(patient, study);
-			if(addAllSeries) {
-				List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
-				for (org.shanoir.ng.importer.model.Study studyOfAllStudies : studies) {
-					// only select concerned study, not all studies
-					if (studyOfAllStudies.getStudyInstanceUID().equals(studyInstanceUID)) {
-						List<Serie> series = study.getSeries();
-						for (Serie serie : series) {
-							if (!serie.isIgnored() && !serie.isErroneous()) {
-								importJob.getSelectedSeries().add((Serie)serie.clone());
-							}
-						}
-					}
-				}
-				// ignore empty DICOM studies without series
-				// happens when DICOM study with different modality exists in DICOM server
-				if(!importJob.getSelectedSeries().isEmpty()) {
-					importJobs.put(studyInstanceUID, importJob);
-				}
-			} else {
-				importJobs.put(studyInstanceUID, importJob);
-			}
-		}
-	}
-	
-	public Map<String, ImportJob> getImportJobs() {
-		return importJobs;
-	}
+    private void handleStudyTreeNode(PatientTreeNode patientTreeNode, StudyTreeNode studyTreeNode, boolean addAllSeries) throws CloneNotSupportedException {
+        Patient patient = patientTreeNode.getPatient();
+        Study study = studyTreeNode.getStudy();
+        LocalDate studyDate = study.getStudyDate();
+        if (studyDate == null) {
+            LOG.error("Study date could not be used for import, study: " + study.getStudyDescription());
+            if (mainWindow != null) {
+                JOptionPane.showMessageDialog(mainWindow.frame,
+                        "Study date could not be used for import: " + study.getStudyDescription(),
+                        "Data error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+            return;
+        }
+        String studyInstanceUID = study.getStudyInstanceUID();
+        ImportJob importJob = importJobs.get(studyInstanceUID);
+        if (importJob == null) {
+            importJob = ImportUtils.createNewImportJob(patient, study);
+            if (addAllSeries) {
+                List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
+                for (org.shanoir.ng.importer.model.Study studyOfAllStudies : studies) {
+                    // only select concerned study, not all studies
+                    if (studyOfAllStudies.getStudyInstanceUID().equals(studyInstanceUID)) {
+                        List<Serie> series = study.getSeries();
+                        for (Serie serie : series) {
+                            if (!serie.isIgnored() && !serie.isErroneous()) {
+                                importJob.getSelectedSeries().add((Serie) serie.clone());
+                            }
+                        }
+                    }
+                }
+                // ignore empty DICOM studies without series
+                // happens when DICOM study with different modality exists in DICOM server
+                if (!importJob.getSelectedSeries().isEmpty()) {
+                    importJobs.put(studyInstanceUID, importJob);
+                }
+            } else {
+                importJobs.put(studyInstanceUID, importJob);
+            }
+        }
+    }
+
+    public Map<String, ImportJob> getImportJobs() {
+        return importJobs;
+    }
 
 }

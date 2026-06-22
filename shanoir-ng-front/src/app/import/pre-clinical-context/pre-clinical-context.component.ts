@@ -11,38 +11,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
-import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { Examination } from '../../examinations/shared/examination.model';
 import { AnimalSubject } from '../../preclinical/animalSubject/shared/animalSubject.model';
 import { AnimalSubjectService } from '../../preclinical/animalSubject/shared/animalSubject.service';
-import { PreclinicalSubject } from '../../preclinical/animalSubject/shared/preclinicalSubject.model';
-import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-import { Subject } from '../../subjects/shared/subject.model';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { ServiceLocator } from '../../utils/locator.service';
+import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
-import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
 
 
 @Component({
     selector: 'pre-clinical-context',
     templateUrl: '../clinical-context/clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown, preventInitialChildAnimations],
-    standalone: false
+    imports: [TooltipComponent, SelectBoxComponent, FormsModule]
 })
 export class PreClinicalContextComponent extends AbstractClinicalContextComponent implements OnDestroy {
 
     private animalSubject: AnimalSubject = new AnimalSubject();
-    private animalSubjectService: AnimalSubjectService = ServiceLocator.injector.get(AnimalSubjectService);
+    private animalSubjectService: AnimalSubjectService = inject(AnimalSubjectService);
     patient: PatientDicom;
-    editSubjectStudy: boolean = false;
 
     postConstructor() {
         this.patient = this.importDataService.patients[0];
@@ -54,8 +49,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         return !this.importDataService.patients || !this.importDataService.patients[0];
     }
 
-    protected getSubjectList(studyId: number): Promise<SubjectWithSubjectStudy[]> {
-        this.openSubjectStudy = false;
+    protected getSubjectList(studyId: number): Promise<Subject[]> {
         if (!studyId) {
             return Promise.resolve([]);
         } else {
@@ -68,22 +62,20 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     importData(timestamp: number): Promise<any> {
-        let context = this.importDataService.contextData;
-        let contextImportJob = this.importDataService.archiveUploaded;
-        let importJob = new ImportJob();
+        const context = this.importDataService.contextData;
+        const contextImportJob = this.importDataService.archiveUploaded;
+        const importJob = new ImportJob();
         importJob.patients = new Array<PatientDicom>();
-        // this.patient.subject = new IdName(this.context.subject.id, this.context.subject.name);
-        this.patient.subject = Subject.makeSubject(
-                context.subject.id,
-                context.subject.name,
-                context.subject.identifier,
-                context.subject.subjectStudy);
+
+        this.patient.subject = new SimpleSubject(context.subject);
+
         importJob.patients.push(this.patient);
         importJob.workFolder = contextImportJob.workFolder;
         importJob.fromDicomZip = true;
         importJob.subjectName = context.subject.name;
         importJob.studyName = context.study.name;
         importJob.examinationId = context.examination.id;
+        importJob.studyInstanceUID = context.examination.studyInstanceUID;
         importJob.studyId = context.study.id;
         importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
         importJob.archive = contextImportJob.archive;
@@ -115,55 +107,43 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         return '/preclinical-examination/create';
     }
 
-    protected fillCreateSubjectStep(step: Step) {
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledSubject());
-        this.breadcrumbsService.currentStep.addPrefilled("firstName", this.computeNameFromDicomTag(this.patient.patientName)[1]);
-        this.breadcrumbsService.currentStep.addPrefilled("lastName", this.computeNameFromDicomTag(this.patient.patientName)[2]);
-        this.breadcrumbsService.currentStep.addPrefilled("patientName", this.patient.patientName);
-        this.breadcrumbsService.currentStep.addPrefilled("forceStudy", this.study);
-        this.breadcrumbsService.currentStep.addPrefilled("subjectNamePrefix", this.subjectNamePrefix);
-
-    }
-
-    private getPrefilledSubject(): Subject | PreclinicalSubject {
-        let subjectStudy = new SubjectStudy();
-        subjectStudy.study = this.study;
-        subjectStudy.physicallyInvolved = false;
-        let newSubject = new Subject();
+    protected prefillSubject() {
+        const newSubject = new Subject();
         newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
         if (this.patient.patientSex) {
             if (this.patient.patientSex == 'F' || this.patient.patientSex == 'M') {
                 newSubject.sex = this.patient.patientSex;
             }
         }
-        newSubject.subjectStudyList = [subjectStudy];
-        let newPreclinicalSubject = new PreclinicalSubject();
-        let newAnimalSubject = new AnimalSubject();
+        const newAnimalSubject = new AnimalSubject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
-        newSubject.name = this.patient.patientName;
-        newPreclinicalSubject.animalSubject = newAnimalSubject;
-        newPreclinicalSubject.subject = newSubject;
-        return newPreclinicalSubject;
+        newSubject.name = this.subjectNamePrefix ? this.subjectNamePrefix + '-' + this.patient.patientName : this.patient.patientName;
+        newSubject.preclinical = true;
+        newSubject.study = this.study;
+        newSubject.physicallyInvolved = false;
+        newAnimalSubject.subject = newSubject;
+        this.breadcrumbsService.addNextStepPrefilled('entity', newAnimalSubject);
+        this.breadcrumbsService.addNextStepPrefilled('firstName', this.computeNameFromDicomTag(this.patient.patientName)[1]);
+        this.breadcrumbsService.addNextStepPrefilled('lastName', this.computeNameFromDicomTag(this.patient.patientName)[2]);
+        this.breadcrumbsService.addNextStepPrefilled('patientName', this.patient.patientName);
+        this.breadcrumbsService.addNextStepPrefilled('entity.study', this.study, true);
+        this.breadcrumbsService.addNextStepPrefilled('subjectNamePrefix', this.subjectNamePrefix);
+        this.breadcrumbsService.addNextStepPrefilled('isAlreadyAnonymized', newSubject.isAlreadyAnonymized);
     }
 
-    protected fillCreateExaminationStep(step: Step): void {
-        this.breadcrumbsService.currentStep.addPrefilled("entity", this.getPrefilledExam());
-    }
-
-    private getPrefilledExam(): Examination {
-        let newExam = new Examination();
+    protected getPrefilledExamination(): Examination {
+        const newExam = new Examination();
         newExam.preclinical = true;
         newExam.hasStudyCenterData = true;
         newExam.study = new IdName(this.study.id, this.study.name);
         if (this.center) {
             newExam.center = new IdName(this.center.id, this.center.name);
         }
-        newExam.subjectStudy = this.subject;
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
-        newExam.comment = this.getFirstSelectedStudy().studyDescription;
+        newExam.comment = this.getFirstSelectedStudy()?.studyDescription;
         newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }
@@ -185,8 +165,8 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected getFirstSelectedSerie(): SerieDicom {
-        for (let study of this.patient.studies) {
-            for (let serie of study.series) {
+        for (const study of this.patient.studies) {
+            for (const serie of study.series) {
                 if (serie.selected) return serie;
             }
         }
@@ -194,8 +174,8 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     protected getFirstSelectedStudy(): StudyDicom {
-        for (let study of this.patient.studies) {
-            for (let serie of study.series) {
+        for (const study of this.patient.studies) {
+            for (const serie of study.series) {
                 if (serie.selected) return study;
             }
         }
@@ -207,7 +187,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     get valid(): boolean {
-        let context = this.getContext();
+        const context = this.getContext();
         return (
             context.study
             && !!context.center

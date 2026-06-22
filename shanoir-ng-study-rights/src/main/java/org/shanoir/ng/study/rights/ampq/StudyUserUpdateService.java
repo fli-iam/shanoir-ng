@@ -30,64 +30,64 @@ import java.util.*;
 @Service
 public class StudyUserUpdateService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(StudyUserUpdateService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StudyUserUpdateService.class);
 
-	@Autowired
-	private StudyUserRightsRepository studyUserRepository;
+    @Autowired
+    private StudyUserRightsRepository studyUserRepository;
 
-	public void processCommands(Iterable<StudyUserCommand> commands) {
+    public void processCommands(Iterable<StudyUserCommand> commands) {
 
-		List<StudyUser> toBeCreated = new ArrayList<>();
-		Map<Long, StudyUser> toBeUpdated = new HashMap<>();
-		Set<Long> toBeDeleted = new HashSet<>();
-		for (StudyUserCommand command : commands) {
-			LOG.debug("command : {}, id : {}/{}",
-					command.getStudyUser() != null && command.getStudyUser().getId() != null ? command.getStudyUser().getId().toString() : "null",
-					command.getStudyUserId() != null ? command.getStudyUserId().toString() : "null",
-					command.getType());
-			if (CommandType.CREATE.equals(command.getType())) {
-				toBeCreated.add((StudyUser) command.getStudyUser());
-			} else if (CommandType.UPDATE.equals(command.getType())) {
-				toBeUpdated.put(command.getStudyUser().getId(), (StudyUser) command.getStudyUser());
-			} else if (CommandType.DELETE.equals(command.getType())) {
-				toBeDeleted.add(command.getStudyUserId());
-			}
-		}
+        List<StudyUser> toBeCreated = new ArrayList<>();
+        Map<Long, StudyUser> toBeUpdated = new HashMap<>();
+        Set<Long> toBeDeleted = new HashSet<>();
+        for (StudyUserCommand command : commands) {
+            LOG.debug("command : {}, id : {}/{}",
+                    command.getStudyUser() != null && command.getStudyUser().getId() != null ? command.getStudyUser().getId().toString() : "null",
+                    command.getStudyUserId() != null ? command.getStudyUserId().toString() : "null",
+                    command.getType());
+            if (CommandType.CREATE.equals(command.getType())) {
+                toBeCreated.add((StudyUser) command.getStudyUser());
+            } else if (CommandType.UPDATE.equals(command.getType())) {
+                toBeUpdated.put(command.getStudyUser().getId(), (StudyUser) command.getStudyUser());
+            } else if (CommandType.DELETE.equals(command.getType())) {
+                toBeDeleted.add(command.getStudyUserId());
+            }
+        }
 
-		Iterable<StudyUser> toBeUpdatedDb = studyUserRepository.findAllById(toBeUpdated.keySet());
-		for (StudyUser existingSu : toBeUpdatedDb) {
-			StudyUser replacingSu = toBeUpdated.get(existingSu.getId());
-			existingSu.setReceiveStudyUserReport(replacingSu.isReceiveStudyUserReport());
-			existingSu.setReceiveNewImportReport(replacingSu.isReceiveNewImportReport());
-			existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
-			existingSu.setConfirmed(replacingSu.isConfirmed());
-			existingSu.setCenterIds(replacingSu.getCenterIds());
-		}
+        Iterable<StudyUser> toBeUpdatedDb = studyUserRepository.findAllById(toBeUpdated.keySet());
+        for (StudyUser existingSu : toBeUpdatedDb) {
+            StudyUser replacingSu = toBeUpdated.get(existingSu.getId());
+            existingSu.setReceiveStudyUserReport(replacingSu.isReceiveStudyUserReport());
+            existingSu.setReceiveNewImportReport(replacingSu.isReceiveNewImportReport());
+            existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
+            existingSu.setConfirmed(replacingSu.isConfirmed());
+            existingSu.setCenterIds(replacingSu.getCenterIds());
+        }
 
-		if (!toBeCreated.isEmpty()) {
-			LOG.debug("Saving {} new study-user(s)", toBeCreated.size());
-			for (StudyUser su : toBeCreated) {
-				LOG.debug("getId : {}", su.getId());
-				LOG.debug("getUserName : {}", su.getUserName());
-				LOG.debug("getStudyId : {}", su.getStudyId());
-				LOG.debug("getUserId : {}", su.getUserId());
-				LOG.debug("getStudyUserRights :{}",  su.getStudyUserRights() == null ? "null" : su.getStudyUserRights().size());
-				if (su.getStudyUserRights() != null) {
-					for (StudyUserRight right : su.getStudyUserRights()) {
-						LOG.debug("    ---> : {}", right);
-					}
-				}
-			}
-			studyUserRepository.saveAll(toBeCreated);
-		}
-		int updateSize = IterableConverter.toList(toBeUpdatedDb).size();
-		if (updateSize > 0) {
-			LOG.debug("Updating {} study-user(s)", updateSize);
-			studyUserRepository.saveAll(toBeUpdatedDb);
-		}
-		if (!toBeDeleted.isEmpty()) {
-			LOG.debug("Deleting {} study-user(s)", toBeDeleted.size());
-			studyUserRepository.deleteByIdIn(toBeDeleted);
-		}
-	}
+        if (!toBeCreated.isEmpty()) {
+            LOG.debug("Saving {} new study-user(s)", toBeCreated.size());
+            for (StudyUser su : toBeCreated) {
+                LOG.debug("getId : {}", su.getId());
+                LOG.debug("getUserName : {}", su.getUserName());
+                LOG.debug("getStudyId : {}", su.getStudyId());
+                LOG.debug("getUserId : {}", su.getUserId());
+                LOG.debug("getStudyUserRights :{}",  su.getStudyUserRights() == null ? "null" : su.getStudyUserRights().size());
+                if (su.getStudyUserRights() != null) {
+                    for (StudyUserRight right : su.getStudyUserRights()) {
+                        LOG.debug("    ---> : {}", right);
+                    }
+                }
+            }
+            studyUserRepository.saveAll(toBeCreated);
+        }
+        int updateSize = IterableConverter.toList(toBeUpdatedDb).size();
+        if (updateSize > 0) {
+            LOG.debug("Updating {} study-user(s)", updateSize);
+            studyUserRepository.saveAll(toBeUpdatedDb);
+        }
+        if (!toBeDeleted.isEmpty()) {
+            LOG.debug("Deleting {} study-user(s)", toBeDeleted.size());
+            studyUserRepository.deleteByIdIn(toBeDeleted);
+        }
+    }
 }

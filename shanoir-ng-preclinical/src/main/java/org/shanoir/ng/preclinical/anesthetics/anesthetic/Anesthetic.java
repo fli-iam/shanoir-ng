@@ -19,7 +19,6 @@ import java.util.Set;
 import org.shanoir.ng.preclinical.anesthetics.ingredients.AnestheticIngredient;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
-import org.shanoir.ng.shared.validation.Unique;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -43,7 +42,6 @@ import jakarta.validation.constraints.NotNull;
 public class Anesthetic extends HalEntity {
 
     @JsonProperty("name")
-    @Unique
     @NotNull
     private String name = null;
 

@@ -14,6 +14,7 @@
 import { Center } from '../../centers/shared/center.model';
 import { Id } from '../../shared/models/id.model';
 import { User } from '../../users/shared/user.model';
+
 import { StudyUserRight } from './study-user-right.enum';
 import { Study } from './study.model';
 
@@ -36,7 +37,7 @@ export class StudyUser {
     }
 
     public static completeMember(studyUser: StudyUser, users: User[]) {
-        let user: User = users.find(u => u.id == studyUser.userId);
+        const user: User = users.find(u => u.id == studyUser.userId);
         if (user) studyUser.user = user;
     }
 }

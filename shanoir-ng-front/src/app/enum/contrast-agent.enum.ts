@@ -26,7 +26,7 @@ export enum ContrastAgent {
 
 } export namespace ContrastAgent {
     
-    export function all(): Array<ContrastAgent> {
+    export function all(): ContrastAgent[] {
         return allOfEnum<ContrastAgent>(ContrastAgent);
     }
 
@@ -34,5 +34,5 @@ export enum ContrastAgent {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export var options: Option<ContrastAgent>[] = all().map(prop => new Option<ContrastAgent>(prop, getLabel(prop)));
+    export const options: Option<ContrastAgent>[] = all().map(prop => new Option<ContrastAgent>(prop, getLabel(prop)));
 }

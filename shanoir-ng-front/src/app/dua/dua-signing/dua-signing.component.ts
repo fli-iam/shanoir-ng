@@ -13,19 +13,21 @@
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { browserDownloadFile } from '../../utils/app.utils';
 import { DataUserAgreement } from '../shared/dua.model';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 
 
 @Component({
     selector: 'dua-signing',
     templateUrl: 'dua-signing.component.html',
     styleUrls: ['dua-signing.component.css'],
-    standalone: false
+    imports: [CheckboxComponent, FormsModule]
 })
 
 export class DUASigningComponent implements OnChanges {
@@ -48,7 +50,7 @@ export class DUASigningComponent implements OnChanges {
             if (this.dua && this.dua.studyId) {
                 this.studyService.downloadDuaBlob(this.dua.path, this.dua.studyId).then(response => {
                     this.duaBlob = response;
-                    let url: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(this.duaBlob));
+                    const url: SafeResourceUrl = this.sanitizer.bypassSecurityTrustResourceUrl(URL.createObjectURL(this.duaBlob));
                     this.pdfUrl = url as string;
                 });
             } else {
@@ -64,14 +66,8 @@ export class DUASigningComponent implements OnChanges {
     }
 
     refuse() {
-        let confirmMsg: string = 'Do you really want to refuse the Data User Agreement for the study xxxx ? You will be removed from this study and won\'t be asked again.';
-        this.confirmService.confirm('Warning !', confirmMsg).then(response => {
-            if (response) {
-
-            } else {
-
-            }
-        });
+        const confirmMsg: string = 'Do you really want to refuse the Data User Agreement for the study xxxx ? You will be removed from this study and won\'t be asked again.';
+        this.confirmService.confirm('Warning !', confirmMsg);
     }
 
     dlDua() {

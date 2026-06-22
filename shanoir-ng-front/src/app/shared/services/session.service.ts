@@ -35,7 +35,7 @@ export class SessionService {
 
     public cleanSessions() {
         Object.keys(localStorage).filter(key => key.startsWith('activeSession-')).forEach(key => {
-            let lastHeartBeat: number = parseInt(localStorage.getItem(key));
+            const lastHeartBeat: number = parseInt(localStorage.getItem(key));
             if ((Date.now() - lastHeartBeat) > this.DEATH_THRESHOLD) {
                 localStorage.removeItem(key);
             }

@@ -13,7 +13,7 @@
  */
 
 export enum StudyType {
-    CLINICAL = <any> "Clinical",
-    PRECLINICAL = <any> "Preclinical",
-    METHODOLOGICAL = <any> "Methodological"
+    CLINICAL = "Clinical",
+    PRECLINICAL = "Preclinical",
+    METHODOLOGICAL = "Methodological"
 }

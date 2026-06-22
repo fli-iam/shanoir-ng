@@ -20,17 +20,17 @@ import {
     OnChanges,
     Output,
     SimpleChanges,
-    ViewChild,
+    ViewChild, AfterViewInit,
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+
+import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
 
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { Tag } from '../../../tags/tag.model';
 import { isDarkColor } from '../../../utils/app.utils';
-import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
-
-const noop = () => {
-};
+import { TooltipComponent } from '../tooltip/tooltip.component';
 
 export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
     provide: NG_VALUE_ACCESSOR,
@@ -43,10 +43,10 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
     templateUrl: 'tree-node.component.html',
     styleUrls: ['tree-node.component.css'],
     providers: [CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR],
-    standalone: false
+    imports: [RouterLink, FormsModule, TooltipComponent]
 })
 
-export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
+export class TreeNodeComponent implements ControlValueAccessor, OnChanges, AfterViewInit {
 
     @Input() label: string;
     @Input() pictoUrl: string;
@@ -75,8 +75,8 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
     @Output() chkbxChange = new EventEmitter();
     @Output() firstOpen = new EventEmitter();
     @Output() buttonClick = new EventEmitter();
-    private onTouchedCallback: () => void = noop;
-    private onChangeCallback: (_: any) => void = noop;
+    private onTouchedCallback: () => void = () => { return; };
+    private onChangeCallback: (_: any) => void = () => { return; };
 
     constructor(private cdr: ChangeDetectorRef) {
     }
@@ -108,7 +108,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges {
 
     public isClickable(): boolean {
         if (this.clickable != undefined) return this.clickable;
-        else if (this.labelClick.observers.length > 0) {
+        else if (this.labelClick.observed) {
             return true;
         }
         return false;

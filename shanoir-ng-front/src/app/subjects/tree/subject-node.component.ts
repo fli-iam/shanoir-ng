@@ -12,32 +12,37 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { ConsoleService } from 'src/app/shared/console/console.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
 import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import {
     ClinicalSubjectNode,
     ExaminationNode,
-    PreclinicalSubjectNode,
+    AnimalSubjectNode,
     ShanoirNode,
     SubjectNode,
     UNLOADED
 } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { ExaminationNodeComponent } from '../../examinations/tree/examination-node.component';
 
 
 @Component({
     selector: 'subject-node',
     templateUrl: 'subject-node.component.html',
-    standalone: false
+    imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, ExaminationNodeComponent]
 })
 
 export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode> implements OnChanges {
@@ -63,7 +68,7 @@ export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode>
             if (this.input instanceof SubjectNode) {
                 this.node = this.input;
             } else if (this.input.subject.preclinical) {
-                this.node = new PreclinicalSubjectNode(
+                this.node = new AnimalSubjectNode(
                     this.node,
                     this.input.subject.id,
                     this.input.subject.name,
@@ -99,7 +104,7 @@ export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode>
                 .then(examinations => {
                     this.node.examinations = [];
                     if (examinations) {
-                        let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                        const sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
                             return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
                         })
                         if (sortedExaminations) {
@@ -133,9 +138,6 @@ export class SubjectNodeComponent extends TreeNodeAbstractComponent<SubjectNode>
 
     showSubjectDetails() {
         this.router.navigate(['/' + this.node.title + '/details/' + this.node.id]);
-    }
-
-    collapseAll() {
     }
 
     onExaminationDelete(index: number) {

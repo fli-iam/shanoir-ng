@@ -12,24 +12,29 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { AcquisitionEquipmentNode } from '../../tree/tree.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from "../shared/acquisition-equipment.service";
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
 
 
 @Component({
     selector: 'equipment-node',
     templateUrl: 'equipment-node.component.html',
-    standalone: false
+    imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent]
 })
 
 export class EquipmentNodeComponent extends TreeNodeAbstractComponent<AcquisitionEquipmentNode> implements OnChanges {
 
     @Input() input: AcquisitionEquipmentNode | AcquisitionEquipment;
-    @Output() onEquipmentDelete: EventEmitter<void> = new EventEmitter();
+    @Output() equipmentDelete: EventEmitter<void> = new EventEmitter();
     detailsPath: string = '/acquisition-equipment/details/';
 
     constructor(
@@ -53,7 +58,7 @@ export class EquipmentNodeComponent extends TreeNodeAbstractComponent<Acquisitio
         this.equipmentService.get(this.node.id).then(entity => {
             this.equipmentService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onEquipmentDelete.emit();
+                    this.equipmentDelete.emit();
                 }
             });
         })

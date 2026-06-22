@@ -30,7 +30,7 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
     selector: 'study-card-list',
     templateUrl: 'study-card-list.component.html',
     styleUrls: ['study-card-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class StudyCardListComponent extends BrowserPaginEntityListComponent<StudyCard> {
 
@@ -61,7 +61,7 @@ export class StudyCardListComponent extends BrowserPaginEntityListComponent<Stud
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Name", field: "name" },
             { headerName: "Study", field: 'study.name', defaultField: 'study.id',
 			 	route: (studyCard: StudyCard) => '/study/details/' + studyCard.study.id
@@ -79,7 +79,7 @@ export class StudyCardListComponent extends BrowserPaginEntityListComponent<Stud
 
     format(acqEqpt: AcquisitionEquipment): string {
         if (acqEqpt && acqEqpt.manufacturerModel) {
-            let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
+            const manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
             return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
                 + " (" + DatasetModalityType[manufModel.datasetModalityType] + ") " + acqEqpt.serialNumber;
         }

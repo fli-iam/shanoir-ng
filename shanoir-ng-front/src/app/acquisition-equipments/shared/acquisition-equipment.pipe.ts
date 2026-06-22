@@ -14,19 +14,17 @@
 
 import { Pipe, PipeTransform } from "@angular/core";
 
-import { AcquisitionEquipment } from "./acquisition-equipment.model";
 import { DatasetModalityType } from "../../enum/dataset-modality-type.enum";
+
+import { AcquisitionEquipment } from "./acquisition-equipment.model";
 import { ManufacturerModel } from './manufacturer-model.model';
 
-@Pipe({
-    name: "acqEqptLabel",
-    standalone: false
-})
+@Pipe({ name: "acqEqptLabel" })
 export class AcquisitionEquipmentPipe implements PipeTransform {
 
     transform(acqEqpt: AcquisitionEquipment): string {
         if (acqEqpt) {
-            let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
+            const manufModel: ManufacturerModel = acqEqpt.manufacturerModel;
             if (manufModel && acqEqpt.center) {
                 return manufModel.manufacturer.name + " - " + manufModel.name + " " + (manufModel.magneticField ? (manufModel.magneticField + "T") : "")
                     + " (" + DatasetModalityType.getLabel(manufModel.datasetModalityType) + ") " + acqEqpt.serialNumber + " - " + acqEqpt.center.name;

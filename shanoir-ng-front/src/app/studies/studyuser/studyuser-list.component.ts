@@ -11,27 +11,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Center } from '../../centers/shared/center.model';
+import { Component, forwardRef, inject, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
+import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
+import { IdName } from 'src/app/shared/models/id-name.model';
+import { ConsoleService } from 'src/app/shared/console/console.service';
+
+import { Center } from '../../centers/shared/center.model';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { User } from '../../users/shared/user.model';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import { IdName } from 'src/app/shared/models/id-name.model';
-import { ConsoleService } from 'src/app/shared/console/console.service';
-import { ServiceLocator } from 'src/app/utils/locator.service';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 
 @Component({
     selector: 'studyuser-list',
@@ -44,7 +46,7 @@ import { ServiceLocator } from 'src/app/utils/locator.service';
             multi: true,
         }
     ],
-    standalone: false
+    imports: [FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent]
 })
 
 export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
@@ -70,19 +72,19 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     invitationFunction: string;
     newUser: User[] = [];
 
-    private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    private onTouchedCallback = () => { return; };
+    private onChangeCallback: (any) => void = () => { return; };
 
     constructor(private keycloakService: KeycloakService,
                 private accessRequestService: AccessRequestService) {
         this.isAdmin = keycloakService.isUserAdmin();
-        this.consoleService = ServiceLocator.injector.get(ConsoleService);
+        this.consoleService = inject(ConsoleService);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.studies && this.studies) {
             this.studyOptions = this.studies.map(study => {
-                let option: Option<Study> = new Option<Study>(study, study.name);
+                const option: Option<Study> = new Option<Study>(study, study.name);
                 option.disabled = !!this.studyUserList?.find(su => su.studyId == study.id || su.study?.id == study.id);
                 return option;
             });
@@ -145,13 +147,16 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             { headerName: 'Can import', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true,
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_IMPORT, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
+            { headerName: 'Can execute', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true,
+                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_EXECUTE, su, value),
+                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_EXECUTE)},
             { headerName: 'Can admin', type: 'boolean',  disableSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px',
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
             // { headerName: 'Receive Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
             // { headerName: 'Receive Member Mail', type: 'boolean', field: 'receiveStudyUserReport', editable: true, width: '54px' },
         ];
-        if (deleteButton) {
+        if (deleteButton && !this.study?.isDraft) {
             this.columnDefs.push({ headerName: '', type: 'button', awesome: 'fa-regular fa-trash-can', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)});
         }
     }
@@ -172,7 +177,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     onEditCenter(center: Center, su: StudyUser, selected: boolean) {
         if (!su.centers) su.centers = [];
-        let index: number = su.centers.findIndex(c => c.id == center.id)
+        const index: number = su.centers.findIndex(c => c.id == center.id)
         if (!su.centers.find(c => c.id == center.id) && selected) {
             su.centers.push(center);
         }
@@ -221,7 +226,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         this.onTouchedCallback();
     }
 
-    studyStatusStr(studyStatus: string) {
+    enumStrToStr(studyStatus: string) {
         return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 
@@ -237,15 +242,15 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     addStudy(selectedStudy: Study, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
         if (this.studyOptions) {
-            let option = this.studyOptions.find(opt => opt.value.id == selectedStudy.id);
+            const option = this.studyOptions.find(opt => opt.value.id == selectedStudy.id);
             if (option) option.disabled = true;
         }
 
-        let backedUpStudyUser: StudyUser = this.studyUserBackup.find(su => su.study?.id == selectedStudy.id);
+        const backedUpStudyUser: StudyUser = this.studyUserBackup.find(su => su.study?.id == selectedStudy.id);
         if (backedUpStudyUser) {
             this.studyUserList.unshift(backedUpStudyUser);
         } else {
-            let studyUser: StudyUser = new StudyUser();
+            const studyUser: StudyUser = new StudyUser();
             studyUser.study = selectedStudy;
             studyUser.receiveStudyUserReport = false;
             studyUser.receiveNewImportReport = false;
@@ -268,14 +273,14 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     }
 
     public inviteUser() {
-        let study = new IdName(this.study.id, this.study.name);
+        const study = new IdName(this.study.id, this.study.name);
         this.accessRequestService.inviteUser(this.invitationMail, this.invitationFunction, study).then(request => {
             if (!request) {
                 this.consoleService.log('info', "No user found with such email, an invitation was sent.");
             } else {
                 this.addUser(request.user);
             }
-        }).catch(exception =>  {
+        }).catch(() =>  {
             this.consoleService.log('error', "No user found with such login, please check the user information or use its email.");
         });
     }
@@ -291,12 +296,12 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         if (this.isMe(selectedUser)) {
             this.freshlyAddedMe = true;
         }
-        let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
+        const backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
             this.studyUserList.unshift(backedUpStudyUser);
             this.pannelStudyUser = backedUpStudyUser;
         } else {
-            let studyUser: StudyUser = new StudyUser();
+            const studyUser: StudyUser = new StudyUser();
             studyUser.userId = selectedUser.id;
             studyUser.userName = selectedUser.username;
             studyUser.receiveStudyUserReport = false;

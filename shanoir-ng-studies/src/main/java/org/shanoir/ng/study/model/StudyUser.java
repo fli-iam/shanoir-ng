@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -49,183 +49,183 @@ import jakarta.validation.constraints.NotBlank;
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class StudyUser extends AbstractEntity implements StudyUserInterface {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 5813071870148636187L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 5813071870148636187L;
 
-	/** Inform an user about changes on study_user: creation */
-	private boolean receiveStudyUserReport;
+    /** Inform an user about changes on study_user: creation */
+    private boolean receiveStudyUserReport;
 
-	/** Advice the user when new import done in the study. */
-	private boolean receiveNewImportReport;
-	
-	/**
-	 * With the introduction of a Data User Agreement form, a study
-	 * responsible can add an user to a study, but his StudyUser is
-	 * not confirmed as long, as the user has not validated the DUA.
-	 * The default is true, in case no DUA is existing.
-	 */
-	private boolean confirmed = true;
+    /** Advice the user when new import done in the study. */
+    private boolean receiveNewImportReport;
 
-	/** Study id. */
-	@ManyToOne
-	@JsonIgnore
-	private Study study;
-		
-	/** User id. */
-	private Long userId;
+    /**
+     * With the introduction of a Data User Agreement form, a study
+     * responsible can add an user to a study, but his StudyUser is
+     * not confirmed as long, as the user has not validated the DUA.
+     * The default is true, in case no DUA is existing.
+     */
+    private boolean confirmed = true;
 
-	/** Type of the relationship. */
-	@ElementCollection(fetch = FetchType.EAGER)
-	@Fetch(FetchMode.JOIN)
-	@CollectionTable(name="study_user_study_user_rights", joinColumns=@JoinColumn(name="study_user_id"))
-	private List<Integer> studyUserRights;
-	
-	/** User name. Duplicate: master record in ms users. */
-	@NotBlank
-	private String userName;
+    /** Study id. */
+    @ManyToOne
+    @JsonIgnore
+    private Study study;
 
-	@ManyToMany(fetch = FetchType.EAGER)
-	@Fetch(FetchMode.JOIN)
-	@JoinTable(name = "study_user_center", joinColumns = @JoinColumn(name = "study_user_id"), inverseJoinColumns = @JoinColumn(name = "center_id"))
-	private List<Center> centers;
+    /** User id. */
+    private Long userId;
 
-	/**
-	 * @return the receiveStudyUserReport
-	 */
-	@Override
-	public boolean isReceiveStudyUserReport() {
-		return receiveStudyUserReport;
-	}
+    /** Type of the relationship. */
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Fetch(FetchMode.JOIN)
+    @CollectionTable(name = "study_user_study_user_rights", joinColumns = @JoinColumn(name = "study_user_id"))
+    private List<Integer> studyUserRights;
 
-	/**
-	 * @param receiveStudyUserReport
-	 *            the receiveStudyUserReport to set
-	 */
-	@Override
-	public void setReceiveStudyUserReport(boolean receiveStudyUserReport) {
-		this.receiveStudyUserReport = receiveStudyUserReport;
-	}
+    /** User name. Duplicate: master record in ms users. */
+    @NotBlank
+    private String userName;
 
-	/**
-	 * @return the receiveNewImportReport
-	 */
-	@Override
-	public boolean isReceiveNewImportReport() {
-		return receiveNewImportReport;
-	}
+    @ManyToMany(fetch = FetchType.EAGER)
+    @Fetch(FetchMode.JOIN)
+    @JoinTable(name = "study_user_center", joinColumns = @JoinColumn(name = "study_user_id"), inverseJoinColumns = @JoinColumn(name = "center_id"))
+    private List<Center> centers;
 
-	/**
-	 * @param receiveNewImportReport
-	 *            the receiveNewImportReport to set
-	 */
-	@Override
-	public void setReceiveNewImportReport(boolean receiveNewImportReport) {
-		this.receiveNewImportReport = receiveNewImportReport;
-	}
+    /**
+     * @return the receiveStudyUserReport
+     */
+    @Override
+    public boolean isReceiveStudyUserReport() {
+        return receiveStudyUserReport;
+    }
 
-	public boolean isConfirmed() {
-		return confirmed;
-	}
+    /**
+     * @param receiveStudyUserReport
+     *            the receiveStudyUserReport to set
+     */
+    @Override
+    public void setReceiveStudyUserReport(boolean receiveStudyUserReport) {
+        this.receiveStudyUserReport = receiveStudyUserReport;
+    }
 
-	public void setConfirmed(boolean confirmed) {
-		this.confirmed = confirmed;
-	}
+    /**
+     * @return the receiveNewImportReport
+     */
+    @Override
+    public boolean isReceiveNewImportReport() {
+        return receiveNewImportReport;
+    }
 
-	/**
-	 * @return the studyId
-	 */
-	@Override
-	@JsonInclude
-	@Transient
-	public Long getStudyId() {
-		return study.getId();
-	}
+    /**
+     * @param receiveNewImportReport
+     *            the receiveNewImportReport to set
+     */
+    @Override
+    public void setReceiveNewImportReport(boolean receiveNewImportReport) {
+        this.receiveNewImportReport = receiveNewImportReport;
+    }
 
-	public Study getStudy() {
-		return study;
-	}
+    public boolean isConfirmed() {
+        return confirmed;
+    }
 
-	public void setStudy(Study study) {
-		this.study = study;
-	}
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
+    }
 
-	/**
-	 * @return the studyUserRight
-	 */
-	@Override
-	public List<StudyUserRight> getStudyUserRights() {
-		List<StudyUserRight> list = new ArrayList<>();
-		for (Integer id : studyUserRights) {
-			list.add(StudyUserRight.getType(id));
-		}
-		return list;
-	}
+    /**
+     * @return the studyId
+     */
+    @Override
+    @JsonInclude
+    @Transient
+    public Long getStudyId() {
+        return study.getId();
+    }
 
-	/**
-	 * @param studyUserRight the studyUserRight to set
-	 */
-	@Override
-	public void setStudyUserRights(List<StudyUserRight> studyUserRights) {
-		this.studyUserRights = new ArrayList<>();
-		if (studyUserRights != null) {
-			for (StudyUserRight sur : studyUserRights)  {
-				this.studyUserRights.add(sur.getId());
-			}
-		}
-	}
+    public Study getStudy() {
+        return study;
+    }
 
-	/**
-	 * @return the userId
-	 */
-	@Override
-	public Long getUserId() {
-		return userId;
-	}
+    public void setStudy(Study study) {
+        this.study = study;
+    }
 
-	/**
-	 * @param userId
-	 *            the userId to set
-	 */
-	@Override
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    /**
+     * @return the studyUserRight
+     */
+    @Override
+    public List<StudyUserRight> getStudyUserRights() {
+        List<StudyUserRight> list = new ArrayList<>();
+        for (Integer id : studyUserRights) {
+            list.add(StudyUserRight.getType(id));
+        }
+        return list;
+    }
 
-	@Override
-	public String getUserName() {
-		return userName;
-	}
+    /**
+     * @param studyUserRight the studyUserRight to set
+     */
+    @Override
+    public void setStudyUserRights(List<StudyUserRight> studyUserRights) {
+        this.studyUserRights = new ArrayList<>();
+        if (studyUserRights != null) {
+            for (StudyUserRight sur : studyUserRights)  {
+                this.studyUserRights.add(sur.getId());
+            }
+        }
+    }
 
-	@Override
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
+    /**
+     * @return the userId
+     */
+    @Override
+    public Long getUserId() {
+        return userId;
+    }
 
-	@JsonIgnore
-	public List<Center> getCenters() {
-		return centers;
-	}
+    /**
+     * @param userId
+     *            the userId to set
+     */
+    @Override
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public List<Long> getCenterIds() {
-		if (CollectionUtils.isEmpty(this.centers)) {
-			return Collections.emptyList();
-		}
-		return centers.stream().map(center -> center.getId()).collect(Collectors.toList());
-	}
+    @Override
+    public String getUserName() {
+        return userName;
+    }
 
-	@JsonIgnore
-	public void setCenters(List<Center> centers) {
-		this.centers = centers;
-	}
-	
-	public void setCenterIds(List<Long> ids) {
-		centers = ids.stream().map(id -> {
-			Center center = new Center();
-			center.setId(id);
-			return center;
-		}).collect(Collectors.toList());
-	}
+    @Override
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    @JsonIgnore
+    public List<Center> getCenters() {
+        return centers;
+    }
+
+    public List<Long> getCenterIds() {
+        if (CollectionUtils.isEmpty(this.centers)) {
+            return Collections.emptyList();
+        }
+        return centers.stream().map(center -> center.getId()).collect(Collectors.toList());
+    }
+
+    @JsonIgnore
+    public void setCenters(List<Center> centers) {
+        this.centers = centers;
+    }
+
+    public void setCenterIds(List<Long> ids) {
+        centers = ids.stream().map(id -> {
+            Center center = new Center();
+            center.setId(id);
+            return center;
+        }).collect(Collectors.toList());
+    }
 
 }

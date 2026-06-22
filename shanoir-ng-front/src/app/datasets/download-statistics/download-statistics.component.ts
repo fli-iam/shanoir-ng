@@ -13,14 +13,16 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { DatasetService } from '../shared/dataset.service';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 @Component({
     selector: 'download-statistics',
     templateUrl: 'download-statistics.component.html',
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, TooltipComponent]
 })
 
 export class DownloadStatisticsComponent{
@@ -63,9 +65,9 @@ export class DownloadStatisticsComponent{
     }
 
     hasError(fieldName: string, errors: string[]) {
-        let formError = this.formErrors(fieldName);
+        const formError = this.formErrors(fieldName);
         if (formError) {
-            for(let errorName of errors) {
+            for(const errorName of errors) {
                 if(formError[errorName]) return true;
             }
         }

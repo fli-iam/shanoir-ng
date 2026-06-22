@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -25,16 +25,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 /**
  * As Spring Boot >= 1.4 does not automatically provide a RestTemplate
  * we have to pass by the builder and init it here for the entire app.
- * 
+ *
  * @author mkain
  */
 @Configuration
 @EnableAsync
 public class ShanoirNiftiConversionConfiguration {
 
-	@Bean(name = "asyncExecutor")
+    @Bean(name = "asyncExecutor")
     public Executor asyncExecutor() {
-		SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(100);
         executor.setMaxPoolSize(100);
@@ -43,5 +43,5 @@ public class ShanoirNiftiConversionConfiguration {
         executor.initialize();
         return executor;
     }
-	
+
 }

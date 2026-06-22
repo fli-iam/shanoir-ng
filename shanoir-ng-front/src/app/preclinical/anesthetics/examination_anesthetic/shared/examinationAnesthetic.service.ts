@@ -13,10 +13,13 @@
  */
 
 import { Injectable } from '@angular/core';
-import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
-import { ExaminationAnesthetic } from './examinationAnesthetic.model';
-import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+
+import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
+import * as PreclinicalUtils from '../../../utils/preclinical.utils';
+
+import { ExaminationAnesthetic } from './examinationAnesthetic.model';
 
 @Injectable()
 export class ExaminationAnestheticService extends EntityService<ExaminationAnesthetic>{
@@ -28,26 +31,23 @@ export class ExaminationAnestheticService extends EntityService<ExaminationAnest
     
     getEntityInstance() { return new ExaminationAnesthetic(); }      
     
-    getExaminationAnesthetics(examination_id:number): Promise<ExaminationAnesthetic[]>{
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examination_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
-        return this.http.get<ExaminationAnesthetic[]>(url)
-        .toPromise()
+    getExaminationAnesthetics(examinationId:number): Promise<ExaminationAnesthetic[]>{
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examinationId}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
+        return firstValueFrom(this.http.get<ExaminationAnesthetic[]>(url))
         .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
 
     
     
-    getExaminationAnesthetic(examination_id:number,eaid: number): Promise<ExaminationAnesthetic> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examination_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}/${eaid}`;
-        return this.http.get<ExaminationAnesthetic>(url)
-        .toPromise()
+    getExaminationAnesthetic(examinationId:number,eaid: number): Promise<ExaminationAnesthetic> {
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examinationId}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}/${eaid}`;
+        return firstValueFrom(this.http.get<ExaminationAnesthetic>(url))
         .then((entity) => this.toRealObject(entity));
     }
     
     getAllExaminationForAnesthetic(aid: number): Promise<ExaminationAnesthetic[]> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}${PreclinicalUtils.PRECLINICAL_ALL_URL}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}/${aid}`;
-        return this.http.get<ExaminationAnesthetic[]>(url)
-                .toPromise()
+        return firstValueFrom(this.http.get<ExaminationAnesthetic[]>(url))
                 .then(response => response)
                 .catch((error) => {
                     console.error('Error while getting ExaminationAnesthetic for an Anesthetic', error);
@@ -55,24 +55,21 @@ export class ExaminationAnestheticService extends EntityService<ExaminationAnest
                 });
     }
     
-    updateAnesthetic(examination_id:number, examAnesthetic: ExaminationAnesthetic): Promise<ExaminationAnesthetic> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examination_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}/${examAnesthetic.internal_id}`;
-        return this.http
-            .put<ExaminationAnesthetic>(url, JSON.stringify(examAnesthetic)) 
-            .toPromise();
+    updateAnesthetic(examinationId:number, examAnesthetic: ExaminationAnesthetic): Promise<ExaminationAnesthetic> {
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examinationId}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}/${examAnesthetic.internalId}`;
+        return firstValueFrom(this.http
+            .put<ExaminationAnesthetic>(url, JSON.stringify(examAnesthetic)));
         }
     
-    createAnesthetic(examination_id:number, examAnesthetic: ExaminationAnesthetic): Promise<ExaminationAnesthetic> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examination_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}`;
-            return this.http
-            .post<ExaminationAnesthetic>(url, JSON.stringify(examAnesthetic))
-            .toPromise();
+    createAnesthetic(examinationId:number, examAnesthetic: ExaminationAnesthetic): Promise<ExaminationAnesthetic> {
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examinationId}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}`;
+            return firstValueFrom(this.http
+            .post<ExaminationAnesthetic>(url, JSON.stringify(examAnesthetic)));
         }
 
     deleteAnesthetic(examAnesthetic: ExaminationAnesthetic): Promise<void> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examAnesthetic.examination_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}/${examAnesthetic.id}`;
-        return this.http.delete<void>(url)
-            .toPromise()
+        const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examAnesthetic.examinationId}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}/${examAnesthetic.id}`;
+        return firstValueFrom(this.http.delete<void>(url));
     }
     
 }

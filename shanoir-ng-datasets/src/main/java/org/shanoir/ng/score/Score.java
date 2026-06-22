@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -23,7 +23,7 @@ import org.shanoir.ng.shared.hateoas.Links;
 
 /**
  * Score.
- * 
+ *
  * @author ifakhfakh, JCome
  *
  */
@@ -32,38 +32,38 @@ import org.shanoir.ng.shared.hateoas.Links;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Score extends HalEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 5995692961509079060L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 5995692961509079060L;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "variable_assessment_id", nullable = false, updatable = true)
-	@JsonIgnore
-	private VariableAssessment variableAssessment;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "variable_assessment_id", nullable = false, updatable = true)
+    @JsonIgnore
+    private VariableAssessment variableAssessment;
 
-	public Score() {
+    public Score() {
 
-	}
+    }
 
-	public Score(VariableAssessment va) {
-		this.variableAssessment = va;
-	}
+    public Score(VariableAssessment va) {
+        this.variableAssessment = va;
+    }
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "score/" + getId());
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "score/" + getId());
+    }
 
-	public VariableAssessment getVariableAssessment() {
-		return variableAssessment;
-	}
+    public VariableAssessment getVariableAssessment() {
+        return variableAssessment;
+    }
 
-	public void setVariableAssessment(VariableAssessment variableAssessment) {
-		this.variableAssessment = variableAssessment;
-	}
+    public void setVariableAssessment(VariableAssessment variableAssessment) {
+        this.variableAssessment = variableAssessment;
+    }
 
 }

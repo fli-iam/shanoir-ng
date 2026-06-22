@@ -13,14 +13,17 @@
  */
 
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
 import { ColumnDefinition } from '../column.definition.type';
 import { Filter } from '../pageable.model';
+
 
 @Component({
     selector: 'shanoir-table-search',
     templateUrl: 'search.component.html',
     styleUrls: ['search.component.css'],
-    standalone: false
+    imports: [FormsModule]
 })
 
 export class TableSearchComponent implements OnChanges {
@@ -38,8 +41,8 @@ export class TableSearchComponent implements OnChanges {
 
     private computeSearchableColumns(): any[] {
         if (!this.columnDefs) return [];
-        let cols: any[] = [];
-        for (let col of this.columnDefs) {
+        const cols: any[] = [];
+        for (const col of this.columnDefs) {
             if (col.type != "boolean" && col.type != "button" && !col.disableSearch) {
                 cols.push(col);
             }

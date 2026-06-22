@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dicom.web;
 
 import java.util.List;
@@ -45,7 +59,7 @@ public class SeriesInstanceUIDHandler {
         LOG.info("DICOMWeb cache created: acquisitionUIDToSeriesInstanceUIDCache");
     }
 
-    @Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+    @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
     public void clearAcquisitionIdToSeriesInstanceUIDCache() {
         acquisitionUIDToSeriesInstanceUIDCache.clear();
         LOG.info("DICOMWeb cache cleared: acquisitionUIDToSeriesInstanceUIDCache");
@@ -60,10 +74,10 @@ public class SeriesInstanceUIDHandler {
                 seriesInstanceUID = findSeriesInstanceUID(acquisition);
                 if (seriesInstanceUID != null) {
                     String existing = acquisitionUIDToSeriesInstanceUIDCache.putIfAbsent(acquisitionUID, seriesInstanceUID);
-					if (existing == null) {
-						LOG.info("DICOMWeb cache adding: {}, {}", acquisitionUID, seriesInstanceUID);
-						LOG.info("DICOMWeb cache, size: {}", acquisitionUIDToSeriesInstanceUIDCache.size());
-					}
+                    if (existing == null) {
+                        LOG.info("DICOMWeb cache adding: {}, {}", acquisitionUID, seriesInstanceUID);
+                        LOG.info("DICOMWeb cache, size: {}", acquisitionUIDToSeriesInstanceUIDCache.size());
+                    }
                 }
             }
         }
@@ -71,6 +85,9 @@ public class SeriesInstanceUIDHandler {
     }
 
     public String findSeriesInstanceUID(DatasetAcquisition acquisition) {
+        String seriesInstanceUIDDb = acquisition.getSeriesInstanceUID();
+        if (seriesInstanceUIDDb != null && !seriesInstanceUIDDb.isEmpty())
+            return seriesInstanceUIDDb;
         if (acquisition instanceof MrDatasetAcquisition
                 || acquisition instanceof CtDatasetAcquisition
                 || acquisition instanceof PetDatasetAcquisition) {

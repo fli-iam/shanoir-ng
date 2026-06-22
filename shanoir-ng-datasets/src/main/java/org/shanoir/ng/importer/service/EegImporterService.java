@@ -1,9 +1,41 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
-import org.shanoir.ng.dataset.model.*;
+import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
+import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -16,32 +48,17 @@ import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 @Service
 public class EegImporterService {
 
     private static final Logger LOG = LoggerFactory.getLogger(EegImporterService.class);
-
-    @Value("${datasets-data}")
-    private String niftiStorageDir;
 
     @Autowired
     private ImporterMailService mailService;
@@ -55,11 +72,8 @@ public class EegImporterService {
     @Autowired
     private ShanoirEventService eventService;
 
-    private static final String SESSION_PREFIX = "ses-";
-
-    private static final String SUBJECT_PREFIX = "sub-";
-
-    private static final String EEG_PREFIX = "eeg";
+    @Autowired
+    private StorageService storageService;
 
     /**
      * Create a dataset acquisition, and associated dataset.
@@ -69,7 +83,7 @@ public class EegImporterService {
 
         Long userId = KeycloakUtil.getTokenUserId();
         ShanoirEvent event;
-        if(Objects.isNull(importJob.getShanoirEvent())){
+        if (Objects.isNull(importJob.getShanoirEvent())) {
             event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
         } else {
             event = importJob.getShanoirEvent();
@@ -128,38 +142,35 @@ public class EegImporterService {
                 // Set files
                 if (datasetDto.getFiles() != null) {
 
-                    // Copy the data somewhere else
-                    final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
-                    final String sesLabel = SESSION_PREFIX + importJob.getExaminationId();
-
-                    final File outDir = new File(niftiStorageDir + File.separator + EEG_PREFIX + File.separator + subLabel + File.separator + sesLabel + File.separator);
-                    outDir.mkdirs();
-
                     // Move file one by one to the new directory
                     for (String filePath : datasetDto.getFiles()) {
-
-                        File srcFile = new File(filePath);
-                        String originalNiftiName = srcFile.getAbsolutePath().substring(filePath.lastIndexOf('/') + 1);
-                        File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
-                        Path finalLocation = null;
-                        try {
-                            finalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
-                            LOG.error("IOException generating EEG Dataset Expression", e);
-                        }
-
-                        // Create datasetExpression => Files
-                        if (finalLocation != null) {
-                            DatasetFile file = new DatasetFile();
-                            file.setDatasetExpression(expression);
-                            file.setPath(finalLocation.toUri().toString());
-                            filesSize += Files.size(finalLocation);
-                            file.setPacs(false);
-                            files.add(file);
+                        File file = new File(filePath);
+                        try (InputStream is = Files.newInputStream(file.toPath())) {
+                            String contentType = Files.probeContentType(file.toPath());
+                            if (contentType == null) {
+                                contentType = URLConnection.guessContentTypeFromName(file.getName());
+                            }
+                            if (contentType == null) {
+                                contentType = "application/octet-stream";
+                            }
+                            String path = storageService.storeDatasetsData(
+                                    importJob.getStudyId(), importJob.getSubjectId(), importJob.getExaminationId(),
+                                    BidsDataType.EEG.getFolderName(), file.getName(),
+                                    is, contentType, file.length());
+                            // Create datasetExpression => Files
+                            if (path != null) {
+                                DatasetFile datasetFile = new DatasetFile();
+                                datasetFile.setDatasetExpression(expression);
+                                datasetFile.setPath(path);
+                                filesSize += Files.size(file.toPath());
+                                datasetFile.setPacs(false);
+                                files.add(datasetFile);
+                            }
+                        } catch (Exception e) {
+                            throw new RuntimeException("Could not read file: " + file.getName(), e);
                         }
                     }
                 }
-
                 expression.setDatasetFiles(files);
                 expression.setSize(filesSize);
                 datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
@@ -180,7 +191,7 @@ public class EegImporterService {
                 }
 
                 // Fill dataset with informations
-                datasetToCreate.setChannelCount(datasetDto.getChannels() != null? datasetDto.getChannels().size() : 0);
+                datasetToCreate.setChannelCount(datasetDto.getChannels() != null ? datasetDto.getChannels().size() : 0);
                 datasetToCreate.setChannels(datasetDto.getChannels());
                 datasetToCreate.setEvents(datasetDto.getEvents());
                 datasetToCreate.setCreationDate(LocalDate.now());
@@ -195,13 +206,13 @@ public class EegImporterService {
             }
 
             datasetAcquisition.setDatasets(datasets);
-            datasetAcquisitionService.create(datasetAcquisition);
+            datasetAcquisitionService.create(datasetAcquisition, true);
 
             event.setProgress(1f);
             event.setStatus(ShanoirEvent.SUCCESS);
             // This message is important for email service
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-                    +" Successfully created datasets for subject [" + importJob.getSubjectName()
+                    + " Successfully created datasets for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
 

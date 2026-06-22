@@ -13,12 +13,14 @@
  */
 import { Component, ElementRef, EventEmitter, forwardRef, HostListener, Input, OnChanges, Output, PipeTransform, SimpleChanges, ViewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+
 import { arraysEqual, objectsEqual } from '../../utils/app.utils';
 import { BrowserPaging } from '../components/table/browser-paging.model';
 import { ColumnDefinition } from '../components/table/column.definition.type';
 import { FilterablePageable, Page } from '../components/table/pageable.model';
 import { TableComponent } from '../components/table/table.component';
-import { Option } from '../select/select.component';
+import { Option, SelectBoxComponent } from '../select/select.component';
+
 
 
 @Component({
@@ -32,7 +34,7 @@ import { Option } from '../select/select.component';
             multi: true,
         }
     ],
-    standalone: false
+    imports: [SelectBoxComponent, TableComponent]
 })
 
 export class MultiSelectTableComponent implements ControlValueAccessor, OnChanges {
@@ -45,9 +47,9 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
     @Input() disabled: boolean = false;
     @Input() readOnly: boolean = false;
     @Input() placeholder: string;
-    @Output() onTouch = new EventEmitter();
-    private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    @Output() touch = new EventEmitter();
+    private onTouchedCallback = () => { return; };
+    private onChangeCallback: (any) => void = () => { return; };
     modelArray: any[];
     selectedOptions: Option<any>[] = [];
     @Input() columnDefs: ColumnDefinition[] = [];
@@ -63,8 +65,8 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
         if (changes.optionArr && this.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
             this.options = [];
             this.optionArr.forEach(item => {
-                let label: string = this.getLabel(item);
-                let newOption: Option<any> = new Option<any>(item, label);
+                const label: string = this.getLabel(item);
+                const newOption: Option<any> = new Option<any>(item, label);
                 if (item.color) newOption.color = item.color;
                 if (item.backgroundColor) newOption.backgroundColor = item.backgroundColor;
                 this.options.push(newOption);
@@ -131,7 +133,7 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
     }
 
     onSelectOption(id: number) {
-        let option: Option<{id: number}> = this.options?.find(opt => opt?.value?.id == id);
+        const option: Option<{id: number}> = this.options?.find(opt => opt?.value?.id == id);
         this.modelArray.push(option.value);
         this.selectedOptions.push(option);
         option.disabled = true;
@@ -143,7 +145,7 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
 
     onRemoveItem(item: any) {
         this.modelArray = this.modelArray?.filter(one => one.id != item.id);
-        let removed: Option<any> = this.options?.find(option => option.value?.id == item.id);
+        const removed: Option<any> = this.options?.find(option => option.value?.id == item.id);
         if (removed) removed.disabled = false;
         this.selectedOptions = this.selectedOptions?.filter(option => option.value?.id != item.id);
         this.browserPaging.setItems(this.modelArray);
@@ -159,7 +161,7 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
     onFocusOut(event: FocusEvent) {
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
             this.onTouchedCallback();
-            this.onTouch.emit();
+            this.touch.emit();
         }
     }
 

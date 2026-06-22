@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -26,11 +26,10 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Mapper for examinations.
- * 
+ *
  * @author yyao
  *
  */
@@ -38,75 +37,74 @@ import org.springframework.transaction.annotation.Transactional;
 @DecoratedWith(ExaminationDecorator.class)
 public interface ExaminationMapper {
 
-	/**
-	 * Map list of @Examination to list of @ExaminationDTO.
-	 * 
-	 * @param examinations list of examinations.
-	 * @return list of examinations DTO.
-	 */
-	PageImpl<ExaminationDTO> examinationsToExaminationDTOs(Page<Examination> examinations);
-	
-	/**
-	 * Map list of @Examination to not pageable list of @ExaminationDTO.
-	 * 
-	 * @param examinations list of examinations.
-	 * @return list of examinations DTO.
-	 */
-	List<ExaminationDTO> examinationsToExaminationDTOs(List<Examination> examinations);
-	
-    
-	/**
-	 * Map list of @Examination to list of @SubjectExaminationDTO.
-	 * 
-	 * @param examination examination to map.
-	 * @return list of subject examination DTO.
-	 */
-	List<SubjectExaminationDTO> examinationsToSubjectExaminationDTOs(List<Examination> examinations);
+    /**
+     * Map list of @Examination to list of @ExaminationDTO.
+     *
+     * @param examinations list of examinations.
+     * @return list of examinations DTO.
+     */
+    PageImpl<ExaminationDTO> examinationsToExaminationDTOs(Page<Examination> examinations);
 
-	/**
-	 * Map a @Examination to a @ExaminationDTO.
-	 * 
-	 * @param examination examination to map.
-	 * @return examination DTO.
-	 */
-	@Mapping(target = "copies", expression = "java(mapCopiesFromExamination(examination.getCopies()))")
-	@Mapping(target = "source", expression = "java(mapSourceFromExamination(examination.getSource()))")
-	ExaminationDTO examinationToExaminationDTO(Examination examination);
+    /**
+     * Map list of @Examination to not pageable list of @ExaminationDTO.
+     *
+     * @param examinations list of examinations.
+     * @return list of examinations DTO.
+     */
+    List<ExaminationDTO> examinationsToExaminationDTOs(List<Examination> examinations);
 
-	/**
-	 * Map a @ExaminationDTO to a @Examination.
-	 * 
-	 * @param examinationDTO
-	 * @return examination.
-	 */
-	Examination examinationDTOToExamination(ExaminationDTO examinationDTO);
-	
-	/**
-	 * Map a @Examination to a @SubjectExaminationDTO.
-	 * 
-	 * @param examination examination to map.
-	 * @return subject examination DTO.
-	 */
-	SubjectExaminationDTO examinationToSubjectExaminationDTO(Examination examination);
+    /**
+     * Map list of @Examination to list of @SubjectExaminationDTO.
+     *
+     * @param examination examination to map.
+     * @return list of subject examination DTO.
+     */
+    List<SubjectExaminationDTO> examinationsToSubjectExaminationDTOs(List<Examination> examinations);
 
-	default List<Long> mapCopiesFromExamination(List<Examination> copies) {
-		if (copies == null) {
-			return null;
-		}
-		return copies.stream()
-				.map(Examination::getId)
-				.collect(Collectors.toList());
-	}
+    /**
+     * Map a @Examination to a @ExaminationDTO.
+     *
+     * @param examination examination to map.
+     * @return examination DTO.
+     */
+    @Mapping(target = "copies", expression = "java(mapCopiesFromExamination(examination.getCopies()))")
+    @Mapping(target = "source", expression = "java(mapSourceFromExamination(examination.getSource()))")
+    ExaminationDTO examinationToExaminationDTO(Examination examination);
 
-	default Long mapSourceFromExamination(Examination source) {
-		return source != null ? source.getId() : null;
-	}
+    /**
+     * Map a @ExaminationDTO to a @Examination.
+     *
+     * @param examinationDTO
+     * @return examination.
+     */
+    Examination examinationDTOToExamination(ExaminationDTO examinationDTO);
 
-	default List<Examination> mapCopiesExaminationFromLong(List<Long> copies) {
-		return null;
-	}
+    /**
+     * Map a @Examination to a @SubjectExaminationDTO.
+     *
+     * @param examination examination to map.
+     * @return subject examination DTO.
+     */
+    SubjectExaminationDTO examinationToSubjectExaminationDTO(Examination examination);
 
-	default Examination mapSourceExaminationFromLong(Long source) {
-		return null;
-	}
+    default List<Long> mapCopiesFromExamination(List<Examination> copies) {
+        if (copies == null) {
+            return null;
+        }
+        return copies.stream()
+                .map(Examination::getId)
+                .collect(Collectors.toList());
+    }
+
+    default Long mapSourceFromExamination(Examination source) {
+        return source != null ? source.getId() : null;
+    }
+
+    default List<Examination> mapCopiesExaminationFromLong(List<Long> copies) {
+        return null;
+    }
+
+    default Examination mapSourceExaminationFromLong(Long source) {
+        return null;
+    }
 }

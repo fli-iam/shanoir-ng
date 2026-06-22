@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -21,190 +21,190 @@ import org.shanoir.ng.studycenter.StudyCenterDTO;
 
 /**
  * DTO for centers.
- * 
+ *
  * @author msimon
  *
  */
 public class CenterDTO {
 
-	private List<AcquisitionEquipmentDTO> acquisitionEquipments;
+    private List<AcquisitionEquipmentDTO> acquisitionEquipments;
 
-	private String city;
+    private String city;
 
-	private String country;
+    private String country;
 
-	private Long id;
+    private Long id;
 
-	private String name;
+    private String name;
 
-	private String phoneNumber;
+    private String phoneNumber;
 
-	private String postalCode;
+    private String postalCode;
 
-	private String street;
+    private String street;
 
-	private String website;
-	
-	private Boolean compatible = false;
-	
-	private List<StudyCenterDTO> studyCenterList;
+    private String website;
 
-	/**
-	 * Default constructor.
-	 */
-	public CenterDTO() {
-		// empty constructor
-	}
+    private Boolean compatible = false;
 
-	/**
-	 * @return the acquisitionEquipments
-	 */
-	public List<AcquisitionEquipmentDTO> getAcquisitionEquipments() {
-		return acquisitionEquipments;
-	}
+    private List<StudyCenterDTO> studyCenterList;
 
-	/**
-	 * @param acquisitionEquipments
-	 *            the acquisitionEquipments to set
-	 */
-	public void setAcquisitionEquipments(List<AcquisitionEquipmentDTO> acquisitionEquipments) {
-		this.acquisitionEquipments = acquisitionEquipments;
-	}
+    /**
+     * Default constructor.
+     */
+    public CenterDTO() {
+        // empty constructor
+    }
 
-	/**
-	 * @return the city
-	 */
-	public String getCity() {
-		return city;
-	}
+    /**
+     * @return the acquisitionEquipments
+     */
+    public List<AcquisitionEquipmentDTO> getAcquisitionEquipments() {
+        return acquisitionEquipments;
+    }
 
-	/**
-	 * @param city
-	 *            the city to set
-	 */
-	public void setCity(String city) {
-		this.city = city;
-	}
+    /**
+     * @param acquisitionEquipments
+     *            the acquisitionEquipments to set
+     */
+    public void setAcquisitionEquipments(List<AcquisitionEquipmentDTO> acquisitionEquipments) {
+        this.acquisitionEquipments = acquisitionEquipments;
+    }
 
-	/**
-	 * @return the country
-	 */
-	public String getCountry() {
-		return country;
-	}
+    /**
+     * @return the city
+     */
+    public String getCity() {
+        return city;
+    }
 
-	/**
-	 * @param country
-	 *            the country to set
-	 */
-	public void setCountry(String country) {
-		this.country = country;
-	}
+    /**
+     * @param city
+     *            the city to set
+     */
+    public void setCity(String city) {
+        this.city = city;
+    }
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    /**
+     * @return the country
+     */
+    public String getCountry() {
+        return country;
+    }
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @param country
+     *            the country to set
+     */
+    public void setCountry(String country) {
+        this.country = country;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @return the phoneNumber
-	 */
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param phoneNumber
-	 *            the phoneNumber to set
-	 */
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @return the postalCode
-	 */
-	public String getPostalCode() {
-		return postalCode;
-	}
+    /**
+     * @return the phoneNumber
+     */
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
 
-	/**
-	 * @param postalCode
-	 *            the postalCode to set
-	 */
-	public void setPostalCode(String postalCode) {
-		this.postalCode = postalCode;
-	}
+    /**
+     * @param phoneNumber
+     *            the phoneNumber to set
+     */
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
-	/**
-	 * @return the street
-	 */
-	public String getStreet() {
-		return street;
-	}
+    /**
+     * @return the postalCode
+     */
+    public String getPostalCode() {
+        return postalCode;
+    }
 
-	/**
-	 * @param street
-	 *            the street to set
-	 */
-	public void setStreet(String street) {
-		this.street = street;
-	}
+    /**
+     * @param postalCode
+     *            the postalCode to set
+     */
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
 
-	/**
-	 * @return the website
-	 */
-	public String getWebsite() {
-		return website;
-	}
+    /**
+     * @return the street
+     */
+    public String getStreet() {
+        return street;
+    }
 
-	/**
-	 * @param website
-	 *            the website to set
-	 */
-	public void setWebsite(String website) {
-		this.website = website;
-	}
+    /**
+     * @param street
+     *            the street to set
+     */
+    public void setStreet(String street) {
+        this.street = street;
+    }
 
-	public Boolean getCompatible() {
-		return compatible;
-	}
+    /**
+     * @return the website
+     */
+    public String getWebsite() {
+        return website;
+    }
 
-	public void setCompatible(Boolean compatible) {
-		this.compatible = compatible;
-	}
+    /**
+     * @param website
+     *            the website to set
+     */
+    public void setWebsite(String website) {
+        this.website = website;
+    }
 
-	public List<StudyCenterDTO> getStudyCenterList() {
-		return studyCenterList;
-	}
+    public Boolean getCompatible() {
+        return compatible;
+    }
 
-	public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
-		this.studyCenterList = studyCenterList;
-	}
+    public void setCompatible(Boolean compatible) {
+        this.compatible = compatible;
+    }
+
+    public List<StudyCenterDTO> getStudyCenterList() {
+        return studyCenterList;
+    }
+
+    public void setStudyCenterList(List<StudyCenterDTO> studyCenterList) {
+        this.studyCenterList = studyCenterList;
+    }
 
 }

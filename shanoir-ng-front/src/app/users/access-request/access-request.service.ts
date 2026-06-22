@@ -13,18 +13,20 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { IdName } from 'src/app/shared/models/id-name.model';
+import { Subscription, firstValueFrom } from 'rxjs';
 
+import { IdName } from 'src/app/shared/models/id-name.model';
 import { KeycloakService } from 'src/app/shared/keycloak/keycloak.service';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
+
 import { AccessRequest } from './access-request.model';
 
 @Injectable()
 export class AccessRequestService extends EntityService<AccessRequest> implements OnDestroy {
 
-    getEntityInstance(entity?: AccessRequest): AccessRequest {
+    getEntityInstance(): AccessRequest {
         return new AccessRequest();
     }
 
@@ -43,7 +45,7 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
         formData.set("studyName", study.name);
         formData.set("issuer", KeycloakService.auth.authz.tokenParsed.name);
         formData.set("role", func);
-        return this.http.put(this.API_URL + "/invitation/", formData).toPromise()
+        return firstValueFrom(this.http.put(this.API_URL + "/invitation/", formData))
             .then(response =>
             {
                 if (response){
@@ -55,15 +57,15 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
     }
 
     public findByStudy(studyId: number): Promise<AccessRequest[]> {
-        return this.http.get<AccessRequest[]>(this.API_URL+"/byStudy/" + studyId).toPromise();
+        return firstValueFrom(this.http.get<AccessRequest[]>(this.API_URL+"/byStudy/" + studyId));
     }
 
     public resolveRequest(id: number, value: boolean): Promise<any> {
-        return this.http.put(AppUtils.BACKEND_API_ACCESS_REQUEST_RESOLVE + id, "" + value).toPromise();
+        return firstValueFrom(this.http.put(AppUtils.BACKEND_API_ACCESS_REQUEST_RESOLVE + id, "" + value));
     }
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscribtions) {
+        for(const subscribtion of this.subscribtions) {
             subscribtion.unsubscribe();
         }
     }

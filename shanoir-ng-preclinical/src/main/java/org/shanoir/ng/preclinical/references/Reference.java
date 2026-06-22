@@ -56,6 +56,14 @@ public class Reference extends HalEntity {
         return this;
     }
 
+    public Reference() { }
+
+    public Reference(String category, String reftype, String value) {
+        this.category = category;
+        this.reftype = reftype;
+        this.value = value;
+    }
+
     @Schema(name = "none")
     public String getCategory() {
         return category;

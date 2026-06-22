@@ -4,7 +4,7 @@
 
 .logo { margin-bottom: 20px; display: flex; justify-content: center; min-width: 300px; position: relative; }
 
-.logo img { height: 78px; opacity: 0.2; margin-top: 4px;
+.logo img { height: 60px; opacity: 0.2; margin-top: 11px;
     -webkit-filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9));
     filter: drop-shadow(0px -3px 0px rgba(0,0,0,.9));
 }
@@ -43,19 +43,6 @@ a:hover, a:active { color: inherit; }
 .user-commands a:link, .user-commands a:visited { color: inherit; text-decoration: none; }
 .user-commands a:hover, .user-commands a:active { text-decoration: none; }
 
-
-.counter { margin: 0 6px;
-    background-color: var(--color-c);
-    border-radius: 21px;
-    width: 15px;
-    height: 15px;
-    display: inline-block;
-    text-align: center;
-    font-size: 10px;
-    vertical-align: middle;
-    padding: 1px 1px 0 0px;
-}
-
 .admin-tag { color: orange; }
     .admin-tag i { margin-right: 4px; }
 .admin-tag-sep { color: var(--color-b-light2); }
@@ -69,9 +56,9 @@ a:hover, a:active { color: inherit; }
     .instance-name::after { content: var(--instance-name); }
 
 progress-bar { background-color: var(--color-b-light); height: 14px; border: 1px solid var(--color-b-light2); vertical-align: -2px; width: 160px; font-size: 10px; }
-progress-bar >>> .text, progress-bar >>> .left-text { line-height: 14px; }
+progress-bar ::ng-deep .text, progress-bar ::ng-deep .left-text { line-height: 14px; }
 .sub-menu progress-bar { width: 100px; height: 12px; font-size: 10px; }
-.sub-menu progress-bar >>> .text, .sub-menu progress-bar >>> .left-text { line-height: 13px; }
+.sub-menu progress-bar ::ng-deep .text, .sub-menu progress-bar ::ng-deep .left-text { line-height: 13px; }
 
 .jobs i { margin-right: 6px; width: auto !important; }
 
@@ -85,3 +72,21 @@ progress-bar >>> .text, progress-bar >>> .left-text { line-height: 14px; }
 
 .menu-link { display: inline-block; width: 100%; }
 .remove-task { position: absolute; left: 7px; padding-top: 1px; }
+
+.slide-down-menu {
+    animation: 200ms ease-in-out both slideDown;
+}
+
+.slide-up-menu {
+    animation: 200ms ease-out both slideUp;
+}
+
+@keyframes slideDown {
+    from { max-height: 0; }
+    to   { max-height: var(--submenu-height); }
+}
+
+@keyframes slideUp {
+    from { max-height: var(--submenu-height); }
+    to   { max-height: 0; }
+}

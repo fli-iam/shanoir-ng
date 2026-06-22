@@ -28,6 +28,8 @@ body {
 .shanoir-text {
 	display: block;
 	color: white;
+	word-spacing: 1em;
+	letter-spacing: 0.3em;
 }
 
 .stats {
@@ -127,4 +129,5 @@ hr {
 .spacer::after { content: ""; border-left: 1px solid #aaa; margin: 0px 15px 0px 14px; font-size: 11px; }
 .title .spacer::after { margin: 0px 17px 0px 17px; font-size: 18px; }
 .details { display: inline-block; margin-bottom: 15px; }
-
+.shanoir-text { color: var(--grey); }
+em { font-style: normal; font-weight: bold; color: white; }

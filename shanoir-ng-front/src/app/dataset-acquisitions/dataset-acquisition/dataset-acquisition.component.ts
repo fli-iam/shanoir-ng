@@ -12,13 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { Selection } from 'src/app/studies/study/tree.service';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
@@ -31,19 +32,27 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
-
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
+import { MrProtocolComponent } from '../modality/mr/mr-protocol.component';
+import { CtProtocolComponent } from '../modality/ct/ct-protocol.component';
+import { PetProtocolComponent } from '../modality/pet/pet-protocol.component';
+import { XaProtocolComponent } from '../modality/xa/xa-protocol.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
     selector: 'dataset-acquisition-detail',
     templateUrl: 'dataset-acquisition.component.html',
     styleUrls: ['dataset-acquisition.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, RouterLink, MrProtocolComponent, CtProtocolComponent, PetProtocolComponent, XaProtocolComponent, LoadingBarComponent, LocalDateFormatPipe, AcquisitionEquipmentPipe]
 })
 export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisition> {
 
     public studyCards: StudyCard[];
     public acquisitionEquipments: AcquisitionEquipment[];
     hasDownloadRight: boolean = false;
+    hasAdministrateRight: boolean = false;
     noDatasets: boolean = false;
     hasDicom: boolean = false;
     protected downloadState: TaskState = new TaskState();
@@ -57,7 +66,11 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             private studyRightsService: StudyRightsService,
             public acqEqPipe: AcquisitionEquipmentPipe,
             private downloadService: MassDownloadService) {
-        super(route, 'dataset-acquisition');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'dataset-acquisition';
     }
 
     getService(): EntityService<DatasetAcquisition> {
@@ -85,10 +98,12 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
         })
         if (this.keycloakService.isUserAdmin()) {
             this.hasDownloadRight = true;
+            this.hasAdministrateRight = true;
             return Promise.resolve();
         } else {
             return this.studyRightsService.getMyRightsForStudy(this.datasetAcquisition.examination.study.id).then(rights => {
                 this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
             });
         }
     }
@@ -109,12 +124,12 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'type': [this.datasetAcquisition.type],
-            'study-card': [this.datasetAcquisition.studyCard],
-            'acq-eq': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
+            'studyCard': [this.datasetAcquisition.studyCard],
+            'acquisitionEquipment': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
             'rank': [this.datasetAcquisition.rank],
-            'startTime': [this.datasetAcquisition.acquisitionStartTime],
-            'software-release': [this.datasetAcquisition.softwareRelease],
-            'sorting-index': [this.datasetAcquisition.sortingIndex],
+            'acquisitionStartTime': [this.datasetAcquisition.acquisitionStartTime],
+            'softwareRelease': [this.datasetAcquisition.softwareRelease],
+            'sortingIndex': [this.datasetAcquisition.sortingIndex],
             'protocol': [this.datasetAcquisition.protocol]
         });
     }

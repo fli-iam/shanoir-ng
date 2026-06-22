@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -20,136 +20,136 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 
 public class ExaminationDTO {
-	
-	private Long id;
 
-	private Long centerId;
+    private Long id;
 
-	private String centerName;
+    private Long centerId;
 
-	private String comment;
+    private String centerName;
 
-	@LocalDateAnnotations
-	private LocalDate examinationDate;
+    private String comment;
 
-	private String note;
+    @LocalDateAnnotations
+    private LocalDate examinationDate;
 
-	private String studyName;
+    private String note;
 
-	private Double subjectWeight;
+    private String studyName;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    private Double subjectWeight;
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @return the centerId
-	 */
-	public Long getCenterId() {
-		return centerId;
-	}
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @param centerId the centerId to set
-	 */
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
+    /**
+     * @return the centerId
+     */
+    public Long getCenterId() {
+        return centerId;
+    }
 
-	/**
-	 * @return the centerName
-	 */
-	public String getCenterName() {
-		return centerName;
-	}
+    /**
+     * @param centerId the centerId to set
+     */
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
 
-	/**
-	 * @param centerName the centerName to set
-	 */
-	public void setCenterName(String centerName) {
-		this.centerName = centerName;
-	}
+    /**
+     * @return the centerName
+     */
+    public String getCenterName() {
+        return centerName;
+    }
 
-	/**
-	 * @return the comment
-	 */
-	public String getComment() {
-		return comment;
-	}
+    /**
+     * @param centerName the centerName to set
+     */
+    public void setCenterName(String centerName) {
+        this.centerName = centerName;
+    }
 
-	/**
-	 * @param comment the comment to set
-	 */
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+    /**
+     * @return the comment
+     */
+    public String getComment() {
+        return comment;
+    }
 
-	/**
-	 * @return the examinationDate
-	 */
-	public LocalDate getExaminationDate() {
-		return examinationDate;
-	}
+    /**
+     * @param comment the comment to set
+     */
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
-	/**
-	 * @param examinationDate the examinationDate to set
-	 */
-	public void setExaminationDate(LocalDate examinationDate) {
-		this.examinationDate = examinationDate;
-	}
+    /**
+     * @return the examinationDate
+     */
+    public LocalDate getExaminationDate() {
+        return examinationDate;
+    }
 
-	/**
-	 * @return the note
-	 */
-	public String getNote() {
-		return note;
-	}
+    /**
+     * @param examinationDate the examinationDate to set
+     */
+    public void setExaminationDate(LocalDate examinationDate) {
+        this.examinationDate = examinationDate;
+    }
 
-	/**
-	 * @param note the note to set
-	 */
-	public void setNote(String note) {
-		this.note = note;
-	}
+    /**
+     * @return the note
+     */
+    public String getNote() {
+        return note;
+    }
 
-	/**
-	 * @return the studyName
-	 */
-	public String getStudyName() {
-		return studyName;
-	}
+    /**
+     * @param note the note to set
+     */
+    public void setNote(String note) {
+        this.note = note;
+    }
 
-	/**
-	 * @param studyName the studyName to set
-	 */
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
-	}
+    /**
+     * @return the studyName
+     */
+    public String getStudyName() {
+        return studyName;
+    }
 
-	/**
-	 * @return the subjectWeight
-	 */
-	public Double getSubjectWeight() {
-		return subjectWeight;
-	}
+    /**
+     * @param studyName the studyName to set
+     */
+    public void setStudyName(String studyName) {
+        this.studyName = studyName;
+    }
 
-	/**
-	 * @param subjectWeight the subjectWeight to set
-	 */
-	public void setSubjectWeight(Double subjectWeight) {
-		this.subjectWeight = subjectWeight;
-	}
-	
-	
+    /**
+     * @return the subjectWeight
+     */
+    public Double getSubjectWeight() {
+        return subjectWeight;
+    }
+
+    /**
+     * @param subjectWeight the subjectWeight to set
+     */
+    public void setSubjectWeight(Double subjectWeight) {
+        this.subjectWeight = subjectWeight;
+    }
+
+
 
 }

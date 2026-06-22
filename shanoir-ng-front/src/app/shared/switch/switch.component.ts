@@ -12,8 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, Output, SimpleChanges, HostListener, HostBinding, EventEmitter, forwardRef } from '@angular/core';
+import { Component, Input, Output, HostListener, HostBinding, EventEmitter, forwardRef } from '@angular/core';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+
 
 
 @Component({
@@ -27,27 +28,26 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
             multi: true,
         }
     ],
-    standalone: false
+    imports: []
 })
 
 export class ToggleSwitchComponent implements ControlValueAccessor { 
     
     @HostBinding('class.on') toggle: boolean = null;
-    @Output() onChange = new EventEmitter();
-    private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    @Output() userChange = new EventEmitter();
+    private onTouchedCallback = () => { return; };
+    private onChangeCallback: (any) => void = () => { return; };
     @Input() @HostBinding('class.disabled') disabled: boolean = false;
     @Input() reverse: boolean = false;
     @Input() mode: 'on-off' | undefined;
 
-    constructor() {}
 
     @HostListener('click', []) 
     onClick() {
         if (this.disabled) return; 
         this.toggle = !this.toggle;
         this.onChangeCallback(this.toggle);
-        this.onChange.emit(this.toggle);    
+        this.userChange.emit(this.toggle);    
     }
 
     @HostListener('keydown', ['$event']) 
@@ -56,19 +56,19 @@ export class ToggleSwitchComponent implements ControlValueAccessor {
         if (' ' == event.key) {
             this.toggle = !this.toggle;
             this.onChangeCallback(this.toggle);
-        this.onChange.emit(this.toggle);
+        this.userChange.emit(this.toggle);
             event.preventDefault();
         } else if ('ArrowLeft' == event.key) {
             if (this.toggle) {
                 this.toggle = false;
                 this.onChangeCallback(this.toggle);
-        this.onChange.emit(this.toggle);
+        this.userChange.emit(this.toggle);
             }
         } else if ('ArrowRight' == event.key) {
             if (!this.toggle) {
                 this.toggle = true;
                 this.onChangeCallback(this.toggle);
-                this.onChange.emit(this.toggle);
+                this.userChange.emit(this.toggle);
             }
         }
     }

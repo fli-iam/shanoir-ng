@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.vip.execution.service;
 
 import org.shanoir.ng.dataset.model.Dataset;
@@ -18,18 +32,20 @@ import java.util.*;
 @Service
 public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
 
-    @Value("${vip-data-folder}")
+    @Value("${storage.file-system.vip-data}")
     private String trackingFilePrefixe;
 
-    private int MAX_LAST_LINES_TO_CHECK = 10;
+    private static final int MAX_LAST_LINES_TO_CHECK = 10;
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionTrackingServiceImpl.class);
 
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
 
-    public enum execStatus {VALID, SENT}
+    public enum ExecStatus { VALID, SENT }
 
-    public void updateTrackingFile(ExecutionMonitoring executionMonitoring, execStatus execStatus) {
+    private final Object lock = new Object();
+
+    public void updateTrackingFile(ExecutionMonitoring executionMonitoring, ExecStatus execStatus) {
         try {
             File trackingFile = new File(getTrackingFilePath(executionMonitoring));
             createTrackingFile(trackingFile);
@@ -45,31 +61,32 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
     }
 
     public void completeTracking(ExecutionMonitoring executionMonitoring, DatasetProcessing newProcessing) {
-        try {
-            File trackingFile = new File(getTrackingFilePath(executionMonitoring));
-            List<String> lastLines = getLastLines(trackingFile);
+        synchronized (lock) {
+            try {
+                File trackingFile = new File(getTrackingFilePath(executionMonitoring));
+                List<String> lastLines = getLastLines(trackingFile);
 
-            boolean retrievedLine = false;
-            for (String line : lastLines) {
-                List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(",")));
+                boolean retrievedLine = false;
+                for (String line : lastLines) {
+                    List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(",")));
 
-                if(Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
-                    lineParts.set(1, newProcessing.getId().toString());
-                    lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("error.yaml", file.getName())) ? "true" : "false");
-                    lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("results.yaml", file.getName())) ? "true" : "false");
+                    if (Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
+                        lineParts.set(1, newProcessing.getId().toString());
+                        lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("error.yaml", file.getName())) ? "true" : "false");
+                        lineParts.add(newProcessing.getOutputDatasets().stream().anyMatch(file -> Objects.equals("results.yaml", file.getName())) ? "true" : "false");
 
-                    lastLines.set(lastLines.indexOf(line), String.join(",", lineParts));
-                    retrievedLine = true;
-                    break;
+                        lastLines.set(lastLines.indexOf(line), String.join(",", lineParts));
+                        retrievedLine = true;
+                        break;
+                    }
                 }
+                if (!retrievedLine) {
+                    throw new ShanoirException("Execution monitoring tracking line is lost, can not complete line.");
+                }
+                writeLastLines(lastLines, trackingFile);
+            } catch (IOException | ShanoirException e) {
+                LOG.error("An error occured while trying to write in VIP tracking file", e);
             }
-            if (!retrievedLine) {
-                throw new ShanoirException("Execution monitoring tracking line is lost, can not complete line.");
-            }
-
-            writeLastLines(lastLines, trackingFile);
-        } catch (IOException | ShanoirException e) {
-            LOG.error("An error occured while trying to write in VIP tracking file", e);
         }
     }
 
@@ -77,7 +94,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      * Create a new line for the execution input
      */
     private void createTrackingLine(ExecutionMonitoring executionMonitoring, File trackingFile) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile,true));) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile, true));) {
 
             String newLine;
 
@@ -87,7 +104,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
             newLine += executionMonitoring.getInputDatasets().getFirst().getDatasetAcquisition().getExamination().getId() + ",";
             newLine += executionMonitoring.getInputDatasets().stream().map(dataset -> String.valueOf(dataset.getId())).reduce((id1, id2) -> id1 + " / " + id2).orElse("") + ",";
             String names = executionMonitoring.getInputDatasets().stream().filter(dataset -> Objects.nonNull(dataset.getOriginMetadata())).map(Dataset::getName).reduce((id1, id2) -> id1 + " / " + id2).orElse("");
-            newLine += (names.length() > 66 ? names.substring(0, 66) : names ) + ",,,";
+            newLine += (names.length() > 66 ? names.substring(0, 66) : names) + ",,,";
 
             writer.write(newLine);
         } catch (IOException e) {
@@ -99,23 +116,25 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      * Update the execution monitoring line (at VIP sending moment)
      */
     private void updateTrackingLine(ExecutionMonitoring executionMonitoring, File trackingFile) throws IOException, ShanoirException {
-        List<String> lastLines = getLastLines(trackingFile);
+        synchronized (lock) {
+            List<String> lastLines = getLastLines(trackingFile);
 
-        boolean retrievedLine = false;
-        for (String line : lastLines) {
-            List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(",")));
+            boolean retrievedLine = false;
+            for (String line : lastLines) {
+                List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(",")));
 
-            if (Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
-                lineParts.add("true,,");
-                lastLines.set(lastLines.indexOf(line), String.join(",", lineParts));
-                retrievedLine = true;
-                break;
+                if (Long.parseLong(lineParts.get(1)) == executionMonitoring.getId()) {
+                    lineParts.add("true,,");
+                    lastLines.set(lastLines.indexOf(line), String.join(",", lineParts));
+                    retrievedLine = true;
+                    break;
+                }
             }
+            if (!retrievedLine) {
+                throw new ShanoirException("Execution monitoring tracking line is lost, can not update line.");
+            }
+            writeLastLines(lastLines, trackingFile);
         }
-        if (!retrievedLine) {
-            throw new ShanoirException("Execution monitoring tracking line is lost, can not update line.");
-        }
-        writeLastLines(lastLines, trackingFile);
     }
 
     /**
@@ -148,7 +167,7 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
     /**
      * Rewrite the lines at the end of the files according to MAX_LAST_LINES_TO_CHECK
      */
-    private synchronized void writeLastLines(List<String> lastLines, File trackingFile) {
+    private void writeLastLines(List<String> lastLines, File trackingFile) {
         List<String> lines = null;
         try {
             //BufferedWriter clear file, so we need to read it before opening buffer
@@ -156,11 +175,11 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
         } catch (IOException e) {
             LOG.error("An error occured while reading files in VIP tracking file", e);
         }
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile))) {
             List<String> updatedLines = lines.subList(0, Math.max(1, lines.size() - MAX_LAST_LINES_TO_CHECK));
             updatedLines.addAll(lastLines);
 
-            for(String line : updatedLines.subList(0, updatedLines.size() - 1)) {
+            for (String line : updatedLines.subList(0, updatedLines.size() - 1)) {
                 writer.write(line);
                 writer.newLine();
             }
@@ -183,9 +202,9 @@ public class ExecutionTrackingServiceImpl implements ExecutionTrackingService {
      */
     private void createTrackingFile(File trackingFile) throws IOException {
         new File(trackingFilePrefixe).mkdirs();
-        if(trackingFile.createNewFile()) {
+        if (trackingFile.createNewFile()) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(trackingFile));) {
-                String headers = "Date (HH:mm dd/MM/yyyy),Processing_id,Exam_id,Dataset_id,Dataset_name,Sent_to_VIP,Error_file,Result_file";
+                String headers = "Date (HH:mm dd/MM/yyyy),Processing_id,Exam_id,Dataset_id,Dataset_name,Sent_to_VIP,Status,Results_file";
                 writer.write(headers);
             } catch (IOException e) {
                 LOG.error("An error occured while creating VIP tracking file", e);

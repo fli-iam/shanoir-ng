@@ -12,14 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, Input, OnChanges, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
-import { Router } from '@angular/router';
-import { StudyCardService } from '../../study-cards/shared/study-card.service';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { Entity } from 'src/app/shared/components/entity/entity.abstract';
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { QualityCardService } from 'src/app/study-cards/shared/quality-card.service';
 import { isDarkColor } from 'src/app/utils/app.utils';
 import { SuperPromise } from 'src/app/utils/super-promise';
+
+import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import {
     MemberNode,
@@ -34,6 +36,13 @@ import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { TreeService } from '../study/tree.service';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { SubjectNodeComponent } from '../../subjects/tree/subject-node.component';
+import { CenterNodeComponent } from '../../centers/tree/center-node.component';
+import { StudyCardNodeComponent } from '../../study-cards/tree/study-card-node.component';
+import { MemberNodeComponent } from '../../users/tree/member-node.component';
 
 export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
 
@@ -41,7 +50,7 @@ export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
     selector: 'study-node',
     templateUrl: 'study-node.component.html',
     styleUrls: ['study-node.component.css'],
-    standalone: false
+    imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, FormsModule, SubjectNodeComponent, CenterNodeComponent, StudyCardNodeComponent, MemberNodeComponent]
 })
 
 export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> implements OnChanges {
@@ -86,7 +95,7 @@ export class StudyNodeComponent extends TreeNodeAbstractComponent<StudyNode> imp
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
-            let id: number = this.input instanceof StudyNode ? this.input.id : this.input.study.id;
+            const id: number = this.input instanceof StudyNode ? this.input.id : this.input.study.id;
             this.idPromise.resolve(id);
             if (this.input instanceof StudyNode) {
                 this.node = this.input;

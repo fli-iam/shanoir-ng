@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.utils;
 
 import java.awt.Dimension;
@@ -17,7 +31,6 @@ import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.service.QualityService;
-import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.ExaminationData;
@@ -35,129 +48,126 @@ import org.slf4j.LoggerFactory;
  */
 public class QualityUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(QualityUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(QualityUtils.class);
 
-	private static QualityService qualityService = new QualityService();
+    private static QualityService qualityService = new QualityService();
 
-	private static ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
+    private static ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
 
-	private static DatasetsCreatorService datasetsCreatorService = new DatasetsCreatorService();
+    private static DatasetsCreatorService datasetsCreatorService = new DatasetsCreatorService();
 
-	public static QualityCardResult checkQualityAtImport(ImportJob importJob, boolean isImportFromPACS) throws Exception {
+    public static QualityCardResult checkQualityAtImport(ImportJob importJob, boolean isImportFromPACS) throws Exception {
 
-		QualityCardResult qualityCardResult = new QualityCardResult();
-		ExaminationData examinationData = new ExaminationData();
-		SubjectStudy subjectStudy = new SubjectStudy();
-		final File importJobDir = new File(importJob.getWorkFolder());
-		List<QualityCard> qualityCards = new ArrayList<>();
-		
-		// Call Shanoir server to get all quality cards for the selected study
-		try {
-			qualityCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findQualityCardsByStudyId(importJob.getStudyId());
-		} catch (Exception e) {
-			logger.error("Error while retrieving quality cards from server for study " + importJob.getStudyId() + " : " + e.getMessage());
-			throw e;
-		}
+        QualityCardResult qualityCardResult = new QualityCardResult();
+        ExaminationData examinationData = new ExaminationData();
+        final File importJobDir = new File(importJob.getWorkFolder());
+        List<QualityCard> qualityCards = new ArrayList<>();
 
-		// If no quality cards are found for the study we skip the quality control
-		if (qualityCards == null || qualityCards.isEmpty()) {
-			logger.info("Quality Control At Import - No quality cards found for study " + importJob.getStudyId());
-			return qualityCardResult;
-		}
-		
-		// Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
-		imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), isImportFromPACS, null, true);
+        // Call Shanoir server to get all quality cards for the selected study
+        try {
+            qualityCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findQualityCardsByStudyId(importJob.getStudyId());
+        } catch (Exception e) {
+            LOG.error("Error while retrieving quality cards from server for study " + importJob.getStudyId() + " : " + e.getMessage());
+            throw e;
+        }
 
-		// Construct Dicom datasets from images
-		for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
-			List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
-			for (Iterator<org.shanoir.ng.importer.model.Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-				org.shanoir.ng.importer.model.Study study = studiesIt.next();
-				List<Serie> series = study.getSelectedSeries();
-				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
-					Serie serie = seriesIt.next();
-					try {
-						serie.setDatasets(new ArrayList<Dataset>());
-						datasetsCreatorService.constructDicom(null, serie, true);
-					} catch (SecurityException e) {
-						logger.error(e.getMessage());
-					}
-				}
-			}
-		}
+        // If no quality cards are found for the study we skip the quality control
+        if (qualityCards == null || qualityCards.isEmpty()) {
+            LOG.info("Quality Control At Import - No quality cards found for study " + importJob.getStudyId());
+            return qualityCardResult;
+        }
 
-		// Convert Import ms ImportJob into Datasets ms ImportJob
-		org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
+        // Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
+        imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), isImportFromPACS, null, true);
 
-		examinationData.setStudyId(importJob.getStudyId());
-		// Set an Id to the subjectStudy to retrieve the qualityTag
-		subjectStudy.setId(importJob.getSubject().getId());
-		examinationData.setSubjectStudy(subjectStudy);
+        // Construct Dicom datasets from images
+        for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
+            List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
+            for (Iterator<org.shanoir.ng.importer.model.Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
+                org.shanoir.ng.importer.model.Study study = studiesIt.next();
+                List<Serie> series = study.getSelectedSeries();
+                for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
+                    Serie serie = seriesIt.next();
+                    try {
+                        serie.setDatasets(new ArrayList<Dataset>());
+                        datasetsCreatorService.constructDicom(null, serie, true);
+                    } catch (SecurityException e) {
+                        LOG.error(e.getMessage());
+                    }
+                }
+            }
+        }
 
-		try {
-			qualityCardResult = qualityService.checkQuality(examinationData, importJobDto, qualityCards);
-		} catch (Exception e) {
-			logger.error("Error while checking quality at import for examination " + importJob.getExaminationId() + " : " + e.getMessage());
-			throw e;
-		}
-		
-		return qualityCardResult;
-	}
+        // Convert Import ms ImportJob into Datasets ms ImportJob
+        org.shanoir.ng.importer.dto.ImportJob importJobDto = convertImportJob(importJob);
 
-	/**
-	 * Convert ImportJob from import ms as used by Shanoir Uploader into Datasets ImportJob needed to call the ImporterService.checkQuality() method
-	 * @param importJob
-	 * @return
-	 */
-	private static org.shanoir.ng.importer.dto.ImportJob convertImportJob(ImportJob importJob) {
-		org.shanoir.ng.importer.dto.ImportJob importJobDto = new org.shanoir.ng.importer.dto.ImportJob();
-		List<Patient> patients = new ArrayList<>();
-		Patient patient = new Patient();
-		List<Study> studies = new ArrayList<>();
-		// Until modifications of ImportUtils.java are done (get rid of Patients List), we browse the DICOM tree
-		studies.add(StudyMapper.INSTANCE.toDto(importJob.getPatients().get(0).getStudies().get(0)));
-		patient.setStudies(studies);
-		patients.add(patient);
-		importJobDto.setExaminationId(importJob.getExaminationId());
-		importJobDto.setTimestamp(importJob.getTimestamp());
-		importJobDto.setFromDicomZip(importJob.isFromDicomZip());
-		importJobDto.setFromShanoirUploader(Boolean.TRUE);
-		importJobDto.setFromPacs(importJob.isFromPacs());
-		importJobDto.setWorkFolder(importJob.getWorkFolder());
-		importJobDto.setPatients(patients);
-		importJobDto.setUserId(importJob.getUserId());
-		importJobDto.setUsername(importJob.getUsername());
-		return importJobDto;
-	}
+        examinationData.setStudyId(importJob.getStudyId());
+        examinationData.setSubjectId(importJob.getSubject().getId());
 
-	public static String getQualityControlreport(QualityCardResult qualityCardResult) {
-		String qualityCardReport = "";
+        try {
+            qualityCardResult = qualityService.checkQuality(examinationData, importJobDto, qualityCards);
+        } catch (Exception e) {
+            LOG.error("Error while checking quality at import for examination " + importJob.getExaminationId() + " : " + e.getMessage());
+            throw e;
+        }
 
-		if (!qualityCardResult.isEmpty()) {
-			for (QualityCardResultEntry entry : qualityCardResult) {
-				//We set two return lines to separate the different quality card entries
-				qualityCardReport = qualityCardReport + entry.getMessage() + "\n" + "\n";
-			}
-		}
+        return qualityCardResult;
+    }
 
-		return qualityCardReport;
-	}
+    /**
+     * Convert ImportJob from import ms as used by Shanoir Uploader into Datasets ImportJob needed to call the ImporterService.checkQuality() method
+     * @param importJob
+     * @return
+     */
+    private static org.shanoir.ng.importer.dto.ImportJob convertImportJob(ImportJob importJob) {
+        org.shanoir.ng.importer.dto.ImportJob importJobDto = new org.shanoir.ng.importer.dto.ImportJob();
+        List<Patient> patients = new ArrayList<>();
+        Patient patient = new Patient();
+        List<Study> studies = new ArrayList<>();
+        // Until modifications of ImportUtils.java are done (get rid of Patients List), we browse the DICOM tree
+        studies.add(StudyMapper.INSTANCE.toDto(importJob.getPatients().get(0).getStudies().get(0)));
+        patient.setStudies(studies);
+        patients.add(patient);
+        importJobDto.setExaminationId(importJob.getExaminationId());
+        importJobDto.setTimestamp(importJob.getTimestamp());
+        importJobDto.setFromDicomZip(importJob.isFromDicomZip());
+        importJobDto.setFromShanoirUploader(Boolean.TRUE);
+        importJobDto.setFromPacs(importJob.isFromPacs());
+        importJobDto.setWorkFolder(importJob.getWorkFolder());
+        importJobDto.setPatients(patients);
+        importJobDto.setUserId(importJob.getUserId());
+        importJobDto.setUsername(importJob.getUsername());
+        return importJobDto;
+    }
 
-	public static JScrollPane getQualityControlreportScrollPane(QualityCardResult qualityControlResult) {
-		String message = new String();
-		if (qualityControlResult.hasError()) {
-			message = ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.failed.message");
-		} else if (qualityControlResult.hasWarning() || qualityControlResult.hasFailedValid()) {
-			message = ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.warning.message");
-		}
-		JTextArea textArea = new JTextArea(message + getQualityControlreport(qualityControlResult));
+    public static String getQualityControlreport(QualityCardResult qualityCardResult) {
+        String qualityCardReport = "";
+
+        if (!qualityCardResult.isEmpty()) {
+            for (QualityCardResultEntry entry : qualityCardResult) {
+                //We set two return lines to separate the different quality card entries
+                qualityCardReport = qualityCardReport + entry.getMessage() + "\n" + "\n";
+            }
+        }
+
+        return qualityCardReport;
+    }
+
+    public static JScrollPane getQualityControlreportScrollPane(QualityCardResult qualityControlResult) {
+        String message = new String();
+        if (qualityControlResult.hasError()) {
+            message = ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.failed.message");
+        } else if (qualityControlResult.hasWarning() || qualityControlResult.hasFailedValid()) {
+            message = ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.warning.message");
+        }
+        JTextArea textArea = new JTextArea(message + getQualityControlreport(qualityControlResult));
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setEditable(false);
-		textArea.setPreferredSize(new Dimension(800, 300));
-		JScrollPane scrollPane = new JScrollPane(textArea);
+        textArea.setPreferredSize(new Dimension(800, 300));
+        JScrollPane scrollPane = new JScrollPane(textArea);
 
-		return scrollPane;
-	}
+        return scrollPane;
+    }
 
 }

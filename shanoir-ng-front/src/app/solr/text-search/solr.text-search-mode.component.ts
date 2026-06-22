@@ -11,32 +11,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { slideDown } from '../../shared/animations/animations';
+import { Component, EventEmitter, forwardRef, Output, SimpleChanges, OnChanges } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+
+import { ToggleSwitchComponent } from '../../shared/switch/switch.component';
+
 
 
 @Component({
     selector: 'solr-text-search-mode',
     templateUrl: 'solr.text-search-mode.component.html',
     styleUrls: ['solr.text-search.component.css'],
-    animations: [slideDown],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => SolrTextSearchModeComponent),
-          multi: true,
-        }],
-    standalone: false
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SolrTextSearchModeComponent),
+            multi: true,
+        }
+    ],
+    imports: [ToggleSwitchComponent, FormsModule]
 })
 
-export class SolrTextSearchModeComponent implements ControlValueAccessor {
+export class SolrTextSearchModeComponent implements ControlValueAccessor, OnChanges {
 
     showInfo: boolean = false;
-    @Output() onChange: EventEmitter<boolean> = new EventEmitter();
+    @Output() userChange: EventEmitter<boolean> = new EventEmitter();
     expertMode: boolean = false;
-    protected propagateChange = (_: any) => {};
-    protected propagateTouched = () => {};
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['expertMode']) {
@@ -52,7 +54,7 @@ export class SolrTextSearchModeComponent implements ControlValueAccessor {
 
     onExpertModeUserChange() {
         this.onExpertModeChange();
-        this.onChange.emit(this.expertMode);
+        this.userChange.emit(this.expertMode);
     }
 
     writeValue(value: boolean): void {

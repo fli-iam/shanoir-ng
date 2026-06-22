@@ -12,14 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { StudyCard } from '../shared/study-card.model';
-import { StudyCardListComponent } from './study-card-list.component';
 import { StudyCardService } from '../shared/study-card.service';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
-import { ActivatedRoute } from '@angular/router';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { TableComponent } from '../../shared/components/table/table.component';
+
+import { StudyCardListComponent } from './study-card-list.component';
 
 
 
@@ -27,7 +29,7 @@ import { ColumnDefinition } from '../../shared/components/table/column.definitio
     selector: 'study-card-list-for-rules',
     templateUrl: 'study-card-list-for-rules.component.html',
     styleUrls: ['study-card-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class StudyCardForRulesListComponent extends StudyCardListComponent implements OnInit {
 
@@ -39,7 +41,6 @@ export class StudyCardForRulesListComponent extends StudyCardListComponent imple
             private activatedRoute: ActivatedRoute) {
 
         super(studyCardService, acqEqptLabelPipe);
-        this.breadcrumbsService.resetMilestone();
     }
 
     ngOnInit() {
@@ -48,7 +49,7 @@ export class StudyCardForRulesListComponent extends StudyCardListComponent imple
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Name", field: "name" },
             { headerName: "Study", field: 'study.name', defaultField: 'study.id' },
             { headerName: "Acquisition Center", field: 'acquisitionEquipment.center.name'},
@@ -74,8 +75,8 @@ export class StudyCardForRulesListComponent extends StudyCardListComponent imple
     }
 
     onRowClick(sc: StudyCard) {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/study-card/select-rule/select/' + sc.id]).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/study-card/select-rule/select/' + sc.id]).then(() => {
             this.breadcrumbsService.currentStep.label = 'Import rule';
             this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {

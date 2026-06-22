@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.gui;
 
 import java.awt.Container;
@@ -24,188 +38,188 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- *	This class is the Proxy GUI which allows an user to configure the proxy
+ *    This class is the Proxy GUI which allows an user to configure the proxy
  *  in order to access the remote Shanoir server.
- * 
+ *
  * @author arno
  * @author mkain
- * 
+ *
  */
 @SuppressWarnings("serial")
 @Component
 public class ProxyConfigurationPanel extends JPanel {
 
-	public JLabel enableProxyLabel;
-	public JCheckBox enableProxyCB;
-	public JLabel secureSslProxyLabel;
-	public JCheckBox secureSslProxyCB;
-	public JLabel httpHostLabel;
-	public JTextField httpHostText;
-	public JLabel httpPortLabel;
-	public JTextField httpPortText;
-	public JLabel httpLoginLabel;
-	public JTextField httpLoginText;
-	public JLabel httpPasswordLabel;
-	public JPasswordField httpPasswordText;
-	public JButton httpConnect;
+    public JLabel enableProxyLabel;
+    public JCheckBox enableProxyCB;
+    public JLabel secureSslProxyLabel;
+    public JCheckBox secureSslProxyCB;
+    public JLabel httpHostLabel;
+    public JTextField httpHostText;
+    public JLabel httpPortLabel;
+    public JTextField httpPortText;
+    public JLabel httpLoginLabel;
+    public JTextField httpLoginText;
+    public JLabel httpPasswordLabel;
+    public JPasswordField httpPasswordText;
+    public JButton httpConnect;
 
-	@Autowired
-	private ProxyPanelActionListener proxyPanelActionListener;
+    @Autowired
+    private ProxyPanelActionListener proxyPanelActionListener;
 
-	public void configure(StartupStateContext sSC) {
-		Container container = new Container();
-		container.setLayout(new GridBagLayout());
-		GridBagConstraints shanoirStartupGBC = new GridBagConstraints();
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		this.add(container);
+    public void configure(StartupStateContext sSC) {
+        Container container = new Container();
+        container.setLayout(new GridBagLayout());
+        GridBagConstraints shanoirStartupGBC = new GridBagConstraints();
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        this.add(container);
 
-		this.setBorder(new EmptyBorder(5, 5, 5, 5));
+        this.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-		enableProxyLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.proxy.activate"));
-		enableProxyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		shanoirStartupGBC.weightx = 0.2;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 0;
-		shanoirStartupGBC.gridy = 0;
-		container.add(enableProxyLabel, shanoirStartupGBC);
+        enableProxyLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.proxy.activate"));
+        enableProxyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        shanoirStartupGBC.weightx = 0.2;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 0;
+        shanoirStartupGBC.gridy = 0;
+        container.add(enableProxyLabel, shanoirStartupGBC);
 
-		enableProxyCB = new JCheckBox();
-		enableProxyCB.setHorizontalAlignment(SwingConstants.LEFT);
-		shanoirStartupGBC.weightx = 0.7;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 2;
-		shanoirStartupGBC.gridy = 0;
-		container.add(enableProxyCB, shanoirStartupGBC);
-		ActionListener actionListener = new ActionListener() {
-			public void actionPerformed(ActionEvent actionEvent) {
-				if (enableProxyCB.isSelected()) {
-					secureSslProxyCB.setEnabled(true);
-					httpHostText.setEnabled(true);
-					httpPortText.setEnabled(true);
-					httpLoginText.setEnabled(true);
-					httpPasswordText.setEnabled(true);
-				} else {
-					secureSslProxyCB.setSelected(false);
-					secureSslProxyCB.setEnabled(false);
-					httpHostText.setText("");
-					httpHostText.setEnabled(false);
-					httpPortText.setText("");
-					httpPortText.setEnabled(false);
-					httpLoginText.setText("");
-					httpLoginText.setEnabled(false);
-					httpPasswordText.setText("");
-					httpPasswordText.setEnabled(false);
-				}
-			}
-		};
-		enableProxyCB.addActionListener(actionListener);
-		
-		secureSslProxyLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.proxy.ssl"));
-		secureSslProxyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		shanoirStartupGBC.weightx = 0.2;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 0;
-		shanoirStartupGBC.gridy = 1;
-		container.add(secureSslProxyLabel, shanoirStartupGBC);
+        enableProxyCB = new JCheckBox();
+        enableProxyCB.setHorizontalAlignment(SwingConstants.LEFT);
+        shanoirStartupGBC.weightx = 0.7;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 2;
+        shanoirStartupGBC.gridy = 0;
+        container.add(enableProxyCB, shanoirStartupGBC);
+        ActionListener actionListener = new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                if (enableProxyCB.isSelected()) {
+                    secureSslProxyCB.setEnabled(true);
+                    httpHostText.setEnabled(true);
+                    httpPortText.setEnabled(true);
+                    httpLoginText.setEnabled(true);
+                    httpPasswordText.setEnabled(true);
+                } else {
+                    secureSslProxyCB.setSelected(false);
+                    secureSslProxyCB.setEnabled(false);
+                    httpHostText.setText("");
+                    httpHostText.setEnabled(false);
+                    httpPortText.setText("");
+                    httpPortText.setEnabled(false);
+                    httpLoginText.setText("");
+                    httpLoginText.setEnabled(false);
+                    httpPasswordText.setText("");
+                    httpPasswordText.setEnabled(false);
+                }
+            }
+        };
+        enableProxyCB.addActionListener(actionListener);
 
-		secureSslProxyCB = new JCheckBox();
-		secureSslProxyCB.setHorizontalAlignment(SwingConstants.LEFT);
-		shanoirStartupGBC.weightx = 0.7;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 2;
-		shanoirStartupGBC.gridy = 1;
-		container.add(secureSslProxyCB, shanoirStartupGBC);
+        secureSslProxyLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.proxy.ssl"));
+        secureSslProxyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        shanoirStartupGBC.weightx = 0.2;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 0;
+        shanoirStartupGBC.gridy = 1;
+        container.add(secureSslProxyLabel, shanoirStartupGBC);
 
-		httpHostLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.proxy.host"));
-		httpHostLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		shanoirStartupGBC.weightx = 0.2;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 0;
-		shanoirStartupGBC.gridy = 2;
-		container.add(httpHostLabel, shanoirStartupGBC);
+        secureSslProxyCB = new JCheckBox();
+        secureSslProxyCB.setHorizontalAlignment(SwingConstants.LEFT);
+        shanoirStartupGBC.weightx = 0.7;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 2;
+        shanoirStartupGBC.gridy = 1;
+        container.add(secureSslProxyCB, shanoirStartupGBC);
 
-		httpHostText = new JTextField("");
-		httpHostText.setPreferredSize(new Dimension(150, 20));
-		httpHostText.setHorizontalAlignment(SwingConstants.LEFT);
-		shanoirStartupGBC.weightx = 0.7;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 2;
-		shanoirStartupGBC.gridy = 2;
-		container.add(httpHostText, shanoirStartupGBC);
+        httpHostLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.proxy.host"));
+        httpHostLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        shanoirStartupGBC.weightx = 0.2;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 0;
+        shanoirStartupGBC.gridy = 2;
+        container.add(httpHostLabel, shanoirStartupGBC);
 
-		httpPortLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.proxy.port"));
-		httpPortLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		shanoirStartupGBC.weightx = 0.2;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 0;
-		shanoirStartupGBC.gridy = 3;
-		container.add(httpPortLabel, shanoirStartupGBC);
+        httpHostText = new JTextField("");
+        httpHostText.setPreferredSize(new Dimension(150, 20));
+        httpHostText.setHorizontalAlignment(SwingConstants.LEFT);
+        shanoirStartupGBC.weightx = 0.7;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 2;
+        shanoirStartupGBC.gridy = 2;
+        container.add(httpHostText, shanoirStartupGBC);
 
-		httpPortText = new JTextField("");
-		httpPortText.setPreferredSize(new Dimension(150, 20));
-		httpPortText.setHorizontalAlignment(SwingConstants.LEFT);
-		shanoirStartupGBC.weightx = 0.7;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 2;
-		shanoirStartupGBC.gridy = 3;
-		container.add(httpPortText, shanoirStartupGBC);
+        httpPortLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.proxy.port"));
+        httpPortLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        shanoirStartupGBC.weightx = 0.2;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 0;
+        shanoirStartupGBC.gridy = 3;
+        container.add(httpPortLabel, shanoirStartupGBC);
 
-		httpLoginLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.login"));
-		httpLoginLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		shanoirStartupGBC.weightx = 0.2;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 0;
-		shanoirStartupGBC.gridy = 4;
-		container.add(httpLoginLabel, shanoirStartupGBC);
+        httpPortText = new JTextField("");
+        httpPortText.setPreferredSize(new Dimension(150, 20));
+        httpPortText.setHorizontalAlignment(SwingConstants.LEFT);
+        shanoirStartupGBC.weightx = 0.7;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 2;
+        shanoirStartupGBC.gridy = 3;
+        container.add(httpPortText, shanoirStartupGBC);
 
-		httpLoginText = new JTextField("");
-		httpLoginText.setPreferredSize(new Dimension(150, 20));
-		httpLoginText.setHorizontalAlignment(SwingConstants.LEFT);
-		shanoirStartupGBC.weightx = 0.7;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 2;
-		shanoirStartupGBC.gridy = 4;
-		container.add(httpLoginText, shanoirStartupGBC);
+        httpLoginLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.login"));
+        httpLoginLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        shanoirStartupGBC.weightx = 0.2;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 0;
+        shanoirStartupGBC.gridy = 4;
+        container.add(httpLoginLabel, shanoirStartupGBC);
 
-		httpPasswordLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.password"));
-		httpPasswordLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		shanoirStartupGBC.weightx = 0.2;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 0;
-		shanoirStartupGBC.gridy = 5;
-		container.add(httpPasswordLabel, shanoirStartupGBC);
+        httpLoginText = new JTextField("");
+        httpLoginText.setPreferredSize(new Dimension(150, 20));
+        httpLoginText.setHorizontalAlignment(SwingConstants.LEFT);
+        shanoirStartupGBC.weightx = 0.7;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 2;
+        shanoirStartupGBC.gridy = 4;
+        container.add(httpLoginText, shanoirStartupGBC);
 
-		httpPasswordText = new JPasswordField();
-		httpPasswordText.setPreferredSize(new Dimension(150, 20));
-		httpPasswordText.setHorizontalAlignment(SwingConstants.LEFT);
-		shanoirStartupGBC.weightx = 0.7;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 2;
-		shanoirStartupGBC.gridy = 5;
-		container.add(httpPasswordText, shanoirStartupGBC);
+        httpPasswordLabel = new JLabel(ShUpConfig.resourceBundle.getString("shanoir.uploader.password"));
+        httpPasswordLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        shanoirStartupGBC.weightx = 0.2;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 0;
+        shanoirStartupGBC.gridy = 5;
+        container.add(httpPasswordLabel, shanoirStartupGBC);
 
-		httpConnect = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.proxy.save"));
-		httpConnect.setPreferredSize(new Dimension(150, 20));
-		httpConnect.setHorizontalAlignment(SwingConstants.CENTER);
-		shanoirStartupGBC.weightx = 0.7;
-		shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
-		shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
-		shanoirStartupGBC.gridx = 2;
-		shanoirStartupGBC.gridy = 6;
-		container.add(httpConnect, shanoirStartupGBC);
-		proxyPanelActionListener.configure(this, sSC);
-		httpConnect.addActionListener(proxyPanelActionListener);
-	}
+        httpPasswordText = new JPasswordField();
+        httpPasswordText.setPreferredSize(new Dimension(150, 20));
+        httpPasswordText.setHorizontalAlignment(SwingConstants.LEFT);
+        shanoirStartupGBC.weightx = 0.7;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 2;
+        shanoirStartupGBC.gridy = 5;
+        container.add(httpPasswordText, shanoirStartupGBC);
+
+        httpConnect = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.proxy.save"));
+        httpConnect.setPreferredSize(new Dimension(150, 20));
+        httpConnect.setHorizontalAlignment(SwingConstants.CENTER);
+        shanoirStartupGBC.weightx = 0.7;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 2;
+        shanoirStartupGBC.gridy = 6;
+        container.add(httpConnect, shanoirStartupGBC);
+        proxyPanelActionListener.configure(this, sSC);
+        httpConnect.addActionListener(proxyPanelActionListener);
+    }
 }

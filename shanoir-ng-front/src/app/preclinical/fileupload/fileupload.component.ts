@@ -12,16 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, Input, Output, EventEmitter, ViewChild, Injectable } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { lastValueFrom, Observable, share } from 'rxjs';
 
 import { FileUploadReady } from './fileUploadReady.model';
-import { Observable } from 'rxjs';
 
 @Component({
     selector: 'file-upload',
-    template: '<input type="file" [multiple]="multiple" #fileInput>',
-    standalone: false
+    template: '<input type="file" [multiple]="multiple" #fileInput>'
 })
 
 export class FileUploadComponent {
@@ -38,16 +37,17 @@ export class FileUploadComponent {
     progressObserver: any;
 
     constructor(private http: HttpClient) {
-       this.progress$ = Observable.create(observer => {
-        this.progressObserver = observer}).share();    
+        this.progress$ = new Observable(observer => {
+            this.progressObserver = observer;
+        }).pipe(share());
     }
     
     public prepareUploadRequest(){
         
         this.fileUploadReady = new FileUploadReady();
-        let inputEl: HTMLInputElement = this.inputEl.nativeElement;
-        let fileCount: number = inputEl.files.length;            
-        let formData = new FormData();
+        const inputEl: HTMLInputElement = this.inputEl.nativeElement;
+        const fileCount: number = inputEl.files.length;            
+        const formData = new FormData();
         this.fileUploadReady.xhr = new XMLHttpRequest();
         this.fileUploadReady.formData = new FormData();
     
@@ -68,9 +68,9 @@ export class FileUploadComponent {
             
         }
         this.fileUploadReady.formData = formData;
-        if(this.url && this.auto == true){
-            this.uploadRequest(this.url).subscribe();
-        }else{
+        if (this.url && this.auto == true){
+            lastValueFrom(this.uploadRequest(this.url));
+        } else{
             this.selectedFile.emit(this.fileUploadReady);
         }
         
@@ -78,7 +78,7 @@ export class FileUploadComponent {
     
     
     private uploadRequest (url: string): Observable<any> {
-        return Observable.create(observer => {
+        return new Observable(observer => {
             this.fileUploadReady.xhr.onreadystatechange = () => {
                 if (this.fileUploadReady.xhr.readyState === 4) {
                     if (this.fileUploadReady.xhr.status === 200) {

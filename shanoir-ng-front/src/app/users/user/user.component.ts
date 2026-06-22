@@ -12,28 +12,36 @@
 * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 */
 import { Component } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import {
+    AbstractControl, FormsModule, ReactiveFormsModule, UntypedFormControl, UntypedFormGroup, ValidationErrors,
+    ValidatorFn, Validators
+} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { StudyUser } from 'src/app/studies/shared/study-user.model';
 import { StudyService } from 'src/app/studies/shared/study.service';
+import { Selection } from 'src/app/studies/study/tree.service';
+
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';
+import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 import { Study } from "../../studies/shared/study.model";
 import { KEYCLOAK_BASE_URL } from "../../utils/app.utils";
+import { AccountRequestInfoComponent } from '../account-request-info/account-request-info.component';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { StudyUser } from 'src/app/studies/shared/study-user.model';
-
 
 @Component({
     selector: 'user-detail',
     templateUrl: 'user.component.html',
     styleUrls: ['user.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, DatepickerComponent, CheckboxComponent, AccountRequestInfoComponent, LocalDateFormatPipe]
 })
 
 export class UserComponent extends EntityComponent<User> {
@@ -43,13 +51,19 @@ export class UserComponent extends EntityComponent<User> {
     public acceptLoading: boolean = false;
     public studies = [];
     public studyToDelete = [];
+    protected showTreeByDefault: boolean = false;
+    public dateDisplay = dateDisplay;
 
     constructor(
             private route: ActivatedRoute,
             private userService: UserService,
             private roleService: RoleService,
             private studyService: StudyService) {
-        super(route, 'user');
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'user';
     }
 
     public get user(): User { return this.entity; }
@@ -89,8 +103,8 @@ export class UserComponent extends EntityComponent<User> {
         if (user.extensionRequestDemand && user.extensionRequestInfo) {
             user.expirationDate = user.extensionRequestInfo.extensionDate;
         }
-        let studyUsersPromise: Promise<void> = this.studyService.findStudiesByUserId().then(studies => {
-            let studyUserList: StudyUser[] = [];
+        const studyUsersPromise: Promise<void> = this.studyService.findStudiesByUserId().then(studies => {
+            const studyUserList: StudyUser[] = [];
             this.studies = [];
             studies.forEach(s => {
                 s.studyUserList.forEach(su => {
@@ -102,7 +116,7 @@ export class UserComponent extends EntityComponent<User> {
             });
             user.studyUserList = studyUserList;
         });
-        let rolesPromise = this.getRoles().then(() => {
+        const rolesPromise = this.getRoles().then(() => {
             user.role = this.getRoleById(user.role.id);
         });
         return Promise.all([studyUsersPromise, rolesPromise]).then();
@@ -130,7 +144,7 @@ export class UserComponent extends EntityComponent<User> {
     deny(): void {
         this.denyLoading = true;
         this.userService.denyAccountRequest(this.id)
-            .then((user) => {
+            .then(() => {
                 this.consoleService.log('info', 'The request for user "' + this.user.username + '" has been denied !');
                 this.goBack();
                 this.denyLoading = false;
@@ -141,15 +155,17 @@ export class UserComponent extends EntityComponent<User> {
     }
 
     buildForm(): UntypedFormGroup {
-        const emailRegex = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$';
-        let userForm = this.formBuilder.group({
-            'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
-            'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+        const emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+        const userForm = this.formBuilder.group({
+            'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
+            'lastName': [this.user.lastName, [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
             'email': [this.user.email, [Validators.required, Validators.pattern(emailRegex), this.registerOnSubmitValidator('unique', 'email')]],
             'expirationDate': [this.user.expirationDate],
             'extensionMotivation': [this.user.extensionRequestInfo ? this.user.extensionRequestInfo.extensionMotivation : ''],
             'role': [this.user.role, [Validators.required]],
             'canAccessToDicomAssociation': new UntypedFormControl('false'),
+            'twoFactorEnabled': new UntypedFormControl(this.user.twoFactorEnabled),
+            'keycloakEnabled': new UntypedFormControl(this.user.keycloakEnabled),
             'accountRequestInfo': [this.user.accountRequestInfo]
         });
         if (this.user.extensionRequestDemand) {
@@ -161,7 +177,7 @@ export class UserComponent extends EntityComponent<User> {
     }
 
     getRoleById(id: number): Role {
-        for (let role of this.roles) {
+        for (const role of this.roles) {
             if (id == role.id) {
                 return role;
             }
@@ -187,9 +203,9 @@ export class UserComponent extends EntityComponent<User> {
     }
 
     save(): Promise<User> {
-        let a: Promise<any>[] = [];
+        const a: Promise<any>[] = [];
         a.push(super.save());
-        for (let item of this.studyToDelete) {
+        for (const item of this.studyToDelete) {
             a.push(this.studyService.deleteUserFromStudy(item.id, this.entity.id));
         }
         return Promise.all([a]).then(() => {
@@ -204,5 +220,13 @@ export class UserComponent extends EntityComponent<User> {
             "&response_type=code" +
             "&scope=openid" +
             "&kc_action=UPDATE_PASSWORD", "_self");
+    }
+
+    private nonSpecialCharsValidator(): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            if(control.value != undefined){
+                return /^[\p{L}\p{M}\s'-]+$/u.test(control.value) ? null : { invalidName: true };            }
+            return null;
+        };
     }
 }

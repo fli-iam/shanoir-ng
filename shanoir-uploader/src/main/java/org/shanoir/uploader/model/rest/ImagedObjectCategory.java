@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -16,89 +16,89 @@ package org.shanoir.uploader.model.rest;
 
 /**
  * Imaged object category.
- * 
+ *
  * @author msimon
  *
  */
 public enum ImagedObjectCategory {
 
-	/**
-	 * Phantom
-	 */
-	PHANTOM(1, "Phantom"),
+    /**
+     * Phantom
+     */
+    PHANTOM(1, "Phantom"),
 
-	/**
-	 * Living human being
-	 */
-	LIVING_HUMAN_BEING(2, "Living human being"),
+    /**
+     * Living human being
+     */
+    LIVING_HUMAN_BEING(2, "Living human being"),
 
-	/**
-	 * Human cadaver
-	 */
-	HUMAN_CADAVER(3, "Human cadaver"),
+    /**
+     * Human cadaver
+     */
+    HUMAN_CADAVER(3, "Human cadaver"),
 
-	/**
-	 * Anatomical piece
-	 */
-	ANATOMICAL_PIECE(4, "Anatomical piece"),
+    /**
+     * Anatomical piece
+     */
+    ANATOMICAL_PIECE(4, "Anatomical piece"),
 
-	/**
-	 * Living animal
-	 */
-	LIVING_ANIMAL(5, "Living animal"),
-	
-	/**
-	 * Animal cadaver
-	 */
-	ANIMAL_CADAVER(6, "Animal cadaver");
+    /**
+     * Living animal
+     */
+    LIVING_ANIMAL(5, "Living animal"),
 
-	private int id;
+    /**
+     * Animal cadaver
+     */
+    ANIMAL_CADAVER(6, "Animal cadaver");
 
-	private String name;
+    private int id;
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param id
-	 *            id
-	 */
-	private ImagedObjectCategory(final int id, final String name) {
-		this.id = id;
-		this.name = name;
-	}
+    private String name;
 
-	/**
-	 * Get an imaged object category by its id.
-	 * 
-	 * @param id
-	 *            category id.
-	 * @return imaged object category.
-	 */
-	public static ImagedObjectCategory getCategory(final Integer id) {
-		if (id == null) {
-			return null;
-		}
-		for (ImagedObjectCategory category : ImagedObjectCategory.values()) {
-			if (id.equals(category.getId())) {
-				return category;
-			}
-		}
-		throw new IllegalArgumentException("No matching imaged object category for id " + id);
-	}
+    /**
+     * Constructor.
+     *
+     * @param id
+     *            id
+     */
+    private ImagedObjectCategory(final int id, final String name) {
+        this.id = id;
+        this.name = name;
+    }
 
-	/**
-	 * @return the id
-	 */
-	public int getId() {
-		return id;
-	}
+    /**
+     * Get an imaged object category by its id.
+     *
+     * @param id
+     *            category id.
+     * @return imaged object category.
+     */
+    public static ImagedObjectCategory getCategory(final Integer id) {
+        if (id == null) {
+            return null;
+        }
+        for (ImagedObjectCategory category : ImagedObjectCategory.values()) {
+            if (id.equals(category.getId())) {
+                return category;
+            }
+        }
+        throw new IllegalArgumentException("No matching imaged object category for id " + id);
+    }
 
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
 
-	public String toString() {
-		return this.name;
-	}
+    public String getName() {
+        return name;
+    }
+
+    public String toString() {
+        return this.name;
+    }
 
 }

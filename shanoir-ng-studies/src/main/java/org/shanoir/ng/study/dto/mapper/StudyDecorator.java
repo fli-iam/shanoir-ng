@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -22,6 +22,7 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
+import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
 import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.tag.model.TagMapper;
@@ -29,102 +30,105 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Decorator for study.
- * 
+ *
  * @author msimon
  *
  */
 public abstract class StudyDecorator implements StudyMapper {
 
-	@Autowired
-	private StudyMapper delegate;
+    @Autowired
+    private StudyMapper delegate;
 
-	@Autowired
-	private StudyCenterMapper studyCenterMapper;
+    @Autowired
+    private StudyCenterMapper studyCenterMapper;
 
-	@Autowired
-	private SubjectStudyMapper subjectStudyMapper;
+    @Autowired
+    private SubjectStudyMapper subjectStudyMapper;
 
-	@Autowired
-	private TagMapper tagMapper;
+    @Autowired
+    private SubjectMapper subjectMapper;
 
-	@Autowired
-	private StudyTagMapper studyTagMapper;
+    @Autowired
+    private TagMapper tagMapper;
 
-	@Override
-	public List<StudyDTO> studiesToStudyDTOs(final List<Study> studies) {
-		final List<StudyDTO> studyDTOs = new ArrayList<>();
-		for (Study study : studies) {
-			final StudyDTO studyDTO = convertStudyToStudyDTO(study, false);
-			if (study.getSubjectStudyList() != null) {
-				studyDTO.setNbSubjects(study.getNbSubjects());
-			}
-			if (study.getExaminations() != null) {
-				studyDTO.setNbExaminations(study.getNbExaminations());
-			}
-			studyDTOs.add(studyDTO);
-		}
-		return studyDTOs;
-	}
+    @Autowired
+    private StudyTagMapper studyTagMapper;
 
-	@Override
-	public StudyDTO studyToStudyDTO(final Study study) {
-		return convertStudyToStudyDTO(study, true);
-	}
-	
-	@Override
-	public IdNameCenterStudyDTO studyToExtendedIdNameDTO (final Study study) {
-		final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
-		simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
-		//simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
-		simpleStudyDTO.setProfile(study.getProfile());
-		return simpleStudyDTO;
-	}
-	
-	@Override
-	public List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs (final List<Study> studies) {
-		List<IdNameCenterStudyDTO> simpleStudyDTOs = new ArrayList<>();
-		for (Study study: studies) {
-			final IdNameCenterStudyDTO simpleStudyDTO = studyToExtendedIdNameDTO(study);
-			simpleStudyDTOs.add(simpleStudyDTO);
-		}
-		return simpleStudyDTOs;
-	}
+    @Override
+    public List<StudyDTO> studiesToStudyDTOs(final List<Study> studies) {
+        final List<StudyDTO> studyDTOs = new ArrayList<>();
+        for (Study study : studies) {
+            final StudyDTO studyDTO = convertStudyToStudyDTO(study, false);
+            if (study.getSubjectStudyList() != null) {
+                studyDTO.setNbSubjects(study.getNbSubjects());
+            }
+            if (study.getExaminations() != null) {
+                studyDTO.setNbExaminations(study.getNbExaminations());
+            }
+            studyDTOs.add(studyDTO);
+        }
+        return studyDTOs;
+    }
 
-	/*
-	 * Map a @Study to a @StudyDTO.
-	 * 
-	 * @param study study to map.
-	 * 
-	 * @param withData study with data?
-	 * 
-	 * @return study DTO.
-	 */
-	private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
-		final StudyDTO studyDTO = delegate.studyToStudyDTO(study);
-		studyDTO.setStudyCenterList(
-				studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
-		if (withData) {
-			studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
-			if (study.getTags() != null) {
-				studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));				
-			}
-		}
-		return studyDTO;
-	}
+    @Override
+    public StudyDTO studyToStudyDTO(final Study study) {
+        return convertStudyToStudyDTO(study, true);
+    }
 
-	@Override
-	public StudyLightDTO studyToStudyLightDTO(final Study study) {
-		final StudyLightDTO studyLightDTO = delegate.studyToStudyLightDTO(study);
-		studyLightDTO.setNbSubjects(study.getNbSubjects());
-		studyLightDTO.setNbExaminations(study.getNbExaminations());
-		if (study.getStudyTags() != null) {
-			studyLightDTO.setStudyTags(studyTagMapper.studyTagListToStudyTagDTOList(study.getStudyTags()));
-		}
-		if (study.getLicense() != null) {
-			studyLightDTO.setLicense(study.getLicense());
-		}
-		return studyLightDTO;
-	}
+    @Override
+    public IdNameCenterStudyDTO studyToExtendedIdNameDTO(final Study study) {
+        final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
+        simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
+        //simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
+        simpleStudyDTO.setProfile(study.getProfile());
+        return simpleStudyDTO;
+    }
+
+    @Override
+    public List<IdNameCenterStudyDTO> studiesToSimpleStudyDTOs(final List<Study> studies) {
+        List<IdNameCenterStudyDTO> simpleStudyDTOs = new ArrayList<>();
+        for (Study study: studies) {
+            final IdNameCenterStudyDTO simpleStudyDTO = studyToExtendedIdNameDTO(study);
+            simpleStudyDTOs.add(simpleStudyDTO);
+        }
+        return simpleStudyDTOs;
+    }
+
+    /*
+     * Map a @Study to a @StudyDTO.
+     *
+     * @param study study to map.
+     *
+     * @param withData study with data?
+     *
+     * @return study DTO.
+     */
+    private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
+        final StudyDTO studyDTO = delegate.studyToStudyDTO(study);
+        studyDTO.setStudyCenterList(
+                studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
+        if (withData) {
+            studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
+            if (study.getTags() != null) {
+                studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
+            }
+            studyDTO.setSubjects(subjectMapper.subjectsToSubjectDTOs(study.getSubjects()));
+        }
+        return studyDTO;
+    }
+
+    @Override
+    public StudyLightDTO studyToStudyLightDTO(final Study study) {
+        final StudyLightDTO studyLightDTO = delegate.studyToStudyLightDTO(study);
+        studyLightDTO.setNbSubjects(study.getNbSubjects());
+        studyLightDTO.setNbExaminations(study.getNbExaminations());
+        if (study.getStudyTags() != null) {
+            studyLightDTO.setStudyTags(studyTagMapper.studyTagListToStudyTagDTOList(study.getStudyTags()));
+        }
+        if (study.getLicense() != null) {
+            studyLightDTO.setLicense(study.getLicense());
+        }
+        return studyLightDTO;
+    }
 
 }
-

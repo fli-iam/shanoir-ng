@@ -15,13 +15,15 @@ import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from 'src/app/studies/study/tree.service';
-import { DatasetNode, MetadataNode } from '../../tree/tree.model';
+
+import { MetadataNode } from '../../tree/tree.model';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 
 
 @Component({
     selector: 'metadata-node',
     templateUrl: 'metadata-node.component.html',
-    standalone: false
+    imports: [TreeNodeComponent]
 })
 
 export class MetadataNodeComponent extends TreeNodeAbstractComponent<MetadataNode> implements OnChanges {

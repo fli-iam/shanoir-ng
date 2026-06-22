@@ -12,12 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Injectable } from '@angular/core';
-
+import {Injectable, Injector} from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../utils/app.utils';
-import { Task } from './task.model';
+import {MassDownloadService} from "../shared/mass-download/mass-download.service";
+
+import {Task, TaskState} from './task.model';
 
 @Injectable()
 export class TaskService extends EntityService<Task> {
@@ -25,42 +28,49 @@ export class TaskService extends EntityService<Task> {
     API_URL = AppUtils.BACKEND_API_TASKS_URL;
 
 
-    constructor(protected http: HttpClient) {
+    constructor(protected http: HttpClient,
+                protected injector: Injector) {
         super(http);
     }
 
     getEntityInstance() { return new Task(); }
 
     getTasks(): Promise<Task[]> {
-        return this.http.get<Task[]>(this.API_URL)
-            .toPromise()
+        return firstValueFrom(this.http.get<Task[]>(this.API_URL))
             .then(this.mapEntityList);
     }
 
     public toRealObject(entity: any): Task {
-        let trueObject = Object.assign(new Task(), entity);
+        const trueObject = Object.assign(new Task(), entity);
         trueObject.completeId = entity.idAsString;
         Object.keys(entity).forEach(key => {
             if (key != 'idAsString') {
-                let value = entity[key];
+                const value = entity[key];
                 if (['creationDate', 'lastUpdate'].includes(key) && value) {
                     trueObject[key] = new Date(value);
                 }
             }
         });
+        trueObject.id = Number(trueObject.id);
+        trueObject.studyId = Number(trueObject.studyId);
+        trueObject.objectId = Number(trueObject.objectId);
         return trueObject;
     }
 
     public downloadStats(item: Task) {
-        let endpoint = AppUtils.BACKEND_API_DATASET_MS_URL + item.route;
-        this.http.get(endpoint, { observe: 'response', responseType: 'blob' })
-            .toPromise()
+        const endpoint = AppUtils.BACKEND_API_DATASET_MS_URL + item.route;
+        firstValueFrom(this.http.get(endpoint, { observe: 'response', responseType: 'blob' }))
             .then((response: HttpResponse<Blob>) => {
-                if (response.status == 200 || response.status == 204) {
+                if (response.status == 200) {
                     AppUtils.browserDownloadFileFromResponse(response);
-                } else {
-                    this.consoleService.log('error', 'Statistics file not found or deleted (after 6 hours).');
+                } else if ([404, 204].includes(response.status)) {
+                    this.consoleService.log('error', 'File not found or expired (after 6 hours).');
                 }
             });
+    }
+
+    public downloadProcessingOutputs(item: Task) {
+        const downloadService = this.injector.get(MassDownloadService);
+        downloadService.downloadProcessingOutputsByIds(item.message.replace(/^[^:]*:\s*/, "").split(",").map(Number), new TaskState(), item.message.match(/sorted by\s+([^,]+)/i)?.[1])
     }
 }

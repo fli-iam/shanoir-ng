@@ -12,11 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+
 import { Order, Page, Pageable, Sort } from '../shared/components/table/pageable.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import * as AppUtils from '../utils/app.utils';
+
 import { FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 
 
@@ -29,13 +32,13 @@ export class SolrService {
 
     public indexAll() {
         if (this.keycloakService.isUserAdmin()) {
-            return this.http.post<void>(AppUtils.BACKEND_API_SOLR_INDEX_URL, {}, {reportProgress: true, observe: 'events'}).toPromise();
+            return firstValueFrom(this.http.post<void>(AppUtils.BACKEND_API_SOLR_INDEX_URL, {}, {reportProgress: true, observe: 'events'}));
         }
     }
 
     public search(solrReq: SolrRequest, pageable: Pageable): Promise<SolrResultPage> {
-        return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(solrReq), { 'params': pageable.toParams() })
-        .toPromise().then(solrResPage => {
+        return firstValueFrom(this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(solrReq), { 'params': pageable.toParams() }))
+        .then(solrResPage => {
             solrResPage.content?.forEach(doc => doc.id = parseInt(doc.id as unknown as string));
             return solrResPage;
         });
@@ -43,16 +46,16 @@ export class SolrService {
 
     public getFacet(facetName: string, pageable: FacetPageable, mainRequest: SolrRequest): Promise<FacetResultPage> {
         // we can't set paxe size to 0, it would set it to default value (20)
-        let fakePageable: Pageable = new Pageable(1, 1, new Sort([new Order('DESC', 'id')]));
+        const fakePageable: Pageable = new Pageable(1, 1, new Sort([new Order('DESC', 'id')]));
         mainRequest.facetPaging = new Map();
         mainRequest.facetPaging.set(facetName, pageable);
-        return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(mainRequest), { 'params': fakePageable.toParams() })
-            .toPromise().then(solrResPage => {
+        return firstValueFrom(this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(mainRequest), { 'params': fakePageable.toParams() }))
+            .then(solrResPage => {
                 solrResPage.content?.forEach(doc => doc.id = parseInt(doc.id as unknown as string));
                 if (solrResPage.facetResultPages?.[0]) {
                     return solrResPage.facetResultPages[0];
                 } else {
-                    let reconstructed: FacetResultPage = new FacetResultPage();
+                    const reconstructed: FacetResultPage = new FacetResultPage();
                     reconstructed.number = pageable.pageNumber;
                     reconstructed.size = 0;
                     reconstructed.numberOfElements = 0;
@@ -62,10 +65,10 @@ export class SolrService {
     }
 
     public getByDatasetIds(datasetIds: number[], pageable: Pageable): Promise<Page<SolrDocument>> {
-        return this.http.post<Page<SolrDocument>>(AppUtils.BACKEND_API_SOLR_URL + '/byIds',
+        return firstValueFrom(this.http.post<Page<SolrDocument>>(AppUtils.BACKEND_API_SOLR_URL + '/byIds',
                 JSON.stringify(datasetIds),
-                { 'params': pageable.toParams() })
-            .toPromise().then(page => {
+                { 'params': pageable.toParams() }))
+            .then(page => {
                 if (page) page.content.forEach(solrDoc => solrDoc.id = parseInt(solrDoc.datasetId));
                 return page;
             });
@@ -75,7 +78,7 @@ export class SolrService {
         return JSON.stringify(solrRequest, (key, value) => {
             // write a Map as a key value object
             if(value instanceof Map) {
-                let res: any = {};
+                const res: any = {};
                 value.forEach((v, k) => res[k] = v);
                 return res;
             } else if (key.endsWith('Date') && value == 'invalid') {

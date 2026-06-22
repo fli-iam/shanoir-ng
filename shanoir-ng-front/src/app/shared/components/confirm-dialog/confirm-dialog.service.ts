@@ -12,28 +12,27 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable, ComponentRef } from '@angular/core';
+
+import { ServiceLocator } from 'src/app/utils/locator.service';
+
 import { ConfirmDialogComponent } from './confirm-dialog.component';
-import { ServiceLocator } from '../../../utils/locator.service';
 
 
 @Injectable()
 export class ConfirmDialogService {
-    
-    constructor() {
-    }
 
     public confirm(title: string, message?: string, buttons?: {yes: string, cancel: string}): Promise<boolean> {
-        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(ConfirmDialogComponent);
-        let dialog: ConfirmDialogComponent = ref.instance;
+        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.createComponent(ConfirmDialogComponent);
+        const dialog: ConfirmDialogComponent = ref.instance;
         return dialog.openConfirm(title, message, buttons).then(answer => {
             ref.destroy();
             return answer;
         });
     }
 
-    public choose(title: string, message?: string, buttons?: {yes: string, no: string, cancel: string}): Promise<'yes' | 'no' | false> {
-        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(ConfirmDialogComponent);
-        let dialog: ConfirmDialogComponent = ref.instance;
+    public choose(title: string, message?: string, buttons?: {yes: string, no: string, cancel?: string}): Promise<'yes' | 'no' | false> {
+        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.createComponent(ConfirmDialogComponent);
+        const dialog: ConfirmDialogComponent = ref.instance;
         return dialog.openChoose(title, message, buttons).then(answer => {
             ref.destroy();
             return answer;
@@ -41,8 +40,8 @@ export class ConfirmDialogService {
     }
 
     public inform(title: string, message?: string, button?: string): Promise<boolean> {
-        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(ConfirmDialogComponent);
-        let dialog: ConfirmDialogComponent = ref.instance;
+        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.createComponent(ConfirmDialogComponent);
+        const dialog: ConfirmDialogComponent = ref.instance;
         return dialog.openInfo(title, message, button).then(answer => {
             ref.destroy();
             return answer;
@@ -50,8 +49,8 @@ export class ConfirmDialogService {
     }
 
     public error(title: string, message?: string, link?: string): Promise<boolean> {
-        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(ConfirmDialogComponent);
-        let dialog: ConfirmDialogComponent = ref.instance;
+        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.createComponent(ConfirmDialogComponent);
+        const dialog: ConfirmDialogComponent = ref.instance;
         return dialog.openError(title, message, link).then(answer => {
             ref.destroy();
             return answer;

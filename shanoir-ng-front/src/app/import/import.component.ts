@@ -12,11 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { RouterOutlet } from '@angular/router';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { findLastIndex } from '../utils/app.utils';
+
 
 export type ImportMode = 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | 'Processed Dataset';
 
@@ -24,7 +26,7 @@ export type ImportMode = 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | 'Process
     selector: 'imports',
     templateUrl: 'import.component.html',
     styleUrls: ['import.component.css'],
-    standalone: false
+    imports: [FormsModule, RouterOutlet]
 })
 export class ImportComponent {
 
@@ -39,7 +41,7 @@ export class ImportComponent {
     }
 
     getImportMode(): ImportMode | '' {
-        let lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
+        const lastIndex: number = findLastIndex(this.breadcrumbsService.steps, step => step.importStart);
         if (lastIndex != -1) {
             return this.breadcrumbsService.steps[lastIndex].importMode;
         }

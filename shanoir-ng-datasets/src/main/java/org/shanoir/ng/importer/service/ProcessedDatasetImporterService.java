@@ -1,10 +1,24 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.importer.service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,26 +41,20 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 @Service
 @Scope("prototype")
 public class ProcessedDatasetImporterService {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(ProcessedDatasetImporterService.class);
-
-    private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
-
-    private static final String SUBJECT_PREFIX = "sub-";
-
-    @Value("${datasets-data}")
-    private String niftiStorageDir;
 
     @Autowired
     private DatasetService datasetService;
@@ -63,11 +71,14 @@ public class ProcessedDatasetImporterService {
     @Autowired
     private SolrService solrService;
 
+    @Autowired
+    private StorageService storageService;
+
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 
     /**
      * Create a processed dataset dataset associated with a dataset processing.
-     * 
+     *
      * @param importJob
      */
     public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws Exception {
@@ -103,18 +114,18 @@ public class ProcessedDatasetImporterService {
             } else {
                 expression.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
                 datasetFile.setPacs(false);
-                Path location = saveProcessedDatasetFile(importJob, processedDatasetFile);
-                datasetFile.setPath(location.toUri().toString());
+                String path = saveProcessedDatasetFile(importJob, processedDatasetFile);
+                datasetFile.setPath(path);
             }
             expression.setDatasetFiles(Collections.singletonList(datasetFile));
-            
+
             dataset = datasetService.create(dataset);
             solrService.indexDataset(dataset.getId());
 
             event.setStatus(ShanoirEvent.SUCCESS);
-            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")] " +
-                    "Successfully created processed dataset [" + dataset.getId() + "] " +
-                    "for subject [" + importJob.getSubjectName() + "]");
+            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")] "
+                    + "Successfully created processed dataset [" + dataset.getId() + "] "
+                    + "for subject [" + importJob.getSubjectName() + "]");
             event.setProgress(1f);
             eventService.publishEvent(event);
             return dataset;
@@ -146,7 +157,7 @@ public class ProcessedDatasetImporterService {
 
     /**
      * Check ProcessedDatasetImportJob.
-     * 
+     *
      * @param job
      * @param event
      * @return
@@ -159,8 +170,8 @@ public class ProcessedDatasetImporterService {
             eventService.publishEvent(event);
             return false;
         }
-        if (job.getDatasetProcessing().getInputDatasets() == null ||
-                job.getDatasetProcessing().getInputDatasets().isEmpty()) {
+        if (job.getDatasetProcessing().getInputDatasets() == null
+                || job.getDatasetProcessing().getInputDatasets().isEmpty()) {
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("Processing input dataset(s) missing.");
             event.setProgress(-1f);
@@ -174,7 +185,7 @@ public class ProcessedDatasetImporterService {
             eventService.publishEvent(event);
             return false;
         }
-        for(Dataset input : job.getDatasetProcessing().getInputDatasets()){
+        for (Dataset input : job.getDatasetProcessing().getInputDatasets()) {
             Long studyId = datasetService.getStudyId(input);
             if (studyId != null && !studyId.equals(job.getStudyId())) {
                 event.setStatus(ShanoirEvent.ERROR);
@@ -200,19 +211,26 @@ public class ProcessedDatasetImporterService {
         return dataset;
     }
 
-    private Path saveProcessedDatasetFile(ProcessedDatasetImportJob job, File processedDatasetFile) throws IOException {
-        final String subLabel = SUBJECT_PREFIX + job.getSubjectName();
-        final File outDir = new File(niftiStorageDir + File.separator + PROCESSED_DATASET_PREFIX + File.separator + subLabel + File.separator);
-        outDir.mkdirs();
-        String fileName = processedDatasetFile.getName();
-        File destFile = new File(outDir.getAbsolutePath() + File.separator + formatter.format(LocalDateTime.now()) + File.separator + fileName);
-        Path location;
-        try {
-            destFile.getParentFile().mkdirs();
-            location = Files.copy(processedDatasetFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            return location;
+    private String saveProcessedDatasetFile(ProcessedDatasetImportJob job, File processedDatasetFile)
+            throws IOException {
+        final String timestamp = formatter.format(LocalDateTime.now());
+        final String fileName = processedDatasetFile.getName();
+        final String contentType = Files.probeContentType(processedDatasetFile.toPath());
+        final long size = processedDatasetFile.length();
+        try (InputStream inputStream = new FileInputStream(processedDatasetFile)) {
+            return storageService.storeProcessedData(
+                    job.getStudyId(),
+                    job.getSubjectId(),
+                    timestamp,
+                    fileName,
+                    inputStream,
+                    contentType,
+                    size);
+        } catch (StorageException e) {
+            LOG.error("StorageException storing Processed Dataset file for subject {}", job.getSubjectName(), e);
+            throw new IOException("Failed to store processed dataset file", e);
         } catch (IOException e) {
-            LOG.error("IOException generating Processed Dataset Expression", e);
+            LOG.error("IOException reading Processed Dataset file for subject {}", job.getSubjectName(), e);
             throw e;
         }
     }
