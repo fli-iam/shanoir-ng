@@ -204,7 +204,7 @@ public class RabbitMQDatasetsService {
      * @throws JsonMappingException
      */
     @Transactional
-    private void manageSubjectUpdate(final String subjectStr) throws JsonProcessingException, JsonMappingException {
+    protected void manageSubjectUpdate(final String subjectStr) throws JsonProcessingException, JsonMappingException {
         Subject subject = objectMapper.readValue(subjectStr, Subject.class);
         subject = subjectRepository.save(subject);
         LOG.info("Subject replicated in MS Datasets with ID: {} and Name: {}",
@@ -240,7 +240,7 @@ public class RabbitMQDatasetsService {
     }
 
     @Transactional
-    private void manageSubjectBatchUpdate(final String subjectBatchStr) throws JsonProcessingException {
+    protected void manageSubjectBatchUpdate(final String subjectBatchStr) throws JsonProcessingException {
         SubjectBatchDTO batchDTO = objectMapper.readValue(subjectBatchStr, SubjectBatchDTO.class);
         Set<Long> allStudyIds = new HashSet<>();
         List<Long> allSubjectIds = new ArrayList<>();
@@ -279,7 +279,7 @@ public class RabbitMQDatasetsService {
     }
 
     @Transactional
-    private void saveCenter(Center center) {
+    protected void saveCenter(Center center) {
         centerRepository.save(center);
     }
 
@@ -290,7 +290,7 @@ public class RabbitMQDatasetsService {
     }
 
     @Transactional
-    private void deleteCenter(Long centerId) {
+    protected void deleteCenter(Long centerId) {
         centerRepository.deleteById(centerId);
     }
 
