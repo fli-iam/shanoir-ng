@@ -39,7 +39,7 @@ module.exports = tseslint.config(
             parserOptions: { project: ['./tsconfig.json'] },
         },
         rules: {
-            '@typescript-eslint/no-deprecated': 'warn',
+            '@typescript-eslint/no-deprecated': 'error',
             '@angular-eslint/directive-selector': [
                 'error',
                 {
@@ -81,7 +81,6 @@ module.exports = tseslint.config(
 
             // Angular ESLint rules
             '@angular-eslint/prefer-inject': 'off', // heavy migration & not sure that is relevant
-            '@angular-eslint/prefer-standalone': 'off', // should it be done later? Standalone is meant to be the standard. Heavy migration.
         },
     },
     {
@@ -94,6 +93,7 @@ module.exports = tseslint.config(
             '@angular-eslint/template/click-events-have-key-events': 'off',
             '@angular-eslint/template/mouse-events-have-key-events': 'off',
             '@angular-eslint/template/interactive-supports-focus': 'off',
+            '@angular-eslint/template/prefer-control-flow': 'error',
         },
     },
     {

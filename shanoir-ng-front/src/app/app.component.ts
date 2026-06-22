@@ -24,7 +24,6 @@ import { WindowService } from './shared/services/window.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { StudyService } from './studies/shared/study.service';
 import { TreeService } from './studies/study/tree.service';
-import { UserService } from './users/shared/user.service';
 import { NotificationsService } from './shared/notifications/notifications.service';
 import { SideMenuComponent } from './shared/side-menu/side-menu.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
@@ -32,6 +31,7 @@ import { StudyTreeComponent } from './studies/study/study-tree.component';
 import { MsgBoxComponent } from './shared/msg-box/msg-box.component';
 import { LoaderComponent } from './shared/loader/loader.component';
 import { ServiceLocator } from './utils/locator.service';
+import { AccessRequestService } from './users/access-request/access-request.service';
 
 @Component({
     selector: 'app-root',
@@ -58,7 +58,7 @@ export class AppComponent implements OnInit, AfterViewInit {
             private confirmService: ConfirmDialogService,
             protected router: Router,
             private studyService: StudyService,
-            private userService: UserService,
+            private accessRequestService: AccessRequestService,
             public treeService: TreeService,
             private notificationsService: NotificationsService) {
 
@@ -74,7 +74,7 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.globalService.registerGlobalClick(this.element);
         this.windowService.width = window.innerWidth;
         if (this.keycloakSessionService.isAuthenticated()) {
-            this.userService.getAccessRequestsForAdmin();
+            this.accessRequestService.getAccessRequestsForAdmin();
             this.duaAlert();
 
             if (this.keycloakService.isUserAdmin())

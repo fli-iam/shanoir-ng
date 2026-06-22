@@ -14,9 +14,13 @@
 
 package org.shanoir.ng.accessrequest.controller;
 
+import java.time.LocalDate;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.swagger.v3.oas.annotations.Parameter;
+
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.EmailService;
@@ -53,6 +57,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.shanoir.ng.accessrequest.model.ValidationDTO;
+import org.shanoir.ng.shared.event.UserAccessData;
+import org.springframework.beans.factory.annotation.Value;
+
 /**
  * Api for access request, to make a demand on
  * @author jcome
@@ -82,6 +90,9 @@ public class AccessRequestApiController implements AccessRequestApi {
     @Autowired
     private StudyUserRightsRepository studyUserRightsRepository;
 
+    @Value("${shanoir.userDefaultExpirationDays:183}")
+    private int accessRequestExpirationDays;
+
     private static final Logger LOG = LoggerFactory.getLogger(AccessRequestApiController.class);
 
     public ResponseEntity<AccessRequest> saveNewAccessRequest(
@@ -91,6 +102,8 @@ public class AccessRequestApiController implements AccessRequestApi {
         User user = userService.findById(KeycloakUtil.getTokenUserId());
         request.setUser(user);
         request.setStatus(AccessRequest.ON_DEMAND);
+        request.setExpiration(null); // IMPORTANT : this prevents a user from setting an expiration date for his access request,
+        // which would be a security issue. Also the expiration date should be set at the time of validation, not at the time of request.
 
         // Sanity check: user already has a pending access request
         List<AccessRequest> accessRequests = this.accessRequestService.findByUserIdAndStudyId(user.getId(), request.getStudyId());
@@ -162,6 +175,13 @@ public class AccessRequestApiController implements AccessRequestApi {
 
         // Get all access requests
         List<AccessRequest> accessRequests = this.accessRequestService.findByStudyIdAndStatus(studiesId, AccessRequest.ON_DEMAND);
+        for (AccessRequest accessRequest : accessRequests) {
+            // pre-fetch expiration date so the 6 months or so starts at validation time, not at request time
+            if (accessRequest.getExpiration() == null) {
+                LocalDate expiration = LocalDate.now().plusDays(accessRequestExpirationDays);
+                accessRequest.setExpiration(expiration);
+            }
+        }
 
         if (CollectionUtils.isEmpty(accessRequests)) {
             return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
@@ -170,15 +190,24 @@ public class AccessRequestApiController implements AccessRequestApi {
         return new ResponseEntity<List<AccessRequest>>(accessRequests, HttpStatus.OK);
     }
 
+    @Override
     public ResponseEntity<Void> resolveNewAccessRequest(
             @Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
-            @Parameter(name = "Accept or refuse the request", required = true) @RequestBody boolean validation,
+            @Parameter(name = "Accept or refuse the request", required = true) @RequestBody ValidationDTO validation,
             BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException {
         AccessRequest resolvedRequest = accessRequestService.findById(accessRequestId).orElse(null);
-        if (resolvedRequest == null) {
+        if (resolvedRequest == null || resolvedRequest.getStatus() != AccessRequest.ON_DEMAND) {
             return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
         }
-        if (validation) {
+        if  (validation.getExpiration() != null) {
+            resolvedRequest.setExpiration(validation.getExpiration());
+        } else if (resolvedRequest.getExpiration() == null) {
+            LocalDate expiration = LocalDate.now().plusDays(accessRequestExpirationDays);
+            resolvedRequest.setExpiration(expiration);
+        }
+
+
+        if (validation.isAccept()) {
             resolvedRequest.setStatus(AccessRequest.APPROVED);
         } else {
             resolvedRequest.setStatus(AccessRequest.REFUSED);
@@ -186,18 +215,21 @@ public class AccessRequestApiController implements AccessRequestApi {
 
         accessRequestService.update(resolvedRequest);
 
-        if (validation) {
+        if (validation.isAccept()) {
             // if there is an account request, accept it.
             if (resolvedRequest.getUser().isAccountRequestDemand() != null && resolvedRequest.getUser().isAccountRequestDemand()) {
                 this.userService.confirmAccountRequest(resolvedRequest.getUser());
             }
+
+            UserAccessData userAccessData = new UserAccessData(resolvedRequest.getUser().getUsername(), resolvedRequest.getExpiration());
+            String serializedUserAccessData = mapper.writeValueAsString(userAccessData);
 
             // Update study to add a new user
             ShanoirEvent subscription = new ShanoirEvent(
                     ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
                     resolvedRequest.getStudyId().toString(),
                     resolvedRequest.getUser().getId(),
-                    resolvedRequest.getUser().getUsername(),
+                    serializedUserAccessData,
                     ShanoirEvent.SUCCESS,
                     resolvedRequest.getStudyId());
 
@@ -213,8 +245,13 @@ public class AccessRequestApiController implements AccessRequestApi {
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
-    public ResponseEntity<AccessRequest> getByid(@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException {
+    public ResponseEntity<AccessRequest> getById(@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException {
         AccessRequest acceReq = this.accessRequestService.findById(accessRequestId).get();
+        // pre-fetch expiration date so the 6 months or so starts at validation time, not at request time
+        if (acceReq.getExpiration() == null) {
+            LocalDate expiration = LocalDate.now().plusDays(accessRequestExpirationDays);
+            acceReq.setExpiration(expiration);
+        }
         return new ResponseEntity<AccessRequest>(acceReq, HttpStatus.OK);
     }
 

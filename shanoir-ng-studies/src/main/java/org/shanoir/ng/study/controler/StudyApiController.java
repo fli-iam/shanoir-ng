@@ -17,6 +17,7 @@ package org.shanoir.ng.study.controler;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -59,6 +60,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -80,6 +82,9 @@ import jakarta.validation.Valid;
 public class StudyApiController implements StudyApi {
 
     private static final String PDF_EXTENSION = ".pdf";
+
+    @Value("${shanoir.userDefaultExpirationDays}")
+    private int userDefaultExpirationDays;
 
     @Autowired
     private StudyService studyService;
@@ -220,6 +225,7 @@ public class StudyApiController implements StudyApi {
         try {
             study.setIsDraft(!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN"));
             addCurrentUserAsStudyUserIfEmptyStudyUsers(study);
+            setDefaultStudyUserExpirationDates(study);
             createdStudy = studyService.create(study);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_STUDY_EVENT,
                     createdStudy.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
@@ -249,8 +255,8 @@ public class StudyApiController implements StudyApi {
     }
 
     private void addCurrentUserAsStudyUserIfEmptyStudyUsers(final Study study) {
-        if (study.getStudyUserList() == null) {
-            List<StudyUser> studyUserList = new ArrayList<StudyUser>();
+        if (study.getStudyUserList() == null || study.getStudyUserList().isEmpty()) {
+            List<StudyUser> studyUserList = new ArrayList<>();
             StudyUser studyUser = new StudyUser();
             studyUser.setStudy(study);
             studyUser.setUserId(KeycloakUtil.getTokenUserId());
@@ -259,6 +265,16 @@ public class StudyApiController implements StudyApi {
                     StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE));
             studyUserList.add(studyUser);
             study.setStudyUserList(studyUserList);
+        }
+    }
+
+    private void setDefaultStudyUserExpirationDates(final Study study) {
+        if (study.getStudyUserList() != null && !study.getStudyUserList().isEmpty()) {
+            for (StudyUser studyUser : study.getStudyUserList()) {
+                if (studyUser.getExpiration() == null) {
+                    studyUser.setExpiration(LocalDate.now().plusDays(userDefaultExpirationDays));
+                }
+            }
         }
     }
 

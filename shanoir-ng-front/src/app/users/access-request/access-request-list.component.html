@@ -42,6 +42,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     {{ request.motivation }}
                 </span>
             </li>
+            <li>
+                <label class="required-label">Expiration Date</label>
+                <span class="right-col">
+                    <datepicker [(ngModel)]="request.expiration" required [ngModelOptions]="{ standalone: true }"></datepicker>
+                </span>
+            </li>
         </ul>
         <button type="button" (click)="decide(request, true)" class="accept right-icon">
             Accept

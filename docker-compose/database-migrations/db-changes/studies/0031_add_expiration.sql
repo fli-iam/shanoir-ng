@@ -11,5 +11,6 @@
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 alter table study_user add COLUMN expiration DATE NOT NULL;
-update study_user
-set expiration = current_date + interval 6 month;
+update study_user su
+join users.users u on u.id = su.user_id
+set su.expiration = u.expiration_date;

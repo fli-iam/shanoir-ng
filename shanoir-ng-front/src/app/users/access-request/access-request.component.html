@@ -102,6 +102,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
                     </li>
                 }
+                @if (mode != 'create') {
+                    <li>
+                        <label class="required-label">Expiration Date</label>
+                        <span class="right-col">
+                            <datepicker formControlName="expiration"></datepicker>
+                        </span>
+                    </li>
+                }
             </ul>
             @if (mode == 'view') {
                 <button type="button" (click)="acceptRequest()" class="accept right-icon">
