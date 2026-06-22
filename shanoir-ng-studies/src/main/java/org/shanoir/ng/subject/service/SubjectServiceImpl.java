@@ -27,6 +27,9 @@ import org.hibernate.Hibernate;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -107,21 +110,28 @@ public class SubjectServiceImpl implements SubjectService {
     @Autowired
     private StudyExaminationRepository studyExaminationRepository;
 
+    @Autowired
+    private ShanoirEventService eventService;
+
     private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
     @Override
     @Transactional
     public void deleteById(final Long id) throws EntityNotFoundException {
-        Optional<Subject> subject = subjectRepository.findById(id);
-        if (subject.isEmpty()) {
+        Optional<Subject> subjectOpt = subjectRepository.findById(id);
+        if (subjectOpt.isEmpty()) {
             throw new EntityNotFoundException(Subject.class, id);
         }
+
+        Subject subject = subjectOpt.get();
+        publishSubjectEvent(subject, ShanoirEventType.DELETE_SUBJECT_EVENT);
+
         // Delete all associated study_examination
         studyExaminationRepository.deleteBySubjectId(id);
-        subject.get().getTags().clear();
+        subject.getTags().clear();
         subjectRepository.deleteSubjectStudyTagsBySubjectId(id);
         subjectRepository.deleteById(id);
-        if (subject.get().isPreclinical())
+        if (subject.isPreclinical())
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
         rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, id.toString());
     }
@@ -202,6 +212,7 @@ public class SubjectServiceImpl implements SubjectService {
         } catch (DataIntegrityViolationException e) {
             throw new ShanoirException("Subject with the same name already exists in the study.", HttpStatus.CONFLICT.value());
         }
+
         LOG.info("New subject created with ID: {} and Name: {}", subjectDb.getId(), subjectDb.getName());
         if (withAMQP) {
             try {
@@ -210,6 +221,8 @@ public class SubjectServiceImpl implements SubjectService {
                 LOG.error("Unable to propagate subject creation to microservices: ", e);
             }
         }
+
+        publishSubjectEvent(subjectDb, ShanoirEventType.CREATE_SUBJECT_EVENT);
         return subjectDb;
     }
 
@@ -237,6 +250,8 @@ public class SubjectServiceImpl implements SubjectService {
                 LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
             }
         }
+
+        publishSubjectEvent(subjectDb, ShanoirEventType.CREATE_SUBJECT_EVENT);
         return subjectDb;
     }
 
@@ -350,6 +365,7 @@ public class SubjectServiceImpl implements SubjectService {
         subjectOld = updateSubjectValues(subjectOld, subjectNew);
         subjectOld = subjectRepository.save(subjectOld);
         updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectOld));
+        publishSubjectEvent(subjectOld, ShanoirEventType.UPDATE_SUBJECT_EVENT);
         return subjectOld;
     }
 
@@ -556,4 +572,34 @@ public class SubjectServiceImpl implements SubjectService {
         }
     }
 
+    /**
+     * Use this method to publish historic event related to subjects in a study
+     *
+     * @param subject the involved subject
+     * @param eventType the type of event
+     */
+    private void publishSubjectEvent(Subject subject, String eventType) {
+        Study study = subject.getStudy();
+        String eventMsg;
+
+        switch (eventType) {
+            case ShanoirEventType.CREATE_SUBJECT_EVENT:
+                eventMsg = "Subject " + subject.getName() + " (id: " + subject.getId() + ") created";
+                break;
+            case ShanoirEventType.DELETE_SUBJECT_EVENT:
+                eventMsg = "Subject " + subject.getName() + " (id: " + subject.getId() + ") removed";
+                break;
+            default:
+                eventMsg = "Unknown subject event type: "  + eventType;
+        }
+        eventService.publishEvent(
+                new ShanoirEvent(
+                        eventType,
+                        subject.getId().toString(),
+                        KeycloakUtil.getTokenUserId(),
+                        eventMsg,
+                        ShanoirEvent.SUCCESS,
+                        study.getId())
+        );
+    }
 }
