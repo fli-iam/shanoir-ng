@@ -11,14 +11,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { DatepickerComponent } from "src/app/shared/date-picker/date-picker.component";
+
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { UserService } from '../shared/user.service';
-import {StudyService} from "../../studies/shared/study.service";
-import {KeycloakService} from "../../shared/keycloak/keycloak.service";
+import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { StudyService } from "../../studies/shared/study.service";
 
 import { AccessRequest } from './access-request.model';
 import { AccessRequestService } from './access-request.service';
@@ -27,20 +29,19 @@ import { AccessRequestService } from './access-request.service';
     selector: 'accessRequestList',
     templateUrl: 'access-request-list.component.html',
     styleUrls: ['access-request-list.component.css'],
-    imports: [FormsModule, RouterLink]
+    imports: [FormsModule, RouterLink, DatePipe, DatepickerComponent]
 })
 
 export class AccessRequestListComponent {
     accessRequests: AccessRequest[] = [];
 
     constructor(
-            public userService: UserService,
             public accessRequestService: AccessRequestService,
             public studyService: StudyService,
             public breadcrumbsService: BreadcrumbsService,
             public keycloakService: KeycloakService) {
 
-        userService.getAccessRequestsForAdmin().then(accessRequests => {
+        this.accessRequestService.getAccessRequestsForAdmin().then(accessRequests => {
             this.accessRequests = [...accessRequests];
         });
 
@@ -59,10 +60,10 @@ export class AccessRequestListComponent {
     }
 
     decide(request: AccessRequest, accept: boolean) {
-        this.accessRequestService.resolveRequest(request.id, accept);
+        this.accessRequestService.resolveRequest(request.id, accept, request.expiration);
         const index = this.accessRequests.indexOf(request);
         this.accessRequests.splice(index, 1);
-        this.userService.decreaseAccessRequests();
+        this.accessRequestService.decreaseAccessRequests();
     }
 
     public isAdmin(): boolean {

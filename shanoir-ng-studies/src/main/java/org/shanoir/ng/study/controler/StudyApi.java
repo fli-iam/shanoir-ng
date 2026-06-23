@@ -26,6 +26,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.study.dto.CopyData;
+import org.shanoir.ng.study.dto.IdDate;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
@@ -393,6 +394,16 @@ public interface StudyApi {
     @GetMapping(value = "/studyUser/{studyId}", produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
     ResponseEntity<List<StudyUser>> getStudyUserByStudyId(@PathVariable("studyId") Long studyId);
+
+    @Operation(summary = "", description = "If exists, returns a list of expiration dates corresponding to the given userId")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "List of expiration dates"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "/studyUser/userExpirationDates", produces = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
+    ResponseEntity<List<IdDate>> getUserExpirationDates();
 
     @Operation(summary = "getStudyStatistics", description = "Returns study imaging statistics corresponding to the given study id")
     @ApiResponses(value = {

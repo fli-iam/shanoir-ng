@@ -282,7 +282,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         const result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
-        } else if ((col.type == 'date' || col.type == 'dateTime') && !col.cellRenderer) {
+        } else if ((col.type == 'date' || col.type == 'dateTime')) {
             const date: Date = TableComponent.harmonizeToDate(result);
             let dateFormat;
             if (col.type == 'dateTime') dateFormat = {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false };

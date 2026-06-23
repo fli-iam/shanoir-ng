@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -31,6 +31,7 @@ export class StudyUser {
     user: User;
     confirmed: boolean = false;
     centers: Center[];
+    expiration: Date;
 
     public completeMember(users: User[]) {
         StudyUser.completeMember(this, users);
@@ -39,6 +40,10 @@ export class StudyUser {
     public static completeMember(studyUser: StudyUser, users: User[]) {
         const user: User = users.find(u => u.id == studyUser.userId);
         if (user) studyUser.user = user;
+    }
+
+    get expired(): boolean {
+        return this.expiration?.getTime() < new Date().getTime();
     }
 }
 
@@ -53,6 +58,7 @@ export class StudyUserDTO {
     user: User;
     confirmed: boolean = false;
     centerIds: number[];
+    expiration: Date;
 
     constructor(studyUser: StudyUser) {
         this.id = studyUser.id;
@@ -65,5 +71,6 @@ export class StudyUserDTO {
         this.user = studyUser.user;
         this.confirmed = studyUser.confirmed;
         this.centerIds = studyUser.centers?.map(center => center.id);
+        this.expiration = studyUser.expiration;
     }
 }

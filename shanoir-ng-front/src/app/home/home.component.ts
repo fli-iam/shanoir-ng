@@ -25,9 +25,10 @@ import { StudyLight } from '../studies/shared/study.dto';
 import { StudyService } from '../studies/shared/study.service';
 import { AccessRequest } from '../users/access-request/access-request.model';
 import { User } from '../users/shared/user.model';
-import { UserService } from '../users/shared/user.service';
 import { DUASigningComponent } from '../dua/dua-signing/dua-signing.component';
 import { EventTypePipe } from '../async-tasks/event.pipe';
+import { AccessRequestService } from '../users/access-request/access-request.service';
+import { UserService } from '../users/shared/user.service';
 
 import { ChallengeBlockComponent } from './challenge/challenge-block.component';
 
@@ -59,6 +60,7 @@ export class HomeComponent {
             private breadcrumbsService: BreadcrumbsService,
             private studyService: StudyService,
             private keycloakService: KeycloakService,
+            private accessRequestService: AccessRequestService,
             private userService: UserService,
             private taskService: TaskService) {
         this.breadcrumbsService.nameStep('Home');
@@ -91,7 +93,7 @@ export class HomeComponent {
         });
         // Load access requests
         if (this.isUserAtLeastExpert()) {
-            this.userService.getAccessRequestsForAdmin().then(acs => {
+            this.accessRequestService.getAccessRequestsForAdmin().then(acs => {
                 this.accessRequests = acs;
             });
         }

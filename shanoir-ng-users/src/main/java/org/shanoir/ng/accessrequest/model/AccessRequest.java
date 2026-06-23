@@ -14,12 +14,14 @@
 
 package org.shanoir.ng.accessrequest.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.user.model.User;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 /**
  * This class is used by a user to ask an access to a given study.
@@ -40,6 +42,8 @@ public class AccessRequest extends AbstractEntity {
     private String studyName;
 
     private Long studyId;
+
+    private LocalDate expiration;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -97,5 +101,13 @@ public class AccessRequest extends AbstractEntity {
 
     public void setStudyName(String studyName) {
         this.studyName = studyName;
+    }
+
+    public LocalDate getExpiration() {
+        return expiration;
+    }
+
+    public void setExpiration(LocalDate expiration) {
+        this.expiration = expiration;
     }
 }

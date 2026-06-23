@@ -12,17 +12,33 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Field } from '../../shared/reflect/field.decorator';
-import { Entity } from '../../shared/components/entity/entity.abstract';
-import { User } from '../../users/shared/user.model';
+package org.shanoir.ng.accessrequest.model;
 
-export class AccessRequest extends Entity {
-    @Field() id: number;
-    @Field() studyId: number;
-    @Field() studyName: string;
-    @Field() user: User;
-    @Field() motivation: string;
-    @Field() status: number;
-    @Field() alreadyMember: boolean;
-    @Field() expiration: Date;
+import java.time.LocalDate;
+
+public class ValidationDTO {
+
+    private boolean accept;
+
+    private LocalDate expiration;
+
+    public boolean isAccept() {
+        return accept;
+    }
+
+    public boolean getAccept() {
+        return isAccept();
+    }
+
+    public LocalDate getExpiration() {
+        return expiration;
+    }
+
+    public void setAccept(boolean accept) {
+        this.accept = accept;
+    }
+
+    public void setExpiration(LocalDate expiration) {
+        this.expiration = expiration;
+    }
 }

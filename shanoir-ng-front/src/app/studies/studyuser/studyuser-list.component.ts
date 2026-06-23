@@ -17,6 +17,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/f
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 import { IdName } from 'src/app/shared/models/id-name.model';
 import { ConsoleService } from 'src/app/shared/console/console.service';
+import { LocalDateFormatPipe } from 'src/app/shared/localLanguage/localDateFormat.pipe';
+import { DatepickerComponent } from 'src/app/shared/date-picker/date-picker.component';
 
 import { Center } from '../../centers/shared/center.model';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
@@ -46,7 +48,7 @@ import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
             multi: true,
         }
     ],
-    imports: [FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent]
+    imports: [FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent, LocalDateFormatPipe, DatepickerComponent],
 })
 
 export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
@@ -65,12 +67,13 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
-    pannelStudyUser: StudyUser;
+    panelStudyUser: StudyUser;
     StudyUserRight = StudyUserRight;
     isAdmin: boolean;
     invitationMail: string;
     invitationFunction: string;
     newUser: User[] = [];
+    minExpirationDate: Date = new Date();
 
     private onTouchedCallback = () => { return; };
     private onChangeCallback: (any) => void = () => { return; };
@@ -187,12 +190,17 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         this.onStudyUserEdit();
     }
 
+    onExpirationChange(su: StudyUser, expiration: Date) {
+        su.expiration = expiration;
+        this.onStudyUserEdit();
+    }
+
     hasCenter(center: Center, su: StudyUser): boolean {
         return !!su.centers?.find(c => c.id == center.id);
     }
 
     onUserClick(studyUser: StudyUser) {
-        if (this.pannelStudyUser && (this.pannelStudyUser.id == studyUser.id)) {
+        if (this.panelStudyUser && (this.panelStudyUser.id == studyUser.id)) {
             this.closePannel();
         } else {
             this.openPannel(studyUser);
@@ -200,11 +208,11 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     }
 
     openPannel(studyUser: StudyUser) {
-        this.pannelStudyUser = studyUser;
+        this.panelStudyUser = studyUser;
     }
 
     closePannel() {
-        this.pannelStudyUser = null;
+        this.panelStudyUser = null;
     }
 
     private removeStudyUser = (item: StudyUser) => {
@@ -266,9 +274,9 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     onToggleAllCenters(check: boolean) {
         if(!check) {
-            this.pannelStudyUser.centers = [...this.centers];
+            this.panelStudyUser.centers = [...this.centers];
         } else {
-            this.pannelStudyUser.centers = [];
+            this.panelStudyUser.centers = [];
         }
     }
 
@@ -299,7 +307,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         const backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
             this.studyUserList.unshift(backedUpStudyUser);
-            this.pannelStudyUser = backedUpStudyUser;
+            this.panelStudyUser = backedUpStudyUser;
         } else {
             const studyUser: StudyUser = new StudyUser();
             studyUser.userId = selectedUser.id;
@@ -309,7 +317,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             studyUser.studyUserRights = rights;
             studyUser.completeMember(this.users);
             this.studyUserList.unshift(studyUser);
-            this.pannelStudyUser = studyUser;
+            this.panelStudyUser = studyUser;
         }
         this.newUser.unshift(this.studyUserList.at(0).user)
         this.browserPaging.setItems(this.studyUserList);

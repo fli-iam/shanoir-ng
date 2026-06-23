@@ -11,18 +11,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+package org.shanoir.ng.study.dto;
 
-import { Field } from '../../shared/reflect/field.decorator';
-import { Entity } from '../../shared/components/entity/entity.abstract';
-import { User } from '../../users/shared/user.model';
+import java.time.LocalDate;
 
-export class AccessRequest extends Entity {
-    @Field() id: number;
-    @Field() studyId: number;
-    @Field() studyName: string;
-    @Field() user: User;
-    @Field() motivation: string;
-    @Field() status: number;
-    @Field() alreadyMember: boolean;
-    @Field() expiration: Date;
+public class IdDate {
+
+    private Long id;
+    private LocalDate date;
+
+    public IdDate() { }
+
+    public IdDate(Long id, LocalDate date) {
+        this.id = id;
+        this.date = date;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 }

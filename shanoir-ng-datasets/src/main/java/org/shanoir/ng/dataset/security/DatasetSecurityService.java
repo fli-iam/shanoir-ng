@@ -734,6 +734,9 @@ public class DatasetSecurityService {
      */
     public boolean checkDatasetDTOPage(Iterable<DatasetDTO> page, String rightStr) {
         UserRights userRights = studyRightsService.getUserRights();
+        if (page == null) {
+            return true;
+        }
         for (DatasetDTO dataset : page) {
             Long studyId = dataset.getStudyId();
             Long centerId = dataset.getCenterId();

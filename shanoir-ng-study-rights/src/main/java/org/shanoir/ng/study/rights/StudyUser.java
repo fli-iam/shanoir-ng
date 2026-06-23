@@ -14,8 +14,12 @@
 
 package org.shanoir.ng.study.rights;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.hibernate.validator.constraints.NotBlank;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -25,9 +29,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-
-import org.hibernate.validator.constraints.NotBlank;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
 
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "studyId", "userId" }, name = "study_user_idx") })
@@ -49,6 +50,8 @@ public class StudyUser implements StudyUserInterface {
      * The default is true, in case no DUA is existing.
      */
     private boolean confirmed = true;
+
+    private LocalDate expiration;
 
     /** Study id. */
     private Long studyId;
@@ -111,6 +114,18 @@ public class StudyUser implements StudyUserInterface {
         this.confirmed = confirmed;
     }
 
+    public boolean canAccessStudy() {
+        return isConfirmed() && (getExpiration() == null || getExpiration().isAfter(LocalDate.now()));
+    }
+
+    public LocalDate getExpiration() {
+        return expiration;
+    }
+
+    public void setExpiration(LocalDate expiration) {
+        this.expiration = expiration;
+    }
+
     /**
      * @return the studyId
      */
@@ -133,8 +148,10 @@ public class StudyUser implements StudyUserInterface {
     @Override
     public List<StudyUserRight> getStudyUserRights() {
         List<StudyUserRight> list = new ArrayList<>();
-        for (Integer localId : studyUserRights) {
-            list.add(StudyUserRight.getType(localId));
+        if (studyUserRights != null) {
+            for (Integer localId : studyUserRights) {
+                list.add(StudyUserRight.getType(localId));
+            }
         }
         return list;
     }

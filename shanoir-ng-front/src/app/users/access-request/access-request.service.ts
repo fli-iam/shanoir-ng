@@ -13,7 +13,7 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subject, Subscription, firstValueFrom } from 'rxjs';
 
 import { IdName } from 'src/app/shared/models/id-name.model';
 import { KeycloakService } from 'src/app/shared/keycloak/keycloak.service';
@@ -26,17 +26,33 @@ import { AccessRequest } from './access-request.model';
 @Injectable()
 export class AccessRequestService extends EntityService<AccessRequest> implements OnDestroy {
 
+    
     getEntityInstance(): AccessRequest {
         return new AccessRequest();
     }
 
     API_URL = AppUtils.BACKEND_API_USER_ACCESS_REQUEST;
-
-    subscribtions: Subscription[] = [];
     
+    public accessRequets: Subject<number> = new Subject();
+    private _accessRequests: number = 0;
+    private refreshTimeout;
+    subscribtions: Subscription[] = [];
+
+
     constructor(protected http: HttpClient) {
         super(http);
+        this.refreshTimeout = setInterval(() => {
+            this.getAccessRequestsForAdmin();
+        }, 1000 * 60 * 2);
     }
+
+    decreaseAccessRequests() {
+        this._accessRequests --;
+        this.accessRequets.next(this._accessRequests);
+    }
+
+
+
 
     public inviteUser(mail: string, func: string, study: IdName): Promise<AccessRequest> {
         const formData: FormData = new FormData();
@@ -56,17 +72,42 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
 
     }
 
-    public findByStudy(studyId: number): Promise<AccessRequest[]> {
-        return firstValueFrom(this.http.get<AccessRequest[]>(this.API_URL+"/byStudy/" + studyId));
+    getAccessRequests(): Promise<AccessRequest[]> {
+        return firstValueFrom(this.http.get<AccessRequest[]>(AppUtils.BACKEND_API_USER_ACCESS_REQUEST_BY_USER))
+            .then((typeResult: AccessRequest[]) => {
+                return typeResult;
+            });
     }
 
-    public resolveRequest(id: number, value: boolean): Promise<any> {
-        return firstValueFrom(this.http.put(AppUtils.BACKEND_API_ACCESS_REQUEST_RESOLVE + id, "" + value));
+    getAccessRequestsForAdmin(): Promise<AccessRequest[]> {
+        return firstValueFrom(this.http.get<AccessRequest[]>(AppUtils.BACKEND_API_USER_ACCESS_REQUEST_BY_ADMIN))
+            .then((typeResult: AccessRequest[]) => {
+                this._accessRequests = typeResult?.length;
+                this.accessRequets.next(typeResult?.length);
+                return typeResult;
+            }).then((typeResult: AccessRequest[]) => this.mapEntityList(typeResult));
+    }
+
+    public findByStudy(studyId: number): Promise<AccessRequest[]> {
+        return firstValueFrom(this.http.get<AccessRequest[]>(this.API_URL+"/byStudy/" + studyId))
+            .then(this.mapEntityList);
+    }
+
+    public resolveRequest(id: number, value: boolean, expiration: Date | null): Promise<any> {
+        return firstValueFrom(this.http.put(AppUtils.BACKEND_API_ACCESS_REQUEST_RESOLVE + id, "" 
+            + JSON.stringify({response: value, expiration: expiration})));
+    }
+
+    protected toRealObject(entity: any): AccessRequest {
+        const trueObject: AccessRequest = super.toRealObject(entity);
+        trueObject.expiration = entity.expiration ? new Date(entity.expiration) : null;
+        return trueObject;
     }
 
     ngOnDestroy() {
         for(const subscribtion of this.subscribtions) {
             subscribtion.unsubscribe();
         }
+        clearInterval(this.refreshTimeout);
     }
 }

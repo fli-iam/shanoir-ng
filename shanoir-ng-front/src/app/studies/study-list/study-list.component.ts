@@ -14,13 +14,13 @@
 import { Component, ViewChild } from '@angular/core';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from "../shared/study-user.model";
@@ -42,14 +42,18 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     hasDUA: boolean;
     isSuConfirmed: boolean;
     private studyIdsForCurrentUser: number[];
+    private requestDates: Map<number, Date>;
 
     constructor(
         private studyService: StudyService,
         private confirmService: ConfirmDialogService,
-        private userService: UserService) {
+        private accessRequestService: AccessRequestService) {
 
         super('study');
         this.studyService.getStudiesByRight(StudyUserRight.CAN_ADMINISTRATE).then( studies => this.studyIdsForCurrentUser = studies);
+        this.studyService.fetchCurrentUserStudyDates().then(requestDates => {
+            this.requestDates = requestDates;
+        });
     }
 
     getService(): EntityService<Study> {
@@ -83,10 +87,10 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     return study;
                 }));
             return studies;
-        })
+        });
         const allPromise: Promise<Study[]> = Promise.all([
             earlyResult,
-            this.userService.getAccessRequests(),
+            this.accessRequestService.getAccessRequests()
         ]).then(([studies, accessRequests]) => {
             if (accessRequests?.length > 0) {
                 for (const accessRequest of accessRequests) {
@@ -198,6 +202,23 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                         return tip;
                     } else {
                         return "Calculating the detailed study storage volume, this may take up to a minute"
+                    }
+                }
+            }, {
+                headerName: "Access end", type: "date", 
+                cellRenderer: (params: any) => {
+                    return this.requestDates?.get(params.data?.id);
+                },
+                cellGraphics: (data: any) => {
+                    const maxDate = this.requestDates?.get(data.id);
+                    if (maxDate && maxDate > new Date()) {
+                        if (maxDate && maxDate < new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)) {
+                            return {color: 'darkorange'};
+                        } else {
+                            return {color: 'green'};
+                        }
+                    } else {
+                        return {color: 'red'};
                     }
                 }
             }

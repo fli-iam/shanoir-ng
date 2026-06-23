@@ -45,8 +45,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [getPage]="getPage.bind(this)"
             [columnDefs]="columnDefs"
             (rowClick)="onUserClick($event)"
-            [selectedId]="pannelStudyUser?.id"></shanoir-table>
-        @if (pannelStudyUser) {
+            [selectedId]="panelStudyUser?.id"></shanoir-table>
+        @if (panelStudyUser) {
             <span class="right-col">
                 <div class="pannel">
                     <div class="close" (click)="closePannel()"><i class="fas fa-times"></i></div>
@@ -56,26 +56,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <ul>
                                 <li>
                                     <label>Username</label>
-                                    <span class="right-col">{{ pannelStudyUser.userName }}</span>
+                                    <span class="right-col">{{ panelStudyUser.userName }}</span>
                                 </li>
                                 <li>
                                     <label>First name</label>
-                                    <span class="right-col">{{ pannelStudyUser.user?.firstName }}</span>
+                                    <span class="right-col">{{ panelStudyUser.user?.firstName }}</span>
                                 </li>
                                 <li>
                                     <label>Last name</label>
-                                    <span class="right-col">{{ pannelStudyUser.user?.lastName }}</span>
+                                    <span class="right-col">{{ panelStudyUser.user?.lastName }}</span>
                                 </li>
                                 <li>
                                     <label>Email</label>
-                                    <span class="right-col">{{ pannelStudyUser.user?.email }}</span>
+                                    <span class="right-col">{{ panelStudyUser.user?.email }}</span>
                                 </li>
                                 <li>
                                     <label>Receive Import Mail</label>
                                     <span class="right-col">
                                         <checkbox
                                             [mode]="mode == 'view' ? mode : 'edit'"
-                                            [(ngModel)]="pannelStudyUser.receiveNewImportReport"
+                                            [(ngModel)]="panelStudyUser.receiveNewImportReport"
                                             (userChange)="onStudyUserEdit()"></checkbox>
                                     </span>
                                 </li>
@@ -84,7 +84,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <span class="right-col">
                                         <checkbox
                                             [mode]="mode == 'view' ? mode : 'edit'"
-                                            [(ngModel)]="pannelStudyUser.receiveStudyUserReport"
+                                            [(ngModel)]="panelStudyUser.receiveStudyUserReport"
                                             (userChange)="onStudyUserEdit()"></checkbox>
                                     </span>
                                 </li>
@@ -97,40 +97,57 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <li>
                                 <label>Role</label>
                                 <span class="right-col left-icon fix-icon user-icon">
-                                    @if (pannelStudyUser.user?.role?.id == 2) {
+                                    @if (panelStudyUser.user?.role?.id == 2) {
                                         <i class="fas fa-user"></i>
                                     }
-                                    @if (pannelStudyUser.user?.role?.id == 3) {
+                                    @if (panelStudyUser.user?.role?.id == 3) {
                                         <i class="fas fa-user-tie"></i>
                                     }
-                                    @if (pannelStudyUser.user?.role?.id == 1) {
+                                    @if (panelStudyUser.user?.role?.id == 1) {
                                         <i class="fas fa-user-cog"></i>
                                     }
-                                    {{ pannelStudyUser.user?.role?.displayName }}
+                                    {{ panelStudyUser.user?.role?.displayName }}
                                 </span>
                             </li>
                             <li>
                                 <label>DUA</label>
                                 <span class="right-col fix-icon">
-                                    @if (pannelStudyUser.confirmed) {
+                                    @if (panelStudyUser.confirmed) {
                                         <span class="bool-true"><i class="fas fa-check"></i></span>
                                     }
-                                    @if (!pannelStudyUser.confirmed) {
+                                    @if (!panelStudyUser.confirmed) {
                                         <span class="bool-false"><i class="fas fa-times"></i></span>
                                     }
                                 </span>
                             </li>
+                            @if (panelStudyUser.expiration || mode != 'view') {
+                                <li>
+                                    <label>Expiration</label>
+                                    <span class="right-col fix-icon left-icon">
+                                        @if (panelStudyUser.expired) {
+                                            <span class="bool-false"><i class="fas fa-times"></i></span>
+                                        } @else {
+                                            <span class="bool-true"><i class="fas fa-check"></i></span>
+                                        }
+                                        @if (mode == 'view' && panelStudyUser.expiration) {
+                                            {{panelStudyUser.expiration | localDateFormatPipe}}
+                                        } @else {
+                                            <datepicker [ngModel]="panelStudyUser.expiration" (ngModelChange)="onExpirationChange(panelStudyUser, $event)" [min]="minExpirationDate"></datepicker>
+                                        }
+                                    </span>
+                                </li>
+                            }
                             <li>
                                 <label>Can see all</label>
                                 <span class="right-col">
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
-                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)"
-                                        (userChange)="onEditRight(StudyUserRight.CAN_SEE_ALL, pannelStudyUser, $event)"
+                                        [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)"
+                                        (userChange)="onEditRight(StudyUserRight.CAN_SEE_ALL, panelStudyUser, $event)"
                                         [disabled]="
-                                            newUser.includes(pannelStudyUser.user) ||
-                                            (pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) &&
-                                                pannelStudyUser.userId == getLoggedUserId()) ||
+                                            newUser.includes(panelStudyUser.user) ||
+                                            (panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) &&
+                                                panelStudyUser.userId == getLoggedUserId()) ||
                                             study.isDraft
                                         "></checkbox>
                                 </span>
@@ -140,8 +157,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <span class="right-col">
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
-                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)"
-                                        (userChange)="onEditRight(StudyUserRight.CAN_DOWNLOAD, pannelStudyUser, $event)"
+                                        [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)"
+                                        (userChange)="onEditRight(StudyUserRight.CAN_DOWNLOAD, panelStudyUser, $event)"
                                         [disabled]="study.isDraft"></checkbox>
                                 </span>
                             </li>
@@ -150,8 +167,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <span class="right-col">
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
-                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_IMPORT)"
-                                        (userChange)="onEditRight(StudyUserRight.CAN_IMPORT, pannelStudyUser, $event)"
+                                        [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_IMPORT)"
+                                        (userChange)="onEditRight(StudyUserRight.CAN_IMPORT, panelStudyUser, $event)"
                                         [disabled]="study.isDraft"></checkbox>
                                 </span>
                             </li>
@@ -160,8 +177,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <span class="right-col">
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
-                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_EXECUTE)"
-                                        (userChange)="onEditRight(StudyUserRight.CAN_EXECUTE, pannelStudyUser, $event)"
+                                        [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_EXECUTE)"
+                                        (userChange)="onEditRight(StudyUserRight.CAN_EXECUTE, panelStudyUser, $event)"
                                         [disabled]="study.isDraft"></checkbox>
                                 </span>
                             </li>
@@ -170,8 +187,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <span class="right-col">
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
-                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)"
-                                        (userChange)="onEditRight(StudyUserRight.CAN_ADMINISTRATE, pannelStudyUser, $event)"
+                                        [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)"
+                                        (userChange)="onEditRight(StudyUserRight.CAN_ADMINISTRATE, panelStudyUser, $event)"
                                         [disabled]="study.isDraft"></checkbox>
                                 </span>
                             </li>
@@ -180,18 +197,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <fieldset>
                         <legend>Center rights</legend>
                         <ul>
-                            @if (mode == 'edit' || pannelStudyUser.centers?.length == 0) {
+                            @if (mode == 'edit' || panelStudyUser.centers?.length == 0) {
                                 <li class="all-centers">
                                     <label>All centers (default)</label>
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
-                                        [ngModel]="!(pannelStudyUser.centers?.length > 0)"
+                                        [ngModel]="!(panelStudyUser.centers?.length > 0)"
                                         (userChange)="onToggleAllCenters($event)"
                                         [disabled]="study.isDraft"></checkbox>
                                 </li>
                             }
                         </ul>
-                        @if (pannelStudyUser.centers?.length > 0) {
+                        @if (panelStudyUser.centers?.length > 0) {
                             <ul>
                                 @for (center of centers; track center) {
                                     <li>
@@ -199,8 +216,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <span class="right-col">
                                             <checkbox
                                                 [mode]="mode == 'view' ? mode : 'edit'"
-                                                [ngModel]="hasCenter(center, pannelStudyUser)"
-                                                (userChange)="onEditCenter(center, pannelStudyUser, $event)"
+                                                [ngModel]="hasCenter(center, panelStudyUser)"
+                                                (userChange)="onEditCenter(center, panelStudyUser, $event)"
                                                 [disabled]="study.isDraft"></checkbox>
                                         </span>
                                     </li>
