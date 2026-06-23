@@ -16,7 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     @for (condition of rule.conditions; track condition; let i = $index) {
         <div class="condition">
             <condition
-                ruleScope="Examination"
+                ruleScope="DatasetAcquisition"
                 [(condition)]="rule.conditions[i]"
                 [mode]="mode"
                 [fieldOptions]="conditionFieldOptions"
