@@ -321,8 +321,10 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
-        event.setMessage("Delete examination - datasetAcquisition with id : " + id);
-        shanoirEventService.publishEvent(event);
+        if (event != null) {
+            event.setMessage("Delete examination - datasetAcquisition with id : " + id);
+            shanoirEventService.publishEvent(event);
+        }
         delete(entity, event);
 
         repository.deleteById(id);
