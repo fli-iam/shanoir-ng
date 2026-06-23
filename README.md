@@ -324,7 +324,7 @@ server directly:
    `SHANOIR_KEYCLOAK_USER`/`SHANOIR_KEYCLOAK_PASSWORD' (default is `admin`/`&a1A&a1A`)
 3. go to the **shanoir-ng** realm
 4. create/edit the new user and grant the relevant role (eg. `ROLE_ADMIN`). By
-   default, new user accounts are created in Keycloak by the users microservice
+   default, new user accounts are created in Keycloak by the users' microservice
    with temporary passwords, you may reset the password in keycloak's admin
    interface and receive the new password is by e-mail. In development, if you
    do hot have a configured SMTP relay, then you may choose to overide the
