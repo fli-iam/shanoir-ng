@@ -74,7 +74,7 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
             {
                headerName: 'Message', field: 'message', width: '100%', type:'link',
                download: item => this.downloadStats(item),
-               downloadCondition: item => ['downloadStatistics.event'].includes(item.eventType) && item.progress == 1,
+               downloadCondition: item => ['downloadStatistics.event', 'copyDataset.event'].includes(item.eventType) && item.progress == 1,
                link: item => item.route
             }, {
                headerName: 'Progress', field: 'progress', width: '110px', type: 'progress',
@@ -83,6 +83,8 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
                headerName: "Creation", field: "creationDate", width: '130px', type: 'dateTime', defaultSortCol: true, defaultAsc: false,
             }, {
                 headerName: "Last update", field: "lastUpdate", width: '130px', type: 'dateTime'
+            }, {
+                headerName: "Route", field: "route", width: '100px'
             }
         ];
     }
@@ -92,10 +94,9 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
     }
 
     downloadStats(item: any) {
-        if (item instanceof Task 
-                && ["downloadStatistics.event"].includes(item.eventType) 
+        if (item instanceof Task
+                && ["downloadStatistics.event", "copyDataset.event"].includes(item.eventType)
                 && item.progress == 1) {
-            console.log('Calling taskService.downloadStats with item:', item);
             this.taskService.downloadStats(item);
         }
     }

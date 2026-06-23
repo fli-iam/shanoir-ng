@@ -528,7 +528,7 @@ export class MassDownloadService {
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
         const contentDispHeader: string = response.headers.get('Content-Disposition');
-        return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length).replace('/', '_');
+        return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length).replace('/', '_').replace(/"/g, '');
     }
 
     private initReport(datasetIds: number[], taskId: number, folderName: string, setup: DownloadSetup): Report {
@@ -598,7 +598,7 @@ export class MassDownloadService {
             next: ret => {
                 modalRef.destroy();
                 resPromise.resolve(ret);
-            }, 
+            },
             error: error => {
                 modalRef.destroy();
                 resPromise.reject(error);
