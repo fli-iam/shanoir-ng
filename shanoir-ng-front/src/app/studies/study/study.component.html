@@ -398,15 +398,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     }
                                     @default {
                                         <input type="number" formControlName="expectedNbOfSubjects" />
-                                        @if (hasError('expectedNbOfSubjects', ['required'])) {
-                                            <label
-                                                animate.enter="slide-down-error"
-                                                animate.leave="slide-up-error"
-                                                class="form-validation-alert"
-                                                i18n="Edit study|Expected number of subjects required error@@studyDetailExpectedNbOfSubjectsRequiredError">
-                                                Expected number of subjects is required!
-                                            </label>
-                                        }
                                         @if (hasError('expectedNbOfSubjects', ['min'])) {
                                             <label
                                                 animate.enter="slide-down-error"
@@ -479,15 +470,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     }
                                     @default {
                                         <input type="number" formControlName="expectedNbOfCenters" />
-                                        @if (hasError('expectedNbOfCenters', ['required'])) {
-                                            <label
-                                                animate.enter="slide-down-error"
-                                                animate.leave="slide-up-error"
-                                                class="form-validation-alert"
-                                                i18n="Edit study|Expected number of centers required error@@studyDetailExpectedNbOfCentersRequiredError">
-                                                Expected number of centers is required!
-                                            </label>
-                                        }
                                         @if (hasError('expectedNbOfCenters', ['min'])) {
                                             <label
                                                 animate.enter="slide-down-error"
@@ -558,15 +540,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     }
                                     @default {
                                         <input type="text" formControlName="sponsor" />
-                                        @if (hasError('sponsor', ['required'])) {
-                                            <label
-                                                animate.enter="slide-down-error"
-                                                animate.leave="slide-up-error"
-                                                class="form-validation-alert"
-                                                i18n="Edit study|Sponsor required error@@studyDetailSponsorRequiredError">
-                                                Sponsor is required!
-                                            </label>
-                                        }
                                         @if (hasError('sponsor', ['minlength', 'maxlength'])) {
                                             <label
                                                 animate.enter="slide-down-error"
@@ -591,15 +564,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     }
                                     @default {
                                         <input type="text" formControlName="principalInvestigator" />
-                                        @if (hasError('principalInvestigator', ['required'])) {
-                                            <label
-                                                animate.enter="slide-down-error"
-                                                animate.leave="slide-up-error"
-                                                class="form-validation-alert"
-                                                i18n="Edit study|Principal investigator required error@@studyDetailPrincipalInvestigatorRequiredError">
-                                                Principal investigator is required!
-                                            </label>
-                                        }
                                         @if (hasError('principalInvestigator', ['minlength', 'maxlength'])) {
                                             <label
                                                 animate.enter="slide-down-error"
@@ -894,7 +858,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 @if (keycloakService.isUserAdmin()) {
                     <fieldset [class.hidden-tab]="activeTab != 'executions'" tab="executions">
                         <legend>Execution templates</legend>
-                        <execution-template-list [studyId]="study.id" [studyName]="study.name"/>
+                        <execution-template-list [studyId]="study.id" [studyName]="study.name" [embedded]="true"></execution-template-list>
                     </fieldset>
                 }
             </form>
