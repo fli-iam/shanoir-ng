@@ -323,6 +323,8 @@ COPY --link \
     nginx/shanoir.template.conf \
     nginx/shanoir.template.dev.conf \
     nginx/shanoir.template.prod.conf \
+    nginx/shanoir.template.keycloak-full.conf \
+    nginx/shanoir.template.keycloak-limited.conf \
     /etc/nginx/
 
 COPY --link \
@@ -347,7 +349,7 @@ FROM node:lts-alpine3.21 AS front-dev
 
 WORKDIR /app
 
-RUN npm install -g @angular/cli@20.3.7
+RUN npm install -g @angular/cli@21.2.8
 
 
 

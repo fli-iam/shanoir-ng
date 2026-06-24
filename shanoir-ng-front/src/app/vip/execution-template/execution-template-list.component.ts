@@ -1,4 +1,5 @@
-import {Component, Input, ViewChild} from '@angular/core';
+import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -14,10 +15,10 @@ import { ExecutionTemplateService } from "./execution-template.service";
 @Component({
     selector: 'execution-template-list',
     templateUrl: './execution-template-list.component.html',
-    standalone: false
-
+    imports: [FormsModule, ReactiveFormsModule, TableComponent]
+    
 })
-export class ExecutionTemplateListComponent extends BrowserPaginEntityListComponent<ExecutionTemplate> {
+export class ExecutionTemplateListComponent extends BrowserPaginEntityListComponent<ExecutionTemplate> implements OnInit {
 
     @Input() studyId: number
     @Input() studyName: string

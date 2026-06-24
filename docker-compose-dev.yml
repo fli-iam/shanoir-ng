@@ -141,6 +141,7 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_ADMIN_EMAIL
@@ -179,6 +180,7 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_MIGRATION
       - SHANOIR_STORAGE_TYPE
       - S3_ENDPOINT
@@ -218,6 +220,7 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -253,6 +256,7 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_MIGRATION
@@ -301,6 +305,7 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_MIGRATION
       - SHANOIR_STORAGE_TYPE
       - S3_ENDPOINT
@@ -332,6 +337,7 @@ services:
   #
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
+    platform: linux/x86_64
     build:
       context: docker-compose
       target: nifti-conversion
@@ -339,6 +345,7 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -437,12 +444,16 @@ services:
       - SHANOIR_URL_HOST
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
+      - SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS
+      - SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS
+      - SHANOIR_VIEWER_OHIF_PREFETCH_NUM_REQUESTS
       - SHANOIR_X_FORWARDED
       - SHANOIR_INSTANCE_NAME
       - SHANOIR_INSTANCE_COLOR
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_KEYCLOAK_ADAPTER_MODE
+      - SHANOIR_KEYCLOAK_API
       - VIP_URL_SCHEME
       - VIP_URL_HOST
     volumes:

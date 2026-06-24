@@ -15,14 +15,11 @@
 
 import { Component, ContentChildren, forwardRef, HostListener, Input, QueryList, AfterViewInit } from '@angular/core';
 
-import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
-
 @Component({
     selector: 'menu-item',
     templateUrl: 'menu-item.component.html',
     styleUrls: ['menu-item.component.css'],
-    animations: [menuSlideRight],
-    standalone: false
+    imports: []
 })
 
 export class MenuItemComponent implements AfterViewInit {
@@ -37,7 +34,6 @@ export class MenuItemComponent implements AfterViewInit {
     public siblings: QueryList<MenuItemComponent>;
     public parent: any;
     public hasChildren: boolean = true;
-    public overflow: boolean = false;
     public init: boolean = false;
 
     public closeAll: () => void;
@@ -55,7 +51,6 @@ export class MenuItemComponent implements AfterViewInit {
         setTimeout(() => {
             this.hasChildren = doHasChildren;
             this.opened = false;
-            this.overflow = true;
             this.init = true;
         }, 100);
     }
@@ -68,16 +63,14 @@ export class MenuItemComponent implements AfterViewInit {
     public open() {
         this.closeSiblings(() => {
             this.opened =  true;
-            setTimeout(() => this.overflow = false, menuAnimDur);
         })
     }
 
     public close(callback: () => void = () => { return; }) {
         if (this.hasChildren) {
             this.closeChildren(() => {
-                this.overflow = true;
                 this.opened =  false;
-                setTimeout(callback, menuAnimDur);
+                setTimeout(callback);
             });
         } else {
             callback();
