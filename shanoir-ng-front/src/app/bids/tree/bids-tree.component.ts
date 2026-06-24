@@ -74,13 +74,13 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
         }));
         this.subscriptions.push(
             this.notificationsService.getNotifications().subscribe(tasks => {
-                this.task = tasks.find(t => 
+                this.task = tasks.find(t =>
                         t.id === this.task?.id ||
                         (
                             t.eventType === 'bidsExport.event'
                             && t.objectId === this.studyId
                             && [TaskStatus.IN_PROGRESS, TaskStatus.QUEUED, TaskStatus.IN_PROGRESS_BUT_WARNING].includes(t.status))
-                        );               
+                        );
             })
         );
     }
@@ -193,7 +193,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
         const contentDispHeader: string = response.headers.get('Content-Disposition');
-        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length).replace(/"/g, '');
     }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
@@ -235,7 +235,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
                         const length = obj[key].length;
                         if (length > MAX_NB_ISSUES_DISPLAY) {
                             obj[key] = obj[key].slice(0, MAX_NB_ISSUES_DISPLAY);
-                            obj[key].push({ message: `... and ${length - MAX_NB_ISSUES_DISPLAY} more issues not displayed. 
+                            obj[key].push({ message: `... and ${length - MAX_NB_ISSUES_DISPLAY} more issues not displayed.
                                 You can download the full report for more details.` });
                         }
                     } else {
@@ -253,7 +253,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
         const blob = new Blob([JSON.stringify(this.report, null, 4)], {
             type: 'application/json'
         });
-        AppUtils.browserDownloadFile(blob, 'bids_validator_' 
+        AppUtils.browserDownloadFile(blob, 'bids_validator_'
             + AppUtils.sanitizeFilename(this.studyName) + '_'
             + new Date().toLocaleString('fr-FR')
             + '.json'
