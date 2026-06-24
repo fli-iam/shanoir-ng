@@ -31,6 +31,7 @@ import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.weasis.dicom.param.DicomNode;
 
 /**
@@ -44,6 +45,7 @@ import org.weasis.dicom.param.DicomNode;
  * @author mkain
  *
  */
+@Component
 public class DicomServerClient implements IDicomServerClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(DicomServerClient.class);
