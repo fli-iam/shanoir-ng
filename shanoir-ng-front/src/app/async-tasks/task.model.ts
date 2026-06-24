@@ -116,7 +116,7 @@ export class Task extends Entity {
             return '/dataset-processing/details/' + this.objectId
         } else if (this.eventType === 'solrIndexAll.event' && this.status != -1) {
             return '/solr-search';
-        } else if (['downloadStatistics.event'].includes(this.eventType) && this.status != -1 && this.status != 2) {
+        } else if (['downloadStatistics.event', "copyDataset.event"].includes(this.eventType) && this.status != -1 && this.status != 2) {
             return '/datasets/download/event/' + this.idAsString;
         } else if (this.eventType === 'massiveOutputsDownload.event' && this.status != -1 && this.status != 2) {
             return '/datasets/massiveProcessingOutputsDownload';
@@ -161,5 +161,3 @@ export class Task extends Entity {
         return this;
     }
 }
-
-
