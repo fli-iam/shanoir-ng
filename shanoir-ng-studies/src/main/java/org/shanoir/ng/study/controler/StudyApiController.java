@@ -370,7 +370,7 @@ public class StudyApiController implements StudyApi {
             return;
         }
         try (InputStream is = resource.getInputStream()) {
-            response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + "\"");
             response.setContentType(contentType);
             response.setContentLengthLong(resource.contentLength());
             org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
