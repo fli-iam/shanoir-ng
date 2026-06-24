@@ -30,6 +30,8 @@ import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.condition.AcqDICOMConditionOnDatasets;
+import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnAcq;
+import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnDatasets;
 import org.shanoir.ng.studycard.model.condition.CardCondition;
 import org.shanoir.ng.studycard.model.condition.ExamDICOMConditionOnDatasets;
 import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnAcq;
@@ -161,20 +163,15 @@ public class QualityCardRule extends AbstractEntity {
         boolean allFulfilled = true;
         ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level
-        // We create a list containing only the acquisition we want to apply the rule
-        // on, to use the same condition fulfillment methods as for study card
-        // conditions on datasets or acquisitions list.
-        List<DatasetAcquisition> acquisitionList = new ArrayList<>();
-        acquisitionList.add(da);
         for (CardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();
             boolean fulfilled = true;
             if (condition instanceof AcqDICOMConditionOnDatasets) {
                 fulfilled = ((AcqDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
-            } else if (condition instanceof ExamMetadataCondOnAcq) {
-                fulfilled = ((ExamMetadataCondOnAcq) condition).fulfilled(acquisitionList, msg);
-            } else if (condition instanceof ExamMetadataCondOnDatasets) {
-                fulfilled = ((ExamMetadataCondOnDatasets) condition).fulfilled(acquisitionList, msg);
+            } else if (condition instanceof AcqMetadataCondOnAcq) {
+                fulfilled = ((AcqMetadataCondOnAcq) condition).fulfilled(da, msg);
+            } else if (condition instanceof AcqMetadataCondOnDatasets) {
+                fulfilled = ((AcqMetadataCondOnDatasets) condition).fulfilled(da.getDatasets(), msg);
             } else {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }
