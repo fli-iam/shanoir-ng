@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -112,6 +113,9 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Autowired
     private ShanoirEventService eventService;
+
+    @Autowired
+    private Environment environment;
 
     private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
@@ -579,6 +583,9 @@ public class SubjectServiceImpl implements SubjectService {
      * @param eventType the type of event
      */
     private void publishSubjectEvent(Subject subject, String eventType) {
+        for (String profile : environment.getActiveProfiles()) {
+            if ("test".equals(profile)) return;
+        }
         Study study = subject.getStudy();
         String eventMsg;
 
