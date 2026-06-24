@@ -1,6 +1,10 @@
 import {Component} from '@angular/core'
 import {ActivatedRoute} from "@angular/router"
-import {FormGroup, UntypedFormGroup, Validators} from "@angular/forms"
+import {FormGroup, ReactiveFormsModule, UntypedFormGroup, Validators} from "@angular/forms"
+import { CommonModule } from '@angular/common'
+
+import { FormFooterComponent } from 'src/app/shared/components/form-footer/form-footer.component'
+import { TooltipComponent } from 'src/app/shared/components/tooltip/tooltip.component'
 
 import {EntityComponent} from "../../../shared/components/entity/entity.component.abstract"
 import {EntityService} from "../../../shared/components/entity/entity.abstract.service"
@@ -8,11 +12,17 @@ import {ExecutionTemplateFilter} from "../../models/execution-template-filter"
 
 import {ExecutionTemplateFilterService} from "./execution-template-filter.service"
 
+
 @Component({
     selector: 'execution-template-filter',
     templateUrl: './execution-template-filter.component.html',
     styleUrls: ['./execution-template-filter.component.css'],
-    standalone: false
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormFooterComponent,
+        TooltipComponent
+    ]
 })
 
 export class ExecutionTemplateFilterComponent extends EntityComponent<ExecutionTemplateFilter> {

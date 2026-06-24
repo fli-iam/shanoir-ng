@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Directive, Input, OnDestroy, OnInit } from '@angular/core';
+import { Directive, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
@@ -19,7 +19,6 @@ import { TreeService } from 'src/app/studies/study/tree.service';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { capitalizeFirstLetter } from '../../../utils/app.utils';
-import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
 import { ConsoleService } from '../../console/console.service';
@@ -65,13 +64,13 @@ export abstract class EntityListComponent<T extends Entity> implements OnInit, O
             protected readonly ROUTING_NAME: string) {
 
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);
-        this.router = ServiceLocator.injector.get(Router);
-        this.confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
-        this.consoleService = ServiceLocator.injector.get(ConsoleService);
-        this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
-        this.keycloakService = ServiceLocator.injector.get(KeycloakService);
-        this.windowService = ServiceLocator.injector.get(WindowService);
-        this.treeService = ServiceLocator.injector.get(TreeService);
+        this.router = inject(Router);
+        this.confirmDialogService = inject(ConfirmDialogService);
+        this.consoleService = inject(ConsoleService);
+        this.breadcrumbsService = inject(BreadcrumbsService);
+        this.keycloakService = inject(KeycloakService);
+        this.windowService = inject(WindowService);
+        this.treeService = inject(TreeService);
 
         this.computeOptions();
         this.columnDefs = this.getColumnDefs();

@@ -29,7 +29,7 @@ import { ShanoirError } from '../../../../shared/models/error.model';
     selector: 'pathologyModel-list',
     templateUrl: 'pathologyModel-list.component.html',
     styleUrls: ['pathologyModel-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class PathologyModelsListComponent extends BrowserPaginEntityListComponent<PathologyModel> {
   @ViewChild('modelsTable') table: TableComponent;

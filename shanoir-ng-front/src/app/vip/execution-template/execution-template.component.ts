@@ -2,24 +2,37 @@ import { ChangeDetectorRef, Component } from '@angular/core'
 import { ActivatedRoute } from "@angular/router"
 import {
     FormGroup,
+    ReactiveFormsModule,
     UntypedFormGroup,
     Validators
 } from "@angular/forms"
+import { CommonModule } from '@angular/common'
+
+import { FormFooterComponent } from 'src/app/shared/components/form-footer/form-footer.component'
+import { TooltipComponent } from 'src/app/shared/components/tooltip/tooltip.component'
 
 import { EntityComponent } from "../../shared/components/entity/entity.component.abstract"
 import { ExecutionTemplate } from "../models/execution-template"
 import { EntityService } from "../../shared/components/entity/entity.abstract.service"
 import { Pipeline } from "../models/pipeline"
-import { Option } from "../../shared/select/select.component"
+import { Option, SelectBoxComponent } from "../../shared/select/select.component"
 import { DatasetProcessingType } from "../../enum/dataset-processing-type.enum"
 
 import {ExecutionTemplateService} from "./execution-template.service"
+import { ExecutionTemplateFilterListComponent } from './filter/execution-template-filter-list.component'
 
 @Component({
     selector: 'execution-template',
     templateUrl: './execution-template.component.html',
     styleUrls: ['./execution-template.component.css'],
-    standalone: false
+    imports: [
+        CommonModule,
+        ReactiveFormsModule, 
+        FormFooterComponent,
+        SelectBoxComponent,
+        TooltipComponent,
+        ExecutionTemplateFilterListComponent
+    ]
 })
 
 export class ExecutionTemplateComponent extends EntityComponent<ExecutionTemplate> {

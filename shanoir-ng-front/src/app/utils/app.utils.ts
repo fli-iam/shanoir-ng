@@ -12,20 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { HttpResponse } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
-import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpProgressEvent, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { last, map, mergeMap, shareReplay } from 'rxjs/operators';
 
-import { TaskState, TaskStatus } from '../async-tasks/task.model';
-
-import { ServiceLocator } from './locator.service';
+import { environment } from '../../environments/environment';
 
 
 // Base urls
 const url = window.location;
 export const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
-export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
+export const KEYCLOAK_BASE_URL = environment.keycloakUrl;
 export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/welcome";
 export const LOGIN_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
 export const SILENT_CHECK_SSO_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/assets/silent-check-sso.html";
@@ -169,8 +165,6 @@ export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_M
 // Custom sentence to introduce the Shanoir instance on welcome page
 export const FRONTEND_WELCOME_INTRODUCTION: string = "This is an instance of the Shanoir database.";
 
-declare let JSZip: any;
-
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
     if (error.error && error.error.details) {
@@ -187,21 +181,16 @@ export function hasUniqueError(error: any, fieldName: string): boolean {
 }
 
 export function browserDownloadFile(blob: Blob, filename: string) {
-    if (window.navigator.msSaveBlob) {
-        // IE 10+
-        window.navigator.msSaveBlob(blob, filename);
-    } else {
-        const link = document.createElement('a');
-        // Browsers that support HTML5 download attribute
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+    const link = document.createElement('a');
+    // Browsers that support HTML5 download attribute
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 }
 
@@ -210,114 +199,6 @@ export function browserDownloadFileFromResponse(response: HttpResponse<any>) {
         browserDownloadFile(response.body, getFilename(response));
     } else {
         throw new Error('can\'t download, server response is empty');
-    }
-}
-
-export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
-    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
-    return http.get(
-        url,
-        {
-            reportProgress: true,
-            responseType: 'blob',
-            params: params
-        }
-    )
-    .pipe(map(response => {
-        return response;
-    }))
-    .toPromise();
-}
-
-export function downloadWithStatusGET(url: string, params?: HttpParams, state?: TaskState): Observable<TaskState> {
-    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
-    const obs: Observable<HttpEvent<Blob>> = http.get(
-        url,
-        {
-            reportProgress: true,
-            observe: 'events',
-            responseType: 'blob',
-            params: params
-        }
-    ).pipe(shareReplay());
-    obs.pipe(last()).subscribe(response => {
-        browserDownloadFileFromResponse(response as HttpResponse<Blob>)
-    });
-    return obs.pipe(mergeMap(event => {
-        return extractState(event).then(s => {
-            if (state) {
-                state.errors = s.errors;
-                state.progress = s.progress;
-                state.status = s.status;
-            }
-            return s;
-        });
-    }));
-}
-
-export function downloadWithStatusPOST(url: string, formData: FormData, state?: TaskState): Observable<TaskState> {
-    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
-    const obs: Observable<HttpEvent<Blob>> = http.post(
-        url,
-        formData,
-        {
-            reportProgress: true,
-            observe: 'events',
-            responseType: 'blob'
-        }
-    ).pipe(shareReplay());
-    obs.pipe(last()).subscribe(response => {
-        browserDownloadFileFromResponse(response as HttpResponse<Blob>)
-    });
-    return obs.pipe(mergeMap(event => {
-        return extractState(event).then(s => {
-            if (state) {
-                state.errors = s.errors;
-                state.progress = s.progress;
-                state.status = s.status;
-            }
-            return s;
-        });
-    }));
-}
-
-export function extractState(event: HttpEvent<any>): Promise<TaskState> {
-    let task: TaskState;
-    switch (event.type) {
-        case HttpEventType.Sent:
-        case HttpEventType.ResponseHeader: {
-            task = new TaskState(TaskStatus.QUEUED, 0);
-            return Promise.resolve(task);
-        }
-        case HttpEventType.DownloadProgress: {
-            const total: number = (event as HttpProgressEvent).total;
-            task = new TaskState(TaskStatus.IN_PROGRESS, (event as HttpProgressEvent).loaded);
-            if (total) task.progress /= total;
-            return Promise.resolve(task);
-        }
-        case HttpEventType.Response: {
-            task = new TaskState(TaskStatus.DONE);
-            const blob: Blob = (event as HttpResponse<Blob>).body;
-            if (blob && event.headers.get('Content-Type') == 'application/zip') {
-                //report.list[id].zipSize = getSizeStr(blob?.size);
-                // Check ERRORS file in zip
-                const zip: any = new JSZip();
-                return zip.loadAsync(blob).then(dataFiles => {
-                    if (dataFiles.files['ERRORS.json']) {
-                        return dataFiles.files['ERRORS.json'].async('string').then(content => {
-                            const errorsJson: any = JSON.parse(content);
-                            task.errors = JSON.stringify(errorsJson, null, 4);
-                            task.status = TaskStatus.DONE_BUT_WARNING;
-                            return task;
-                        });
-                    }
-                    return task;
-                });
-            } else {
-                return Promise.resolve(task);
-            }
-        }
-        default: return Promise.resolve(task);
     }
 }
 
@@ -353,10 +234,7 @@ export function findLastIndex<T>(array: T[], predicate: (value: T, index: number
 }
 
 
-@Pipe({
-    name: 'times',
-    standalone: false
-})
+@Pipe({ name: 'times' })
 export class TimesPipe implements PipeTransform {
     transform(value: number): any {
         const iterable = {};
@@ -370,10 +248,7 @@ export class TimesPipe implements PipeTransform {
     }
 }
 
-@Pipe({
-    name: 'getValues',
-    standalone: false
-})
+@Pipe({ name: 'getValues' })
 export class GetValuesPipe implements PipeTransform {
     transform(map: Map<any, any>): any[] {
         const ret = [];
@@ -405,10 +280,7 @@ export function capitalsAndUnderscoresToDisplayable(str: string) {
     return capitalizeFirstLetter(str.replace(new RegExp('_', 'g'), ' ').toLowerCase());
 }
 
-@Pipe({
-    name: 'camel',
-    standalone: false
-})
+@Pipe({ name: 'camel' })
 export class CamelPipe implements PipeTransform {
     transform(value: string): any {
         return capitalsAndUnderscoresToDisplayable(value);
