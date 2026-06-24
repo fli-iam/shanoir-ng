@@ -390,35 +390,27 @@ public class StudySecurityService {
      * @return true or false
      */
     public boolean hasRightOnSubjectForEveryStudies(SubjectDTO subjectDto, String rightStr) {
-        if (subjectDto == null || subjectDto.getSubjectStudyList() == null) {
-            return false;
-        }
-
+        boolean res = false;
         Subject subject = subjectRepository.findById(subjectDto.getId()).orElse(null);
-        if (subject == null || subject.getSubjectStudyList() == null) {
-            return false;
-        }
-
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
         List<Long> toRemove = new ArrayList<>();
-        boolean res = false;
-
-        for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-            if (hasPrivilege(subjectStudy.getStudy(), right)) {
-                res = true;
-            } else {
-                toRemove.add(subjectStudy.getId());
+        if (subjectDto != null && subjectDto.getSubjectStudyList() != null) {
+            for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+                if (hasPrivilege(subjectStudy.getStudy(), right)) {
+                    res = true;
+                } else {
+                    toRemove.add(subjectStudy.getId());
+                }
             }
-        }
-
-        ListIterator<SubjectStudyDTO> iter = subjectDto.getSubjectStudyList().listIterator();
-        while (iter.hasNext()) {
-            if (toRemove.contains(iter.next().getId())) {
-                iter.remove();
+            ListIterator<SubjectStudyDTO> iter = subjectDto.getSubjectStudyList().listIterator();
+            while (iter.hasNext()) {
+                if (toRemove.contains(iter.next().getId())) {
+                    iter.remove();
+                }
             }
+            return res;
         }
-
-        return res;
+        return false;
     }
 
     /**
