@@ -129,10 +129,14 @@ public class QualityCardRule extends AbstractEntity {
                 QualityCardResultEntry resultEntry = initResult(datasetAcquisition);
                 resultEntry.setFailedValid(QualityTag.VALID.equals(getQualityTag()) && !conditionResult.isFulfilled());
                 resultEntry.setTagSet(getQualityTag());
+                // Here we use the original dataset name metadata (= seriesDescription) or the dataset acquisition ID to clearly identify the dataset acquisition concerned by the quality card result message.
+                String seriesDescription = datasetAcquisition.getDatasets().get(0).getOriginMetadata().getName() != null ? datasetAcquisition.getDatasets().get(0).getOriginMetadata().getName() : Long.toString(datasetAcquisition.getId());
                 if (conditionResult.isFulfilled()) {
-                    resultEntry.setMessage("Tag " + getQualityTag().name() + " was set because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
+                    resultEntry.setMessage("Tag " + getQualityTag().name() + " was set on acquisition " + seriesDescription
+                    + " because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
                 } else {
-                    resultEntry.setMessage("Tag " + getQualityTag().name() + " could not be set because those conditions failed : " + StringUtils.join(conditionResult.getUnfulfilledConditionsMsgList(), ", "));
+                    resultEntry.setMessage("Tag " + getQualityTag().name() + " could not be set on acquisition " + seriesDescription
+                    + " because those conditions failed : " + StringUtils.join(conditionResult.getUnfulfilledConditionsMsgList(), ", "));
                 }
                 result.add(resultEntry);
             }
