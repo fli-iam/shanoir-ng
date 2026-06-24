@@ -51,6 +51,7 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -67,6 +68,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class SubjectServiceTest {
 
     private static final Long SUBJECT_ID = 1L;
+
+    @Mock
+    private Environment environment;
 
     @Mock
     private SubjectRepository subjectRepository;
@@ -91,6 +95,7 @@ public class SubjectServiceTest {
 
     @BeforeEach
     public void setup() {
+        given(environment.getActiveProfiles()).willReturn(new String[]{"test"});
         given(subjectRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createSubject()));
         given(subjectRepository.findById(SUBJECT_ID)).willReturn(Optional.of(ModelsUtil.createSubject()));
         List<Subject> subjects = new ArrayList<Subject>();
