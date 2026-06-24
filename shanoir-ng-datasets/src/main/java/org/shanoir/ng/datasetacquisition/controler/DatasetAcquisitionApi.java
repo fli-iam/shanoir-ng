@@ -13,6 +13,7 @@
  */
 package org.shanoir.ng.datasetacquisition.controler;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
@@ -28,15 +29,18 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @Tag(name = "datasetacquisition", description = "the datasetacquisition API")
@@ -147,5 +151,34 @@ public interface DatasetAcquisitionApi {
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
             @Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition, BindingResult result)
             throws RestServiceException;
+
+    @Operation(summary = "", description = "Add extra data to a dataset acquisition")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "extra data added"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "422", description = "bad parameters"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @PostMapping(value = "/datasetacquisition/extra-data-upload/{datasetAcquisitionId}",
+            produces = {"application/json"},
+            consumes = {"multipart/form-data"})
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_IMPORT'))")
+    ResponseEntity<Void> addExtraData(
+            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+            @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
+
+    @Operation(summary = "", description = "Download extra data from a dataset acquisition")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "file downloaded"),
+        @ApiResponse(responseCode = "204", description = "no content"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "422", description = "bad parameters"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @GetMapping(value = "/datasetacquisition/extra-data-download/{datasetAcquisitionId}/{fileName:.+}/")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_SEE_ALL'))")
+    void downloadExtraData(
+            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
 }

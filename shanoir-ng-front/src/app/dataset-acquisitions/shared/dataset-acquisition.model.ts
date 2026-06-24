@@ -38,4 +38,5 @@ export abstract class DatasetAcquisition extends Entity {
     @Field() copies: number[];
     @Field() source: number;
     @Field() acquisitionStartTime: Date;
+    @Field() extraDataFilePathList: string[] = [];
 }
