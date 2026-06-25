@@ -2,42 +2,60 @@ package org.shanoir.uploader.dicom.controller;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Properties;
 
-import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.action.event.DicomClientReadyEvent;
+import org.shanoir.uploader.action.init.PacsConfigurationState;
+import org.shanoir.uploader.action.init.StartupStateContext;
 import org.shanoir.uploader.dicom.DicomServerClient;
 import org.shanoir.uploader.dicom.dto.ConfigDTO;
-import org.shanoir.uploader.dicom.query.Media;
-import org.shanoir.uploader.dicom.query.PatientTreeNode;
-import org.shanoir.uploader.dicom.query.SerieTreeNode;
-import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.context.ApplicationListener;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+import jakarta.annotation.PostConstruct;
 
 
 @RestController
 @RequestMapping("/dicom")
-@Controller
-public class DicomApiController {
-    @Autowired
-    DicomServerClient dicomServerClient;
+public class DicomApiController implements ApplicationListener<DicomClientReadyEvent> {
 
-    public DicomApiController() throws Exception {
-//        try {
-//            dicomServerClient = new DicomServerClient(ShUpConfig.dicomServerProperties, new File(ShUpConfig.WORK_FOLDER));
-//        } catch (Exception e) {
-//            logger.error("Error initializing DicomServerClient", e);
-//        }
-    }
+    public ShUpOnloadConfig shUpOnloadConfig = ShUpOnloadConfig.getInstance();
+
+    private volatile DicomServerClient dicomServerClient;
 
     private static final Logger logger = LoggerFactory.getLogger(DicomApiController.class);
+
+    @Override
+    public void onApplicationEvent(DicomClientReadyEvent event) {
+        this.dicomServerClient = event.getDicomServerClient();
+        logger.info("DicomApiController: DicomServerClient ready.");
+    }
+
+    // Securize endpoints if called before initialization of DicomServerClient
+    private DicomServerClient getClient() {
+        if (dicomServerClient == null) {
+            throw new ResponseStatusException(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "DICOM client not yet initialized"
+            );
+        }
+        return dicomServerClient;
+    }
 
     @GetMapping("/configuration")
     public ConfigDTO getDicomConfiguration() {
@@ -65,15 +83,9 @@ public class DicomApiController {
 
     @GetMapping("/echo")
     public HashMap<String, Boolean> echoDicomServer() {
-        try {
-            //dicomServerClient;
-        } catch (Exception e) {
-            logger.error("Error creating DicomServerClient", e);
-            return new HashMap<String, Boolean>() {{ put("success", false); }};
-        }
         return new HashMap<String, Boolean>() {
             {
-                put("success", dicomServerClient.echoDicomServer());
+                put("success", getClient().echoDicomServer());
             }
         };
     }
@@ -107,7 +119,7 @@ public class DicomApiController {
     public List<Patient> queryDicomServer(@RequestBody HashMap<String, String> queryParameters) throws Exception {
         logger.info("Querying Dicom server with parameters: {}", queryParameters);
 
-        List<Patient> patients = dicomServerClient.queryDicomServer(Objects.equals(queryParameters.get("studyRootQuery"), "true"), queryParameters.get("modality"), queryParameters.get("patientName"), queryParameters.get("patientID"), queryParameters.get("studyDescription"), queryParameters.get("patientBirthDate"), queryParameters.get("studyDate"));
+        List<Patient> patients = getClient().queryDicomServer(Objects.equals(queryParameters.get("studyRootQuery"), "true"), queryParameters.get("modality"), queryParameters.get("patientName"), queryParameters.get("patientID"), queryParameters.get("studyDescription"), queryParameters.get("patientBirthDate"), queryParameters.get("studyDate"));
 
 //        Media media = new Media();
 //        if (patients != null) {

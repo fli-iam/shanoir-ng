@@ -18,10 +18,12 @@ import java.net.MalformedURLException;
 
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.action.event.DicomClientReadyEvent;
 import org.shanoir.uploader.dicom.DicomServerClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 /**
@@ -47,6 +49,9 @@ public class PacsConfigurationState implements State {
     @Autowired
     private PacsManualConfigurationState pacsManualConfigurationState;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     public void load(StartupStateContext context) {
         initDicomServerClient();
         /**
@@ -68,6 +73,7 @@ public class PacsConfigurationState implements State {
         try {
             dSC = new DicomServerClient(ShUpConfig.dicomServerProperties, shUpOnloadConfig.getWorkFolder());
             shUpOnloadConfig.setDicomServerClient(dSC);
+            eventPublisher.publishEvent(new DicomClientReadyEvent(this, dSC));
             LOG.info("PacsConfigurationState: DicomServerClient successfully initialized.");
         } catch (MalformedURLException e) {
             LOG.info("Error with init of DicomServerClient: " + e.getMessage(), e);
