@@ -16,7 +16,11 @@ package org.shanoir.ng.importer.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -112,11 +116,13 @@ public class ImporterService {
         eventService.publishEvent(event);
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         Set<DatasetAcquisition> generatedAcquisitions = null;
+        AcquisitionsResult acquisitionsResult = null;
         try {
             Examination examination = examinationRepository.findById(importJob.getExaminationId()).orElse(null);
             if (examination != null) {
                 // generate acquisitions
-                generatedAcquisitions = generateAcquisitions(examination, importJob, event);
+                acquisitionsResult = generateAcquisitions(examination, importJob, event);
+                generatedAcquisitions = acquisitionsResult.acquisitions();
                 examination.getDatasetAcquisitions().addAll(generatedAcquisitions);
                 generatedAcquisitions = new HashSet<>(datasetAcquisitionService.createAll(generatedAcquisitions));
                 try {
@@ -167,18 +173,13 @@ public class ImporterService {
             }
 
             // Send success mail
-            mailService.sendImportEmail(importJob, userId, examination, generatedAcquisitions);
-            // TODO : add quality
-            // result in mail or
-            // link to qr in case of
-            // da not imported
-            // because of quality
-            // check failure
+            mailService.sendImportEmail(importJob, userId, examination, generatedAcquisitions, acquisitionsResult.qualityCardNames());
 
         } catch (QualityException e) {
             String msg = e.buildErrorMessage();
             event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Quality checks didn't pass at import, import aborted");
+            event.setMessage("Import from Shanoir user " + importJob.getUserId() + " aborted."
+                                + "<br/>None of the acquisitions fulfilled the conditions from the following Quality Card(s) : " + String.join(", ", e.getQualityCardNames()) + ".");
             event.setReport(e.getQualityResult().toString());
             event.setProgress(-1f);
             eventService.publishEvent(event);
@@ -198,13 +199,14 @@ public class ImporterService {
         }
     }
 
-    private Set<DatasetAcquisition> generateAcquisitions(Examination examination, ImportJob importJob,
+    private AcquisitionsResult generateAcquisitions(Examination examination, ImportJob importJob,
             ShanoirEvent event) throws Exception {
         StudyCard studyCard = getStudyCard(importJob);
         List<QualityCard> qualityCards = importJob.isFromShanoirUploader() ? Collections.emptyList() : qualityCardService.findByStudy(examination.getStudyId());
         boolean hasQualityCards = qualityCards != null && !qualityCards.isEmpty();
         Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
         QualityCardResult qualityResult = new QualityCardResult();
+        List<String> qualityCardNames = Collections.emptyList();
         int rank = 0;
         // We use flatMap to get all selected series from all patients and studies in
         // the import job
@@ -249,7 +251,8 @@ public class ImporterService {
                     List<QualityCard> cardsToCheckAtImport = qualityCards.stream()
                             .filter(QualityCard::isToCheckAtImport)
                             .toList();
-                    LOG.warn("Applying quality cards {} at import for acquisition {}.", cardsToCheckAtImport.stream().map(QualityCard::getName).toList(), acquisition.getId());
+                    qualityCardNames = cardsToCheckAtImport.stream().map(QualityCard::getName).toList();
+                    LOG.warn("Applying quality cards {} at import for acquisition {}.", qualityCardNames, acquisition.getId());
                     QualityCardResult serieQualityResult = applyQualityCheck(acquisition, dicomAttributes, cardsToCheckAtImport, importJob);
                     applyQualityResult(acquisition, serie, serieQualityResult, event);
                     qualityResult.merge(serieQualityResult);
@@ -281,9 +284,9 @@ public class ImporterService {
                 LOG.warn("All series to be imported for the new examination {} have control quality tag ERROR, the examination will be deleted if empty.", examination.getComment());
                 examinationService.deleteEmptyExamination(examination.getId());
             }
-            throw new QualityException(null, qualityResult, new Throwable("All series to be imported have control quality tag ERROR"));
+            throw new QualityException(null, qualityResult, qualityCardNames, new Throwable("All series to be imported have control quality tag ERROR"));
         }
-        return generatedAcquisitions;
+        return new AcquisitionsResult(generatedAcquisitions, qualityCardNames, qualityResult);
     }
 
     /**
@@ -481,5 +484,11 @@ public class ImporterService {
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, datasetFilePath, KeycloakUtil.getTokenUserId(), "Import of dataset failed.", ShanoirEvent.ERROR, -1f);
         eventService.publishEvent(event);
     }
+
+    private record AcquisitionsResult(
+        Set<DatasetAcquisition> acquisitions,
+        List<String> qualityCardNames,
+        QualityCardResult qualityResult
+    ) {}
 
 }

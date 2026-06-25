@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.studycard.model;
 
+import java.util.List;
+
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
@@ -25,12 +27,15 @@ public class QualityException extends Exception {
 
     private DatasetAcquisition datasetAcquisition;
 
+    private List<String> qualityCardNames;
+
     private QualityCardResult qualityResult;
 
 
-    public QualityException(DatasetAcquisition datasetAcquisition, QualityCardResult qualityResult, Throwable cause) {
+    public QualityException(DatasetAcquisition datasetAcquisition, QualityCardResult qualityResult, List<String> qualityCardNames, Throwable cause) {
         super(cause);
         this.datasetAcquisition = datasetAcquisition;
+        this.qualityCardNames = qualityCardNames;
         this.qualityResult = qualityResult;
     }
 
@@ -49,6 +54,14 @@ public class QualityException extends Exception {
 
     public void setQualityResult(QualityCardResult qualityResult) {
         this.qualityResult = qualityResult;
+    }
+
+    public List<String> getQualityCardNames() {
+        return qualityCardNames;
+    }
+
+    public void setQualityCardNames(List<String> qualityCardNames) {
+        this.qualityCardNames = qualityCardNames;
     }
 
     public String buildErrorMessage() { // TODO : improve error messages

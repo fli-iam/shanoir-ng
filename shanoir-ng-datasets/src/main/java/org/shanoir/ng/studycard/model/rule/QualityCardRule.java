@@ -133,10 +133,10 @@ public class QualityCardRule extends AbstractEntity {
                 String seriesDescription = datasetAcquisition.getDatasets().get(0).getOriginMetadata().getName() != null ? datasetAcquisition.getDatasets().get(0).getOriginMetadata().getName() : Long.toString(datasetAcquisition.getId());
                 if (conditionResult.isFulfilled()) {
                     resultEntry.setMessage("Tag " + getQualityTag().name() + " was set on acquisition " + seriesDescription
-                    + " because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
+                            + " because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
                 } else {
                     resultEntry.setMessage("Tag " + getQualityTag().name() + " could not be set on acquisition " + seriesDescription
-                    + " because those conditions failed : " + StringUtils.join(conditionResult.getUnfulfilledConditionsMsgList(), ", "));
+                            + " because those conditions failed : " + StringUtils.join(conditionResult.getUnfulfilledConditionsMsgList(), ", "));
                 }
                 result.add(resultEntry);
             }
