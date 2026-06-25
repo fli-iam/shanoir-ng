@@ -187,19 +187,20 @@ public class PlannedExecutionManager {
         // Create the monitoring, processing resources and submit to VIP in a SHORT transaction that commits
         // before VIP starts downloading. The processing resources (resourceId -> datasets mapping) must be
         // committed and visible to VIP's /carmin-data/path callback, otherwise the download fails with HTTP 400.
-        final String[] vipIdentifierHolder = new String[1];
+        String vipIdentifier;
         try {
-            transactionRunner.runInTransaction(em -> {
+            vipIdentifier = transactionRunner.callInTransaction(em -> {
                 try {
                     ExecutionCandidateDTO candidate = plannedExecutionServiceImpl.prepareExecutionCandidate(template, executionLevel, objectId);
-                    if (Objects.nonNull(candidate)) {
-                        candidate.setRefreshToken(offlineToken);
-                        IdName monitoringIdName = executionService.createExecutions(List.of(candidate));
-                        vipIdentifierHolder[0] = executionMonitoringService.getVipIdentifierFromMonitoringId(monitoringIdName.getId());
-                        for (Long acquisitionId : plannedExecutionToRemoveWithAcquisitionId) {
-                            plannedExecutionRepository.deleteByAcquisitionIdAndTemplateId(acquisitionId, template.getId());
-                        }
+                    if (Objects.isNull(candidate)) {
+                        return null;
                     }
+                    candidate.setRefreshToken(offlineToken);
+                    IdName monitoringIdName = executionService.createExecutions(List.of(candidate));
+                    for (Long acquisitionId : plannedExecutionToRemoveWithAcquisitionId) {
+                        plannedExecutionRepository.deleteByAcquisitionIdAndTemplateId(acquisitionId, template.getId());
+                    }
+                    return executionMonitoringService.getVipIdentifierFromMonitoringId(monitoringIdName.getId());
                 } catch (RestServiceException | SecurityException | EntityNotFoundException e) {
                     throw new RuntimeException(e);
                 }
@@ -212,7 +213,6 @@ public class PlannedExecutionManager {
 
         // Transaction committed: processing resources are now visible to VIP. Poll status OUTSIDE the transaction
         // so the dataset lock (involvedDatasetIds) is held until the execution finishes, serializing dependent runs.
-        String vipIdentifier = vipIdentifierHolder[0];
         if (vipIdentifier == null) {
             return;
         }
