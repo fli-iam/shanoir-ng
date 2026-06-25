@@ -29,11 +29,11 @@ import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplateParameter;
 import org.shanoir.ng.vip.executionTemplate.model.PlannedExecution;
 import org.shanoir.ng.vip.executionTemplate.repository.ExecutionTemplateRepository;
 import org.shanoir.ng.vip.executionTemplate.repository.PlannedExecutionRepository;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,14 +74,6 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
 
     @Autowired
     private ObjectCodec objectCodec;
-
-    /**
-     * Client the auto-exec offline/refresh token was issued to. Must match the client used by
-     * {@link org.shanoir.ng.shared.security.KeycloakServiceAccountUtils#refreshUserToken} and the one
-     * VIP uses for its own background token refresh, otherwise Keycloak rejects the refresh with invalid_grant.
-     */
-    @Value("${user-token.client.id:shanoir-ng-front}")
-    private String userTokenClientId;
 
     //A call is corresponding to all or a part of an examination acquisitions. If various examination imported, then multiple calls will be done
     public void applyExecution(Map<Long, List<Long>> createdAcquisitionsPerTemplateId) {
@@ -220,7 +212,9 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
 
         ExecutionCandidateDTO candidate = new ExecutionCandidateDTO();
         candidate.setInputParameters(new HashMap<>());
-        candidate.setClient(userTokenClientId);
+        // Use the exact client the offline token was issued to (its "azp" claim), mirroring what the frontend
+        // sends in the manual exec path. VIP refreshes the token in the background with this same client.
+        candidate.setClient(SecurityContextUtil.getClientId(template.getOfflineToken()));
         candidate.setName(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "execution_name")).findFirst().get().getValue());
         candidate.setName(candidate.getName() + "_" + (Objects.isNull(examId) ? "" : examId + "_") + LocalDate.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE));
         String converterValue = template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "converter")).findFirst().map(ExecutionTemplateParameter::getValue).orElse(null);

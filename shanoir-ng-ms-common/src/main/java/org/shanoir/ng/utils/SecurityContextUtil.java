@@ -65,6 +65,17 @@ public abstract class SecurityContextUtil {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
+    /**
+     * Extract the client the given token was issued to, i.e. its OIDC "azp" (authorized party) claim.
+     * Used to refresh/use a user offline token with the exact client it belongs to, so it never has to be
+     * configured separately and can never drift from the token. Returns null if the token is not a decodable
+     * JWT or carries no azp claim.
+     */
+    public static String getClientId(String token) {
+        Object azp = decodeJwtClaims(token).get("azp");
+        return azp != null ? azp.toString() : null;
+    }
+
     @SuppressWarnings("unchecked")
     public static Map<String, Object> decodeJwtClaims(String accessToken) {
         try {

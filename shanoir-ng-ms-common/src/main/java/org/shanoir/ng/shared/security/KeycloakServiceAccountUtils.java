@@ -17,6 +17,7 @@ package org.shanoir.ng.shared.security;
 
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +50,6 @@ public class KeycloakServiceAccountUtils {
     private String clientId;
     @Value("${service-account.client.credential-secret:'SECRET'}")
     private String clientSecret;
-    @Value("${user-token.client.id:shanoir-ng-front}")
-    private String userTokenClientId;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -66,7 +65,9 @@ public class KeycloakServiceAccountUtils {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("client_id", this.userTokenClientId);
+        // Refresh with the exact client the token was issued to (its "azp" claim); a mismatching client_id
+        // makes Keycloak reject the grant with invalid_grant.
+        map.add("client_id", SecurityContextUtil.getClientId(refreshToken));
         map.add("grant_type", "refresh_token");
         map.add("refresh_token", refreshToken);
 
