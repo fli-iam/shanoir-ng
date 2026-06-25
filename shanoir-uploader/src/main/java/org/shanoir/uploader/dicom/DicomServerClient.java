@@ -45,7 +45,6 @@ import org.weasis.dicom.param.DicomNode;
  * @author mkain
  *
  */
-@Component
 public class DicomServerClient implements IDicomServerClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(DicomServerClient.class);
