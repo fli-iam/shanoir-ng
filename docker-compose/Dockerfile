@@ -323,6 +323,8 @@ COPY --link \
     nginx/shanoir.template.conf \
     nginx/shanoir.template.dev.conf \
     nginx/shanoir.template.prod.conf \
+    nginx/shanoir.template.keycloak-full.conf \
+    nginx/shanoir.template.keycloak-limited.conf \
     /etc/nginx/
 
 COPY --link \

@@ -115,7 +115,7 @@ public interface SubjectApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/{subjectId}", produces = { "application/json" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubject(returnObject.getBody(), 'CAN_SEE_ALL')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject.getBody() == null or @studySecurityService.hasRightOnSubject(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<SubjectDTO> findSubjectById(
             @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 

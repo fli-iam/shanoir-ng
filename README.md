@@ -108,8 +108,7 @@ Then the shanoir-downloader project can be simply managed as a normal git repo (
 
 Shanoir  : https://shanoir-ng-nginx/shanoir-ng/home
 
-Keycloak : http://localhost:8080/auth/admin/master/console/#/realms/shanoir-ng/roles
-
+Keycloak : https://shanoir-ng-nginx/auth/admin/master/console/#/realms/shanoir-ng/roles
 
 ## DEPLOY
 * Install docker and docker-compose:
@@ -319,12 +318,12 @@ New user accounts need to be validated by a shanoir admin. However, on the first
 run, there is not admin account so you will need to create it on the keycloak
 server directly:
 
-1. go to Keycloak admin interface: http://localhost:8080/auth/admin/
+1. go to Keycloak admin interface: https://shanoir-ng-nginx/auth/admin/
 2. sign in with the credentials configured in
    `SHANOIR_KEYCLOAK_USER`/`SHANOIR_KEYCLOAK_PASSWORD' (default is `admin`/`&a1A&a1A`)
 3. go to the **shanoir-ng** realm
 4. create/edit the new user and grant the relevant role (eg. `ROLE_ADMIN`). By
-   default, new user accounts are created in Keycloak by the users microservice
+   default, new user accounts are created in Keycloak by the users' microservice
    with temporary passwords, you may reset the password in keycloak's admin
    interface and receive the new password is by e-mail. In development, if you
    do hot have a configured SMTP relay, then you may choose to overide the
