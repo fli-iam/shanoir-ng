@@ -1,0 +1,88 @@
+# CI-only compose overrides (not a production or hospital template).
+#
+# This file is layered on top of docker-compose.yml via:
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.ci.yml
+#
+# Differences from a typical hospital deployment:
+#   - Mailhog as SMTP sink (no real mail relay)
+#   - Internal HTTP issuer URI for Spring Resource Server (JWT from Keycloak inside Docker network)
+#   - Relaxed console log levels for CI
+#   - java.security.egd=/dev/./urandom to avoid SecureRandom stalls in CI
+#   - create-keycloak-user.sh may set sslRequired=NONE on the realm when CI=true
+#
+# Production should use a real SMTP relay, proper TLS, DNS hostnames, and
+# SHANOIR_MIGRATION=never for normal operation (see README).
+#
+# DCM4CHEE is opt-in via the "dcm4chee" profile (heavy; OOMs GitHub Actions runners).
+# CI bootstrap uses: bash ./bootstrap.sh --clean --no-build --no-dcm4chee
+# Local full stack with PACS: docker compose --profile dcm4chee up -d
+
+
+services:
+  ldap:
+    profiles: ["dcm4chee"]
+  dcm4chee-database:
+    profiles: ["dcm4chee"]
+  dcm4chee-arc:
+    profiles: ["dcm4chee"]
+  keycloak-database:
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+  database-migrations:
+  database:
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+  smtp-sink:
+    container_name: smtp-sink
+    image: mailhog/mailhog:v1.0.1
+    networks:
+      - shanoir_ng_network
+  users:
+    environment:
+      - SHANOIR_SMTP_HOST=smtp-sink
+      - SHANOIR_SMTP_PORT=1025
+      - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+    depends_on:
+      smtp-sink:
+        condition: service_started
+  studies:
+    environment:
+      - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+  datasets:
+    environment:
+      - VIP_URL_HOST=localhost
+      - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+  import:
+    environment:
+      - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+  preclinical:
+    environment:
+      - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+  nifti-conversion:
+    environment:
+      - SHANOIR_CONSOLE_LOG_LEVEL=INFO
+      - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
+  keycloak:
+    environment:
+      - SHANOIR_SMTP_HOST=smtp-sink
+      - SHANOIR_SMTP_PORT=1025
+    depends_on:
+      smtp-sink:
+        condition: service_started
+  nginx:
+    environment:
+      - VIP_URL_HOST=localhost
