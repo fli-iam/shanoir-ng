@@ -2,17 +2,21 @@ package org.shanoir.uploader.dicom.controller;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
 
 import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.event.DicomClientReadyEvent;
 import org.shanoir.uploader.dicom.DicomServerClient;
+import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.dto.ConfigDTO;
+import org.shanoir.uploader.dicom.query.Media;
+import org.shanoir.uploader.dicom.query.PatientTreeNode;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
+import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
@@ -61,6 +65,15 @@ public class DicomApiController implements ApplicationListener<DicomClientReadyE
         return dicomServerClient;
     }
 
+    @GetMapping("/echo")
+    public HashMap<String, Boolean> echoDicomServer() {
+        return new HashMap<String, Boolean>() {
+            {
+                put("success", getClient().echoDicomServer());
+            }
+        };
+    }
+
     @GetMapping("/configuration")
     public ConfigDTO getDicomConfiguration() {
         Integer pacsDicomPort = null;
@@ -83,15 +96,6 @@ public class DicomApiController implements ApplicationListener<DicomClientReadyE
             localDicomPort,
             ShUpConfig.dicomServerProperties.getProperty("local.dicom.server.aet.calling")
             );
-    }
-
-    @GetMapping("/echo")
-    public HashMap<String, Boolean> echoDicomServer() {
-        return new HashMap<String, Boolean>() {
-            {
-                put("success", getClient().echoDicomServer());
-            }
-        };
     }
 
     @PutMapping("/configuration")
@@ -120,38 +124,45 @@ public class DicomApiController implements ApplicationListener<DicomClientReadyE
     }
 
     @PostMapping("/query")
-    public List<Patient> queryDicomServer(@RequestBody HashMap<String, String> queryParameters) throws Exception {
+    public Object queryDicomServer(@RequestBody HashMap<String, String> queryParameters) throws Exception {
         logger.info("Querying Dicom server with parameters: {}", queryParameters);
 
         List<Patient> patients = getClient().queryDicomServer(Objects.equals(queryParameters.get("studyRootQuery"), "true"), queryParameters.get("modality"), queryParameters.get("patientName"), queryParameters.get("patientID"), queryParameters.get("studyDescription"), queryParameters.get("patientBirthDate"), queryParameters.get("studyDate"));
 
-//        Media media = new Media();
-//        if (patients != null) {
-//            for (Iterator patientsIt = patients.iterator(); patientsIt.hasNext();) {
-//                Patient patient = (Patient) patientsIt.next();
-//                final PatientTreeNode patientTreeNode = media.initChildTreeNode(patient);
-//                // add patients
-//                media.addTreeNode(patientTreeNode);
-//                List<Study> studies = patient.getStudies();
-//                for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
-//                    Study study = (Study) studiesIt.next();
-//                    final StudyTreeNode studyTreeNode = patientTreeNode.initChildTreeNode(study);
-//                    // add studies
-//                    patientTreeNode.addTreeNode(studyTreeNode);
-//                    List<Serie> series = study.getSeries();
-//                    for (Iterator seriesIt = series.iterator(); seriesIt.hasNext();) {
-//                        Serie serie = (Serie) seriesIt.next();
-//                        if (!serie.isErroneous() && !serie.isIgnored()) {
-//                            final SerieTreeNode serieTreeNode = studyTreeNode.initChildTreeNode(serie);
-//                            // add series
-//                            studyTreeNode.addTreeNode(serieTreeNode);
-//                        }
-//                    }
-//                }
-//            }
-//        }
+        Media media = new Media();
 
-        return patients;
+        logger.info(patients.toString());
+
+        // content of function fillMediaWithPatients(Media media, final List<Patient> patients)
+        if (patients != null) {
+            for (Iterator patientsIt = patients.iterator(); patientsIt.hasNext();) {
+                Patient patient = (Patient) patientsIt.next();
+                final PatientTreeNode patientTreeNode = media.initChildTreeNode(patient);
+                logger.info("Patient info read: " + patient.toString());
+                // add patients
+                media.addTreeNode(patientTreeNode);
+                List<Study> studies = patient.getStudies();
+                for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
+                    Study study = (Study) studiesIt.next();
+                    final StudyTreeNode studyTreeNode = patientTreeNode.initChildTreeNode(study);
+                    // add studies
+                    patientTreeNode.addTreeNode(studyTreeNode);
+                    List<Serie> series = study.getSeries();
+                    for (Iterator seriesIt = series.iterator(); seriesIt.hasNext();) {
+                        Serie serie = (Serie) seriesIt.next();
+                        if (!serie.isErroneous() && !serie.isIgnored()) {
+                            final SerieTreeNode serieTreeNode = studyTreeNode.initChildTreeNode(serie);
+                            // add series
+                            studyTreeNode.addTreeNode(serieTreeNode);
+                        }
+                    }
+                }
+            }
+            logger.info(media.getTreeNodes().size() + " patients read from DICOM server.");
+            logger.info("Patients read from DICOM server: " + media.getTreeNodes().toString());
+        }
+
+        return media.getData();
     }
 
 }
