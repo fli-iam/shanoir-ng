@@ -233,7 +233,7 @@ public class HttpService {
                     return true;
                 }
             }).build();
-            LOG.info("buildHttpClient: sslContextDev build.");
+            LOG.debug("buildHttpClient: sslContextDev build.");
         }
         // In case of proxy: generate credentials provider with correct host
         HttpHost proxyHost = null;
@@ -249,10 +249,10 @@ public class HttpService {
                     credentialsProvider.setCredentials(new AuthScope(proxyHost),
                             new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
                                     serviceConfiguration.getProxyPassword().toCharArray()));
-                    LOG.info("buildHttpClient: credentialsProvider build.");
+                    LOG.debug("buildHttpClient: credentialsProvider build.");
                     createHttpClientContext(proxyHost, credentialsProvider);
                 }
-                LOG.info("buildHttpClient: proxyHost (host+port) build.");
+                LOG.debug("buildHttpClient: proxyHost (host+port) build.");
             // Only host is configured, so do not set port
             } else if (serviceConfiguration.getProxyHost() != null) {
                 proxyHost = new HttpHost(serviceConfiguration.getProxyHost());
@@ -262,10 +262,10 @@ public class HttpService {
                     credentialsProvider.setCredentials(new AuthScope(proxyHost),
                             new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
                                     serviceConfiguration.getProxyPassword().toCharArray()));
-                    LOG.info("buildHttpClient: credentialsProvider build.");
+                    LOG.debug("buildHttpClient: credentialsProvider build.");
                     createHttpClientContext(proxyHost, credentialsProvider);
                 }
-                LOG.info("buildHttpClient: proxyHost (host) build.");
+                LOG.debug("buildHttpClient: proxyHost (host) build.");
             } else {
                 throw new Exception("Proxy enabled, but no host set or only port does not work.");
             }
@@ -287,7 +287,7 @@ public class HttpService {
         context.setCredentialsProvider(credentialsProvider);
         context.setAuthCache(authCache);
         this.context = context;
-        LOG.info("createHttpClientContext: context created and assigned.");
+        LOG.debug("createHttpClientContext: context created and assigned.");
     }
 
     /**
