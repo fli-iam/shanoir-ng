@@ -42,6 +42,7 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.dto.StudyCardOnStudyResultDTO;
@@ -339,10 +340,30 @@ public class ShanoirUploaderServiceClient {
                     final int statusCode = response.getCode();
                     if (HttpStatus.SC_OK == statusCode) {
                         JSONObject responseEntityJson = new JSONObject(responseEntityString);
+                        String accessToken = responseEntityJson.getString("access_token");
                         String refreshToken = responseEntityJson.getString("refresh_token");
-                        userId = responseEntityJson.getLong("userId");
+                        // Decode the access token payload (middle JWT segment) to read userId.
+                        // The token is not verified here – trust is established by HTTPS and
+                        // the prior Keycloak authentication exchange.
+                        try {
+                            String[] jwtParts = accessToken.split("\\.");
+                            if (jwtParts.length >= 2) {
+                                byte[] payloadBytes = java.util.Base64.getUrlDecoder()
+                                        .decode(padBase64(jwtParts[1]));
+                                JSONObject payload = new JSONObject(new String(payloadBytes,
+                                        java.nio.charset.StandardCharsets.UTF_8));
+                                if (payload.has(KeycloakUtil.USER_ID_TOKEN_ATT)) {
+                                    this.userId = payload.getLong(KeycloakUtil.USER_ID_TOKEN_ATT);
+                                } else {
+                                    LOG.warn("Keycloak token does not contain '{}' claim.",
+                                            KeycloakUtil.USER_ID_TOKEN_ATT);
+                                }
+                            }
+                        } catch (Exception e) {
+                            LOG.error("Could not extract userId from access token: {}", e.getMessage());
+                        }
                         refreshToken(keycloakURL, refreshToken);
-                        return responseEntityJson.getString("access_token");
+                        return accessToken;
                     }
                 }
             } catch (Exception e) {
@@ -352,6 +373,13 @@ public class ShanoirUploaderServiceClient {
             LOG.error(e.getMessage());
         }
         return null;
+    }
+
+    private static String padBase64(String base64Url) {
+        int remainder = base64Url.length() % 4;
+        if (remainder == 0)
+            return base64Url;
+        return base64Url + "=".repeat(4 - remainder);
     }
 
     /**
