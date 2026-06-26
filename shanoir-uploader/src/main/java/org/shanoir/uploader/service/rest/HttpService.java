@@ -294,13 +294,13 @@ public class HttpService {
                     .setSslContext(sslContextDev)
                     .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
                     .build();
-            LOG.info("DEV SSLSocketFactory used.");
+            LOG.debug("DEV SSLSocketFactory used.");
         } else {
             sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
                     .setHostnameVerifier(new CustomHostnameVerifier())
                     .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
                     .build();
-            LOG.info("Standard SSLSocketFactory used with CustomHostnameVerifier.");
+            LOG.debug("Standard SSLSocketFactory used with CustomHostnameVerifier.");
         }
         final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
                     .setMaxConnTotal(500)
@@ -316,7 +316,7 @@ public class HttpService {
                     .setDefaultCredentialsProvider(credentialsProvider)
                     .setProxy(proxyHost)
                     .build();
-            LOG.info("CloseableHttpClient created with proxyHost: "
+            LOG.debug("CloseableHttpClient created with proxyHost: "
                     + proxyHost.getHostName() + ":" + proxyHost.getPort()
                     + " and credentialsProvider: " + credentialsProvider.toString() + ".");
             return httpClient;
@@ -329,7 +329,7 @@ public class HttpService {
                         .setRoutePlanner(routePlanner)
                         .setProxy(proxyHost)
                         .build();
-                LOG.info("CloseableHttpClient created with proxyHost: "
+                LOG.debug("CloseableHttpClient created with proxyHost: "
                         + proxyHost.getHostName() + ":" + proxyHost.getPort()
                         + " and without a credentialsProvider.");
                 return httpClient;
@@ -338,7 +338,7 @@ public class HttpService {
                         .setConnectionManager(connectionManager)
                         .setConnectionManagerShared(true)
                         .build();
-                LOG.info("CloseableHttpClient created without proxyHost"
+                LOG.debug("CloseableHttpClient created without proxyHost"
                         + " and without a credentialsProvider.");
                 return httpClient;
             }

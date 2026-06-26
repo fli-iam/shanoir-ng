@@ -282,7 +282,7 @@ public class ShanoirUploaderServiceClient {
 
         this.httpService = new HttpService(this.serverURL);
 
-        LOG.info("ShanoirUploaderService successfully initialized.");
+        LOG.debug("ShanoirUploaderService successfully initialized.");
     }
 
     /**
