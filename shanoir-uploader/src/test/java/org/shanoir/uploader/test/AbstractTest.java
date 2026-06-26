@@ -55,11 +55,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class is the base class for all ShUp test classes, that do
- * integration tests on shanoir servers. It provides the login and
- * the creation of the ShanoirUploaderServiceClient.
+ * integration tests on shanoir servers. It provides login and creation of
+ * role-specific ShanoirUploaderServiceClient instances.
+ *
+ * Three roles are supported, each backed by its own authenticated client:
+ * - adminClient (ROLE_ADMIN)
+ * - expertClient (ROLE_EXPERT)
+ * - userClient (ROLE_USER)
  *
  * @author mkain
- *
  */
 public abstract class AbstractTest {
 
@@ -71,13 +75,28 @@ public abstract class AbstractTest {
 
     private static final String PROFILE = "profile";
 
+    private static final String ADMIN_NAME = "admin.name";
+
+    private static final String ADMIN_PASSWORD = "admin.password";
+
+    private static final String EXPERT_NAME = "expert.name";
+
+    private static final String EXPERT_PASSWORD = "expert.password";
+
     private static final String USER_NAME = "user.name";
 
     private static final String USER_PASSWORD = "user.password";
 
     private static final String IN_PROGRESS = "IN_PROGRESS";
 
-    protected static ShanoirUploaderServiceClient shUpClient;
+    // -------------------------------------------------------------------------
+    // Role-specific authenticated clients
+    // -------------------------------------------------------------------------
+    protected static ShanoirUploaderServiceClient adminClient;
+
+    protected static ShanoirUploaderServiceClient expertClient;
+
+    protected static ShanoirUploaderServiceClient userClient;
 
     protected static Pseudonymizer pseudonymizer;
 
@@ -87,46 +106,99 @@ public abstract class AbstractTest {
     public static void setup() {
         ShanoirUploader.initShanoirUploaderFolders();
         PropertiesUtil.initPropertiesFromResourcePath(testProperties, TEST_PROPERTIES);
+
         String profile = testProperties.getProperty(PROFILE);
         PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.profileProperties,
                 ShUpConfig.PROFILE_DIR + profile + "/" + ShUpConfig.PROFILE_PROPERTIES);
         PropertiesUtil.initPropertiesFromResourcePath(ShUpConfig.endpointProperties, ShUpConfig.ENDPOINT_PROPERTIES);
+
         identifierCalculator = new IdentifierCalculator();
-        shUpClient = new ShanoirUploaderServiceClient();
-        shUpClient.configure();
-        ShUpOnloadConfig.setShanoirUploaderServiceClient(shUpClient);
-        String user = testProperties.getProperty(USER_NAME);
-        String password = testProperties.getProperty(USER_PASSWORD);
-        LOG.info("Testing profile {} with user {}.", profile, user);
-        String token;
-        try {
-            token = shUpClient.loginWithKeycloakForToken(user, password);
-            if (token != null) {
-                ShUpOnloadConfig.setTokenString(token);
-            } else {
-                LOG.error("Login error. Server down, wrong profile or credentials error.");
-                Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
+
+        // Log in each role; a missing credentials entry is treated as "not configured"
+        // rather than a hard failure so that partial test environments still work.
+        adminClient = buildAuthenticatedClient(ADMIN_NAME, ADMIN_PASSWORD, "ROLE_ADMIN");
+        expertClient = buildAuthenticatedClient(EXPERT_NAME, EXPERT_PASSWORD, "ROLE_EXPERT");
+        userClient = buildAuthenticatedClient(USER_NAME, USER_PASSWORD, "ROLE_USER");
+
+        // At least one client must have authenticated successfully
+        boolean anyClientAvailable = (adminClient != null || expertClient != null || userClient != null);
+        Assumptions.assumeTrue(anyClientAvailable,
+                "Skipping tests: no role credentials configured or server unavailable.");
+
+        ShanoirUploaderServiceClient defaultClient = expertClient != null ? expertClient
+                : adminClient != null ? adminClient : userClient;
+        ShUpOnloadConfig.setShanoirUploaderServiceClient(defaultClient);
+
+        // Pseudonymizer – only needed when the mode is active
+        if (ShUpConfig.isModePseudonymus() && defaultClient != null) {
+            File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath()
+                    + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
+            try {
+                String pseudonymusKeyValue = defaultClient.findValueByKey(ShUpConfig.MODE_PSEUDONYMUS_KEY);
+                pseudonymizer = new Pseudonymizer(pseudonymusKeyValue, pseudonymusFolder.getAbsolutePath());
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+                System.exit(0);
             }
-            if (ShUpConfig.isModePseudonymus()) {
-                File pseudonymusFolder = new File(ShUpOnloadConfig.getWorkFolder().getParentFile().getAbsolutePath()
-                        + File.separator + Pseudonymizer.PSEUDONYMUS_FOLDER);
-                String pseudonymusKeyValue = shUpClient.findValueByKey(ShUpConfig.MODE_PSEUDONYMUS_KEY);
-                try {
-                    pseudonymizer = new Pseudonymizer(pseudonymusKeyValue, pseudonymusFolder.getAbsolutePath());
-                } catch (PseudonymusException e) {
-                    LOG.error(e.getMessage(), e);
-                    System.exit(0);
-                }
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage());
-            Assumptions.assumeTrue(false, "Skipping test: probably no server available.");
         }
     }
 
+    /**
+     * Creates and authenticates a {@link ShanoirUploaderServiceClient} for the
+     * given credentials. Returns {@code null} when credentials are blank or when
+     * the server cannot be reached, so callers can skip gracefully with
+     * {@link Assumptions}.
+     *
+     * @param nameKey     property key for the username (e.g. {@code "expert.name"})
+     * @param passwordKey property key for the password (e.g.
+     *                    {@code "expert.password"})
+     * @param roleLabel   human-readable label used only in log messages
+     * @return authenticated client, or {@code null} on failure
+     */
+    private static ShanoirUploaderServiceClient buildAuthenticatedClient(
+            String nameKey, String passwordKey, String roleLabel) {
+        String name = testProperties.getProperty(nameKey);
+        String password = testProperties.getProperty(passwordKey);
+        if (StringUtils.isBlank(name) || StringUtils.isBlank(password)) {
+            LOG.warn("Credentials for {} not configured (keys: {}, {}). Client will be null.",
+                    roleLabel, nameKey, passwordKey);
+            return null;
+        }
+        ShanoirUploaderServiceClient client = new ShanoirUploaderServiceClient();
+        client.configure();
+        try {
+            String token = client.loginWithKeycloakForToken(name, password);
+            if (token == null) {
+                LOG.error("Login failed for {} (user={}). Server down or wrong credentials.", roleLabel, name);
+                return null;
+            }
+            ShUpOnloadConfig.setTokenString(token);
+            LOG.info("Authenticated {} as user {}.", roleLabel, name);
+            return client;
+        } catch (Exception e) {
+            LOG.error("Exception while authenticating {}: {}", roleLabel, e.getMessage());
+            return null;
+        }
+    }
+
+    protected static void requireAdminClient() {
+        Assumptions.assumeTrue(adminClient != null,
+                "Skipping test: ROLE_ADMIN client not available.");
+    }
+
+    protected static void requireExpertClient() {
+        Assumptions.assumeTrue(expertClient != null,
+                "Skipping test: ROLE_EXPERT client not available.");
+    }
+
+    protected static void requireUserClient() {
+        Assumptions.assumeTrue(userClient != null,
+                "Skipping test: ROLE_USER client not available.");
+    }
+
     public static Center createCenter() {
-        Center center = new Center();
         String centerUUID = UUID.randomUUID().toString();
+        Center center = new Center();
         center.setName("Center-Name-" + centerUUID);
         center.setCity("Rennes");
         center.setStreet("Center-Street-" + centerUUID);
@@ -134,29 +206,28 @@ public abstract class AbstractTest {
         center.setPostalCode("35000");
         center.setWebsite("Center-Website-" + centerUUID);
         center.setPhoneNumber("+3335353535");
-        Center createdCenter = shUpClient.createCenter(center);
-        return createdCenter;
+        return expertClient.createCenter(center);
     }
 
     public static AcquisitionEquipment createEquipment(Center createdCenter) {
         Manufacturer manufacturer = new Manufacturer();
-        manufacturer.setName("Manufacturer-" + UUID.randomUUID().toString());
-        Manufacturer createdManufacturer = shUpClient.createManufacturer(manufacturer);
+        manufacturer.setName("Manufacturer-" + UUID.randomUUID());
+        Manufacturer createdManufacturer = expertClient.createManufacturer(manufacturer);
         Assertions.assertNotNull(createdManufacturer);
+
         ManufacturerModel manufacturerModel = new ManufacturerModel();
-        manufacturerModel.setName("Manufacturer-Model-" + UUID.randomUUID().toString());
+        manufacturerModel.setName("Manufacturer-Model-" + UUID.randomUUID());
         manufacturerModel.setManufacturer(createdManufacturer);
         manufacturerModel.setDatasetModalityType("0"); // 0 == MR
         manufacturerModel.setMagneticField(3.0);
-        ManufacturerModel createdManufacturerModel = shUpClient.createManufacturerModel(manufacturerModel);
+        ManufacturerModel createdManufacturerModel = expertClient.createManufacturerModel(manufacturerModel);
         Assertions.assertNotNull(createdManufacturerModel);
+
         AcquisitionEquipment equipment = new AcquisitionEquipment();
-        String serialNumberRandom = "Serial-Number-" + UUID.randomUUID().toString();
-        equipment.setSerialNumber(serialNumberRandom);
+        equipment.setSerialNumber("Serial-Number-" + UUID.randomUUID());
         equipment.setCenter(new IdName(createdCenter.getId(), createdCenter.getName()));
         equipment.setManufacturerModel(createdManufacturerModel);
-        AcquisitionEquipment createdEquipment = shUpClient.createEquipment(equipment);
-        return createdEquipment;
+        return expertClient.createEquipment(equipment);
     }
 
     public static Study createStudyAndCenterAndStudyCard() {
@@ -165,44 +236,44 @@ public abstract class AbstractTest {
         studyExtraDetails.setExpectedNbOfCenters(5L);
         studyExtraDetails.setSponsor("sponsor");
         studyExtraDetails.setPrincipalInvestigator("principal investigator");
-        org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
+
+        Study study = new Study();
         study.setExtraDetails(studyExtraDetails);
-        final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
-        study.setName(randomStudyName);
+        study.setName("Study-Name-" + UUID.randomUUID());
         study.setIsDraft(Boolean.TRUE);
+
         Date today = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(today);
         calendar.add(Calendar.YEAR, 1);
-        Date todayPlusOneYear = calendar.getTime();
         study.setStartDate(today);
-        study.setEndDate(todayPlusOneYear);
+        study.setEndDate(calendar.getTime());
         study.setStudyStatus(IN_PROGRESS);
-        study.setStudyCardPolicy(org.shanoir.uploader.model.rest.Study.SC_MANDATORY);
-        // add center to study
-        List<StudyCenter> studyCenterList = new ArrayList<StudyCenter>();
-        final StudyCenter studyCenter = new StudyCenter();
+        study.setStudyCardPolicy(Study.SC_MANDATORY);
+
+        List<StudyCenter> studyCenterList = new ArrayList<>();
+        StudyCenter studyCenter = new StudyCenter();
         Center createdCenter = createCenter();
         Assertions.assertNotNull(createdCenter);
         studyCenter.setCenter(createdCenter);
         studyCenterList.add(studyCenter);
         study.setStudyCenterList(studyCenterList);
-        // create study
-        study = shUpClient.createStudy(study);
+
+        study = adminClient.createStudy(study);
         Assertions.assertNotNull(study);
-        // create equipment
+
         AcquisitionEquipment createdEquipment = createEquipment(createdCenter);
         Assertions.assertNotNull(createdEquipment);
-        // create study card and add to study
+
         StudyCard studyCard = new StudyCard();
-        final String randomStudyCardName = "Study-Card-Name-" + UUID.randomUUID().toString();
-        studyCard.setName(randomStudyCardName);
+        studyCard.setName("Study-Card-Name-" + UUID.randomUUID());
         studyCard.setAcquisitionEquipmentId(createdEquipment.getId());
         studyCard.setAcquisitionEquipment(createdEquipment);
         studyCard.setCenterId(createdCenter.getId());
         studyCard.setStudyId(study.getId());
-        shUpClient.createStudyCard(studyCard);
+        expertClient.createStudyCard(studyCard);
         Assertions.assertNotNull(studyCard);
+
         List<StudyCard> studyCards = new ArrayList<>();
         studyCards.add(studyCard);
         study.setStudyCards(studyCards);
@@ -211,8 +282,7 @@ public abstract class AbstractTest {
 
     public Subject createSubject(Study study) {
         Subject subject = new Subject();
-        String randomPatientName = UUID.randomUUID().toString().substring(0, 15);
-        randomPatientName = randomPatientName.replaceAll("-", "");
+        String randomPatientName = UUID.randomUUID().toString().substring(0, 15).replaceAll("-", "");
         subject.setName(randomPatientName);
         subject.setStudy(new IdName(study.getId(), study.getName()));
         subject.setBirthDate(LocalDate.now());
@@ -223,8 +293,7 @@ public abstract class AbstractTest {
         subject.setSubjectType(SubjectType.PATIENT);
         subject.setPhysicallyInvolved(true);
         subject.setTags(new ArrayList<>());
-        subject = shUpClient.createSubject(subject, true, null);
-        return subject;
+        return expertClient.createSubject(subject, true, null);
     }
 
     public Examination createExamination(Long studyId, Long subjectId, Long centerId) {
@@ -234,8 +303,7 @@ public abstract class AbstractTest {
         examination.setCenterId(centerId);
         examination.setExaminationDate(new Date());
         examination.setComment("examinationComment");
-        examination = shUpClient.createExamination(examination);
-        return examination;
+        return expertClient.createExamination(examination);
     }
 
 }
