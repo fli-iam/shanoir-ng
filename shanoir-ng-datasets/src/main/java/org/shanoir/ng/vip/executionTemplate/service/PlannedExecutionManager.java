@@ -129,9 +129,11 @@ public class PlannedExecutionManager {
                     ExecutionInQueue execution = next;
 
                     // Submit execution.
-                    // NB: threadExecution manages its own (short) transaction internally; the VIP status
-                    // polling must run OUTSIDE any transaction so the processing resources are committed and
-                    // visible to VIP's /carmin-data/path download callback while the execution is RUNNING.
+                    // NB: threadExecution runs without a single enclosing transaction, for two independent reasons:
+                    // (1) createExecutions must commit the processing resources before POSTing, so they are visible
+                    // to VIP's /carmin-data/path download callback; (2) the VIP status-poll loop that follows can
+                    // run for a long time and must not hold a DB transaction open. It uses short, scoped
+                    // transactions internally instead.
                     executor.submit(() -> {
                         threadExecution(execution.getTemplate(), execution.getObjectId(), execution.getType(), execution.getPlannedExecutionToRemove());
                         involvedDatasetIds.removeAll(candidateData);
