@@ -214,6 +214,8 @@ public class ShanoirUploaderServiceClient {
 
     private Map<Integer, String> apiResponseMessages;
 
+    private Long userId;
+
     public void configure() {
         apiResponseMessages = new HashMap<Integer, String>();
         apiResponseMessages.put(200, "ok");
@@ -338,6 +340,7 @@ public class ShanoirUploaderServiceClient {
                     if (HttpStatus.SC_OK == statusCode) {
                         JSONObject responseEntityJson = new JSONObject(responseEntityString);
                         String refreshToken = responseEntityJson.getString("refresh_token");
+                        userId = responseEntityJson.getLong("userId");
                         refreshToken(keycloakURL, refreshToken);
                         return responseEntityJson.getString("access_token");
                     }
@@ -1239,6 +1242,14 @@ public class ShanoirUploaderServiceClient {
                 throw new Exception("Error in postDicom");
             }
         }
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
 }

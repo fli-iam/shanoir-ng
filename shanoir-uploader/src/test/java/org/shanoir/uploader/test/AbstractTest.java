@@ -17,6 +17,7 @@ package org.shanoir.uploader.test;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +29,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.ShanoirUploader;
@@ -46,6 +49,7 @@ import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.StudyCenter;
 import org.shanoir.uploader.model.rest.StudyExtraDetails;
+import org.shanoir.uploader.model.rest.StudyUser;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -173,7 +177,7 @@ public abstract class AbstractTest {
                 return null;
             }
             ShUpOnloadConfig.setTokenString(token);
-            LOG.info("Authenticated {} as user {}.", roleLabel, name);
+            LOG.info("Authenticated {} as user {}, {}.", roleLabel, name, client.getUserId());
             return client;
         } catch (Exception e) {
             LOG.error("Exception while authenticating {}: {}", roleLabel, e.getMessage());
@@ -240,7 +244,7 @@ public abstract class AbstractTest {
         Study study = new Study();
         study.setExtraDetails(studyExtraDetails);
         study.setName("Study-Name-" + UUID.randomUUID());
-        study.setIsDraft(Boolean.TRUE);
+        study.setIsDraft(Boolean.FALSE);
 
         Date today = new Date();
         Calendar calendar = Calendar.getInstance();
@@ -261,6 +265,13 @@ public abstract class AbstractTest {
 
         study = adminClient.createStudy(study);
         Assertions.assertNotNull(study);
+
+        StudyUser studyUser = new StudyUser();
+        studyUser.setStudyId(study.getId());
+        studyUser.setUserId(expertClient.getUserId());
+        studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD,
+                    StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE));
+        adminClient.addStudyUser(study.getId(), studyUser);
 
         AcquisitionEquipment createdEquipment = createEquipment(createdCenter);
         Assertions.assertNotNull(createdEquipment);
