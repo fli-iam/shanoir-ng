@@ -42,6 +42,7 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.dto.StudyCardOnStudyResultDTO;
@@ -53,6 +54,7 @@ import org.shanoir.uploader.model.rest.Manufacturer;
 import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.StudyUser;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
@@ -86,6 +88,8 @@ public class ShanoirUploaderServiceClient {
     private static final String SERVICE_STUDIES_NAMES_CENTERS = "service.studies.find.names.centers";
 
     private static final String SERVICE_STUDIES_PUBLIC_DATA = "service.studies.find.public.data";
+
+    private static final String SERVICE_STUDY_USER = "service.studies.study.user";
 
     private static final String SERVICE_STUDYCARDS_CREATE = "service.studycards.create";
 
@@ -153,6 +157,8 @@ public class ShanoirUploaderServiceClient {
 
     private String serviceURLStudiesFindPublicData;
 
+    private String serviceURLStudyUser;
+
     private String serviceURLStudyCardsCreate;
 
     private String serviceURLStudyCardsFind;
@@ -209,6 +215,8 @@ public class ShanoirUploaderServiceClient {
 
     private Map<Integer, String> apiResponseMessages;
 
+    private Long userId;
+
     public void configure() {
         apiResponseMessages = new HashMap<Integer, String>();
         apiResponseMessages.put(200, "ok");
@@ -226,6 +234,8 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
         this.serviceURLStudiesFindPublicData = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_PUBLIC_DATA);
+        this.serviceURLStudyUser = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDY_USER);
         this.serviceURLStudyCardsCreate = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_CREATE);
         this.serviceURLStudyCardsFind = this.serverURL
@@ -282,7 +292,7 @@ public class ShanoirUploaderServiceClient {
 
         this.httpService = new HttpService(this.serverURL);
 
-        LOG.info("ShanoirUploaderService successfully initialized.");
+        LOG.debug("ShanoirUploaderService successfully initialized.");
     }
 
     /**
@@ -330,18 +340,46 @@ public class ShanoirUploaderServiceClient {
                     final int statusCode = response.getCode();
                     if (HttpStatus.SC_OK == statusCode) {
                         JSONObject responseEntityJson = new JSONObject(responseEntityString);
+                        String accessToken = responseEntityJson.getString("access_token");
                         String refreshToken = responseEntityJson.getString("refresh_token");
+                        // Decode the access token payload (middle JWT segment) to read userId.
+                        // The token is not verified here – trust is established by HTTPS and
+                        // the prior Keycloak authentication exchange.
+                        try {
+                            String[] jwtParts = accessToken.split("\\.");
+                            if (jwtParts.length >= 2) {
+                                byte[] payloadBytes = java.util.Base64.getUrlDecoder()
+                                        .decode(padBase64(jwtParts[1]));
+                                JSONObject payload = new JSONObject(new String(payloadBytes,
+                                        java.nio.charset.StandardCharsets.UTF_8));
+                                if (payload.has(KeycloakUtil.USER_ID_TOKEN_ATT)) {
+                                    this.userId = payload.getLong(KeycloakUtil.USER_ID_TOKEN_ATT);
+                                } else {
+                                    LOG.warn("Keycloak token does not contain '{}' claim.",
+                                            KeycloakUtil.USER_ID_TOKEN_ATT);
+                                }
+                            }
+                        } catch (Exception e) {
+                            LOG.error("Could not extract userId from access token: {}", e.getMessage());
+                        }
                         refreshToken(keycloakURL, refreshToken);
-                        return responseEntityJson.getString("access_token");
+                        return accessToken;
                     }
                 }
             } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error(e.getMessage());
             }
         } catch (UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error(e.getMessage());
         }
         return null;
+    }
+
+    private static String padBase64(String base64Url) {
+        int remainder = base64Url.length() % 4;
+        if (remainder == 0)
+            return base64Url;
+        return base64Url + "=".repeat(4 - remainder);
     }
 
     /**
@@ -428,11 +466,56 @@ public class ShanoirUploaderServiceClient {
                 List<Study> studies = Util.getMappedList(response, Study.class);
                 return studies;
             } else {
-                LOG.error("Could not get study public data (status code: " + code + ", message: "
-                        + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                if (code != HttpStatus.SC_NO_CONTENT) {
+                    LOG.error("Could not get study public data (status code: " + code + ", message: "
+                            + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                }
                 return null;
             }
         }
+    }
+
+    public StudyUser addStudyUser(
+            final Long studyId,
+            final StudyUser studyUser) {
+        try {
+            String json = Util.objectWriter.writeValueAsString(studyUser);
+            try (CloseableHttpResponse response = httpService.post(
+                    this.serviceURLStudyUser + studyId, json, false)) {
+                int code = response.getCode();
+                if (code == HttpStatus.SC_OK) {
+                    return Util.getMappedObject(response, org.shanoir.uploader.model.rest.StudyUser.class);
+                } else {
+                    LOG.error("Error in addStudyUser: studyId={}, userId={} (status code: {}, message: {})",
+                            studyId, studyUser.getUserId(), code,
+                            apiResponseMessages.getOrDefault(code, "unknown status code"));
+                }
+            }
+        } catch (JsonProcessingException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public boolean removeStudyUser(final Long studyId, final Long userId) {
+        try {
+            try (CloseableHttpResponse response = httpService.delete(
+                    this.serviceURLStudyUser + studyId + "/" + userId)) {
+                int code = response.getCode();
+                if (code == HttpStatus.SC_NO_CONTENT || code == HttpStatus.SC_OK) {
+                    return true;
+                } else {
+                    LOG.error("Error in removeStudyUser: studyId={}, userId={} (status code: {}, message: {})",
+                            studyId, userId, code,
+                            apiResponseMessages.getOrDefault(code, "unknown status code"));
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return false;
     }
 
     public List<Subject> findSubjects() throws Exception {
@@ -1187,6 +1270,14 @@ public class ShanoirUploaderServiceClient {
                 throw new Exception("Error in postDicom");
             }
         }
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
 }

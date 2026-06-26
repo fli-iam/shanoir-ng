@@ -502,6 +502,49 @@ public class StudyApiController implements StudyApi {
     }
 
     @Override
+    public ResponseEntity<StudyUser> addStudyUser(
+            @PathVariable("studyId") Long studyId,
+            @RequestBody @Valid StudyUser studyUser) throws RestServiceException {
+        Study study = studyService.findById(studyId);
+        if (study == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        // Guard: the path variable is authoritative – ignore whatever the caller
+        // may have put in the body to prevent study-id spoofing.
+        studyUser.setStudy(study);
+
+        // Reject duplicate memberships early with a clear 422
+        boolean alreadyMember = study.getStudyUserList() != null
+                && study.getStudyUserList().stream()
+                        .anyMatch(su -> studyUser.getUserId().equals(su.getUserId()));
+        if (alreadyMember) {
+            throw new RestServiceException(new ErrorModel(
+                    HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "User " + studyUser.getUserId() + " is already a member of study " + studyId, null));
+        }
+
+        StudyUser created;
+        try {
+            created = studyUserService.addStudyUserToStudy(studyUser);
+        } catch (Exception e) {
+            LOG.error("Error while adding user {} to study {}: {}", studyUser.getUserId(), studyId, e.getMessage());
+            throw new RestServiceException(new ErrorModel(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Could not add user to study.", e));
+        }
+
+        eventService.publishEvent(new ShanoirEvent(
+                ShanoirEventType.UPDATE_STUDY_EVENT,
+                studyId.toString(),
+                KeycloakUtil.getTokenUserId(),
+                "Added user " + studyUser.getUserId(),
+                ShanoirEvent.SUCCESS,
+                studyId));
+
+        return new ResponseEntity<>(created, HttpStatus.OK);
+    }
+
+    @Override
     @Transactional
     public ResponseEntity<List<IdName>> findPublicStudiesConnected() {
         List<IdName> studiesDTO = new ArrayList<>();

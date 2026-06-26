@@ -24,6 +24,7 @@ import javax.net.ssl.SSLContext;
 import org.apache.hc.client5.http.auth.AuthCache;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
@@ -140,7 +141,7 @@ public class HttpService {
             CloseableHttpResponse response = httpClient.execute(httpPost, context);
             return response;
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error(e.getMessage());
             throw e;
         }
     }
@@ -208,6 +209,18 @@ public class HttpService {
         }
     }
 
+    public CloseableHttpResponse delete(String url) throws Exception {
+        try {
+            HttpDelete httpDelete = new HttpDelete(url);
+            httpDelete.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            CloseableHttpResponse response = httpClient.execute(httpDelete, context);
+            return response;
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
     private CloseableHttpClient buildHttpClient(String url) throws Exception {
         SSLContext sslContextDev = null;
         if (url.equals(DEV_LOCAL)) {
@@ -220,7 +233,7 @@ public class HttpService {
                     return true;
                 }
             }).build();
-            LOG.info("buildHttpClient: sslContextDev build.");
+            LOG.debug("buildHttpClient: sslContextDev build.");
         }
         // In case of proxy: generate credentials provider with correct host
         HttpHost proxyHost = null;
@@ -236,10 +249,10 @@ public class HttpService {
                     credentialsProvider.setCredentials(new AuthScope(proxyHost),
                             new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
                                     serviceConfiguration.getProxyPassword().toCharArray()));
-                    LOG.info("buildHttpClient: credentialsProvider build.");
+                    LOG.debug("buildHttpClient: credentialsProvider build.");
                     createHttpClientContext(proxyHost, credentialsProvider);
                 }
-                LOG.info("buildHttpClient: proxyHost (host+port) build.");
+                LOG.debug("buildHttpClient: proxyHost (host+port) build.");
             // Only host is configured, so do not set port
             } else if (serviceConfiguration.getProxyHost() != null) {
                 proxyHost = new HttpHost(serviceConfiguration.getProxyHost());
@@ -249,10 +262,10 @@ public class HttpService {
                     credentialsProvider.setCredentials(new AuthScope(proxyHost),
                             new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
                                     serviceConfiguration.getProxyPassword().toCharArray()));
-                    LOG.info("buildHttpClient: credentialsProvider build.");
+                    LOG.debug("buildHttpClient: credentialsProvider build.");
                     createHttpClientContext(proxyHost, credentialsProvider);
                 }
-                LOG.info("buildHttpClient: proxyHost (host) build.");
+                LOG.debug("buildHttpClient: proxyHost (host) build.");
             } else {
                 throw new Exception("Proxy enabled, but no host set or only port does not work.");
             }
@@ -274,7 +287,7 @@ public class HttpService {
         context.setCredentialsProvider(credentialsProvider);
         context.setAuthCache(authCache);
         this.context = context;
-        LOG.info("createHttpClientContext: context created and assigned.");
+        LOG.debug("createHttpClientContext: context created and assigned.");
     }
 
     /**
@@ -294,13 +307,13 @@ public class HttpService {
                     .setSslContext(sslContextDev)
                     .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
                     .build();
-            LOG.info("DEV SSLSocketFactory used.");
+            LOG.debug("DEV SSLSocketFactory used.");
         } else {
             sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
                     .setHostnameVerifier(new CustomHostnameVerifier())
                     .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
                     .build();
-            LOG.info("Standard SSLSocketFactory used with CustomHostnameVerifier.");
+            LOG.debug("Standard SSLSocketFactory used with CustomHostnameVerifier.");
         }
         final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
                     .setMaxConnTotal(500)
@@ -316,7 +329,7 @@ public class HttpService {
                     .setDefaultCredentialsProvider(credentialsProvider)
                     .setProxy(proxyHost)
                     .build();
-            LOG.info("CloseableHttpClient created with proxyHost: "
+            LOG.debug("CloseableHttpClient created with proxyHost: "
                     + proxyHost.getHostName() + ":" + proxyHost.getPort()
                     + " and credentialsProvider: " + credentialsProvider.toString() + ".");
             return httpClient;
@@ -329,7 +342,7 @@ public class HttpService {
                         .setRoutePlanner(routePlanner)
                         .setProxy(proxyHost)
                         .build();
-                LOG.info("CloseableHttpClient created with proxyHost: "
+                LOG.debug("CloseableHttpClient created with proxyHost: "
                         + proxyHost.getHostName() + ":" + proxyHost.getPort()
                         + " and without a credentialsProvider.");
                 return httpClient;
@@ -338,7 +351,7 @@ public class HttpService {
                         .setConnectionManager(connectionManager)
                         .setConnectionManagerShared(true)
                         .build();
-                LOG.info("CloseableHttpClient created without proxyHost"
+                LOG.debug("CloseableHttpClient created without proxyHost"
                         + " and without a credentialsProvider.");
                 return httpClient;
             }
