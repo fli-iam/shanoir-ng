@@ -69,14 +69,17 @@ public class PacsConfigurationState implements State {
      * Initialize the DicomServerClient.
      */
     private void initDicomServerClient() {
+        LOG.info(">>> initDicomServerClient called");
+        LOG.info(">>> dicomServerProperties = {}", ShUpConfig.dicomServerProperties);
         DicomServerClient dSC;
         try {
             dSC = new DicomServerClient(ShUpConfig.dicomServerProperties, shUpOnloadConfig.getWorkFolder());
             shUpOnloadConfig.setDicomServerClient(dSC);
+            LOG.debug(">>> Publishing DicomClientReadyEvent");
             eventPublisher.publishEvent(new DicomClientReadyEvent(this, dSC));
-            LOG.info("PacsConfigurationState: DicomServerClient successfully initialized.");
+            LOG.debug("PacsConfigurationState: DicomServerClient successfully initialized.");
         } catch (MalformedURLException e) {
-            LOG.info("Error with init of DicomServerClient: " + e.getMessage(), e);
+            LOG.debug("Error with init of DicomServerClient: " + e.getMessage(), e);
         }
     }
 
