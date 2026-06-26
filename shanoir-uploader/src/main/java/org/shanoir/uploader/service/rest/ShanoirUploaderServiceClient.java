@@ -53,6 +53,7 @@ import org.shanoir.uploader.model.rest.Manufacturer;
 import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.StudyUser;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
@@ -86,6 +87,8 @@ public class ShanoirUploaderServiceClient {
     private static final String SERVICE_STUDIES_NAMES_CENTERS = "service.studies.find.names.centers";
 
     private static final String SERVICE_STUDIES_PUBLIC_DATA = "service.studies.find.public.data";
+
+    private static final String SERVICE_STUDY_USER = "service.studies.study.user";
 
     private static final String SERVICE_STUDYCARDS_CREATE = "service.studycards.create";
 
@@ -152,6 +155,8 @@ public class ShanoirUploaderServiceClient {
     private String serviceURLStudiesFindNamesAndCenters;
 
     private String serviceURLStudiesFindPublicData;
+
+    private String serviceURLStudyUser;
 
     private String serviceURLStudyCardsCreate;
 
@@ -226,6 +231,8 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
         this.serviceURLStudiesFindPublicData = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_PUBLIC_DATA);
+        this.serviceURLStudyUser = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDY_USER);
         this.serviceURLStudyCardsCreate = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_CREATE);
         this.serviceURLStudyCardsFind = this.serverURL
@@ -435,6 +442,49 @@ public class ShanoirUploaderServiceClient {
                 return null;
             }
         }
+    }
+
+    public StudyUser addStudyUser(
+            final Long studyId,
+            final StudyUser studyUser) {
+        try {
+            String json = Util.objectWriter.writeValueAsString(studyUser);
+            try (CloseableHttpResponse response = httpService.post(
+                    this.serviceURLStudyUser + studyId, json, false)) {
+                int code = response.getCode();
+                if (code == HttpStatus.SC_OK) {
+                    return Util.getMappedObject(response, org.shanoir.uploader.model.rest.StudyUser.class);
+                } else {
+                    LOG.error("Error in addStudyUser: studyId={}, userId={} (status code: {}, message: {})",
+                            studyId, studyUser.getUserId(), code,
+                            apiResponseMessages.getOrDefault(code, "unknown status code"));
+                }
+            }
+        } catch (JsonProcessingException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public boolean removeStudyUser(final Long studyId, final Long userId) {
+        try {
+            try (CloseableHttpResponse response = httpService.delete(
+                    this.serviceURLStudyUser + studyId + "/" + userId)) {
+                int code = response.getCode();
+                if (code == HttpStatus.SC_NO_CONTENT || code == HttpStatus.SC_OK) {
+                    return true;
+                } else {
+                    LOG.error("Error in removeStudyUser: studyId={}, userId={} (status code: {}, message: {})",
+                            studyId, userId, code,
+                            apiResponseMessages.getOrDefault(code, "unknown status code"));
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return false;
     }
 
     public List<Subject> findSubjects() throws Exception {
