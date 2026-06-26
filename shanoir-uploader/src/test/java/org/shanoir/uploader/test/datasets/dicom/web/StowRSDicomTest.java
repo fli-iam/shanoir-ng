@@ -64,7 +64,7 @@ public class StowRSDicomTest extends AbstractTest {
                             try {
                                 userClient.postDicom(f);
                             } catch (Exception e) {
-                                logger.error(e.getMessage(), e);
+                                logger.error(e.getMessage());
                             }
                         }
                         long stopTime = System.currentTimeMillis();
