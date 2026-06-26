@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -37,7 +36,6 @@ import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.repository.StudyTagRepository;
@@ -47,7 +45,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 public class StudySecurityService {
@@ -389,26 +386,11 @@ public class StudySecurityService {
      * @param rightStr
      * @return true or false
      */
-    public boolean hasRightOnSubjectForEveryStudies(SubjectDTO subjectDto, String rightStr) {
-        boolean res = false;
+    public boolean hasRightOnSubject(SubjectDTO subjectDto, String rightStr) {
         Subject subject = subjectRepository.findById(subjectDto.getId()).orElse(null);
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
-        List<Long> toRemove = new ArrayList<>();
-        if (subjectDto != null && subjectDto.getSubjectStudyList() != null) {
-            for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-                if (hasPrivilege(subjectStudy.getStudy(), right)) {
-                    res = true;
-                } else {
-                    toRemove.add(subjectStudy.getId());
-                }
-            }
-            ListIterator<SubjectStudyDTO> iter = subjectDto.getSubjectStudyList().listIterator();
-            while (iter.hasNext()) {
-                if (toRemove.contains(iter.next().getId())) {
-                    iter.remove();
-                }
-            }
-            return res;
+        if (subject != null && subject.getStudy() != null) {
+            return hasPrivilege(subject.getStudy(), right);
         }
         return false;
     }
@@ -633,27 +615,6 @@ public class StudySecurityService {
             return false;
         }
         return studyUser.getStudyUserRights() != null && studyUser.getStudyUserRights().contains(neededRight) && studyUser.isConfirmed();
-    }
-
-    /**
-     * Filters the centers based on study user limitation.
-     * @param centers
-     * @param studyId
-     * @return
-     */
-    public boolean filterCenters(List<IdName> centers, Long studyId) {
-        Long userId = KeycloakUtil.getTokenUserId();
-
-        StudyUser su = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
-        if (su == null || userId == null) {
-            return false;
-        }
-        if (CollectionUtils.isEmpty(su.getCenters())) {
-            return true;
-        }
-        // Filter only allowed centers.
-        centers.removeIf(center -> !su.getCenterIds().contains(center.getId()));
-        return true;
     }
 
     /**

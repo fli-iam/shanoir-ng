@@ -35,16 +35,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div class="shanoir">
         <img class="shanoir-logo" [src]="shanoirLogoUrl" alt="Shanoir logo" />
         <div class="shanoir-text">
-            <em>SHA</em>
-            ring i
-            <em>N</em>
-            viv
-            <em>O</em>
-            &nbsp;
-            <em>I</em>
-            maging
-            <em>R</em>
-            esources
+            <em>SHA</em>ring
+            i<em>N</em>
+            viv<em>O</em>&nbsp;<em>I</em>maging<em>
+            R</em>esources
         </div>
     </div>
     <div class="stats">
@@ -52,36 +46,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <br />
         It has
         <strong>
-            {{ studiesCount || 'no' }} collection
-            @if (studiesCount > 1) {
-                s
-            }
+            {{ studiesCount || 'no' }} collection@if (studiesCount > 1) {s}
         </strong>
         (
         @if (publicStudies.length > 0) {
             including
-            <strong>{{ publicStudies.length }}</strong>
+            <strong>{{ publicStudies.length }}&nbsp;</strong>
         } @else {
             <strong>none</strong>
         }
         <strong>public</strong>
         ) containing
         <strong>
-            {{ datasetAcquisitionsCount || 'no' }} image
-            @if (datasetAcquisitionsCount > 1) {
-                s
-            }
+            {{ datasetAcquisitionsCount || 'no' }} image@if (datasetAcquisitionsCount > 1) {s}
         </strong>
         of
         <strong>
-            {{ subjectsCount || 'no' }} subject
-            @if (subjectsCount > 1) {
-                s
-            }
-        </strong>
-        , for a total of
-        <strong>{{ storageSize }} GB</strong>
-        .
+            {{ subjectsCount || 'no' }} subject@if (subjectsCount > 1) {s}
+        </strong>, for a total of
+        <strong>{{ formattedStorageSize }}</strong>.
         <br />
         There
         @if (usersCount < 2) {
@@ -90,10 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             are
         }
         <strong>
-            {{ usersCount || 'no' }} active user
-            @if (usersCount > 1) {
-                s
-            }
+            {{ usersCount || 'no' }} active user@if (usersCount > 1) {s}
         </strong>
         and
         @if (eventsCount === 0 || !eventsCount) {

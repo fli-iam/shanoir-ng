@@ -290,14 +290,14 @@ export class StudyComponent extends EntityComponent<Study> {
             'protocolFile': [],
             'dataUserAgreement': [],
             'studyUserList': [this.study.studyUserList],
-            'expectedNbOfSubjects': [this.study.expectedNbOfSubjects, [Validators.required, Validators.min(1)]],
+            'expectedNbOfSubjects': [this.study.expectedNbOfSubjects, [Validators.min(1)]],
             'averageExaminationSize': [this.study.averageExaminationSize, [Validators.min(1)]],
             'estimatedTotalVolume': [this.study.estimatedTotalVolume, [Validators.min(1)]],
-            'expectedNbOfCenters': [this.study.expectedNbOfCenters, [Validators.required, Validators.min(1)]],
+            'expectedNbOfCenters': [this.study.expectedNbOfCenters, [Validators.min(1)]],
             'inclusionRate': [this.study.inclusionRate, [Validators.min(1)]],
             'inclusionRateUnit': [this.study.inclusionRateUnit],
-            'sponsor': [this.study.sponsor, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
-            'principalInvestigator': [this.study.principalInvestigator, [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+            'sponsor': [this.study.sponsor, [Validators.minLength(2), Validators.maxLength(200)]],
+            'principalInvestigator': [this.study.principalInvestigator, [Validators.minLength(2), Validators.maxLength(200)]],
             'scientificAdvisor': [this.study.scientificAdvisor, [Validators.minLength(2), Validators.maxLength(200)]]
         });
 
