@@ -216,8 +216,8 @@ public class EegImporterService {
                     + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
 
-            // Send mail
-            mailService.sendImportEmail(importJob, userId, examination, Collections.singleton(datasetAcquisition));
+            // Send mail (Quality Cards are not yet implemented for EEG)
+            mailService.sendImportEmail(importJob, userId, examination, Collections.singleton(datasetAcquisition), null);
         } catch (Exception e) {
             LOG.error("Error while importing EEG: ", e);
             event.setStatus(ShanoirEvent.ERROR);

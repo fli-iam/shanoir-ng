@@ -66,6 +66,7 @@ public class ImportJob implements Serializable {
 
     private String username;
 
+    // To be deleted
     private QualityTag qualityTag;
 
     private String studyInstanceUID;

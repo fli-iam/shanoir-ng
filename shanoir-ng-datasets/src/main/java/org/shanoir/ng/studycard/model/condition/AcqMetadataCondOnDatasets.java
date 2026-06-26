@@ -48,14 +48,12 @@ public class AcqMetadataCondOnDatasets extends StudyCardMetadataCondition<Datase
         shanoirField = field.getId();
     }
 
-    public boolean fulfilled(List<Dataset> datasets) {
+    public boolean fulfilled(List<Dataset> datasets, StringBuffer report) {
         if (datasets == null) throw new IllegalArgumentException("datasets can not be null");
         DatasetMetadataField field = this.getShanoirField();
         if (field == null) throw new IllegalArgumentException("field can not be null");
         int nbOk = 0;
-        //int total = 0;
         for (Dataset dataset : datasets) {
-            //total++;
             boolean alreadyFulfilled = getCardinality() >= 1 && nbOk >= getCardinality();
             if (!alreadyFulfilled) {
                 boolean fulfilled = fulfilled(field, dataset);
@@ -64,7 +62,10 @@ public class AcqMetadataCondOnDatasets extends StudyCardMetadataCondition<Datase
                 }
             }
         }
-        return cardinalityComplies(nbOk, datasets.size());
+        boolean complies = cardinalityComplies(nbOk, datasets.size());
+        // nbUnknown is 0 on shanoir metadata fields as fulfilled method returns true or false, never null
+        writeConditionsReport(report, complies, nbOk, 0, datasets.size());
+        return complies;
     }
 
     private boolean fulfilled(DatasetMetadataField field, Dataset dataset) {
@@ -87,4 +88,5 @@ public class AcqMetadataCondOnDatasets extends StudyCardMetadataCondition<Datase
             return false;
         }
     }
+
 }

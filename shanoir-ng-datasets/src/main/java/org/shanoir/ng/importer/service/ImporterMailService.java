@@ -56,13 +56,13 @@ public class ImporterMailService {
     private ObjectMapper objectMapper;
 
     /**
-     * Sens the import email through rabbitMQ to user MS
+     * Sends the import email through rabbitMQ to user MS
      * @param importJob the import job
      * @param userId the userID
      * @param examination the exam ID
      * @param generatedAcquisitions
      */
-    public void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions) {
+    public void sendImportEmail(ImportJob importJob, Long userId, Examination examination, Set<DatasetAcquisition> generatedAcquisitions, List<String> qualityCardNames) {
         EmailDatasetsImported generatedMail = new EmailDatasetsImported();
 
         LinkedHashMap<Long, String> datasets = new LinkedHashMap<>();
@@ -76,6 +76,7 @@ public class ImporterMailService {
         generatedMail.setStudyName(importJob.getStudyName());
         generatedMail.setUserId(userId);
         generatedMail.setStudyCard(importJob.getStudyCardName());
+        generatedMail.setQualityCards(qualityCardNames);
 
         for (DatasetAcquisition acq : generatedAcquisitions.stream().sorted(Comparator.comparingInt(DatasetAcquisition::getSortingIndex)).toList()) {
             if (!CollectionUtils.isEmpty(acq.getDatasets())) {

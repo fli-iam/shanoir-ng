@@ -21,21 +21,21 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.download.ExaminationAttributes;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
-import org.shanoir.ng.studycard.model.ExaminationData;
+import org.shanoir.ng.studycard.model.condition.AcqDICOMConditionOnDatasets;
+import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnAcq;
+import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnDatasets;
 import org.shanoir.ng.studycard.model.condition.CardCondition;
 import org.shanoir.ng.studycard.model.condition.ExamDICOMConditionOnDatasets;
 import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnAcq;
 import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnDatasets;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -47,14 +47,14 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-public class QualityExaminationRule extends AbstractEntity {
+public class QualityCardRule extends AbstractEntity {
 
     private Integer tag;
 
     @NotNull
     private boolean orConditions;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     // there is a join table because a rule_id fk would lead to an ambiguity and bugs
     // because it could refer to a study card or quality card rule
     @JoinTable(name = "quality_card_condition_join", joinColumns = {@JoinColumn(name = "quality_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
@@ -84,51 +84,59 @@ public class QualityExaminationRule extends AbstractEntity {
         this.orConditions = orConditions;
     }
 
-    public void apply(Examination examination, QualityCardResult result, WADODownloaderService downloader) {
-        apply(examination, null, result, downloader);
+    public void apply(DatasetAcquisition datasetAcquisition, QualityCardResult result, WADODownloaderService downloader)
+            throws PacsException {
+        apply(datasetAcquisition, null, result, downloader);
     }
 
-    public void apply(ExaminationData examination, QualityCardResult result, WADODownloaderService downloader) {
-        apply(examination, null, result, downloader);
-    }
-
-    public void apply(Examination examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
-        ExaminationData examData = new ExaminationData(examination);
-        if (examData.getSubjectId() == null) {
-            Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
-            log.warn("No subject in exam " + examination.getId());
-        } else {
-            apply(examData, examinationDicomAttributes, result, downloader);
+    /**
+     *
+     * @param acquisitionDicomAttributes if null conditions will be checked on the
+     *                                   acquisition data and dicom data will be
+     *                                   fetched from pacs.
+     *                                   Else conditions will be checked on the
+     *                                   looping on the given dicom attributes
+     * @param datasetAcquisition
+     * @param result
+     * @param downloader
+     * @throws PacsException
+     */
+    public void apply(DatasetAcquisition datasetAcquisition, AcquisitionAttributes<?> acquisitionDicomAttributes,
+            QualityCardResult result, WADODownloaderService downloader) throws PacsException {
+        // if applied at import and not from ShUp then acquisitionDicomAttributes should
+        // not be null, otherwise we fetch DICOM acquisition attributes.
+        if (acquisitionDicomAttributes == null) {
+            acquisitionDicomAttributes = downloader.getDicomAttributesForAcquisition(datasetAcquisition);
         }
-    }
 
-    public void apply(ExaminationData examination, ExaminationAttributes<?> examinationDicomAttributes, QualityCardResult result, WADODownloaderService downloader) {
         // In case a rule was added without condition (= set as Always in gui)
         if (this.getConditions() == null || this.getConditions().isEmpty()) {
-            QualityCardResultEntry resultEntry = initResult(examination);
+            QualityCardResultEntry resultEntry = initResult(datasetAcquisition);
             resultEntry.setTagSet(getQualityTag());
             resultEntry.setMessage("Tag " + getQualityTag().name() + " was set by the quality card rule without any condition.");
             result.add(resultEntry);
-            result.addUpdatedSubject(
-                    setTagToSubject(examination.getSubjectId()));
+            result.addUpdatedDatasetAcquisition(setTagToDatasetAcquisition(datasetAcquisition));
         } else {
-            ConditionResult conditionResult = conditionsfulfilled(examinationDicomAttributes, examination, result, downloader);
+            ConditionResult conditionResult = conditionsfulfilled(acquisitionDicomAttributes, datasetAcquisition, result);
             if (conditionResult.isFulfilled()) {
-                result.addUpdatedSubject(
-                        setTagToSubject(examination.getSubjectId()));
+                result.addUpdatedDatasetAcquisition(setTagToDatasetAcquisition(datasetAcquisition));
             }
             // if conditions not fulfilled for a VALID tag
             // or if conditions fulfilled for a ERROR or WARNING tag
             // then add an entry to the report
             if ((conditionResult.isFulfilled() && !getQualityTag().equals(QualityTag.VALID))
                     || (!conditionResult.isFulfilled() && getQualityTag().equals(QualityTag.VALID))) {
-                QualityCardResultEntry resultEntry = initResult(examination);
+                QualityCardResultEntry resultEntry = initResult(datasetAcquisition);
                 resultEntry.setFailedValid(QualityTag.VALID.equals(getQualityTag()) && !conditionResult.isFulfilled());
                 resultEntry.setTagSet(getQualityTag());
+                // Here we use the original dataset name metadata (= seriesDescription) or the dataset acquisition ID to clearly identify the dataset acquisition concerned by the quality card result message.
+                String seriesDescription = datasetAcquisition.getDatasets().get(0).getOriginMetadata().getName() != null ? datasetAcquisition.getDatasets().get(0).getOriginMetadata().getName() : Long.toString(datasetAcquisition.getId());
                 if (conditionResult.isFulfilled()) {
-                    resultEntry.setMessage("Tag " + getQualityTag().name() + " was set because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
+                    resultEntry.setMessage("Tag " + getQualityTag().name() + " was set on acquisition " + seriesDescription
+                            + " because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
                 } else {
-                    resultEntry.setMessage("Tag " + getQualityTag().name() + " could not be set because those conditions failed : " + StringUtils.join(conditionResult.getUnfulfilledConditionsMsgList(), ", "));
+                    resultEntry.setMessage("Tag " + getQualityTag().name() + " could not be set on acquisition " + seriesDescription
+                            + " because those conditions failed : " + StringUtils.join(conditionResult.getUnfulfilledConditionsMsgList(), ", "));
                 }
                 result.add(resultEntry);
             }
@@ -138,15 +146,12 @@ public class QualityExaminationRule extends AbstractEntity {
 
     /**
      *
-     * @param subjectStudies
-     * @return list of updated subject studies
+     * @param datasetAcquisitionId
+     * @return an updated dataset acquisition
      */
-    private Subject setTagToSubject(Long subjectId) {
-        // don't touch subjectStudy as we later will compare the original with the updated
-        Subject subjectCopy = new Subject();
-        subjectCopy.setId(subjectId);
-        subjectCopy.setQualityTag(getQualityTag());
-        return subjectCopy;
+    private DatasetAcquisition setTagToDatasetAcquisition(DatasetAcquisition datasetAcquisition) {
+        datasetAcquisition.setQualityTag(getQualityTag());
+        return datasetAcquisition;
     }
 
     /**
@@ -157,31 +162,20 @@ public class QualityExaminationRule extends AbstractEntity {
      * @param result
      * @return
      */
-    private ConditionResult conditionsfulfilled(ExaminationAttributes<?> dicomAttributes, ExaminationData examination, QualityCardResult result, WADODownloaderService downloader) {
+    private ConditionResult conditionsfulfilled(AcquisitionAttributes<?> dicomAttributes, DatasetAcquisition da,
+            QualityCardResult result) {
         boolean allFulfilled = true;
         ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level
-        boolean pilotedByDicomAttributes;
-        ExaminationAttributes<Long> examinationAttributesCache = null;
-        if (dicomAttributes != null) {
-            pilotedByDicomAttributes = true;
-        } else {
-            pilotedByDicomAttributes = false;
-            examinationAttributesCache = new ExaminationAttributes<>(downloader.getWadoURLHandler());
-        }
         for (CardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();
             boolean fulfilled = true;
-            if (condition instanceof ExamDICOMConditionOnDatasets) {
-                if (pilotedByDicomAttributes) {
-                    fulfilled = ((ExamDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
-                } else {
-                    fulfilled = ((ExamDICOMConditionOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), examinationAttributesCache, downloader, msg);
-                }
-            } else if (condition instanceof ExamMetadataCondOnAcq) {
-                fulfilled = ((ExamMetadataCondOnAcq) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
-            } else if (condition instanceof ExamMetadataCondOnDatasets) {
-                fulfilled = ((ExamMetadataCondOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
+            if (condition instanceof AcqDICOMConditionOnDatasets) {
+                fulfilled = ((AcqDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
+            } else if (condition instanceof AcqMetadataCondOnAcq) {
+                fulfilled = ((AcqMetadataCondOnAcq) condition).fulfilled(da, msg);
+            } else if (condition instanceof AcqMetadataCondOnDatasets) {
+                fulfilled = ((AcqMetadataCondOnDatasets) condition).fulfilled(da.getDatasets(), msg);
             } else {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }
@@ -203,11 +197,12 @@ public class QualityExaminationRule extends AbstractEntity {
         return condResult;
     }
 
-    private QualityCardResultEntry initResult(ExaminationData examination) {
+    private QualityCardResultEntry initResult(DatasetAcquisition datasetAcquisition) {
         QualityCardResultEntry result = new QualityCardResultEntry();
-        result.setSubjectName(examination.getSubjectName());
-        result.setExaminationDate(examination.getExaminationDate());
-        result.setExaminationComment(examination.getExaminationComment());
+        result.setSubjectName(datasetAcquisition.getExamination().getSubject() != null ? datasetAcquisition.getExamination().getSubject().getName() : null);
+        result.setDatasetAcquisitionId(datasetAcquisition.getId());
+        result.setExaminationDate(datasetAcquisition.getExamination().getExaminationDate());
+        result.setExaminationComment(datasetAcquisition.getExamination().getComment());
         return result;
     }
 

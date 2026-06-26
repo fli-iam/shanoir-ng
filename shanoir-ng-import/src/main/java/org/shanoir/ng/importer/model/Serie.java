@@ -24,6 +24,7 @@ import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
+import org.shanoir.ng.shared.quality.QualityTag;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -111,6 +112,9 @@ public class Serie implements Cloneable {
 
     @JsonProperty("datasets")
     private List<Dataset> datasets;
+
+    @JsonProperty("qualityTag")
+    private QualityTag qualityTag;
 
     // Keep this empty constructor to avoid Jackson deserialization exceptions
     public Serie() { }
@@ -351,6 +355,14 @@ public class Serie implements Cloneable {
 
     public void setSequenceName(String sequenceName) {
         this.sequenceName = sequenceName;
+    }
+
+    public QualityTag getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualityTag(QualityTag qualityTag) {
+        this.qualityTag = qualityTag;
     }
 
     public String toString() {

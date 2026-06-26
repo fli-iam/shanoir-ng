@@ -26,16 +26,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.InternetAddress;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.model.DatasetDetail;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
-import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.EmailStudy;
+import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
@@ -52,6 +50,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
 
 /**
  * Implementation of email service.
@@ -89,6 +90,8 @@ public class EmailServiceImpl implements EmailService {
     private static final String EXAM_DATE = "exam_date";
 
     private static final String STUDY_CARD = "study_card";
+
+    private static final String QUALITY_CARDS = "quality_cards";
 
     private static final String SERIES = "series";
 
@@ -495,6 +498,7 @@ public class EmailServiceImpl implements EmailService {
                 variables.put(EXAMINATION, examDetail);
                 variables.put(EXAM_DATE, generatedMail.getExamDate());
                 variables.put(STUDY_CARD, generatedMail.getStudyCard());
+                variables.put(QUALITY_CARDS, generatedMail.getQualityCards());
                 variables.put(SERVER_ADDRESS, shanoirServerAddress);
                 final String content = build("notifyStudyAdminDataImported", variables);
                 LOG.info(content);

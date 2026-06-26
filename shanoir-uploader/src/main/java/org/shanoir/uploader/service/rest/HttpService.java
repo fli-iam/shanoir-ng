@@ -24,6 +24,7 @@ import javax.net.ssl.SSLContext;
 import org.apache.hc.client5.http.auth.AuthCache;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
@@ -201,6 +202,18 @@ public class HttpService {
             StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
             httpPut.setEntity(requestEntity);
             CloseableHttpResponse response = httpClient.execute(httpPut, context);
+            return response;
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    public CloseableHttpResponse delete(String string) throws Exception {
+        try {
+            HttpDelete httpDelete = new HttpDelete(string);
+            httpDelete.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            CloseableHttpResponse response = httpClient.execute(httpDelete, context);
             return response;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

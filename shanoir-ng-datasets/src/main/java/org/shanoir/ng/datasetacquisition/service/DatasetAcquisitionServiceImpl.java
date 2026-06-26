@@ -135,6 +135,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         to.setSortingIndex(from.getSortingIndex());
         to.setStudyCard(from.getStudyCard());
         to.setAcquisitionStartTime(from.getAcquisitionStartTime()); // immutable
+        to.setQualityTag(from.getQualityTag());
         return to;
     }
 
