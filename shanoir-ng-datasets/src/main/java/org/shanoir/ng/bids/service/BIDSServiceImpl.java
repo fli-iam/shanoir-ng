@@ -82,6 +82,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -267,11 +268,11 @@ public class BIDSServiceImpl implements BIDSService {
      * @param subject the subject we want to export as BIDS
      * @param studyName the study name
      * @param workDir Subject BIDS directory where we are working. Will be created if null.
-     * @param index subject index
      * @return data from the subject formatted as BIDS in a .zip file.
      * @throws IOException
      */
-    private void exportAsBids(final Subject subject, final String studyName, Long studyId, final File workDir) throws IOException {
+    @Transactional(readOnly = true)
+    protected void exportAsBids(final Subject subject, final String studyName, Long studyId, final File workDir) throws IOException {
         File subjectFolder = createSubjectFolder(subject.getId(), workDir);
 
         // Get subject examinations and filter on the one with adapted study only
