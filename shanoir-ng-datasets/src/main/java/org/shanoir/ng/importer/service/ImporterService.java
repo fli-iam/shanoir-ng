@@ -486,9 +486,9 @@ public class ImporterService {
     }
 
     private record AcquisitionsResult(
-        Set<DatasetAcquisition> acquisitions,
-        List<String> qualityCardNames,
-        QualityCardResult qualityResult
-    ) {}
+            Set<DatasetAcquisition> acquisitions,
+            List<String> qualityCardNames,
+            QualityCardResult qualityResult
+    ) { }
 
 }
