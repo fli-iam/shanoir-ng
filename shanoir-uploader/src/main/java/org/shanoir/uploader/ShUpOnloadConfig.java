@@ -16,7 +16,7 @@ package org.shanoir.uploader;
 
 import java.io.File;
 
-import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.DicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -34,7 +34,7 @@ public class ShUpOnloadConfig {
 
     private static File workFolder;
 
-    private static IDicomServerClient dicomServerClient;
+    private static DicomServerClient dicomServerClient;
 
     private static CurrentNominativeDataController currentNominativeDataController;
 
@@ -68,11 +68,11 @@ public class ShUpOnloadConfig {
         ShUpOnloadConfig.workFolder = workFolder;
     }
 
-    public static IDicomServerClient getDicomServerClient() {
+    public static DicomServerClient getDicomServerClient() {
         return dicomServerClient;
     }
 
-    public static void setDicomServerClient(IDicomServerClient dicomServerClient) {
+    public static void setDicomServerClient(DicomServerClient dicomServerClient) {
         ShUpOnloadConfig.dicomServerClient = dicomServerClient;
     }
 

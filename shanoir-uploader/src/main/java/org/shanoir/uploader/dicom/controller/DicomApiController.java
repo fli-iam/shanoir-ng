@@ -11,8 +11,6 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.event.DicomClientReadyEvent;
-import org.shanoir.uploader.action.init.PacsConfigurationState;
-import org.shanoir.uploader.action.init.StartupStateContext;
 import org.shanoir.uploader.dicom.DicomServerClient;
 import org.shanoir.uploader.dicom.dto.ConfigDTO;
 import org.slf4j.Logger;
@@ -27,8 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import jakarta.annotation.PostConstruct;
-
 
 @RestController
 @RequestMapping("/dicom")
@@ -42,17 +38,25 @@ public class DicomApiController implements ApplicationListener<DicomClientReadyE
 
     @Override
     public void onApplicationEvent(DicomClientReadyEvent event) {
+        logger.debug(">>> DicomClientReadyEvent received, client = {}", event.getDicomServerClient());
         this.dicomServerClient = event.getDicomServerClient();
-        logger.info("DicomApiController: DicomServerClient ready.");
+        logger.debug("DicomApiController: DicomServerClient ready.");
     }
 
     // Securize endpoints if called before initialization of DicomServerClient
     private DicomServerClient getClient() {
         if (dicomServerClient == null) {
-            throw new ResponseStatusException(
-                HttpStatus.SERVICE_UNAVAILABLE,
-                "DICOM client not yet initialized"
-            );
+            try {
+                dicomServerClient = shUpOnloadConfig.getDicomServerClient();
+                if (dicomServerClient == null) {
+                    throw new ResponseStatusException(
+                        HttpStatus.SERVICE_UNAVAILABLE,
+                        "DICOM client not yet initialized"
+                    );
+                }
+            } catch (Exception e) {
+                logger.error("Error retrieving DicomServerClient: " + e.getMessage(), e);
+            }
         }
         return dicomServerClient;
     }
