@@ -18,16 +18,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
@@ -38,6 +37,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.OverallStatistics;
+import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -56,7 +56,6 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
-import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
@@ -86,6 +85,7 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Dataset service implementation.
@@ -125,7 +125,7 @@ public class DatasetServiceImpl implements DatasetService {
     private DatasetProcessingService processingService;
 
     @Autowired
-    private DatasetTransactionalServiceImpl datasetTransactionalService;
+    private DatasetService datasetService;
 
     @Autowired
     private DatasetAsyncService datasetAsyncService;
@@ -144,7 +144,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Autowired
     @Lazy
-    private SubjectRepository subjectRepository;
+    private DatasetExpressionRepository deRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -456,7 +456,7 @@ public class DatasetServiceImpl implements DatasetService {
             int total = datasets.size();
             updateEvent(0f, event, studyId);
             for (List<Long> partition : ListUtils.partition(datasets, 1000)) {
-                datasetTransactionalService.deletePartitionOfNiftis(partition, total, event).get();
+                datasetService.deletePartitionOfNiftis(partition, total, event).get();
             }
             updateEvent(1f, event, studyId);
         } catch (Exception e) {
@@ -607,6 +607,18 @@ public class DatasetServiceImpl implements DatasetService {
         return results;
     }
 
+    @Transactional
+    public Future<Void> deletePartitionOfNiftis(List<Long> partition, float total, ShanoirEvent event) {
+
+        float progress = event.getProgress();
+        for (Dataset dataset : repository.findAllById(partition)) {
+            progress += 1f / total;
+            updateEvent(progress, event);
+            deleteNifti(dataset);
+        }
+        return CompletableFuture.completedFuture(null);
+    }
+
     protected void fillMetadataFile(File metadataFile, List<Long> datasetIds, List<String> metadataKeys) throws Exception {
         LOG.info("Filling metadata file.");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(metadataFile, true))) {
@@ -684,5 +696,44 @@ public class DatasetServiceImpl implements DatasetService {
         }
         LOG.info("Metadata file created");
         return metadataFile;
+    }
+
+    /**
+     * Deletes nifti on file server
+     * @param dataset
+     */
+    protected void deleteNifti(Dataset dataset) {
+        Set<DatasetExpression> expressionsToDelete = new HashSet<>();
+
+        for (Iterator<DatasetExpression> iterex = dataset.getDatasetExpressions().iterator(); iterex.hasNext();) {
+            DatasetExpression expression = iterex.next();
+            if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
+                continue;
+            }
+            for (Iterator<DatasetFile> iter = expression.getDatasetFiles().iterator(); iter.hasNext();) {
+                DatasetFile file = iter.next();
+                URL url = null;
+                try {
+                    url = new URL(file.getPath().replaceAll("%20", " "));
+                    File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
+                    if (srcFile.exists()) {
+                        LOG.error("Deleting: " + srcFile.getAbsolutePath());
+                        FileUtils.delete(srcFile);
+                    }
+                    // We are forced to detach elements here to be able to delete them from DB
+                    file.setDatasetExpression(null);
+                    iter.remove();
+                } catch (Exception e) {
+                    LOG.error("Could not delete nifti file: {}", file.getPath(), e);
+                }
+            }
+            expression.setDataset(null);
+            iterex.remove();
+            expressionsToDelete.add(expression);
+        }
+        if (expressionsToDelete.isEmpty()) {
+            return;
+        }
+        deRepository.deleteAll(expressionsToDelete);
     }
 }
