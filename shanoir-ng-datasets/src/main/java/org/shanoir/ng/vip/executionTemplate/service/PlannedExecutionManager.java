@@ -14,12 +14,14 @@
 
 package org.shanoir.ng.vip.executionTemplate.service;
 
+import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.shared.service.TransactionRunner;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
@@ -87,6 +89,9 @@ public class PlannedExecutionManager {
     @Autowired
     private TransactionRunner transactionRunner;
 
+    @Autowired
+    private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
+
     public PlannedExecutionManager() {
         executor = Executors.newFixedThreadPool(maxThreads);
     }
@@ -123,10 +128,14 @@ public class PlannedExecutionManager {
                     //Execution in executor submission has to be final
                     ExecutionInQueue execution = next;
 
-                    // Submit execution
+                    // Submit execution.
+                    // NB: threadExecution runs without a single enclosing transaction, for two independent reasons:
+                    // (1) createExecutions must commit the processing resources before POSTing, so they are visible
+                    // to VIP's /carmin-data/path download callback; (2) the VIP status-poll loop that follows can
+                    // run for a long time and must not hold a DB transaction open. It uses short, scoped
+                    // transactions internally instead.
                     executor.submit(() -> {
-                        transactionRunner.runInTransaction(em ->
-                                threadExecution(execution.getTemplate(), execution.getObjectId(), execution.getType(), execution.getPlannedExecutionToRemove()));
+                        threadExecution(execution.getTemplate(), execution.getObjectId(), execution.getType(), execution.getPlannedExecutionToRemove());
                         involvedDatasetIds.removeAll(candidateData);
                     });
                 } else {
@@ -159,37 +168,80 @@ public class PlannedExecutionManager {
      * Thread the creation of monitoring and start of execution for the given template id and acquisition id
      */
     private void threadExecution(ExecutionTemplate template, Long objectId, String executionLevel, List<Long> plannedExecutionToRemoveWithAcquisitionId) {
-        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        String offlineToken = template.getOfflineToken();
+        if (offlineToken == null) {
+            LOG.error("No offline token stored for template {}. Cannot execute without user credentials.", template.getId());
+            return;
+        }
 
         try {
-            ExecutionCandidateDTO candidate = plannedExecutionServiceImpl.prepareExecutionCandidate(template, executionLevel, objectId);
-            if (Objects.nonNull(candidate)) {
-                IdName monitoringIdName = executionService.createExecutions(List.of(candidate));
-                String vipIdentifier = executionMonitoringService.getVipIdentifierFromMonitoringId(monitoringIdName.getId());
+            AccessTokenResponse tokenResponse = keycloakServiceAccountUtils.refreshUserToken(offlineToken);
+            Map<String, Object> claims = SecurityContextUtil.decodeJwtClaims(tokenResponse.getToken());
+            String username = (String) claims.getOrDefault("preferred_username", "shanoir");
+            Object userIdRaw = claims.get("userId");
+            Long userId = userIdRaw != null ? Long.valueOf(userIdRaw.toString()) : 92233720L;
+            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN", username, userId, tokenResponse.getToken());
+        } catch (SecurityException e) {
+            LOG.error("Failed to refresh user token for template {}. Execution aborted.", template.getId(), e);
+            return;
+        }
+
+        // Resolve the candidate in a read transaction (lazy associations need an open session while the DTO is built).
+        ExecutionCandidateDTO candidate;
+        try {
+            candidate = transactionRunner.callInTransaction(em ->
+                    plannedExecutionServiceImpl.prepareExecutionCandidate(template, executionLevel, objectId));
+        } catch (RuntimeException e) {
+            LOG.error("Failed to prepare execution candidate for template {} ({} {}).", template.getId(), executionLevel, objectId, e);
+            return;
+        }
+        if (candidate == null) {
+            return;
+        }
+        candidate.setRefreshToken(offlineToken);
+
+        // createExecutions commits the processing resources (resourceId -> datasets mapping) BEFORE it submits to
+        // VIP, so they are visible to VIP's /carmin-data/path callback.
+        String vipIdentifier;
+        try {
+            IdName monitoringIdName = executionService.createExecutions(List.of(candidate));
+            transactionRunner.runInTransaction(em -> {
                 for (Long acquisitionId : plannedExecutionToRemoveWithAcquisitionId) {
                     plannedExecutionRepository.deleteByAcquisitionIdAndTemplateId(acquisitionId, template.getId());
                 }
+            });
+            vipIdentifier = executionMonitoringService.getVipIdentifierFromMonitoringId(monitoringIdName.getId());
+        } catch (RestServiceException | SecurityException | EntityNotFoundException | RuntimeException e) {
+            LOG.error("Execution from template {} for {} {} failed.", template.getId(), executionLevel, objectId, e);
+            return;
+        }
 
-                ExecutionStatus status = ExecutionStatus.RUNNING;
+        // Resources are committed and the execution is submitted. Poll status OUTSIDE any transaction so the dataset
+        // lock (involvedDatasetIds) is held until the execution finishes, serializing dependent runs.
+        if (vipIdentifier == null) {
+            return;
+        }
 
-                while (Objects.equals(status, ExecutionStatus.RUNNING)) {
-                    TimeUnit.SECONDS.sleep(statusSleepSeconds);
+        try {
+            ExecutionStatus status = ExecutionStatus.RUNNING;
+            while (Objects.equals(status, ExecutionStatus.RUNNING)) {
+                TimeUnit.SECONDS.sleep(statusSleepSeconds);
 
-                    for (int attempt = 1; attempt <= maxStatusRetries; attempt++) {
-                        try {
-                            status = executionService.getExecutionStatusFromVipIdentifier(vipIdentifier);
+                for (int attempt = 1; attempt <= maxStatusRetries; attempt++) {
+                    try {
+                        status = executionService.getExecutionStatusFromVipIdentifier(vipIdentifier);
+                        break;
+                    } catch (Exception e) {
+                        if (attempt == maxStatusRetries) {
                             break;
-                        } catch (Exception e) {
-                            if (attempt == maxStatusRetries) {
-                                break;
-                            }
-                            TimeUnit.SECONDS.sleep(1);
                         }
+                        TimeUnit.SECONDS.sleep(1);
                     }
                 }
             }
-        } catch (RestServiceException | SecurityException | EntityNotFoundException | InterruptedException e) {
-            LOG.error("Execution from template {} for {} {} failed.", template.getId(), executionLevel, objectId, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOG.error("Status polling interrupted for execution from template {} ({} {}).", template.getId(), executionLevel, objectId, e);
         }
     }
 

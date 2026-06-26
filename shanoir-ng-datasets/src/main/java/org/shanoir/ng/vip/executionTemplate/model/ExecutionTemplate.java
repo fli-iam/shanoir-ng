@@ -33,6 +33,9 @@ public class ExecutionTemplate extends HalEntity {
     private String filterCombination;
     private int priority;
 
+    @Column(length = 2000)
+    private String offlineToken;
+
     @OneToMany(mappedBy = "executionTemplate", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ExecutionTemplateFilter> filters;
 
@@ -97,5 +100,13 @@ public class ExecutionTemplate extends HalEntity {
 
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+
+    public String getOfflineToken() {
+        return offlineToken;
+    }
+
+    public void setOfflineToken(String offlineToken) {
+        this.offlineToken = offlineToken;
     }
 }
