@@ -50,6 +50,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class SeriesInstanceUIDHandler {
@@ -305,6 +306,7 @@ public class SeriesInstanceUIDHandler {
         }
     }
 
+    @Transactional(readOnly = true)
     public String findSeriesInstanceUIDFromCacheOrDatabase(String acquisitionUID) {
         String seriesInstanceUID = virtualUIDToSeriesInstanceUIDCache.get(acquisitionUID);
         if (seriesInstanceUID == null) {
