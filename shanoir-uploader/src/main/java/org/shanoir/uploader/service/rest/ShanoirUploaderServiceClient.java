@@ -89,6 +89,8 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_STUDIES_PUBLIC_DATA = "service.studies.find.public.data";
 
+    private static final String SERVICE_STUDY_APPROVE = "service.studies.study.approve";
+
     private static final String SERVICE_STUDY_USER = "service.studies.study.user";
 
     private static final String SERVICE_STUDYCARDS_CREATE = "service.studycards.create";
@@ -156,6 +158,8 @@ public class ShanoirUploaderServiceClient {
     private String serviceURLStudiesFindNamesAndCenters;
 
     private String serviceURLStudiesFindPublicData;
+
+    private String serviceURLStudyApprove;
 
     private String serviceURLStudyUser;
 
@@ -234,6 +238,8 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
         this.serviceURLStudiesFindPublicData = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_PUBLIC_DATA);
+        this.serviceURLStudyApprove = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDY_APPROVE);
         this.serviceURLStudyUser = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDY_USER);
         this.serviceURLStudyCardsCreate = this.serverURL
@@ -944,6 +950,26 @@ public class ShanoirUploaderServiceClient {
             LOG.error(e.getMessage(), e);
         } catch (Exception ioE) {
             LOG.error(ioE.getMessage(), ioE);
+        }
+        return null;
+    }
+
+    public Study approveDraftStudy(final Long studyId) {
+        try {
+            String url = this.serviceURLStudyApprove + studyId;
+            try (CloseableHttpResponse response = httpService.put(url, null)) {
+                int code = response.getCode();
+                if (code == HttpStatus.SC_OK) {
+                    Study approvedStudy = Util.getMappedObject(response, Study.class);
+                    return approvedStudy;
+                } else {
+                    LOG.error("Error in approveDraftStudy: studyId={} (status code: {}, message: {})",
+                            studyId, code,
+                            apiResponseMessages.getOrDefault(code, "unknown status code"));
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Error in approveDraftStudy: studyId={}, error: {}", studyId, e.getMessage(), e);
         }
         return null;
     }
