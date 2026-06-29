@@ -243,7 +243,6 @@ public class StudyApiController implements StudyApi {
         } catch (ShanoirException e) {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), e));
         }
-
         return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
     }
 

@@ -128,7 +128,7 @@ public class StudyDraftTest extends AbstractTest {
         }
         Assertions.assertTrue(addFailed,
                 "Adding a user to a DRAFT study must fail before approval.");
-        LOG.info("Step 2 passed – attempt to add member to DRAFT study was rejected.");
+        LOG.info("Step 2 passed - attempt to add member to DRAFT study was rejected.");
     }
 
     /**
@@ -149,7 +149,7 @@ public class StudyDraftTest extends AbstractTest {
                 "Study must no longer be in DRAFT state after admin approval.");
         // Keep the local reference up-to-date so subsequent steps see the right state
         createdStudy = approvedStudy;
-        LOG.info("Step 3 passed – study id={} is now approved (isDraft={}).",
+        LOG.info("Step 3 passed - study id={} is now approved (isDraft={}).",
                 createdStudy.getId(), createdStudy.getIsDraft());
     }
 
@@ -161,7 +161,7 @@ public class StudyDraftTest extends AbstractTest {
     @Order(4)
     void expertAddsUserToApprovedStudy_succeeds() {
         Assertions.assertNotNull(createdStudy,
-                "Step 4 requires Steps 1–3 to have run successfully.");
+                "Step 4 requires Steps 1-3 to have run successfully.");
         Assertions.assertFalse(Boolean.TRUE.equals(createdStudy.getIsDraft()),
                 "Step 4 requires the study to have been approved in Step 3.");
         LOG.info("Step 4 - Expert adds user {} to approved study {}.",
