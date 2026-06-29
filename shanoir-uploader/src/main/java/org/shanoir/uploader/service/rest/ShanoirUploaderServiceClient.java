@@ -957,7 +957,7 @@ public class ShanoirUploaderServiceClient {
     public Study approveDraftStudy(final Long studyId) {
         try {
             String url = this.serviceURLStudyApprove + studyId;
-            try (CloseableHttpResponse response = httpService.put(url, null)) {
+            try (CloseableHttpResponse response = httpService.put(url)) {
                 int code = response.getCode();
                 if (code == HttpStatus.SC_OK) {
                     Study approvedStudy = Util.getMappedObject(response, Study.class);

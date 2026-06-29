@@ -195,6 +195,18 @@ public class HttpService {
         }
     }
 
+    public CloseableHttpResponse put(String url) throws Exception {
+        try {
+            HttpPut httpPut = new HttpPut(url);
+            httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            CloseableHttpResponse response = httpClient.execute(httpPut);
+            return response;
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
     public CloseableHttpResponse put(String url, String json) throws Exception {
         try {
             HttpPut httpPut = new HttpPut(url);
