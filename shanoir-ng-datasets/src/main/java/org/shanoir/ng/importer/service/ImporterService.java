@@ -178,8 +178,8 @@ public class ImporterService {
         } catch (QualityException e) {
             String msg = e.buildErrorMessage();
             event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage("Import from Shanoir user " + importJob.getUserId() + " aborted.\n"
-                                + " None of the acquisitions fulfilled the conditions from the following Quality Card(s) : " + String.join(", ", e.getQualityCardNames()) + ".");
+            event.setMessage("Import from Shanoir user " + importJob.getUsername() + " aborted.\n"
+                                + "None of the acquisitions fulfilled the conditions from the following Quality Card(s) : " + String.join(", ", e.getQualityCardNames()) + ".");
             event.setReport(e.getQualityResult().toString());
             event.setProgress(-1f);
             eventService.publishEvent(event);

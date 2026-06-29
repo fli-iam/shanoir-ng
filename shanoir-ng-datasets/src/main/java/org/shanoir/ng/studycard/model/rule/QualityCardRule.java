@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dcm4che3.data.Tag;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.AcquisitionAttributes;
@@ -130,7 +131,7 @@ public class QualityCardRule extends AbstractEntity {
                 resultEntry.setFailedValid(QualityTag.VALID.equals(getQualityTag()) && !conditionResult.isFulfilled());
                 resultEntry.setTagSet(getQualityTag());
                 // Here we use the original dataset name metadata (= seriesDescription) or the dataset acquisition ID to clearly identify the dataset acquisition concerned by the quality card result message.
-                String seriesDescription = datasetAcquisition.getDatasets().get(0).getOriginMetadata().getName() != null ? datasetAcquisition.getDatasets().get(0).getOriginMetadata().getName() : Long.toString(datasetAcquisition.getId());
+                String seriesDescription = acquisitionDicomAttributes.getFirstDatasetAttributes() != null ? acquisitionDicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesDescription) : datasetAcquisition.getId().toString();
                 if (conditionResult.isFulfilled()) {
                     resultEntry.setMessage("Tag " + getQualityTag().name() + " was set on acquisition " + seriesDescription
                             + " because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
