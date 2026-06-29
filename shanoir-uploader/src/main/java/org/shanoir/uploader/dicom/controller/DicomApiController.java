@@ -158,8 +158,8 @@ public class DicomApiController implements ApplicationListener<DicomClientReadyE
                     }
                 }
             }
-            logger.info(media.getTreeNodes().size() + " patients read from DICOM server.");
             logger.info("Patients read from DICOM server: " + media.getTreeNodes().toString());
+            logger.info("Media : " + media.getData().toString());
         }
 
         return media.getData();

@@ -20,6 +20,7 @@ import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 
@@ -31,6 +32,7 @@ import org.shanoir.uploader.dicom.DicomTreeNode;
 public class Media implements DicomTreeNode {
 
     /** The related patients. */
+    @JsonProperty("relatedPatients")
     private List<DicomTreeNode> relatedPatients;
 
     /**

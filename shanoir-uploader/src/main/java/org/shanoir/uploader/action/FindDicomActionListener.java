@@ -197,6 +197,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
                         studyDescription,
                         mainWindow.birthDate, mainWindow.studyDate);
                 fillMediaWithPatients(media, patients);
+                LOG.info("Media object filled with patients from PACS query: " + media.getData().toString());
                 this.mainWindow.setCursor(Cursor.getDefaultCursor());
             } catch (ConnectException cE) {
                 LOG.error(cE.getMessage(), cE);
