@@ -85,8 +85,8 @@ public class StudyDraftTest extends AbstractTest {
      */
     @Test
     @Order(1)
-    void expertCreatesStudy_landsDraft() {
-        LOG.info("Step 1 - Expert creates a study expected to land in DRAFT state.");
+    void expertCreatesStudyDraft() {
+        LOG.info("Step 1 - Expert creates a study expected in DRAFT state.");
         Study study = buildMinimalStudy();
         createdStudy = expertClient.createStudy(study);
         Assertions.assertNotNull(createdStudy,
@@ -192,7 +192,7 @@ public class StudyDraftTest extends AbstractTest {
         extraDetails.setExpectedNbOfSubjects(5L);
         extraDetails.setExpectedNbOfCenters(1L);
         extraDetails.setSponsor("Test-Sponsor");
-        extraDetails.setPrincipalInvestigator("Test-PI");
+        extraDetails.setPrincipalInvestigator("Test-Principal-Investigator");
 
         Study study = new Study();
         study.setExtraDetails(extraDetails);
