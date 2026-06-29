@@ -174,6 +174,7 @@ public abstract class AbstractTest {
                 LOG.error("Login failed for {} (user={}). Server down or wrong credentials.", roleLabel, name);
                 return null;
             }
+            // @todo change here
             ShUpOnloadConfig.setTokenString(token);
             LOG.info("Authenticated {} as user {}, {}.", roleLabel, name, client.getUserId());
             return client;
