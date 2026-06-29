@@ -137,9 +137,9 @@ jobs:
           # - use $IMAGE_TAG for resulting docker image tag
           # - add a second tag 'develop' when building the main branch
           def tags(image: str):
-              return [f"{env['DOCKER_REPOSITORY']}/{image}:{t}" for t in
+              return [f"{env['DOCKER_REPOSITORY']}/{image}:{t}" for t in (
                         (env['IMAGE_TAG'], MAIN_BRANCH) if is_main_branch else
-                        (env['IMAGE_TAG'],)]
+                        (env['IMAGE_TAG'],))]
   
           # extract the list of images to be built from the docker-compose config
           images = json.loads(subprocess.check_output(
