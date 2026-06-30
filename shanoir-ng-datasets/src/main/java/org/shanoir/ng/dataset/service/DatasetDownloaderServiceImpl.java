@@ -62,6 +62,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DatasetDownloaderServiceImpl {
@@ -124,6 +125,7 @@ public class DatasetDownloaderServiceImpl {
         massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, null);
     }
 
+    @Transactional(readOnly = true)
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting) throws RestServiceException {
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
