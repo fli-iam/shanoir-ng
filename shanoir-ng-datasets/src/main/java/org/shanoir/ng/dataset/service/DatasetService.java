@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import jakarta.mail.MessagingException;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
@@ -183,4 +184,6 @@ public interface DatasetService {
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
     Future<Void> deletePartitionOfNiftis(List<Long> partition, float total, ShanoirEvent event);
+
+    String getDicomMetadataByDatasetId(Long datasetId) throws IOException, MessagingException;
 }

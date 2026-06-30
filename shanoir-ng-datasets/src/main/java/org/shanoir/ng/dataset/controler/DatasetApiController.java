@@ -129,16 +129,10 @@ public class DatasetApiController implements DatasetApi {
     private ExaminationService examinationService;
 
     @Autowired
-    private SubjectService subjectService;
-
-    @Autowired
     private ImporterService importerService;
 
     @Autowired
     private ProcessedDatasetImporterService processedDatasetImporterService;
-
-    @Autowired
-    private WADODownloaderService downloader;
 
     @Autowired
     private ShanoirEventService eventService;
@@ -154,13 +148,7 @@ public class DatasetApiController implements DatasetApi {
     private DatasetDownloaderServiceImpl datasetDownloaderService;
 
     @Autowired
-    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDAndSubjectNameHandler;
-
-    @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private StorageService storageService;
 
     @Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
@@ -195,9 +183,7 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteDatasets(
-            @Parameter(description = "ids of the datasets", required = true) @Valid
-            @RequestBody List<Long> datasetIds, final boolean deleteEmptyAcquisitions)
+    public ResponseEntity<Void> deleteDatasets(List<Long> datasetIds, final boolean deleteEmptyAcquisitions)
             throws RestServiceException {
         try {
             if (datasetIds.size() > DATASET_LIMIT) {
@@ -297,8 +283,7 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public ResponseEntity<List<DatasetLight>> findDatasetsByIds(
-            @RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
+    public ResponseEntity<List<DatasetLight>> findDatasetsByIds(List<Long> datasetIds) {
         List<DatasetLight> datasets = datasetService.findLightByIdIn(datasetIds);
         if (datasets.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -390,11 +375,7 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public void downloadDatasetById(
-            final Long datasetId,
-            @Parameter(description = "Dowloading nifti, decide the nifti converter id") final Long converterId,
-            @Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
-            @Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException {
+    public void downloadDatasetById(final Long datasetId, final Long converterId, final String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException {
         Dataset dataset = this.datasetService.findById(datasetId);
         if (dataset == null) {
             throw new EntityNotFoundException(Dataset.class, datasetId);
@@ -406,23 +387,11 @@ public class DatasetApiController implements DatasetApi {
     @Override
     public ResponseEntity<String> getDicomMetadataByDatasetId(Long datasetId)
             throws IOException, MessagingException {
-        final Dataset dataset = datasetService.findById(datasetId);
-        Optional<URL> firstWADOURL = DatasetFileUtils.getFirstDatasetFilePathURL(
-                dataset,
-                DatasetExpressionFormat.DICOM);
-        if (firstWADOURL.isPresent()) {
-            String dicomJson = downloader.downloadDicomMetadataForURL(firstWADOURL.orElseThrow());
-            if (dataset.getSource() != null) {
-                Optional<Subject> subjectOpt = subjectService.findById(dataset.getSubjectId());
-                String subjectName = subjectOpt.get().getName();
-                JsonNode root = objectMapper.readTree(dicomJson);
-                studyInstanceUIDAndSubjectNameHandler.replacePatientInfo(root, subjectName);
-                dicomJson = objectMapper.writeValueAsString(root);
-            }
-            return ResponseEntity.ok(dicomJson);
-        } else {
+        String dicomJson = datasetService.getDicomMetadataByDatasetId(datasetId);
+        if (dicomJson == null) {
             return ResponseEntity.noContent().build();
         }
+        return ResponseEntity.ok(dicomJson);
     }
 
     public ResponseEntity<Void> createProcessedDataset(@Parameter(description = "ProcessedDataset to create", required = true)  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException, Exception {
@@ -433,15 +402,7 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public void massiveDownloadByDatasetIds(
-            @Parameter(description = "ids of the datasets", required = true) @Valid
-            @RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
-            @Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
-            @RequestParam(value = "format", required = false, defaultValue = DCM) String format,
-            @Parameter(description = "If nifti, decide converter to use") @Valid
-            @RequestParam(value = "converterId", required = false) Long converterId,
-            @Parameter(description = "Sorting for directories tree") @Valid
-            @RequestParam(value = "sortingForProcessingOutputs", required = false) String sortingForProcessingOutputs,
+    public void massiveDownloadByDatasetIds(List<Long> datasetIds, String format, Long converterId, String sortingForProcessingOutputs,
             HttpServletResponse response) throws RestServiceException {
 
         // STEP 0: Check data integrity
@@ -463,11 +424,7 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public void massiveDownloadByStudyId(
-            @Parameter(description = "id of the study", required = true) @Valid
-            @RequestParam(value = "studyId", required = true) Long studyId,
-            @Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
-            @RequestParam(value = "format", required = false, defaultValue = DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
+    public void massiveDownloadByStudyId(Long studyId, String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
         // STEP 0: Check data integrity
         if (studyId == null) {
             throw new RestServiceException(
@@ -486,11 +443,7 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public void massiveDownloadByExaminationId(
-            @Parameter(description = "id of the examination", required = true) @Valid
-            @RequestParam(value = "examinationId", required = true) Long examinationId,
-            @Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
-            @RequestParam(value = "format", required = false, defaultValue = DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
+    public void massiveDownloadByExaminationId(Long examinationId, String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
         // STEP 0: Check data integrity
         if (examinationId == null) {
             throw new RestServiceException(
@@ -510,11 +463,7 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public void massiveDownloadByAcquisitionId(
-            @Parameter(description = "id of the acquisition", required = true) @Valid
-            @RequestParam(value = "acquisitionId", required = true) Long acquisitionId,
-            @Parameter(description = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
-            @RequestParam(value = "format", required = false, defaultValue = "dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
+    public void massiveDownloadByAcquisitionId(Long acquisitionId, String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
 
         // STEP 0: Check data integrity
         if (acquisitionId == null) {
@@ -534,8 +483,7 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public ResponseEntity<List<DatasetDownloadData>> getDownloadData(
-            @Parameter(description = "Input arguments", required = true) @Valid @RequestBody DatasetDownloadDataInput input) {
+    public ResponseEntity<List<DatasetDownloadData>> getDownloadData(DatasetDownloadDataInput input) {
         List<DatasetDownloadData> downloadDataList = datasetService.getDownloadDataByAcquisitionAndExaminationIds(input.getAcquisitionIds(), input.getExaminationIds());
         return new ResponseEntity<>(downloadDataList, HttpStatus.OK);
     }
@@ -586,15 +534,7 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public ResponseEntity<String> downloadStatistics(
-            @Parameter(description = "Study name including regular expression", required = false) @Valid
-            @RequestParam(value = "studyNameInRegExp", required = false) String studyNameInRegExp,
-            @Parameter(description = "Study name excluding regular expression", required = false) @Valid
-            @RequestParam(value = "studyNameOutRegExp", required = false) String studyNameOutRegExp,
-            @Parameter(description = "Subject name including regular expression", required = false) @Valid
-            @RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
-            @Parameter(description = "Subject name excluding regular expression", required = false) @Valid
-            @RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp) throws IOException {
+    public ResponseEntity<String> downloadStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws IOException {
 
         String params = "";
         if (studyNameInRegExp != null && !StringUtils.isEmpty(studyNameInRegExp)) params += "\nStudy to include : " + studyNameInRegExp;

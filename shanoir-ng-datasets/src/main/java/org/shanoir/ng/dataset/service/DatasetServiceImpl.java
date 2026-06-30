@@ -25,6 +25,8 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.mail.MessagingException;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -42,6 +44,7 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.datasetfile.DatasetFileRepository;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -55,8 +58,10 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -76,6 +81,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -145,6 +151,13 @@ public class DatasetServiceImpl implements DatasetService {
     @Autowired
     @Lazy
     private DatasetExpressionRepository deRepository;
+
+    @Autowired
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDAndSubjectNameHandler;
+
+    @Autowired
+    private SubjectService subjectService;
+
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -617,6 +630,26 @@ public class DatasetServiceImpl implements DatasetService {
             deleteNifti(dataset);
         }
         return CompletableFuture.completedFuture(null);
+    }
+
+    @Transactional(readOnly = true)
+    public String getDicomMetadataByDatasetId(Long datasetId) throws IOException, MessagingException {
+        final Dataset dataset = datasetService.findById(datasetId);
+        Optional<URL> firstWADOURL = DatasetFileUtils.getFirstDatasetFilePathURL(dataset,
+                DatasetExpressionFormat.DICOM);
+        if (firstWADOURL.isPresent()) {
+            String dicomJson = downloader.downloadDicomMetadataForURL(firstWADOURL.orElseThrow());
+            if (dataset.getSource() != null) {
+                Optional<Subject> subjectOpt = subjectService.findById(dataset.getSubjectId());
+                String subjectName = subjectOpt.get().getName();
+                JsonNode root = objectMapper.readTree(dicomJson);
+                studyInstanceUIDAndSubjectNameHandler.replacePatientInfo(root, subjectName);
+                dicomJson = objectMapper.writeValueAsString(root);
+            }
+            return dicomJson;
+        } else {
+            return null;
+        }
     }
 
     protected void fillMetadataFile(File metadataFile, List<Long> datasetIds, List<String> metadataKeys) throws Exception {
