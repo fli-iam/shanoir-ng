@@ -186,4 +186,11 @@ public interface DatasetService {
     Future<Void> deletePartitionOfNiftis(List<Long> partition, float total, ShanoirEvent event);
 
     String getDicomMetadataByDatasetId(Long datasetId) throws IOException, MessagingException;
+
+    /**
+     * Populate a list of datasets with their presence in PACS or not
+     *
+     * @param datasets a list of datasets
+     */
+    void populateInPacs(List<Dataset> datasets);
 }

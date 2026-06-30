@@ -22,6 +22,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
@@ -69,6 +70,9 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
     @Autowired
     private ExaminationService examinationService;
+
+    @Autowired
+    private DatasetService datasetService;
 
     public DatasetProcessingApiController() {
 
@@ -131,6 +135,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
         final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
         List<Dataset> inputDatasets = datasetProcessing.get().getInputDatasets();
+        datasetService.populateInPacs(inputDatasets);
         return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(inputDatasets), HttpStatus.OK);
     }
 
@@ -139,6 +144,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
         final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
         List<Dataset> outputDatasets = datasetProcessing.get().getOutputDatasets();
+        datasetService.populateInPacs(outputDatasets);
         return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(outputDatasets), HttpStatus.OK);
     }
 

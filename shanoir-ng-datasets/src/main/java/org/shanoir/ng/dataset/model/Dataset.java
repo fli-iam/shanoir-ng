@@ -210,6 +210,9 @@ public abstract class Dataset extends AbstractEntity {
     @Transient
     private String sopInstanceUID;
 
+    @Transient
+    private Boolean inPacs;
+
     public Dataset() {
     }
 
@@ -555,7 +558,14 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     public boolean getInPacs() {
-        return getDatasetExpressions() != null && getDatasetExpressions().size() > 0;
+        if (inPacs != null) {
+            return inPacs;
+        }
+        return datasetExpressions != null && !datasetExpressions.isEmpty();
+    }
+
+    public void setInPacs(Boolean inPacs) {
+        this.inPacs = inPacs;
     }
 
     public List<StudyTag> getTags() {

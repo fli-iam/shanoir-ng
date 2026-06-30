@@ -234,4 +234,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "JOIN dataset_acquisition acq ON acq.id = dataset.dataset_acquisition_id "
             + "WHERE acq.examination_id = ?1", nativeQuery = true)
     List<Long> findIdsByExaminationId(Long examinationId);
+
+    @Query("SELECT DISTINCT de.dataset.id FROM DatasetExpression de WHERE de.dataset.id IN :ids")
+    Set<Long> findDatasetIdsHavingExpressions(@Param("ids") List<Long> ids);
 }
