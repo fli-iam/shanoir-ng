@@ -77,17 +77,17 @@ public abstract class AbstractTest {
 
     private static final String PROFILE = "profile";
 
-    private static final String ADMIN_NAME = "admin.name";
+    private static final String ADMIN_NAME = "shanoir.client.admin.name";
 
-    private static final String ADMIN_PASSWORD = "admin.password";
+    private static final String ADMIN_PASSWORD = "shanoir.client.admin.password";
 
-    private static final String EXPERT_NAME = "expert.name";
+    private static final String EXPERT_NAME = "shanoir.client.expert.name";
 
-    private static final String EXPERT_PASSWORD = "expert.password";
+    private static final String EXPERT_PASSWORD = "shanoir.client.expert.password";
 
-    private static final String USER_NAME = "user.name";
+    private static final String USER_NAME = "shanoir.client.user.name";
 
-    private static final String USER_PASSWORD = "user.password";
+    private static final String USER_PASSWORD = "shanoir.client.user.password";
 
     private static final String IN_PROGRESS = "IN_PROGRESS";
 
