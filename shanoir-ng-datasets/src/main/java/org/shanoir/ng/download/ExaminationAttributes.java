@@ -29,6 +29,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.WADOURLHandler;
 import org.shanoir.ng.examination.model.Examination;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The parameterized type is the type for the uid keys
@@ -76,6 +77,7 @@ public class ExaminationAttributes<T> {
         acquisitionMap.get(acquisitionId).get().addDatasetAttributes(datasetId, attributes);
     }
 
+    @Transactional(readOnly = true)
     public void addDatasetAttributes(ExaminationAttributes<Long> examinationAttributes, Examination examination, Attributes singleImageAttributes) {
         String sopUID = singleImageAttributes.getString(Tag.SOPInstanceUID);
         if (sopUID != null && examination != null && examination.getDatasetAcquisitions() != null && examinationAttributes != null) {
