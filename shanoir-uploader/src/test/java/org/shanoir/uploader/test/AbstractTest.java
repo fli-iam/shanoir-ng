@@ -159,8 +159,8 @@ public abstract class AbstractTest {
      */
     private static ShanoirUploaderServiceClient buildAuthenticatedClient(
             String nameKey, String passwordKey, String roleLabel) {
-        String name = testProperties.getProperty(nameKey);
-        String password = testProperties.getProperty(passwordKey);
+        String name = resolveCredential(nameKey);
+        String password = resolveCredential(passwordKey);
         if (StringUtils.isBlank(name) || StringUtils.isBlank(password)) {
             LOG.warn("Credentials for {} not configured (keys: {}, {}). Client will be null.",
                     roleLabel, nameKey, passwordKey);
@@ -181,6 +181,36 @@ public abstract class AbstractTest {
             LOG.error("Exception while authenticating {}: {}", roleLabel, e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Resolves a credential value, giving priority to an environment variable
+     * over the corresponding entry in {@code test.properties}.
+     *
+     * The environment variable name is derived from the property key by
+     * upper-casing it and replacing every {@code '.'} with {@code '_'}. For
+     * example, the property key {@code "user.name"} maps to the environment
+     * variable {@code USER_NAME}, and {@code "user.password"} maps to
+     * {@code USER_PASSWORD}.
+     *
+     * This allows CI/CD pipelines or container deployments to inject
+     * credentials (e.g. from secrets) via environment variables, without
+     * requiring {@code test.properties} to be present or populated. When the
+     * environment variable is not set (or blank), the value falls back to
+     * {@code test.properties}.
+     *
+     * @param propertyKey the dotted property key (e.g. {@code "admin.password"})
+     * @return the resolved value, or {@code null}/blank if neither source has it
+     */
+    private static String resolveCredential(String propertyKey) {
+        String envVarName = propertyKey.toUpperCase().replace('.', '_');
+        String envValue = System.getenv(envVarName);
+        if (StringUtils.isNotBlank(envValue)) {
+            LOG.debug("Resolved credential for key '{}' from environment variable '{}'.",
+                    propertyKey, envVarName);
+            return envValue;
+        }
+        return testProperties.getProperty(propertyKey);
     }
 
     protected static void requireAdminClient() {
