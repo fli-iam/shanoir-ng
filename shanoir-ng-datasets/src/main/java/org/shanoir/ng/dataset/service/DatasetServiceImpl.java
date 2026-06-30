@@ -655,6 +655,7 @@ public class DatasetServiceImpl implements DatasetService {
         return metadataLine;
     }
 
+    @Transactional(readOnly = true)
     protected String getMetadataFromDicom(Dataset dataset) throws Exception {
         DatasetDownloadError result = new DatasetDownloadError();
         List<URL> pathURLs = new ArrayList<>();
