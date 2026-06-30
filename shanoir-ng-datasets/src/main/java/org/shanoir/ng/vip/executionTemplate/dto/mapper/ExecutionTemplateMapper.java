@@ -24,7 +24,6 @@ import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplate;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-@DecoratedWith(ExecutionTemplateDecorator.class)
 public interface ExecutionTemplateMapper {
 
     @Named("ExecutionTemplateToDTO")
