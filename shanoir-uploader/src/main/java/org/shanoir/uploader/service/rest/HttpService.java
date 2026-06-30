@@ -64,7 +64,7 @@ import org.shanoir.uploader.ShUpOnloadConfig;
  * the constructor, that "solves" the certificate issue for testing/development
  * purpose only.
  *
- * The SocketFactory is only used in case of "https://shanoir-ng-nginx" is
+ * The SocketFactory is only used in case of "https://localhost" is
  * present in the URL.
  *
  * @author mkain
@@ -76,7 +76,7 @@ public class HttpService {
 
     private static ServiceConfiguration serviceConfiguration = ServiceConfiguration.getInstance();
 
-    private static final String DEV_LOCAL = "https://shanoir-ng-nginx";
+    private static final String DEV_LOCAL = "https://localhost";
 
     private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 
@@ -88,9 +88,20 @@ public class HttpService {
 
     private HttpClientContext context;
 
-    public HttpService(String serverURL) {
+    private ShanoirUploaderServiceClient client;
+
+    public HttpService(ShanoirUploaderServiceClient client) {
         try {
-            httpClient = buildHttpClient(serverURL);
+            this.client = client;
+            httpClient = buildHttpClient(this.client.getServerURL());
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    public HttpService(String url) {
+        try {
+            httpClient = buildHttpClient(url);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
@@ -107,7 +118,7 @@ public class HttpService {
     public CloseableHttpResponse get(String url) throws Exception {
         try {
             HttpGet httpGet = new HttpGet(url);
-            httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpGet.addHeader("Authorization", "Bearer " + client.getAccessToken());
             CloseableHttpResponse response = httpClient.execute(httpGet, context);
             return response;
         } catch (Exception e) {
@@ -119,7 +130,7 @@ public class HttpService {
     public CloseableHttpResponse getDicom(String url) throws Exception {
         try {
             HttpGet httpGet = new HttpGet(url);
-            httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpGet.addHeader("Authorization", "Bearer " + client.getAccessToken());
             CloseableHttpResponse response = httpClient.execute(httpGet, context);
             return response;
         } catch (Exception e) {
@@ -134,7 +145,7 @@ public class HttpService {
             if (isLoginPost) {
                 httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
             } else {
-                httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+                httpPost.addHeader("Authorization", "Bearer " + client.getAccessToken());
             }
             StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
             httpPost.setEntity(requestEntity);
@@ -149,7 +160,7 @@ public class HttpService {
     public CloseableHttpResponse postFile(String url, String tempDirId, File file) throws Exception {
         try {
             HttpPost httpPost = new HttpPost(url + "/" + tempDirId);
-            httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpPost.addHeader("Authorization", "Bearer " + client.getAccessToken());
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
             HttpEntity entity = builder.build();
@@ -165,7 +176,7 @@ public class HttpService {
     public CloseableHttpResponse postFile(String url, File file) throws Exception {
         try {
             HttpPost httpPost = new HttpPost(url);
-            httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpPost.addHeader("Authorization", "Bearer " + client.getAccessToken());
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
             HttpEntity entity = builder.build();
@@ -184,7 +195,7 @@ public class HttpService {
             multipartEntityBuilder.addBinaryBody("dcm_upload", file, ContentType.create(CONTENT_TYPE_DICOM), "filename");
             HttpEntity entity = multipartEntityBuilder.build();
             HttpPost httpPost = new HttpPost(url);
-            httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpPost.addHeader("Authorization", "Bearer " + client.getAccessToken());
             httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART + ";type=" + CONTENT_TYPE_DICOM + ";boundary=" + BOUNDARY);
             httpPost.setEntity(entity);
             CloseableHttpResponse response = httpClient.execute(httpPost, context);
@@ -198,7 +209,7 @@ public class HttpService {
     public CloseableHttpResponse put(String url) throws Exception {
         try {
             HttpPut httpPut = new HttpPut(url);
-            httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpPut.addHeader("Authorization", "Bearer " + client.getAccessToken());
             CloseableHttpResponse response = httpClient.execute(httpPut);
             return response;
         } catch (Exception e) {
@@ -210,7 +221,7 @@ public class HttpService {
     public CloseableHttpResponse put(String url, String json) throws Exception {
         try {
             HttpPut httpPut = new HttpPut(url);
-            httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpPut.addHeader("Authorization", "Bearer " + client.getAccessToken());
             StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
             httpPut.setEntity(requestEntity);
             CloseableHttpResponse response = httpClient.execute(httpPut, context);
@@ -224,7 +235,7 @@ public class HttpService {
     public CloseableHttpResponse delete(String url) throws Exception {
         try {
             HttpDelete httpDelete = new HttpDelete(url);
-            httpDelete.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpDelete.addHeader("Authorization", "Bearer " + client.getAccessToken());
             CloseableHttpResponse response = httpClient.execute(httpDelete, context);
             return response;
         } catch (Exception e) {

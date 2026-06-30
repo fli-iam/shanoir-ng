@@ -69,7 +69,7 @@ import jakarta.mail.util.ByteArrayDataSource;
 
 /**
  *
- * Service layer for REST services of sh-ng.
+ * Service layer for REST services of Shanoir.
  *
  * @author mkain
  *
@@ -221,6 +221,8 @@ public class ShanoirUploaderServiceClient {
 
     private Long userId;
 
+    private String accessToken;
+
     public void configure() {
         apiResponseMessages = new HashMap<Integer, String>();
         apiResponseMessages.put(200, "ok");
@@ -296,7 +298,7 @@ public class ShanoirUploaderServiceClient {
         this.serviceURLSubjectsByStudyId = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_BY_STUDY_ID);
 
-        this.httpService = new HttpService(this.serverURL);
+        this.httpService = new HttpService(this);
 
         LOG.debug("ShanoirUploaderService successfully initialized.");
     }
@@ -409,11 +411,11 @@ public class ShanoirUploaderServiceClient {
                         JSONObject responseEntityJson = new JSONObject(responseEntityString);
                         String newAccessToken = responseEntityJson.getString("access_token");
                         if (newAccessToken != null) {
-                            ShUpOnloadConfig.setTokenString(newAccessToken);
+                            this.setAccessToken(newAccessToken);
                         } else {
                             LOG.error("ERROR: with access token refresh.");
                         }
-                        LOG.debug("Access token has been refreshed.");
+                        LOG.debug("Access token has been refreshed for user: " + userId);
                     } else {
                         LOG.error("ERROR: Access token could NOT be refreshed: HttpStatus-" + statusCode);
                     }
@@ -490,7 +492,7 @@ public class ShanoirUploaderServiceClient {
                     this.serviceURLStudyUser + studyId, json, false)) {
                 int code = response.getCode();
                 if (code == HttpStatus.SC_OK) {
-                    return Util.getMappedObject(response, org.shanoir.uploader.model.rest.StudyUser.class);
+                    return Util.getMappedObject(response, StudyUser.class);
                 } else {
                     LOG.error("Error in addStudyUser: studyId={}, userId={} (status code: {}, message: {})",
                             studyId, studyUser.getUserId(), code,
@@ -1304,6 +1306,22 @@ public class ShanoirUploaderServiceClient {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getServerURL() {
+        return serverURL;
+    }
+
+    public void setServerURL(String serverURL) {
+        this.serverURL = serverURL;
     }
 
 }

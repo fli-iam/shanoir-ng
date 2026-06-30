@@ -169,13 +169,12 @@ public abstract class AbstractTest {
         ShanoirUploaderServiceClient client = new ShanoirUploaderServiceClient();
         client.configure();
         try {
-            String token = client.loginWithKeycloakForToken(name, password);
-            if (token == null) {
+            String accessToken = client.loginWithKeycloakForToken(name, password);
+            if (accessToken == null) {
                 LOG.error("Login failed for {} (user={}). Server down or wrong credentials.", roleLabel, name);
                 return null;
             }
-            // @todo change here
-            ShUpOnloadConfig.setTokenString(token);
+            client.setAccessToken(accessToken);
             LOG.info("Authenticated {} as user {}, {}.", roleLabel, name, client.getUserId());
             return client;
         } catch (Exception e) {

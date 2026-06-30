@@ -123,7 +123,7 @@ public class StudyDraftTest extends AbstractTest {
         } catch (Exception e) {
             // Any exception (e.g. HTTP 422 / 403 surfaced as RuntimeException)
             // also counts as the expected failure
-            LOG.info("Step 2 – addStudyUser threw (expected): {}", e.getMessage());
+            LOG.info("Step 2 - addStudyUser threw (expected): {}", e.getMessage());
             addFailed = true;
         }
         Assertions.assertTrue(addFailed,
@@ -229,10 +229,11 @@ public class StudyDraftTest extends AbstractTest {
         StudyUser su = new StudyUser();
         su.setStudyId(studyId);
         su.setUserId(userId);
+        su.setUserName("dummy-user");
         su.setStudyUserRights(Arrays.asList(
-                StudyUserRight.CAN_SEE_ALL,
-                StudyUserRight.CAN_DOWNLOAD,
-                StudyUserRight.CAN_IMPORT));
+                    StudyUserRight.CAN_SEE_ALL,
+                    StudyUserRight.CAN_DOWNLOAD,
+                    StudyUserRight.CAN_IMPORT));
         return su;
     }
 

@@ -1,5 +1,5 @@
 {
-  "auth-server-url": "https://shanoir-ng-nginx/auth",
+  "auth-server-url": "https://localhost/auth",
   "realm": "shanoir-ng",
   "resource": "shanoir-uploader",
   "ssl-required": "external",

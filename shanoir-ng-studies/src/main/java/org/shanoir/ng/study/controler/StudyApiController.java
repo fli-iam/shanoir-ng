@@ -247,7 +247,7 @@ public class StudyApiController implements StudyApi {
     }
 
     private void addCurrentUserAsStudyUserIfEmptyStudyUsers(final Study study) {
-        if (study.getStudyUserList() == null) {
+        if (study.getStudyUserList() == null || study.getStudyUserList().isEmpty()) {
             List<StudyUser> studyUserList = new ArrayList<StudyUser>();
             StudyUser studyUser = new StudyUser();
             studyUser.setStudy(study);
@@ -507,6 +507,10 @@ public class StudyApiController implements StudyApi {
         Study study = studyService.findById(studyId);
         if (study == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        // We do not allow adding members to draft studies
+        if (study.getIsDraft()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         // Guard: the path variable is authoritative – ignore whatever the caller
         // may have put in the body to prevent study-id spoofing.
