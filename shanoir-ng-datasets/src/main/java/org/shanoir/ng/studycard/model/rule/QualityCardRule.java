@@ -123,14 +123,14 @@ public class QualityCardRule extends AbstractEntity {
                 result.addUpdatedDatasetAcquisition(setTagToDatasetAcquisition(datasetAcquisition));
             }
             // if conditions not fulfilled for a VALID tag
-            // or if conditions fulfilled for a ERROR or WARNING tag
+            // or if conditions fulfilled for an ERROR or WARNING tag
             // then add an entry to the report
             if ((conditionResult.isFulfilled() && !getQualityTag().equals(QualityTag.VALID))
                     || (!conditionResult.isFulfilled() && getQualityTag().equals(QualityTag.VALID))) {
                 QualityCardResultEntry resultEntry = initResult(datasetAcquisition);
                 resultEntry.setFailedValid(QualityTag.VALID.equals(getQualityTag()) && !conditionResult.isFulfilled());
                 resultEntry.setTagSet(getQualityTag());
-                // Here we use the original dataset name metadata (= seriesDescription) or the dataset acquisition ID to clearly identify the dataset acquisition concerned by the quality card result message.
+                // Here we use the seriesDescription attribute or the dataset acquisition ID to clearly identify the dataset acquisition concerned by the quality card result message.
                 String seriesDescription = acquisitionDicomAttributes.getFirstDatasetAttributes() != null ? acquisitionDicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesDescription) : datasetAcquisition.getId().toString();
                 if (conditionResult.isFulfilled()) {
                     resultEntry.setMessage("Tag " + getQualityTag().name() + " was set on acquisition " + seriesDescription
