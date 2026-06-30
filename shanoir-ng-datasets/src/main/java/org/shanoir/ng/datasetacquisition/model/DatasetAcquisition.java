@@ -127,8 +127,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
     /** List of extra files directly attached to the dataset acquisition. */
     @ElementCollection
-    @CollectionTable(name = "acquisition_extra_data_file_path",
-            joinColumns = @JoinColumn(name = "dataset_acquisition_id"))
+    @CollectionTable(name = "acquisition_extra_data_file_path", joinColumns = @JoinColumn(name = "dataset_acquisition_id"))
     @Column(name = "path")
     private List<String> extraDataFilePathList;
 
