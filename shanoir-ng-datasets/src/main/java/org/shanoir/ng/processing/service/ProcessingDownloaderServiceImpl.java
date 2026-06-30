@@ -54,6 +54,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.test.context.transaction.AfterTransaction;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImpl implements ProcessingDownloaderService {    /** Number of downloadable datasets. */
@@ -67,6 +69,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     @PersistenceContext
     private EntityManager em;
 
+    @Transactional(readOnly = true)
     public void massiveDownload(List<DatasetProcessing> processingList, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         manageResultOnly(processingList, resultOnly);
 
