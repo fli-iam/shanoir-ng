@@ -32,6 +32,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
@@ -273,7 +274,7 @@ public class SolrServiceImpl implements SolrService {
                     || order.getProperty().equals("datasetType") || order.getProperty().equals("examinationComment")
                     || order.getProperty().equals("tags") || order.getProperty().equals("subjectType") || order.getProperty().equals("acquisitionEquipmentName")
                     || order.getProperty().equals("processed") || order.getProperty().equals("sortingIndex")
-                    || order.getProperty().equals("dataReuseAgreement")
+                    || order.getProperty().equals("dataReuseAgreement") || order.getProperty().equals("qualityTag")
             ) {
                 pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
                         order.getDirection(), order.getProperty());
@@ -387,6 +388,7 @@ public class SolrServiceImpl implements SolrService {
                 shanoirMetadata.getSubjectName(), SubjectType.getType(shanoirMetadata.getSubjectType()) != null ? SubjectType.getType(shanoirMetadata.getSubjectType()).name() : null, shanoirMetadata.getSubjectId(),
                 shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
                 shanoirMetadata.getCenterId(), shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength(),
-                shanoirMetadata.isProcessed(), DateTimeUtils.localDateToDate(shanoirMetadata.getImportDate()), shanoirMetadata.getUsername(), shanoirMetadata.getSortingIndex(), shanoirMetadata.getDataReuseAgreement());
+                shanoirMetadata.isProcessed(), DateTimeUtils.localDateToDate(shanoirMetadata.getImportDate()), shanoirMetadata.getUsername(), shanoirMetadata.getSortingIndex(), shanoirMetadata.getDataReuseAgreement(),
+                QualityTag.get(shanoirMetadata.getQualityTag()) != null ? QualityTag.get(shanoirMetadata.getQualityTag()).name() : null);
     }
 }

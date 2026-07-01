@@ -51,19 +51,19 @@ import jakarta.persistence.SqlResultSetMapping;
                 @ColumnResult(name = "processed", type = Boolean.class), @ColumnResult(name = "importDate", type = LocalDate.class),
                 @ColumnResult(name = "username", type = String.class), @ColumnResult(name = "sortingIndex", type = Integer.class),
                 @ColumnResult(name = "dataReuseAgreement", type = Boolean.class),
-                @ColumnResult(name="qualityTag", type = String.class)
+                @ColumnResult(name = "qualityTag", type = Integer.class)
         })
 })
 
 public class ShanoirMetadata {
 
     @Id
-    private    Long datasetId;
+    private Long datasetId;
 
-    private    String datasetName;
+    private String datasetName;
 
     // DatasetModalityType: MR, CT, PET etc..
-    private    Integer datasetType;
+    private Integer datasetType;
 
     // T1, T2, Diff, etc..
     private Integer datasetNature;
@@ -111,14 +111,15 @@ public class ShanoirMetadata {
 
     private String username;
 
-    private String qualityTag;
+    // VALID, WARNING, ERROR
+    private Integer qualityTag;
 
     public ShanoirMetadata() { }
 
     public ShanoirMetadata(Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
                             LocalDate datasetCreationDate, Long examinationId, String examinationComment, LocalDate examinationDate, String acquisitionEquipmentName,
                             String subjectName, Integer subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
-                            Double pixelBandwidth, Double magneticFieldStrength, boolean processed, LocalDate importDate, String username, Integer sortingIndex, Boolean dataReuseAgreement, String qualityTag) {
+                            Double pixelBandwidth, Double magneticFieldStrength, boolean processed, LocalDate importDate, String username, Integer sortingIndex, Boolean dataReuseAgreement, Integer qualityTag) {
         this.datasetId = datasetId;
         this.datasetName = datasetName;
         this.datasetType = datasetType;
@@ -420,11 +421,11 @@ public class ShanoirMetadata {
         this.dataReuseAgreement = dataReuseAgreement;
     }
 
-    public String getQualityTag() {
+    public Integer getQualityTag() {
         return qualityTag;
     }
 
-    public void setQualityTag(String qualityTag) {
+    public void setQualityTag(Integer qualityTag) {
         this.qualityTag = qualityTag;
     }
 }
