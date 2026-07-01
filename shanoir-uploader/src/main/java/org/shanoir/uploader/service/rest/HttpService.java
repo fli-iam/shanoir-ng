@@ -118,7 +118,9 @@ public class HttpService {
     public CloseableHttpResponse get(String url) throws Exception {
         try {
             HttpGet httpGet = new HttpGet(url);
-            httpGet.addHeader("Authorization", "Bearer " + client.getAccessToken());
+            if (client != null) {
+                httpGet.addHeader("Authorization", "Bearer " + client.getAccessToken());
+            }
             CloseableHttpResponse response = httpClient.execute(httpGet, context);
             return response;
         } catch (Exception e) {
