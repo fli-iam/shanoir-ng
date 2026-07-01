@@ -9,9 +9,9 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.action.FindDicomActionListener;
 import org.shanoir.uploader.action.event.DicomClientReadyEvent;
 import org.shanoir.uploader.dicom.DicomServerClient;
-import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.dto.ConfigDTO;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
@@ -100,23 +100,9 @@ public class DicomApiController implements ApplicationListener<DicomClientReadyE
 
     @PutMapping("/configuration")
     public void updateDicomConfiguration(@RequestBody ConfigDTO config) {
-        ShUpConfig.dicomServerProperties.setProperty("dicom.server.host", config.getDistantDicomServer().getHost());
-        ShUpConfig.dicomServerProperties.setProperty("dicom.server.port", String.valueOf(config.getDistantDicomServer().getPort()));
-        ShUpConfig.dicomServerProperties.setProperty("dicom.server.aet.called", config.getDistantDicomServer().getAet());
-        ShUpConfig.dicomServerProperties.setProperty("local.dicom.server.host", config.getLocalDicomServer().getHost());
-        ShUpConfig.dicomServerProperties.setProperty("local.dicom.server.port", String.valueOf(config.getLocalDicomServer().getPort()));
-        ShUpConfig.dicomServerProperties.setProperty("local.dicom.server.aet.calling", config.getLocalDicomServer().getAet());
-
-        Properties props = ShUpConfig.dicomServerProperties;
-        props.setProperty("dicom.server.host", config.getDistantDicomServer().getHost());
-        props.setProperty("dicom.server.port", String.valueOf(config.getDistantDicomServer().getPort()));
-        props.setProperty("dicom.server.aet.called", config.getDistantDicomServer().getAet());
-        props.setProperty("local.dicom.server.host", config.getLocalDicomServer().getHost());
-        props.setProperty("local.dicom.server.port", String.valueOf(config.getLocalDicomServer().getPort()));
-        props.setProperty("local.dicom.server.aet.calling", config.getLocalDicomServer().getAet());
-
+        setDicomProperties(ShUpConfig.dicomServerProperties, config);
         try (FileOutputStream fos = new FileOutputStream(ShUpConfig.shanoirUploaderFolder + File.separator + ShUpConfig.DICOM_SERVER_PROPERTIES)) {
-            props.store(fos, "Updated by user");
+            ShUpConfig.dicomServerProperties.store(fos, "Updated by user");
             logger.info("Dicom server properties updated by user");
         } catch (Exception e) {
             logger.error("Error updating Dicom configuration", e);
@@ -128,41 +114,34 @@ public class DicomApiController implements ApplicationListener<DicomClientReadyE
         logger.info("Querying Dicom server with parameters: {}", queryParameters);
 
         List<Patient> patients = getClient().queryDicomServer(Objects.equals(queryParameters.get("studyRootQuery"), "true"), queryParameters.get("modality"), queryParameters.get("patientName"), queryParameters.get("patientID"), queryParameters.get("studyDescription"), queryParameters.get("patientBirthDate"), queryParameters.get("studyDate"));
-
         Media media = new Media();
-
         logger.info(patients.toString());
 
-        // content of function fillMediaWithPatients(Media media, final List<Patient> patients)
-        if (patients != null) {
-            for (Iterator patientsIt = patients.iterator(); patientsIt.hasNext();) {
-                Patient patient = (Patient) patientsIt.next();
-                final PatientTreeNode patientTreeNode = media.initChildTreeNode(patient);
-                logger.info("Patient info read: " + patient.toString());
-                // add patients
-                media.addTreeNode(patientTreeNode);
-                List<Study> studies = patient.getStudies();
-                for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
-                    Study study = (Study) studiesIt.next();
-                    final StudyTreeNode studyTreeNode = patientTreeNode.initChildTreeNode(study);
-                    // add studies
-                    patientTreeNode.addTreeNode(studyTreeNode);
-                    List<Serie> series = study.getSeries();
-                    for (Iterator seriesIt = series.iterator(); seriesIt.hasNext();) {
-                        Serie serie = (Serie) seriesIt.next();
-                        if (!serie.isErroneous() && !serie.isIgnored()) {
-                            final SerieTreeNode serieTreeNode = studyTreeNode.initChildTreeNode(serie);
-                            // add series
-                            studyTreeNode.addTreeNode(serieTreeNode);
-                        }
-                    }
-                }
-            }
-            logger.info("Patients read from DICOM server: " + media.getTreeNodes().toString());
-            logger.info("Media : " + media.getData().toString());
-        }
+        FindDicomActionListener.fillMediaWithPatients(media, patients);
+        logger.info("Patients read from DICOM server: " + media.getTreeNodes().toString());
+        logger.info("Media : " + media.getData().toString());
 
         return media.getData();
+    }
+
+    @PostMapping("/retrieve")
+    public void retrieveDicomSeries(@RequestBody HashMap<String, String> retrieveParameters) throws Exception {
+        logger.info("Retrieving Dicom series with parameters: {}", retrieveParameters);
+
+        String studyInstanceUID = retrieveParameters.get("studyInstanceUID");
+        String seriesInstanceUID = retrieveParameters.get("seriesInstanceUID");
+        String destinationAET = retrieveParameters.get("destinationAET");
+        // final JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, List<Serie> selectedSeries, final File uploadFolder
+        getClient().retrieveDicomFiles(studyInstanceUID, seriesInstanceUID, destinationAET);
+    }
+
+    private void setDicomProperties(Properties dicomServerProperties, ConfigDTO config) {
+        dicomServerProperties.setProperty("dicom.server.host", config.getDistantDicomServer().getHost());
+        dicomServerProperties.setProperty("dicom.server.port", String.valueOf(config.getDistantDicomServer().getPort()));
+        dicomServerProperties.setProperty("dicom.server.aet.called", config.getDistantDicomServer().getAet());
+        dicomServerProperties.setProperty("local.dicom.server.host", config.getLocalDicomServer().getHost());
+        dicomServerProperties.setProperty("local.dicom.server.port", String.valueOf(config.getLocalDicomServer().getPort()));
+        dicomServerProperties.setProperty("local.dicom.server.aet.calling", config.getLocalDicomServer().getAet());
     }
 
 }

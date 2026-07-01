@@ -231,7 +231,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
      * @param selectedRootDir
      * @param dicomDir
      */
-    private void fillMediaWithPatients(Media media, final List<Patient> patients) {
+    public static void fillMediaWithPatients(Media media, final List<Patient> patients) {
         if (patients != null) {
             for (Iterator patientsIt = patients.iterator(); patientsIt.hasNext();) {
                 Patient patient = (Patient) patientsIt.next();
