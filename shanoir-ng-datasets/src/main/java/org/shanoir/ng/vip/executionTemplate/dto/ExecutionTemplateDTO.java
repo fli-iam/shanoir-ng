@@ -32,6 +32,7 @@ public class ExecutionTemplateDTO extends HalEntity {
     private List<ExecutionTemplateFilterDTO> filters;
     private int priority;
     private String filterCombination;
+    private String offlineToken;
 
     public String getFilterCombination() {
         return filterCombination;
@@ -39,6 +40,14 @@ public class ExecutionTemplateDTO extends HalEntity {
 
     public void setFilterCombination(String filterCombination) {
         this.filterCombination = filterCombination;
+    }
+
+    public String getOfflineToken() {
+        return offlineToken;
+    }
+
+    public void setOfflineToken(String offlineToken) {
+        this.offlineToken = offlineToken;
     }
 
     public int getPriority() {

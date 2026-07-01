@@ -18,7 +18,7 @@ import { Pipeline } from "../models/pipeline"
 import { Option, SelectBoxComponent } from "../../shared/select/select.component"
 import { DatasetProcessingType } from "../../enum/dataset-processing-type.enum"
 
-import {ExecutionTemplateService} from "./execution-template.service"
+import { ExecutionTemplateService } from "./execution-template.service"
 import { ExecutionTemplateFilterListComponent } from './filter/execution-template-filter-list.component'
 
 @Component({
@@ -27,7 +27,7 @@ import { ExecutionTemplateFilterListComponent } from './filter/execution-templat
     styleUrls: ['./execution-template.component.css'],
     imports: [
         CommonModule,
-        ReactiveFormsModule, 
+        ReactiveFormsModule,
         FormFooterComponent,
         SelectBoxComponent,
         TooltipComponent,
@@ -137,11 +137,11 @@ export class ExecutionTemplateComponent extends EntityComponent<ExecutionTemplat
         return Promise.resolve()
     }
 
-    save(): Promise<ExecutionTemplate> {
+    async save(): Promise<ExecutionTemplate> {
         this.templateService.checkOneDatasetGroup(this)
         this.templateService.cleanParameters(this)
         this.templateService.shapeParameterEntities(this)
-        this.templateService.updateEntityOnSave(this)
+        await this.templateService.updateEntityOnSave(this)
         super.save()
         return Promise.resolve(this.entity)
     }
