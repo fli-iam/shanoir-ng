@@ -40,4 +40,5 @@ export abstract class DatasetAcquisition extends Entity {
     @Field() source: number;
     @Field() acquisitionStartTime: Date;
     @Field() qualityTag: QualityTag; // set in QualityCardResultEntry.java
+    @Field() extraDataFilePathList: string[] = [];
 }

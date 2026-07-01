@@ -112,6 +112,7 @@ export class DatasetAcquisitionDTOService {
         entity.importDate = dto.importDate;
         entity.username = dto.username;
         entity.qualityTag = dto.qualityTag;
+        entity.extraDataFilePathList = dto.extraDataFilePathList;
         if (dto.acquisitionEquipmentId) {
             entity.acquisitionEquipment = new AcquisitionEquipment();
             entity.acquisitionEquipment.id = dto.acquisitionEquipmentId;
@@ -167,6 +168,7 @@ export class DatasetAcquisitionDTO {
         this.source = dsAcq.source;
         this.copies = dsAcq.copies;
         this.qualityTag = dsAcq.qualityTag;
+        this.extraDataFilePathList = dsAcq.extraDataFilePathList;
     }
 
     id: number;
@@ -183,6 +185,7 @@ export class DatasetAcquisitionDTO {
     copies: number[];
     source: number;
     qualityTag: QualityTag;
+    extraDataFilePathList: string[] = [];
 }
 
 export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
@@ -211,6 +214,7 @@ export class ExaminationDatasetAcquisitionDTO {
     type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS';
     datasets: any;
     qualityTag: QualityTag;
+    extraDataFilePathList: string[];
 }
 
 export class DatasetAcquisitionDatasetsDTO extends DatasetAcquisitionDTO {

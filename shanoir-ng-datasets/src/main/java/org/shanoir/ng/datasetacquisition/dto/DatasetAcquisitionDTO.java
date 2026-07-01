@@ -55,6 +55,8 @@ public class DatasetAcquisitionDTO {
     private LocalDateTime acquisitionStartTime;
 
     private QualityTag qualityTag;
+  
+    private List<String> extraDataFilePathList;
 
     public Long getId() {
         return id;
@@ -182,5 +184,13 @@ public class DatasetAcquisitionDTO {
 
     public void setQualityTag(QualityTag qualityTag) {
         this.qualityTag = qualityTag;
+    }
+  
+    public List<String> getExtraDataFilePathList() {
+        return extraDataFilePathList;
+    }
+
+    public void setExtraDataFilePathList(List<String> extraDataFilePathList) {
+        this.extraDataFilePathList = extraDataFilePathList;
     }
 }

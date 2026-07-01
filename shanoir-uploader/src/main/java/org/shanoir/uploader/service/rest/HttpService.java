@@ -64,7 +64,7 @@ import org.shanoir.uploader.ShUpOnloadConfig;
  * the constructor, that "solves" the certificate issue for testing/development
  * purpose only.
  *
- * The SocketFactory is only used in case of "https://shanoir-ng-nginx" is
+ * The SocketFactory is only used in case of "https://localhost" is
  * present in the URL.
  *
  * @author mkain
@@ -76,7 +76,7 @@ public class HttpService {
 
     private static ServiceConfiguration serviceConfiguration = ServiceConfiguration.getInstance();
 
-    private static final String DEV_LOCAL = "https://shanoir-ng-nginx";
+    private static final String DEV_LOCAL = "https://localhost";
 
     private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 
@@ -88,9 +88,20 @@ public class HttpService {
 
     private HttpClientContext context;
 
-    public HttpService(String serverURL) {
+    private ShanoirUploaderServiceClient client;
+
+    public HttpService(ShanoirUploaderServiceClient client) {
         try {
-            httpClient = buildHttpClient(serverURL);
+            this.client = client;
+            httpClient = buildHttpClient(this.client.getServerURL());
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    public HttpService(String url) {
+        try {
+            httpClient = buildHttpClient(url);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
@@ -107,7 +118,9 @@ public class HttpService {
     public CloseableHttpResponse get(String url) throws Exception {
         try {
             HttpGet httpGet = new HttpGet(url);
-            httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            if (client != null) {
+                httpGet.addHeader("Authorization", "Bearer " + client.getAccessToken());
+            }
             CloseableHttpResponse response = httpClient.execute(httpGet, context);
             return response;
         } catch (Exception e) {
@@ -119,7 +132,7 @@ public class HttpService {
     public CloseableHttpResponse getDicom(String url) throws Exception {
         try {
             HttpGet httpGet = new HttpGet(url);
-            httpGet.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpGet.addHeader("Authorization", "Bearer " + client.getAccessToken());
             CloseableHttpResponse response = httpClient.execute(httpGet, context);
             return response;
         } catch (Exception e) {
@@ -134,14 +147,14 @@ public class HttpService {
             if (isLoginPost) {
                 httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
             } else {
-                httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+                httpPost.addHeader("Authorization", "Bearer " + client.getAccessToken());
             }
             StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
             httpPost.setEntity(requestEntity);
             CloseableHttpResponse response = httpClient.execute(httpPost, context);
             return response;
         } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error(e.getMessage());
             throw e;
         }
     }
@@ -149,7 +162,7 @@ public class HttpService {
     public CloseableHttpResponse postFile(String url, String tempDirId, File file) throws Exception {
         try {
             HttpPost httpPost = new HttpPost(url + "/" + tempDirId);
-            httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpPost.addHeader("Authorization", "Bearer " + client.getAccessToken());
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
             HttpEntity entity = builder.build();
@@ -165,7 +178,7 @@ public class HttpService {
     public CloseableHttpResponse postFile(String url, File file) throws Exception {
         try {
             HttpPost httpPost = new HttpPost(url);
-            httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpPost.addHeader("Authorization", "Bearer " + client.getAccessToken());
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
             builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
             HttpEntity entity = builder.build();
@@ -184,7 +197,7 @@ public class HttpService {
             multipartEntityBuilder.addBinaryBody("dcm_upload", file, ContentType.create(CONTENT_TYPE_DICOM), "filename");
             HttpEntity entity = multipartEntityBuilder.build();
             HttpPost httpPost = new HttpPost(url);
-            httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpPost.addHeader("Authorization", "Bearer " + client.getAccessToken());
             httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART + ";type=" + CONTENT_TYPE_DICOM + ";boundary=" + BOUNDARY);
             httpPost.setEntity(entity);
             CloseableHttpResponse response = httpClient.execute(httpPost, context);
@@ -195,10 +208,22 @@ public class HttpService {
         }
     }
 
+    public CloseableHttpResponse put(String url) throws Exception {
+        try {
+            HttpPut httpPut = new HttpPut(url);
+            httpPut.addHeader("Authorization", "Bearer " + client.getAccessToken());
+            CloseableHttpResponse response = httpClient.execute(httpPut);
+            return response;
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
     public CloseableHttpResponse put(String url, String json) throws Exception {
         try {
             HttpPut httpPut = new HttpPut(url);
-            httpPut.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            httpPut.addHeader("Authorization", "Bearer " + client.getAccessToken());
             StringEntity requestEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
             httpPut.setEntity(requestEntity);
             CloseableHttpResponse response = httpClient.execute(httpPut, context);
@@ -209,10 +234,10 @@ public class HttpService {
         }
     }
 
-    public CloseableHttpResponse delete(String string) throws Exception {
+    public CloseableHttpResponse delete(String url) throws Exception {
         try {
-            HttpDelete httpDelete = new HttpDelete(string);
-            httpDelete.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+            HttpDelete httpDelete = new HttpDelete(url);
+            httpDelete.addHeader("Authorization", "Bearer " + client.getAccessToken());
             CloseableHttpResponse response = httpClient.execute(httpDelete, context);
             return response;
         } catch (Exception e) {
@@ -233,7 +258,7 @@ public class HttpService {
                     return true;
                 }
             }).build();
-            LOG.info("buildHttpClient: sslContextDev build.");
+            LOG.debug("buildHttpClient: sslContextDev build.");
         }
         // In case of proxy: generate credentials provider with correct host
         HttpHost proxyHost = null;
@@ -249,10 +274,10 @@ public class HttpService {
                     credentialsProvider.setCredentials(new AuthScope(proxyHost),
                             new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
                                     serviceConfiguration.getProxyPassword().toCharArray()));
-                    LOG.info("buildHttpClient: credentialsProvider build.");
+                    LOG.debug("buildHttpClient: credentialsProvider build.");
                     createHttpClientContext(proxyHost, credentialsProvider);
                 }
-                LOG.info("buildHttpClient: proxyHost (host+port) build.");
+                LOG.debug("buildHttpClient: proxyHost (host+port) build.");
             // Only host is configured, so do not set port
             } else if (serviceConfiguration.getProxyHost() != null) {
                 proxyHost = new HttpHost(serviceConfiguration.getProxyHost());
@@ -262,10 +287,10 @@ public class HttpService {
                     credentialsProvider.setCredentials(new AuthScope(proxyHost),
                             new UsernamePasswordCredentials(serviceConfiguration.getProxyUser(),
                                     serviceConfiguration.getProxyPassword().toCharArray()));
-                    LOG.info("buildHttpClient: credentialsProvider build.");
+                    LOG.debug("buildHttpClient: credentialsProvider build.");
                     createHttpClientContext(proxyHost, credentialsProvider);
                 }
-                LOG.info("buildHttpClient: proxyHost (host) build.");
+                LOG.debug("buildHttpClient: proxyHost (host) build.");
             } else {
                 throw new Exception("Proxy enabled, but no host set or only port does not work.");
             }
@@ -287,7 +312,7 @@ public class HttpService {
         context.setCredentialsProvider(credentialsProvider);
         context.setAuthCache(authCache);
         this.context = context;
-        LOG.info("createHttpClientContext: context created and assigned.");
+        LOG.debug("createHttpClientContext: context created and assigned.");
     }
 
     /**
@@ -307,13 +332,13 @@ public class HttpService {
                     .setSslContext(sslContextDev)
                     .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
                     .build();
-            LOG.info("DEV SSLSocketFactory used.");
+            LOG.debug("DEV SSLSocketFactory used.");
         } else {
             sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
                     .setHostnameVerifier(new CustomHostnameVerifier())
                     .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
                     .build();
-            LOG.info("Standard SSLSocketFactory used with CustomHostnameVerifier.");
+            LOG.debug("Standard SSLSocketFactory used with CustomHostnameVerifier.");
         }
         final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
                     .setMaxConnTotal(500)
@@ -329,7 +354,7 @@ public class HttpService {
                     .setDefaultCredentialsProvider(credentialsProvider)
                     .setProxy(proxyHost)
                     .build();
-            LOG.info("CloseableHttpClient created with proxyHost: "
+            LOG.debug("CloseableHttpClient created with proxyHost: "
                     + proxyHost.getHostName() + ":" + proxyHost.getPort()
                     + " and credentialsProvider: " + credentialsProvider.toString() + ".");
             return httpClient;
@@ -342,7 +367,7 @@ public class HttpService {
                         .setRoutePlanner(routePlanner)
                         .setProxy(proxyHost)
                         .build();
-                LOG.info("CloseableHttpClient created with proxyHost: "
+                LOG.debug("CloseableHttpClient created with proxyHost: "
                         + proxyHost.getHostName() + ":" + proxyHost.getPort()
                         + " and without a credentialsProvider.");
                 return httpClient;
@@ -351,7 +376,7 @@ public class HttpService {
                         .setConnectionManager(connectionManager)
                         .setConnectionManagerShared(true)
                         .build();
-                LOG.info("CloseableHttpClient created without proxyHost"
+                LOG.debug("CloseableHttpClient created without proxyHost"
                         + " and without a credentialsProvider.");
                 return httpClient;
             }
