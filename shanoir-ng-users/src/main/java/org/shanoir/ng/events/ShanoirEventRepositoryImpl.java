@@ -132,9 +132,9 @@ public class ShanoirEventRepositoryImpl implements ShanoirEventRepositoryCustom 
     }
 
     public Long countByLastUpdateAfter(Date expiryDate) {
-        String queryStr = "select count(e) from ShanoirEvent as e where e.lastUpdate > ?1";
+        String queryStr = "select count(e.id) from ShanoirEvent as e where e.lastUpdate > :expiryDate";
         Query query = entityManager.createQuery(queryStr);
-        query.setParameter(1, expiryDate);
+        query.setParameter("expiryDate", expiryDate);
         return (Long) query.getSingleResult();
     }
 
