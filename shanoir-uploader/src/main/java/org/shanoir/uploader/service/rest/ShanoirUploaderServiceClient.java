@@ -220,6 +220,8 @@ public class ShanoirUploaderServiceClient {
 
     private Long userId;
 
+    private String userName;
+
     private String accessToken;
 
     public void configure() {
@@ -364,6 +366,12 @@ public class ShanoirUploaderServiceClient {
                                 } else {
                                     LOG.warn("Keycloak token does not contain '{}' claim.",
                                             KeycloakUtil.USER_ID_TOKEN_ATT);
+                                }
+                                if (payload.has(KeycloakUtil.PREFERRED_USERNAME)) {
+                                    this.userName = payload.getString(KeycloakUtil.PREFERRED_USERNAME);
+                                } else {
+                                    LOG.warn("Keycloak token does not contain '{}' claim.",
+                                            KeycloakUtil.PREFERRED_USERNAME);
                                 }
                             }
                         } catch (Exception e) {
@@ -984,7 +992,7 @@ public class ShanoirUploaderServiceClient {
                     StudyCard studyCardCreated = Util.getMappedObject(response, StudyCard.class);
                     return studyCardCreated;
                 } else {
-                    LOG.error("Error in createStudyCard: with study " + studyCard.getName()
+                    LOG.error("Error in createStudyCard: " + studyCard.getName()
                             + " (status code: " + code + ", message: "
                             + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
                 }
@@ -1305,6 +1313,14 @@ public class ShanoirUploaderServiceClient {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getAccessToken() {

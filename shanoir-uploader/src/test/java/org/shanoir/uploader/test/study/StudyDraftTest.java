@@ -14,20 +14,13 @@
 
 package org.shanoir.uploader.test.study;
 
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.UUID;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.uploader.model.rest.Study;
-import org.shanoir.uploader.model.rest.StudyExtraDetails;
 import org.shanoir.uploader.model.rest.StudyUser;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.test.AbstractTest;
@@ -72,9 +65,10 @@ public class StudyDraftTest extends AbstractTest {
     private static final Long NEW_MEMBER_USER_ID = 99_999L;
 
     @BeforeEach
-    void requireBothClients() {
+    void requireAllClients() {
         requireAdminClient();
         requireExpertClient();
+        requireUserClient();
     }
 
     /**
@@ -112,7 +106,7 @@ public class StudyDraftTest extends AbstractTest {
                 "Step 2 requires Step 1 to have run successfully.");
         LOG.info("Step 2 - Expert tries to add user {} to DRAFT study {}.",
                 NEW_MEMBER_USER_ID, createdStudy.getId());
-        StudyUser candidate = buildStudyUser(createdStudy.getId(), NEW_MEMBER_USER_ID);
+        StudyUser candidate = buildStudyUser(createdStudy.getId(), NEW_MEMBER_USER_ID, userClient.getUserName());
         boolean addFailed = false;
         try {
             StudyUser result = expertClient.addStudyUser(createdStudy.getId(), candidate);
@@ -166,7 +160,7 @@ public class StudyDraftTest extends AbstractTest {
                 "Step 4 requires the study to have been approved in Step 3.");
         LOG.info("Step 4 - Expert adds user {} to approved study {}.",
                 NEW_MEMBER_USER_ID, createdStudy.getId());
-        StudyUser candidate = buildStudyUser(createdStudy.getId(), NEW_MEMBER_USER_ID);
+        StudyUser candidate = buildStudyUser(createdStudy.getId(), NEW_MEMBER_USER_ID, userClient.getUserName());
         StudyUser created = null;
         try {
             created = expertClient.addStudyUser(createdStudy.getId(), candidate);
@@ -179,62 +173,6 @@ public class StudyDraftTest extends AbstractTest {
                 "The returned StudyUser must carry the id of the newly added user.");
         LOG.info("Step 4 passed - user {} successfully added to study {}.",
                 NEW_MEMBER_USER_ID, createdStudy.getId());
-    }
-
-    /**
-     * Builds a minimal valid {@link Study} payload suitable for a POST to the
-     * studies endpoint.  Mirrors the structure used in
-     * {@link AbstractTest#createStudyAndCenterAndStudyCard()} but deliberately
-     * omits the study-card (not needed for the approval flow under test).
-     */
-    private Study buildMinimalStudy() {
-        StudyExtraDetails extraDetails = new StudyExtraDetails();
-        extraDetails.setExpectedNbOfSubjects(5L);
-        extraDetails.setExpectedNbOfCenters(1L);
-        extraDetails.setSponsor("Test-Sponsor");
-        extraDetails.setPrincipalInvestigator("Test-Principal-Investigator");
-
-        Study study = new Study();
-        study.setExtraDetails(extraDetails);
-        study.setName("Study-Draft-Approval-" + UUID.randomUUID());
-        // isDraft will be overridden server-side for non-admin callers, but we
-        // set it explicitly to make the intention of this test clear.
-        study.setIsDraft(Boolean.FALSE);
-        study.setStudyStatus(IN_PROGRESS);
-        study.setStudyCardPolicy(Study.SC_MANDATORY);
-
-        Date today = new Date();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(today);
-        cal.add(Calendar.YEAR, 1);
-        study.setStartDate(today);
-        study.setEndDate(cal.getTime());
-
-        // StudyCenterList can be empty for the draft-approval scenario;
-        // the server will accept the study and assign it draft status.
-        study.setStudyCenterList(new java.util.ArrayList<>());
-
-        return study;
-    }
-
-    /**
-     * Builds a {@link StudyUser} candidate for the given study and user ids with
-     * a standard set of import/view rights.
-     *
-     * @param studyId the target study
-     * @param userId  the user to add
-     * @return a populated but not-yet-persisted {@link StudyUser}
-     */
-    private StudyUser buildStudyUser(Long studyId, Long userId) {
-        StudyUser su = new StudyUser();
-        su.setStudyId(studyId);
-        su.setUserId(userId);
-        su.setUserName("dummy-user");
-        su.setStudyUserRights(Arrays.asList(
-                    StudyUserRight.CAN_SEE_ALL,
-                    StudyUserRight.CAN_DOWNLOAD,
-                    StudyUserRight.CAN_IMPORT));
-        return su;
     }
 
 }

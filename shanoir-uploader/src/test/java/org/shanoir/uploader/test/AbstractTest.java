@@ -263,25 +263,7 @@ public abstract class AbstractTest {
     }
 
     public static Study createStudyAndCenterAndStudyCard() {
-        StudyExtraDetails studyExtraDetails = new StudyExtraDetails();
-        studyExtraDetails.setExpectedNbOfSubjects(5L);
-        studyExtraDetails.setExpectedNbOfCenters(5L);
-        studyExtraDetails.setSponsor("sponsor");
-        studyExtraDetails.setPrincipalInvestigator("principal investigator");
-
-        Study study = new Study();
-        study.setExtraDetails(studyExtraDetails);
-        study.setName("Study-Name-" + UUID.randomUUID());
-        study.setIsDraft(Boolean.FALSE);
-
-        Date today = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(today);
-        calendar.add(Calendar.YEAR, 1);
-        study.setStartDate(today);
-        study.setEndDate(calendar.getTime());
-        study.setStudyStatus(IN_PROGRESS);
-        study.setStudyCardPolicy(Study.SC_MANDATORY);
+        Study study = buildMinimalStudy();
 
         List<StudyCenter> studyCenterList = new ArrayList<>();
         StudyCenter studyCenter = new StudyCenter();
@@ -293,19 +275,24 @@ public abstract class AbstractTest {
 
         study = adminClient.createStudy(study);
         Assertions.assertNotNull(study);
+        LOG.info("New study {} ({}) created.", study.getName(), study.getId());
 
         StudyUser studyUser = new StudyUser();
         studyUser.setStudyId(study.getId());
         studyUser.setUserId(expertClient.getUserId());
+        studyUser.setUserName(expertClient.getUserName());
+        studyUser.setConfirmed(true);
         studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD,
                     StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE));
-        adminClient.addStudyUser(study.getId(), studyUser);
+        studyUser = adminClient.addStudyUser(study.getId(), studyUser);
+        Assertions.assertNotNull(studyUser);
+        LOG.info("StudyUser {} added to study: {}", studyUser.getUserName(), study.getName());
 
         AcquisitionEquipment createdEquipment = createEquipment(createdCenter);
         Assertions.assertNotNull(createdEquipment);
 
         StudyCard studyCard = new StudyCard();
-        studyCard.setName("Study-Card-Name-" + UUID.randomUUID());
+        studyCard.setName("Study-Card-" + UUID.randomUUID());
         studyCard.setAcquisitionEquipmentId(createdEquipment.getId());
         studyCard.setAcquisitionEquipment(createdEquipment);
         studyCard.setCenterId(createdCenter.getId());
@@ -316,6 +303,42 @@ public abstract class AbstractTest {
         List<StudyCard> studyCards = new ArrayList<>();
         studyCards.add(studyCard);
         study.setStudyCards(studyCards);
+        return study;
+    }
+
+    /**
+     * Builds a minimal valid {@link Study} payload suitable for a POST to the
+     * studies endpoint. Mirrors the structure used in
+     * {@link AbstractTest#createStudyAndCenterAndStudyCard()} but deliberately
+     * omits the study-card (not needed for the approval flow under test).
+     */
+    public static Study buildMinimalStudy() {
+        StudyExtraDetails extraDetails = new StudyExtraDetails();
+        extraDetails.setExpectedNbOfSubjects(5L);
+        extraDetails.setExpectedNbOfCenters(1L);
+        extraDetails.setSponsor("Test-Sponsor");
+        extraDetails.setPrincipalInvestigator("Test-Principal-Investigator");
+
+        Study study = new Study();
+        study.setExtraDetails(extraDetails);
+        study.setName("Study-" + UUID.randomUUID());
+        // isDraft will be overridden server-side for non-admin callers, but we
+        // set it explicitly to make the intention of this test clear.
+        study.setIsDraft(Boolean.FALSE);
+        study.setStudyStatus(IN_PROGRESS);
+        study.setStudyCardPolicy(Study.SC_MANDATORY);
+
+        Date today = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(today);
+        cal.add(Calendar.YEAR, 1);
+        study.setStartDate(today);
+        study.setEndDate(cal.getTime());
+
+        // StudyCenterList can be empty for the draft-approval scenario;
+        // the server will accept the study and assign it draft status.
+        study.setStudyCenterList(new java.util.ArrayList<>());
+
         return study;
     }
 
@@ -343,6 +366,28 @@ public abstract class AbstractTest {
         examination.setExaminationDate(new Date());
         examination.setComment("examinationComment");
         return expertClient.createExamination(examination);
+    }
+
+
+    /**
+     * Builds a {@link StudyUser} candidate for the given study and user ids with
+     * a standard set of import/view rights.
+     *
+     * @param studyId the target study
+     * @param userId  the user to add
+     * @return a populated but not-yet-persisted {@link StudyUser}
+     */
+    public StudyUser buildStudyUser(Long studyId, Long userId, String userName) {
+        StudyUser su = new StudyUser();
+        su.setStudyId(studyId);
+        su.setUserId(userId);
+        su.setUserName(userName);
+        su.setConfirmed(true);
+        su.setStudyUserRights(Arrays.asList(
+                StudyUserRight.CAN_SEE_ALL,
+                StudyUserRight.CAN_DOWNLOAD,
+                StudyUserRight.CAN_IMPORT));
+        return su;
     }
 
 }
