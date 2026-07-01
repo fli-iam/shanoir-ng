@@ -150,6 +150,10 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     public attachNewFile(event: any) {
         for (const newFile of Array.from(event.target.files as FileList)) {
+            if (this.datasetAcquisition.extraDataFilePathList.includes(newFile.name)) {
+                this.consoleService.log('warn', 'A file named "' + newFile.name + '" is already attached and was skipped.');
+                continue;
+            }
             this.datasetAcquisition.extraDataFilePathList.push(newFile.name);
             this.files.push(newFile);
         }
@@ -178,7 +182,17 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             const uploads: Promise<void>[] = [];
             // Once the acquisition is saved, save associated extra-data files
             for (const file of this.files) {
-                uploads.push(this.datasetAcquisitionService.postFile(file, this.entity.id));
+                uploads.push(
+                    this.datasetAcquisitionService.postFile(file, this.entity.id).catch(error => {
+                        // 409: a file with the same name already exists on the server; keep the
+                        // existing one and skip this upload instead of failing the whole save.
+                        if (error?.status === 409) {
+                            this.consoleService.log('warn', 'A file named "' + file.name + '" already exists on this acquisition and was not re-uploaded.');
+                            return;
+                        }
+                        throw error;
+                    })
+                );
             }
             return Promise.all(uploads).then(() => null);
         });

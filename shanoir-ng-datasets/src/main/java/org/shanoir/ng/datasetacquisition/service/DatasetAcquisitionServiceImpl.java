@@ -153,7 +153,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                 }
             }
         }
-        to.setExtraDataFilePathList(from.getExtraDataFilePathList());
+        // Persist a de-duplicated list so the same file name is never stored twice, whatever the client sends
+        if (from.getExtraDataFilePathList() != null) {
+            to.setExtraDataFilePathList(from.getExtraDataFilePathList().stream().distinct().collect(Collectors.toList()));
+        } else {
+            to.setExtraDataFilePathList(null);
+        }
         return to;
     }
 

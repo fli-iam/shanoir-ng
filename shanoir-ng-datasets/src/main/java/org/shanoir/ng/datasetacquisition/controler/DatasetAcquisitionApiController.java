@@ -293,6 +293,17 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
     public ResponseEntity<Void> addExtraData(
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
             @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+        try {
+            if (storageService.existsAcquisitionExtraData(datasetAcquisitionId, file.getOriginalFilename())) {
+                LOG.warn("Extra-data file {} already exists for dataset acquisition {}, upload rejected.",
+                        file.getOriginalFilename(), datasetAcquisitionId);
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
+            }
+        } catch (StorageException e) {
+            LOG.error("Error checking existing extra-data file {} for dataset acquisition {}",
+                    file.getOriginalFilename(), datasetAcquisitionId, e);
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
         if (datasetAcquisitionService.addExtraData(datasetAcquisitionId, file) != null) {
             return new ResponseEntity<>(HttpStatus.OK);
         }

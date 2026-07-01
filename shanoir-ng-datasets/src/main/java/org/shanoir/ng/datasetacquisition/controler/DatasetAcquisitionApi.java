@@ -157,6 +157,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "200", description = "extra data added"),
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "409", description = "a file with the same name already exists"),
         @ApiResponse(responseCode = "422", description = "bad parameters"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
     @PostMapping(value = "/datasetacquisition/extra-data-upload/{datasetAcquisitionId}",
