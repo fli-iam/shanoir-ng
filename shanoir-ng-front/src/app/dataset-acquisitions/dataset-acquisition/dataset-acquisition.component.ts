@@ -149,9 +149,11 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     public attachNewFile(event: any) {
-        const newFile = event.target.files[0];
-        this.datasetAcquisition.extraDataFilePathList.push(newFile.name);
-        this.files.push(newFile);
+        for (const newFile of Array.from(event.target.files as FileList)) {
+            this.datasetAcquisition.extraDataFilePathList.push(newFile.name);
+            this.files.push(newFile);
+        }
+        event.target.value = null;
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }

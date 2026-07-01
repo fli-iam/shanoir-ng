@@ -205,7 +205,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         </ul>
                                     }
                                     @default {
-                                        <input #input hidden type="file" (change)="attachNewFile($event)" />
+                                        <input #input hidden multiple type="file" (change)="attachNewFile($event)" />
                                         <button type="button" (click)="setFile()" class="left-icon">
                                             <i class="fas fa-upload"></i>
                                             Choose file
