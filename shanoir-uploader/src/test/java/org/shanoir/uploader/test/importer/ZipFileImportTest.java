@@ -117,7 +117,7 @@ public class ZipFileImportTest extends AbstractTest {
             importJob.setAnonymisationProfileToUse("Profile OFSEP");
         }
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-        shUpClient.startImportJob(importJobJson);
+        userClient.startImportJob(importJobJson);
     }
 
     private org.shanoir.uploader.model.rest.Subject createSubject(ImportJob importJob, org.shanoir.uploader.model.rest.Study study) throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, ParseException {
@@ -155,7 +155,7 @@ public class ZipFileImportTest extends AbstractTest {
             URL resource = getClass().getClassLoader().getResource(fileName);
             if (resource != null) {
                 File file = new File(resource.toURI());
-                return shUpClient.uploadDicom(file);
+                return userClient.uploadDicom(file);
             }
         } catch (Exception e) {
             logger.error("Error while reading file: ", e);

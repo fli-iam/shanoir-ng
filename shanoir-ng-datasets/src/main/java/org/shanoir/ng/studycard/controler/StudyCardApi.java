@@ -110,7 +110,7 @@ public interface StudyCardApi {
             "application/json" }, method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#studyCard.getStudyId(), 'CAN_ADMINISTRATE'))")
     ResponseEntity<StudyCard> saveNewStudyCard(
-            @Parameter(description = "study Card to create", required = true) @RequestBody StudyCard studyCard,
+            @Parameter(description = "Study card to create", required = true) @RequestBody StudyCard studyCard,
             final BindingResult result) throws RestServiceException;
 
     // Attention: used by ShanoirUploader!

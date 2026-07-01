@@ -35,6 +35,7 @@ public class LoginPanelActionListener implements ActionListener {
     private static final Logger LOG = LoggerFactory.getLogger(LoginPanelActionListener.class);
 
     private LoginConfigurationPanel loginPanel;
+
     private StartupStateContext sSC;
 
     @Autowired
@@ -91,7 +92,7 @@ public class LoginPanelActionListener implements ActionListener {
 
     private void handleResult(AuthResult result, String username) {
         if (result.step == AuthStep.SUCCESS) {
-            ShUpOnloadConfig.setTokenString(result.accessToken);
+            ShUpOnloadConfig.getShanoirUploaderServiceClient().setAccessToken(result.accessToken);
             sSC.getShUpStartupDialog().updateStartupText(
                 "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.success"));
             LOG.info("Login successful for username: {}", username);
