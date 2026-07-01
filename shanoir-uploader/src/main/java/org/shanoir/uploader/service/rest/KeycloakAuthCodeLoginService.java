@@ -79,7 +79,7 @@ public class KeycloakAuthCodeLoginService {
     private static final String REALM_PATH = "/auth/realms/shanoir-ng/protocol/openid-connect";
     private static final String REDIRECT_URI = "http://localhost:12345/callback";
     private static final String CLIENT_ID = "shanoir-uploader";
-    private static final String DEV_LOCAL = "https://shanoir-ng-nginx";
+    private static final String DEV_LOCAL = "https://localhost";
     private static final int MAX_REDIRECTS = 15;
 
     // ─── Public API ──────────────────────────────────────────────────────────
@@ -342,8 +342,8 @@ public class KeycloakAuthCodeLoginService {
                     try (CloseableHttpResponse response = authClient.execute(post)) {
                         if (response.getCode() == 200) {
                             String body = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                            String newToken = new JSONObject(body).getString("access_token");
-                            ShUpOnloadConfig.setTokenString(newToken);
+                            String accessToken = new JSONObject(body).getString("access_token");
+                            ShUpOnloadConfig.getShanoirUploaderServiceClient().setAccessToken(accessToken);
                             LOG.debug("Access token refreshed via browser-flow session.");
                         } else {
                             LOG.error("Token refresh failed: HTTP {}", response.getCode());
@@ -489,4 +489,5 @@ public class KeycloakAuthCodeLoginService {
             .digest(codeVerifier.getBytes(StandardCharsets.US_ASCII));
         return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
     }
+
 }
