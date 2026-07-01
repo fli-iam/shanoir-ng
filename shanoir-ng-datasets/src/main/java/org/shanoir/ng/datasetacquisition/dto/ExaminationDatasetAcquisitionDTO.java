@@ -36,7 +36,7 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
     private Integer sortingIndex;
 
     private QualityTag qualityTag;
-  
+
     private List<String> extraDataFilePathList;
 
     public String getType() {
@@ -78,7 +78,7 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
     public void setQualityTag(QualityTag qualityTag) {
         this.qualityTag = qualityTag;
     }
-  
+
     public List<String> getExtraDataFilePathList() {
         return extraDataFilePathList;
     }
