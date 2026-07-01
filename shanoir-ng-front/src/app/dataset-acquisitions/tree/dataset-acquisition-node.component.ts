@@ -76,6 +76,7 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
                     this.input.datasetAcquisition.id,
                     label,
                     UNLOADED,
+                    null,
                     this.input.datasetAcquisition.extraDataFilePathList,
                     this.input.studyRights.includes(StudyUserRight.CAN_ADMINISTRATE),
                     this.input.studyRights.includes(StudyUserRight.CAN_DOWNLOAD)

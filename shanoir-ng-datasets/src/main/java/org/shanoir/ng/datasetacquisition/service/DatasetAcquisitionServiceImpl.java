@@ -141,6 +141,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         to.setSortingIndex(from.getSortingIndex());
         to.setStudyCard(from.getStudyCard());
         to.setAcquisitionStartTime(from.getAcquisitionStartTime()); // immutable
+        to.setQualityTag(from.getQualityTag());
         // Update extra data paths => delete files not present in the new list anymore
         if (to.getExtraDataFilePathList() != null) {
             for (String filePath : to.getExtraDataFilePathList()) {

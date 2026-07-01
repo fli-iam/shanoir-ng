@@ -48,7 +48,7 @@ import { SolrRangeCriterionComponent } from './criteria/solr.range-criterion.com
 import { SolrTextSearchComponent } from './text-search/solr.text-search.component';
 import { SolrTextSearchModeComponent } from './text-search/solr.text-search-mode.component';
 
-const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed', 'dataReuseAgreement'];
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed', 'dataReuseAgreement', 'qualityTag'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
     selector: 'solr-search',
@@ -494,6 +494,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Tags", field: "tags", cellRenderer: (params: any) => {
                     return params?.data?.tags ? params.data.tags.join(', ') : '';
                 }},
+            {headerName: "Quality tag", field: "qualityTag"},
             {headerName: "Modality", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Series date", field: "datasetCreationDate", type: "date", hidden: true},

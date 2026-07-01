@@ -52,6 +52,16 @@ public interface ExaminationService {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE'))")
     void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event);
 
+      /*
+     * Delete an empty examination without checking rights,
+     * used during quality control to delete any empty examination created during import.
+     *
+     * @param id examination id.
+     * @throws EntityNotFoundException
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    void deleteEmptyExamination(Long id) throws EntityNotFoundException;
+
     /**
      * Get all examinations for a specific user to support DICOMweb.
      *

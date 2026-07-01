@@ -14,14 +14,22 @@
 
 package org.shanoir.ng.studycard.controler;
 
-import io.swagger.v3.oas.annotations.Parameter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.PacsException;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -39,14 +47,14 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class StudyCardApiController implements StudyCardApi {
 
     private static final String MICROSERVICE_COMMUNICATION_ERROR = "Microservice communication error";
+
+    private static final String PACS_COMMUNICATION_ERROR = "Error during PACS communication while applying quality card on study";
 
     private static final Logger LOG = LoggerFactory.getLogger(StudyCardApiController.class);
 
@@ -192,7 +200,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> applyStudyCard(
-            @Parameter(description = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException, SolrServerException, IOException {
+            @Parameter(description = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException, SolrServerException, IOException, RestServiceException {
         if (studyCardApplyObject == null
                 || studyCardApplyObject.getDatasetAcquisitionIds() == null
                 || studyCardApplyObject.getDatasetAcquisitionIds().isEmpty()
@@ -202,7 +210,13 @@ public class StudyCardApiController implements StudyCardApi {
         StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
         LOG.debug("re-apply studycard n° " + studyCard.getId());
         List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
-        cardProcessingService.applyStudyCard(studyCard, acquisitions);
+        try {
+            cardProcessingService.applyStudyCard(studyCard, acquisitions);
+        } catch (PacsException | EntityNotFoundException e) {
+            LOG.error("Study card could not be applied for acquisitions {}", studyCardApplyObject.getDatasetAcquisitionIds(), e);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, e));
+        }
 
         // Get all updated dataset ids
         List<Long> datasetIds = new ArrayList<Long>();

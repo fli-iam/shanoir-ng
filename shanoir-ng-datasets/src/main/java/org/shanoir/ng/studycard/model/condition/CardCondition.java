@@ -202,4 +202,18 @@ public abstract class CardCondition extends AbstractEntity {
         }
     }
 
+    protected void writeConditionsReport(StringBuffer report, boolean complies, int nbOk, int nbUnknown, int total) {
+        if (report != null) {
+            if (!complies) {
+                switch (getCardinality()) {
+                    case -1 -> report.append("\nThis condition failed because only " + nbOk + " out of all (" + total + ") dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                    case 0 -> report.append("\nThis condition failed because " + nbOk + " dataset(s) complied where 0 was required" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                    default -> report.append("\nThis condition failed because only " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                }
+            } else {
+                report.append("\nThe condition [" + toString() + "] succeeds because " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+            }
+        }
+    }
+
 }
