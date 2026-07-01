@@ -62,7 +62,7 @@ public class StowRSDicomTest extends AbstractTest {
                         long startTime = System.currentTimeMillis();
                         for (File f : tempDir.listFiles()) {
                             try {
-                                userClient.postDicom(f);
+                                expertClient.postDicom(f);
                             } catch (Exception e) {
                                 logger.error(e.getMessage());
                             }
