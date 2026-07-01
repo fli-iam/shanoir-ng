@@ -62,5 +62,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [withMenu]="withMenu"></dataset-node>
             }
         }
+        @if (!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0) {
+            <node
+                label="Extra data files"
+                awesome="fa-regular fa-folder-open"
+                [hasChildren]="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
+                [(opened)]="node.extraDataOpen">
+                @for (file of node.extraDataFilePathList; track file) {
+                    <node
+                        label="{{ file }}"
+                        awesome="fas fa-file"
+                        [buttonPicto]="'fas fa-download'"
+                        (buttonClick)="downloadFile(file)"
+                        [hasChildren]="false"></node>
+                }
+            </node>
+        }
     </node>
 }
