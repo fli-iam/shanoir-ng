@@ -157,6 +157,7 @@ test_database() {
     db_check_tables datasets \
         dataset dataset_metadata dataset_acquisition \
         mr_dataset mr_dataset_acquisition study_cards \
+        card_condition \
         related_datasets dataset_property processing_resource \
         execution_monitoring xa_dataset
 
