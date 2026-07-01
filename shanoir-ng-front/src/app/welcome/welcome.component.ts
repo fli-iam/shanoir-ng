@@ -343,20 +343,6 @@ export class WelcomeComponent implements OnInit {
         this._renderer2.appendChild(this._document.head, script);
 	}
 
-    private fetchUsersCount() {
-        //count all users
-        this.userService.countAllUsers().then(count => {
-            this.usersCount = count;
-        });
-    }
-
-    private fetchEventsCount() {
-        // count all users events during last month
-        this.userService.countLastMonthEvents().then(count => {
-            this.eventsCount = count;
-        });
-    }
-
     private fetchOverallStats() {
         // get public studies data
         this.fetchPublicStudies();
@@ -366,9 +352,22 @@ export class WelcomeComponent implements OnInit {
             this.subjectsCount = stats.subjectsCount;
             this.datasetAcquisitionsCount = stats.datasetAcquisitionsCount;
             this.storageSize = stats.storageSize;
-            this.fetchUsersCount();
-            this.fetchEventsCount();
-            this.addSchemaToDOM();
+            Promise.all([this.fetchUsersCount(), this.fetchEventsCount()])
+                .then(() => this.addSchemaToDOM());
+        });
+    }
+
+    private fetchUsersCount(): Promise<void> {
+        //count all users
+        return this.userService.countAllUsers().then(count => {
+            this.usersCount = count;
+        });
+    }
+
+    private fetchEventsCount(): Promise<void> {
+        // count all users events during last month
+        return this.userService.countLastMonthEvents().then(count => {
+            this.eventsCount = count;
         });
     }
 
