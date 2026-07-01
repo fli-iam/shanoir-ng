@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.datasetacquisition.dto;
 
+import java.util.List;
+
 import org.shanoir.ng.shared.core.model.IdName;
 
 /**
@@ -31,6 +33,8 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
     private Long examinationId;
 
     private Integer sortingIndex;
+
+    private List<String> extraDataFilePathList;
 
     public String getType() {
         return type;
@@ -62,6 +66,14 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
 
     public void setExaminationId(Long examinationId) {
         this.examinationId = examinationId;
+    }
+
+    public List<String> getExtraDataFilePathList() {
+        return extraDataFilePathList;
+    }
+
+    public void setExtraDataFilePathList(List<String> extraDataFilePathList) {
+        this.extraDataFilePathList = extraDataFilePathList;
     }
 
 }
