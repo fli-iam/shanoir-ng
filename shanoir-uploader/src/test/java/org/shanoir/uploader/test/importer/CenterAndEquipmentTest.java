@@ -35,7 +35,7 @@ public class CenterAndEquipmentTest extends AbstractTest {
         Center createdCenter = createCenter();
         AcquisitionEquipment createdEquipment = createEquipment(createdCenter);
         Assertions.assertNotNull(createdEquipment);
-        List<AcquisitionEquipment> equipments = shUpClient.findAcquisitionEquipmentsBySerialNumber(createdEquipment.getSerialNumber());
+        List<AcquisitionEquipment> equipments = expertClient.findAcquisitionEquipmentsBySerialNumber(createdEquipment.getSerialNumber());
         Assertions.assertNotNull(equipments);
     }
 

@@ -221,11 +221,13 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
     }
 
     public void setCenterIds(List<Long> ids) {
-        centers = ids.stream().map(id -> {
-            Center center = new Center();
-            center.setId(id);
-            return center;
-        }).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(ids)) {
+            centers = ids.stream().map(id -> {
+                Center center = new Center();
+                center.setId(id);
+                return center;
+            }).collect(Collectors.toList());
+        }
     }
 
 }

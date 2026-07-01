@@ -74,7 +74,7 @@ public class OtpInputSubmitActionListener implements ActionListener {
 
     private void handleResult(AuthResult result) {
         if (result.step == AuthStep.SUCCESS) {
-            ShUpOnloadConfig.setTokenString(result.accessToken);
+            ShUpOnloadConfig.getShanoirUploaderServiceClient().setAccessToken(result.accessToken);
             sSC.getShUpStartupDialog().updateStartupText(
                 "\n" + ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.test.connection.success"));
             LOG.info("OTP verification succeeded.");
