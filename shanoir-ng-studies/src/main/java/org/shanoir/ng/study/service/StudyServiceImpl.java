@@ -228,7 +228,6 @@ public class StudyServiceImpl implements StudyService {
         Study studyDb = studyRepository.save(study);
 
         if (subjectStudyListSave != null && !subjectStudyListSave.isEmpty()) {
-            updateTags(subjectStudyListSave, studyDb.getTags());
             studyDb.setSubjectStudyList(new ArrayList<>());
             for (SubjectStudy subjectStudy : subjectStudyListSave) {
                 SubjectStudy newSubjectStudy = new SubjectStudy();
@@ -502,39 +501,6 @@ public class StudyServiceImpl implements StudyService {
                 || oldSub.isPhysicallyInvolved() != newSub.isPhysicallyInvolved()
                 || !Objects.equals(oldSub.getTags(), newSub.getTags())
                 || !Objects.equals(oldSub.getStudyIdentifier(), newSub.getStudyIdentifier());
-    }
-
-    /**
-     * For each subject study tag of study, set the fresh tag id by looking into
-     * studyDb tags,
-     * then update db subject study tags lists with the given study
-     *
-     * @param subjectStudyList
-     * @param dbStudyTags
-     * @return updated study
-     */
-    private void updateTags(List<SubjectStudy> subjectStudyList, List<Tag> dbStudyTags) {
-        if (subjectStudyList == null || dbStudyTags == null) {
-            return;
-        }
-        for (SubjectStudy subjectStudy : subjectStudyList) {
-            if (subjectStudy.getTags() == null) {
-                continue;
-            }
-            for (Tag tag : subjectStudy.getTags()) {
-                if (tag.getId() == null) {
-                    Tag dbTag = dbStudyTags.stream().filter(
-                            upTag -> upTag.getColor().equals(tag.getColor())
-                                    && upTag.getName().equals(tag.getName()))
-                            .findFirst().orElse(null);
-                    if (dbTag == null) {
-                        throw new IllegalStateException(
-                                "Cannot link a new tag to a subject-study, this tag does not exist in the study");
-                    }
-                    tag.setId(dbTag.getId());
-                }
-            }
-        }
     }
 
     private List<Long> getTagsToDelete(Study study, Study studyDb) {

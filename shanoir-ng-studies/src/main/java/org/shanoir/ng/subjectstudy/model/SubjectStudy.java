@@ -14,21 +14,16 @@
 
 package org.shanoir.ng.subjectstudy.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.tag.model.Tag;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 
@@ -64,21 +59,8 @@ public class SubjectStudy extends AbstractEntity {
     /** Subject type. */
     private Integer subjectType;
 
-    @Transient
-    private List<Tag> tags;
-
     /** QualityCard tags associated to the subject. */
     private Integer qualityTag;
-
-    public List<Tag> getTags() {
-        if (tags != null) return tags;
-        if (subject == null || subject.getTags() == null) return null;
-        return new ArrayList<>(subject.getTags());
-    }
-
-    public void setTags(List<Tag> tags) {
-        this.tags = tags;
-    }
 
     public QualityTag getQualityTag() {
         return QualityTag.get(qualityTag);
