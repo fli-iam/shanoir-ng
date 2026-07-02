@@ -22,6 +22,7 @@ import java.util.Map;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyUserRepository;
@@ -122,4 +123,26 @@ public class StudyUserServiceImpl implements StudyUserService {
             throw new AmqpRejectAndDontRequeueException(e);
         }
     }
+
+    @Override
+    @Transactional
+    public StudyUser addStudyUserToStudy(StudyUser studyUser) throws MicroServiceCommunicationException {
+        StudyUser saved = studyUserRepository.save(studyUser);
+        StudyUserCommand command = new StudyUserCommand(CommandType.CREATE, saved);
+        studyUserUpdateBroadcastService.broadcast(List.of(command));
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public void removeStudyUserFromStudy(Long studyId, Long userId) throws MicroServiceCommunicationException {
+        StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
+        if (studyUser == null) {
+            return;
+        }
+        StudyUserCommand command = new StudyUserCommand(CommandType.DELETE, studyUser.getId());
+        studyUserUpdateBroadcastService.broadcast(List.of(command));
+        studyUserRepository.delete(studyUser);
+    }
+
 }

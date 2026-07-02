@@ -13,7 +13,10 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
+
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -39,7 +42,7 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
 
     API_URL = AppUtils.BACKEND_API_DATASET_ACQUISITION_URL;
     
-    constructor(protected http: HttpClient) {
+    constructor(protected http: HttpClient, private downloadService: SingleDownloadService) {
         super(http)
     }
 
@@ -85,5 +88,17 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
     public stringify(entity: DatasetAcquisition) {
         const dto = new DatasetAcquisitionDTO(entity);
         return JSON.stringify(dto, this.customReplacer);
+    }
+
+    postFile(fileToUpload: File, acquisitionId: number): Promise<any> {
+        const endpoint = this.API_URL + '/extra-data-upload/' + acquisitionId;
+        const formData: FormData = new FormData();
+        formData.append('file', fileToUpload, fileToUpload.name);
+        return firstValueFrom(this.http.post<any>(endpoint, formData));
+    }
+
+    downloadFile(fileName: string, acquisitionId: number, state?: TaskState): Observable<TaskState> {
+        const endpoint: string = this.API_URL + '/extra-data-download/' + acquisitionId + "/" + fileName + "/";
+        return this.downloadService.downloadSingleFile(endpoint, null, state);
     }
 }

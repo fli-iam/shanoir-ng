@@ -4,7 +4,7 @@ set -e
 
 . /bin/entrypoint_common
 
-
+optional SHANOIR_KEYCLOAK_API
 require SHANOIR_X_FORWARDED
 x_forwarded_headers() {
 	if [ "$SHANOIR_X_FORWARDED" = "generate" ] ; then
@@ -22,6 +22,12 @@ x_forwarded_headers() {
 		cat /etc/nginx/shanoir.template.prod.conf
 	else
 		cat /etc/nginx/shanoir.template.dev.conf
+	fi
+
+	if [ "$SHANOIR_KEYCLOAK_API" = full ] ; then
+		cat /etc/nginx/shanoir.template.keycloak-full.conf
+	else
+		cat /etc/nginx/shanoir.template.keycloak-limited.conf
 	fi
 ) >/etc/nginx/shanoir.conf
 
@@ -49,6 +55,7 @@ optional SHANOIR_PRECLINICAL_HOST
 optional SHANOIR_PREFIX
 optional SHANOIR_STUDIES_HOST
 optional SHANOIR_USERS_HOST
+optional SHANOIR_KEYCLOAK_URL
 require VIP_URL_HOST
 require VIP_URL_SCHEME
 
@@ -92,6 +99,7 @@ sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
 	s/SHANOIR_IMPORT_HOST/$SHANOIR_IMPORT_HOST/g
 	s/SHANOIR_DATASETS_HOST/$SHANOIR_DATASETS_HOST/g
 	s/SHANOIR_PRECLINICAL_HOST/$SHANOIR_PRECLINICAL_HOST/g
+	s+SHANOIR_KEYCLOAK_URL+$SHANOIR_KEYCLOAK_URL+g
 	s/VIP_URL_HOST/$VIP_URL_HOST/g
 	s/VIP_URL_SCHEME/$VIP_URL_SCHEME/g
 "	/etc/nginx/server.conf \
