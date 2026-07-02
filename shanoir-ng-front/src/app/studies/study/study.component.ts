@@ -671,11 +671,6 @@ export class StudyComponent extends EntityComponent<Study> {
     onStudyTagListChange() {
         // hack : force change detection
         this.study.studyTags = [].concat(this.study.studyTags);
-        // hack : force change detection for the subject-study tag list
-        this.study.subjects.forEach(subjects => {
-            subjects.study.studyTags = this.study.studyTags;
-        });
-        this.study.subjects = [].concat(this.study.subjects);
     }
 
     goToAccessRequest(accessRequest : AccessRequest) {
