@@ -71,6 +71,8 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 
     private LocalDate expiration;
 
+    private boolean receivedExpirationNotification = false;
+
     /** Study id. */
     @ManyToOne
     @JsonIgnore
@@ -243,4 +245,11 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
         }).collect(Collectors.toList());
     }
 
+    public boolean isReceivedExpirationNotification() {
+        return receivedExpirationNotification;
+    }
+
+    public void setReceivedExpirationNotification(boolean receivedExpirationNotification) {
+        this.receivedExpirationNotification = receivedExpirationNotification;
+    }
 }

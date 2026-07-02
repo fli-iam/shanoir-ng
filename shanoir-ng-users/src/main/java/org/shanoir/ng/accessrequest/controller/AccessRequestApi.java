@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.accessrequest.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.accessrequest.model.AccessRequest;
@@ -27,6 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -77,6 +79,19 @@ public interface AccessRequestApi {
             @Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
             @Parameter(name = "Accept or refuse the request", required = true) @RequestBody ValidationDTO validation,
             BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException;
+
+    @Operation(summary = "extension", description = "Request an extension for the given study")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "extension requested"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "extension", produces = { "application/json" }, consumes = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    ResponseEntity<Void> requestExtension(
+            @Parameter(name = "id of the study to extend", required = true) @RequestParam("studyId") Long studyId,
+            @Parameter(name = "new extension date", required = true) @RequestParam("extensionDate") LocalDate extensionDate) throws RestServiceException;
 
     @Operation(summary = "byAdmin", description = "Find all the access request managed by the given adminstrator")
     @ApiResponses(value = {

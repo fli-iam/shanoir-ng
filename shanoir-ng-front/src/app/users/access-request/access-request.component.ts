@@ -109,7 +109,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
             'motivation': [this.accessRequest.motivation, []],
             'studyId': [this.accessRequest.studyId, []],
             'studyName': [this.accessRequest.studyName, []],
-            'expiration': [this.accessRequest.expiration, [Validators.required]]
+            'expiration': [this.accessRequest.expiration]
         });
     }
 

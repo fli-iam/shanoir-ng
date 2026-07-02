@@ -22,6 +22,13 @@ public class ValidationDTO {
 
     private LocalDate expiration;
 
+    public ValidationDTO() { }
+
+    public ValidationDTO(boolean accept, LocalDate expiration) {
+        this.accept = accept;
+        this.expiration = expiration;
+    }
+
     public boolean isAccept() {
         return accept;
     }

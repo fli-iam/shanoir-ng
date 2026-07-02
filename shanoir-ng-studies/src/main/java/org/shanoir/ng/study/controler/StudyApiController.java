@@ -568,6 +568,19 @@ public class StudyApiController implements StudyApi {
         return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<List<StudyLightDTO>> findExpiredStudiesData() {
+        List<StudyLightDTO> studiesDTO = new ArrayList<>();
+        List<Study> studies = studyService.findExpiredStudies();
+        if (studies.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        for (Study study : studies) {
+            studiesDTO.add(studyMapper.studyToStudyLightDTONoFilePaths(study));
+        }
+        return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
+    }
+
     /**
      * This method allows to filter studies by on the one the given user is not part
      * in

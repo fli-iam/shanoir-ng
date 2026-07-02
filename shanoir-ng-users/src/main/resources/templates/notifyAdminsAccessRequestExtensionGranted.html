@@ -12,15 +12,17 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h2 i18n="Manage studies|Title@@studyListTitle">Manage studies</h2>
-
-<shanoir-table
-    #table
-    [class.narrow]="windowService.isWide()"
-    [getPage]="getPage.bind(this)"
-    [columnDefs]="columnDefs"
-    [customActionDefs]="customActionDefs"
-    [rowRoute]="getRowRoute.bind(this)"
-    (rowClick)="goToViewFromEntity($event)"
-    [greyedCondition]="greyedCondition.bind(this)"
-    [filter]="tableFilter"></shanoir-table>
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+    <p>Dear administrator for the study <span th:text="${studyName}"></span>,</p>
+    <p>
+        <span th:text="${firstname}"></span> <span th:text="${lastname}"></span> access
+        has been extended for the study <a th:href="${studyAddress}" th:text="${studyName}"></a>
+        to the following date: <span th:text="${extensionDate}"></span>.
+    </p>
+    <p>Regards,<br/>
+    Shanoir administrator</p>
+</body>
+</html>

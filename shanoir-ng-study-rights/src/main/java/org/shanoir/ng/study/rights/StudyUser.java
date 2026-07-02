@@ -53,6 +53,8 @@ public class StudyUser implements StudyUserInterface {
 
     private LocalDate expiration;
 
+    private boolean receivedExpirationNotification = false;
+
     /** Study id. */
     private Long studyId;
 
@@ -215,4 +217,11 @@ public class StudyUser implements StudyUserInterface {
         this.centerIds = centerIds;
     }
 
+    public boolean isReceivedExpirationNotification() {
+        return receivedExpirationNotification;
+    }
+
+    public void setReceivedExpirationNotification(boolean receivedExpirationNotification) {
+        this.receivedExpirationNotification = receivedExpirationNotification;
+    }
 }

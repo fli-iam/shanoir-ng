@@ -61,6 +61,7 @@ import { BidsTreeComponent } from "../../bids/tree/bids-tree.component";
 import { StudyHistoryComponent } from "../study-history/study-history.component";
 import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.pipe";
 import { SizePipe } from "../../shared/utils/size.pipe";
+import { DaysLeftPipe } from "../../shared/localLanguage/daysLeft.pipe";
 
 import { Selection } from './tree.service';
 import { CopyFromCsvComponent } from "./copy-csv.component";
@@ -69,8 +70,8 @@ import { CopyFromCsvComponent } from "./copy-csv.component";
     selector: 'study-detail',
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
-    imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent, 
-        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent]
+    imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent,
+        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, DaysLeftPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent]
 })
 
 export class StudyComponent extends EntityComponent<Study> {
@@ -127,11 +128,11 @@ export class StudyComponent extends EntityComponent<Study> {
             private userService: UserService,
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
-            private accessRequestService: AccessRequestService,
+            protected accessRequestService: AccessRequestService,
             protected downloadService: MassDownloadService) {
         super(route);
         this.activeTab = 'general';
-        
+
     }
 
     protected getRoutingName(): string {
@@ -154,7 +155,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public set study(study: Study) {
         this.entity = study;
     }
-    
+
     public set entity(study: Study) {
         super.entity = study;
         this.updateSubjectTagsInUse();

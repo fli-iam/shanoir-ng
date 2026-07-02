@@ -39,6 +39,8 @@ public class AccessRequest extends AbstractEntity {
 
     public static final int ON_DEMAND = 0;
 
+    public static final int ON_EXTENSION_DEMAND = 2;
+
     private String studyName;
 
     private Long studyId;
@@ -54,6 +56,7 @@ public class AccessRequest extends AbstractEntity {
     /** 0: unresolved
      *  1: accepted
      * -1:  refused
+     *  2: extension requested
      */
     private int status;
 

@@ -32,7 +32,7 @@ import { TreeService } from './tree.service';
 })
 
 export class CopyFromCsvComponent {
-    
+
     @Input() studyId: any;
     @ViewChild('input') inputEl: ElementRef;
     private copyDataService: CopyDataService = inject(CopyDataService);
@@ -40,7 +40,6 @@ export class CopyFromCsvComponent {
     private confirmService = inject(ConfirmDialogService);
 
     @HostListener('click') onClick() {
-        console.log("CopyFromCsvComponent clicked");
         this.inputEl?.nativeElement.click();
     }
 

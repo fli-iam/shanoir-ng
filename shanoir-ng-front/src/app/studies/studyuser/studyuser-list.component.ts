@@ -19,6 +19,7 @@ import { IdName } from 'src/app/shared/models/id-name.model';
 import { ConsoleService } from 'src/app/shared/console/console.service';
 import { LocalDateFormatPipe } from 'src/app/shared/localLanguage/localDateFormat.pipe';
 import { DatepickerComponent } from 'src/app/shared/date-picker/date-picker.component';
+import { DoubleAwesomeComponent } from "src/app/shared/double-awesome/double-awesome.component";
 
 import { Center } from '../../centers/shared/center.model';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
@@ -48,7 +49,7 @@ import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
             multi: true,
         }
     ],
-    imports: [FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent, LocalDateFormatPipe, DatepickerComponent],
+    imports: [FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent, LocalDateFormatPipe, DatepickerComponent, DoubleAwesomeComponent],
 })
 
 export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
@@ -79,7 +80,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     private onChangeCallback: (any) => void = () => { return; };
 
     constructor(private keycloakService: KeycloakService,
-                private accessRequestService: AccessRequestService) {
+                protected accessRequestService: AccessRequestService) {
         this.isAdmin = keycloakService.isUserAdmin();
         this.consoleService = inject(ConsoleService);
     }

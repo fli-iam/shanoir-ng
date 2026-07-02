@@ -350,21 +350,37 @@ export class CenterStudyDTO {
 }
 
 export class StudyLight {
-  downloadableByDefault: boolean;
-  challenge: boolean;
-  endDate: Date;
-  id: number;
-  name: string;
-  nbExaminations: number;
-  nbSubjects: number;
-  startDate: Date;
-  studyStatus: "IN_PROGRESS" | "FINISHED";
-  studyType: StudyType;
-  description: string;
-  license: string;
-  studyTags: Tag[];
-  profile: Profile;
-  isDraft: boolean;
+    downloadableByDefault: boolean;
+    challenge: boolean;
+    endDate: Date;
+    id: number;
+    name: string;
+    nbExaminations: number;
+    nbSubjects: number;
+    startDate: Date;
+    studyStatus: "IN_PROGRESS" | "FINISHED";
+    studyType: StudyType;
+    description: string;
+    license: string;
+    studyTags: Tag[];
+    profile: Profile;
+    isDraft: boolean;
+
+    static toStudy(studyLight: StudyLight): Study {
+        const study: Study = new Study();
+        study.id = studyLight.id;
+        study.downloadableByDefault = studyLight.downloadableByDefault;
+        study.endDate = studyLight.endDate;
+        study.name = studyLight.name;
+        study.nbExaminations = studyLight.nbExaminations;
+        study.nbSubjects = studyLight.nbSubjects;
+        study.startDate = studyLight.startDate;
+        study.studyStatus = studyLight.studyStatus;
+        study.studyType = studyLight.studyType;
+        study.description = studyLight.description;
+        study.studyTags = studyLight.studyTags;
+        return study;
+    }
 }
 
 

@@ -164,7 +164,7 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
         else return value;
     }
 
-    private static datePattern(date: Date): string {
+    protected static datePattern(date: Date): string {
         return date.getFullYear()
             + '-'
             + ('0' + (date.getMonth() + 1)).slice(-2)

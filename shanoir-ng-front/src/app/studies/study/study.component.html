@@ -337,7 +337,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <li>
                                 <label>My access expiration date</label>
                                 <span class="right-col" [style.color]="userExpirationColor">
-                                    {{ userExpiration | localDateFormatPipe }}
+                                    {{ userExpiration | localDateFormatPipe }} ({{ userExpiration | daysLeftPipe }} days left)
+                                    <button class="right-button" (click)="accessRequestService.openAccessExtensionModal(userExpiration, study)">Ask extension</button>
                                 </span>
                             </li>
                         }

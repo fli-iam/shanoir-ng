@@ -43,6 +43,7 @@ export class StudyUser {
     }
 
     get expired(): boolean {
+        if (typeof this.expiration?.getTime !== 'function') return false;
         return this.expiration?.getTime() < new Date().getTime();
     }
 }

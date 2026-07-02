@@ -11,20 +11,20 @@
 
 .block { border: 1px solid black; margin: 10px; display: inline-block; text-align: center; overflow: hidden; border-radius: 30px ;}
 .block table { border-collapse: collapse; }
-.block .icon, .block .pannel, .block-title { width: 180px; padding: 0 10px; vertical-align: middle; }
+.block .icon, .block .panel, .block-title { width: 180px; padding: 0 10px; vertical-align: middle; }
 .block .icon, .block { height: 200px; }
-.block .pannel { text-align: left; }
+.block .panel { text-align: left; }
 .block, .block table, .block input { font-size: 12px; }
 .block-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; color: var(--color-b-light); }
 .icon { color: black; }
 .icon i { font-size: 120px; display: block; height: 136px; margin-top: 10px; opacity: 0.7; }
 .block td { position: relative; height: 200px; }
-.block .pannel table { width: 100%; }
-.block .pannel td { height: auto; }
+.block .panel table { width: 100%; }
+.block .panel td { height: auto; }
 
 .access-requests { border-color: blueviolet; }
 .access-requests .icon { background-color: blueviolet; }
-.access-requests .pannel table { margin-top: 8px; }
+.access-requests .panel table { margin-top: 8px; }
 .access-requests-list:hover { color: blueviolet; }
 .access-requests-list td {  overflow: hidden; }
 .access-requests-list .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; }
@@ -34,18 +34,18 @@
 .pending em { font-style: normal; font-size: 20px; color: var(--color-a); font-weight: bold; }
 .solr { border-color: darkorange; }
 .solr .icon { background-color: darkorange; }
-.solr .pannel { font-size: 20px; text-align: center; }
-.solr .pannel i { margin-right: 7px; }
+.solr .panel { font-size: 20px; text-align: center; }
+.solr .panel i { margin-right: 7px; }
 .solr input { margin-bottom: 10px; text-align: center; }
 
 .jobs { border-color: seagreen; }
 .jobs .icon { background-color: seagreen; }
- 
+
 .notifications { border-color: crimson; }
 .notifications .icon { background-color: crimson; }
 .notification-list:hover { color: crimson; }
 .notification-list td { max-width: 102px; overflow: hidden; }
-.notifications .pannel tr + tr { border-top: 1px solid var(--grey); }
+.notifications .panel tr + tr { border-top: 1px solid var(--grey); }
 
 .studies { border-color: blue; }
 .studies th { line-height: 30px; }
@@ -70,3 +70,10 @@ h2 { margin-bottom: 30px; }
 .doc .icon { background-color: darkorange; }
 .doc li { line-height: 20px; }
 .doc li i { color: var(--color-a-light); margin-right: 7px; }
+
+.expiring-studies { border-color: orangered; }
+.expiring-studies .icon { background-color: orangered; }
+.expiring-studies .study-name { font-weight: bold; color: var(--color-a); }
+.expiring-studies .date { font-weight: bold; color: orangered; }
+.expiring-studies .panel { text-align: center; }
+.expiring-studies .panel div { margin: 20px 0; }

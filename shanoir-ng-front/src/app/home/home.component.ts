@@ -54,13 +54,15 @@ export class HomeComponent {
     nbExtensionRequests: number;
     accessRequests: AccessRequest[] = [];
     protected downloadState: TaskState = new TaskState();
+    protected expiringStudies: StudyLight[] = [];
+    protected expiringDates: Map<number, Date> = new Map<number, Date>();
 
 
     constructor(
             private breadcrumbsService: BreadcrumbsService,
             private studyService: StudyService,
             private keycloakService: KeycloakService,
-            private accessRequestService: AccessRequestService,
+            protected accessRequestService: AccessRequestService,
             private userService: UserService,
             private taskService: TaskService) {
         this.breadcrumbsService.nameStep('Home');
@@ -84,7 +86,9 @@ export class HomeComponent {
         }).then(() => {
             this.loaded = true;
             if (this.admin || !this.challengeDua) {
-                this.fetchChallengeStudies()
+                this.fetchChallengeStudies().then(() => {
+                    this.computeExpiringStudies(this.allStudies);
+                });
                 if (this.admin) {
                     this.fetchAccountRequests();
                 }
@@ -103,8 +107,8 @@ export class HomeComponent {
         this.load();
     }
 
-    private fetchChallengeStudies() {
-        this.studyService.getStudiesLight().then(studies => {
+    private fetchChallengeStudies(): Promise<void> {
+        return this.studyService.getStudiesLight().then(studies => {
             this.challengeStudies = [];
             if (studies) {
                 this.allStudies = studies;
@@ -114,6 +118,25 @@ export class HomeComponent {
                         this.challengeStudies.push(study);
                     }
                 }
+            }
+        });
+    }
+
+    private computeExpiringStudies(studies: StudyLight[]) {
+        this.studyService.fetchCurrentUserStudyDates().then(expirationDates => {
+            this.expiringDates = expirationDates;
+            if (expirationDates) {
+                this.expiringStudies = this.studies.filter(study => {
+                    const expDate = expirationDates.get(study.id);
+                    if (expDate) {
+                        const today = new Date();
+                        const diffTime = expDate.getTime() - today.getTime();
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        return diffDays <= 15; // Expiring in 15 days or less
+                    } else {
+                        return false;
+                    }
+                });
             }
         });
     }

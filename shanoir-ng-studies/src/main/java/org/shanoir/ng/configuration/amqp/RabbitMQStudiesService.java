@@ -245,15 +245,21 @@ public class RabbitMQStudiesService {
             Long studyId = Long.valueOf(event.getObjectId());
             // Get the study
             Study studyToUpdate = studyRepo.findById(studyId).orElseThrow();
-
             for (StudyUser su : studyToUpdate.getStudyUserList()) {
-                if (su.getUserId().equals(userId)) {
-                    // user already exists on study
-                    return true;
+                if (su.getUserId().equals(userId)) { // user already exists on study
+                    // check if it's an extension request
+                    if (userAccessData != null && event.getEventType().equals(ShanoirEventType.USER_EXTEND_TO_STUDY_EVENT)
+                            && userAccessData.getExpiration().isAfter(su.getExpiration())) {
+                        // If it's an extension request, just update the expiration date
+                        su.setExpiration(userAccessData.getExpiration());
+                        su.setReceivedExpirationNotification(false);
+                        studyService.updateStudyUserToStudy(su, studyToUpdate);
+                        eventService.publishEvent(event);
+                    }
+                    return true; // end of the method, user already exists on study
                 }
             }
-
-            // Create a new StudyUser
+            // Else create a new StudyUser
             StudyUser subscription = new StudyUser();
             subscription.setStudy(studyToUpdate);
             subscription.setUserId(userId);
@@ -263,8 +269,8 @@ public class RabbitMQStudiesService {
             if (userAccessData != null) {
                 subscription.setUserName(userAccessData.getUserName());
                 subscription.setExpiration(userAccessData.getExpiration() != null
-                    ? userAccessData.getExpiration()
-                    : LocalDate.now().plusDays(userDefaultExpirationDays));
+                        ? userAccessData.getExpiration()
+                        : LocalDate.now().plusDays(userDefaultExpirationDays));
             }
             if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {
                 subscription.setConfirmed(false);
@@ -276,8 +282,7 @@ public class RabbitMQStudiesService {
             eventService.publishEvent(event);
             return true;
         } catch (Exception e) {
-            LOG.error("Could not directly subscribe a user to the study: ", e);
-            return false;
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the study subscription.", e);
         }
     }
 

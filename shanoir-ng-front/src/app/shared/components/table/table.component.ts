@@ -76,7 +76,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     currentPage: number = 1;
     loaderImageUrl: string = "assets/images/loader.gif";
     isError: boolean = false;
-    filter: Filter = new Filter(null, null);
+    @Input() filter: Filter = new Filter(null, null);
     firstLoading: boolean = true;
     currentDrag: {columns: any; leftOrigin: number, totalWidth: number, leftColIndex: number};
     private subscriptions: Subscription[] = [];
@@ -118,6 +118,11 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 if (this.subRowsDefs) this.nbColumns++;
             });
         }
+        if (changes.filter) {
+            if (!this.filter) {
+                this.filter = new Filter(null, null);
+            }
+        }
     }
 
     ngOnDestroy(): void {
@@ -157,7 +162,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         if (savedState) {
             this.lastSortedCol = this.columnDefs.find(col => col && savedState.lastSortedCol && col.field == savedState.lastSortedCol.field);
             this.lastSortedAsc = savedState.lastSortedAsc;
-            this.filter = savedState.filter;
+            this.filter = savedState.filter || new Filter(null, null);
             this.maxResults = savedState.maxResults;
             if (savedState.selection && Symbol.iterator in Object(savedState.selection)) {
                 this.selection = new Set();
@@ -667,8 +672,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 pageable.pageNumber = i + 1;
                 completion = completion.then(() => { // load pages sequentially
                     const getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, false, true)
-                    if (!task 
-                            && (performance.now() - startTs > 5000) 
+                    if (!task
+                            && (performance.now() - startTs > 5000)
                             && (i / this.page.totalPages < 0.8)) {
                         task = this.startNofification(i / this.page.totalPages);
                     } else if (task) {

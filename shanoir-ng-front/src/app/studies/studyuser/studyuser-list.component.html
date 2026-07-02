@@ -131,6 +131,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                         @if (mode == 'view' && panelStudyUser.expiration) {
                                             {{panelStudyUser.expiration | localDateFormatPipe}}
+                                            @if (panelStudyUser.userId == getLoggedUserId()) {
+                                                <button class="right-button" (click)="accessRequestService.openAccessExtensionModal(panelStudyUser.expiration, study)">
+                                                    Ask extension
+                                                </button>
+                                            }
                                         } @else {
                                             <datepicker [ngModel]="panelStudyUser.expiration" (ngModelChange)="onExpirationChange(panelStudyUser, $event)" [min]="minExpirationDate"></datepicker>
                                         }

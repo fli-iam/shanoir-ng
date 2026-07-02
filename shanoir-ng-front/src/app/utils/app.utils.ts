@@ -38,6 +38,7 @@ export const BACKEND_API_USER_ACCESS_REQUEST: string = BACKEND_API_USERS_MS_URL 
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_USER: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byUser';
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_ADMIN: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byAdmin';
 export const BACKEND_API_ACCESS_REQUEST_RESOLVE: string = BACKEND_API_USERS_MS_URL + '/accessrequest/resolve/';
+export const BACKEND_API_ACCESS_REQUEST_EXTENSION: string = BACKEND_API_USERS_MS_URL + '/accessrequest/extension';
 export const BACKEND_API_USER_PUBLIC_COUNT: string = BACKEND_API_USER_URL + BACKEND_API_COUNT_ENDPOINT;
 
 // ShanoirEvents http api
@@ -63,6 +64,7 @@ export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_URL + '/public';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/data';
+export const BACKEND_API_STUDY_EXPIRED_STUDIES_DATA_URL: string = BACKEND_API_STUDY_URL + '/expired';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/connected';
 export const BACKEND_API_STUDY_COPY_DATASETS: string = BACKEND_API_STUDY_URL + '/copyDatasets';
 export const BACKEND_API_STUDY_FILES: string = BACKEND_API_STUDY_URL + '/files';

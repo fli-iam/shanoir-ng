@@ -112,6 +112,17 @@ public interface StudyApi {
     @RequestMapping(value = "/public/data", produces = { "application/json" }, method = RequestMethod.GET)
     ResponseEntity<List<StudyLightDTO>> findPublicStudiesData();
 
+    // find expired studies on /data
+    @Operation(summary = "", description = "If exists, returns the studies that are expired")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study found"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @RequestMapping(value = "/expired", produces = { "application/json" }, method = RequestMethod.GET)
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    ResponseEntity<List<StudyLightDTO>> findExpiredStudiesData();
+
     @Operation(summary = "", description = "Returns id and name for all the studies")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found studies"),
@@ -401,7 +412,7 @@ public interface StudyApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "404", description = "no study found"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @GetMapping(value = "/studyUser/userExpirationDates", produces = { "application/json" })
+    @GetMapping(value = "/userExpirationDates", produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
     ResponseEntity<List<IdDate>> getUserExpirationDates();
 

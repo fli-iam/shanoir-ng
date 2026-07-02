@@ -58,7 +58,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.accessrequest.model.ValidationDTO;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.UserAccessData;
+import org.shanoir.ng.study.rights.StudyRightsService;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -89,6 +92,9 @@ public class AccessRequestApiController implements AccessRequestApi {
 
     @Autowired
     private StudyUserRightsRepository studyUserRightsRepository;
+
+    @Autowired
+    private StudyRightsService studyRightsService;
 
     @Value("${shanoir.userDefaultExpirationDays:183}")
     private int accessRequestExpirationDays;
@@ -175,6 +181,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 
         // Get all access requests
         List<AccessRequest> accessRequests = this.accessRequestService.findByStudyIdAndStatus(studiesId, AccessRequest.ON_DEMAND);
+        accessRequests.addAll(this.accessRequestService.findByStudyIdAndStatus(studiesId, AccessRequest.ON_EXTENSION_DEMAND));
         for (AccessRequest accessRequest : accessRequests) {
             // pre-fetch expiration date so the 6 months or so starts at validation time, not at request time
             if (accessRequest.getExpiration() == null) {
@@ -196,53 +203,105 @@ public class AccessRequestApiController implements AccessRequestApi {
             @Parameter(name = "Accept or refuse the request", required = true) @RequestBody ValidationDTO validation,
             BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException {
         AccessRequest resolvedRequest = accessRequestService.findById(accessRequestId).orElse(null);
-        if (resolvedRequest == null || resolvedRequest.getStatus() != AccessRequest.ON_DEMAND) {
+        int status = resolvedRequest != null ? resolvedRequest.getStatus() : -1;
+        if (resolvedRequest == null || (status != AccessRequest.ON_DEMAND && status != AccessRequest.ON_EXTENSION_DEMAND)) {
             return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
         }
-        if  (validation.getExpiration() != null) {
-            resolvedRequest.setExpiration(validation.getExpiration());
-        } else if (resolvedRequest.getExpiration() == null) {
-            LocalDate expiration = LocalDate.now().plusDays(accessRequestExpirationDays);
-            resolvedRequest.setExpiration(expiration);
-        }
-
-
         if (validation.isAccept()) {
-            resolvedRequest.setStatus(AccessRequest.APPROVED);
-        } else {
-            resolvedRequest.setStatus(AccessRequest.REFUSED);
-        }
-
-        accessRequestService.update(resolvedRequest);
-
-        if (validation.isAccept()) {
-            // if there is an account request, accept it.
-            if (resolvedRequest.getUser().isAccountRequestDemand() != null && resolvedRequest.getUser().isAccountRequestDemand()) {
-                this.userService.confirmAccountRequest(resolvedRequest.getUser());
+            if (validation.getExpiration() != null) {
+                resolvedRequest.setExpiration(validation.getExpiration());
+            } else if (resolvedRequest.getExpiration() == null) {
+                LocalDate expiration = LocalDate.now().plusDays(accessRequestExpirationDays);
+                resolvedRequest.setExpiration(expiration);
             }
-
             UserAccessData userAccessData = new UserAccessData(resolvedRequest.getUser().getUsername(), resolvedRequest.getExpiration());
             String serializedUserAccessData = mapper.writeValueAsString(userAccessData);
+            ShanoirEvent subscription;
+            if (status == AccessRequest.ON_DEMAND) {
+                resolvedRequest.setStatus(AccessRequest.APPROVED);
+                accessRequestService.update(resolvedRequest);
+                // if there is an account request, accept it.
+                if (resolvedRequest.getUser().isAccountRequestDemand() != null && resolvedRequest.getUser().isAccountRequestDemand()) {
+                    this.userService.confirmAccountRequest(resolvedRequest.getUser());
+                }
+                // Update study to add a new user
+                subscription = new ShanoirEvent(
+                        ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
+                        resolvedRequest.getStudyId().toString(),
+                        resolvedRequest.getUser().getId(),
+                        serializedUserAccessData,
+                        ShanoirEvent.SUCCESS,
+                        resolvedRequest.getStudyId());
 
-            // Update study to add a new user
-            ShanoirEvent subscription = new ShanoirEvent(
-                    ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
-                    resolvedRequest.getStudyId().toString(),
-                    resolvedRequest.getUser().getId(),
-                    serializedUserAccessData,
-                    ShanoirEvent.SUCCESS,
-                    resolvedRequest.getStudyId());
+            } else if (status == AccessRequest.ON_EXTENSION_DEMAND) {
+                resolvedRequest.setStatus(AccessRequest.APPROVED);
+                accessRequestService.update(resolvedRequest);
+                // Update study to extend a user access
+                subscription = new ShanoirEvent(
+                        ShanoirEventType.USER_EXTEND_TO_STUDY_EVENT,
+                        resolvedRequest.getStudyId().toString(),
+                        resolvedRequest.getUser().getId(),
+                        serializedUserAccessData,
+                        ShanoirEvent.SUCCESS,
+                        resolvedRequest.getStudyId());
+            } else {
+                throw new IllegalStateException("Access request status is not valid for this operation: " + status);
+            }
+            try {
+                this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
+                // successfully sent to rabbitmq, send emails
+                if (status == AccessRequest.ON_EXTENSION_DEMAND) {
+                    sendEmailsForExtension(resolvedRequest);
+                }
+            } catch (AmqpRejectAndDontRequeueException e) {
+                throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Could not transmit study-user update info through RabbitMQ", e));
+            }
 
-            this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
         } else {
-            emailService.notifyUserRefusedFromStudy(resolvedRequest);
+            resolvedRequest.setStatus(AccessRequest.REFUSED);
+            accessRequestService.update(resolvedRequest);
+            if (status == AccessRequest.ON_EXTENSION_DEMAND) {
+                emailService.notifyUserAccessRequestExtensionRefused(resolvedRequest.getUser(), new IdName(resolvedRequest.getStudyId(), resolvedRequest.getStudyName()));
+            } else if (status == AccessRequest.ON_DEMAND) {
+                emailService.notifyUserRefusedFromStudy(resolvedRequest);
+            }
             // Deny account request creation
             if (resolvedRequest.getUser().isAccountRequestDemand()) {
                 userService.denyAccountRequest(resolvedRequest.getUser().getId());
             }
         }
-
         return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+
+    private void sendEmailsForExtension(AccessRequest resolvedRequest) {
+        User user = resolvedRequest.getUser();
+        String studyName = resolvedRequest.getStudyName();
+        if (StringUtils.isEmpty(studyName)) {
+            studyName = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_QUEUE, resolvedRequest.getStudyId());
+        }
+        IdName study = new IdName(resolvedRequest.getStudyId(), studyName);
+        LocalDate extensionDate = resolvedRequest.getExpiration();
+        emailService.notifyAdminsAccessRequestExtensionGranted(user, study, extensionDate);
+        emailService.notifyUserAccessRequestExtensionGranted(user, study, extensionDate);
+    }
+
+    @Override
+    public ResponseEntity<Void> requestExtension(
+            @Parameter(name = "id of the study to extend", required = true) @RequestParam("studyId") Long studyId,
+            @Parameter(name = "new extension date", required = true) @RequestParam("extensionDate") LocalDate extensionDate) throws RestServiceException {
+        StudyUser studyUser = studyUserRightsRepository.findByUserIdAndStudyId(KeycloakUtil.getTokenUserId(), studyId);
+        if (studyUser == null) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.FORBIDDEN.value(), "You are not allowed to request an extension for this study."));
+        } else if (extensionDate == null || extensionDate.isBefore(LocalDate.now())) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.BAD_REQUEST.value(), "The extension date must be in the future."));
+        } else if (studyUser.getExpiration() != null && extensionDate.isBefore(studyUser.getExpiration())) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.BAD_REQUEST.value(), "The extension date must be after the current expiration date."));
+        } else {
+            accessRequestService.requestExtension(studyId, KeycloakUtil.getTokenUserId(), extensionDate);
+            String studyName = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_QUEUE, studyId);
+            emailService.notifyAdminsAccessRequestExtensionRequest(new IdName(KeycloakUtil.getTokenUserId(), KeycloakUtil.getTokenUserName()), new IdName(studyId, studyName), extensionDate);
+            return new ResponseEntity<Void>(HttpStatus.OK);
+        }
     }
 
     public ResponseEntity<AccessRequest> getById(@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException {

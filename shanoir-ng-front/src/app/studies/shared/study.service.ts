@@ -51,8 +51,8 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     private studyVolumesCache: Map<number, StudyStorageVolumeDTO> = new Map();
 
     constructor(
-            protected http: HttpClient, 
-            private keycloakService: KeycloakService, 
+            protected http: HttpClient,
+            private keycloakService: KeycloakService,
             private studyDTOService: StudyDTOService,
             private downloadService: SingleDownloadService,
             private downloadUtilsService: DownloadUtilsService) {
@@ -68,10 +68,10 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     getStudiesLight(): Promise<StudyLight[]> {
-      return firstValueFrom(this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_STUDIES_LIGHT_URL))
-        .then((typeResult: StudyLight[]) => {
-          return typeResult;
-        });
+        return firstValueFrom(this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_STUDIES_LIGHT_URL))
+            .then((typeResult: StudyLight[]) => {
+                return typeResult;
+            });
     }
 
     findStudiesByUserId(): Promise<Study[]> {
@@ -97,10 +97,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     getPublicStudiesData(): Promise<StudyLight[]> {
-      return firstValueFrom(this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL))
-        .then((typeResult: StudyLight[]) => {
-          return typeResult;
-        });
+      return firstValueFrom(this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL));
+    }
+
+    getExpiredStudiesData(): Promise<StudyLight[]> {
+      return firstValueFrom(this.http.get<StudyLight[]>(AppUtils.BACKEND_API_STUDY_EXPIRED_STUDIES_DATA_URL));
     }
 
     getChallenges(): Promise<IdName[]> {
@@ -120,12 +121,18 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     getStudyUserFromStudyId(studyId: number): Promise<StudyUser[]> {
         return firstValueFrom(this.http.get<StudyUser[]>(AppUtils.BACKEND_API_STUDY_DELETE_USER + '/' + studyId))
             .then((su : StudyUser[]) => {
-                return su;
+                if (!su) return [];
+                return su
+                    .map(s => Object.assign(new StudyUser(), s))
+                    .map(s => {
+                        s.expiration = s.expiration ? new Date(s.expiration) : null;
+                        return s;
+                    });
             });
     }
 
     fetchCurrentUserStudyDates(): Promise<Map<number, Date>> {
-        return firstValueFrom(this.http.get<{id: number, date: Date}[]>(AppUtils.BACKEND_API_STUDY_URL + '/studyUser/userExpirationDates')).then(dtos => {
+        return firstValueFrom(this.http.get<{id: number, date: Date}[]>(AppUtils.BACKEND_API_STUDY_URL + '/userExpirationDates')).then(dtos => {
             const result: Map<number, Date> = new Map();
             dtos?.forEach(dto => {
                 result.set(dto.id, new Date(dto.date));
