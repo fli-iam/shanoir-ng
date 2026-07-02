@@ -14,12 +14,9 @@
 
 package org.shanoir.ng.subjectstudy.dto;
 
-import java.util.List;
-
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
-import org.shanoir.ng.tag.model.TagDTO;
 
 /**
  * DTO for subject of a study.
@@ -42,8 +39,6 @@ public class SubjectStudyDTO {
     private SubjectType subjectType;
 
     private boolean physicallyInvolved;
-
-    private List<TagDTO> tags;
 
     private QualityTag qualityTag;
 
@@ -124,21 +119,6 @@ public class SubjectStudyDTO {
     public void setPhysicallyInvolved(boolean physicallyInvolved) {
         this.physicallyInvolved = physicallyInvolved;
     }
-
-    /**
-     * @return the tags
-     */
-    public List<TagDTO> getTags() {
-        return tags;
-    }
-
-    /**
-     * @param tags the tags to set
-     */
-    public void setTags(List<TagDTO> tags) {
-        this.tags = tags;
-    }
-
 
     public QualityTag getQualityTag() {
         return qualityTag;
