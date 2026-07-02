@@ -14,18 +14,9 @@
 
 package org.shanoir.ng.subjectstudy.service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
-import org.shanoir.ng.tag.model.Tag;
-import org.shanoir.ng.tag.repository.TagRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,12 +37,6 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
 
     @Autowired
     private SubjectStudyRepository subjectStudyRepository;
-
-    @Autowired
-    private SubjectRepository subjectRepository;
-
-    @Autowired
-    private TagRepository tagRepository;
 
     @Override
     public SubjectStudy findById(final Long id) {
@@ -79,14 +64,6 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
         subjectStudyOld.setPhysicallyInvolved(subjectStudyNew.isPhysicallyInvolved());
         subjectStudyOld.setSubjectStudyIdentifier(subjectStudyNew.getSubjectStudyIdentifier());
         subjectStudyOld.setSubjectType(subjectStudyNew.getSubjectType());
-        List<Tag> newTags = subjectStudyNew.getTags();
-        if (newTags != null && subjectStudyOld.getSubject() != null) {
-            List<Long> tagIds = newTags.stream().map(Tag::getId).filter(Objects::nonNull).collect(Collectors.toList());
-            Set<Tag> managedTags = new HashSet<>();
-            tagRepository.findAllById(tagIds).forEach(managedTags::add);
-            subjectStudyOld.getSubject().setTags(managedTags);
-            subjectRepository.save(subjectStudyOld.getSubject());
-        }
         return subjectStudyOld;
     }
 
