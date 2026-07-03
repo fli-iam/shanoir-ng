@@ -157,20 +157,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         }
     }
 
-    // Save dataset and dataset files in batch to avoid memory overflow
-    @Transactional
-    public void saveDatasetWithDatasetFileBatch(Dataset dataset) {
-        List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions(); // save list
-        dataset.setDatasetExpressions(List.of()); // empty it
-        Dataset savedDataset = datasetRepository.save(dataset); // save dataset without dataset expressions
-        for (DatasetExpression dexp : datasetExpressions) { // for each dataset expression
-            dexp.setDataset(savedDataset); // attach the saved dataset to the dataset expression
-            dexp.setDatasetFiles(List.of()); // empty the list of dataset files
-            DatasetExpression savedDexp = datasetExpressionRepository.save(dexp); // save the dataset expression without dataset files
-            datasetFileRepository.copyDatasetFiles(dexp.getId(), savedDexp.getId()); // copy dataset files in a super fast single query
-        }
-    }
-
     private DatasetAcquisition moveAcquisition(DatasetAcquisition oldAcq, Dataset newDs, Long studyId,
             Subject targetSubject, Map<Long, Examination> examMap, Long userId) {
         Examination newExam = null;
