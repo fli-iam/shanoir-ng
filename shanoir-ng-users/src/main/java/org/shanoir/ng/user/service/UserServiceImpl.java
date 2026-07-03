@@ -215,7 +215,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findById(final Long id) {
-        return userRepository.findById(id).orElse(null);
+        final User user = userRepository.findById(id).orElse(null);
+        // Two-factor and enabled state live in Keycloak; expose them to admins so the form can display them.
+        if (user != null && KeycloakUtil.isAdmin()) {
+            try {
+                user.setTwoFactorEnabled(keycloakClient.isTotpEnabled(user.getKeycloakId()));
+            } catch (SecurityException e) {
+                LOG.error("Could not read two-factor authentication status for user {}", id, e);
+            }
+            try {
+                user.setKeycloakEnabled(keycloakClient.isUserEnabled(user.getKeycloakId()));
+            } catch (SecurityException e) {
+                LOG.error("Could not read the enabled status for user {}", id, e);
+            }
+        }
+        return user;
     }
 
     @Override
@@ -273,6 +287,18 @@ public class UserServiceImpl implements UserService {
         final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
         savedUser.setKeycloakId(keycloakUserId); // Save keycloak id
         userRepository.save(savedUser);
+
+        // Two-factor authentication is managed in Keycloak. create() is admin-only (see @PreAuthorize),
+        // so honour the flag at creation time too. A new user has no OTP credential yet, so only
+        // enabling is meaningful.
+        if (Boolean.TRUE.equals(user.getTwoFactorEnabled())) {
+            try {
+                keycloakClient.enableTotp(keycloakUserId);
+            } catch (SecurityException e) {
+                LOG.error("Could not enable two-factor authentication for newly created user {}", savedUser.getId(), e);
+            }
+        }
+
         emailService.notifyCreateUser(savedUser, newPassword); // Send email to user
         return savedUser;
     }
@@ -339,7 +365,32 @@ public class UserServiceImpl implements UserService {
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.UPDATE_USER_EVENT, user.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS);
         eventService.publishEvent(event);
 
-        return updateUserOnAllSystems(userDb, user);
+        // Two-factor authentication is managed in Keycloak and only by admins.
+        if (KeycloakUtil.isAdmin() && user.getTwoFactorEnabled() != null) {
+            try {
+                if (user.getTwoFactorEnabled()) {
+                    keycloakClient.enableTotp(userDb.getKeycloakId());
+                } else {
+                    keycloakClient.disableTotp(userDb.getKeycloakId());
+                }
+            } catch (SecurityException e) {
+                LOG.error("Could not update two-factor authentication status for user {}", user.getId(), e);
+            }
+        }
+
+        final User updatedUser = updateUserOnAllSystems(userDb, user);
+
+        // The Keycloak enabled flag is rewritten by updateUserOnAllSystems, so apply the admin's
+        // activation choice afterwards to make it the final state. Only admins may change it.
+        if (KeycloakUtil.isAdmin() && user.getKeycloakEnabled() != null) {
+            try {
+                keycloakClient.setUserEnabled(userDb.getKeycloakId(), user.getKeycloakEnabled());
+            } catch (SecurityException e) {
+                LOG.error("Could not update the enabled status for user {}", user.getId(), e);
+            }
+        }
+
+        return updatedUser;
     }
 
     @Override

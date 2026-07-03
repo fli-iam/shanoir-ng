@@ -14,9 +14,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  */
 public class Study implements Comparable<Study> {
 
-    public static final String SC_MANDATORY = "MANDATORY";
+    public static final String SC_MANDATORY = "1";
 
-    public static final String SC_DISABLED = "DISABLED";
+    public static final String SC_DISABLED = "2";
 
     private Long id;
 
@@ -39,6 +39,16 @@ public class Study implements Comparable<Study> {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
     private Date endDate;
+
+    private StudyExtraDetails extraDetails;
+
+    public StudyExtraDetails getExtraDetails() {
+        return extraDetails;
+    }
+
+    public void setExtraDetails(StudyExtraDetails extraDetails) {
+        this.extraDetails = extraDetails;
+    }
 
     public Long getId() {
         return id;

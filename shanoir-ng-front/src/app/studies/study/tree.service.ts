@@ -240,9 +240,11 @@ export class TreeService {
             return Promise.all([studyLoaded]).then(() => {
                 return this.selectNode(this.selection)
             }).then(node => {
-                this.selectedNode = node;
-                this.treeAvailable = !!this.selectedNode;
-                return node;
+                if (node != null) {
+                    this.selectedNode = node;
+                    this.treeAvailable = !!this.selectedNode;
+                    return node;
+                }
             });
 
         }
@@ -269,6 +271,9 @@ export class TreeService {
         } else if (selection?.type == 'acquisition') {
             node = this.selectAcquisition(selection.entity as DatasetAcquisition);
         } else if (selection?.type == 'processing') {
+            if ((selection.entity as DatasetProcessing).parentId == null) {
+                return Promise.resolve(null);
+            }
             node = this.selectProcessing(selection.entity as DatasetProcessing);
         } else if (selection?.type == 'examination') {
             node = this.selectExamination(selection.entity as Examination);
@@ -406,10 +411,16 @@ export class TreeService {
         } else {
             processingPromise = Promise.resolve(processing);
         }
-        return processingPromise.then(proc => {
-            return this.selectDataset(proc.inputDatasets[0]?.id).then(parentDsNode => {
+
+        return processingPromise.then(async proc => {
+            const firstRealInput = await this.datasetProcessingService.getFirstRealInput(proc);
+            return this.selectDataset(firstRealInput).then(parentDsNode => {
                 return parentDsNode?.open().then(() => {
                     if (parentDsNode.processings != UNLOADED) {
+                        if (proc.parentId === null) {
+                            return parentDsNode.processings?.filter(pnode => pnode.id > proc.id)
+                                .sort((a, b) => a.id - b.id)[0];
+                        }
                         return parentDsNode.processings?.find(pnode => pnode.id == proc.id);
                     }
                 });

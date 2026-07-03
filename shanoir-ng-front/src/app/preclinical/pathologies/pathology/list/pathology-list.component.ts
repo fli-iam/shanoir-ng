@@ -27,7 +27,7 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
     selector: 'pathology-list',
     templateUrl: 'pathology-list.component.html',
     styleUrls: ['pathology-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class PathologiesListComponent extends BrowserPaginEntityListComponent<Pathology>{
     @ViewChild('pathologiesTableTable') table: TableComponent;

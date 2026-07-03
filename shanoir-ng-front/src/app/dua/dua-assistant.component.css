@@ -40,7 +40,7 @@
 .created-title { color: green; }
 
 .document-header { display: flex; width: 100%; margin-bottom: 50px; }
-.shanoir-logo { height: 60px; margin-left: -10px; margin-left: auto; background-color: var(--color-a); border-radius: 2px; }
+.shanoir-logo { height: 45px; padding: 10px; margin-left: -10px; margin-left: auto; background-color: var(--color-a); border-radius: 2px; }
 .other-logo { max-height: 150px; display: block; }
 form.other-logo { 
     display: flex;

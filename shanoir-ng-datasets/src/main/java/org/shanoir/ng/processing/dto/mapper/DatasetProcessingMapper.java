@@ -16,10 +16,7 @@ package org.shanoir.ng.processing.dto.mapper;
 
 import java.util.List;
 
-import org.mapstruct.DecoratedWith;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
+import org.mapstruct.*;
 import org.shanoir.ng.dataset.dto.DatasetWithProcessingsDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -40,13 +37,14 @@ public interface DatasetProcessingMapper {
     DatasetProcessingDTO datasetProcessingToDatasetProcessingDTO(DatasetProcessing processing);
 
     /**
-     * Map list of @DatasetProcessing to list of @DatasetProcessingDTO.
+     * Map list of @DatasetProcessing to list of @DatasetProcessingDTO with or without inputs
      *
      * @param datasetProcessings processings
      *            list of dataset processings.
+     * @param withInputs inclusion boolean
      * @return list of dataset processings DTO.
      */
-    List<DatasetProcessingDTO> datasetProcessingsToDatasetProcessingDTOs(List<DatasetProcessing> datasetProcessings);
+    List<DatasetProcessingDTO> datasetProcessingsToDatasetProcessingDTOs(List<DatasetProcessing> datasetProcessings, @Context boolean withInputs);
 
     @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
     DatasetWithProcessingsDTO datasetToDatasetWithProcessingsDTO(Dataset dataset);

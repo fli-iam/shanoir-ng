@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.processing.dto.mapper;
 
+import org.mapstruct.Context;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +41,11 @@ public abstract class DatasetProcessingDecorator implements DatasetProcessingMap
         return dto;
     }
 
-    @Override
-    public List<DatasetProcessingDTO> datasetProcessingsToDatasetProcessingDTOs(List<DatasetProcessing> processings) {
+    public List<DatasetProcessingDTO> datasetProcessingsToDatasetProcessingDTOs(List<DatasetProcessing> processings, @Context boolean withInputs) {
         // When loading multiple processing, remove input datasets to avoid loading too much data #2121
+        if (withInputs) {
+            return processings.stream().map(this::datasetProcessingToDatasetProcessingDTO).collect(Collectors.toList());
+        }
         return processings.stream().map(this::datasetProcessingToDatasetProcessingDTO).peek(dto -> dto.setInputDatasets(null)).collect(Collectors.toList());
     }
 }

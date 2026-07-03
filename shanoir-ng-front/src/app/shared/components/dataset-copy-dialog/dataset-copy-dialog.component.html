@@ -14,14 +14,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="overlay">
     <div class="main">
-        <h2 class="header">
-            Copy datasets to another study
-        </h2>
+        <h2 class="header">Copy datasets to another study</h2>
         <div class="body">
             <p class="info">
                 <i class="fas fa-info-circle"></i>
-                You need import rights on dataset's study AND destination study.
-                Also, note that the dataset's center will be added to destination study.
+                You need import rights on dataset's study AND destination study. Also, note that the dataset's center will be added to destination study.
             </p>
 
             <p>
@@ -32,22 +29,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <p>
                 <span class="label">Target study:</span>
                 <span class="content">
-                    <select-box class="studies-select-box"
-                            [optionArr]="studies"
-                            [(ngModel)]="selectedStudy"
-                            (ngModelChange)="pickStudy($event)"
-                            placeholder="Select a study to copy datasets to">
-                    </select-box>
+                    <select-box
+                        class="studies-select-box"
+                        [optionArr]="studies"
+                        [(ngModel)]="selectedStudy"
+                        (ngModelChange)="pickStudy($event)"
+                        placeholder="Select a study to copy datasets to"></select-box>
                 </span>
             </p>
             @if (subjectIds.length === 1) {
-            <p>
-                <span class="label">Subject name (optional):</span>
-                <span class="content">
-                    <input type="text" [(ngModel)]="subjectName" placeholder="Enter subject name for copied datasets"
-                        class="subject-name-input" />
-                </span>
-            </p>
+                <p>
+                    <span class="label">Subject name (optional):</span>
+                    <span class="content">
+                        <input type="text" [(ngModel)]="subjectName" placeholder="Enter subject name for copied datasets" class="subject-name-input" />
+                    </span>
+                </p>
             }
             @if (statusMessage) {
                 <div class="error">
@@ -61,9 +57,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <i class="fa-solid fa-copy"></i>
                     Copy
                 </button>
-                <button type="button" (click)="close()">
-                    Cancel
-                </button>
+                <button type="button" (click)="close()">Cancel</button>
             </div>
         </div>
     </div>

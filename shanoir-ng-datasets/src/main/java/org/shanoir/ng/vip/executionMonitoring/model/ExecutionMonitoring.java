@@ -17,6 +17,8 @@ package org.shanoir.ng.vip.executionMonitoring.model;
 import jakarta.persistence.*;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 
+import java.util.LinkedHashMap;
+
 /**
  * extension of the DatasetProcessing for VIP execution context
  *
@@ -45,6 +47,9 @@ public class ExecutionMonitoring extends DatasetProcessing {
     private Long startDate;
 
     private Long endDate;
+
+    @Transient
+    private LinkedHashMap<String, LinkedHashMap<String, Object>> jobs;
 
     public String getIdentifier() {
         return identifier;
@@ -118,4 +123,11 @@ public class ExecutionMonitoring extends DatasetProcessing {
         this.outputProcessing = outputProcessing;
     }
 
+    public LinkedHashMap<String, LinkedHashMap<String, Object>> getJobs() {
+        return jobs;
+    }
+
+    public void setJobs(LinkedHashMap<String, LinkedHashMap<String, Object>> jobs) {
+        this.jobs = jobs;
+    }
 }

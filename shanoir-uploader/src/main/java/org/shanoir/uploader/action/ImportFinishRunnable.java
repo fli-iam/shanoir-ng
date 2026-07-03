@@ -56,7 +56,7 @@ public class ImportFinishRunnable implements Runnable {
             try {
                 File importJobJson = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
                 importJobJson.createNewFile();
-                Util.objectMapper.writeValue(importJobJson, importJob);
+                Util.mapper.writeValue(importJobJson, importJob);
             } catch (IOException e) {
                 logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
             }

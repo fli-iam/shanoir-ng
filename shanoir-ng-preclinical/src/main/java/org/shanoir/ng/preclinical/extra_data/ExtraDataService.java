@@ -44,6 +44,8 @@ public interface ExtraDataService<T> {
      */
     List<T> findAllByExaminationId(Long id);
 
+    List<T> findAll();
+
     /**
      * Find examination extra data by its id.
      *

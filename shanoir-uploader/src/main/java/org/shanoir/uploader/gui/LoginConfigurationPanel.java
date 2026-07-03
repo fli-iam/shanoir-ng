@@ -30,6 +30,8 @@ import javax.swing.border.EmptyBorder;
 
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.init.LoginPanelActionListener;
+import org.shanoir.uploader.action.init.AuthCancelActionListener;
+import org.shanoir.uploader.action.init.AuthCancelActionListener.CancelTarget;
 import org.shanoir.uploader.action.init.StartupStateContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,11 +52,19 @@ public class LoginConfigurationPanel extends JPanel {
     public JPasswordField passwordText;
     public JButton connect;
     public JButton connectLater;
+    public JButton cancel;
 
     @Autowired
     private LoginPanelActionListener loginPanelActionListener;
 
+    @Autowired
+    private AuthCancelActionListener authCancelActionListener;
+
     public void configure(StartupStateContext sSC) {
+        this.removeAll();
+        this.revalidate();
+        this.repaint();
+
         Container container = new Container();
         container.setLayout(new GridBagLayout());
         GridBagConstraints shanoirStartupGBC = new GridBagConstraints();
@@ -121,9 +131,20 @@ public class LoginConfigurationPanel extends JPanel {
         shanoirStartupGBC.gridy = 3;
         container.add(connectLater, shanoirStartupGBC);
 
+        cancel = new JButton(ShUpConfig.resourceBundle.getString("shanoir.uploader.cancel"));
+        cancel.setPreferredSize(new Dimension(200, 20));
+        cancel.setHorizontalAlignment(SwingConstants.CENTER);
+        shanoirStartupGBC.weightx = 0.7;
+        shanoirStartupGBC.fill = GridBagConstraints.HORIZONTAL;
+        shanoirStartupGBC.insets = new Insets(5, 5, 5, 5);
+        shanoirStartupGBC.gridx = 2;
+        shanoirStartupGBC.gridy = 4;
+        container.add(cancel, shanoirStartupGBC);
+
         loginPanelActionListener.configure(this, sSC);
+        authCancelActionListener.configure(sSC, CancelTarget.SELECT_PROFILE);
         connect.addActionListener(loginPanelActionListener);
         connectLater.addActionListener(loginPanelActionListener);
+        cancel.addActionListener(authCancelActionListener);
     }
-
 }

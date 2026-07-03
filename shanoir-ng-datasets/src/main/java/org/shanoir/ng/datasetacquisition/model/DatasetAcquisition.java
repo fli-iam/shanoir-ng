@@ -39,7 +39,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Inheritance;
@@ -122,6 +124,12 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
     private List<DatasetAcquisition> copies;
+
+    /** List of extra files directly attached to the dataset acquisition. */
+    @ElementCollection
+    @CollectionTable(name = "acquisition_extra_data_file_path", joinColumns = @JoinColumn(name = "dataset_acquisition_id"))
+    @Column(name = "path")
+    private List<String> extraDataFilePathList;
 
     private LocalDateTime acquisitionStartTime;
 
@@ -227,6 +235,21 @@ public abstract class DatasetAcquisition extends AbstractEntity {
      */
     public void setSoftwareRelease(String softwareRelease) {
         this.softwareRelease = softwareRelease;
+    }
+
+    /**
+     * @return the extraDataFilePathList
+     */
+    public List<String> getExtraDataFilePathList() {
+        return extraDataFilePathList;
+    }
+
+    /**
+     * @param extraDataFilePathList
+     *            the extraDataFilePathList to set
+     */
+    public void setExtraDataFilePathList(List<String> extraDataFilePathList) {
+        this.extraDataFilePathList = extraDataFilePathList;
     }
 
     /**

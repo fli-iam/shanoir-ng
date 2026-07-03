@@ -55,6 +55,11 @@ public class PhysiologicalDataServiceImpl implements ExtraDataService<Physiologi
     }
 
     @Override
+    public List<PhysiologicalData> findAll() {
+        return Utils.toList(physioDataRepository.findAll());
+    }
+
+    @Override
     public PhysiologicalData findById(final Long id) {
         return physioDataRepository.findById(id).orElse(null);
     }

@@ -7,12 +7,13 @@ import { Pipeline } from 'src/app/vip/models/pipeline';
 import { ExecutionDataService } from '../execution.data-service';
 
 import { PipelineService } from "./pipeline/pipeline.service";
+import { PipelineComponent } from './pipeline/pipeline.component';
 
 @Component({
     selector: 'app-pipelines',
     templateUrl: './pipelines.component.html',
     styleUrls: ['./pipelines.component.css'],
-    standalone: false
+    imports: [PipelineComponent]
 })
 export class PipelinesComponent implements OnInit {
 

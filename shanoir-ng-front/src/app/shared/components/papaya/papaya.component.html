@@ -11,11 +11,23 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<button [disabled]="isLoading() || !(params || loadingCallback)" *ngIf="!downloaded" (click)="load()">
-    <span *ngIf="!(isLoading() || !(params || loadingCallback))" class="right-icon">Show preview<i class="fas fa-search"></i></span>
-    <span *ngIf="isLoading() || !(params || loadingCallback)" class="loader right-icon">Loading<i class="fa fa-cog fa-spin"></i></span>
-</button>
-<div [hidden]="!downloaded || !(params || loadingCallback)" class="preview papaya" data-params="params"></div> 
-<div *ngIf="error" class="error">
-    Sorry, there was an error with the papaya viewer.
-</div>
+@if (!downloaded) {
+    <button [disabled]="isLoading() || !(params || loadingCallback)" (click)="load()">
+        @if (!(isLoading() || !(params || loadingCallback))) {
+            <span class="right-icon">
+                Show preview
+                <i class="fas fa-search"></i>
+            </span>
+        }
+        @if (isLoading() || !(params || loadingCallback)) {
+            <span class="loader right-icon">
+                Loading
+                <i class="fa fa-cog fa-spin"></i>
+            </span>
+        }
+    </button>
+}
+<div [hidden]="!downloaded || !(params || loadingCallback)" class="preview papaya" data-params="params"></div>
+@if (error) {
+    <div class="error">Sorry, there was an error with the papaya viewer.</div>
+}

@@ -13,29 +13,32 @@
  */
 
 import { Component } from '@angular/core';
+import { DecimalPipe, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 import { Task, TaskState } from '../async-tasks/task.model';
 import { TaskService } from '../async-tasks/task.service';
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DataUserAgreement } from '../dua/shared/dua.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
-import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 import { StudyLight } from '../studies/shared/study.dto';
 import { StudyService } from '../studies/shared/study.service';
 import { AccessRequest } from '../users/access-request/access-request.model';
 import { User } from '../users/shared/user.model';
 import { UserService } from '../users/shared/user.service';
+import { DUASigningComponent } from '../dua/dua-signing/dua-signing.component';
+import { EventTypePipe } from '../async-tasks/event.pipe';
+
+import { ChallengeBlockComponent } from './challenge/challenge-block.component';
 
 @Component({
     selector: 'home',
     templateUrl: 'home.component.html',
     styleUrls: ['home.component.css'],
-    standalone: false
+    imports: [DUASigningComponent, ChallengeBlockComponent, RouterLink, DecimalPipe, DatePipe, EventTypePipe]
 })
 
 export class HomeComponent {
-
-    shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
 
     challengeDua: DataUserAgreement;
     challengeStudies: StudyLight[];

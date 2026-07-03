@@ -14,9 +14,23 @@
 
 package org.shanoir.ng.dataset.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -34,6 +48,7 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -43,14 +58,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class DatasetDownloaderServiceImpl {
@@ -96,6 +107,9 @@ public class DatasetDownloaderServiceImpl {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @Autowired
+    private StorageService storageService;
+
     @PostConstruct
     protected void initialize() {
         // Set timeout to 5mn (consider nifti reconversion can take some time)
@@ -117,7 +131,7 @@ public class DatasetDownloaderServiceImpl {
 
         // Prepare the HTTP response for a zip download
         response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", "attachment;filename=" + getFileName(datasets));
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + getFileName(datasets) + "\"");
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
             Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
@@ -221,7 +235,26 @@ public class DatasetDownloaderServiceImpl {
                 path += "/Exam_" + relevantDataset.getDatasetAcquisition().getExamination().getComment() + "_id_" + relevantDataset.getDatasetAcquisition().getExamination().getId();
             }
 
-            if (sorting.contains("acquisition")) {
+            if (sorting.contains("acquisitionDate")) {
+                String dateTime;
+                if (relevantDataset.getDatasetAcquisition().getAcquisitionStartTime() == null) {
+                    Map<String, String> dateTimeMap = datasetService.getSpecificDicomMetadataValues(relevantDataset, List.of("00080022", "00080032"));
+                    if (dateTimeMap.containsKey("00080022")) {
+                        dateTime = LocalDate.parse(dateTimeMap.get("00080022"), DateTimeFormatter.ofPattern("yyyyMMdd")).format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+                    } else {
+                        dateTime = "NoDate";
+                    }
+
+                    if (dateTimeMap.containsKey("00080032") && dateTimeMap.get("00080032").length() > 4) {
+                        dateTime += "_" + dateTimeMap.get("00080032").substring(0, 2) + "-" + dateTimeMap.get("00080032").substring(2, 4);
+                    } else {
+                        dateTime += "_NoTime";
+                    }
+                } else {
+                    dateTime = relevantDataset.getDatasetAcquisition().getAcquisitionStartTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm"));
+                }
+                path += "/Acq_date_" + dateTime + "_acq_id_" + relevantDataset.getDatasetAcquisition().getId();
+            } else if (sorting.contains("acquisition")) {
                 path += "/Acq_id_" + relevantDataset.getDatasetAcquisition().getId();
             }
             datasetDownloadPath.put(dataset.getId(), path);
@@ -229,7 +262,7 @@ public class DatasetDownloaderServiceImpl {
         return datasetDownloadPath;
     }
 
-    protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String outputFormat, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, Map<String, List<String>> datasetDownloadNameListPerPath) throws IOException, RestServiceException {
+    protected void manageDatasetDownload(Dataset dataset, Map<Long, DatasetDownloadError> downloadResults, ZipOutputStream zipOutputStream, String subjectName, String datasetFilePath, String outputFormat, boolean withManifest, Map<Long, List<String>> filesByAcquisitionId, Long converterId, Map<String, List<String>> datasetDownloadNameListPerPath) throws Exception {
         if (!dataset.isDownloadable()) {
             downloadResults.put(dataset.getId(), new DatasetDownloadError("Dataset not downloadable", DatasetDownloadError.ERROR));
             return;
@@ -252,14 +285,15 @@ public class DatasetDownloaderServiceImpl {
             try {
                 Long converterToUse = (converterId != null) ? converterId : DEFAULT_NIFTI_CONVERTER_ID;
                 tempDir = convertToNifti(dataset, pathURLs, converterToUse, downloadResult, subjectName);
-                DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
+                DatasetFileUtils.copyFilesForDownload(storageService, pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
             } finally {
                 LOG.info("Deleting temporary conversion folder [{}]", tempDir.getAbsolutePath());
                 FileUtils.deleteQuietly(tempDir);
             }
         } else { // Download the other types
             DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, format, downloadResult);
-            DatasetFileUtils.copyFilesForDownload(pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
+            DatasetFileUtils.copyFilesForDownload(storageService,
+                    pathURLs, zipOutputStream, dataset, subjectName, true, datasetFilePath, datasetDownloadNameListPerPath);
         }
         if (downloadResult.getStatus() == null)
             downloadResults.remove(dataset.getId());
@@ -347,4 +381,5 @@ public class DatasetDownloaderServiceImpl {
         }
         return datasetFilePath;
     }
+
 }

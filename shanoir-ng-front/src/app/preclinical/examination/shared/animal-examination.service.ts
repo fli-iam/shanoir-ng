@@ -14,7 +14,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpResponse, HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 
 import { Examination } from '../../../examinations/shared/examination.model';
 import * as AppUtils from '../../../utils/app.utils';
@@ -33,17 +33,17 @@ export class AnimalExaminationService extends EntityService<Examination>{
     getEntityInstance() { return new Examination(); }
 
     getPage(pageable: Pageable): Promise<Page<Examination>> {
-        return this.http.get<Page<Examination>>(
+        return firstValueFrom(this.http.get<Page<Examination>>(
             AppUtils.BACKEND_API_EXAMINATION_PRECLINICAL_URL+'/1', 
             { 'params': pageable.toParams() }
-        ).toPromise();
+        ));
     }
 
     getBrukerArchive(examinationId): Promise<HttpResponse<Blob>> {
-        return this.http.get(
+        return firstValueFrom(this.http.get(
             AppUtils.BACKEND_API_EXAMINATION_PRECLINICAL_URL+'/examinationId/' + examinationId  + '/export',
             { observe: 'response', responseType: 'blob' }
-        ).toPromise();
+        ));
     }
     
     postFile(fileToUpload: File, examId: number): Observable<any> {

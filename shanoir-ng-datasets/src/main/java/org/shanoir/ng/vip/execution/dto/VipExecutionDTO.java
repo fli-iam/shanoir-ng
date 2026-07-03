@@ -16,6 +16,7 @@ package org.shanoir.ng.vip.execution.dto;
 
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,14 +28,15 @@ public class VipExecutionDTO {
     private String pipelineIdentifier;
     private int timeout;
     private ExecutionStatus status;
-    private Map<String, java.lang.Object> inputValues;
+    private Map<String, List<String>> inputValues;
     private Map<String, List<java.lang.Object>> returnedFiles;
     private String studyIdentifier;
     private Integer errorCode;
     private Long startDate;
     private Long endDate;
-    private String resultsLocation;
+    private List<String> resultsLocation;
     private String sorting;
+    private LinkedHashMap<String, LinkedHashMap<String, Object>> jobs;
 
     public VipExecutionDTO() { }
 
@@ -83,11 +85,11 @@ public class VipExecutionDTO {
         this.status = status;
     }
 
-    public Map<String, java.lang.Object> getInputValues() {
+    public Map<String, List<String>> getInputValues() {
         return inputValues;
     }
 
-    public void setInputValues(Map<String, java.lang.Object> inputValues) {
+    public void setInputValues(Map<String, List<String>> inputValues) {
         this.inputValues = inputValues;
     }
 
@@ -131,11 +133,11 @@ public class VipExecutionDTO {
         this.endDate = endDate;
     }
 
-    public String getResultsLocation() {
+    public List<String> getResultsLocation() {
         return resultsLocation;
     }
 
-    public void setResultsLocation(String resultsLocation) {
+    public void setResultsLocation(List<String> resultsLocation) {
         this.resultsLocation = resultsLocation;
     }
 
@@ -145,5 +147,13 @@ public class VipExecutionDTO {
 
     public void setSorting(String sorting) {
         this.sorting = sorting;
+    }
+
+    public LinkedHashMap<String, LinkedHashMap<String, Object>> getJobs() {
+        return jobs;
+    }
+
+    public void setJobs(LinkedHashMap<String, LinkedHashMap<String, Object>> jobs) {
+        this.jobs = jobs;
     }
 }
