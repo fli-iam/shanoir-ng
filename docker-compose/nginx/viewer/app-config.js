@@ -25,6 +25,14 @@ window.config = {
 	modes: [],
 	experimentalStudyBrowserSort: true,
 	showStudyList: false,
+	customizationService: [
+		{
+			// Show only the examination the viewer was opened with:
+			'studyBrowser.studyMode': {
+				$set: 'primary',
+			},
+		},
+	],
 	maxNumRequests: {
 		interaction: SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS,
 		thumbnail: SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS,
