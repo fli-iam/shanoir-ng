@@ -12,21 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, forwardRef, inject, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import { IdName } from 'src/app/shared/models/id-name.model';
 import { ConsoleService } from 'src/app/shared/console/console.service';
-import { LocalDateFormatPipe } from 'src/app/shared/localLanguage/localDateFormat.pipe';
 import { DatepickerComponent } from 'src/app/shared/date-picker/date-picker.component';
-import { DoubleAwesomeComponent } from "src/app/shared/double-awesome/double-awesome.component";
+import { LocalDateFormatPipe } from 'src/app/shared/localLanguage/localDateFormat.pipe';
+import { IdName } from 'src/app/shared/models/id-name.model';
+import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 
 import { Center } from '../../centers/shared/center.model';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { User } from '../../users/shared/user.model';
@@ -35,8 +36,6 @@ import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
-import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
-import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 
 @Component({
     selector: 'studyuser-list',
@@ -49,7 +48,7 @@ import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
             multi: true,
         }
     ],
-    imports: [FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent, LocalDateFormatPipe, DatepickerComponent, DoubleAwesomeComponent],
+    imports: [FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent, LocalDateFormatPipe, DatepickerComponent],
 })
 
 export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
