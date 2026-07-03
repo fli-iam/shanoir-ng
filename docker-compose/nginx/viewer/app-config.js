@@ -12,6 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+// Shim Node-only globals that leak into a lazily loaded OHIF 3.12 browser
+// chunk (ReferenceError: __filename is not defined -> black screen on the first
+// load). Defining them on the global object lets the bare references resolved.
+// Safe to remove if the upstream ohif/app image stops referencing them.
+window.__filename = window.__filename || '';
+window.__dirname = window.__dirname || '/';
+
 window.config = {
 	routerBasename: null,
 	extensions: [],

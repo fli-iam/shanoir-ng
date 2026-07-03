@@ -132,13 +132,16 @@ public class StudyApiController implements StudyApi {
             if (!CollectionUtils.isEmpty(duas)) {
                 this.dataUserAgreementService.deleteAll(duas);
             }
+            studyService.deleteById(studyId);
             storageService.deleteDirectoryStudyData(studyId);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_STUDY_EVENT, studyId.toString(),
                     KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            LOG.error("Error while deleting protocol file {}", e);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            LOG.error("Error while deleting study {}", studyId, e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
