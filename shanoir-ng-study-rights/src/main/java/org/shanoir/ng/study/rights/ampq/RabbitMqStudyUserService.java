@@ -68,6 +68,15 @@ public class RabbitMqStudyUserService {
         }
     }
 
+    public void receiveStudyUsers(Iterable<StudyUserCommand> commands) throws AmqpRejectAndDontRequeueException {
+        try {
+            LOG.debug("Received study-user commands : {}", commands);
+            service.processCommands(commands);
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException("Study User Update rejected !!!", e);
+        }
+    }
+
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
