@@ -87,7 +87,7 @@ export class HomeComponent {
             this.loaded = true;
             if (this.admin || !this.challengeDua) {
                 this.fetchChallengeStudies().then(() => {
-                    this.computeExpiringStudies(this.allStudies);
+                    this.computeExpiringStudies();
                 });
                 if (this.admin) {
                     this.fetchAccountRequests();
@@ -122,7 +122,7 @@ export class HomeComponent {
         });
     }
 
-    private computeExpiringStudies(studies: StudyLight[]) {
+    private computeExpiringStudies() {
         this.studyService.fetchCurrentUserStudyDates().then(expirationDates => {
             this.expiringDates = expirationDates;
             if (expirationDates) {

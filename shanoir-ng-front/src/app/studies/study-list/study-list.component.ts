@@ -11,12 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 import { Filter } from 'src/app/shared/components/table/pageable.model';
+import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
@@ -26,9 +26,9 @@ import { TableComponent } from '../../shared/components/table/table.component';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from "../shared/study-user.model";
+import { StudyLight } from '../shared/study.dto';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
-import { StudyLight } from '../shared/study.dto';
 
 
 @Component({
@@ -38,7 +38,7 @@ import { StudyLight } from '../shared/study.dto';
     imports: [TableComponent]
 })
 
-export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
+export class StudyListComponent extends BrowserPaginEntityListComponent<Study> implements OnInit {
 
     @ViewChild('table', { static: false }) table: TableComponent;
     private studyIdsForCurrentUser: number[];

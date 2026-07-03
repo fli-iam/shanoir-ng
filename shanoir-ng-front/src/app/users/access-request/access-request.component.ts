@@ -13,12 +13,12 @@
  */
 
 import { Component } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { IdName } from 'src/app/shared/models/id-name.model';
 import { DatepickerComponent } from 'src/app/shared/date-picker/date-picker.component';
+import { IdName } from 'src/app/shared/models/id-name.model';
 
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
