@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
@@ -117,6 +118,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
      * @see org.shanoir.ng.dataset.modality.DatasetStrategy#generateSingleMrDataset(org.dcm4che3.data.Attributes, org.shanoir.ng.importer.dto.Serie, org.shanoir.ng.importer.dto.Dataset, int, org.shanoir.ng.importer.dto.ImportJob)
      */
     @Override
+    @Transactional(readOnly = true)
     public MrDataset generateSingleDataset(Attributes attributes, Serie serie, Dataset dataset, int datasetIndex,
             Long subjectId) throws Exception {
         MrDataset mrDataset = new MrDataset();
