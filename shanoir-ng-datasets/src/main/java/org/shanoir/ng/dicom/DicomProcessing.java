@@ -131,26 +131,6 @@ public class DicomProcessing {
         }
     }
 
-    public ExaminationAttributes<String> getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws ShanoirException {
-        ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
-        if (study != null) {
-            for (Serie serie : study.getSeries()) {
-                attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
-            }
-        }
-        return attributes;
-    }
-
-    public static ExaminationAttributes<String> getDicomExaminationAttributes(Study study) throws ShanoirException {
-        ExaminationAttributes<String> attributes = new ExaminationAttributes<>(wadoURLHandler);
-        if (study != null) {
-            for (Serie serie : study.getSeries()) {
-                attributes.addAcquisitionAttributes(serie.getSeriesInstanceUID(), getDicomAcquisitionAttributes(serie));
-            }
-        }
-        return attributes;
-    }
-
     public static AcquisitionAttributes<String> getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
         AcquisitionAttributes<String> attributes = new AcquisitionAttributes<>();
         String sopUID = null;
