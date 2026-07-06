@@ -81,7 +81,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -676,6 +675,14 @@ public class DatasetServiceImpl implements DatasetService {
         List<Long> ids = datasets.stream().map(Dataset::getId).collect(Collectors.toList());
         Set<Long> withExpressions = repository.findDatasetIdsHavingExpressions(ids);
         datasets.forEach(d -> d.setInPacs(withExpressions.contains(d.getId())));
+    }
+
+    public Dataset getFirstRealInput(Dataset dataset) {
+        if (dataset.getDatasetProcessing() != null) {
+            return getFirstRealInput(repository.findByIdWithProcessingAncestors(dataset.getId()).getDatasetProcessing().getInputDatasets().get(0));
+        } else {
+            return dataset;
+        }
     }
 
     protected void fillMetadataFile(File metadataFile, List<Long> datasetIds, List<String> metadataKeys) throws Exception {

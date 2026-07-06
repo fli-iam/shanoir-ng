@@ -38,6 +38,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import javax.xml.crypto.Data;
+
 /**
  * Dataset service.
  *
@@ -193,4 +195,11 @@ public interface DatasetService {
      * @param datasets a list of datasets
      */
     void populateInPacs(List<Dataset> datasets);
+
+    /**
+     * Return the first ancestor which has not been produced by a pipeline
+     *
+     * @param dataset a dataset
+     */
+    Dataset getFirstRealInput(Dataset dataset);
 }

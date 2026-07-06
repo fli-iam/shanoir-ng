@@ -42,6 +42,7 @@ import org.dcm4che3.io.DicomOutputStream;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.dicom.WADOURLHandler;
@@ -132,6 +133,9 @@ public class WADODownloaderService {
 
     private WebClient webClient;
 
+    @Autowired
+    private DatasetService datasetService;
+
     @PostConstruct
     public void initWebClient() {
         this.webClient = webClientBuilder
@@ -195,7 +199,7 @@ public class WADODownloaderService {
     private String buildFileName(String subjectName, Dataset dataset, String datasetFilePath, String instanceUID) {
         String serieDescription = dataset.getUpdatedMetadata().getName();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-        dataset = dataset.getFirstRealInput();
+        dataset = datasetService.getFirstRealInput(dataset);
         String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
         String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
         // Replace all forbidden characters.

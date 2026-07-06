@@ -23,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -44,6 +45,7 @@ import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceReposi
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -135,7 +137,11 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
 
-    public boolean canProcess(String pipelineIdentifier) throws ResultHandlerException {
+    @Autowired
+    @Lazy
+    private DatasetService datasetService;
+
+   public boolean canProcess(String pipelineIdentifier) throws ResultHandlerException {
         if (Objects.isNull(pipelineIdentifier)) {
             throw new ResultHandlerException("Pipeline identifier can not be null", null);
         }
@@ -332,7 +338,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             }
 
             if (Objects.isNull(examinationId)) {
-                examinationId = datasets.get(0).getFirstRealInput().getDatasetAcquisition().getExamination().getId();
+                examinationId = datasetService.getFirstRealInput(datasets.get(0)).getDatasetAcquisition().getExamination().getId();
             }
 
             for (Dataset ds : datasets) {

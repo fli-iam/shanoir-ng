@@ -94,8 +94,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Query("SELECT SUM(expr.size) FROM DatasetExpression expr WHERE expr.size IS NOT NULL")
     Long findDatasetsExpressionSizesSum();
 
-    List<Dataset> deleteByDatasetProcessingId(Long id);
-
     boolean existsByTagsContains(StudyTag tag);
 
     @Query("SELECT DISTINCT ds FROM Dataset ds LEFT JOIN ds.processings p "
@@ -214,8 +212,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             """)
     Set<Long> findRelatedStudyIds(@Param("id") Long id);
 
-
-
     @Query(value = "SELECT ds.id FROM dataset ds "
             + "JOIN dataset_metadata AS meta ON ds.updated_metadata_id = meta.id "
             + "WHERE ds.dataset_acquisition_id IN (?1) "
@@ -228,13 +224,17 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "AND (?2 = '' OR meta.name LIKE ?2)", nativeQuery = true)
     List<Long> findFilteredIdsByDatasetAcquisitionId(Long acquisitionId, String filter);
 
-    List<Dataset> findByIdIn(List<Long> ids);
-
     @Query(value = "SELECT dataset.id FROM dataset "
             + "JOIN dataset_acquisition acq ON acq.id = dataset.dataset_acquisition_id "
             + "WHERE acq.examination_id = ?1", nativeQuery = true)
     List<Long> findIdsByExaminationId(Long examinationId);
 
     @Query("SELECT DISTINCT de.dataset.id FROM DatasetExpression de WHERE de.dataset.id IN :ids")
-    Set<Long> findDatasetIdsHavingExpressions(@Param("ids") List<Long> ids);
+    Set<Long> findDatasetIdsHavingExpressions(List<Long> ids);
+
+    @Query("SELECT dataset FROM Dataset dataset " +
+            "JOIN FETCH dataset.datasetProcessing AS dp " +
+            "JOIN FETCH dp.inputDatasets " +
+            "WHERE dataset.id = :id")
+    Dataset findByIdWithProcessingAncestors(Long id);
 }
