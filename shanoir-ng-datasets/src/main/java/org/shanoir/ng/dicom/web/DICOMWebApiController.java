@@ -196,19 +196,28 @@ public class DICOMWebApiController implements DICOMWebApi {
         if (allParams.containsKey(INCLUDEFIELD)) {
             includefield = allParams.get(INCLUDEFIELD);
         }
-        if (allParams.containsKey(SERIES_INSTANCE_UID)) {
-            seriesInstanceUID = seriesInstanceUIDHandler.resolveSeriesInstanceUID(allParams.get(SERIES_INSTANCE_UID));
+        Map<String, String> seriesToVirtualUIDs;
+        String filterUID = allParams.get(SERIES_INSTANCE_UID);
+        if (seriesInstanceUIDHandler.isAcquisitionUID(filterUID)) {
+            // an acquisition can span multiple series in the PACS (SEG/SR
+            // datasets), so query all series of the study and filter locally
+            // on the full series set of the acquisition
+            seriesToVirtualUIDs = seriesInstanceUIDHandler
+                    .findSeriesToVirtualUIDsOfAcquisition(seriesInstanceUIDHandler.extractAcquisitionId(filterUID));
+        } else {
+            if (filterUID != null) {
+                seriesInstanceUID = seriesInstanceUIDHandler.resolveSeriesInstanceUID(filterUID);
+            }
+            Long examinationID = studyInstanceUIDAndSubjectNameHandler.extractExaminationId(examinationUID);
+            seriesToVirtualUIDs = seriesInstanceUIDHandler.findSeriesToVirtualUIDs(examinationID);
         }
         if (studyInstanceUID != null) {
             String response = dicomWebService.findSeriesOfStudy(studyInstanceUID, includefield, seriesInstanceUID);
             if (response != null) {
                 JsonNode root = mapper.readTree(response);
-                Long examinationID = studyInstanceUIDAndSubjectNameHandler.extractExaminationId(examinationUID);
-                Map<String, String> seriesToAcquisitionUIDs = seriesInstanceUIDHandler
-                        .findSeriesToAcquisitionUIDs(examinationID);
-                root = filterAndSortSeries(root, seriesToAcquisitionUIDs.keySet());
+                root = filterAndSortSeries(root, seriesToVirtualUIDs.keySet());
                 studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUIDAndPatientInfo(root, examinationUID, false, subjectName);
-                seriesInstanceUIDHandler.replaceSeriesInstanceUIDs(root, seriesToAcquisitionUIDs);
+                seriesInstanceUIDHandler.replaceSeriesInstanceUIDs(root, seriesToVirtualUIDs);
                 return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -249,8 +258,13 @@ public class DICOMWebApiController implements DICOMWebApi {
             String response = dicomWebService.findSerieMetadataOfStudy(studyInstanceUID, serieInstanceUID);
             JsonNode root = mapper.readTree(response);
             studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUIDAndPatientInfo(root, examinationUID, false, subjectName);
-            if (!serieInstanceUID.equals(serieId)) {
-                seriesInstanceUIDHandler.replaceSeriesInstanceUID(root, serieInstanceUID, serieId);
+            // replace all real series UIDs of the exam, not only the requested
+            // one: SEG/SR objects reference their source series in the
+            // ReferencedSeriesSequence and the viewer only knows virtual UIDs
+            Long examinationID = studyInstanceUIDAndSubjectNameHandler.extractExaminationId(examinationUID);
+            Map<String, String> seriesToVirtualUIDs = seriesInstanceUIDHandler.findSeriesToVirtualUIDs(examinationID);
+            for (Map.Entry<String, String> seriesToVirtualUID : seriesToVirtualUIDs.entrySet()) {
+                seriesInstanceUIDHandler.replaceSeriesInstanceUID(root, seriesToVirtualUID.getKey(), seriesToVirtualUID.getValue());
             }
             rewriteBulkDataURIs(root, studyInstanceUID, examinationUID, serieInstanceUID, serieId);
             return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);

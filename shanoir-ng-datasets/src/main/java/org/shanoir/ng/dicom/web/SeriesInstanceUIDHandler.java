@@ -272,4 +272,10 @@ public class SeriesInstanceUIDHandler {
         return id;
     }
 
+    public Long extractDatasetId(String datasetUID) {
+        String datasetUIDWithoutPrefix = datasetUID.substring(DATASET_PREFIX.length());
+        Long id = Long.parseLong(datasetUIDWithoutPrefix);
+        return id;
+    }
+
 }
