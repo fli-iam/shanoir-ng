@@ -30,6 +30,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -43,6 +44,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -70,6 +72,15 @@ public class DICOMWebApiController implements DICOMWebApi {
     private static final String SERIES_INSTANCE_UID = "SeriesInstanceUID";
 
     private static final String VALUE = "Value";
+
+    private static final String BULK_DATA_URI = "BulkDataURI";
+
+    private static final String BULKDATA_PATH = "/bulkdata/";
+
+    private static final String STUDIES_PATH = "/studies/";
+
+    @Value("${viewer.ohif.url.base}")
+    private String viewerBaseUrl;
 
     @Autowired
     private ExaminationService examinationService;
@@ -241,9 +252,44 @@ public class DICOMWebApiController implements DICOMWebApi {
             if (!serieInstanceUID.equals(serieId)) {
                 seriesInstanceUIDHandler.replaceSeriesInstanceUID(root, serieInstanceUID, serieId);
             }
+            rewriteBulkDataURIs(root, studyInstanceUID, examinationUID, serieInstanceUID, serieId);
             return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     * The PACS does not inline large binary attributes, e.g. overlay data
+     * (60xx3000), in the serie metadata, but references them with an absolute
+     * BulkDataURI, that points to the PACS itself, only reachable within the
+     * internal Docker network, and contains the real UIDs. So rewrite each
+     * BulkDataURI to the public DICOMWeb facade URL with the virtual UIDs:
+     * the viewer can reach it and never sees real UIDs.
+     */
+    private void rewriteBulkDataURIs(JsonNode root, String studyInstanceUID, String examinationUID,
+            String serieInstanceUID, String acquisitionUID) {
+        if (root.isArray()) {
+            for (JsonNode element : root) {
+                rewriteBulkDataURIs(element, studyInstanceUID, examinationUID, serieInstanceUID, acquisitionUID);
+            }
+        } else if (root.isObject()) {
+            JsonNode bulkDataURINode = root.get(BULK_DATA_URI);
+            if (bulkDataURINode != null && bulkDataURINode.isTextual()) {
+                String bulkDataURI = bulkDataURINode.asText();
+                int index = bulkDataURI.indexOf(STUDIES_PATH);
+                if (index != -1) {
+                    String rewritten = viewerBaseUrl + bulkDataURI.substring(index)
+                            .replace(studyInstanceUID, examinationUID)
+                            .replace(serieInstanceUID, acquisitionUID);
+                    ((ObjectNode) root).put(BULK_DATA_URI, rewritten);
+                }
+            }
+            for (JsonNode child : root) {
+                if (child.isContainerNode()) {
+                    rewriteBulkDataURIs(child, studyInstanceUID, examinationUID, serieInstanceUID, acquisitionUID);
+                }
+            }
         }
     }
 
@@ -258,6 +304,33 @@ public class DICOMWebApiController implements DICOMWebApi {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @Override
+    public ResponseEntity findBulkDataOfStudyOfSerieOfInstance(String examinationUID, String serieInstanceUID,
+                                                               String sopInstanceUID, HttpServletRequest request) throws RestServiceException {
+        String studyInstanceUID = studyInstanceUIDAndSubjectNameHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
+        serieInstanceUID = seriesInstanceUIDHandler.resolveSeriesInstanceUID(serieInstanceUID);
+        String bulkDataPath = extractBulkDataPath(request);
+        if (!StringUtils.isEmpty(studyInstanceUID) && !StringUtils.isEmpty(serieInstanceUID)
+                && !StringUtils.isEmpty(sopInstanceUID) && !StringUtils.isEmpty(bulkDataPath)) {
+            return dicomWebService.findBulkDataOfStudyOfSerieOfInstance(studyInstanceUID, serieInstanceUID, sopInstanceUID, bulkDataPath);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    private String extractBulkDataPath(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        int index = requestURI.indexOf(BULKDATA_PATH);
+        if (index == -1) {
+            return null;
+        }
+        String bulkDataPath = requestURI.substring(index + BULKDATA_PATH.length());
+        if (request.getQueryString() != null) {
+            bulkDataPath += "?" + request.getQueryString();
+        }
+        return bulkDataPath;
     }
 
     @Override
