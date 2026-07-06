@@ -25,6 +25,7 @@ import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
@@ -33,6 +34,8 @@ import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,36 +64,47 @@ public class SeriesInstanceUIDHandler {
 
     public static final String PREFIX = UIDGeneration.ROOT + ".";
 
+    /**
+     * Datasets, that live in their own DICOM series within an acquisition,
+     * e.g. SEG or SR objects created by the viewer, are exposed with a
+     * dataset-level virtual UID: ROOT + ".0." + dataset id. The "0" segment
+     * distinguishes them from acquisitionUIDs, as ROOT + ".0" can never
+     * start an acquisitionUID (no acquisition with id 0 exists) and
+     * "0.<datasetId>" never parses as a Long.
+     */
+    public static final String DATASET_PREFIX = PREFIX + "0.";
+
     @Autowired
     private DatasetAcquisitionService acquisitionService;
 
-    private ConcurrentHashMap<String, String> acquisitionUIDToSeriesInstanceUIDCache;
+    @Autowired
+    private DatasetService datasetService;
+
+    @Autowired
+    private DatasetProcessingRepository datasetProcessingRepository;
+
+    private ConcurrentHashMap<String, String> virtualUIDToSeriesInstanceUIDCache;
 
     @PostConstruct
     public void init() {
-        acquisitionUIDToSeriesInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
-        LOG.info("DICOMWeb cache created: acquisitionUIDToSeriesInstanceUIDCache");
+        virtualUIDToSeriesInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
+        LOG.info("DICOMWeb cache created: virtualUIDToSeriesInstanceUIDCache");
     }
 
     @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
-    public void clearAcquisitionIdToSeriesInstanceUIDCache() {
-        acquisitionUIDToSeriesInstanceUIDCache.clear();
-        LOG.info("DICOMWeb cache cleared: acquisitionUIDToSeriesInstanceUIDCache");
+    public void clearVirtualUIDToSeriesInstanceUIDCache() {
+        virtualUIDToSeriesInstanceUIDCache.clear();
+        LOG.info("DICOMWeb cache cleared: virtualUIDToSeriesInstanceUIDCache");
     }
 
-    /**
-     * Resolves the real SeriesInstanceUID for PACS queries: acquisitionUIDs
-     * (virtual UIDs exposed to the viewer) are translated via cache/database,
-     * real SeriesInstanceUIDs are returned unchanged.
-     *
-     * @param seriesOrAcquisitionUID
-     * @return
-     */
-    public String resolveSeriesInstanceUID(String seriesOrAcquisitionUID) {
-        if (isAcquisitionUID(seriesOrAcquisitionUID)) {
-            return findSeriesInstanceUIDFromCacheOrDatabase(seriesOrAcquisitionUID);
+    public String resolveSeriesInstanceUID(String seriesOrVirtualUID) {
+        if (isAcquisitionUID(seriesOrVirtualUID)) {
+            return findSeriesInstanceUIDFromCacheOrDatabase(seriesOrVirtualUID);
         }
-        return seriesOrAcquisitionUID;
+        if (isDatasetUID(seriesOrVirtualUID)) {
+            return findSeriesInstanceUIDOfDatasetFromCacheOrDatabase(seriesOrVirtualUID);
+        }
+        return seriesOrVirtualUID;
     }
 
     /**
@@ -113,30 +127,81 @@ public class SeriesInstanceUIDHandler {
         }
     }
 
+    public boolean isDatasetUID(String uid) {
+        if (uid == null || !uid.startsWith(DATASET_PREFIX)) {
+            return false;
+        }
+        try {
+            Long.parseLong(uid.substring(DATASET_PREFIX.length()));
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     /**
-     * Maps the real SeriesInstanceUID of each DICOM acquisition of an examination
-     * to its acquisitionUID (virtual UID exposed to the viewer).
+     * Maps the real SeriesInstanceUID of each DICOM series of an examination
+     * to its virtual UID: the acquisitionUID for the primary series of each
+     * acquisition and the datasetUID for each dataset within an acquisition,
+     * that lives in its own DICOM series, e.g. SEG or SR objects.
      *
      * @param examinationId
      * @return
      */
-    public Map<String, String> findSeriesToAcquisitionUIDs(Long examinationId) {
-        Map<String, String> seriesToAcquisitionUIDs = new LinkedHashMap<>();
+    public Map<String, String> findSeriesToVirtualUIDs(Long examinationId) {
+        Map<String, String> seriesToVirtualUIDs = new LinkedHashMap<>();
         List<DatasetAcquisition> acquisitions = acquisitionService.findByExamination(examinationId);
         for (DatasetAcquisition acquisition : acquisitions) {
-            String acquisitionUID = PREFIX + acquisition.getId();
-            String seriesInstanceUID = acquisitionUIDToSeriesInstanceUIDCache.get(acquisitionUID);
-            if (seriesInstanceUID == null) {
-                seriesInstanceUID = findSeriesInstanceUID(acquisition);
-                if (seriesInstanceUID != null) {
-                    acquisitionUIDToSeriesInstanceUIDCache.putIfAbsent(acquisitionUID, seriesInstanceUID);
-                }
-            }
-            if (seriesInstanceUID != null) {
-                seriesToAcquisitionUIDs.put(seriesInstanceUID, acquisitionUID);
+            addSeriesOfAcquisition(acquisition, seriesToVirtualUIDs);
+        }
+        return seriesToVirtualUIDs;
+    }
+
+    public Map<String, String> findSeriesToVirtualUIDsOfAcquisition(Long acquisitionId) {
+        Map<String, String> seriesToVirtualUIDs = new LinkedHashMap<>();
+        DatasetAcquisition acquisition = acquisitionService.findById(acquisitionId);
+        if (acquisition != null) {
+            addSeriesOfAcquisition(acquisition, seriesToVirtualUIDs);
+        }
+        return seriesToVirtualUIDs;
+    }
+
+    private void addSeriesOfAcquisition(DatasetAcquisition acquisition, Map<String, String> seriesToVirtualUIDs) {
+        String acquisitionUID = PREFIX + acquisition.getId();
+        String primarySeriesInstanceUID = virtualUIDToSeriesInstanceUIDCache.get(acquisitionUID);
+        if (primarySeriesInstanceUID == null) {
+            primarySeriesInstanceUID = findSeriesInstanceUID(acquisition);
+            if (primarySeriesInstanceUID != null) {
+                virtualUIDToSeriesInstanceUIDCache.putIfAbsent(acquisitionUID, primarySeriesInstanceUID);
             }
         }
-        return seriesToAcquisitionUIDs;
+        if (primarySeriesInstanceUID != null) {
+            seriesToVirtualUIDs.put(primarySeriesInstanceUID, acquisitionUID);
+        }
+        // deliberately type-agnostic (no instanceof on the dataset): SEG
+        // datasets can be stored as Generic in the database, the series
+        // extracted from the PACS file path is the only reliable criterion
+        for (Dataset dataset : acquisition.getDatasets()) {
+            addSeriesOfDataset(dataset, seriesToVirtualUIDs);
+            // outputs of processings, that used this dataset as input,
+            // e.g. segmentations computed by a pipeline, are exposed as
+            // dataset series as well (DICOM-in-PACS outputs only: NIfTI
+            // outputs have no series and are skipped by the UID extraction)
+            for (DatasetProcessing processing : datasetProcessingRepository.findAllByInputDatasets_Id(dataset.getId())) {
+                for (Dataset outputDataset : processing.getOutputDatasets()) {
+                    addSeriesOfDataset(outputDataset, seriesToVirtualUIDs);
+                }
+            }
+        }
+    }
+
+    private void addSeriesOfDataset(Dataset dataset, Map<String, String> seriesToVirtualUIDs) {
+        String seriesInstanceUID = findSeriesInstanceUID(dataset);
+        if (seriesInstanceUID != null && !seriesToVirtualUIDs.containsKey(seriesInstanceUID)) {
+            String datasetUID = DATASET_PREFIX + dataset.getId();
+            virtualUIDToSeriesInstanceUIDCache.putIfAbsent(datasetUID, seriesInstanceUID);
+            seriesToVirtualUIDs.put(seriesInstanceUID, datasetUID);
+        }
     }
 
     /**
@@ -201,17 +266,36 @@ public class SeriesInstanceUIDHandler {
     }
 
     public String findSeriesInstanceUIDFromCacheOrDatabase(String acquisitionUID) {
-        String seriesInstanceUID = acquisitionUIDToSeriesInstanceUIDCache.get(acquisitionUID);
+        String seriesInstanceUID = virtualUIDToSeriesInstanceUIDCache.get(acquisitionUID);
         if (seriesInstanceUID == null) {
             Long acquisitionId = extractAcquisitionId(acquisitionUID);
             DatasetAcquisition acquisition = acquisitionService.findById(acquisitionId);
             if (acquisition != null) {
                 seriesInstanceUID = findSeriesInstanceUID(acquisition);
                 if (seriesInstanceUID != null) {
-                    String existing = acquisitionUIDToSeriesInstanceUIDCache.putIfAbsent(acquisitionUID, seriesInstanceUID);
+                    String existing = virtualUIDToSeriesInstanceUIDCache.putIfAbsent(acquisitionUID, seriesInstanceUID);
                     if (existing == null) {
                         LOG.info("DICOMWeb cache adding: {}, {}", acquisitionUID, seriesInstanceUID);
-                        LOG.info("DICOMWeb cache, size: {}", acquisitionUIDToSeriesInstanceUIDCache.size());
+                        LOG.info("DICOMWeb cache, size: {}", virtualUIDToSeriesInstanceUIDCache.size());
+                    }
+                }
+            }
+        }
+        return seriesInstanceUID;
+    }
+
+    public String findSeriesInstanceUIDOfDatasetFromCacheOrDatabase(String datasetUID) {
+        String seriesInstanceUID = virtualUIDToSeriesInstanceUIDCache.get(datasetUID);
+        if (seriesInstanceUID == null) {
+            Long datasetId = extractDatasetId(datasetUID);
+            Dataset dataset = datasetService.findById(datasetId);
+            if (dataset != null) {
+                seriesInstanceUID = findSeriesInstanceUID(dataset);
+                if (seriesInstanceUID != null) {
+                    String existing = virtualUIDToSeriesInstanceUIDCache.putIfAbsent(datasetUID, seriesInstanceUID);
+                    if (existing == null) {
+                        LOG.info("DICOMWeb cache adding: {}, {}", datasetUID, seriesInstanceUID);
+                        LOG.info("DICOMWeb cache, size: {}", virtualUIDToSeriesInstanceUIDCache.size());
                     }
                 }
             }
@@ -230,21 +314,23 @@ public class SeriesInstanceUIDHandler {
                 || acquisition instanceof GenericDatasetAcquisition) {
             List<Dataset> datasets = acquisition.getDatasets();
             if (!datasets.isEmpty()) {
-                Dataset dataset = datasets.get(0);
-                List<DatasetExpression> expressions = dataset.getDatasetExpressions();
-                if (!expressions.isEmpty()) {
-                    for (DatasetExpression expression : expressions) {
-                        // only DICOM is of interest here
-                        if (expression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
-                            List<DatasetFile> files = expression.getDatasetFiles();
-                            if (!files.isEmpty()) {
-                                DatasetFile file = files.get(0);
-                                if (file.isPacs()) {
-                                    String path = file.getPath();
-                                    return findSeriesInstanceUID(path);
-                                }
-                            }
-                        }
+                return findSeriesInstanceUID(datasets.get(0));
+            }
+        }
+        return null;
+    }
+
+    public String findSeriesInstanceUID(Dataset dataset) {
+        List<DatasetExpression> expressions = dataset.getDatasetExpressions();
+        for (DatasetExpression expression : expressions) {
+            // only DICOM is of interest here
+            if (expression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
+                List<DatasetFile> files = expression.getDatasetFiles();
+                if (!files.isEmpty()) {
+                    DatasetFile file = files.get(0);
+                    if (file.isPacs()) {
+                        String path = file.getPath();
+                        return findSeriesInstanceUID(path);
                     }
                 }
             }
