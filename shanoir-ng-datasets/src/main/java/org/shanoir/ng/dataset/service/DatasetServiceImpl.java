@@ -305,6 +305,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Dataset update(final Dataset dataset) throws EntityNotFoundException {
         final Dataset datasetDb = repository.findById(dataset.getId()).orElse(null);
         if (datasetDb == null) {
@@ -314,7 +315,7 @@ public class DatasetServiceImpl implements DatasetService {
         Dataset ds = repository.save(datasetDb);
         try {
             Long studyId;
-            if (ds.getDatasetProcessing() == null) {
+            if (ds.getDatasetProcessing().getId() == null) {
                 studyId = ds.getDatasetAcquisition().getExamination().getStudyId();
             } else {
                 studyId = ds.getStudyId();
@@ -530,8 +531,8 @@ public class DatasetServiceImpl implements DatasetService {
         if (dataset.getStudyId() != null) {
             return dataset.getStudyId();
         }
-        if (dataset.getDatasetProcessing() != null) {
-            return dataset.getDatasetProcessing().getStudyId();
+        if (dataset.getDatasetProcessing().getId() != null) {
+            return repository.findByIdWithDatasetProcessing(dataset.getId()).getDatasetProcessing().getStudyId();
         }
         if (dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null) {
             return dataset.getDatasetAcquisition().getExamination().getStudyId();

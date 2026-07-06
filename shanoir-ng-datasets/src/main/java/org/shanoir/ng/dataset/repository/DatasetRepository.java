@@ -26,14 +26,13 @@ import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.xml.crypto.Data;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, JpaRepository<Dataset, Long> {
 
@@ -252,5 +251,8 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             "JOIN FETCH dataset.datasetAcquisition AS acq " +
             "JOIN FETCH acq.examination " +
             "WHERE dataset.id = :id")
-    Dataset findDatasetByIdWithStudyRelations(Long id);
+    Dataset findByIdWithExaminationRelationsAndRelatedStudies(Long id);
+
+    @EntityGraph(attributePaths = {"datasetProcessing"})
+    Dataset findByIdWithDatasetProcessing(Long id);
 }

@@ -531,7 +531,7 @@ public class DatasetSecurityService {
             throw new IllegalArgumentException("Dataset cannot be null here.");
         }
 
-        Dataset datasetWithRelations = datasetRepository.findDatasetByIdWithStudyRelations(dataset.getId());
+        Dataset datasetWithRelations = datasetRepository.findByIdWithExaminationRelationsAndRelatedStudies(dataset.getId());
 
         Long studyId = getStudyIdFromDataset(dataset);
 
