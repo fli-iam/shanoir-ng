@@ -49,9 +49,14 @@ public class MrProtocolStrategy {
     private static final Logger LOG = LoggerFactory.getLogger(MrProtocolStrategy.class);
 
     public MrProtocol generateProtocolForSerie(Attributes attributes, Serie serie) throws IOException {
-        if (MultiframeExtractor.isSupportedSOPClass(serie.getSopClassUID())) {
-            MultiframeExtractor emf = new MultiframeExtractor();
-            attributes = emf.extract(attributes, 0);
+        try {
+            if (MultiframeExtractor.isSupportedSOPClass(serie.getSopClassUID())) {
+                MultiframeExtractor emf = new MultiframeExtractor();
+                attributes = emf.extract(attributes, 0);
+            }
+        } catch(Exception e) {
+            LOG.warn("Multiframe extraction failed, falling back to basic attributes,"
+             + "some per-frame metadata may be missing for serie {}: {}", serie.getSeriesDescription(), e.getMessage(), e);
         }
 
         MrProtocol mrProtocol = new MrProtocol();
