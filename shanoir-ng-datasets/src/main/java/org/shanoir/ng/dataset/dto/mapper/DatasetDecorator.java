@@ -51,15 +51,6 @@ public abstract class DatasetDecorator implements DatasetMapper {
     protected EegDatasetMapper eegMapper;
 
     @Override
-    public List<IdName> datasetsToIdNameDTOs(final List<Dataset> datasets) {
-        final List<IdName> datasetDTOs = new ArrayList<>();
-        for (Dataset dataset : datasets) {
-            datasetDTOs.add(datasetToIdNameDTO(dataset));
-        }
-        return datasetDTOs;
-    }
-
-    @Override
     public PageImpl<DatasetDTO> datasetToDatasetDTO(Page<Dataset> page) {
         Page<DatasetDTO> mappedPage = page.map(new Function<Dataset, DatasetDTO>() {
             public DatasetDTO apply(Dataset entity) {
@@ -73,20 +64,5 @@ public abstract class DatasetDecorator implements DatasetMapper {
             }
         });
         return new PageImpl<>(mappedPage);
-    }
-
-    @Override
-    public IdName datasetToIdNameDTO(final Dataset dataset) {
-        return defaultMapper.datasetToIdNameDTO(dataset);
-    }
-
-    @Override
-    public DatasetWithDependenciesDTO datasetToDatasetWithParentsAndProcessingsDTO(Dataset dataset) {
-        final DatasetWithDependenciesDTO datasetDTO = defaultMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset);
-        Hibernate.initialize(dataset.getCopies());
-        datasetDTO.setCopies(dataset.getCopies().stream()
-                .map(Dataset::getId)
-                .collect(Collectors.toList()));
-        return datasetDTO;
     }
 }

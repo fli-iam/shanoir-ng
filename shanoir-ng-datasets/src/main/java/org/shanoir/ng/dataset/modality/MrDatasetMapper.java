@@ -35,21 +35,11 @@ import org.springframework.data.domain.Page;
 @DecoratedWith(MrDatasetDecorator.class)
 public interface MrDatasetMapper {
 
-
-    /**
-     * Map list of @Dataset to list of @IdNameDTO.
-     *
-     * @param datasets
-     *            list of datasets.
-     * @return list of datasets DTO.
-     */
-    List<IdName> datasetsToIdNameDTOs(List<MrDataset> datasets);
-
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param dataset dataset to map
+     *
      * @return dataset DTO.
      */
     @Named(value = "standard")
@@ -59,8 +49,8 @@ public interface MrDatasetMapper {
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param dataset dataset to map
+     *
      * @return dataset DTO.
      */
     @Named(value = "withProcessings")
@@ -71,8 +61,8 @@ public interface MrDatasetMapper {
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param datasets datasets to map
+     *
      * @return dataset DTO.
      */
     @IterableMapping(qualifiedByName = "standard")
@@ -81,8 +71,8 @@ public interface MrDatasetMapper {
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param page paged dataset to map
+     *
      * @return dataset DTO.
      */
     @IterableMapping(qualifiedByName = "standard")
@@ -91,8 +81,8 @@ public interface MrDatasetMapper {
     /**
      * Map a @Dataset to a @IdNameDTO.
      *
-     * @param dataset
-     *            dataset to map.
+     * @param dataset dataset to map.
+     *
      * @return dataset DTO.
      */
     IdName datasetToIdNameDTO(MrDataset dataset);

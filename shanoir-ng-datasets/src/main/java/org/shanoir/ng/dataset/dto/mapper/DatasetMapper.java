@@ -49,8 +49,8 @@ public interface DatasetMapper {
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param dataset dataset to map
+     *            .
      * @return dataset DTO.
      */
     @Named(value = "standard")
@@ -59,8 +59,8 @@ public interface DatasetMapper {
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param dataset to map
+     *            .
      * @return dataset DTO.
      */
     @Named(value = "withProcessings")
@@ -71,8 +71,8 @@ public interface DatasetMapper {
     /**
      * Map a @Dataset list to a @DatasetDTO list.
      *
-     * @param datasets
-     *            dataset.
+     * @param datasets dataset to map
+     *
      * @return dataset DTO.
      */
     @IterableMapping(qualifiedByName = "standard")
@@ -82,18 +82,18 @@ public interface DatasetMapper {
     /**
      * Map a @Dataset to a @DatasetDTO.
      *
-     * @param datasets
-     *            dataset.
+     * @param page paged dataset to map
+     *           .
      * @return dataset DTO.
      */
     @IterableMapping(qualifiedByName = "standard")
-    public PageImpl<DatasetDTO> datasetToDatasetDTO(Page<Dataset> page);
+    PageImpl<DatasetDTO> datasetToDatasetDTO(Page<Dataset> page);
 
     /**
      * Map a @Dataset to a @IdNameDTO.
      *
-     * @param dataset
-     *            dataset to map.
+     * @param dataset dataset to map.
+     *
      * @return dataset DTO.
      */
     IdName datasetToIdNameDTO(Dataset dataset);

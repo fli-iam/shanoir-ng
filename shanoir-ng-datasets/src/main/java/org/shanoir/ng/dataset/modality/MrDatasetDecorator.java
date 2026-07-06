@@ -41,15 +41,6 @@ public abstract class MrDatasetDecorator implements MrDatasetMapper {
     }
 
     @Override
-    public List<IdName> datasetsToIdNameDTOs(final List<MrDataset> datasets) {
-        final List<IdName> datasetDTOs = new ArrayList<>();
-        for (MrDataset dataset : datasets) {
-            datasetDTOs.add(datasetToIdNameDTO(dataset));
-        }
-        return datasetDTOs;
-    }
-
-    @Override
     public IdName datasetToIdNameDTO(final MrDataset dataset) {
         return delegate.datasetToIdNameDTO(dataset);
     }
