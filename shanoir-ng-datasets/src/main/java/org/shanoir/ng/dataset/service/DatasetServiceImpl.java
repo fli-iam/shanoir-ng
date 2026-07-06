@@ -218,11 +218,8 @@ public class DatasetServiceImpl implements DatasetService {
      * @throws RestServiceException
      */
     public void deleteByIdCascade(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-        final Dataset dataset = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
-
         // Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
-        if (!CollectionUtils.isEmpty(dataset.getCopies())) {
+        if (repository.existsBySourceId(id)) {
             throw new RestServiceException(
                     new ErrorModel(
                             HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -230,7 +227,7 @@ public class DatasetServiceImpl implements DatasetService {
                     ));
         }
 
-        delete(dataset);
+        datasetService.deleteById(id);
     }
 
     public void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException {

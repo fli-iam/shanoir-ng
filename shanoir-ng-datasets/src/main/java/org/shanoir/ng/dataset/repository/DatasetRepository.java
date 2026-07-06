@@ -258,4 +258,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     @EntityGraph(attributePaths = {"tags"})
     Dataset findByIdWithTags(Long id);
+
+    boolean existsBySourceId(Long sourceId);
 }
