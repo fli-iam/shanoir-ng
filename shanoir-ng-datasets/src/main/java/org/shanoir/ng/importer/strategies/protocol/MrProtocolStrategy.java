@@ -54,9 +54,10 @@ public class MrProtocolStrategy {
                 MultiframeExtractor emf = new MultiframeExtractor();
                 attributes = emf.extract(attributes, 0);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.warn("Multiframe extraction failed, falling back to basic attributes,"
-             + "some per-frame metadata may be missing for serie {}: {}", serie.getSeriesDescription(), e.getMessage(), e);
+                    + "some per-frame metadata may be missing for serie {}: {}",
+                    serie.getSeriesDescription(), e.getMessage(), e);
         }
 
         MrProtocol mrProtocol = new MrProtocol();
