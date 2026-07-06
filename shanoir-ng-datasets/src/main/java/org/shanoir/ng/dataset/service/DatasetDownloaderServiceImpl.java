@@ -221,7 +221,7 @@ public class DatasetDownloaderServiceImpl {
             String path = "";
             Dataset relevantDataset = dataset;
 
-            if (Objects.nonNull(dataset.getDatasetProcessing())) {
+            if (Objects.nonNull(dataset.getDatasetProcessing().getId())) {
                 relevantDataset = datasetService.getFirstRealInput(dataset);
             }
 
