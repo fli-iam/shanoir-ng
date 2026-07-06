@@ -33,6 +33,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.xml.crypto.Data;
+
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, JpaRepository<Dataset, Long> {
 
     @Query(value = "SELECT COUNT(*) FROM dataset as ds "
@@ -237,4 +239,18 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             "JOIN FETCH dp.inputDatasets " +
             "WHERE dataset.id = :id")
     Dataset findByIdWithProcessingAncestors(Long id);
+
+    @Query("SELECT dataset FROM Dataset dataset " +
+            "JOIN FETCH dataset.datasetProcessing AS dp " +
+            "JOIN FETCH dp.inputDatasets " +
+            "WHERE dataset.id in :ids")
+    List<Dataset> findByIdsWithProcessingAncestors(List<Long> ids);
+
+    @Query("SELECT dataset FROM Dataset dataset " +
+            "JOIN FETCH dataset.relatedStudies " +
+            "JOIN FETCH dataset.datasetProcessing " +
+            "JOIN FETCH dataset.datasetAcquisition AS acq " +
+            "JOIN FETCH acq.examination " +
+            "WHERE dataset.id = :id")
+    Dataset findDatasetByIdWithStudyRelations(Long id);
 }
