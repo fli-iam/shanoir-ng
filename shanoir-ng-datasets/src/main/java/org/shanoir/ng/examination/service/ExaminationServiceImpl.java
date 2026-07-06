@@ -276,7 +276,8 @@ public class ExaminationServiceImpl implements ExaminationService {
     }
 
     @Override
-    public Examination update(final Examination examination) throws EntityNotFoundException, ShanoirException, StorageException {
+    @Transactional
+    public Examination update(final Examination examination) throws ShanoirException, StorageException {
         final Examination examinationDb = examinationRepository.findById(examination.getId()).orElse(null);
         if (examinationDb == null) {
             throw new EntityNotFoundException(Examination.class, examination.getId());
