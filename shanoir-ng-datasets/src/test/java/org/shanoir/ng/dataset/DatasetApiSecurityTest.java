@@ -236,21 +236,13 @@ public class DatasetApiSecurityTest {
         assertThat(api.findDatasetByStudyId(2L).getBody()).isNullOrEmpty();
         assertAccessDenied(api::findDatasetByStudyId, 3L);
 
-        //findDatasetIdsBySubjectIdStudyId(Long, Long)
-        assertAccessAuthorized(api::findDatasetIdsBySubjectIdStudyId, 1L, 1L);
-        assertThat(api.findDatasetIdsBySubjectIdStudyId(1L, 1L).getBody()).hasSize(1);
-        assertThat(api.findDatasetIdsBySubjectIdStudyId(1L, 1L).getBody().get(0)).isEqualTo(1L);
-        assertThat(api.findDatasetIdsBySubjectIdStudyId(3L, 1L).getBody()).isNullOrEmpty();
-        assertThat(api.findDatasetIdsBySubjectIdStudyId(2L, 2L).getBody()).isNullOrEmpty();
-        assertAccessDenied(api::findDatasetIdsBySubjectIdStudyId, 4L, 4L);
-
         //findDatasetsBySubjectIdStudyId(Long, Long)
-        assertAccessAuthorized(api::findDatasetsBySubjectIdStudyId, 1L, 1L);
-        assertThat(api.findDatasetsBySubjectIdStudyId(1L, 1L).getBody()).hasSize(1);
-        assertThat(api.findDatasetsBySubjectIdStudyId(1L, 1L).getBody().get(0).getId()).isEqualTo(1L);
-        assertThat(api.findDatasetsBySubjectIdStudyId(3L, 1L).getBody()).isNullOrEmpty();
-        assertThat(api.findDatasetsBySubjectIdStudyId(2L, 2L).getBody()).isNullOrEmpty();
-        assertAccessDenied(api::findDatasetsBySubjectIdStudyId, 4L, 4L);
+        assertAccessAuthorized(api::findDatasetsBySubjectId, 1L);
+        assertThat(api.findDatasetsBySubjectId(1L).getBody()).hasSize(1);
+        assertThat(api.findDatasetsBySubjectId(1L).getBody().get(0).getId()).isEqualTo(1L);
+        assertThat(api.findDatasetsBySubjectId(3L).getBody()).isNullOrEmpty();
+        assertThat(api.findDatasetsBySubjectId(2L).getBody()).isNullOrEmpty();
+        assertAccessDenied(api::findDatasetsBySubjectId, 4L);
 
         //downloadDatasetById(Long, Long, String, HttpServletResponse)
         assertAccessAuthorized(api::downloadDatasetById, 1L, 1L, "file", null);

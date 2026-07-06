@@ -260,4 +260,8 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     Dataset findByIdWithTags(Long id);
 
     boolean existsBySourceId(Long sourceId);
+
+    @Query("SELECT dataset FROM Dataset dataset " +
+            "WHERE dataset.subjectId = :subjectId")
+    List<Dataset> findBySubjectId(Long subjectId);
 }

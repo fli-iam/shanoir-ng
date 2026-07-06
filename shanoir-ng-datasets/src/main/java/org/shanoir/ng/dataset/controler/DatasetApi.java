@@ -199,19 +199,6 @@ public interface DatasetApi {
     ResponseEntity<Integer> findNbDatasetByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
-    @Operation(summary = "", description = "Returns the list of dataset id by subject id and study id")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "found datasets"),
-        @ApiResponse(responseCode = "204", description = "no dataset found"),
-        @ApiResponse(responseCode = "401", description = "unauthorized"),
-        @ApiResponse(responseCode = "403", description = "forbidden"),
-        @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/subject/{subjectId}/study/{studyId}", produces = {"application/json"}, method = RequestMethod.GET)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-    ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
-            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
-
     @Operation(summary = "", description = "Returns the list of dataset by subject id and study id")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "found datasets"),
@@ -219,12 +206,11 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "find/subject/{subjectId}/study/{studyId}", produces = {"application/json"}, method = RequestMethod.GET)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+    @RequestMapping(value = "find/subject/{subjectId}", produces = {"application/json"}, method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnSubjectId(#subjectId, 'CAN_SEE_ALL'))")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
-    ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectIdStudyId(
-            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+    ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectId(
+            @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
     @Operation(summary = "downloadDatasetById", description = "If exists, returns a zip file of the dataset corresponding to the given id")
     @ApiResponses(value = {

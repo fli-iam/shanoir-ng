@@ -41,6 +41,7 @@ import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.OverallStatistics;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.CsvCopyService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
@@ -126,9 +127,6 @@ public class DatasetApiController implements DatasetApi {
     private CreateStatisticsService createStatisticsService;
 
     @Autowired
-    private ExaminationService examinationService;
-
-    @Autowired
     private ImporterService importerService;
 
     @Autowired
@@ -142,6 +140,9 @@ public class DatasetApiController implements DatasetApi {
 
     @Autowired
     private SolrService solrService;
+
+    @Autowired
+    private DatasetRepository datasetRepository;
 
     @Qualifier("datasetDownloaderServiceImpl")
     @Autowired
@@ -344,34 +345,10 @@ public class DatasetApiController implements DatasetApi {
         return new ResponseEntity<Integer>(nbDatasets, HttpStatus.OK);
     }
 
-    @Override
-    public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
-            Long subjectId,
-            Long studyId) {
-        List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
-        return new ResponseEntity<>(datasets.stream().map(Dataset::getId).collect(Collectors.toList()), HttpStatus.OK);
-    }
-
-    public ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectIdStudyId(
-            Long subjectId,
-            Long studyId) {
-        List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
+    public ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectId(
+            Long subjectId) {
+        List<Dataset> datasets = datasetRepository.findBySubjectId(subjectId);
         return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
-    }
-
-    private List<Dataset> getBySubjectStudy(Long subjectId, Long studyId) {
-        final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
-
-        List<Dataset> datasets = new ArrayList<>();
-        for (Examination examination : examinations) {
-            List<DatasetAcquisition> datasetAcquisitions = examination.getDatasetAcquisitions();
-            for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-                for (Dataset dataset : datasetAcquisition.getDatasets()) {
-                    datasets.add(dataset);
-                }
-            }
-        }
-        return datasets;
     }
 
     @Override

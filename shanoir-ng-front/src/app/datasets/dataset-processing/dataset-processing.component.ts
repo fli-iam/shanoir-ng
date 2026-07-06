@@ -223,8 +223,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     fetchDatasets(): Promise<void> {
-        if (!this.datasetProcessing?.studyId || !this.subject?.id) return Promise.resolve();
-        return this.datasetService.getByStudyIdAndSubjectId(this.datasetProcessing.studyId, this.subject.id).then(datasets => {
+        if (!this.subject?.id) return Promise.resolve();
+        return this.datasetService.getBySubjectId(this.subject.id).then(datasets => {
             for (const dataset of datasets) {
                 this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
             }
