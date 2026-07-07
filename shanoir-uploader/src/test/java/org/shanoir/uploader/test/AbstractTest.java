@@ -127,8 +127,8 @@ public abstract class AbstractTest {
         Assumptions.assumeTrue(anyClientAvailable,
                 "Skipping tests: no role credentials configured or server unavailable.");
 
-        ShanoirUploaderServiceClient defaultClient = expertClient != null ? expertClient
-                : adminClient != null ? adminClient : userClient;
+        ShanoirUploaderServiceClient defaultClient = userClient != null ? userClient
+                : expertClient != null ? expertClient : adminClient;
         ShUpOnloadConfig.setShanoirUploaderServiceClient(defaultClient);
 
         // Pseudonymizer – only needed when the mode is active
