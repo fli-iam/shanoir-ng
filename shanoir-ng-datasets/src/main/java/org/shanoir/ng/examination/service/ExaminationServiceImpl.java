@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
@@ -111,6 +112,9 @@ public class ExaminationServiceImpl implements ExaminationService {
     @Autowired
     private StorageService storageService;
 
+    @Autowired
+    private DatasetAcquisitionRepository acquisitionRepository;
+
     @Override
     @Transactional(readOnly = true)
     public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
@@ -188,7 +192,7 @@ public class ExaminationServiceImpl implements ExaminationService {
         if (!examinationOpt.isPresent()) {
             throw new EntityNotFoundException(Examination.class, id);
         }
-        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findByExaminationWithDatasets(id);
+        List<DatasetAcquisition> acquisitions = acquisitionRepository.findByExaminationIdWithDatasets(id);
         if (CollectionUtils.isEmpty(acquisitions)) {
             examinationRepository.deleteById(id);
         } else {

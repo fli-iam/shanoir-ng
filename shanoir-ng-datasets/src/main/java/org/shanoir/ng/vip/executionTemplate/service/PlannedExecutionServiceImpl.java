@@ -72,9 +72,6 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
     @Lazy
     private PlannedExecutionManager plannedExecutionManager;
 
-    @Autowired
-    private ObjectCodec objectCodec;
-
     //A call is corresponding to all or a part of an examination acquisitions. If various examination imported, then multiple calls will be done
     public void applyExecution(Map<Long, List<Long>> createdAcquisitionsPerTemplateId) {
         LOG.info("Auto executions for newly imported DICOM started.");

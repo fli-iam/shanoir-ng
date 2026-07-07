@@ -41,6 +41,7 @@ public class DICOMJsonApiController implements DICOMJsonApi {
         if (examinations.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
+
         List<StudyDTO> studies = examinationToStudyDTOMapper.examinationsToStudyDTOs(examinations);
         StudiesDTO studiesDTO = new StudiesDTO();
         studiesDTO.setStudies(studies);
