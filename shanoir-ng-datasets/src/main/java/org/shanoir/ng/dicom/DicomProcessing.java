@@ -45,7 +45,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class DicomProcessing {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GenericDatasetAcquisitionStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomProcessing.class);
 
     private static UIDGeneration uidGenerator = new UIDGeneration();
 
