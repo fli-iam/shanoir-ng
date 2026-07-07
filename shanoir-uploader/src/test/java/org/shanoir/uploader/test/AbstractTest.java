@@ -262,7 +262,7 @@ public abstract class AbstractTest {
         return expertClient.createEquipment(equipment);
     }
 
-    public static Study createStudyAndCenterAndStudyCard() {
+    public static Study createStudyAndCenterAndStudyCardAndAddMembers() {
         Study study = buildMinimalStudy();
 
         List<StudyCenter> studyCenterList = new ArrayList<>();
@@ -277,16 +277,26 @@ public abstract class AbstractTest {
         Assertions.assertNotNull(study);
         LOG.info("New study {} ({}) created.", study.getName(), study.getId());
 
-        StudyUser studyUser = new StudyUser();
-        studyUser.setStudyId(study.getId());
-        studyUser.setUserId(expertClient.getUserId());
-        studyUser.setUserName(expertClient.getUserName());
-        studyUser.setConfirmed(true);
-        studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD,
+        StudyUser studyUserExpert = new StudyUser();
+        studyUserExpert.setStudyId(study.getId());
+        studyUserExpert.setUserId(expertClient.getUserId());
+        studyUserExpert.setUserName(expertClient.getUserName());
+        studyUserExpert.setConfirmed(true);
+        studyUserExpert.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD,
                     StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE));
-        studyUser = adminClient.addStudyUser(study.getId(), studyUser);
-        Assertions.assertNotNull(studyUser);
-        LOG.info("StudyUser {} added to study: {}", studyUser.getUserName(), study.getName());
+        studyUserExpert = adminClient.addStudyUser(study.getId(), studyUserExpert);
+        Assertions.assertNotNull(studyUserExpert);
+        LOG.info("StudyUser {} added to study: {}", studyUserExpert.getUserName(), study.getName());
+
+        StudyUser studyUserUser = new StudyUser();
+        studyUserUser.setStudyId(study.getId());
+        studyUserUser.setUserId(userClient.getUserId());
+        studyUserUser.setUserName(userClient.getUserName());
+        studyUserUser.setConfirmed(true);
+        studyUserUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+        studyUserUser = adminClient.addStudyUser(study.getId(), studyUserUser);
+        Assertions.assertNotNull(studyUserUser);
+        LOG.info("StudyUser {} added to study: {}", studyUserUser.getUserName(), study.getName());
 
         AcquisitionEquipment createdEquipment = createEquipment(createdCenter);
         Assertions.assertNotNull(createdEquipment);
@@ -309,7 +319,7 @@ public abstract class AbstractTest {
     /**
      * Builds a minimal valid {@link Study} payload suitable for a POST to the
      * studies endpoint. Mirrors the structure used in
-     * {@link AbstractTest#createStudyAndCenterAndStudyCard()} but deliberately
+     * {@link AbstractTest#createStudyAndCenterAndStudyCardAndAddMembers()} but deliberately
      * omits the study-card (not needed for the approval flow under test).
      */
     public static Study buildMinimalStudy() {

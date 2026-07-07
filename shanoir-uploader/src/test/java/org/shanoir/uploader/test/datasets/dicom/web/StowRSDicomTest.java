@@ -26,7 +26,7 @@ public class StowRSDicomTest extends AbstractTest {
 
     @Test
     public void postDicomSRToDicomWeb() throws Exception {
-        Study study = createStudyAndCenterAndStudyCard();
+        Study study = createStudyAndCenterAndStudyCardAndAddMembers();
         Subject subject = createSubject(study);
         Examination examination = createExamination(study.getId(), subject.getId(),
                 study.getStudyCenterList().get(0).getCenter().getId());
@@ -50,7 +50,7 @@ public class StowRSDicomTest extends AbstractTest {
 
     @Test
     public void postDICOMMRToDicomWeb() throws Exception {
-        Study study = createStudyAndCenterAndStudyCard();
+        Study study = createStudyAndCenterAndStudyCardAndAddMembers();
         try {
             URL resource = getClass().getClassLoader().getResource("acr_phantom_t1/");
             if (resource != null) {
