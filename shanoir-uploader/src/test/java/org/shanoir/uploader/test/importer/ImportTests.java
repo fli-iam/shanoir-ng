@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.test.importer;
 
 import java.io.File;
@@ -21,6 +35,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
@@ -28,6 +43,7 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.check.DicomInstanceConsistencyChecker;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.exception.PseudonymusException;
@@ -53,12 +69,18 @@ public class ImportTests extends AbstractTest {
 
     private static final String ACR_PHANTOM_T1_DIR = "acr_phantom_t1/";
 
+    // The server-side import is asynchronous: give it time to appear before
+    // declaring the consistency check failed.
+    private static final long CONSISTENCY_CHECK_TIMEOUT_MILLIS = 2 * 60 * 1000; // 2 min
+
+    private static final long CONSISTENCY_CHECK_POLL_INTERVAL_MILLIS = 5 * 1000; // 5 sec
+
     private static org.shanoir.uploader.model.rest.Study study;
 
     @Test
     @Order(1)
-    public void testImportWithDicomZipUpload() {
-        logger.info("START testImportWithDicomZipUpload...................");
+    public void testImportFromDicomZip() {
+        logger.info("START testImportFromDicomZip...................");
         try {
             study = createStudyAndCenterAndStudyCardAndAddMembers();
             ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
@@ -70,6 +92,7 @@ public class ImportTests extends AbstractTest {
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
+            Assertions.fail(e.getMessage());
         }
     }
 
@@ -134,6 +157,52 @@ public class ImportTests extends AbstractTest {
         Util.mapper.writeValue(importJobJsonFile, importJob);
 
         startImportJobFromShanoirUploader(importJob, uploadFolder);
+
+        // Local files here were pseudonymized before upload, exactly like the
+        // server-side copy, so a full tag comparison is meaningful.
+        waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
+    }
+
+    /**
+     * Polls the server until the local DICOM files match their remote,
+     * persisted counterparts for the given examination, or a timeout is
+     * reached. Wraps {@link DicomInstanceConsistencyChecker}, since the import
+     * triggered by {@code startImportJob} is processed asynchronously on
+     * the server and may not be immediately queryable.
+     *
+     * @param localDicomFolder folder containing the local DICOM files to
+     *                         compare (flat, referencedFileID-named)
+     * @param examinationId    the examination created for this import
+     * @param compareTags      passed through to
+     *                         {@link DicomInstanceConsistencyChecker#checkImportJob}
+     */
+    private void waitAndCheckServerConsistency(File localDicomFolder, Long examinationId, boolean compareTags)
+            throws Exception {
+        String examinationUID = StudyInstanceUIDAndSubjectNameHandler.PREFIX + examinationId;
+        DicomInstanceConsistencyChecker checker = new DicomInstanceConsistencyChecker(userClient);
+
+        // Parse the local DICOM folder once; do not delete the generated DICOMDIR
+        // between retries, since the on-disk content never changes while polling.
+        List<Patient> localPatients = checker.parseLocalFolder(localDicomFolder, false);
+
+        long deadline = System.currentTimeMillis() + CONSISTENCY_CHECK_TIMEOUT_MILLIS;
+        Exception lastError = null;
+        while (System.currentTimeMillis() < deadline) {
+            try {
+                int numberChecked = checker.checkImportJob(localPatients, localDicomFolder, examinationUID,
+                        compareTags, false);
+                logger.info("Server-side consistency check OK: {} DICOM instance(s) matched for examination {}.",
+                        numberChecked, examinationId);
+                return;
+            } catch (Exception e) {
+                lastError = e;
+                logger.debug("Import not yet available/consistent on server for examination {}, retrying: {}",
+                        examinationId, e.getMessage());
+                Thread.sleep(CONSISTENCY_CHECK_POLL_INTERVAL_MILLIS);
+            }
+        }
+        Assertions.fail("DICOM instances were not consistent with the server within timeout for examination "
+                + examinationId + (lastError != null ? ": " + lastError.getMessage() : ""));
     }
 
     private Long createExamination(org.shanoir.uploader.model.rest.Study study, ImportJob importJob,
@@ -176,13 +245,6 @@ public class ImportTests extends AbstractTest {
         return subjectREST;
     }
 
-    /**
-     * Uploads the anonymized DICOM files found in {@code uploadFolder} one by
-     * one to a freshly created server temp dir, then starts the import job
-     * with that temp dir as workFolder — same sequence as
-     * {@code UploadServiceJob#processStartForServer()} /
-     * {@code #setTempDirIdAndStartImport()}.
-     */
     private void startImportJobFromShanoirUploader(ImportJob importJob, File uploadFolder) throws Exception {
         File[] dicomFiles = uploadFolder.listFiles(
                 (dir, name) -> name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX));
@@ -206,17 +268,6 @@ public class ImportTests extends AbstractTest {
         userClient.startImportJob(importJobJson);
     }
 
-    /**
-     * Attention: as we simulate for testing reason, the ZIP upload import
-     * via Web GUI, we add a pseudonymization profile, as the GUI does it.
-     *
-     * @param importJob
-     * @param subjectREST
-     * @param examination
-     * @param study
-     * @throws JsonProcessingException
-     * @throws Exception
-     */
     private void startImportJobFromZip(ImportJob importJob, org.shanoir.uploader.model.rest.Subject subjectREST,
             Long examinationId, org.shanoir.uploader.model.rest.Study study)
             throws JsonProcessingException, Exception {
@@ -227,10 +278,8 @@ public class ImportTests extends AbstractTest {
         importJob.setStudyCardName(studyCard.getName());
         importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipment().getId());
         importJob.setExaminationId(examinationId);
-        // Profile Neurinfo
         if (ShUpConfig.isModeSubjectNameManual()) {
             importJob.setAnonymisationProfileToUse("Profile Neurinfo");
-            // Profile OFSEP
         } else {
             importJob.setAnonymisationProfileToUse("Profile OFSEP");
         }
