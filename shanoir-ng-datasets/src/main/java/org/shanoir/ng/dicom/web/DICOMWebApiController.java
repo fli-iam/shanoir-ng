@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -78,6 +79,10 @@ public class DICOMWebApiController implements DICOMWebApi {
     private static final String BULKDATA_PATH = "/bulkdata/";
 
     private static final String STUDIES_PATH = "/studies/";
+
+    private static final Pattern BULK_DATA_PATH_PATTERN = Pattern.compile("[0-9a-fA-F]+(?:/[0-9a-fA-F]+)*");
+
+    private static final Pattern BULK_DATA_QUERY_PATTERN = Pattern.compile("(?:offset|length)=\\d+(?:&(?:offset|length)=\\d+)*");
 
     @Value("${viewer.ohif.url.base}")
     private String viewerBaseUrl;
@@ -355,8 +360,15 @@ public class DICOMWebApiController implements DICOMWebApi {
             return null;
         }
         String bulkDataPath = requestURI.substring(index + BULKDATA_PATH.length());
-        if (request.getQueryString() != null) {
-            bulkDataPath += "?" + request.getQueryString();
+        if (!BULK_DATA_PATH_PATTERN.matcher(bulkDataPath).matches()) {
+            return null;
+        }
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            if (!BULK_DATA_QUERY_PATTERN.matcher(queryString).matches()) {
+                return null;
+            }
+            bulkDataPath += "?" + queryString;
         }
         return bulkDataPath;
     }
