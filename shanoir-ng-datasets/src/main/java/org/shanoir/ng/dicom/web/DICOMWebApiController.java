@@ -290,12 +290,9 @@ public class DICOMWebApiController implements DICOMWebApi {
         } else if (root.isObject()) {
             JsonNode bulkDataURINode = root.get(BULK_DATA_URI);
             if (bulkDataURINode != null && bulkDataURINode.isTextual()) {
-                String bulkDataURI = bulkDataURINode.asText();
-                int index = bulkDataURI.indexOf(STUDIES_PATH);
-                if (index != -1) {
-                    String rewritten = viewerBaseUrl + bulkDataURI.substring(index)
-                            .replace(studyInstanceUID, examinationUID)
-                            .replace(serieInstanceUID, acquisitionUID);
+                String rewritten = rewriteBulkDataURI(bulkDataURINode.asText(), studyInstanceUID, examinationUID,
+                        serieInstanceUID, acquisitionUID);
+                if (rewritten != null) {
                     ((ObjectNode) root).put(BULK_DATA_URI, rewritten);
                 }
             }
@@ -305,6 +302,23 @@ public class DICOMWebApiController implements DICOMWebApi {
                 }
             }
         }
+    }
+
+    private String rewriteBulkDataURI(String bulkDataURI, String studyInstanceUID, String examinationUID,
+            String serieInstanceUID, String acquisitionUID) {
+        int index = bulkDataURI.indexOf(STUDIES_PATH);
+        if (index == -1) {
+            return null;
+        }
+        String[] segments = bulkDataURI.substring(index + 1).split("/");
+        for (int i = 1; i < segments.length; i++) {
+            if ("studies".equals(segments[i - 1]) && segments[i].equals(studyInstanceUID)) {
+                segments[i] = examinationUID;
+            } else if ("series".equals(segments[i - 1]) && segments[i].equals(serieInstanceUID)) {
+                segments[i] = acquisitionUID;
+            }
+        }
+        return viewerBaseUrl + "/" + String.join("/", segments);
     }
 
     @Override
