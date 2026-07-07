@@ -281,12 +281,13 @@ public class DICOMWebService {
                 } else {
                     LOG.error("DICOMWeb: findBulkDataOfStudyOfSerieOfInstance: status {} for url {}",
                             response.getCode(), url);
+                    return ResponseEntity.status(response.getCode()).build();
                 }
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        return new ResponseEntity(HttpStatus.NOT_FOUND);
+        return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private byte[] modifyDicomPatientInfo(byte[] dicomBytes, String subjectName) throws Exception {

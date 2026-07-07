@@ -46,6 +46,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 
 import jakarta.annotation.PostConstruct;
 
@@ -298,8 +299,7 @@ public class SeriesInstanceUIDHandler {
             JsonNode value = values.get(i);
             if (value.isTextual() && value.asText().contains(seriesInstanceUID)) {
                 String replaced = value.asText().replace(seriesInstanceUID, acquisitionUID);
-                values.remove(i);
-                values.insert(i, replaced);
+                values.set(i, TextNode.valueOf(replaced));
             }
         }
     }
