@@ -231,7 +231,7 @@ public abstract class AbstractTest {
     public static Center createCenter() {
         String centerUUID = UUID.randomUUID().toString();
         Center center = new Center();
-        center.setName("Center-Name-" + centerUUID);
+        center.setName("Center-" + centerUUID);
         center.setCity("Rennes");
         center.setStreet("Center-Street-" + centerUUID);
         center.setCountry("Center-Country-" + centerUUID);
