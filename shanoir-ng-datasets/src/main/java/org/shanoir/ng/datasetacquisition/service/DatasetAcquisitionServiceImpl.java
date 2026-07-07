@@ -341,7 +341,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
      * @throws RestServiceException
      */
     public void deleteByIdCascade(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        final DatasetAcquisition entity = repository.findByIdWithDatasets(id).orElse(null);
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
