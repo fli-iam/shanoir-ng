@@ -188,7 +188,7 @@ public class ExaminationServiceImpl implements ExaminationService {
         if (!examinationOpt.isPresent()) {
             throw new EntityNotFoundException(Examination.class, id);
         }
-        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findByExamination(id);
+        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findByExaminationWithDatasets(id);
         if (CollectionUtils.isEmpty(acquisitions)) {
             examinationRepository.deleteById(id);
         } else {

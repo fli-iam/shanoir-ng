@@ -70,9 +70,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private DatasetAcquisitionRepository repository;
 
     @Autowired
-    private ExaminationRepository examRepository;
-
-    @Autowired
     private SecurityService securityService;
 
     @Autowired
@@ -119,16 +116,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     public List<DatasetAcquisition> findByDatasetId(Long[] datasetIds) {
         return repository.findDistinctByDatasetsIdIn(datasetIds);
-    }
-
-    @Override
-    public List<DatasetAcquisition> findByExamination(Long examinationId) {
-        Optional<Examination> exam = examRepository.findByIdWithEagerAcquisitions(examinationId);
-        if (exam.isPresent()) {
-            return exam.get().getDatasetAcquisitions();
-        } else {
-            return Collections.emptyList();
-        }
     }
 
     @Override

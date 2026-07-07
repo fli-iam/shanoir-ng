@@ -39,19 +39,6 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
     private ExaminationDatasetAcquisitionMapper delegate;
 
     @Override
-    public List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
-            final List<DatasetAcquisition> datasetAcquisitions) {
-        if (datasetAcquisitions == null) {
-            return null;
-        }
-        final List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionDTOs = new ArrayList<>();
-        for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-            datasetAcquisitionDTOs.add(datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition));
-        }
-        return datasetAcquisitionDTOs;
-    }
-
-    @Override
     public ExaminationDatasetAcquisitionDTO datasetAcquisitionToExaminationDatasetAcquisitionDTO(
             final DatasetAcquisition datasetAcquisition) {
         final ExaminationDatasetAcquisitionDTO datasetAcquisitionDTO = delegate

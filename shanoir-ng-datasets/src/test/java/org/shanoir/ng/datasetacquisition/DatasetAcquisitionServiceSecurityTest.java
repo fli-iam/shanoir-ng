@@ -189,10 +189,10 @@ public class DatasetAcquisitionServiceSecurityTest {
         assertAccessDenied(service::findById, 4L);
 
         // findByExamination(Long)
-        assertAccessAuthorized(service::findByExamination, 1L);
-        assertThat(service.findByExamination(2L).isEmpty());
-        assertThat(service.findByExamination(3L).isEmpty());
-        assertThat(service.findByExamination(4L).isEmpty());
+        assertAccessAuthorized(service::findByExaminationWithDatasets, 1L);
+        assertThat(service.findByExaminationWithDatasets(2L).isEmpty());
+        assertThat(service.findByExaminationWithDatasets(3L).isEmpty());
+        assertThat(service.findByExaminationWithDatasets(4L).isEmpty());
 
         // findPage(Pageable)
         assertThat(service.findPage(PageRequest.of(0, 10))).hasSize(1);

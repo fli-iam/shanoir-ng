@@ -94,4 +94,10 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             + "WHERE acq.examination_id = ?1 "
             + "AND acq.id IN (?2)", nativeQuery = true)
     List<Long> findIdsFromIdsListWithExamId(Long examId, List<Long> acqIdList);
+
+    @Query("SELECT da FROM DatasetAcquisition da "
+            + "LEFT JOIN FETCH da.datasets "
+            + "WHERE da.examination.id = :examinationId "
+            + "ORDER BY COALESCE(da.sortingIndex, 0)")
+    List<DatasetAcquisition> findByExaminationIdWithDatasets(@Param("examinationId") Long examinationId);
 }

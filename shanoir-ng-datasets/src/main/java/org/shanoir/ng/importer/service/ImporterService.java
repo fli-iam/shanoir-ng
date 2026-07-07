@@ -287,7 +287,7 @@ public class ImporterService {
         // If all series to be imported are in error we consider that the whole import failed
         if (generatedAcquisitions.isEmpty()) {
             // if the examination was created for this import, we delete it as it will be empty
-            List<DatasetAcquisition> examinationDatasetAcquisitions = datasetAcquisitionService.findByExamination(examination.getId());
+            List<DatasetAcquisition> examinationDatasetAcquisitions = datasetAcquisitionService.findByExaminationWithDatasets(examination.getId());
             if (examinationDatasetAcquisitions == null || examinationDatasetAcquisitions.isEmpty()) {
                 LOG.warn("All series to be imported for the new examination {} have control quality tag ERROR, the examination will be deleted if empty.", examination.getComment());
                 examinationService.deleteEmptyExamination(examination.getId());
