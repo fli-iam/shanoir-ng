@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.dicom.web;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,18 +85,34 @@ public class SeriesInstanceUIDHandler {
     @Autowired
     private DatasetProcessingRepository datasetProcessingRepository;
 
+    /**
+     * The viewer requests the metadata of each serie of an examination
+     * separately, so the series-to-virtual-UID map of the examination is
+     * cached shortly to avoid rebuilding it from the database per serie.
+     * The short TTL keeps new series visible in time, e.g. a SEG object
+     * stored by the viewer or a fresh processing output.
+     */
+    private static final long EXAMINATION_SERIES_TTL_MS = 30000;
+
+    private record ExaminationSeriesCacheEntry(long creationTime, Map<String, String> seriesToVirtualUIDs) {
+    }
+
     private ConcurrentHashMap<String, String> virtualUIDToSeriesInstanceUIDCache;
+
+    private ConcurrentHashMap<Long, ExaminationSeriesCacheEntry> examinationToSeriesVirtualUIDsCache;
 
     @PostConstruct
     public void init() {
         virtualUIDToSeriesInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
-        LOG.info("DICOMWeb cache created: virtualUIDToSeriesInstanceUIDCache");
+        examinationToSeriesVirtualUIDsCache = new ConcurrentHashMap<Long, ExaminationSeriesCacheEntry>(1000);
+        LOG.info("DICOMWeb caches created: virtualUIDToSeriesInstanceUIDCache, examinationToSeriesVirtualUIDsCache");
     }
 
     @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
-    public void clearVirtualUIDToSeriesInstanceUIDCache() {
+    public void clearVirtualUIDCaches() {
         virtualUIDToSeriesInstanceUIDCache.clear();
-        LOG.info("DICOMWeb cache cleared: virtualUIDToSeriesInstanceUIDCache");
+        examinationToSeriesVirtualUIDsCache.clear();
+        LOG.info("DICOMWeb caches cleared: virtualUIDToSeriesInstanceUIDCache, examinationToSeriesVirtualUIDsCache");
     }
 
     public String resolveSeriesInstanceUID(String seriesOrVirtualUID) {
@@ -149,19 +167,44 @@ public class SeriesInstanceUIDHandler {
      * @return
      */
     public Map<String, String> findSeriesToVirtualUIDs(Long examinationId) {
-        Map<String, String> seriesToVirtualUIDs = new LinkedHashMap<>();
-        List<DatasetAcquisition> acquisitions = acquisitionService.findByExamination(examinationId);
-        for (DatasetAcquisition acquisition : acquisitions) {
-            addSeriesOfAcquisition(acquisition, seriesToVirtualUIDs);
+        ExaminationSeriesCacheEntry entry = examinationToSeriesVirtualUIDsCache.get(examinationId);
+        if (entry != null && System.currentTimeMillis() - entry.creationTime() < EXAMINATION_SERIES_TTL_MS) {
+            return entry.seriesToVirtualUIDs();
         }
+        List<DatasetAcquisition> acquisitions = acquisitionService.findByExamination(examinationId);
+        Map<String, String> seriesToVirtualUIDs = Collections.unmodifiableMap(buildSeriesToVirtualUIDs(acquisitions));
+        examinationToSeriesVirtualUIDsCache.put(examinationId,
+                new ExaminationSeriesCacheEntry(System.currentTimeMillis(), seriesToVirtualUIDs));
         return seriesToVirtualUIDs;
     }
 
     public Map<String, String> findSeriesToVirtualUIDsOfAcquisition(Long acquisitionId) {
-        Map<String, String> seriesToVirtualUIDs = new LinkedHashMap<>();
         DatasetAcquisition acquisition = acquisitionService.findById(acquisitionId);
-        if (acquisition != null) {
+        if (acquisition == null) {
+            return Collections.emptyMap();
+        }
+        return buildSeriesToVirtualUIDs(List.of(acquisition));
+    }
+
+    private Map<String, String> buildSeriesToVirtualUIDs(List<DatasetAcquisition> acquisitions) {
+        Map<String, String> seriesToVirtualUIDs = new LinkedHashMap<>();
+        List<Long> datasetIds = new ArrayList<>();
+        for (DatasetAcquisition acquisition : acquisitions) {
             addSeriesOfAcquisition(acquisition, seriesToVirtualUIDs);
+            for (Dataset dataset : acquisition.getDatasets()) {
+                datasetIds.add(dataset.getId());
+            }
+        }
+        // outputs of processings, that used these datasets as input,
+        // e.g. segmentations computed by a pipeline, are exposed as
+        // dataset series as well (DICOM-in-PACS outputs only: NIfTI
+        // outputs have no series and are skipped by the UID extraction)
+        if (!datasetIds.isEmpty()) {
+            for (DatasetProcessing processing : datasetProcessingRepository.findAllByInputDatasets_IdIn(datasetIds)) {
+                for (Dataset outputDataset : processing.getOutputDatasets()) {
+                    addSeriesOfDataset(outputDataset, seriesToVirtualUIDs);
+                }
+            }
         }
         return seriesToVirtualUIDs;
     }
@@ -183,23 +226,19 @@ public class SeriesInstanceUIDHandler {
         // extracted from the PACS file path is the only reliable criterion
         for (Dataset dataset : acquisition.getDatasets()) {
             addSeriesOfDataset(dataset, seriesToVirtualUIDs);
-            // outputs of processings, that used this dataset as input,
-            // e.g. segmentations computed by a pipeline, are exposed as
-            // dataset series as well (DICOM-in-PACS outputs only: NIfTI
-            // outputs have no series and are skipped by the UID extraction)
-            for (DatasetProcessing processing : datasetProcessingRepository.findAllByInputDatasets_Id(dataset.getId())) {
-                for (Dataset outputDataset : processing.getOutputDatasets()) {
-                    addSeriesOfDataset(outputDataset, seriesToVirtualUIDs);
-                }
-            }
         }
     }
 
     private void addSeriesOfDataset(Dataset dataset, Map<String, String> seriesToVirtualUIDs) {
-        String seriesInstanceUID = findSeriesInstanceUID(dataset);
+        String datasetUID = DATASET_PREFIX + dataset.getId();
+        String seriesInstanceUID = virtualUIDToSeriesInstanceUIDCache.get(datasetUID);
+        if (seriesInstanceUID == null) {
+            seriesInstanceUID = findSeriesInstanceUID(dataset);
+            if (seriesInstanceUID != null) {
+                virtualUIDToSeriesInstanceUIDCache.putIfAbsent(datasetUID, seriesInstanceUID);
+            }
+        }
         if (seriesInstanceUID != null && !seriesToVirtualUIDs.containsKey(seriesInstanceUID)) {
-            String datasetUID = DATASET_PREFIX + dataset.getId();
-            virtualUIDToSeriesInstanceUIDCache.putIfAbsent(datasetUID, seriesInstanceUID);
             seriesToVirtualUIDs.put(seriesInstanceUID, datasetUID);
         }
     }
