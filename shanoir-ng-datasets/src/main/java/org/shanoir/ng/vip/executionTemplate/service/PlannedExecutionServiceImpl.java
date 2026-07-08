@@ -159,8 +159,8 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
             datasetIds = datasetRepository.findFilteredIdsByDatasetAcquisitionIdIn(acquisitionIds, "%");
         }
 
-        for (Long acquisitionId : acquisitionIds) {
-            DatasetAcquisition acquisition = acquisitionRepository.findById(acquisitionId).orElse(null);
+        List<DatasetAcquisition> acqList = acquisitionRepository.findByIdsWithDatasets(acquisitionIds);
+        for (DatasetAcquisition acquisition : acqList) {
             if (Objects.nonNull(acquisition)) {
                 List<Dataset> datasetList = acquisition.getDatasets();
                 for (int i = 0; i < datasetList.size(); i++) {
