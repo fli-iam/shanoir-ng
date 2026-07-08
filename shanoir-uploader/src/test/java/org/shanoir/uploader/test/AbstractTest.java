@@ -91,6 +91,10 @@ public abstract class AbstractTest {
 
     private static final String IN_PROGRESS = "IN_PROGRESS";
 
+    private static final String SC_MANDATORY = "MANDATORY";
+
+    private static final String SC_DISABLED = "DISABLED";
+
     // -------------------------------------------------------------------------
     // Role-specific authenticated clients
     // -------------------------------------------------------------------------
@@ -300,8 +304,7 @@ public abstract class AbstractTest {
     /**
      * Creates a study with the study card policy set to {@link Study#SC_DISABLED}
      * and a center + confirmed study-users (expert and user), but
-     * <strong>without</strong> creating any {@link AcquisitionEquipment} or
-     * {@link StudyCard}.
+     * <strong>without</strong> creating any {@link StudyCard}.
      *
      * Used to cover the "no study card" import scenario: some studies do not
      * require (and never get) a study card during DICOM import, as opposed to
@@ -317,7 +320,7 @@ public abstract class AbstractTest {
      */
     public static Study createStudyAndCenterWithoutStudyCard() {
         Study study = buildMinimalStudy();
-        study.setStudyCardPolicy(Study.SC_DISABLED);
+        study.setStudyCardPolicy(SC_DISABLED);
 
         List<StudyCenter> studyCenterList = new ArrayList<>();
         StudyCenter studyCenter = new StudyCenter();
@@ -389,7 +392,7 @@ public abstract class AbstractTest {
         // set it explicitly to make the intention of this test clear.
         study.setIsDraft(Boolean.FALSE);
         study.setStudyStatus(IN_PROGRESS);
-        study.setStudyCardPolicy(Study.SC_MANDATORY);
+        study.setStudyCardPolicy(SC_MANDATORY);
 
         Date today = new Date();
         Calendar cal = Calendar.getInstance();
