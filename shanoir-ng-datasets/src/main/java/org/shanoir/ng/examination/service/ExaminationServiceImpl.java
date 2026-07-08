@@ -208,6 +208,17 @@ public class ExaminationServiceImpl implements ExaminationService {
         }
     }
 
+    public List<Examination> findAllWithAcqAndDatasets() {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return examinationRepository.findAllWithAcqAndDatasets();
+        } else {
+            List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+            Set<Long> unrestrictedStudies = new HashSet<Long>();
+            securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
+            return examinationRepository.findAllWithAcqAndDatasetsByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies);
+        }
+    }
+
     public Page<Examination> findPage(final Pageable pageable, boolean preclinical, String searchStr, String searchField) {
         List<Pair<Long, Long>> studyCenters = new ArrayList<>();
         Set<Long> unrestrictedStudies = new HashSet<Long>();

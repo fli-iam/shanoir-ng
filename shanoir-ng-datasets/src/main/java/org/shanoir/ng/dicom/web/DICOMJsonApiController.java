@@ -38,7 +38,7 @@ public class DICOMJsonApiController implements DICOMJsonApi {
 
     @Override
     public ResponseEntity<StudiesDTO> findStudies() {
-        List<Examination> examinations = examinationService.findAll();
+        List<Examination> examinations = examinationService.findAllWithAcqAndDatasets();
         if (examinations.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

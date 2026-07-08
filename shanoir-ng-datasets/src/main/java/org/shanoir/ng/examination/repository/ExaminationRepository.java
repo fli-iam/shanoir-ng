@@ -27,6 +27,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.util.Pair;
 
 /**
  * Repository for examination.
@@ -100,6 +101,18 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
      * @return list of examinations.
      */
     List<Examination> findAll();
+
+
+    /**
+     * Get all examinations, clinical or preclinical.
+     *
+     * @return list of examinations.
+     */
+    @Query("SELECT e FROM Examination e " +
+            "LEFT JOIN FETCH e.datasetAcquisitions da " +
+            "LEFT JOIN FETCH da.datasets " +
+            "WHERE e.id = :id ")
+    List<Examination> findAllWithAcqAndDatasets();
 
     /**
      * Get all examinations, clinical or preclinical filtered by the patient/subject name.

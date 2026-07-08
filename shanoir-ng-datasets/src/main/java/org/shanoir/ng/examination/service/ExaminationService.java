@@ -73,6 +73,15 @@ public interface ExaminationService {
     List<Examination> findAll();
 
     /**
+     * Get all examinations for a specific user to support DICOMweb.
+     *
+     * @return
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
+    List<Examination> findAllWithAcqAndDatasets();
+
+    /**
      * Get a paginated list of examinations reachable by connected user.
      *
      * @param pageable pagination data.
