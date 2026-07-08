@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
-import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.tag.model.TagDTO;
 
 /**

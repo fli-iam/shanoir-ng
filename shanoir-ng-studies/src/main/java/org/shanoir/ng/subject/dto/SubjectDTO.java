@@ -23,7 +23,6 @@ import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.Sex;
-import org.shanoir.ng.subjectstudy.dto.StudyTagsDTO;
 import org.shanoir.ng.tag.model.TagDTO;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
