@@ -45,6 +45,7 @@ import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.StudyCardPolicy;
 import org.shanoir.uploader.model.rest.StudyCenter;
 import org.shanoir.uploader.model.rest.StudyExtraDetails;
 import org.shanoir.uploader.model.rest.StudyUser;
@@ -90,10 +91,6 @@ public abstract class AbstractTest {
     private static final String USER_PASSWORD = "shanoir.client.user.password";
 
     private static final String IN_PROGRESS = "IN_PROGRESS";
-
-    private static final String SC_MANDATORY = "MANDATORY";
-
-    private static final String SC_DISABLED = "DISABLED";
 
     // -------------------------------------------------------------------------
     // Role-specific authenticated clients
@@ -320,7 +317,7 @@ public abstract class AbstractTest {
      */
     public static Study createStudyAndCenterWithoutStudyCard() {
         Study study = buildMinimalStudy();
-        study.setStudyCardPolicy(SC_DISABLED);
+        study.setStudyCardPolicy(StudyCardPolicy.DISABLED.name());
 
         List<StudyCenter> studyCenterList = new ArrayList<>();
         StudyCenter studyCenter = new StudyCenter();
@@ -333,7 +330,7 @@ public abstract class AbstractTest {
         study = adminClient.createStudy(study);
         Assertions.assertNotNull(study);
         LOG.info("New study {} ({}) created with SC_DISABLED (no study card) policy.",
-                study.getName(), study.getId());
+                study.getName(), study.getId(), study.isWithStudyCards());
 
         addExpertAndUserStudyUsers(study);
 
@@ -392,7 +389,7 @@ public abstract class AbstractTest {
         // set it explicitly to make the intention of this test clear.
         study.setIsDraft(Boolean.FALSE);
         study.setStudyStatus(IN_PROGRESS);
-        study.setStudyCardPolicy(SC_MANDATORY);
+        study.setStudyCardPolicy(StudyCardPolicy.MANDATORY.name());
 
         Date today = new Date();
         Calendar cal = Calendar.getInstance();

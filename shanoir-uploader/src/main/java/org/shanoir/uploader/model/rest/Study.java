@@ -14,10 +14,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  */
 public class Study implements Comparable<Study> {
 
-    public static final String SC_MANDATORY = "1";
-
-    public static final String SC_DISABLED = "2";
-
     private Long id;
 
     private String name;
@@ -123,11 +119,14 @@ public class Study implements Comparable<Study> {
     }
 
     public boolean isWithStudyCards() {
-        if(SC_MANDATORY.equals(studyCardPolicy)) {
-            return true;
-        } else if(SC_DISABLED.equals(studyCardPolicy)) {
-            return false;
-        } else { return true; }
+        if (studyCardPolicy != null) {
+            if (studyCardPolicy.equals(StudyCardPolicy.MANDATORY.getIdString())) {
+                return true;
+            } else if (studyCardPolicy.equals(StudyCardPolicy.DISABLED.getIdString())) {
+                return false;
+            }
+        }
+        return false;
     }
 
     public Boolean getIsDraft() {
