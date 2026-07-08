@@ -167,7 +167,7 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
                     Dataset dataset = datasetList.get(i);
 
                     // Delete the planned execution record only after the last dataset of this acquisition is submitted.
-                    List<Long> plannedExecutionToRemove = (i == datasetList.size() - 1) ? List.of(acquisitionId) : List.of();
+                    List<Long> plannedExecutionToRemove = (i == datasetList.size() - 1) ? List.of(acquisition.getId()) : List.of();
                     plannedExecutionManager.addToExecutionsQueue(new ExecutionInQueue(template, dataset.getId(), "dataset", plannedExecutionToRemove));
                     try {
                         Thread.sleep(1000); // Delay between submissions, VIP needs it
