@@ -305,8 +305,7 @@ public class ExaminationApiController implements ExaminationApi {
     }
 
     @Override
-    public void downloadExtraData(Long examinationId, String fileName,
-            HttpServletResponse response) throws IOException {
+    public void downloadExtraData(Long examinationId, String fileName, HttpServletResponse response) throws IOException {
         try {
             Resource fileToDownload = storageService.loadExtraData(examinationId, fileName);
             if (fileToDownload != null) {
