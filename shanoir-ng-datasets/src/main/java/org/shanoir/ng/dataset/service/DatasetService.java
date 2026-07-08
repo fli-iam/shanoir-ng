@@ -80,7 +80,7 @@ public interface DatasetService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
-    Dataset findById(Long id);
+    Dataset findById(Long id) throws EntityNotFoundException;
 
     /**
      * Find datasets by their ids.
@@ -187,7 +187,7 @@ public interface DatasetService {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
     Future<Void> deletePartitionOfNiftis(List<Long> partition, float total, ShanoirEvent event);
 
-    String getDicomMetadataByDatasetId(Long datasetId) throws IOException, MessagingException;
+    String getDicomMetadataByDatasetId(Long datasetId) throws IOException, MessagingException, EntityNotFoundException;
 
     /**
      * Populate a list of datasets with their presence in PACS or not
@@ -195,6 +195,13 @@ public interface DatasetService {
      * @param datasets a list of datasets
      */
     void populateInPacs(List<Dataset> datasets);
+
+    /**
+     * Populate a list of datasets with their realted center id
+     *
+     * @param datasets a list of datasets
+     */
+    void populateCenterId(List<Dataset> datasets);
 
     /**
      * Return the first ancestor which has not been produced by a pipeline

@@ -22,6 +22,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.http.ResponseEntity;
@@ -114,7 +115,7 @@ public interface DatasetProcessingApi {
             @ApiResponse(responseCode = "500", description = "unexpected error")})
     @GetMapping(value = "/{datasetProcessingId}/inputDatasets/", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<DatasetDTO>> getInputDatasets(@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
+    ResponseEntity<List<DatasetDTO>> getInputDatasets(@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) throws EntityNotFoundException;
 
     @Operation(summary = "", description = "Returns the output datasets of a processing")
     @ApiResponses(value = {
@@ -125,7 +126,7 @@ public interface DatasetProcessingApi {
             @ApiResponse(responseCode = "500", description = "unexpected error")})
     @GetMapping(value = "/{datasetProcessingId}/outputDatasets/", produces = {"application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<List<DatasetDTO>> getOutputDatasets(@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
+    ResponseEntity<List<DatasetDTO>> getOutputDatasets(@Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) throws EntityNotFoundException;
 
     @Operation(summary = "", description = "Saves a new dataset processing")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "created dataset processing"),

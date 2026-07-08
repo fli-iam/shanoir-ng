@@ -28,6 +28,7 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.processing.service.ProcessingDownloaderService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -64,6 +65,9 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
     @Autowired
     private DatasetProcessingService datasetProcessingService;
+
+    @Autowired
+    private DatasetProcessingRepository repository;
 
     @Autowired
     private ProcessingDownloaderService processingDownloaderService;
@@ -132,19 +136,21 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
     @Override
     public ResponseEntity<List<DatasetDTO>> getInputDatasets(
-            @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
-        final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
-        List<Dataset> inputDatasets = datasetProcessing.get().getInputDatasets();
+            @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) throws EntityNotFoundException {
+        DatasetProcessing datasetProcessing = repository.findByIdWithInputs(datasetProcessingId).orElseThrow(() -> new EntityNotFoundException(DatasetProcessing.class, datasetProcessingId));
+        List<Dataset> inputDatasets = datasetProcessing.getInputDatasets();
         datasetService.populateInPacs(inputDatasets);
+        datasetService.populateCenterId(inputDatasets);
         return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(inputDatasets), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<List<DatasetDTO>> getOutputDatasets(
-            @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
-        final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
-        List<Dataset> outputDatasets = datasetProcessing.get().getOutputDatasets();
+            @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) throws EntityNotFoundException {
+        DatasetProcessing datasetProcessing = repository.findByIdWithOutputs(datasetProcessingId).orElseThrow(() -> new EntityNotFoundException(DatasetProcessing.class, datasetProcessingId));
+        List<Dataset> outputDatasets = datasetProcessing.getOutputDatasets();
         datasetService.populateInPacs(outputDatasets);
+        datasetService.populateCenterId(outputDatasets);
         return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(outputDatasets), HttpStatus.OK);
     }
 

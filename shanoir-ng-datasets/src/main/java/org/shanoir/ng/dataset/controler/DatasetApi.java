@@ -112,7 +112,7 @@ public interface DatasetApi {
     @GetMapping(value = "/{datasetId}", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL'))")
     ResponseEntity<DatasetWithDependenciesDTOInterface> findDatasetById(
-            @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
+            @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId) throws EntityNotFoundException;
 
     @Operation(summary = "", description = "Updates a dataset")
     @ApiResponses(value = {
@@ -238,7 +238,7 @@ public interface DatasetApi {
     @GetMapping(value = "/dicom-metadata/{datasetId}")
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
     ResponseEntity<String> getDicomMetadataByDatasetId(
-            @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId) throws MalformedURLException, IOException, MessagingException;
+            @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId) throws MalformedURLException, IOException, MessagingException, EntityNotFoundException;
 
     @Operation(summary = "", description = "Creates a processed dataset")
     @ApiResponses(value = {

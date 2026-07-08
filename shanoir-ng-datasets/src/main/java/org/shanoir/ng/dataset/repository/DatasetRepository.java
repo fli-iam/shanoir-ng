@@ -14,6 +14,7 @@
 package org.shanoir.ng.dataset.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
@@ -22,6 +23,7 @@ import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetRightsDTO;
 import org.shanoir.ng.dataset.model.OverallStatistics;
+import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -42,8 +44,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
     Long countDatasetsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
 
-    Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
-
     Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Sort sort);
 
     Iterable<Dataset> findByDatasetAcquisition_Examination_Study_Id(Long studyId);
@@ -60,15 +60,9 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "WHERE ds.subject_id IN (?1)", nativeQuery = true)
     List<Long> findIdsBySubjectIdIn(List<Long> subjectIds);
 
-    Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
+    List<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
 
     int countByDatasetAcquisitionId(Long acquisitionId);
-
-    Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
-
-    Iterable<Dataset> findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(Long studycardId, List<Long> studyIds);
-
-    Iterable<Dataset> findByDatasetAcquisitionExaminationId(Long examId);
 
     @Query(value = "SELECT ds.id FROM dataset ds "
             + "LEFT JOIN dataset_acquisition acq ON ds.dataset_acquisition_id = acq.id "
@@ -96,10 +90,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     Long findDatasetsExpressionSizesSum();
 
     boolean existsByTagsContains(StudyTag tag);
-
-    @Query("SELECT DISTINCT ds FROM Dataset ds LEFT JOIN ds.processings p "
-            + "WHERE p.id IN :processingIds")
-    List<Dataset> findDatasetsByProcessingIdIn(@Param("processingIds") List<Long> processingIds);
 
     @Query("""
             SELECT DISTINCT
@@ -264,4 +254,86 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Query("SELECT dataset FROM Dataset dataset " +
             "WHERE dataset.subjectId = :subjectId")
     List<Dataset> findBySubjectId(Long subjectId);
+
+    @Query("SELECT dataset FROM Dataset dataset " +
+            "JOIN FETCH dataset.datasetProcessing AS dp " +
+            "JOIN FETCH dp.inputDatasets " +
+            "JOIN FETCH dataset.datasetAcquisition AS acq " +
+            "JOIN FETCH acq.examination " +
+            "WHERE dataset.id in :ids")
+    Optional<Dataset> findByIdWithProcessingAncestorsAndExamination(Long id);
+
+    @Query("SELECT dataset FROM Dataset dataset " +
+            "JOIN FETCH dataset.datasetProcessing AS dp " +
+            "JOIN FETCH dp.inputDatasets " +
+            "JOIN FETCH dataset.datasetAcquisition AS acq " +
+            "JOIN FETCH acq.examination " +
+            "WHERE dataset.id in :ids")
+    List<Dataset> findByIdsWithProcessingAncestorsAndExamination(List<Long> ids);
+
+    @Query("SELECT dataset FROM Dataset dataset " +
+            "JOIN FETCH dataset.datasetProcessing AS dp " +
+            "JOIN FETCH dp.inputDatasets " +
+            "JOIN FETCH dataset.datasetAcquisition AS acq " +
+            "JOIN FETCH acq.examination e " +
+            "WHERE acq.studyCard.id = :acquisitionId")
+    List<Dataset> findByAcquisitionIdWithProcessingAncestorsAndExamination(Long acquisitionId);
+
+    @Query("SELECT dataset FROM Dataset dataset " +
+            "JOIN FETCH dataset.datasetProcessing AS dp " +
+            "JOIN FETCH dp.inputDatasets " +
+            "JOIN FETCH dataset.datasetAcquisition AS acq " +
+            "JOIN FETCH acq.examination e " +
+            "WHERE acq.id = :studyCardId")
+    List<Dataset> findByStudyCardIdWithProcessingAncestorsAndExamination(Long studyCardId);
+
+    @Query("SELECT dataset FROM Dataset dataset " +
+            "JOIN FETCH dataset.datasetProcessing AS dp " +
+            "JOIN FETCH dp.inputDatasets " +
+            "JOIN FETCH dataset.datasetAcquisition AS acq " +
+            "JOIN FETCH acq.examination e " +
+            "WHERE acq.id = :studyCardId " +
+            "AND e.study.id IN :studyIds")
+    List<Dataset> findByStudyCardIdAndStudyIdsWithProcessingAncestorsAndExamination(Long studyCardId, List<Long> studyIds);
+
+    @Query("SELECT dataset FROM Dataset dataset " +
+            "JOIN FETCH dataset.datasetProcessing AS dp " +
+            "JOIN FETCH dp.inputDatasets " +
+            "JOIN FETCH dataset.datasetAcquisition AS acq " +
+            "JOIN FETCH acq.examination e " +
+            "WHERE e.id = :examinationId")
+    List<Dataset> findByExaminationIdWithProcessingAncestorsAndExamination(Long examinationId);
+
+    @Query("SELECT dataset FROM Dataset dataset " +
+            "JOIN FETCH dataset.datasetProcessing AS dp " +
+            "JOIN FETCH dp.inputDatasets " +
+            "JOIN FETCH dataset.datasetAcquisition AS acq " +
+            "JOIN FETCH acq.examination e " +
+            "WHERE e.study.id IN :study_ids " +
+            "ANd dataset.id IN :ids")
+    List<Dataset> findByIdsAndStudyIdsWithProcessingAncestorsAndExamination(List<Long> studyIds, List<Long> ids);
+
+    @Query(value = "SELECT d.id FROM Dataset d",
+            countQuery = "SELECT COUNT(d) FROM Dataset d")
+    Page<Long> findAllIds(Pageable pageable);
+
+    @Query(value = "SELECT d.id FROM Dataset d")
+    List<Long> findAllIds(Sort sort);
+
+    default Page<Dataset> findAllWithProcessingAncestorsAndExamination(Pageable pageable) {
+        Page<Long> idPage = findAllIds(pageable);
+        List<Dataset> datasetList = findByIdsWithProcessingAncestorsAndExamination(idPage.getContent());
+        return new PageImpl<>(datasetList, pageable, idPage.getTotalElements());
+    }
+
+    default Page<Dataset> findByStudyIdsWithProcessingAncestorsAndExamination(List<Long> studyIds, Pageable pageable) {
+        Page<Long> idPage = findAllIds(pageable);
+        List<Dataset> datasetList = findByIdsAndStudyIdsWithProcessingAncestorsAndExamination(idPage.getContent(), studyIds);
+        return new PageImpl<>(datasetList, pageable, idPage.getTotalElements());
+    }
+
+    default List<Dataset> findByStudyIdsWithProcessingAncestorsAndExamination(List<Long> studyIds, Sort sort) {
+        return findByIdsAndStudyIdsWithProcessingAncestorsAndExamination(findAllIds(sort), studyIds);
+    }
+
 }

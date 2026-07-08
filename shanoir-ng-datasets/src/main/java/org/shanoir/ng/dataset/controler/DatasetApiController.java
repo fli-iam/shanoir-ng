@@ -240,7 +240,7 @@ public class DatasetApiController implements DatasetApi {
 
     @Override
     public ResponseEntity<DatasetWithDependenciesDTOInterface> findDatasetById(
-            final Long datasetId) {
+            final Long datasetId) throws EntityNotFoundException {
 
         final Dataset dataset = datasetService.findById(datasetId);
 
@@ -275,7 +275,7 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public ResponseEntity<Page<DatasetDTO>> findDatasets(final Pageable pageable) throws RestServiceException {
+    public ResponseEntity<Page<DatasetDTO>> findDatasets(final Pageable pageable) {
         Page<Dataset> datasets = datasetService.findPage(pageable);
         if (datasets.getContent().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -363,7 +363,7 @@ public class DatasetApiController implements DatasetApi {
 
     @Override
     public ResponseEntity<String> getDicomMetadataByDatasetId(Long datasetId)
-            throws IOException, MessagingException {
+            throws IOException, MessagingException, EntityNotFoundException {
         String dicomJson = datasetService.getDicomMetadataByDatasetId(datasetId);
         if (dicomJson == null) {
             return ResponseEntity.noContent().build();

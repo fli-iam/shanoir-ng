@@ -16,6 +16,8 @@ package org.shanoir.ng.processing.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.LongToIntFunction;
+
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
@@ -109,6 +111,14 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id "
             + "WHERE acquisition.examination_id IN (:examinationIds)", nativeQuery = true)
     List<Long> findAllIdsByExaminationIds(List<Long> examinationIds);
+
+    @Query("SELECT processing FROM DatasetProcessing processing " +
+            "JOIN FETCH processing.inputDatasets")
+    Optional<DatasetProcessing> findByIdWithInputs(Long Id);
+
+    @Query("SELECT processing FROM DatasetProcessing processing " +
+            "JOIN FETCH processing.outputDatasets")
+    Optional<DatasetProcessing> findByIdWithOutputs(Long Id);
 
     /**
      * Find all identifying fields for a given processing id

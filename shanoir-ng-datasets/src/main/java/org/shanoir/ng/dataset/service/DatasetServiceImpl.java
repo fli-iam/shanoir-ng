@@ -257,12 +257,10 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
-    public Dataset findById(final Long id) {
-        Dataset dataset = repository.findById(id).orElse(null);
-        if (dataset != null) {
-            populateInPacs(List.of(dataset));
-            dataset.setCenterId(resolveCenterId(dataset));
-        }
+    public Dataset findById(final Long id) throws EntityNotFoundException {
+        Dataset dataset = repository.findByIdWithProcessingAncestorsAndExamination(id).orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+        populateInPacs(List.of(dataset));
+        populateCenterId(List.of(dataset));
         return dataset;
     }
 
@@ -273,7 +271,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     public List<Dataset> findByIdIn(List<Long> ids) {
-        List<Dataset> datasets = Utils.toList(repository.findAllById(ids));
+        List<Dataset> datasets = Utils.toList(repository.findByIdsWithProcessingAncestorsAndExamination(ids));
         populateInPacs(datasets);
         populateCenterId(datasets);
         return datasets;
@@ -357,7 +355,7 @@ public class DatasetServiceImpl implements DatasetService {
     @Override
     public Page<Dataset> findPage(final Pageable pageable) {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            Page<Dataset> page = repository.findAll(pageable);
+            Page<Dataset> page = repository.findAllWithProcessingAncestorsAndExamination(pageable);
             populateInPacs(page.getContent());
             populateCenterId(page.getContent());
             return page;
@@ -383,14 +381,14 @@ public class DatasetServiceImpl implements DatasetService {
         }
 
         if (!hasRestrictions) {
-            Page<Dataset> page = repository.findByDatasetAcquisitionExaminationStudy_IdIn(accessibleStudyIds, pageable);
+            Page<Dataset> page = repository.findByStudyIdsWithProcessingAncestorsAndExamination(accessibleStudyIds, pageable);
             populateInPacs(page.getContent());
             populateCenterId(page.getContent());
             return page;
         }
 
         // If yes, get all examinations and filter by centers
-        List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudy_IdIn(accessibleStudyIds, pageable.getSort()));
+        List<Dataset> datasets = Utils.toList(repository.findByStudyIdsWithProcessingAncestorsAndExamination(accessibleStudyIds, pageable.getSort()));
 
         if (CollectionUtils.isEmpty(datasets)) {
             return new PageImpl<>(datasets);
@@ -403,6 +401,7 @@ public class DatasetServiceImpl implements DatasetService {
 
         datasets = datasets.subList(pageable.getPageSize() * pageable.getPageNumber(), Math.min(datasets.size(), pageable.getPageSize() * (pageable.getPageNumber() + 1)));
         populateInPacs(datasets);
+        populateCenterId(datasets);
 
         Page<Dataset> page = new PageImpl<>(datasets, pageable, size);
         return page;
@@ -446,7 +445,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     public List<Dataset> findByAcquisition(Long acquisitionId) {
-        List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionId(acquisitionId));
+        List<Dataset> datasets = Utils.toList(repository.findByAcquisitionIdWithProcessingAncestorsAndExamination(acquisitionId));
         populateInPacs(datasets);
         populateCenterId(datasets);
         return datasets;
@@ -456,13 +455,13 @@ public class DatasetServiceImpl implements DatasetService {
     public List<Dataset> findByStudycard(Long studycardId) {
         List<Dataset> datasets;
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            datasets = Utils.toList(repository.findBydatasetAcquisitionStudyCardId(studycardId));
+            datasets = repository.findByStudyCardIdWithProcessingAncestorsAndExamination(studycardId);
         } else {
             Long userId = KeycloakUtil.getTokenUserId();
             List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 
-            datasets = Utils.toList(repository.findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(
-                    +studycardId, studyIds));
+            datasets = repository.findByStudyCardIdAndStudyIdsWithProcessingAncestorsAndExamination(
+                    +studycardId, studyIds);
         }
         populateInPacs(datasets);
         populateCenterId(datasets);
@@ -471,7 +470,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     public List<Dataset> findByExaminationId(Long examinationId) {
-        List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationId(examinationId));
+        List<Dataset> datasets = repository.findByExaminationIdWithProcessingAncestorsAndExamination(examinationId);
         populateInPacs(datasets);
         populateCenterId(datasets);
         return datasets;
@@ -479,7 +478,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     public List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId) {
-        List<Dataset> datasets = StreamSupport.stream(repository.findAllById(repository.findDatasetAndOutputByExaminationId(examinationId)).spliterator(), false).toList();
+        List<Dataset> datasets = repository.findByIdsWithProcessingAncestorsAndExamination(repository.findDatasetAndOutputByExaminationId(examinationId));
         populateInPacs(datasets);
         populateCenterId(datasets);
         return datasets;
@@ -660,7 +659,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Transactional(readOnly = true)
-    public String getDicomMetadataByDatasetId(Long datasetId) throws IOException, MessagingException {
+    public String getDicomMetadataByDatasetId(Long datasetId) throws IOException, MessagingException, EntityNotFoundException {
         final Dataset dataset = datasetService.findById(datasetId);
         Optional<URL> firstWADOURL = DatasetFileUtils.getFirstDatasetFilePathURL(dataset,
                 DatasetExpressionFormat.DICOM);
@@ -679,19 +678,12 @@ public class DatasetServiceImpl implements DatasetService {
         }
     }
 
-    private Long resolveCenterId(Dataset dataset) {
-        if (dataset.getDatasetAcquisition() == null || dataset.getDatasetAcquisition().getExamination() == null) {
-            if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null
-                    && !dataset.getDatasetProcessing().getInputDatasets().isEmpty()) {
-                return resolveCenterId(dataset.getDatasetProcessing().getInputDatasets().get(0));
-            }
-            return null;
+    public Dataset getFirstRealInput(Dataset dataset) {
+        if (dataset.getDatasetProcessing() != null) {
+            return getFirstRealInput(repository.findByIdWithProcessingAncestors(dataset.getId()).getDatasetProcessing().getInputDatasets().get(0));
+        } else {
+            return dataset;
         }
-        return dataset.getDatasetAcquisition().getExamination().getCenterId();
-    }
-
-    private void populateCenterId(List<Dataset> datasets) {
-        datasets.forEach(d -> d.setCenterId(resolveCenterId(d)));
     }
 
     public void populateInPacs(List<Dataset> datasets) {
@@ -701,12 +693,8 @@ public class DatasetServiceImpl implements DatasetService {
         datasets.forEach(d -> d.setInPacs(withExpressions.contains(d.getId())));
     }
 
-    public Dataset getFirstRealInput(Dataset dataset) {
-        if (dataset.getDatasetProcessing() != null) {
-            return getFirstRealInput(repository.findByIdWithProcessingAncestors(dataset.getId()).getDatasetProcessing().getInputDatasets().get(0));
-        } else {
-            return dataset;
-        }
+    public void populateCenterId(List<Dataset> datasets) {
+        datasets.forEach(d -> d.setCenterId(resolveCenterId(d)));
     }
 
     protected void fillMetadataFile(File metadataFile, List<Long> datasetIds, List<String> metadataKeys) throws Exception {
@@ -725,7 +713,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
     }
 
-    protected String shapeMetadataLinesForOneDicom(List<String> metadataKeys, Long datasetId, ObjectMapper mapper) {
+    protected String shapeMetadataLinesForOneDicom(List<String> metadataKeys, Long datasetId, ObjectMapper mapper) throws EntityNotFoundException {
         String metadataLine = datasetId.toString();
         final Dataset dataset = findById(datasetId);
         metadataLine += ";" + (Objects.nonNull(dataset.getDatasetAcquisition()) ? dataset.getDatasetAcquisition().getId().toString() : "");
@@ -826,5 +814,17 @@ public class DatasetServiceImpl implements DatasetService {
             return;
         }
         deRepository.deleteAll(expressionsToDelete);
+    }
+
+
+    protected Long resolveCenterId(Dataset dataset) {
+        if (dataset.getDatasetAcquisition() == null || dataset.getDatasetAcquisition().getExamination() == null) {
+            if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null
+                    && !dataset.getDatasetProcessing().getInputDatasets().isEmpty()) {
+                return resolveCenterId(dataset.getDatasetProcessing().getInputDatasets().get(0));
+            }
+            return null;
+        }
+        return dataset.getDatasetAcquisition().getExamination().getCenterId();
     }
 }

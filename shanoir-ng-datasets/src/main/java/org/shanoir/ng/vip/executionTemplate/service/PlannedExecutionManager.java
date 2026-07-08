@@ -162,7 +162,7 @@ public class PlannedExecutionManager {
 
     public synchronized void addToInvolvedDatasetIds(List<Long> longs) {
         for (Long acquisitionId : longs) {
-            involvedDatasetIds.addAll(StreamSupport.stream(datasetRepository.findByDatasetAcquisitionId(acquisitionId).spliterator(), false).map(Dataset::getId).toList());
+            involvedDatasetIds.addAll(datasetRepository.findByDatasetAcquisitionId(acquisitionId).stream().map(Dataset::getId).toList());
         }
     }
 

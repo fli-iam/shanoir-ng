@@ -472,7 +472,7 @@ public class DatasetApiSecurityTest {
         given(datasetRepository.findById(1L)).willReturn(Optional.of(dataset1));
         DatasetRightsDTO drv = mockDatasetRightsDTO(100L, 2L, 1L);
         given(datasetRepository.findRightsDtoBaseById(dataset1.getId())).willReturn(drv);
-        given(datasetRepository.findByDatasetAcquisitionExaminationId(1L)).willReturn(Arrays.asList(new Dataset[]{dataset1}));
+        given(datasetRepository.findByExaminationIdWithProcessingAncestorsAndExamination(1L)).willReturn(Arrays.asList(dataset1));
         exam1.setDatasetAcquisitions(Utils.toList(dsAcq1));
         dsAcq1.setDatasets(Arrays.asList(new Dataset[]{dataset1}));
         // dataset 2
@@ -480,7 +480,7 @@ public class DatasetApiSecurityTest {
         given(datasetRepository.findById(2L)).willReturn(Optional.of(dataset2));
         DatasetRightsDTO drv2 = mockDatasetRightsDTO(100L, 2L, 3L);
         given(datasetRepository.findRightsDtoBaseById(dataset2.getId())).willReturn(drv2);
-        given(datasetRepository.findByDatasetAcquisitionExaminationId(2L)).willReturn(Arrays.asList(new Dataset[]{dataset2}));
+        given(datasetRepository.findByExaminationIdWithProcessingAncestorsAndExamination(2L)).willReturn(Arrays.asList(dataset2));
         exam2.setDatasetAcquisitions(Utils.toList(dsAcq2));
         dsAcq2.setDatasets(Arrays.asList(new Dataset[]{dataset2}));
         // dataset 3
@@ -488,7 +488,7 @@ public class DatasetApiSecurityTest {
         given(datasetRepository.findById(3L)).willReturn(Optional.of(dataset3));
         DatasetRightsDTO drv3 = mockDatasetRightsDTO(100L, 3L, 1L);
         given(datasetRepository.findRightsDtoBaseById(dataset3.getId())).willReturn(drv3);
-        given(datasetRepository.findByDatasetAcquisitionExaminationId(3L)).willReturn(Arrays.asList(new Dataset[]{dataset3}));
+        given(datasetRepository.findByExaminationIdWithProcessingAncestorsAndExamination(3L)).willReturn(Arrays.asList(dataset3));
         exam3.setDatasetAcquisitions(Utils.toList(dsAcq3));
         dsAcq3.setDatasets(Arrays.asList(new Dataset[]{dataset3}));
         // dataset 4
@@ -497,7 +497,7 @@ public class DatasetApiSecurityTest {
         given(datasetRepository.findById(4L)).willReturn(Optional.of(dataset4));
         DatasetRightsDTO drv4 = mockDatasetRightsDTO(100L, 4L, 4L);
         given(datasetRepository.findRightsDtoBaseById(dataset4.getId())).willReturn(drv4);
-        given(datasetRepository.findByDatasetAcquisitionExaminationId(4L)).willReturn(Arrays.asList(new Dataset[]{dataset4}));
+        given(datasetRepository.findByExaminationIdWithProcessingAncestorsAndExamination(4L)).willReturn(Arrays.asList(dataset4));
 
         try {
             DatasetLight datasetLight1 = new DatasetLight(1L, "ds1", MrDataset.class, 1L, "study1", 1L, "subject1", LocalDate.now(), false, 1L);
@@ -516,7 +516,7 @@ public class DatasetApiSecurityTest {
         given(rightsRepository.findByUserId(LOGGED_USER_ID)).willReturn(Arrays.asList(new StudyUser[]{su1}));
         given(datasetRepository.findAll(Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Dataset[]{dataset1, dataset3})));
         given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L, 2L));
-        given(datasetRepository.findByDatasetAcquisitionExaminationStudy_IdIn(Arrays.asList(1L, 2L), PageRequest.of(0, 10).getSort())).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{dataset1, dataset2, dataset3}))));
+        given(datasetRepository.findByStudyIdsWithProcessingAncestorsAndExamination(Arrays.asList(1L, 2L), PageRequest.of(0, 10).getSort())).willReturn(Arrays.asList(dataset1, dataset2, dataset3));
 
         given(datasetRepository.findAllById(Utils.toList(1L))).willReturn(Utils.toList(dataset1));
         given(datasetRepository.findAllById(Utils.toList(1L, 3L))).willReturn(Utils.toList(dataset1, dataset3));
