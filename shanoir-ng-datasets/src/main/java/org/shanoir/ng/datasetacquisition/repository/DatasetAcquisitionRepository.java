@@ -99,5 +99,16 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             + "LEFT JOIN FETCH da.datasets "
             + "WHERE da.examination.id = :examinationId "
             + "ORDER BY COALESCE(da.sortingIndex, 0)")
-    List<DatasetAcquisition> findByExaminationIdWithDatasets(@Param("examinationId") Long examinationId);
+    List<DatasetAcquisition> findByExaminationIdWithDatasets(Long examinationId);
+
+    @Query("SELECT da FROM DatasetAcquisition da "
+            + "LEFT JOIN FETCH da.datasets "
+            + "WHERE da.id IN :ids")
+    List<DatasetAcquisition> findByIdsWithDatasets(List<Long> ids);
+
+    @Query("SELECT da FROM DatasetAcquisition da "
+            + "LEFT JOIN FETCH da.datasets as ds "
+            + "LEFT JOIN FETCH ds.datasetExpressions "
+            + "WHERE da.id IN :ids")
+    List<DatasetAcquisition> findByIdsWithDatasetExpressions(List<Long> ids);
 }

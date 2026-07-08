@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -72,6 +73,9 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Autowired
     private SolrService solrService;
+
+    @Autowired
+    private DatasetAcquisitionRepository acquisitionRepository;
 
     @Override
     public ResponseEntity<Void> deleteStudyCard(
@@ -200,7 +204,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> applyStudyCard(
-            @Parameter(description = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException, SolrServerException, IOException, RestServiceException {
+            @Parameter(description = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException {
         if (studyCardApplyObject == null
                 || studyCardApplyObject.getDatasetAcquisitionIds() == null
                 || studyCardApplyObject.getDatasetAcquisitionIds().isEmpty()
@@ -209,7 +213,7 @@ public class StudyCardApiController implements StudyCardApi {
         }
         StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
         LOG.debug("re-apply studycard n° " + studyCard.getId());
-        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
+        List<DatasetAcquisition> acquisitions = acquisitionRepository.findByIdsWithDatasetExpressions(studyCardApplyObject.getDatasetAcquisitionIds());
         try {
             cardProcessingService.applyStudyCard(studyCard, acquisitions);
         } catch (PacsException | EntityNotFoundException e) {
