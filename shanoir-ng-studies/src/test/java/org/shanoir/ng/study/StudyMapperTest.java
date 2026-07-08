@@ -71,7 +71,7 @@ public class StudyMapperTest {
         study.setName(STUDY_NAME);
         study.setStudyCenterList(new ArrayList<>());
         study.setStudyUserList(new ArrayList<>());
-        study.setSubjectStudyList(new ArrayList<>());
+        study.setSubjects(new ArrayList<>());
         return study;
     }
 

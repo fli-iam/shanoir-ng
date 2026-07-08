@@ -40,9 +40,9 @@ import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subject.model.LegacySubjectStudy;
 import org.shanoir.ng.subjectstudy.dto.StudyTagsDTO;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
-import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.tag.model.TagDTO;
 import org.shanoir.ng.tag.model.TagMapper;
@@ -247,7 +247,7 @@ public class SubjectServiceImpl implements SubjectService {
      * @throws ShanoirException
      */
     private Subject mapSubjectStudyListToSubject(Subject subject) throws ShanoirException {
-        List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+        List<LegacySubjectStudy> subjectStudyList = subject.getSubjectStudyList();
         if (subjectStudyList != null && !subjectStudyList.isEmpty()) {
             if (subjectStudyList.size() > 1) {
                 throw new ShanoirException("A subject is only in one study.", HttpStatus.FORBIDDEN.value());
@@ -278,7 +278,7 @@ public class SubjectServiceImpl implements SubjectService {
         return subject;
     }
 
-    private Subject mapSubjectStudyAttributesToSubject(Subject subject, SubjectStudy subjectStudy) {
+    private Subject mapSubjectStudyAttributesToSubject(Subject subject, LegacySubjectStudy subjectStudy) {
         subject.setStudy(subjectStudy.getStudy());
         subject.setStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
         subject.setSubjectType(subjectStudy.getSubjectType());
@@ -325,7 +325,7 @@ public class SubjectServiceImpl implements SubjectService {
         subjectOld.setPhysicallyInvolved(subjectNew.isPhysicallyInvolved());
         subjectOld.setQualityTag(subjectNew.getQualityTag());
         subjectOld.setStudy(subjectNew.getStudy());
-        List<SubjectStudy> subjectStudyListNew = subjectNew.getSubjectStudyList();
+        List<LegacySubjectStudy> subjectStudyListNew = subjectNew.getSubjectStudyList();
         if (subjectStudyListNew != null) {
             if (subjectStudyListNew.isEmpty() && subjectNew.getStudy() == null) {
                 throw new ShanoirException("A subject has to be in at least one study.", HttpStatus.FORBIDDEN.value());

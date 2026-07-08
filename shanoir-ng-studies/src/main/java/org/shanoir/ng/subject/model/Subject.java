@@ -27,7 +27,6 @@ import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.tag.model.Tag;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -42,7 +41,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.ColumnResult;
 import jakarta.persistence.ConstructorResult;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -53,6 +51,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
@@ -81,9 +80,13 @@ public class Subject extends HalEntity {
     @NotNull
     private Study study;
 
-    /** Relations beetween the subjects and the studies. */
-    @OneToMany(mappedBy = "subject", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SubjectStudy> subjectStudyList;
+    /**
+     * Legacy clients (old ShUp versions) send subject_study objects instead
+     * of the direct study relation: accepted at JSON level only, mapped onto
+     * the subject's own fields on creation/update, never persisted.
+     */
+    @Transient
+    private List<LegacySubjectStudy> subjectStudyList;
 
     private String identifier;
 
@@ -173,11 +176,11 @@ public class Subject extends HalEntity {
         this.name = name;
     }
 
-    public List<SubjectStudy> getSubjectStudyList() {
+    public List<LegacySubjectStudy> getSubjectStudyList() {
         return subjectStudyList;
     }
 
-    public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
+    public void setSubjectStudyList(List<LegacySubjectStudy> subjectStudyList) {
         this.subjectStudyList = subjectStudyList;
     }
 

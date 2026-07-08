@@ -42,10 +42,10 @@ import org.springframework.data.repository.query.Param;
  */
 public interface SubjectRepository extends JpaRepository<Subject, Long>, SubjectRepositoryCustom {
 
-    @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags", "subjectStudyList.study.studyUserList", "pseudonymusHashValues", "study.id", "study.studyUserList", "study.studyUserList.studyUserRights"})
+    @EntityGraph(attributePaths = {"pseudonymusHashValues", "study.tags", "study.studyUserList", "study.studyUserList.studyUserRights"})
     Optional<Subject> findById(Long id);
 
-    @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.studyUserList"})
+    @EntityGraph(attributePaths = {"study.studyUserList"})
     List<Subject> findAllById(Iterable<Long> ids);
 
     @EntityGraph(attributePaths = {"tags"})
@@ -57,7 +57,7 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>, Subject
 
     List<Subject> findByStudyIdAndNameIn(Long studyId, Iterable<String> names);
 
-    @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags"})
+    @EntityGraph(attributePaths = {"study.tags"})
     Subject findFirstByIdentifierAndStudyIdIn(String identifier, Iterable<Long> studyIds);
 
     @Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode AND name REGEXP '^[0-9]+$' AND CHAR_LENGTH(name) IN (7, 8) ORDER BY name DESC LIMIT 1", nativeQuery = true)
@@ -77,7 +77,7 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>, Subject
 
     Iterable<Subject> findByStudyIdInAndIdIn(Iterable<Long> studyIds, Iterable<Long> ids);
 
-    @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags", "subjectStudyList.study.studyUserList"})
+    @EntityGraph(attributePaths = {"study.tags", "study.studyUserList"})
     List<Subject> findByPreclinical(boolean preclinical);
 
     boolean existsByStudyIdAndName(Long studyId, String name);

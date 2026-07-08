@@ -209,9 +209,6 @@ public class StudyServiceImpl implements StudyService {
             }
         }
 
-        // subject_study rows are not persisted anymore, subject.study_id is
-        // the single source of truth
-        study.setSubjectStudyList(null);
         Study studyDb = studyRepository.save(study);
 
         updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
@@ -360,10 +357,9 @@ public class StudyServiceImpl implements StudyService {
                 }
             }
             for (Subject subject : removed) {
-                // Detach from the managed collections first, otherwise the
-                // cascades on studyDb would re-save the deleted entities on flush
+                // Detach from the managed collection first, otherwise the
+                // cascade on studyDb would re-save the deleted entity on flush
                 studyDb.getSubjects().remove(subject);
-                studyDb.getSubjectStudyList().removeIf(ss -> subject.getId().equals(ss.getSubject().getId()));
                 subjectService.deleteById(subject.getId());
 
                 eventService.publishEvent(
