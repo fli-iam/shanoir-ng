@@ -64,9 +64,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     private SubjectRepository subjectRepository;
 
     @Autowired
-    private DatasetExpressionRepository datasetExpressionRepository;
-
-    @Autowired
     private DatasetFileRepository datasetFileRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetCopyServiceImpl.class);

@@ -27,6 +27,7 @@ import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dto.FileEntryDTO;
@@ -100,6 +101,9 @@ public class ExaminationApiController implements ExaminationApi {
     @Autowired
     private StorageService storageService;
 
+    @Autowired
+    private ExaminationRepository repository;
+
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -126,10 +130,9 @@ public class ExaminationApiController implements ExaminationApi {
     }
 
     @Override
-    public ResponseEntity<ExaminationDTO> findExaminationById(
-            @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId) {
-        Examination examination = examinationService.findById(examinationId);
-        orderDatasetAcquisitions(examination);
+    public ResponseEntity<ExaminationDTO> findExaminationById( final Long examinationId) throws EntityNotFoundException {
+        Examination examination = repository.findByIdWithAcquisitions(examinationId)
+                .orElseThrow(() -> new EntityNotFoundException(Examination.class, examinationId));;
         if (examination == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -185,9 +188,9 @@ public class ExaminationApiController implements ExaminationApi {
     public ResponseEntity<ExaminationDTO> saveNewExamination(
             @Parameter(description = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
             final BindingResult result) throws RestServiceException {
-        validate(result);
+        examinationService.validate(result);
         Examination examination = examinationMapper.examinationDTOToExamination(examinationDTO);
-        generateStudyInstanceUID(examination);
+        examinationService.generateStudyInstanceUID(examination);
         try {
             final Examination createdExamination = examinationService.save(examination);
             LOG.info("New examination created: " + createdExamination.toString());
@@ -248,9 +251,7 @@ public class ExaminationApiController implements ExaminationApi {
     }
 
     @Override
-    public ResponseEntity<Void> addExtraData(
-            @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-            @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+    public ResponseEntity<Void> addExtraData(Long examinationId, MultipartFile file) {
         if (examinationService.addExtraData(examinationId, file) != null) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
@@ -283,11 +284,11 @@ public class ExaminationApiController implements ExaminationApi {
         List<String> pathList = new ArrayList<>();
         pathList.add(file.getOriginalFilename());
         examination.setExtraDataFilePathList(pathList);
-        generateStudyInstanceUID(examination);
+        examinationService.generateStudyInstanceUID(examination);
         try {
             Examination dbExamination = examinationService.save(examination);
             String path = examinationService.addExtraData(dbExamination.getId(), file);
-            LOG.info("New examination created: " + examination.toString());
+            LOG.info("New examination created: " + examination);
             if (path != null) {
                 return new ResponseEntity<>(HttpStatus.OK);
             } else {
@@ -304,10 +305,8 @@ public class ExaminationApiController implements ExaminationApi {
     }
 
     @Override
-    public void downloadExtraData(
-            @Parameter(description = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
-            HttpServletResponse response) throws RestServiceException, IOException {
+    public void downloadExtraData(Long examinationId, String fileName,
+            HttpServletResponse response) throws IOException {
         try {
             Resource fileToDownload = storageService.loadExtraData(examinationId, fileName);
             if (fileToDownload != null) {
@@ -331,53 +330,6 @@ public class ExaminationApiController implements ExaminationApi {
         } catch (StorageException e) {
             LOG.error("Error downloading file {} for examination {}: {}", fileName, examinationId, e);
         }
-    }
-
-    /**
-     * Validate a dataset
-     *
-     * @param result
-     * @throws RestServiceException
-     */
-    private void validate(BindingResult result) throws RestServiceException {
-        final FieldErrorMap errors = new FieldErrorMap(result);
-        if (!errors.isEmpty()) {
-            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-            throw new RestServiceException(error);
-        }
-    }
-
-    private void orderDatasetAcquisitions(Examination exam) {
-        if (exam == null || exam.getDatasetAcquisitions() == null || exam.getDatasetAcquisitions().isEmpty()) {
-            return;
-        }
-        exam.getDatasetAcquisitions().sort(new Comparator<DatasetAcquisition>() {
-            @Override
-            public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
-                // Rank is never null
-                Integer aIndex = o1.getSortingIndex() != null ? o1.getSortingIndex() : o1.getRank();
-                Integer bIndex = o2.getSortingIndex() != null ? o2.getSortingIndex() : o2.getRank();
-                if (aIndex == null) {
-                    aIndex = 0;
-                }
-                if (bIndex == null) {
-                    bIndex = 0;
-                }
-                return aIndex - bIndex;
-            }
-        });
-    }
-
-    /**
-     * This method generates during the examination creation a DICOM
-     * StudyInstanceUID, that will be used for all DICOM files of this
-     * examination (== DICOM study).
-     *
-     * @param examination
-     */
-    private void generateStudyInstanceUID(Examination examination) {
-        String newUID = UID_GENERATOR.getNewUID();
-        examination.setStudyInstanceUID(newUID);
     }
 
     @Override

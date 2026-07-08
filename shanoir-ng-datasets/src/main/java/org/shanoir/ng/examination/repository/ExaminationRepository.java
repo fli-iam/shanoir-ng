@@ -139,11 +139,6 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
             """)
     List<ExaminationForRightsDTO> findExaminationsForRights(@Param("ids") List<Long> ids);
 
-
-    @EntityGraph(attributePaths = {"datasetAcquisitions"})
-    @Query("SELECT e FROM Examination e WHERE e.id = :id")
-    Optional<Examination> findByIdWithEagerAcquisitions(@Param("id") Long id);
-
     @Modifying
     @Query("UPDATE Examination e SET e.studyInstanceUID = :studyInstanceUID WHERE e.id = :id")
     int updateStudyInstanceUID(@Param("id") Long id, @Param("studyInstanceUID") String studyInstanceUID);
@@ -158,4 +153,10 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 
     @Query("SELECT distinct(acq.examination.id) FROM DatasetAcquisition acq WHERE acq.id in :ids")
     List<Long> findIdsByAcquisitionIds(List<Long> ids);
+
+    @Query("SELECT e FROM Examination e " +
+            "LEFT JOIN FETCH e.datasetAcquisitions da " +
+            "WHERE e.id = :id " +
+            "ORDER BY COALESCE(da.sortingIndex, da.rank, 0)")
+    Optional<Examination> findByIdWithAcquisitions(Long id);
 }
