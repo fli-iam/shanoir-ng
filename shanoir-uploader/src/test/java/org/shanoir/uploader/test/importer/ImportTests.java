@@ -40,7 +40,6 @@ import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.check.DicomInstanceConsistencyChecker;
@@ -50,6 +49,7 @@ import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.test.AbstractTest;
@@ -75,7 +75,7 @@ public class ImportTests extends AbstractTest {
 
     private static final long CONSISTENCY_CHECK_POLL_INTERVAL_MILLIS = 5 * 1000; // 5 sec
 
-    private static org.shanoir.uploader.model.rest.Study study;
+    private static Study study;
 
     @Test
     @Order(1)
@@ -87,8 +87,9 @@ public class ImportTests extends AbstractTest {
             if (!importJob.getPatients().isEmpty()) {
                 selectAllSeriesForImport(importJob);
                 org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, study);
-                Long examinationId = createExamination(study, importJob, subject);
-                startImportJobFromZip(importJob, subject, examinationId, study);
+                org.shanoir.ng.importer.model.Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
+                Examination examination = createExaminationFromDicomStudy(study, dicomStudy, subject);
+                startImportJobFromZip(importJob, subject, examination.getId(), study);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -109,7 +110,7 @@ public class ImportTests extends AbstractTest {
         Assertions.assertFalse(patients.isEmpty(), "No patients found in test DICOM folder.");
         Patient patient = patients.get(0);
         Assertions.assertFalse(patient.getStudies().isEmpty(), "No studies found for parsed patient.");
-        Study dicomStudy = patient.getStudies().get(0);
+        org.shanoir.ng.importer.model.Study dicomStudy = patient.getStudies().get(0);
         selectAllSeriesForImport(patient);
 
         List<Serie> selectedSeries = new ArrayList<>();
@@ -123,12 +124,12 @@ public class ImportTests extends AbstractTest {
         ImportJob importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
         importJob.setSelectedSeries(selectedSeries);
 
-        org.shanoir.uploader.model.rest.Subject subjectREST = createSubjectFromLocalPatient(patient, study);
+        org.shanoir.uploader.model.rest.Subject subject = createSubjectFromLocalPatient(patient, study);
         importJob.setSubject(patient.getSubject());
-        Examination examination = createExaminationFromDicomStudy(study, dicomStudy, subjectREST);
+        Examination examination = createExaminationFromDicomStudy(study, dicomStudy, subject);
 
         StudyCard studyCard = study.getStudyCards().get(0);
-        importJob = ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(),
+        importJob = ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(),
                 examination.getId(), examination.getStudyInstanceUID(), study, studyCard,
                 studyCard.getAcquisitionEquipment());
         importJob.setFromDicomZip(false);
@@ -149,7 +150,7 @@ public class ImportTests extends AbstractTest {
         Anonymizer anonymizer = new Anonymizer();
         String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
         boolean anonymizationSuccess = anonymizer.pseudonymize(
-                uploadFolder, anonymizationProfile, subjectREST.getName(), examination.getStudyInstanceUID());
+                uploadFolder, anonymizationProfile, subject.getName(), examination.getStudyInstanceUID());
         Assertions.assertTrue(anonymizationSuccess, "Local anonymization of DICOM files failed.");
 
         File importJobJsonFile = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
@@ -205,25 +206,14 @@ public class ImportTests extends AbstractTest {
                 + examinationId + (lastError != null ? ": " + lastError.getMessage() : ""));
     }
 
-    private Long createExamination(org.shanoir.uploader.model.rest.Study study, ImportJob importJob,
+    private Examination createExaminationFromDicomStudy(Study study,
+            org.shanoir.ng.importer.model.Study dicomStudy,
             org.shanoir.uploader.model.rest.Subject subject) {
-        Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
         LocalDate studyDate = dicomStudy.getStudyDate();
         Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
         Date studyDateDate = Date.from(studyDateInstant);
         String examinationComment = dicomStudy.getStudyDescription();
         Examination examination = ImportUtils.createExamination(study, subject, studyDateDate,
-                examinationComment, study.getStudyCards().get(0).getCenterId(), false);
-        return examination.getId();
-    }
-
-    private Examination createExaminationFromDicomStudy(org.shanoir.uploader.model.rest.Study study, Study dicomStudy,
-            org.shanoir.uploader.model.rest.Subject subjectREST) {
-        LocalDate studyDate = dicomStudy.getStudyDate();
-        Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
-        Date studyDateDate = Date.from(studyDateInstant);
-        String examinationComment = dicomStudy.getStudyDescription();
-        Examination examination = ImportUtils.createExamination(study, subjectREST, studyDateDate,
                 examinationComment, study.getStudyCards().get(0).getCenterId(), false);
         Assertions.assertNotNull(examination, "Examination could not be created.");
         return examination;
@@ -310,8 +300,8 @@ public class ImportTests extends AbstractTest {
     private void selectAllSeriesForImport(ImportJob importJob) {
         List<Patient> patients = importJob.getPatients();
         for (Patient patient : patients) {
-            List<Study> studies = patient.getStudies();
-            for (Study study : studies) {
+            List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
+            for (org.shanoir.ng.importer.model.Study study : studies) {
                 List<Serie> series = study.getSeries();
                 for (Serie serie : series) {
                     serie.setSelected(true);
@@ -321,7 +311,7 @@ public class ImportTests extends AbstractTest {
     }
 
     private void selectAllSeriesForImport(Patient patient) {
-        for (Study study : patient.getStudies()) {
+        for (org.shanoir.ng.importer.model.Study study : patient.getStudies()) {
             for (Serie serie : study.getSeries()) {
                 serie.setSelected(true);
             }
