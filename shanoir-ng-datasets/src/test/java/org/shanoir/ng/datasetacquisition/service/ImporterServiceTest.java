@@ -66,7 +66,6 @@ import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
-import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.utils.Utils;
@@ -185,8 +184,6 @@ public class ImporterServiceTest {
         org.shanoir.ng.dataset.modality.GenericDataset createdDataset = new org.shanoir.ng.dataset.modality.GenericDataset();
         createdDataset.setId(100L);
         datasetAcq.setDatasets(Utils.toList(createdDataset));
-
-        ExaminationData examData = new ExaminationData(examination);
 
         QualityCardResult qualityResult = new QualityCardResult();
         QualityCardResultEntry entry = new QualityCardResultEntry();
