@@ -23,7 +23,6 @@ import org.shanoir.ng.study.dto.StudyLightDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
-import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
 import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.tag.model.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +42,6 @@ public abstract class StudyDecorator implements StudyMapper {
     private StudyCenterMapper studyCenterMapper;
 
     @Autowired
-    private SubjectStudyMapper subjectStudyMapper;
-
-    @Autowired
     private SubjectMapper subjectMapper;
 
     @Autowired
@@ -59,9 +55,7 @@ public abstract class StudyDecorator implements StudyMapper {
         final List<StudyDTO> studyDTOs = new ArrayList<>();
         for (Study study : studies) {
             final StudyDTO studyDTO = convertStudyToStudyDTO(study, false);
-            if (study.getSubjectStudyList() != null) {
-                studyDTO.setNbSubjects(study.getNbSubjects());
-            }
+            studyDTO.setNbSubjects(study.getNbSubjects());
             if (study.getExaminations() != null) {
                 studyDTO.setNbExaminations(study.getNbExaminations());
             }
@@ -108,7 +102,6 @@ public abstract class StudyDecorator implements StudyMapper {
         studyDTO.setStudyCenterList(
                 studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
         if (withData) {
-            studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
             if (study.getTags() != null) {
                 studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
             }

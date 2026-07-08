@@ -25,7 +25,6 @@ import org.shanoir.ng.study.model.StudyType;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
-import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.tag.model.StudyTagDTO;
 import org.shanoir.ng.tag.model.TagDTO;
 import org.shanoir.ng.timepoint.TimepointDTO;
@@ -75,8 +74,6 @@ public class StudyDTO {
     private StudyStatus studyStatus;
 
     private StudyType studyType;
-
-    private List<SubjectStudyDTO> subjectStudyList;
 
     private List<SubjectDTO> subjects;
 
@@ -334,21 +331,6 @@ public class StudyDTO {
         this.studyType = studyType;
     }
 
-    /**
-     * @return the subjectStudyList
-     */
-    public List<SubjectStudyDTO> getSubjectStudyList() {
-        return subjectStudyList;
-    }
-
-    /**
-     * @param subjectStudyList
-     *            the subjectStudyList to set
-     */
-    public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
-        this.subjectStudyList = subjectStudyList;
-    }
-
     public List<SubjectDTO> getSubjects() {
         return subjects;
     }
@@ -500,7 +482,7 @@ public class StudyDTO {
                 + nbExaminations + ", nbSubjects=" + nbSubjects + ", protocolFilePaths=" + protocolFilePaths
                 + ", dataUserAgreementPaths=" + dataUserAgreementPaths + ", tags=" + tags + ", studyTags=" + studyTags
                 + ", startDate=" + startDate + ", studyCards=" + studyCards + ", studyCenterList=" + studyCenterList
-                + ", studyStatus=" + studyStatus + ", studyType=" + studyType + ", subjectStudyList=" + subjectStudyList
+                + ", studyStatus=" + studyStatus + ", studyType=" + studyType
                 + ", subjects=" + subjects + ", timepoints=" + timepoints + ", visibleByDefault="
                 + visibleByDefault + ", withExamination=" + withExamination + ", studyUserList=" + studyUserList
                 + ", challenge=" + challenge + ", description=" + description + ", license=" + license
