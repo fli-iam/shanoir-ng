@@ -46,6 +46,7 @@ import org.shanoir.uploader.check.DicomInstanceConsistencyChecker;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.exception.PseudonymusException;
+import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
@@ -75,21 +76,25 @@ public class ImportTests extends AbstractTest {
 
     private static final long CONSISTENCY_CHECK_POLL_INTERVAL_MILLIS = 5 * 1000; // 5 sec
 
-    private static Study study;
+    private static Study studyWithStudyCards;
+
+    private static Study studyNoStudyCards;
+
+    private static AcquisitionEquipment equipment;
 
     @Test
     @Order(1)
     public void testImportFromDicomZip() {
         logger.info("START testImportFromDicomZip...................");
         try {
-            study = createStudyAndCenterAndStudyCardAndAddMembers();
+            studyWithStudyCards = createStudyAndCenterAndStudyCardAndAddMembers();
             ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
             if (!importJob.getPatients().isEmpty()) {
                 selectAllSeriesForImport(importJob);
-                org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, study);
+                org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, studyWithStudyCards);
                 org.shanoir.ng.importer.model.Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
-                Examination examination = createExaminationFromDicomStudy(study, dicomStudy, subject);
-                startImportJobFromZip(importJob, subject, examination.getId(), study);
+                Examination examination = createExaminationFromDicomStudy(studyWithStudyCards, dicomStudy, subject);
+                startImportJobFromZip(importJob, subject, examination.getId(), studyWithStudyCards);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -124,13 +129,13 @@ public class ImportTests extends AbstractTest {
         ImportJob importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
         importJob.setSelectedSeries(selectedSeries);
 
-        org.shanoir.uploader.model.rest.Subject subject = createSubjectFromLocalPatient(patient, study);
+        org.shanoir.uploader.model.rest.Subject subject = createSubjectFromLocalPatient(patient, studyWithStudyCards);
         importJob.setSubject(patient.getSubject());
-        Examination examination = createExaminationFromDicomStudy(study, dicomStudy, subject);
+        Examination examination = createExaminationFromDicomStudy(studyWithStudyCards, dicomStudy, subject);
 
-        StudyCard studyCard = study.getStudyCards().get(0);
+        StudyCard studyCard = studyWithStudyCards.getStudyCards().get(0);
         importJob = ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(),
-                examination.getId(), examination.getStudyInstanceUID(), study, studyCard,
+                examination.getId(), examination.getStudyInstanceUID(), studyWithStudyCards, studyCard,
                 studyCard.getAcquisitionEquipment());
         importJob.setFromDicomZip(false);
         importJob.setFromPacs(false);
@@ -161,6 +166,96 @@ public class ImportTests extends AbstractTest {
 
         // Local files here were pseudonymized before upload, exactly like the
         // server-side copy, so a full tag comparison is meaningful.
+        waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
+    }
+
+    @Test
+    @Order(3)
+    public void testImportFromDicomZipNoStudyCard() {
+        logger.info("START testImportFromDicomZipNoStudyCard...................");
+        try {
+            studyNoStudyCards = createStudyAndCenterWithoutStudyCard();
+            equipment = createEquipment(
+                    studyNoStudyCards.getStudyCenterList().get(0).getCenter());
+            Assertions.assertNotNull(equipment);
+            ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
+            if (!importJob.getPatients().isEmpty()) {
+                selectAllSeriesForImport(importJob);
+                org.shanoir.uploader.model.rest.Subject subject = createSubjectNoStudyCard(importJob, studyNoStudyCards);
+                org.shanoir.ng.importer.model.Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
+                Examination examination = createExaminationNoStudyCard(studyNoStudyCards, dicomStudy, subject);
+                startImportJobFromZipNoStudyCard(importJob, subject, examination.getId(), studyNoStudyCards);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            Assertions.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    @Order(4)
+    public void testImportFromShanoirUploaderNoStudyCard() throws Exception {
+        logger.info("START testImportFromShanoirUploaderNoStudyCard...................");
+        URL resource = getClass().getClassLoader().getResource(ACR_PHANTOM_T1_DIR);
+        Assertions.assertNotNull(resource, "Test resource folder " + ACR_PHANTOM_T1_DIR + " not found.");
+        File dicomSourceDir = new File(resource.toURI());
+
+        List<Patient> patients = ImportUtils.getPatientsFromDir(dicomSourceDir, true);
+        Assertions.assertNotNull(patients);
+        Assertions.assertFalse(patients.isEmpty(), "No patients found in test DICOM folder.");
+        Patient patient = patients.get(0);
+        Assertions.assertFalse(patient.getStudies().isEmpty(), "No studies found for parsed patient.");
+        org.shanoir.ng.importer.model.Study dicomStudy = patient.getStudies().get(0);
+        selectAllSeriesForImport(patient);
+
+        List<Serie> selectedSeries = new ArrayList<>();
+        for (Serie serie : dicomStudy.getSeries()) {
+            if (serie.getSelected()) {
+                selectedSeries.add(serie);
+            }
+        }
+        Assertions.assertFalse(selectedSeries.isEmpty(), "No series selected for import.");
+
+        ImportJob importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
+        importJob.setSelectedSeries(selectedSeries);
+
+        org.shanoir.uploader.model.rest.Subject subject = createSubjectFromLocalPatientNoStudyCard(patient,
+                studyNoStudyCards);
+        importJob.setSubject(patient.getSubject());
+        Examination examination = createExaminationNoStudyCard(studyNoStudyCards, dicomStudy, subject);
+
+        // No study card for this study (SC_DISABLED policy): pass null instead
+        // of a StudyCard/AcquisitionEquipment, mirroring the client-side "no
+        // study card" import path.
+        importJob = ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(),
+                examination.getId(), examination.getStudyInstanceUID(), studyNoStudyCards, null, equipment);
+        importJob.setFromDicomZip(false);
+        importJob.setFromPacs(false);
+        importJob.setFromShanoirUploader(true);
+
+        File uploadFolder = Files.createTempDirectory("shanoir-uploader-test-upload-nostudycard-").toFile();
+        ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
+        JProgressBar progressBar = new JProgressBar();
+        StringBuilder copyReport = new StringBuilder();
+        List<String> copiedFileNames = ImportUtils.copyFilesToUploadFolder(
+                progressBar, copyReport, dicomFileAnalyzer, selectedSeries, uploadFolder,
+                dicomSourceDir.getAbsolutePath());
+        Assertions.assertNotNull(copiedFileNames);
+        Assertions.assertFalse(copiedFileNames.isEmpty(), "No DICOM files copied to local upload folder.");
+        logger.info(copyReport.toString());
+
+        Anonymizer anonymizer = new Anonymizer();
+        String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
+        boolean anonymizationSuccess = anonymizer.pseudonymize(
+                uploadFolder, anonymizationProfile, subject.getName(), examination.getStudyInstanceUID());
+        Assertions.assertTrue(anonymizationSuccess, "Local anonymization of DICOM files failed.");
+
+        File importJobJsonFile = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
+        importJobJsonFile.createNewFile();
+        Util.mapper.writeValue(importJobJsonFile, importJob);
+
+        startImportJobFromShanoirUploader(importJob, uploadFolder);
+
         waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
     }
 
@@ -219,6 +314,27 @@ public class ImportTests extends AbstractTest {
         return examination;
     }
 
+    /**
+     * Same as {@link #createExaminationFromDicomStudy} but for a study without
+     * a study card: the center is taken directly from the study's (single)
+     * center, as set up by
+     * {@link AbstractTest#createStudyAndCenterWithoutStudyCard()},
+     * instead of from a (non-existent) study card.
+     */
+    private Examination createExaminationNoStudyCard(Study study,
+            org.shanoir.ng.importer.model.Study dicomStudy,
+            org.shanoir.uploader.model.rest.Subject subject) {
+        LocalDate studyDate = dicomStudy.getStudyDate();
+        Instant studyDateInstant = studyDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Date studyDateDate = Date.from(studyDateInstant);
+        String examinationComment = dicomStudy.getStudyDescription();
+        Long centerId = study.getStudyCenterList().get(0).getCenter().getId();
+        Examination examination = ImportUtils.createExamination(study, subject, studyDateDate,
+                examinationComment, centerId, false);
+        Assertions.assertNotNull(examination, "Examination could not be created.");
+        return examination;
+    }
+
     private org.shanoir.uploader.model.rest.Subject createSubjectFromLocalPatient(Patient patient,
             org.shanoir.uploader.model.rest.Study study)
             throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, ParseException {
@@ -229,6 +345,27 @@ public class ImportTests extends AbstractTest {
                 HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
                 SubjectType.PATIENT, false, false, randomPatientName, study,
                 study.getStudyCards().get(0).getAcquisitionEquipment());
+        Assertions.assertNotNull(subjectREST, "Subject could not be created from local patient.");
+        subject.setImagedObjectCategory(null); // to fix server issue with incompatible mapping value
+        patient.setSubject(subject);
+        return subjectREST;
+    }
+
+    /**
+     * Same as {@link #createSubjectFromLocalPatient} but for a study without a
+     * study card: {@code null} is passed instead of an
+     * {@link org.shanoir.uploader.model.rest.AcquisitionEquipment}, matching
+     * the "no study card" import path.
+     */
+    private org.shanoir.uploader.model.rest.Subject createSubjectFromLocalPatientNoStudyCard(Patient patient,
+            org.shanoir.uploader.model.rest.Study study)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, ParseException {
+        final String randomPatientName = "Subject-" + UUID.randomUUID().toString();
+        Subject subject = ImportUtils.createSubjectFromPatient(patient, pseudonymizer, identifierCalculator);
+        org.shanoir.uploader.model.rest.Subject subjectREST = ImportUtils.manageSubject(
+                null, subject, randomPatientName, ImagedObjectCategory.LIVING_HUMAN_BEING,
+                HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
+                SubjectType.PATIENT, false, false, randomPatientName, study, equipment);
         Assertions.assertNotNull(subjectREST, "Subject could not be created from local patient.");
         subject.setImagedObjectCategory(null); // to fix server issue with incompatible mapping value
         patient.setSubject(subject);
@@ -277,6 +414,31 @@ public class ImportTests extends AbstractTest {
         userClient.startImportJob(importJobJson);
     }
 
+    /**
+     * Same as {@link #startImportJobFromZip} but for a study without a study
+     * card: the study-card / acquisition-equipment fields on the import job
+     * are left {@code null} instead of being populated from a (non-existent)
+     * study card.
+     */
+    private void startImportJobFromZipNoStudyCard(ImportJob importJob,
+            org.shanoir.uploader.model.rest.Subject subjectREST,
+            Long examinationId, org.shanoir.uploader.model.rest.Study study)
+            throws JsonProcessingException, Exception {
+        importJob.setStudyId(study.getId());
+        importJob.setStudyName(study.getName());
+        importJob.setStudyCardId(null);
+        importJob.setStudyCardName(null);
+        importJob.setAcquisitionEquipmentId(null);
+        importJob.setExaminationId(examinationId);
+        if (ShUpConfig.isModeSubjectNameManual()) {
+            importJob.setAnonymisationProfileToUse("Profile Neurinfo");
+        } else {
+            importJob.setAnonymisationProfileToUse("Profile OFSEP");
+        }
+        String importJobJson = Util.objectWriter.writeValueAsString(importJob);
+        userClient.startImportJob(importJobJson);
+    }
+
     private org.shanoir.uploader.model.rest.Subject createSubject(ImportJob importJob,
             org.shanoir.uploader.model.rest.Study study)
             throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, ParseException {
@@ -288,6 +450,31 @@ public class ImportTests extends AbstractTest {
                 HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
                 SubjectType.PATIENT, false, false, randomPatientName, study,
                 study.getStudyCards().get(0).getAcquisitionEquipment());
+        subject.setImagedObjectCategory(null); // to fix server issue with incompatible mapping value
+        org.shanoir.ng.importer.model.Subject subjectForImportJob = new org.shanoir.ng.importer.model.Subject();
+        subjectForImportJob.setId(subjectREST.getId());
+        subjectForImportJob.setName(subjectREST.getName());
+        patient.setSubject(subjectForImportJob);
+        importJob.setSubjectName(subjectREST.getName());
+        return subjectREST;
+    }
+
+    /**
+     * Same as {@link #createSubject} but for a study without a study card:
+     * {@code null} is passed instead of an
+     * {@link org.shanoir.uploader.model.rest.AcquisitionEquipment}, matching
+     * the "no study card" import path.
+     */
+    private org.shanoir.uploader.model.rest.Subject createSubjectNoStudyCard(ImportJob importJob,
+            org.shanoir.uploader.model.rest.Study study)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, ParseException {
+        Patient patient = importJob.getPatients().get(0);
+        final String randomPatientName = "Subject-" + UUID.randomUUID().toString();
+        Subject subject = ImportUtils.createSubjectFromPatient(patient, pseudonymizer, identifierCalculator);
+        org.shanoir.uploader.model.rest.Subject subjectREST = ImportUtils.manageSubject(
+                null, subject, randomPatientName, ImagedObjectCategory.LIVING_HUMAN_BEING,
+                HemisphericDominance.Left.toString(), HemisphericDominance.Left.toString(),
+                SubjectType.PATIENT, false, false, randomPatientName, study, equipment);
         subject.setImagedObjectCategory(null); // to fix server issue with incompatible mapping value
         org.shanoir.ng.importer.model.Subject subjectForImportJob = new org.shanoir.ng.importer.model.Subject();
         subjectForImportJob.setId(subjectREST.getId());

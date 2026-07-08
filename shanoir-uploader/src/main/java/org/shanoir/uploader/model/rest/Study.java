@@ -9,14 +9,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 /**
  * Light implementation of Study object from ms studies.
  * ShUp has no dependency to ms studies, what is wanted
- * so far, to keep the coupling more lose. ShUp is a tool
- * for imports: dependency to ms import and ms datasets.
+ * so far, to keep the coupling more loose. ShUp is a tool
+ * for imports: dependencies to ms import and ms datasets.
  */
 public class Study implements Comparable<Study> {
 
-    public static final String SC_MANDATORY = "1";
+    public static final String SC_MANDATORY = "MANDATORY";
 
-    public static final String SC_DISABLED = "2";
+    public static final String SC_DISABLED = "DISABLED";
 
     private Long id;
 
