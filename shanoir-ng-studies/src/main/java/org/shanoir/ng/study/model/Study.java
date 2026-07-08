@@ -160,7 +160,7 @@ public class Study extends HalEntity {
     private List<SubjectStudy> subjectStudyList = new ArrayList<>();
 
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Subject> subjects = new ArrayList<>();
+    private List<Subject> subjects;
 
     @Transient
     private int nbSubjects;

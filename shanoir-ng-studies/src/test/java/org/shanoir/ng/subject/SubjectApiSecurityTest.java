@@ -36,7 +36,6 @@ import org.shanoir.ng.subject.controler.SubjectApi;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
@@ -80,8 +79,6 @@ public class SubjectApiSecurityTest {
     @MockBean
     private StudyRepository studyRepository;
 
-    @MockBean
-    private SubjectStudyRepository subjectStudyRepository;
 
     @BeforeEach
     public void setup() {
