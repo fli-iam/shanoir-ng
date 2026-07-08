@@ -237,11 +237,10 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     /**
-     * This method maps subject_study objects (old versions of e.g. ShUp)
-     * to the new structure subject.study_id or maps the new structure of
-     * subject.study_id to subject study, as still required by some code.
-     * This method will be removed entirely after all clients have been
-     * migrated and all dependencies on subject_study will be removed.
+     * Old versions of clients (e.g. ShUp) still send subject_study objects
+     * and no studyId in subject: map their attributes onto the subject.
+     * subject_study rows are not persisted anymore, subject.study_id is
+     * the single source of truth.
      *
      * @param subject
      * @return
@@ -249,6 +248,13 @@ public class SubjectServiceImpl implements SubjectService {
      */
     private Subject mapSubjectStudyListToSubject(Subject subject) throws ShanoirException {
         List<SubjectStudy> subjectStudyList = subject.getSubjectStudyList();
+        if (subjectStudyList != null && !subjectStudyList.isEmpty()) {
+            if (subjectStudyList.size() > 1) {
+                throw new ShanoirException("A subject is only in one study.", HttpStatus.FORBIDDEN.value());
+            }
+            subject = mapSubjectStudyAttributesToSubject(subject, subjectStudyList.get(0));
+        }
+        subject.setSubjectStudyList(null);
 
         if (subject.getStudy() != null && subject.getStudy().getId() != null) {
             Long studyId = subject.getStudy().getId();
@@ -260,36 +266,14 @@ public class SubjectServiceImpl implements SubjectService {
             }
         }
 
-        // Old versions of ShUp will still send subject study objects, and no studyId in
-        // subject
-        if (subjectStudyList != null && !subjectStudyList.isEmpty()) {
-            if (subjectStudyList.size() > 1) {
-                throw new ShanoirException("A subject is only in one study.", HttpStatus.FORBIDDEN.value());
-            }
-            SubjectStudy subjectStudy = subjectStudyList.get(0);
-            subject = mapSubjectStudyAttributesToSubject(subject, subjectStudy);
-            subjectStudy.setSubject(subject);
-            // New code from Angular will be without subject study, but tree requires it
-            // still
-        } else {
-            SubjectStudy subjectStudy = new SubjectStudy();
-            subjectStudy.setStudy(subject.getStudy());
-            subjectStudy.setSubject(subject);
-            subjectStudy.setSubjectType(subject.getSubjectType());
-            subjectStudy.setPhysicallyInvolved(subject.isPhysicallyInvolved());
-            subjectStudy.setSubjectStudyIdentifier(subject.getStudyIdentifier());
-            if (subject.getTags() != null && !subject.getTags().isEmpty()) {
-                Set<Tag> managedTags = new HashSet<>();
-                List<Long> tagIds = subject.getTags().stream()
-                        .map(Tag::getId)
-                        .collect(Collectors.toList());
-                Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
-                managedTagsIt.forEach(managedTags::add);
-                subject.setTags(managedTags);
-            }
-            List<SubjectStudy> subjectStudyListNew = new ArrayList<SubjectStudy>();
-            subjectStudyListNew.add(subjectStudy);
-            subject.setSubjectStudyList(subjectStudyListNew);
+        if (subject.getTags() != null && !subject.getTags().isEmpty()) {
+            Set<Tag> managedTags = new HashSet<>();
+            List<Long> tagIds = subject.getTags().stream()
+                    .map(Tag::getId)
+                    .collect(Collectors.toList());
+            Iterable<Tag> managedTagsIt = tagRepository.findAllById(tagIds);
+            managedTagsIt.forEach(managedTags::add);
+            subject.setTags(managedTags);
         }
         return subject;
     }

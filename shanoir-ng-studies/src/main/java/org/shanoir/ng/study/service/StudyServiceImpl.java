@@ -66,7 +66,6 @@ import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectService;
-import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.tag.repository.TagRepository;
@@ -182,12 +181,6 @@ public class StudyServiceImpl implements StudyService {
             }
         }
 
-        if (study.getSubjectStudyList() != null) {
-            for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-                subjectStudy.setStudy(study);
-            }
-        }
-
         if (study.getTags() != null) {
             for (final Tag tag : study.getTags()) {
                 tag.setStudy(study);
@@ -216,26 +209,10 @@ public class StudyServiceImpl implements StudyService {
             }
         }
 
-        List<SubjectStudy> subjectStudyListSave = null;
-        if (study.getSubjectStudyList() != null) {
-            subjectStudyListSave = new ArrayList<SubjectStudy>(study.getSubjectStudyList());
-        }
+        // subject_study rows are not persisted anymore, subject.study_id is
+        // the single source of truth
         study.setSubjectStudyList(null);
         Study studyDb = studyRepository.save(study);
-
-        if (subjectStudyListSave != null && !subjectStudyListSave.isEmpty()) {
-            studyDb.setSubjectStudyList(new ArrayList<>());
-            for (SubjectStudy subjectStudy : subjectStudyListSave) {
-                SubjectStudy newSubjectStudy = new SubjectStudy();
-                newSubjectStudy.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
-                newSubjectStudy.setSubject(subjectStudy.getSubject());
-                newSubjectStudy.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
-                newSubjectStudy.setSubjectType(subjectStudy.getSubjectType());
-                newSubjectStudy.setStudy(studyDb);
-                studyDb.getSubjectStudyList().add(newSubjectStudy);
-            }
-            studyDb = studyRepository.save(studyDb);
-        }
 
         updateStudyName(studyMapper.studyToStudyDTODetailed(studyDb));
 
