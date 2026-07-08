@@ -14,11 +14,17 @@
 
 package org.shanoir.ng.datasetacquisition;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.datasetacquisition.controler.DatasetAcquisitionApiController;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionDatasetsMapper;
@@ -31,17 +37,26 @@ import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.Collections;
 
 
@@ -83,14 +98,26 @@ public class DatasetAcquisitionApiControllerTest {
     @MockBean
     private RabbitTemplate rabbitTemplate;
 
+    @MockBean
+    private StorageService storageService;
+
     @Autowired
     private MockMvc mvc;
 
     private Gson gson;
 
+    @TempDir
+    private File tempFolder;
+
+    private static final String REQUEST_PATH = "/datasetacquisition";
+
     @BeforeEach
-    public void setup() throws ShanoirException {
+    public void setup() throws Exception {
         gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+        File tempFile = new File(tempFolder, "file1.pdf");
+        Files.writeString(tempFile.toPath(), "test content");
+        Resource tempResource = new FileSystemResource(tempFile);
+        given(storageService.loadAcquisitionExtraData(1L, "file1.pdf")).willReturn(tempResource);
     }
 
     @Test
@@ -116,5 +143,42 @@ public class DatasetAcquisitionApiControllerTest {
 //        assertEquals(((EegImportJob)captor.getValue()).getDatasets().get(0).getName(), dataset.getName());
 //
 //        verify(importerService).cleanTempFiles(eq(importJob.getWorkFolder()));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testAddExtraData() throws Exception {
+        // GIVEN a file to add to a dataset acquisition (service returns null => failure)
+        MockMultipartFile file = new MockMultipartFile("file", "extra-data.txt", MediaType.MULTIPART_FORM_DATA_VALUE, "test content".getBytes());
+
+        // WHEN the file is uploaded
+        mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/extra-data-upload/1").file(file))
+                .andExpect(status().isUnprocessableEntity());
+
+        // THEN the service is called
+        Mockito.verify(datasetAcquisitionService).addExtraData(Mockito.any(Long.class), Mockito.any(MultipartFile.class));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testDownloadExtraDataNotExisting() throws Exception {
+        // GIVEN a dataset acquisition with no such extra-data file (mock returns null)
+        // WHEN we download extra-data
+        // THEN we get a "no content" answer
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/missing.pdf/"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testDownloadExtraData() throws Exception {
+        // GIVEN a dataset acquisition with an extra-data file (stubbed in setup)
+        // WHEN we download extra-data
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/extra-data-download/1/file1.pdf/"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // THEN the file is downloaded
+        assertNotNull(result.getResponse().getContentAsString());
     }
 }

@@ -76,6 +76,18 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public boolean existsAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
+        String directory = ACQUISITION + acquisitionId;
+        try {
+            String decodedFileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8);
+            Path filePath = Paths.get(baseDirDatasets, directory, decodedFileName);
+            return Files.exists(filePath);
+        } catch (InvalidPathException e) {
+            return false;
+        }
+    }
+
+    @Override
     public String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
@@ -109,6 +121,17 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public String getDirectoryAcquisitionExtraData(Long acquisitionId)
+            throws StorageException {
+        if (baseDirDatasets.equals(UNUSED)) {
+            throw new StorageException("Missing datasets directory configuration.", null);
+        }
+        String directory = ACQUISITION + acquisitionId;
+        Path dirPath = Paths.get(baseDirDatasets, directory);
+        return dirPath.toString() + SLASH;
+    }
+
+    @Override
     public String storeExtraData(Long examinationId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException {
@@ -116,6 +139,17 @@ public class FileSystemStorageService implements StorageService {
             throw new StorageException("Missing datasets directory configuration.", null);
         }
         String directory = EXAMINATION + examinationId;
+        return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
+    }
+
+    @Override
+    public String storeAcquisitionExtraData(Long acquisitionId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException {
+        if (baseDirDatasets.equals(UNUSED)) {
+            throw new StorageException("Missing datasets directory configuration.", null);
+        }
+        String directory = ACQUISITION + acquisitionId;
         return store(baseDirDatasets, directory, fileName, inputStream, contentType, size);
     }
 
@@ -198,6 +232,12 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public Resource loadAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
+        String directory = ACQUISITION + acquisitionId;
+        return load(baseDirDatasets, directory, fileName);
+    }
+
+    @Override
     public Resource loadDatasetsData(String path) throws StorageException {
         return load(baseDirDatasets, path);
     }
@@ -247,6 +287,19 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public long getFileSizeAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
+        try {
+            Path filePath = Paths.get(baseDirDatasets, ACQUISITION + acquisitionId, fileName);
+            if (!Files.exists(filePath)) {
+                return 0L;
+            }
+            return Files.size(filePath);
+        } catch (IOException e) {
+            throw new StorageException("Failed to get size of file: " + fileName, e);
+        }
+    }
+
+    @Override
     public String getPublicLocationStudies(String directory, String fileName) throws StorageException {
         return Paths.get(baseDirStudies, directory, fileName).toUri().toString();
     }
@@ -264,6 +317,11 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public void deleteExtraData(Long examinationId, String fileName) throws StorageException {
         delete(baseDirDatasets, EXAMINATION + examinationId, fileName);
+    }
+
+    @Override
+    public void deleteAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException {
+        delete(baseDirDatasets, ACQUISITION + acquisitionId, fileName);
     }
 
     @Override
@@ -309,6 +367,11 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public void deleteDirectoryExtraData(Long examinationId) throws StorageException {
         deleteDirectoryDatasets(EXAMINATION + examinationId);
+    }
+
+    @Override
+    public void deleteDirectoryAcquisitionExtraData(Long acquisitionId) throws StorageException {
+        deleteDirectoryDatasets(ACQUISITION + acquisitionId);
     }
 
     @Override

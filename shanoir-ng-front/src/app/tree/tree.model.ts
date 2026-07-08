@@ -318,6 +318,7 @@ export class DatasetAcquisitionNode extends ShanoirNode {
         public id: number,
         public label: string,
         public datasets: DatasetNode[] | UNLOADED,
+        public extraDataFilePathList: string[] | UNLOADED,
         public canDelete: boolean,
         public canDownload: boolean
     ) {
@@ -325,6 +326,7 @@ export class DatasetAcquisitionNode extends ShanoirNode {
     }
 
     public selected: boolean = false;
+    public extraDataOpen: boolean = false;
     public title: string = "dataset-acquisition";
     protected readonly routeBase = '/dataset-acquisition/details/';
 
@@ -334,6 +336,7 @@ export class DatasetAcquisitionNode extends ShanoirNode {
             dsAcq.id,
             dsAcq.name,
             null,
+            dsAcq.extraDataFilePathList,
             canDelete,
             canDownload
         );
