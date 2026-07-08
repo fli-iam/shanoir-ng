@@ -119,7 +119,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
     @Override
     public ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByInputDataset(@Parameter(description = "id of the input dataset", required = true) @PathVariable("datasetId") Long datasetId) {
-        final List<DatasetProcessing> datasetProcessings = datasetProcessingService.findByInputDatasetId(datasetId);
+        final List<DatasetProcessing> datasetProcessings = repository.findAllByInputDatasets_Id(datasetId);
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

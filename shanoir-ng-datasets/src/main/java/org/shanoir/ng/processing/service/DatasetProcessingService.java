@@ -81,15 +81,6 @@ public interface DatasetProcessingService {
     List<DatasetProcessing> findAll();
 
     /**
-     * Get a list of datasetProcessing having the given dataset as input
-     *
-     * @return a datasetProcessing list.
-     */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    List<DatasetProcessing> findByInputDatasetId(Long datasetId);
-
-
-    /**
      * Get a list of datasetProcessing having the given monitoring as monitoring
      *
      * @return a datasetProcessing list.

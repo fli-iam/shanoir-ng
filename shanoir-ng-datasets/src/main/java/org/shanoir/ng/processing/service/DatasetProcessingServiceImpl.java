@@ -96,11 +96,6 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
         return idList.stream().flatMap(it -> findById(it).stream()).toList();
     }
 
-    @Override
-    public List<DatasetProcessing> findByInputDatasetId(Long datasetId) {
-        return repository.findAllByInputDatasets_Id(datasetId);
-    }
-
     public List<DatasetProcessing> findByMonitoringId(Long monitoringId) {
         return StreamSupport.stream(repository.findAllById(repository.findAllIdsByMonitoringId(monitoringId)).spliterator(), false).collect(Collectors.toList());
     }
@@ -159,7 +154,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
      */
     @Override
     public void removeDatasetFromAllProcessingInput(Long datasetId) throws ShanoirException, RestServiceException, SolrServerException, IOException {
-        List<DatasetProcessing> processings = repository.findAllByInputDatasets_Id(datasetId);
+        List<DatasetProcessing> processings = repository.findByInputIdWithInputs(datasetId);
         List<DatasetProcessing> toUpdate = new ArrayList<>();
         List<DatasetProcessing> toDelete = new ArrayList<>();
 

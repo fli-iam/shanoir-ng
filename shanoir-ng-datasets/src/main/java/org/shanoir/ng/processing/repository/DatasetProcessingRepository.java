@@ -113,12 +113,19 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
     List<Long> findAllIdsByExaminationIds(List<Long> examinationIds);
 
     @Query("SELECT processing FROM DatasetProcessing processing " +
-            "JOIN FETCH processing.inputDatasets")
+            "JOIN FETCH processing.inputDatasets " +
+            "WHERE processing.id = :id")
     Optional<DatasetProcessing> findByIdWithInputs(Long Id);
 
     @Query("SELECT processing FROM DatasetProcessing processing " +
-            "JOIN FETCH processing.outputDatasets")
+            "JOIN FETCH processing.outputDatasets " +
+            "WHERE processing.id = :id")
     Optional<DatasetProcessing> findByIdWithOutputs(Long Id);
+
+    @Query("SELECT DISTINCT p FROM DatasetProcessing p " +
+            "JOIN FETCH p.inputDatasets " +
+            "WHERE EXISTS (SELECT i FROM p.inputDatasets i WHERE i.id = :inputId)")
+    List<DatasetProcessing> findByInputIdWithInputs(Long inputId);
 
     /**
      * Find all identifying fields for a given processing id
