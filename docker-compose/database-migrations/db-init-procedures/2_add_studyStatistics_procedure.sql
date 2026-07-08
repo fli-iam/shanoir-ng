@@ -44,7 +44,7 @@ SELECT DISTINCT
                                    WHEN 10 THEN 'Beh'
                                    WHEN 11 THEN 'Nirs'
                                    WHEN 12 THEN 'Xa' END) AS modality,
-    (CASE ss.quality_tag WHEN 1 THEN 'Valid' WHEN 2 THEN 'Warning' WHEN 3 THEN 'Error' END) AS quality
+    (CASE s.quality_tag WHEN 1 THEN 'Valid' WHEN 2 THEN 'Warning' WHEN 3 THEN 'Error' END) AS quality
 FROM
     datasets.examination e
 INNER JOIN 
@@ -55,14 +55,12 @@ INNER JOIN
     datasets.dataset d ON da.id = d.dataset_acquisition_id
 INNER JOIN
     datasets.dataset_metadata dm ON d.updated_metadata_id = dm.id
-INNER JOIN
-    studies.subject_study ss ON d.subject_id = ss.subject_id
 INNER JOIN 
-    studies.subject s ON ss.subject_id = s.id
+    studies.subject s ON d.subject_id = s.id
 INNER JOIN
     studies.study_center sc ON c.id = sc.center_id
 WHERE e.study_id = studyId 
-AND ss.study_id = studyId 
+AND s.study_id = studyId 
 AND sc.study_id = studyId;
 END //
 
