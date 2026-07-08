@@ -40,10 +40,12 @@ import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
+import org.shanoir.ng.subjectstudy.dto.StudyTagsDTO;
+import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.tag.model.TagDTO;
+import org.shanoir.ng.tag.model.TagMapper;
 import org.shanoir.ng.tag.repository.TagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -79,16 +81,13 @@ public class SubjectServiceImpl implements SubjectService {
     private SubjectRepository subjectRepository;
 
     @Autowired
-    private SubjectStudyRepository subjectStudyRepository;
-
-    @Autowired
     private TagRepository tagRepository;
 
     @Autowired
-    private StudyRepository studyRepository;
+    private TagMapper tagMapper;
 
     @Autowired
-    private SubjectStudyDecorator subjectStudyMapper;
+    private StudyRepository studyRepository;
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -148,7 +147,7 @@ public class SubjectServiceImpl implements SubjectService {
             Long userId = KeycloakUtil.getTokenUserId();
             List<Long> studyIds = studyUserRepository.findDistinctStudyIdByUserId(userId,
                     StudyUserRight.CAN_SEE_ALL.getId());
-            subjects = subjectRepository.findBySubjectStudyListStudyIdIn(studyIds);
+            subjects = subjectRepository.findByStudyIdIn(studyIds);
         }
         return getIdNamesFromSubjects(subjects);
     }
@@ -162,7 +161,7 @@ public class SubjectServiceImpl implements SubjectService {
             Long userId = KeycloakUtil.getTokenUserId();
             List<Long> studyIds = studyUserRepository.findDistinctStudyIdByUserId(userId,
                     StudyUserRight.CAN_SEE_ALL.getId());
-            subjects = subjectRepository.findBySubjectStudyListStudyIdInAndIdIn(studyIds, subjectIds);
+            subjects = subjectRepository.findByStudyIdInAndIdIn(studyIds, subjectIds);
         }
         return getIdNamesFromSubjects(subjects);
     }
@@ -390,37 +389,54 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public List<SimpleSubjectDTO> findAllSubjectsOfStudyAndPreclinical(final Long studyId, final Boolean preclinical) {
         List<SimpleSubjectDTO> simpleSubjectDTOList = new ArrayList<>();
-        List<SubjectStudy> subjectStudyList;
+        List<Subject> subjects;
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            subjectStudyList = subjectStudyRepository.findByStudyId(studyId);
+            subjects = subjectRepository.findByStudy_Id(studyId);
         } else {
             Long userId = KeycloakUtil.getTokenUserId();
-            subjectStudyList = subjectStudyRepository.findByStudyIdAndStudy_StudyUserList_UserId(studyId, userId);
+            subjects = subjectRepository.findByStudyIdAndStudy_StudyUserList_UserId(studyId, userId);
         }
         Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
-        if (subjectStudyList != null) {
-            subjectStudyList.stream().forEach(ss -> {
-                if (studyWithTags != null) {
-                    ss.getStudy().setTags(studyWithTags.getTags());
-                }
-            });
-            for (SubjectStudy rel : subjectStudyList) {
+        List<TagDTO> studyTagDTOs = studyWithTags != null
+                ? tagMapper.tagListToTagDTOList(studyWithTags.getTags()) : null;
+        for (Subject sub : subjects) {
+            if (preclinical == null || preclinical.equals(sub.isPreclinical())) {
                 SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
-                if (studyId.equals(rel.getStudy().getId())
-                        && preclinical == null || (preclinical.equals(rel.getSubject().isPreclinical()))) {
-                    Subject sub = rel.getSubject();
-                    simpleSubjectDTO.setId(sub.getId());
-                    simpleSubjectDTO.setName(sub.getName());
-                    simpleSubjectDTO.setIdentifier(sub.getIdentifier());
-                    simpleSubjectDTO.setImagedObjectCategory(sub.getImagedObjectCategory());
-                    simpleSubjectDTO.setLanguageHemisphericDominance(sub.getLanguageHemisphericDominance());
-                    simpleSubjectDTO.setManualHemisphericDominance(sub.getManualHemisphericDominance());
-                    simpleSubjectDTO.setSubjectStudy(subjectStudyMapper.subjectStudyToSubjectStudyDTO(rel));
-                    simpleSubjectDTOList.add(simpleSubjectDTO);
-                }
+                simpleSubjectDTO.setId(sub.getId());
+                simpleSubjectDTO.setName(sub.getName());
+                simpleSubjectDTO.setIdentifier(sub.getIdentifier());
+                simpleSubjectDTO.setImagedObjectCategory(sub.getImagedObjectCategory());
+                simpleSubjectDTO.setLanguageHemisphericDominance(sub.getLanguageHemisphericDominance());
+                simpleSubjectDTO.setManualHemisphericDominance(sub.getManualHemisphericDominance());
+                simpleSubjectDTO.setSubjectStudy(buildSubjectStudyDTO(sub, studyWithTags, studyTagDTOs));
+                simpleSubjectDTOList.add(simpleSubjectDTO);
             }
         }
         return simpleSubjectDTOList;
+    }
+
+    /**
+     * Builds the subjectStudy part of the payload from the subject itself, kept
+     * for API compatibility until clients are migrated to the direct
+     * subject fields.
+     */
+    private SubjectStudyDTO buildSubjectStudyDTO(Subject subject, Study study, List<TagDTO> studyTagDTOs) {
+        SubjectStudyDTO subjectStudyDTO = new SubjectStudyDTO();
+        subjectStudyDTO.setId(subject.getId());
+        subjectStudyDTO.setSubject(new IdName(subject.getId(), subject.getName()));
+        subjectStudyDTO.setSubjectPreclinical(subject.isPreclinical());
+        StudyTagsDTO studyTagsDTO = new StudyTagsDTO();
+        if (study != null) {
+            studyTagsDTO.setId(study.getId());
+            studyTagsDTO.setName(study.getName());
+        }
+        studyTagsDTO.setTags(studyTagDTOs);
+        subjectStudyDTO.setStudy(studyTagsDTO);
+        subjectStudyDTO.setSubjectStudyIdentifier(subject.getStudyIdentifier());
+        subjectStudyDTO.setSubjectType(subject.getSubjectType());
+        subjectStudyDTO.setPhysicallyInvolved(subject.isPhysicallyInvolved());
+        subjectStudyDTO.setQualityTag(subject.getQualityTag());
+        return subjectStudyDTO;
     }
 
     @Override
@@ -431,7 +447,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public Subject findByIdentifierInStudiesWithRights(String identifier, List<Study> studies) {
         Iterable<Long> studyIds = studies.stream().map(AbstractEntity::getId).collect(Collectors.toList());
-        return subjectRepository.findFirstByIdentifierAndSubjectStudyListStudyIdIn(identifier, studyIds);
+        return subjectRepository.findFirstByIdentifierAndStudyIdIn(identifier, studyIds);
     }
 
     @Override
@@ -445,7 +461,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public Page<Subject> getClinicalFilteredPageByStudies(Pageable page, String name, List<Study> studies) {
         Iterable<Long> studyIds = studies.stream().map(AbstractEntity::getId).collect(Collectors.toList());
-        return subjectRepository.findDistinctByPreclinicalIsFalseAndNameContainingAndSubjectStudyListStudyIdIn(name,
+        return subjectRepository.findDistinctByPreclinicalIsFalseAndNameContainingAndStudyIdIn(name,
                 page, studyIds);
     }
 
@@ -461,7 +477,7 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Override
     public boolean isSubjectNameExistForStudy(Long studyId, String subjectName) {
-        return this.subjectRepository.existsBySubjectStudyListStudyIdAndName(studyId, subjectName);
+        return this.subjectRepository.existsByStudyIdAndName(studyId, subjectName);
     }
 
 }

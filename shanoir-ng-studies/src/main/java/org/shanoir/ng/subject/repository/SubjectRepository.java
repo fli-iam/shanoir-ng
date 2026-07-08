@@ -58,7 +58,7 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>, Subject
     List<Subject> findByStudyIdAndNameIn(Long studyId, Iterable<String> names);
 
     @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags"})
-    Subject findFirstByIdentifierAndSubjectStudyListStudyIdIn(String identifier, Iterable<Long> studyIds);
+    Subject findFirstByIdentifierAndStudyIdIn(String identifier, Iterable<Long> studyIds);
 
     @Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode AND name REGEXP '^[0-9]+$' AND CHAR_LENGTH(name) IN (7, 8) ORDER BY name DESC LIMIT 1", nativeQuery = true)
     Subject findSubjectFromCenterCode(@Param("centerCode") String centerCode);
@@ -66,23 +66,28 @@ public interface SubjectRepository extends JpaRepository<Subject, Long>, Subject
     Page<Subject> findByNameContaining(String name, Pageable pageable);
 
     @EntityGraph(attributePaths = {"tags"})
-    Page<Subject> findDistinctByPreclinicalIsFalseAndNameContainingAndSubjectStudyListStudyIdIn(String name, Pageable pageable, Iterable<Long> studyIds);
+    Page<Subject> findDistinctByPreclinicalIsFalseAndNameContainingAndStudyIdIn(String name, Pageable pageable, Iterable<Long> studyIds);
 
     /**
      * Returns all instances of the type.
      *
      * @return all entities
      */
-    Iterable<Subject> findBySubjectStudyListStudyIdIn(Iterable<Long> studyIds);
+    Iterable<Subject> findByStudyIdIn(Iterable<Long> studyIds);
 
-    Iterable<Subject> findBySubjectStudyListStudyIdInAndIdIn(Iterable<Long> studyIds, Iterable<Long> ids);
+    Iterable<Subject> findByStudyIdInAndIdIn(Iterable<Long> studyIds, Iterable<Long> ids);
 
     @EntityGraph(attributePaths = {"subjectStudyList.study.name", "subjectStudyList.study.tags", "subjectStudyList.study.studyUserList"})
     List<Subject> findByPreclinical(boolean preclinical);
 
-    boolean existsBySubjectStudyListStudyIdAndName(Long studyId, String name);
+    boolean existsByStudyIdAndName(Long studyId, String name);
 
     List<Subject> findByStudy_Id(Long studyId);
+
+    List<Subject> findByStudyIdAndStudy_StudyUserList_UserId(Long studyId, Long userId);
+
+    @Query("SELECT s.study.id, COUNT(s) FROM Subject s GROUP BY s.study.id")
+    List<Object[]> countByStudyIdGroupBy();
 
     @Query("""
             select new org.shanoir.ng.shared.core.model.IdName(s.id, s.name)

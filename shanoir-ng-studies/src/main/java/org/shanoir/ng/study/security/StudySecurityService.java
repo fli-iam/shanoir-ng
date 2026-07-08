@@ -233,21 +233,7 @@ public class StudySecurityService {
             return false;
         }
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
-        if (subject.getStudy() != null) {
-            if (hasPrivilege(subject.getStudy(), right)) {
-                return true;
-            }
-        }
-        // @todo: remove later usage of subject study list
-        if (subject.getSubjectStudyList() == null) {
-            return false;
-        }
-        for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-            if (hasPrivilege(subjectStudy.getStudy(), right)) {
-                return true;
-            }
-        }
-        return false;
+        return subject.getStudy() != null && hasPrivilege(subject.getStudy(), right);
     }
 
     public boolean hasRightOnSubjectForOneStudy(Subject subject, String rightStr) {
@@ -311,23 +297,8 @@ public class StudySecurityService {
             throw new EntityNotFoundException("Subject not found with id: " + subjectId);
         }
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
-        if (subject.getStudy() != null) {
-            // As the subject is already from the database, study object is valid
-            if (!hasPrivilege(subject.getStudy(), right)) {
-                return false;
-            }
-        // @todo: remove later usage of subject study list
-        } else if (subject.getSubjectStudyList() == null) {
-            return false;
-        } else {
-            for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
-                // As the subject is already from the database, study object is valid
-                if (!hasPrivilege(subjectStudy.getStudy(), right)) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        // As the subject is already from the database, study object is valid
+        return subject.getStudy() != null && hasPrivilege(subject.getStudy(), right);
     }
 
     /**

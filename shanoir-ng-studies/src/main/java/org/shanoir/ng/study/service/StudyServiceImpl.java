@@ -579,7 +579,7 @@ public class StudyServiceImpl implements StudyService {
      * @param studies
      */
     private void setNumberOfSubjectsAndExaminations(List<Study> studies) {
-        List<Object[]> subjectsCount = subjectStudyRepository.countByStudyIdGroupBy();
+        List<Object[]> subjectsCount = subjectRepository.countByStudyIdGroupBy();
         HashMap<Long, Long> studyIdSubjectsCountMap = new HashMap<>();
         for (Object[] row : subjectsCount) {
             Long studyId = (Long) row[0];
