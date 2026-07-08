@@ -259,7 +259,10 @@ public class DatasetServiceImpl implements DatasetService {
     @Override
     public Dataset findById(final Long id) {
         Dataset dataset = repository.findById(id).orElse(null);
-        if (dataset != null) populateInPacs(List.of(dataset));
+        if (dataset != null) {
+            populateInPacs(List.of(dataset));
+            dataset.setCenterId(resolveCenterId(dataset));
+        }
         return dataset;
     }
 
@@ -272,6 +275,7 @@ public class DatasetServiceImpl implements DatasetService {
     public List<Dataset> findByIdIn(List<Long> ids) {
         List<Dataset> datasets = Utils.toList(repository.findAllById(ids));
         populateInPacs(datasets);
+        populateCenterId(datasets);
         return datasets;
     }
 
@@ -355,6 +359,7 @@ public class DatasetServiceImpl implements DatasetService {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             Page<Dataset> page = repository.findAll(pageable);
             populateInPacs(page.getContent());
+            populateCenterId(page.getContent());
             return page;
         }
 
@@ -380,6 +385,7 @@ public class DatasetServiceImpl implements DatasetService {
         if (!hasRestrictions) {
             Page<Dataset> page = repository.findByDatasetAcquisitionExaminationStudy_IdIn(accessibleStudyIds, pageable);
             populateInPacs(page.getContent());
+            populateCenterId(page.getContent());
             return page;
         }
 
@@ -442,6 +448,7 @@ public class DatasetServiceImpl implements DatasetService {
     public List<Dataset> findByAcquisition(Long acquisitionId) {
         List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionId(acquisitionId));
         populateInPacs(datasets);
+        populateCenterId(datasets);
         return datasets;
     }
 
@@ -458,6 +465,7 @@ public class DatasetServiceImpl implements DatasetService {
                     +studycardId, studyIds));
         }
         populateInPacs(datasets);
+        populateCenterId(datasets);
         return datasets;
     }
 
@@ -465,6 +473,7 @@ public class DatasetServiceImpl implements DatasetService {
     public List<Dataset> findByExaminationId(Long examinationId) {
         List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationId(examinationId));
         populateInPacs(datasets);
+        populateCenterId(datasets);
         return datasets;
     }
 
@@ -472,6 +481,7 @@ public class DatasetServiceImpl implements DatasetService {
     public List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId) {
         List<Dataset> datasets = StreamSupport.stream(repository.findAllById(repository.findDatasetAndOutputByExaminationId(examinationId)).spliterator(), false).toList();
         populateInPacs(datasets);
+        populateCenterId(datasets);
         return datasets;
     }
 
@@ -667,6 +677,21 @@ public class DatasetServiceImpl implements DatasetService {
         } else {
             return null;
         }
+    }
+
+    private Long resolveCenterId(Dataset dataset) {
+        if (dataset.getDatasetAcquisition() == null || dataset.getDatasetAcquisition().getExamination() == null) {
+            if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null
+                    && !dataset.getDatasetProcessing().getInputDatasets().isEmpty()) {
+                return resolveCenterId(dataset.getDatasetProcessing().getInputDatasets().get(0));
+            }
+            return null;
+        }
+        return dataset.getDatasetAcquisition().getExamination().getCenterId();
+    }
+
+    private void populateCenterId(List<Dataset> datasets) {
+        datasets.forEach(d -> d.setCenterId(resolveCenterId(d)));
     }
 
     public void populateInPacs(List<Dataset> datasets) {

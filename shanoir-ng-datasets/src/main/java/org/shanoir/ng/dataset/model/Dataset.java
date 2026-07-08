@@ -213,6 +213,9 @@ public abstract class Dataset extends AbstractEntity {
     @Transient
     private Boolean inPacs;
 
+    @Transient
+    private Long centerId;
+
     public Dataset() {
     }
 
@@ -443,18 +446,12 @@ public abstract class Dataset extends AbstractEntity {
         return getDatasetAcquisition().getExamination().getStudyId();
     }
 
-    /**
-     * @return the centerId
-     */
-    @Transient
     public Long getCenterId() {
-        if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
-            if (getDatasetProcessing() != null && getDatasetProcessing().getInputDatasets() != null) {
-                return getDatasetProcessing().getInputDatasets().get(0).getCenterId();
-            }
-            return null;
-        }
-        return getDatasetAcquisition().getExamination().getCenterId();
+        return centerId;
+    }
+
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
     }
 
     /**

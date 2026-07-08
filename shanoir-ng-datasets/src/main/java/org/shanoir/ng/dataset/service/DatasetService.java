@@ -90,7 +90,7 @@ public interface DatasetService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
-    List<Dataset> findByIdIn(List<Long> id);
+    List<Dataset> findByIdIn(List<Long> ids);
 
     /**
      * Find datasets by their ids.
