@@ -349,7 +349,7 @@ public class ExaminationApiSecurityTest {
         study.setId(id);
         study.setName("");
         study.setRelatedDatasets(new ArrayList<>());
-        study.setSubjectStudyList(new ArrayList<>());
+        study.setSubjectList(new ArrayList<>());
         study.setTags(new ArrayList<>());
         return study;
     }
