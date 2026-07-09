@@ -29,6 +29,7 @@ import org.shanoir.ng.vip.executionTemplate.model.ExecutionTemplateParameter;
 import org.shanoir.ng.vip.executionTemplate.model.PlannedExecution;
 import org.shanoir.ng.vip.executionTemplate.repository.ExecutionTemplateRepository;
 import org.shanoir.ng.vip.executionTemplate.repository.PlannedExecutionRepository;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.vip.shared.dto.DatasetParameterDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +99,6 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
                     case "dataset" ->
                             transactionRunner.runInTransaction(em -> createExecutionsAtDatasetLevel(template, createdAcquisitionsPerTemplateId.get(templateId)));
                     default -> { }
-
                 }
             }
         }
@@ -212,16 +212,19 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
 
         ExecutionCandidateDTO candidate = new ExecutionCandidateDTO();
         candidate.setInputParameters(new HashMap<>());
-        candidate.setClient("shanoir-uploader");
+        // Use the exact client the offline token was issued to (its "azp" claim), mirroring what the frontend
+        // sends in the manual exec path. VIP refreshes the token in the background with this same client.
+        candidate.setClient(SecurityContextUtil.getClientId(template.getOfflineToken()));
         candidate.setName(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "execution_name")).findFirst().get().getValue());
         candidate.setName(candidate.getName() + "_" + (Objects.isNull(examId) ? "" : examId + "_") + LocalDate.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE));
-        candidate.setConverterId(Long.valueOf(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "converter")).findFirst().get().getValue()));
+        String converterValue = template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "converter")).findFirst().map(ExecutionTemplateParameter::getValue).orElse(null);
+        if (converterValue != null) candidate.setConverterId(Long.valueOf(converterValue));
         candidate.setPipelineIdentifier(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "pipeline_identifier")).findFirst().get().getValue());
         candidate.setProcessingType(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "processing_type")).findFirst().get().getValue());
         candidate.setStudyIdentifier(studyId);
 
         candidate.setDatasetParameters(prepareDatasetParameters(template, objectId));
-        return Objects.isNull(candidate.getDatasetParameters()) ? null : candidate;
+        return (Objects.isNull(candidate.getDatasetParameters()) || candidate.getDatasetParameters().isEmpty()) ? null : candidate;
     }
 
     public List<Long> getInvolvedData(ExecutionInQueue execution) {
@@ -265,7 +268,6 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
                     if (dataset.getName().contains(parameterValue)) {
                         inputIds.add(dataset.getId());
                     }
-                    return null;
                 }
                 default -> { }
             }
@@ -273,7 +275,8 @@ public class PlannedExecutionServiceImpl implements PlannedExecutionService {
                 DatasetParameterDTO datasetParameterDTO = new DatasetParameterDTO();
                 datasetParameterDTO.setDatasetIds(inputIds);
                 datasetParameterDTO.setName(prefixe);
-                datasetParameterDTO.setConverterId(Long.valueOf(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "converter")).findFirst().get().getValue()));
+                String converterVal = template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "converter")).findFirst().map(ExecutionTemplateParameter::getValue).orElse(null);
+                if (converterVal != null) datasetParameterDTO.setConverterId(Long.valueOf(converterVal));
                 datasetParameterDTO.setExportFormat(template.getParameters().stream().filter(parameter -> Objects.equals(parameter.getName(), "export_format")).findFirst().get().getValue());
                 datasetParameterDTO.setGroupBy(GroupByEnum.valueOf(parameterGroup.toUpperCase()));
                 datasetParameters.add(datasetParameterDTO);
