@@ -1,1 +1,0 @@
-ALTER TABLE execution_template ADD COLUMN offline_token VARCHAR(2000);
