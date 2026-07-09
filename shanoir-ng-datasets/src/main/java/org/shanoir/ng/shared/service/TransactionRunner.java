@@ -19,6 +19,7 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Service
 public class TransactionRunner {
@@ -29,5 +30,10 @@ public class TransactionRunner {
     @Transactional
     public void runInTransaction(Consumer<EntityManager> action) {
         action.accept(entityManager);
+    }
+
+    @Transactional
+    public <T> T callInTransaction(Function<EntityManager, T> action) {
+        return action.apply(entityManager);
     }
 }
