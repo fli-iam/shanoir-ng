@@ -113,10 +113,6 @@ public class RabbitMQSubjectService {
         if (subject.getStudy() != null) {
             studyId = subject.getStudy().getId();
         }
-        // @todo: to be removed later
-        if (subject.getSubjectStudyList() != null && !subject.getSubjectStudyList().isEmpty()) {
-            studyId = subject.getSubjectStudyList().get(0).getStudy().getId();
-        }
         Subject subjectOld = subjectRepository.findByStudyIdAndName(studyId, subject.getName());
         if (subjectOld == null) {
             return subjectService.create(subject, withAMQP);

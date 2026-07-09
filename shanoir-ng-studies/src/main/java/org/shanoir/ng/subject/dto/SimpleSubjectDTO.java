@@ -19,6 +19,7 @@ package org.shanoir.ng.subject.dto;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.tag.model.TagDTO;
@@ -43,9 +44,13 @@ public class SimpleSubjectDTO {
 
     private ImagedObjectCategory imagedObjectCategory;
 
-    private SubjectStudyDTO subjectStudy;
-
     private Long studyId;
+
+    private String studyIdentifier;
+
+    private SubjectType subjectType;
+
+    private boolean physicallyInvolved;
 
     private List<TagDTO> tags;
 
@@ -73,12 +78,28 @@ public class SimpleSubjectDTO {
         this.identifier = identifier;
     }
 
-    public SubjectStudyDTO getSubjectStudy() {
-        return subjectStudy;
+    public String getStudyIdentifier() {
+        return studyIdentifier;
     }
 
-    public void setSubjectStudy(SubjectStudyDTO subjectStudy) {
-        this.subjectStudy = subjectStudy;
+    public void setStudyIdentifier(String studyIdentifier) {
+        this.studyIdentifier = studyIdentifier;
+    }
+
+    public SubjectType getSubjectType() {
+        return subjectType;
+    }
+
+    public void setSubjectType(SubjectType subjectType) {
+        this.subjectType = subjectType;
+    }
+
+    public boolean isPhysicallyInvolved() {
+        return physicallyInvolved;
+    }
+
+    public void setPhysicallyInvolved(boolean physicallyInvolved) {
+        this.physicallyInvolved = physicallyInvolved;
     }
 
     public HemisphericDominance getLanguageHemisphericDominance() {

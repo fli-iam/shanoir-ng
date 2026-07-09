@@ -51,13 +51,12 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(indexes = @Index(name = "subject_name_study_id_idx", columnList = "name, study_id", unique = true))
 @JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate", "imagedObjectCategory",
-    "preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
+    "preclinical", "pseudonymusHashValues", "languageHemisphericDominance", "manualHemisphericDominance",
     "userPersonalCommentList" })
 @SqlResultSetMapping(name = "subjectNameResult", classes = { @ConstructorResult(targetClass = IdName.class, columns = {
         @ColumnResult(name = "id", type = Long.class), @ColumnResult(name = "name") }) })
@@ -79,14 +78,6 @@ public class Subject extends HalEntity {
     @JoinColumn(name = "study_id")
     @NotNull
     private Study study;
-
-    /**
-     * Legacy clients (old ShUp versions) send subject_study objects instead
-     * of the direct study relation: accepted at JSON level only, mapped onto
-     * the subject's own fields on creation/update, never persisted.
-     */
-    @Transient
-    private List<LegacySubjectStudy> subjectStudyList;
 
     private String identifier;
 
@@ -174,14 +165,6 @@ public class Subject extends HalEntity {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<LegacySubjectStudy> getSubjectStudyList() {
-        return subjectStudyList;
-    }
-
-    public void setSubjectStudyList(List<LegacySubjectStudy> subjectStudyList) {
-        this.subjectStudyList = subjectStudyList;
     }
 
     public String getIdentifier() {

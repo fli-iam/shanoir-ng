@@ -40,12 +40,7 @@ import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subject.model.LegacySubjectStudy;
-import org.shanoir.ng.subject.dto.StudyTagsDTO;
-import org.shanoir.ng.subject.dto.SubjectStudyDTO;
 import org.shanoir.ng.tag.model.Tag;
-import org.shanoir.ng.tag.model.TagDTO;
-import org.shanoir.ng.tag.model.TagMapper;
 import org.shanoir.ng.tag.repository.TagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -82,9 +77,6 @@ public class SubjectServiceImpl implements SubjectService {
 
     @Autowired
     private TagRepository tagRepository;
-
-    @Autowired
-    private TagMapper tagMapper;
 
     @Autowired
     private StudyRepository studyRepository;
@@ -191,7 +183,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     @Transactional
     public Subject create(Subject subject, boolean withAMQP) throws ShanoirException {
-        subject = mapSubjectStudyListToSubject(subject);
+        subject = prepareSubjectForCreation(subject);
         Subject subjectDb;
         try {
             subjectDb = subjectRepository.save(subject);
@@ -212,7 +204,7 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     @Transactional
     public Subject createAutoIncrement(Subject subject, final Long centerId, boolean withAMQP) throws ShanoirException {
-        subject = mapSubjectStudyListToSubject(subject);
+        subject = prepareSubjectForCreation(subject);
         DecimalFormat formatterCenter = new DecimalFormat(FORMAT_CENTER_CODE);
         String subjectNameCenterPrefix = formatterCenter.format(centerId);
         int maxSubjectNameNumber = 0;
@@ -237,25 +229,14 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     /**
-     * Old versions of clients (e.g. ShUp) still send subject_study objects
-     * and no studyId in subject: map their attributes onto the subject.
-     * subject_study rows are not persisted anymore, subject.study_id is
-     * the single source of truth.
+     * Forbid subject creation in draft studies and replace detached tags
+     * with their managed counterparts.
      *
      * @param subject
      * @return
      * @throws ShanoirException
      */
-    private Subject mapSubjectStudyListToSubject(Subject subject) throws ShanoirException {
-        List<LegacySubjectStudy> subjectStudyList = subject.getSubjectStudyList();
-        if (subjectStudyList != null && !subjectStudyList.isEmpty()) {
-            if (subjectStudyList.size() > 1) {
-                throw new ShanoirException("A subject is only in one study.", HttpStatus.FORBIDDEN.value());
-            }
-            subject = mapSubjectStudyAttributesToSubject(subject, subjectStudyList.get(0));
-        }
-        subject.setSubjectStudyList(null);
-
+    private Subject prepareSubjectForCreation(Subject subject) throws ShanoirException {
         if (subject.getStudy() != null && subject.getStudy().getId() != null) {
             Long studyId = subject.getStudy().getId();
             Optional<Boolean> isDraft = studyRepository.findIsDraftById(studyId);
@@ -275,15 +256,6 @@ public class SubjectServiceImpl implements SubjectService {
             managedTagsIt.forEach(managedTags::add);
             subject.setTags(managedTags);
         }
-        return subject;
-    }
-
-    private Subject mapSubjectStudyAttributesToSubject(Subject subject, LegacySubjectStudy subjectStudy) {
-        subject.setStudy(subjectStudy.getStudy());
-        subject.setStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
-        subject.setSubjectType(subjectStudy.getSubjectType());
-        subject.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
-        subject.setQualityTag(subjectStudy.getQualityTag());
         return subject;
     }
 
@@ -325,15 +297,6 @@ public class SubjectServiceImpl implements SubjectService {
         subjectOld.setPhysicallyInvolved(subjectNew.isPhysicallyInvolved());
         subjectOld.setQualityTag(subjectNew.getQualityTag());
         subjectOld.setStudy(subjectNew.getStudy());
-        List<LegacySubjectStudy> subjectStudyListNew = subjectNew.getSubjectStudyList();
-        if (subjectStudyListNew != null) {
-            if (subjectStudyListNew.isEmpty() && subjectNew.getStudy() == null) {
-                throw new ShanoirException("A subject has to be in at least one study.", HttpStatus.FORBIDDEN.value());
-            }
-            if (subjectStudyListNew.size() > 1 && subjectNew.getStudy() == null) {
-                subjectNew.setStudy(subjectStudyListNew.get(0).getStudy());
-            }
-        }
         return subjectOld;
     }
 
@@ -380,9 +343,6 @@ public class SubjectServiceImpl implements SubjectService {
             Long userId = KeycloakUtil.getTokenUserId();
             subjects = subjectRepository.findByStudyIdAndStudy_StudyUserList_UserId(studyId, userId);
         }
-        Study studyWithTags = studyRepository.findStudyWithTagsById(studyId);
-        List<TagDTO> studyTagDTOs = studyWithTags != null
-                ? tagMapper.tagListToTagDTOList(studyWithTags.getTags()) : null;
         for (Subject sub : subjects) {
             if (preclinical == null || preclinical.equals(sub.isPreclinical())) {
                 SimpleSubjectDTO simpleSubjectDTO = new SimpleSubjectDTO();
@@ -392,35 +352,14 @@ public class SubjectServiceImpl implements SubjectService {
                 simpleSubjectDTO.setImagedObjectCategory(sub.getImagedObjectCategory());
                 simpleSubjectDTO.setLanguageHemisphericDominance(sub.getLanguageHemisphericDominance());
                 simpleSubjectDTO.setManualHemisphericDominance(sub.getManualHemisphericDominance());
-                simpleSubjectDTO.setSubjectStudy(buildSubjectStudyDTO(sub, studyWithTags, studyTagDTOs));
+                simpleSubjectDTO.setStudyId(studyId);
+                simpleSubjectDTO.setStudyIdentifier(sub.getStudyIdentifier());
+                simpleSubjectDTO.setSubjectType(sub.getSubjectType());
+                simpleSubjectDTO.setPhysicallyInvolved(sub.isPhysicallyInvolved());
                 simpleSubjectDTOList.add(simpleSubjectDTO);
             }
         }
         return simpleSubjectDTOList;
-    }
-
-    /**
-     * Builds the subjectStudy part of the payload from the subject itself, kept
-     * for API compatibility until clients are migrated to the direct
-     * subject fields.
-     */
-    private SubjectStudyDTO buildSubjectStudyDTO(Subject subject, Study study, List<TagDTO> studyTagDTOs) {
-        SubjectStudyDTO subjectStudyDTO = new SubjectStudyDTO();
-        subjectStudyDTO.setId(subject.getId());
-        subjectStudyDTO.setSubject(new IdName(subject.getId(), subject.getName()));
-        subjectStudyDTO.setSubjectPreclinical(subject.isPreclinical());
-        StudyTagsDTO studyTagsDTO = new StudyTagsDTO();
-        if (study != null) {
-            studyTagsDTO.setId(study.getId());
-            studyTagsDTO.setName(study.getName());
-        }
-        studyTagsDTO.setTags(studyTagDTOs);
-        subjectStudyDTO.setStudy(studyTagsDTO);
-        subjectStudyDTO.setSubjectStudyIdentifier(subject.getStudyIdentifier());
-        subjectStudyDTO.setSubjectType(subject.getSubjectType());
-        subjectStudyDTO.setPhysicallyInvolved(subject.isPhysicallyInvolved());
-        subjectStudyDTO.setQualityTag(subject.getQualityTag());
-        return subjectStudyDTO;
     }
 
     @Override

@@ -36,7 +36,6 @@ import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
-import org.shanoir.ng.subject.model.LegacySubjectStudy;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.repository.StudyTagRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -318,17 +317,7 @@ public class StudySecurityService {
             return false;
         }
         StudyUserRight right = StudyUserRight.valueOf(rightStr);
-        if (subject.getStudy() != null) {
-            return hasPrivilegeOnStudy(subject.getStudy().getId(), right);
-        }
-        // @todo: remove later usage of subject study list
-        if (subject.getSubjectStudyList() != null) {
-            return subject.getSubjectStudyList().stream()
-                    .map(LegacySubjectStudy::getStudy)
-                    .map(Study::getId)
-                    .allMatch(studyId -> hasPrivilegeOnStudy(studyId, right));
-        }
-        return false;
+        return subject.getStudy() != null && hasPrivilegeOnStudy(subject.getStudy().getId(), right);
     }
 
     /**
