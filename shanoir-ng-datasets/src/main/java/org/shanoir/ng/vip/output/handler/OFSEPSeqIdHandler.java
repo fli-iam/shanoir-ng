@@ -28,6 +28,8 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.tag.model.StudyTag;
@@ -132,7 +134,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     private SolrService solrService;
 
     @Autowired
-    private StudyService studyService;
+    private StudyRepository studyRepository;
 
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
@@ -448,8 +450,9 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     /**
      * Add tags to a dataset
      */
-    private void addDatasetTags(Dataset ds, List<DatasetProperty> properties) {
-        Map<String, StudyTag> studyTagsByName = studyService.findById(ds.getStudyId()).getStudyTags().stream()
+    private void addDatasetTags(Dataset ds, List<DatasetProperty> properties) throws EntityNotFoundException {
+        Study study = studyRepository.findByIdWithStudyTags(ds.getStudyId()).orElseThrow(() -> new EntityNotFoundException(Study.class, ds.getStudyId()));
+        Map<String, StudyTag> studyTagsByName = study.getStudyTags().stream()
                 .collect(Collectors.toMap(StudyTag::getName, Function.identity()));
 
         for (DatasetProperty property : properties) {

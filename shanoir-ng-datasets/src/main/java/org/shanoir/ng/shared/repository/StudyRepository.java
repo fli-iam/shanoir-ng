@@ -16,8 +16,10 @@ package org.shanoir.ng.shared.repository;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.shared.model.Study;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -30,4 +32,7 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
     @Query(value = "select rd.study_id from related_datasets rd where dataset_id = ?1",
             nativeQuery = true)
     List<BigInteger> findByDatasetId(Long datasetId);
+
+    @EntityGraph(attributePaths = "studyTags")
+    Optional<Study> findByIdWithStudyTags(Long id);
 }
