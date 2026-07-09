@@ -32,6 +32,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.common.util.Pair;
 import org.assertj.core.util.Lists;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.download.DatasetDownloadError;
@@ -40,6 +41,7 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.DatasetFileUtils;
@@ -64,7 +66,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     private DatasetProcessingRepository datasetProcessingRepository;
 
     @Autowired
-    private DatasetProcessingServiceImpl datasetProcessingService;
+    private DatasetRepository datasetRepository;
 
     @PersistenceContext
     private EntityManager em;
@@ -140,7 +142,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
 
     public void massiveDownloadByExaminations(List<Examination> examinationList, String processingComment, boolean resultOnly, String format, HttpServletResponse response, boolean withManifest, Long converterId) throws RestServiceException {
         List<Long> processingIdsList = datasetProcessingRepository.findAllIdsByExaminationIds(examinationList.stream().map(Examination::getId).toList());
-        List<DatasetProcessing> processingList = datasetProcessingService.findAllById(processingIdsList);
+        List<DatasetProcessing> processingList = datasetProcessingRepository.findByIdsWithInputsAndOutputs(processingIdsList);
         if (!Objects.isNull(processingComment)) {
             processingList = processingList.stream().filter(it -> Objects.equals(it.getComment(), processingComment)).toList();
         }
@@ -187,10 +189,11 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         }
     }
 
-    protected String getProcessingSubject(DatasetProcessing processing) {
+    protected String getProcessingSubject(DatasetProcessing processing) throws EntityNotFoundException {
         Examination exam = null;
         for (Dataset dataset : processing.getInputDatasets()) {
-            exam = Optional.ofNullable(dataset)
+            Dataset loadedDataset = datasetRepository.findByIdWithProcessingAncestorsAndExamination(dataset.getId()).orElseThrow(() -> new EntityNotFoundException(DatasetProcessing.class, processing.getId()));
+            exam = Optional.ofNullable(loadedDataset)
                     .map(Dataset::getDatasetAcquisition)
                     .map(DatasetAcquisition::getExamination)
                     .orElse(null);

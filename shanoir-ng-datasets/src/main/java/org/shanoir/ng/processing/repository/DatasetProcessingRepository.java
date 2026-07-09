@@ -31,12 +31,24 @@ import org.springframework.data.repository.CrudRepository;
 public interface DatasetProcessingRepository extends CrudRepository<DatasetProcessing, Long> {
 
     /**
-     * Find dataset processing by name.
+     * Find dataset processings by ids.
      *
-     * @param comment comment.
-     * @return a dataset processing.
+     * @param ids list of id.
+     * @return a list of dataset processing.
      */
-    Optional<DatasetProcessing> findByComment(String comment);
+    @Query("SELECT processing FROM DatasetProcessing processing " +
+            "WHERE processing.id IN :ids ")
+    List<DatasetProcessing> findByIds(List<Long> ids);
+
+    /**
+     * Find dataset processings by monitoring id.
+     *
+     * @param id monitoring id.
+     * @return a list of dataset processing.
+     */
+    @Query("SELECT processing FROM DatasetProcessing processing " +
+            "WHERE processing.parent.id = :id ")
+    List<DatasetProcessing> findByMonitoringId(Long id);
 
     /**
      * Find all processings that are linked to given dataset through INPUT_OF_DATASET_PROCESSING table
@@ -121,6 +133,18 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             "JOIN FETCH processing.outputDatasets " +
             "WHERE processing.id = :id")
     Optional<DatasetProcessing> findByIdWithOutputs(Long Id);
+
+    @Query("SELECT processing FROM DatasetProcessing processing " +
+            "JOIN FETCH processing.outputDatasets " +
+            "JOIN FETCH processing.inputDatasets " +
+            "WHERE processing.id = :id")
+    Optional<DatasetProcessing> findByIdWithInputsAndOutputs(Long Id);
+
+    @Query("SELECT processing FROM DatasetProcessing processing " +
+            "JOIN FETCH processing.outputDatasets " +
+            "JOIN FETCH processing.inputDatasets " +
+            "WHERE processing.id IN :ids")
+    List<DatasetProcessing> findByIdsWithInputsAndOutputs(List<Long> Ids);
 
     @Query("SELECT DISTINCT p FROM DatasetProcessing p " +
             "JOIN FETCH p.inputDatasets " +

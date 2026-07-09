@@ -34,6 +34,7 @@ import org.shanoir.ng.processing.service.ProcessingDownloaderService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +102,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     public ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 
-        final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
+        final Optional<DatasetProcessing> datasetProcessing = repository.findById(datasetProcessingId);
         if (!datasetProcessing.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -110,7 +111,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
     @Override
     public ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessings() {
-        final List<DatasetProcessing> datasetProcessings = datasetProcessingService.findAll();
+        final List<DatasetProcessing> datasetProcessings = Utils.toList(repository.findAll());
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -127,7 +128,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     }
 
     public ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByMonitoring(@Parameter(description = "id of the monitoring", required = true) @PathVariable("monitoringId") Long monitoringId) {
-        final List<DatasetProcessing> datasetProcessings = datasetProcessingService.findByMonitoringId(monitoringId);
+        final List<DatasetProcessing> datasetProcessings = repository.findByMonitoringId(monitoringId);
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -204,20 +205,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             @RequestParam(value = "resultOnly") boolean resultOnly,
             HttpServletResponse response) throws RestServiceException {
 
-        List<DatasetProcessing> processingList = new ArrayList<>();
-        for (Long processingId : processingIds) {
-            DatasetProcessing processing = null;
-            try {
-                if (processingId == null) {
-                    throw new Exception();
-                }
-                processing = datasetProcessingService.findById(processingId).get();
-                processingList.add(processing);
-            } catch (Exception e) {
-                throw new RestServiceException(
-                        new ErrorModel(HttpStatus.FORBIDDEN.value(), processingId + " is not a valid processing id."));
-            }
-        }
+        List<DatasetProcessing> processingList = repository.findByIdsWithInputsAndOutputs(processingIds);
         processingDownloaderService.massiveDownload(processingList, resultOnly, "dcm", response, false, null);
     }
 

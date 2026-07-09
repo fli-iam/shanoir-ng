@@ -57,9 +57,6 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     private ProcessingResourceRepository processingResourceRepository;
 
     @Autowired
-    private ProcessingResourceService processingResourceService;
-
-    @Autowired
     private DatasetService datasetService;
 
     @Autowired
@@ -76,28 +73,6 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
         to.setProcessingDate(from.getProcessingDate());
         to.setStudyId(from.getStudyId());
         return to;
-    }
-
-    public Optional<DatasetProcessing> findByComment(String comment) {
-        return repository.findByComment(comment);
-    }
-
-    @Override
-    public Optional<DatasetProcessing> findById(final Long id) {
-        return repository.findById(id);
-    }
-
-    @Override
-    public List<DatasetProcessing> findAll() {
-        return Utils.toList(repository.findAll());
-    }
-
-    public List<DatasetProcessing> findAllById(List<Long> idList) {
-        return idList.stream().flatMap(it -> findById(it).stream()).toList();
-    }
-
-    public List<DatasetProcessing> findByMonitoringId(Long monitoringId) {
-        return StreamSupport.stream(repository.findAllById(repository.findAllIdsByMonitoringId(monitoringId)).spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
@@ -118,7 +93,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     @Override
     @Transactional
     public void deleteById(final Long id) throws ShanoirException, RestServiceException, SolrServerException, IOException {
-        final Optional<DatasetProcessing> entity = repository.findById(id);
+        final Optional<DatasetProcessing> entity = repository.findByIdWithOutputs(id);
         entity.orElseThrow(() -> new EntityNotFoundException("Cannot find dataset processing [" + id + "]"));
 
         // Load datasetProcessing output datasets
