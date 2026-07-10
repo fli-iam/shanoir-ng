@@ -47,6 +47,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.dicom.WADOURLHandler;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.ShanoirWebClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,10 +56,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.json.Json;
 import jakarta.json.stream.JsonParser;
 import jakarta.mail.BodyPart;
@@ -124,21 +123,11 @@ public class WADODownloaderService {
     private static final String CONTENT_TYPE = "&contentType";
 
     @Autowired
-    private WebClient.Builder webClientBuilder;
+    private ShanoirWebClient shanoirWebClient;
 
     @Autowired
     private WADOURLHandler wadoURLHandler;
 
-    private WebClient webClient;
-
-    @PostConstruct
-    public void initWebClient() {
-        this.webClient = webClientBuilder
-                .codecs(configurer -> configurer
-                        .defaultCodecs()
-                        .maxInMemorySize(500 * 1024 * 1024)) // 500MB buffer for large DICOM files
-                .build();
-    }
 
     /**
      * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
@@ -390,7 +379,7 @@ public class WADODownloaderService {
 
     // Internal async methods for potential reuse
     private Mono<byte[]> downloadFileFromPACSAsync(final String url) {
-        return webClient.get()
+        return shanoirWebClient.get()
                 .uri(url)
                 .header(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";")
                 .retrieve()
@@ -401,7 +390,7 @@ public class WADODownloaderService {
     }
 
     private Mono<String> downloadMetadataFromPACSAsync(final String url) {
-        return webClient.get()
+        return shanoirWebClient.get()
                 .uri(url)
                 .header(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON)
                 .retrieve()
