@@ -7,4 +7,5 @@
     window["env"]["ohifUrl"] = "SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST";
     window["env"]["videpeUrl"] = "SHANOIR_VIEWER_VIDEPE_URL_SCHEME://SHANOIR_VIEWER_VIDEPE_URL_HOST";
     window["env"]["vipUrl"] = "VIP_URL_SCHEME://VIP_URL_HOST";
+    window["env"]["mailSupplierBlacklist"] = "MAIL_SUPPLIER_BLACK_LIST";
 })(this);
