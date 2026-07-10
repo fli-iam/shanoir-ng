@@ -17,7 +17,6 @@ package org.shanoir.ng.vip.execution.service;
 import jakarta.annotation.PostConstruct;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.dto.ParameterResourceDTO;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
@@ -48,6 +47,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClient.Builder;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
@@ -64,8 +64,6 @@ public class ExecutionServiceImpl implements ExecutionService {
     private static String shanoirURIScheme;
 
     private final String vipExecutionUri = "/executions";
-
-    private WebClient webClient;
 
     @Value("${vip.uri}")
     private String vipUrl;
@@ -95,11 +93,13 @@ public class ExecutionServiceImpl implements ExecutionService {
     private DatasetProcessingRepository datasetProcessingRepository;
 
     @Autowired
+    private ShanoirWebClient shanoirWebClient;
+
+    @Autowired
     private Utils utils;
 
     @PostConstruct
     public void init() {
-        this.webClient = WebClient.create(vipUrl);
         shanoirURIScheme = (shanoirURISchemeLocal.contains(".") ? shanoirURISchemeLocal.substring(0, shanoirURISchemeLocal.indexOf('.')).replaceAll("-", "") : "local") + ":/";
     }
 
@@ -149,7 +149,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     public Mono<String> getExecutionStderr(Long processingId) {
         DatasetProcessingRepository.IdentificationData identificationData = datasetProcessingRepository.findIdentificationDataFromProcessingId(processingId);
 
-        String url = vipExecutionUri + "/" + identificationData.getMonitoringIdentifier() + "/jobs/" + identificationData.getMonitoringIndex() + "/stderr";
+        String url = vipUrl + vipExecutionUri + "/" + identificationData.getMonitoringIdentifier() + "/jobs/" + identificationData.getMonitoringIndex() + "/stderr";
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
@@ -164,7 +164,7 @@ public class ExecutionServiceImpl implements ExecutionService {
     public Mono<String> getExecutionStdout(Long processingId) {
         DatasetProcessingRepository.IdentificationData identificationData = datasetProcessingRepository.findIdentificationDataFromProcessingId(processingId);
 
-        String url = vipExecutionUri + "/" + identificationData.getMonitoringIdentifier() + "/jobs/" + identificationData.getMonitoringIndex() + "/stdout";
+        String url = vipUrl + vipExecutionUri + "/" + identificationData.getMonitoringIdentifier() + "/jobs/" + identificationData.getMonitoringIndex() + "/stdout";
         return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
@@ -182,7 +182,7 @@ public class ExecutionServiceImpl implements ExecutionService {
             throw new ResultHandlerException("Failed to get execution details from VIP in [" + attempts + "] attempts", null);
         }
 
-        String url = vipExecutionUri + "/" + identifier + "/summary";
+        String url = vipUrl + vipExecutionUri + "/" + identifier + "/summary";
         HttpHeaders headers = getServiceAccountHttpHeaders();
 
         return webClient.get()

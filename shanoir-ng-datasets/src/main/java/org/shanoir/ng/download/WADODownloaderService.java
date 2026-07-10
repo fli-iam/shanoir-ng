@@ -61,7 +61,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.json.Json;
 import jakarta.json.stream.JsonParser;
 import jakarta.mail.BodyPart;
@@ -132,20 +131,9 @@ public class WADODownloaderService {
     @Autowired
     private WADOURLHandler wadoURLHandler;
 
-    private WebClient webClient;
-
     @Autowired
     @Lazy
     private DatasetService datasetService;
-
-    @PostConstruct
-    public void initWebClient() {
-        this.webClient = webClientBuilder
-                .codecs(configurer -> configurer
-                        .defaultCodecs()
-                        .maxInMemorySize(500 * 1024 * 1024)) // 500MB buffer for large DICOM files
-                .build();
-    }
 
     /**
      * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
