@@ -86,7 +86,6 @@ export class CopyFromCsvComponent {
     }
 
     private convertToCopyData(rawData: string[][]): CopyData {
-        console.log('rawData rows:', rawData.length, rawData);
         const datasetIdIndex = rawData[0].indexOf("serieId");
         const subjectIdIndex = rawData[0].indexOf("subjectId");
         const newSubjectNameIndex = rawData[0].indexOf("subjectName");
