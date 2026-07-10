@@ -165,6 +165,9 @@ export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_M
 // Custom sentence to introduce the Shanoir instance on welcome page
 export const FRONTEND_WELCOME_INTRODUCTION: string = "This is an instance of the Shanoir database.";
 
+// Mail supplier blacklist conf
+export const MAIL_SUPPLIER_BLACK_LIST: string = environment.mailSupplierBlacklist;
+
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
     if (error.error && error.error.details) {

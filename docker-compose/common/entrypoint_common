@@ -122,6 +122,7 @@ require()
             SHANOIR_PRECLINICAL_DB_NAME) match "$name" '^([a-z0-9._-]+)$' ;;
             SHANOIR_MIGRATIONS_DB_NAME)  match "$name" '^([a-z0-9._-]+)$' ;;
 
+            MAIL_SUPPLIER_BLACK_LIST)  match "$name" '^([A-Za-z0-9._-]+)$' ;;
             *)
                 error "unknown var: $name"
                 ;;

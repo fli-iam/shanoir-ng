@@ -5,6 +5,8 @@ set -e
 . /bin/entrypoint_common
 
 optional SHANOIR_KEYCLOAK_API
+optional MAIL_SUPPLIER_BLACK_LIST
+
 require SHANOIR_X_FORWARDED
 x_forwarded_headers() {
 	if [ "$SHANOIR_X_FORWARDED" = "generate" ] ; then
@@ -102,6 +104,7 @@ sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
 	s+SHANOIR_KEYCLOAK_URL+$SHANOIR_KEYCLOAK_URL+g
 	s/VIP_URL_HOST/$VIP_URL_HOST/g
 	s/VIP_URL_SCHEME/$VIP_URL_SCHEME/g
+	s/MAIL_SUPPLIER_BLACK_LIST/$MAIL_SUPPLIER_BLACK_LIST/g
 "	/etc/nginx/server.conf \
 	/etc/nginx/shanoir.conf \
 	/etc/nginx/viewer/html/app-config.js \
