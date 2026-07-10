@@ -443,6 +443,7 @@ services:
       - VIP_URL_HOST
       - SHANOIR_DPO_EMAIL
       - SHANOIR_CONTACT_EMAIL
+      - MAIL_SUPPLIER_BLACK_LIST
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
