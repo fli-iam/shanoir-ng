@@ -12,47 +12,56 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div #formContainer class="BloodGasDataFormComponent content-component" >
-	<form *ngIf="form"  [formGroup]="form" class="max-content" novalidate>
-		<div *ngIf="!embedded" class="footer command-zone">
-			<form-footer
-				[state]="footerState"
-				(save)="save()"
-				(edit)="goToEdit()"
-				(back)="goBack()">
-			</form-footer>
-		</div>
-		<span *ngIf="!embedded" class="right-col" [ngSwitch]="mode">
-			<ng-template [ngSwitchCase]="'view'"> 
-				<div class="header command-zone" i18n="View bloodgasdata|Title">View blood gas data</div>
-			</ng-template>
-			<ng-template ngSwitchDefault> 
-				<div class="header command-zone" i18n="Edit bloodgasdata|Title">Add blood gas data</div>
-			</ng-template>
-		</span>
+<div #formContainer class="BloodGasDataFormComponent content-component">
+    @if (form) {
+        <form [formGroup]="form" class="max-content" novalidate>
+            @if (!embedded) {
+                <div class="footer command-zone">
+                    <form-footer [state]="footerState" (save)="save()" (edit)="goToEdit()" (back)="goBack()"></form-footer>
+                </div>
+            }
+            @if (!embedded) {
+                <span class="right-col">
+                    @switch (mode) {
+                        @case ('view') {
+                            <div class="header command-zone" i18n="View bloodgasdata|Title">View blood gas data</div>
+                        }
+                        @default {
+                            <div class="header command-zone" i18n="Edit bloodgasdata|Title">Add blood gas data</div>
+                        }
+                    }
+                </span>
+            }
 
-		<fieldset>
-			<legend *ngIf="embedded">Blood gas data</legend>
-			<ol>
-				<li  class="required">
-					<label i18n="Edit bloodgasdata|File label">File</label>
-					<span class="right-col" [ngSwitch]="mode">
-						<ng-template  [ngSwitchCase]="'view'">
-							{{bloodGasData?.filename}}
-                           <button *ngIf="bloodGasData?.filename" class="download" (click)="downloadFile()">
-                                <i class="fas fa-download"></i>
-                            </button>
-						</ng-template>
-						<ng-template  [ngSwitchCase]="'create'">
-							<upload-file name="bloodgasdataFile" [noFilename]="true" (fileChange)="fileChangeEvent($event.target.files)"></upload-file>
-						</ng-template>
-						<ng-template  [ngSwitchCase]="'edit'">
-							{{bloodGasData?.filename}}
-							<upload-file name="bloodgasdataFile" [noFilename]="true" (fileChange)="fileChangeEvent($event.target.files)"></upload-file>
-						</ng-template>
-					</span>
-				</li>				
-			</ol>
-		</fieldset>
-	</form>
+            <fieldset>
+                @if (embedded) {
+                    <legend>Blood gas data</legend>
+                }
+                <ol>
+                    <li class="required">
+                        <label i18n="Edit bloodgasdata|File label">File</label>
+                        <span class="right-col">
+                            @switch (mode) {
+                                @case ('view') {
+                                    {{ bloodGasData?.filename }}
+                                    @if (bloodGasData?.filename) {
+                                        <button class="download" (click)="downloadFile()">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    }
+                                }
+                                @case ('create') {
+                                    <upload-file name="bloodgasdataFile" [noFilename]="true" (fileChange)="fileChangeEvent($event.target.files)"></upload-file>
+                                }
+                                @case ('edit') {
+                                    {{ bloodGasData?.filename }}
+                                    <upload-file name="bloodgasdataFile" [noFilename]="true" (fileChange)="fileChangeEvent($event.target.files)"></upload-file>
+                                }
+                            }
+                        </span>
+                    </li>
+                </ol>
+            </fieldset>
+        </form>
+    }
 </div>

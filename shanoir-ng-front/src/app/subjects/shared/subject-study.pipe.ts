@@ -16,10 +16,7 @@ import { Pipe, PipeTransform } from "@angular/core";
 
 import { SubjectStudy } from "./subject-study.model";
 
-@Pipe({
-    name: "subjectStudyLabel",
-    standalone: false
-})
+@Pipe({ name: "subjectStudyLabel" })
 export class SubjectStudyPipe implements PipeTransform {
 
     transform(subjectStudy: SubjectStudy) {

@@ -68,8 +68,8 @@ public class UpdateCheckerService {
                             JLabel messageLabel = new JLabel("<html><body>"
                                 + resourceBundle.getString("shanoir.uploader.helpMenu.newVersionAvailable")
                                 + "<b>" + latestTag.replace(TAG_PREFIX, "") + "</b><br>"
-                                + resourceBundle.getString("shanoir.uploader.helpMenu.currentVersion")
-                                + APP_VERSION.replace("v", "")
+                                + resourceBundle.getString("shanoir.uploader.helpMenu.currentVersion") + " "
+                                + (APP_VERSION.equals(DEV) ? APP_VERSION : APP_VERSION.replace("v", ""))
                                 + "<br><br>"
                                 + resourceBundle.getString("shanoir.uploader.helpMenu.releaseLink")
                                 + "</body></html>"
@@ -105,7 +105,7 @@ public class UpdateCheckerService {
                         }
                     }
                     JOptionPane.showMessageDialog(parent,
-                        resourceBundle.getString("shanoir.uploader.helpMenu.currentVersion") + APP_VERSION.replace("v", "") + " " +resourceBundle.getString("shanoir.uploader.helpMenu.versionUpToDate"),
+                        resourceBundle.getString("shanoir.uploader.helpMenu.currentVersion") + " " + (APP_VERSION.equals(DEV) ? APP_VERSION : APP_VERSION.replace("v", "")) + " " + resourceBundle.getString("shanoir.uploader.helpMenu.versionUpToDate"),
                         resourceBundle.getString("shanoir.uploader.helpMenu.noUpdatesFound"),
                         JOptionPane.INFORMATION_MESSAGE);
                         logger.info("No new release found at {}", RELEASES_URL);

@@ -15,6 +15,8 @@
 package org.shanoir.ng.study.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -114,14 +116,14 @@ public class Study extends HalEntity {
     @Fetch(FetchMode.JOIN)
     @CollectionTable(name = "protocol_file_path")
     @Column(name = "path")
-    private List<String> protocolFilePaths;
+    private List<String> protocolFilePaths = new ArrayList<>();
 
     /** List of data user agreement form directly attached to the study. */
     @ElementCollection(fetch = FetchType.EAGER)
     @Fetch(FetchMode.JOIN)
     @CollectionTable(name = "data_user_agreement_file")
     @Column(name = "path")
-    private List<String> dataUserAgreementPaths;
+    private List<String> dataUserAgreementPaths = new ArrayList<>();
 
     /** Start date. */
     @NotNull
@@ -130,7 +132,7 @@ public class Study extends HalEntity {
 
     /** Relations between the investigators, the centers and the studies. */
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StudyCenter> studyCenterList;
+    private List<StudyCenter> studyCenterList = new ArrayList<>();
 
     @NotNull
     private Integer studyStatus;
@@ -144,21 +146,21 @@ public class Study extends HalEntity {
 
     /** Users associated to the research study. */
     @OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StudyUser> studyUserList;
+    private List<StudyUser> studyUserList = new ArrayList<>();
 
     /** List of the examinations related to this study. */
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<StudyExamination> examinations;
+    private Set<StudyExamination> examinations = new HashSet<>();
 
     @Transient
     private int nbExaminations;
 
     /** Relations between the subjects and the studies. */
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SubjectStudy> subjectStudyList;
+    private List<SubjectStudy> subjectStudyList = new ArrayList<>();
 
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Subject> subjects;
+    private List<Subject> subjects = new ArrayList<>();
 
     @Transient
     private int nbSubjects;
@@ -166,7 +168,7 @@ public class Study extends HalEntity {
     /** List of Timepoints dividing the study **/
     @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("rank asc")
-    private List<Timepoint> timepoints;
+    private List<Timepoint> timepoints = new ArrayList<>();
 
     /** Is visible by default. */
     private boolean visibleByDefault;
@@ -179,7 +181,7 @@ public class Study extends HalEntity {
     private boolean challenge;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Tag> tags;
+    private List<Tag> tags = new ArrayList<>();
 
     @Lob
     @Column(name = "description", columnDefinition = "TEXT")

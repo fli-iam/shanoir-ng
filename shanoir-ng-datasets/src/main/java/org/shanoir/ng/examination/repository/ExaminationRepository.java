@@ -155,4 +155,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
      * @return the examination if found
      */
     Optional<Examination> findByStudyInstanceUID(String studyInstanceUID);
+
+    @Query("SELECT distinct(acq.examination.id) FROM DatasetAcquisition acq WHERE acq.id in :ids")
+    List<Long> findIdsByAcquisitionIds(List<Long> ids);
 }

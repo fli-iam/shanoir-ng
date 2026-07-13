@@ -19,14 +19,15 @@ server:
     whitelabel:
       enabled: false
   display-name: Shanoir
+  administrator.name: ${SHANOIR_ADMIN_NAME}
   administrator.email: ${SHANOIR_ADMIN_EMAIL}
 ##### Database #####
 spring:
   datasource:
-    url: jdbc:mysql://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:users}?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    url: jdbc:mariadb://${SHANOIR_DB_HOST:${SHANOIR_PREFIX}database}:${SHANOIR_DB_PORT:3306}/${SHANOIR_DB_NAME:users}?characterEncoding=utf-8
     username: users
     password: password
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
@@ -59,7 +60,7 @@ spring:
     mapper:
       use-getters-as-setters: false
   jooq:
-    sql-dialect: Mysql
+    sql-dialect: MariaDB
   rabbitmq:
     host: ${SHANOIR_PREFIX}rabbitmq
     port: 5672
@@ -80,7 +81,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
+          issuer-uri: ${SHANOIR_KEYCLOAK_URL}/realms/shanoir-ng
+          jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL}/realms/shanoir-ng/protocol/openid-connect/certs
 springdoc:
   api-docs:
     path: "/api-docs"
@@ -96,7 +98,7 @@ front:
     url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 ##### Keycloak admin client, that ms users can directly communicate with keycloak #####
 kc.admin.client:
-  server.url: http://${SHANOIR_PREFIX}keycloak:8080/auth
+  server.url: ${SHANOIR_KEYCLOAK_INTERNAL_URL}
   realm: master
   client.id: admin-cli
   realm.users: shanoir-ng

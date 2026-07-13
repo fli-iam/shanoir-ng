@@ -67,7 +67,7 @@ public class SubjectStudy extends AbstractEntity {
     private Integer subjectType;
 
     /** Tags associated to the subject. */
-    @OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.MERGE, orphanRemoval = true)
     private List<SubjectStudyTag> subjectStudyTags;
 
     /** QualityCard tags associated to the subject. */

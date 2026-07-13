@@ -20,10 +20,10 @@ import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.studycard.model.assignment.DatasetAcquisitionAssignment;
 import org.shanoir.ng.studycard.model.assignment.DatasetAssignment;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
+import org.shanoir.ng.studycard.model.condition.AcqDICOMConditionOnDatasets;
 import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnAcq;
 import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnDatasets;
-import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
-import org.shanoir.ng.studycard.model.condition.StudyCardDICOMConditionOnDatasets;
+import org.shanoir.ng.studycard.model.condition.CardCondition;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -46,9 +46,9 @@ public class DatasetAcquisitionRule extends StudyCardRule<DatasetAcquisition> {
 
     private boolean conditionsfulfilled(AcquisitionAttributes<?> dicomAttributes, DatasetAcquisition acquisition) {
         boolean fulfilled = true;
-        for (StudyCardCondition condition : getConditions()) {
-            if (condition instanceof StudyCardDICOMConditionOnDatasets) {
-                fulfilled &= ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes);
+        for (CardCondition condition : getConditions()) {
+            if (condition instanceof AcqDICOMConditionOnDatasets) {
+                fulfilled &= ((AcqDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes);
             } else if (condition instanceof AcqMetadataCondOnAcq) {
                 fulfilled &= ((AcqMetadataCondOnAcq) condition).fulfilled(acquisition);
             } else if (condition instanceof AcqMetadataCondOnDatasets) {

@@ -266,7 +266,7 @@ CMD ["-jar", "/shanoir-ng-users.jar"]
 
 ################ keycloak ##################################################
 
-FROM quay.io/keycloak/keycloak:26.2.1 AS keycloak-base
+FROM quay.io/keycloak/keycloak:26.2.5 AS keycloak-base
 
 # keycloak options (https://www.keycloak.org/server/all-config)
 #
@@ -278,7 +278,7 @@ FROM quay.io/keycloak/keycloak:26.2.1 AS keycloak-base
 # The relevant variables can be listed with: /opt/keycloak/bin/kc.sh show-config
 #
 # All other variables are set in the entrypoint.
-ENV KC_DB="mysql" \
+ENV KC_DB="mariadb" \
     KC_LOG="console,file" \
     KC_HTTP_RELATIVE_PATH="/auth"
 
@@ -287,7 +287,10 @@ ENV KC_DB="mysql" \
 #
 FROM keycloak-base AS keycloak-builder
 
-COPY keycloak/shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
+# note: mtime is overriden to prevent unwanted rebuilds at runtime
+# see: https://www.keycloak.org/server/containers#_known_issues_with_docker
+COPY --chown=keycloak:keycloak --chmod=644 keycloak/shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
+RUN touch -m --date=@1743465600 /opt/keycloak/providers/*
 
 WORKDIR /opt/keycloak
 RUN /opt/keycloak/bin/kc.sh build
@@ -312,7 +315,7 @@ CMD []
 
 ################ nginx #####################################################
 
-FROM ohif/app:v3.11.0 AS nginx-viewer
+FROM ohif/app:v3.12.5 AS nginx-viewer
 
 FROM nginx AS nginx
 
@@ -323,6 +326,8 @@ COPY --link \
     nginx/shanoir.template.conf \
     nginx/shanoir.template.dev.conf \
     nginx/shanoir.template.prod.conf \
+    nginx/shanoir.template.keycloak-full.conf \
+    nginx/shanoir.template.keycloak-limited.conf \
     /etc/nginx/
 
 COPY --link \
@@ -347,26 +352,26 @@ FROM node:lts-alpine3.21 AS front-dev
 
 WORKDIR /app
 
-RUN npm install -g @angular/cli@20.3.7
+RUN npm install -g @angular/cli@21.2.8
 
 
 
 ################ database ##################################################
 
-FROM mysql/mysql-server:5.7 AS database
+FROM mariadb:11.4 AS database
 
 COPY --link --chmod=0755 \
     database/1_create_databases.sh \
     database/2_add_users.sql \
     /docker-entrypoint-initdb.d/
 
-CMD ["mysqld"]
+CMD ["mariadb"]
 
 
 
 ################ database-migrations #######################################
 
-FROM mysql:5.7 AS database-migrations
+FROM mariadb:11.4 AS database-migrations
 
 COPY --link --chmod=0755 database-migrations/shanoir-entrypoint.sh /
 COPY --link database-migrations/db-changes /opt/db-changes
@@ -379,7 +384,7 @@ CMD []
 
 ################ keycloak-database ##################################################
 
-FROM mysql/mysql-server:5.7 AS keycloak-database
+FROM mariadb:11.4 AS keycloak-database
 
 COPY --link --chmod=0755 keycloak-database/1_add_users.sql /docker-entrypoint-initdb.d/
 
@@ -399,3 +404,37 @@ COPY --link solr/entrypoint /usr/bin/
 
 ENTRYPOINT ["/usr/bin/entrypoint"]
 CMD ["solr-precreate", "shanoir", "/etc/shanoir-core-template"]
+
+
+
+################ BIDS validator #####################################################
+# ---- stage: cache validator deps
+FROM denoland/deno:debian AS deno_cache
+
+# Force Deno to store its cache here
+ENV DENO_DIR=/deno
+
+ARG BIDS_VALIDATOR_VERSION=2.2.10
+
+# Pre-fetch into Deno cache
+RUN deno cache jsr:@bids/validator@${BIDS_VALIDATOR_VERSION}
+
+
+# ---- stage: runtime
+FROM node:20-bullseye-slim AS bids-validator
+
+# Copy deno binary
+COPY --from=deno_cache /usr/bin/deno /usr/local/bin/deno
+
+# Copy the populated DENO_DIR
+COPY --from=deno_cache /deno /deno
+ENV DENO_DIR=/deno
+
+WORKDIR /app
+RUN npm i amqplib@0.10.9
+COPY bids-validator/worker.js /app/worker.js
+
+ENV BIDS_VALIDATOR_VERSION=2.2.10
+ENV NO_COLOR=1
+
+CMD ["node", "worker.js"]

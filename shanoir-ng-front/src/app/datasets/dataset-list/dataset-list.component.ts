@@ -31,7 +31,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 @Component({
     selector: 'dataset-list',
     templateUrl: 'dataset-list.component.html',
-    standalone: false
+    imports: [TableComponent]
 })
 
 export class DatasetListComponent extends EntityListComponent<Dataset>{

@@ -17,19 +17,12 @@ package org.shanoir.ng.dataset.controler;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +40,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
+import org.shanoir.ng.dataset.service.CsvCopyService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -69,6 +63,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -76,8 +71,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -92,7 +87,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.context.event.EventListener;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -111,14 +105,7 @@ public class DatasetApiController implements DatasetApi {
 
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
-    private static final String SUB_PREFIX = "sub-";
-
-    private static final String SES_PREFIX = "ses-";
-
     private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
-
-    @Value("${datasets-data}")
-    private String niftiStorageDir;
 
     @Autowired
     private DatasetMapper datasetMapper;
@@ -168,6 +155,9 @@ public class DatasetApiController implements DatasetApi {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private StorageService storageService;
 
     /** Number of downloadable datasets. */
     private static final int DATASET_LIMIT = 500;
@@ -510,29 +500,6 @@ public class DatasetApiController implements DatasetApi {
         return new ResponseEntity<>(downloadDataList, HttpStatus.OK);
     }
 
-
-    /**
-     * This method receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
-     * @param urls
-     * @param workFolder
-     * @throws IOException
-     * @throws MessagingException
-     */
-    public void copyFilesForBIDSExport(final List<URL> urls, final File workFolder, final String subjectName,
-            final String sesId, final String modalityLabel) throws IOException {
-        for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-            URL url =  iterator.next();
-            File srcFile = new File(url.getPath());
-            String destFilePath = srcFile.getPath().substring(niftiStorageDir.length() + 1, srcFile.getPath().lastIndexOf('/'));
-            File destFolder = new File(workFolder.getAbsolutePath() + File.separator + destFilePath);
-            destFolder.mkdirs();
-            String extensionType = srcFile.getPath().substring(srcFile.getPath().lastIndexOf(".") + 1);
-            String destFileNameBIDS = SUB_PREFIX + subjectName + "_" + SES_PREFIX + sesId + "_" + modalityLabel + "." + extensionType;
-            File destFile = new File(destFolder.getAbsolutePath() + File.separator + destFileNameBIDS);
-            Files.copy(srcFile.toPath(), destFile.toPath());
-        }
-    }
-
     /**
      * Validate a dataset
      *
@@ -611,51 +578,29 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(String eventId) throws IOException {
+    public ResponseEntity<ByteArrayResource> downloadByEventId(String eventId) throws IOException {
         try {
             String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
             File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-            File zipFile = new File(userDir + File.separator + "shanoirExportStatistics_" + eventId + ZIP);
-
+            File zipFile = new File(userDir + File.separator + CreateStatisticsService.TSV_FILE_PREFIX + "_" + eventId + ZIP);
+            if (!zipFile.exists()) {
+                // if it doesn't exist, maybe we are in the case of a copy report TSV file
+                zipFile = new File(userDir + File.separator + CsvCopyService.TSV_FILE_PREFIX + "_" + eventId + ".tsv");
+                if (!zipFile.exists()) {
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                }
+            }
             byte[] data = Files.readAllBytes(zipFile.toPath());
             ByteArrayResource resource = new ByteArrayResource(data);
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename = " + zipFile.getName())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + zipFile.getName() + "\"")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .contentLength(data.length)
                     .body(resource);
         } catch (Exception e) {
             LOG.error("Error during download of statistics for event with id = " + eventId + ".");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-    }
-
-    @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
-    public void deleteStats() {
-        try {
-            String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-            File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-            Path directoryPath = Paths.get(userDir.getPath());
-
-            long currentTime = System.currentTimeMillis();
-            long sixHoursInMillis = TimeUnit.HOURS.toMillis(6);
-            DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directoryPath);
-
-            for (Path filePath : directoryStream) {
-                if (filePath.getFileName().toString().startsWith("shanoirExportStatistics_")) {
-                    BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
-                    FileTime creationTime = attrs.creationTime();
-                    long creationTimeMillis = creationTime.toMillis();
-
-                    if ((currentTime - creationTimeMillis) > sixHoursInMillis) {
-                        Files.delete(filePath);
-                        LOG.error("Statistics file delete after 6 hours : " + filePath.getFileName());
-                    }
-                }
-            }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -710,12 +655,12 @@ public class DatasetApiController implements DatasetApi {
             }
             LOG.info("Metadata file download ended.");
             return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + file.getName() + "\"")
                     .body(resource);
         } catch (IOException e) {
             ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while shaping HTTP response.", e.getMessage());
             throw new RestServiceException(e, error);
         }
-
     }
+
 }

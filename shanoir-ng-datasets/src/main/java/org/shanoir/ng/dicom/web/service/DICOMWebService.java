@@ -286,11 +286,9 @@ public class DICOMWebService {
                     if (subjectName != null && !subjectName.trim().isEmpty()) {
                         dicomBytes = modifyDicomPatientInfo(dicomBytes, subjectName);
                     }
-                    ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
+                    ByteArrayResource byteArrayResource = new ByteArrayResource(dicomBytes);
                     HttpHeaders responseHeaders = new HttpHeaders();
-                    if (!entity.isChunked() && entity.getContentLength() >= 0) {
-                        responseHeaders.setContentLength(entity.getContentLength());
-                    }
+                    responseHeaders.setContentLength(dicomBytes.length);
                     return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
                 } else {
                     LOG.error("DICOMWeb: findInstance: empty response entity.");
@@ -569,16 +567,14 @@ public class DICOMWebService {
         try (CloseableHttpResponse response = httpClient.execute(post)) {
             if (HttpStatus.OK.value() == response.getCode()) {
                 LOG.debug("Rejected from PACS: " + post);
+            } else if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
+                // No DICOM instance present in PACS, nothing to reject: we continue with deletion
+                LOG.warn(response.getCode() + ": No instance to reject in PACS for rejectURL: " + url);
             } else {
                 LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
                         + " for rejectURL: " + url);
-                // in case one URL is Not Found (no DICOM instance present), we continue with deletion
-                if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
-                    return;
-                } else {
-                    throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-                            + " for rejectURL: " + url);
-                }
+                throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
+                        + " for rejectURL: " + url);
             }
         } catch (IOException e) {
             LOG.error("Could not reject instance from PACS: for rejectURL: " + url, e);

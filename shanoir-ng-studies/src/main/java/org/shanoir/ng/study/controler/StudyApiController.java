@@ -15,20 +15,15 @@
 package org.shanoir.ng.study.controler;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -40,6 +35,9 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
+import org.shanoir.ng.study.dto.CopyData;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyLightDTO;
@@ -60,7 +58,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -81,9 +79,6 @@ import jakarta.validation.Valid;
 public class StudyApiController implements StudyApi {
 
     private static final String PDF_EXTENSION = ".pdf";
-
-    @Value("${studies-data}")
-    private String dataDir;
 
     @Autowired
     private StudyService studyService;
@@ -109,6 +104,9 @@ public class StudyApiController implements StudyApi {
     @Autowired
     private RelatedDatasetService relatedDatasetService;
 
+    @Autowired
+    private StorageService storageService;
+
     private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
 
     private final HttpServletRequest request;
@@ -130,26 +128,20 @@ public class StudyApiController implements StudyApi {
                 // Error => should not be able to do this see #793
                 return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
             }
-
             List<DataUserAgreement> duas = dataUserAgreementService.findDUAByStudyId(studyId);
             if (!CollectionUtils.isEmpty(duas)) {
                 this.dataUserAgreementService.deleteAll(duas);
             }
-
-            // Delete all linked files and DUA
-            File studyFolder = new File(studyService.getStudyFilePath(studyId, ""));
-            if (studyFolder.exists()) {
-                FileUtils.deleteDirectory(studyFolder);
-            }
             studyService.deleteById(studyId);
+            storageService.deleteDirectoryStudyData(studyId);
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_STUDY_EVENT, studyId.toString(),
                     KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (IOException e) {
-            LOG.error("Error while deleting protocol file {}", e);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            LOG.error("Error while deleting study {}", studyId, e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -254,12 +246,11 @@ public class StudyApiController implements StudyApi {
         } catch (ShanoirException e) {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), e));
         }
-
         return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
     }
 
     private void addCurrentUserAsStudyUserIfEmptyStudyUsers(final Study study) {
-        if (study.getStudyUserList() == null) {
+        if (study.getStudyUserList() == null || study.getStudyUserList().isEmpty()) {
             List<StudyUser> studyUserList = new ArrayList<StudyUser>();
             StudyUser studyUser = new StudyUser();
             studyUser.setStudy(study);
@@ -273,35 +264,19 @@ public class StudyApiController implements StudyApi {
     }
 
     @Override
-    public ResponseEntity<String> copyDatasetsToStudy(
-            List<Long> datasetIds,
-            String studyIdAsStr,
-            String subjectName,
-            List<Long> centerIds,
-            List<String> subjectIds) {
-        String res;
-        try {
-            Study study = studyService.findById(Long.valueOf(studyIdAsStr));
-            if (study.getIsDraft()) {
-                String errorMsg = "Copy dataset(s): The study " + studyIdAsStr + " is draft. An administrator must approve the study before it's use.";
-                LOG.error(errorMsg);
-                return new ResponseEntity<>(errorMsg, HttpStatus.FORBIDDEN);
-            }
+    public ResponseEntity<Long> copyDatasetsToStudy(
+            @Parameter(description = "Data to copy", required = true) CopyData copyData) throws RestServiceException {
 
-            Map<Long, Long> subjectMapping = new HashMap<>();
-            relatedDatasetService.createSubjectsInTargetStudy(subjectIds, study, subjectMapping, subjectName);
-            res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, study, centerIds, subjectMapping);
-        } catch (SecurityException e) {
-            String errorMsg = "Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : " + e;
-            LOG.error(errorMsg);
-            return new ResponseEntity<>(errorMsg, HttpStatus.FORBIDDEN);
+        try {
+            Long taskId = relatedDatasetService.copyData(copyData);
+            return new ResponseEntity<>(taskId, HttpStatus.OK);
         } catch (ShanoirException e) {
-            String errorMsg = "Error during copy for datasetIds : " + datasetIds + ", studyId : " + studyIdAsStr + ", centersId : " + centerIds + ". Error : " + e;
-            LOG.error(errorMsg);
-            return new ResponseEntity<>(errorMsg, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "Error while copying study datasets.", e));
         }
-        return new ResponseEntity<>(res, HttpStatus.OK);
     }
+
 
     @Override
     public ResponseEntity<StudyStorageVolumeDTO> getDetailedStorageVolume(@PathVariable("studyId") final Long studyId)
@@ -323,10 +298,8 @@ public class StudyApiController implements StudyApi {
 
     @Override
     public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study,
-            final BindingResult result) throws RestServiceException {
-
+            final BindingResult result) throws Exception {
         validate(study, result);
-
         try {
             studyService.update(study);
         } catch (EntityNotFoundException e) {
@@ -387,18 +360,21 @@ public class StudyApiController implements StudyApi {
     public void downloadProtocolFile(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
-            HttpServletResponse response) throws RestServiceException, IOException {
-        String filePath = studyService.getStudyFilePath(studyId, fileName);
-        LOG.info("Retrieving file : {}", filePath);
-        File fileToDownLoad = new File(filePath);
-        if (!fileToDownLoad.exists()) {
+            HttpServletResponse response) throws Exception {
+        Resource resource = storageService.loadStudyData(studyId, fileName);
+        String contentType = request.getServletContext().getMimeType(fileName);
+        downloadFile(fileName, contentType, response, resource);
+    }
+
+    private void downloadFile(String fileName, String contentType, HttpServletResponse response, Resource resource) throws IOException {
+        if (!resource.exists()) {
             response.sendError(HttpStatus.NO_CONTENT.value());
             return;
         }
-        try (InputStream is = new FileInputStream(fileToDownLoad);) {
-            response.setHeader("Content-Disposition", "attachment;filename = " + fileToDownLoad.getName());
-            response.setContentType(request.getServletContext().getMimeType(fileToDownLoad.getAbsolutePath()));
-            response.setContentLengthLong(fileToDownLoad.length());
+        try (InputStream is = resource.getInputStream()) {
+            response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + "\"");
+            response.setContentType(contentType);
+            response.setContentLengthLong(resource.contentLength());
             org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
             response.flushBuffer();
         }
@@ -406,22 +382,20 @@ public class StudyApiController implements StudyApi {
 
     @Override
     public ResponseEntity<Void> uploadProtocolFile(
-            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-            @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
-            throws RestServiceException {
+            @PathVariable("studyId") Long studyId,
+            @Valid @RequestBody MultipartFile file) throws RestServiceException {
         try {
-            String parentDir = dataDir + "/study-" + studyId;
-            Path path = Paths.get(parentDir);
-            Files.createDirectories(path);
-            LOG.info("path: {}", path.getFileName());
-            Path newFilePath = Paths.get(parentDir + "/" + file.getOriginalFilename());
-            Files.createFile(newFilePath);
-            LOG.info("newFilePath: {}", newFilePath.getFileName());
-            file.transferTo(newFilePath);
-        } catch (Exception e) {
-            LOG.error("Error while loading files on examination: {}. File not uploaded. {}", studyId, e);
+            storageService.storeStudyData(
+                    studyId,
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getContentType(),
+                    file.getSize());
+        } catch (StorageException | IOException e) {
+            LOG.error("File upload failed for studyId={}: {}", studyId, e.getMessage());
+            return ResponseEntity.internalServerError().build();
         }
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     private void validate(Study study, BindingResult result) throws RestServiceException {
@@ -460,10 +434,8 @@ public class StudyApiController implements StudyApi {
     public ResponseEntity<Boolean> hasDUAByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws ShanoirException {
-
         DataUserAgreement dua = this.dataUserAgreementService.findDUAByUserIdAndStudyId(KeycloakUtil.getTokenUserId(),
                 studyId);
-
         return new ResponseEntity<>(dua != null, HttpStatus.OK);
     }
 
@@ -481,7 +453,7 @@ public class StudyApiController implements StudyApi {
     }
 
     @Override
-    public ResponseEntity<Void> uploadDataUserAgreement(
+    public ResponseEntity<Void> uploadDataUseAgreement(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "dua to upload", required = true) @Valid @RequestBody MultipartFile file)
             throws RestServiceException {
@@ -496,12 +468,12 @@ public class StudyApiController implements StudyApi {
                 studyService.update(study);
                 return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
             }
-            String duaFilePath = this.studyService.getStudyFilePath(studyId, file.getOriginalFilename());
-
-            Path duaPath = Paths.get(duaFilePath);
-            Files.createDirectories(duaPath.getParent());
-            Files.createFile(duaPath);
-            file.transferTo(duaPath);
+            storageService.storeStudyData(
+                    studyId,
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getContentType(),
+                    file.getSize());
         } catch (Exception e) {
             LOG.error("Error while loading files on study: {}. File not uploaded.", studyId, e);
         }
@@ -509,23 +481,13 @@ public class StudyApiController implements StudyApi {
     }
 
     @Override
-    public void downloadDataUserAgreement(
+    public void downloadDataUseAgreement(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
-            HttpServletResponse response) throws RestServiceException, IOException {
-        String filePath = studyService.getStudyFilePath(studyId, fileName);
-        LOG.info("Retrieving file : {}", filePath);
-        File fileToDownLoad = new File(filePath);
-        if (!fileToDownLoad.exists()) {
-            response.sendError(HttpStatus.NO_CONTENT.value());
-            return;
-        }
-        try (InputStream is = new FileInputStream(fileToDownLoad);) {
-            response.setHeader("Content-Disposition", "attachment;filename = " + fileToDownLoad.getName());
-            response.setContentType(MediaType.APPLICATION_PDF_VALUE);
-            org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
-            response.flushBuffer();
-        }
+            HttpServletResponse response) throws Exception {
+        Resource resource = storageService.loadStudyData(studyId, fileName);
+        String contentType = MediaType.APPLICATION_PDF_VALUE;
+        downloadFile(fileName, contentType, response, resource);
     }
 
     @Override
@@ -533,13 +495,59 @@ public class StudyApiController implements StudyApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(description = "id of the userId", required = true) @PathVariable("userId") Long userId)
             throws IOException {
-        studyService.removeStudyUserFromStudy(studyId, userId);
+        studyService.removeUserFromStudy(studyId, userId);
         List<StudyUserRight> surList = studyUserService.getRightsForStudy(studyId);
-
         if (surList.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<StudyUser> addStudyUser(
+            @PathVariable("studyId") Long studyId,
+            @RequestBody @Valid StudyUser studyUser) throws RestServiceException {
+        Study study = studyService.findById(studyId);
+        if (study == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        // We do not allow adding members to draft studies
+        if (study.getIsDraft()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        // Guard: the path variable is authoritative – ignore whatever the caller
+        // may have put in the body to prevent study-id spoofing.
+        studyUser.setStudy(study);
+
+        // Reject duplicate memberships early with a clear 422
+        boolean alreadyMember = study.getStudyUserList() != null
+                && study.getStudyUserList().stream()
+                        .anyMatch(su -> studyUser.getUserId().equals(su.getUserId()));
+        if (alreadyMember) {
+            throw new RestServiceException(new ErrorModel(
+                    HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "User " + studyUser.getUserId() + " is already a member of study " + studyId, null));
+        }
+
+        StudyUser created;
+        try {
+            created = studyUserService.addStudyUserToStudy(studyUser);
+        } catch (Exception e) {
+            LOG.error("Error while adding user {} to study {}: {}", studyUser.getUserId(), studyId, e.getMessage());
+            throw new RestServiceException(new ErrorModel(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    "Could not add user to study.", e));
+        }
+
+        eventService.publishEvent(new ShanoirEvent(
+                ShanoirEventType.UPDATE_STUDY_EVENT,
+                studyId.toString(),
+                KeycloakUtil.getTokenUserId(),
+                "Added user " + studyUser.getUserId(),
+                ShanoirEvent.SUCCESS,
+                studyId));
+
+        return new ResponseEntity<>(created, HttpStatus.OK);
     }
 
     @Override
@@ -644,4 +652,31 @@ public class StudyApiController implements StudyApi {
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while querying the database.", e));
         }
     }
+
+    @Override
+    public ResponseEntity<List<FileEntryDTO>> getAllFiles() throws StorageException {
+        List<Study> studies = studyService.findAll();
+        List<FileEntryDTO> entries = new ArrayList<>();
+        for (Study study : studies) {
+            Long studyId = study.getId();
+            String directory = storageService.getDirectoryStudyData(studyId);
+            if (study.getProtocolFilePaths() != null) {
+                for (String path : study.getProtocolFilePaths()) {
+                    boolean exists = storageService.existsStudyData(studyId, path);
+                    entries.add(new FileEntryDTO(studyId, directory + path, "PROTOCOL", exists));
+                }
+            }
+            if (study.getDataUserAgreementPaths() != null) {
+                for (String path : study.getDataUserAgreementPaths()) {
+                    boolean exists = storageService.existsStudyData(studyId, path);
+                    entries.add(new FileEntryDTO(studyId, directory + path, "DUA", exists));
+                }
+            }
+        }
+        if (entries.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(entries, HttpStatus.OK);
+    }
+
 }

@@ -48,6 +48,7 @@ import { StudyCardRuleComponent } from './study-card-rule.component';
 import { ShanoirMetadataField } from './action/action.component';
 import { QualityCardRuleComponent } from './quality-card-rule.component';
 
+
 @Component({
     selector: 'study-card-rules',
     templateUrl: 'study-card-rules.component.html',
@@ -59,7 +60,7 @@ import { QualityCardRuleComponent } from './quality-card-rule.component';
             useExisting: forwardRef(() => StudyCardRulesComponent),
         }
     ],
-    standalone: false
+    imports: [StudyCardRuleComponent, QualityCardRuleComponent]
 })
 export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor {
     
@@ -178,7 +179,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     }
 
     @HostListener('focusout', ['$event']) 
-    private onFocusOut(event: FocusEvent) {
+    onFocusOut(event: FocusEvent) {
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
             this.onTouchedCallback();
         } 
@@ -255,10 +256,10 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
                 if (rule.conditions?.find(cond => cond.scope == null)) {
                     errors.noType = true; 
                 }
-                if (rule.conditions?.find(cond => cond.scope == 'StudyCardDICOMConditionOnDatasets' && !cond.dicomTag)) {
+                if (rule.conditions?.find(cond => cond.scope.includes('DICOMCondition') && !cond.dicomTag)) {
                     errors.missingField = 'condition dicomTag';
                 }
-                if (rule.conditions?.find(cond => cond.scope != 'StudyCardDICOMConditionOnDatasets' && !cond.shanoirField)) {
+                if (rule.conditions?.find(cond => !cond.scope.includes('DICOMCondition') && !cond.shanoirField)) {
                     errors.missingField = 'condition shanoirField';
                 }
                 if (rule.conditions?.find(cond => !cond.operation)) {

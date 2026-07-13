@@ -29,7 +29,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
     selector: 'examination-list',
     templateUrl: 'examination-list.component.html',
     styleUrls: ['examination-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class ExaminationListComponent extends EntityListComponent<Examination>{
     @ViewChild('table', { static: false }) table: TableComponent;
@@ -84,7 +84,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     getOptions() {
         return {
-            new: this.keycloakService.isUserAdminOrExpert(),
+            new: true,
             view: true,
             edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()

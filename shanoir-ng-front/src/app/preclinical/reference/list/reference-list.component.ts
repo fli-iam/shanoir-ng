@@ -26,7 +26,7 @@ import { BrowserPaginEntityListComponent } from '../../../shared/components/enti
     selector: 'reference-list',
     templateUrl: 'reference-list.component.html',
     styleUrls: ['reference-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
     
 export class ReferencesListComponent  extends BrowserPaginEntityListComponent<Reference>{

@@ -11,13 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { IdName } from '../../shared/models/id-name.model';
 import * as AppUtils from '../../utils/app.utils';
-import { ServiceLocator } from '../../utils/locator.service';
 
 import { CenterDTO, CenterDTOService } from './center.dto';
 import { Center } from './center.model';
@@ -30,23 +30,20 @@ export class CenterService extends EntityService<Center> {
     constructor(protected http: HttpClient) {
         super(http)
     }
-    private centerDTOService: CenterDTOService = ServiceLocator.injector.get(CenterDTOService);
+    private centerDTOService: CenterDTOService = inject(CenterDTOService);
 
     getEntityInstance() { return new Center(); }
 
     getCentersNames(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL)
-            .toPromise();
+        return firstValueFrom(this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL));
     }
 
     getCentersNamesByStudyId(studyId: number): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL + "/" + studyId)
-            .toPromise();
+        return firstValueFrom(this.http.get<IdName[]>(AppUtils.BACKEND_API_CENTER_NAMES_URL + "/" + studyId));
     }
 
     getCentersByStudyId(studyId: number): Promise<Center[]> {
-        return this.http.get<Center[]>(AppUtils.BACKEND_API_CENTER_STUDY_URL + "/" + studyId)
-            .toPromise();
+        return firstValueFrom(this.http.get<Center[]>(AppUtils.BACKEND_API_CENTER_STUDY_URL + "/" + studyId));
     }
 
     protected mapEntity = (dto: CenterDTO, result?: Center): Promise<Center> => {

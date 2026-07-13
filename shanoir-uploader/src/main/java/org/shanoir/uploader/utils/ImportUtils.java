@@ -401,13 +401,14 @@ public class ImportUtils {
         return subjectREST;
     }
 
-    public static Examination createExamination(Study study, org.shanoir.uploader.model.rest.Subject subjectREST, Date examinationDate, String examinationComment, Long centerId) {
+    public static Examination createExamination(Study study, org.shanoir.uploader.model.rest.Subject subjectREST, Date examinationDate, String examinationComment, Long centerId, Boolean agreeWithDataReuse) {
         Examination examinationREST = new Examination();
         examinationREST.setStudyId(study.getId());
         examinationREST.setSubjectId(subjectREST.getId());
         examinationREST.setCenterId(centerId);
         examinationREST.setExaminationDate(examinationDate);
         examinationREST.setComment(examinationComment);
+        examinationREST.setDataReuseAgreement(agreeWithDataReuse);
         examinationREST = ShUpOnloadConfig.getShanoirUploaderServiceClient().createExamination(examinationREST);
         if (examinationREST == null) {
             return null;
@@ -615,8 +616,8 @@ public class ImportUtils {
         return patients;
     }
 
-    public static AcquisitionEquipment findOrCreateEquipmentWithEquipmentDicom(EquipmentDicom equipmentDicom, Center center) {
-        AcquisitionEquipment equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().findAcquisitionEquipmentsOrCreateByEquipmentDicom(equipmentDicom, center.getId()).get(0);
+    public static AcquisitionEquipment findOrCreateEquipmentWithEquipmentDicom(EquipmentDicom equipmentDicom, Long centerId) {
+        AcquisitionEquipment equipment = ShUpOnloadConfig.getShanoirUploaderServiceClient().findAcquisitionEquipmentsOrCreateByEquipmentDicom(equipmentDicom, centerId).get(0);
         if (equipment == null) {
             logger.error("Error: could not find or create equipment.");
         } else {

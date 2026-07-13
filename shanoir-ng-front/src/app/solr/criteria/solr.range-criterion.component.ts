@@ -12,17 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
-import { slideDown } from '../../shared/animations/animations';
 import { Range } from '../../shared/models/range.model';
+
 
 
 @Component({
     selector: 'solr-range-criterion',
     templateUrl: 'solr.range-criterion.component.html',
     styleUrls: ['solr.criterion.component.css', 'solr.range-criterion.component.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [FormsModule]
 })
 
 export class SolrRangeCriterionComponent {

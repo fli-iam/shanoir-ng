@@ -24,6 +24,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -148,9 +149,9 @@ public interface ExaminationService {
      * @throws ShanoirException
      */
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
-    Examination update(Examination examination) throws EntityNotFoundException, ShanoirException;
+    Examination update(Examination examination) throws EntityNotFoundException, ShanoirException, StorageException;
 
-    Long getExtraDataSizeByStudyId(Long studyId);
+    Long getExtraDataSizeByStudyId(Long studyId) throws StorageException;
 
     /**
      * Add an extra data file to examination
@@ -162,7 +163,16 @@ public interface ExaminationService {
 
     String addExtraDataFromFile(Long examinationId, File file);
 
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD') or @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE')))")
-    String getExtraDataFilePath(Long examinationId, String fileName);
+    /**
+     * Retrieves the DICOM StudyInstanceUID from the backup PACS for the given examination
+     * and updates it in the database. The UID is extracted from the WADO path stored in
+     * dataset_file and verified against the PACS before persisting.
+     *
+     * @param examinationId examination id.
+     * @throws EntityNotFoundException if no examination found with given id.
+     * @throws ShanoirException if the StudyInstanceUID cannot be resolved or is not found in the PACS.
+     */
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
+    void syncStudyInstanceUIDFromPacs(Long examinationId) throws EntityNotFoundException, ShanoirException;
 
 }

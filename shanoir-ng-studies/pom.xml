@@ -33,6 +33,11 @@
 			<artifactId>shanoir-ng-ms-common</artifactId>
 			<version>3.4.0</version>
 		</dependency>
+        <dependency>
+            <groupId>org.shanoir-ng</groupId>
+            <artifactId>shanoir-ng-storage</artifactId>
+            <version>3.4.0</version>
+        </dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -42,7 +47,7 @@
 
 	<build>
 		<plugins>
-			<!-- Package shanoir-ng-studies.jar as Spring Boot executable: Avoid error:
+            <!-- Package shanoir-ng-studies.jar as Spring Boot executable: Avoid error:
 				no main manifest attribute, in /shanoir-ng-studies.jar -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -60,7 +65,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- Copy shanoir-ng-studies.jar for docker-compose up running -->
+            <!-- Copy shanoir-ng-studies.jar for docker-compose up running -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>

@@ -2,19 +2,21 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 import { formatDate } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
+    FormsModule,
+    ReactiveFormsModule,
     UntypedFormControl,
     UntypedFormGroup,
     ValidatorFn,
@@ -32,10 +34,10 @@ import { ExecutionService } from 'src/app/vip/execution/execution.service';
 import { Execution } from 'src/app/vip/models/execution';
 import { ParameterType } from 'src/app/vip/models/parameterType';
 import { Pipeline } from 'src/app/vip/models/pipeline';
+import { TooltipComponent } from 'src/app/shared/components/tooltip/tooltip.component';
 
 import { ConsoleService } from "../../shared/console/console.service";
-import { Option } from '../../shared/select/select.component';
-import { ServiceLocator } from "../../utils/locator.service";
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { ExecutionDataService } from '../execution.data-service';
 import { DatasetParameterDTO } from "../models/dataset-parameter.dto";
 import { ExecutionCandidateDto } from "../models/execution-candidate.dto";
@@ -46,11 +48,11 @@ import { PipelineParameter } from "../models/pipelineParameter";
     selector: 'app-execution',
     templateUrl: './execution.component.html',
     styleUrls: ['./execution.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent, TooltipComponent]
 })
 export class ExecutionComponent implements OnInit {
 
-    protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    protected consoleService = inject(ConsoleService);
     pipeline: Pipeline;
     executionForm: UntypedFormGroup;
     private selectedDatasets: Set<DatasetLight>;
@@ -219,8 +221,8 @@ export class ExecutionComponent implements OnInit {
 
         const exec = this.initExecutionCandidate();
         this.executionService.createExecution(exec).then(
-            monitoring => {
-                this.router.navigate([`/dataset-processing/details/${monitoring.id}`]);
+            () => {
+                this.router.navigate([`/solr-search`]);
             },
             (error) => {
                 this.msgService.log('error', 'Sorry, an error occurred while submitting execution.');
@@ -282,7 +284,7 @@ export class ExecutionComponent implements OnInit {
     getDefaultExecutionName(): string {
         return this.cleanProcessingName(this.pipeline.name
         + "_" + this.pipeline.version
-        + "_" + formatDate(new Date(), 'dd-MM-YYYY_HHmmss', 'en-US'));
+        + "_" + formatDate(new Date(), 'dd-MM-yyyy_HHmmss', 'en-US'));
 
     }
 

@@ -19,6 +19,8 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.study.model.Study;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -47,6 +49,17 @@ public class StudyCenter extends AbstractEntity {
     /** The study. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_id", nullable = false)
+    @JsonIgnoreProperties({
+        "studyCenterList",
+        "subjectStudyList",
+        "subjects",
+        "studyUserList",
+        "examinations",
+        "tags",
+        "studyTags",
+        "timepoints",
+        "profile"
+    }) // Avoid infinite recursion when serializing a StudyCenter with its Study
     private Study study;
 
     /** The subject name prefix associated to the center. */

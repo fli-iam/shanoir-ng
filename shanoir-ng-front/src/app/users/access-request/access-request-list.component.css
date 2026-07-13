@@ -9,11 +9,35 @@ form {
 form { margin-bottom: 20px; }
 
 button.accept { background-color: var(--color-c); }
-  button.accept:disabled { background-color: var(--grey); } 
-  button.accept:active, 
-  button.accept:enabled:hover { opacity: 0.5; }
+    button.accept:disabled { background-color: var(--grey); } 
+    button.accept:active, 
+    button.accept:enabled:hover { opacity: 0.5; }
 
 button.refuse { background-color: var(--color-error); }
-  button.refuse:disabled { background-color: var(--grey); } 
-  button.refuse:active, 
-  button.refuse:enabled:hover { opacity: 0.5; }
+    button.refuse:disabled { background-color: var(--grey); } 
+    button.refuse:active, 
+    button.refuse:enabled:hover { opacity: 0.5; }
+
+@keyframes slideDown {
+    from { max-height: 0; }
+    to   { max-height: 600px; }
+}
+
+@keyframes slideUp {
+    from { max-height: 600px; }
+    to   { max-height: 0; }
+}
+
+
+.slide-down {
+    animation: 500ms ease-in-out both slideDown;
+}
+
+.slide-up {
+    animation: 500ms ease-out both slideUp;
+}
+
+.account-request, .access-request {
+    display: block;
+    overflow: hidden;
+}

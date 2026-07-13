@@ -13,22 +13,21 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators} from '@angular/forms';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { Reference }   from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
-import { slideDown } from '../../../shared/animations/animations';
 import { EntityComponent } from '../../../shared/components/entity/entity.component.abstract';
+import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
 
 @Component({
     selector: 'reference-form',
     templateUrl: 'reference-form.component.html',
     styleUrls: ['reference-form.component.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent]
 })
 export class ReferenceFormComponent extends EntityComponent<Reference>{
 

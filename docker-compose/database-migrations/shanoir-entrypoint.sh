@@ -4,7 +4,7 @@
 #
 # - migrations are provided as sql scripts : "$DB_CHANGES_DIR/<DBNAME>/<SCRIPT>.sql"
 #
-# - the 'migrations.migrations' mysql table stores the list of migrations
+# - the 'migrations.migrations' mariadb table stores the list of migrations
 #   already applied ("<DBNAME>/<SCRIPT>.sql")
 #
 # - migration are applied in alphabetical order of the filename ("<SCRIPT>.sql")
@@ -16,47 +16,91 @@
 #              migrations in the DB_CHANGES_DIR and exit
 #              (to be used for setting up a new shanoir instance)
 #
-#   auto    -> run the mysqld as pid 1, then initialise or apply migrations in a
-#              background process. The mysql daemon is killed in case of
+#   auto    -> run the mariadbd as pid 1, then initialise or apply migrations in a
+#              background process. The mariadb daemon is killed in case of
 #              migration failure (fail-fast)
 #
 #   manual  -> apply the migrations manually and exit
 #              (to be used when migrating to a newer shanoir version)
 #
-#   never   -> do not apply anything, just run the myslqd server
+#   never   -> do not apply anything, just run the mariadbd server
 #              (to be used for normal operation)
 #
-#   dev     -> do not apply anything, just run the myslqd server
+#   dev     -> do not apply anything, just run the mariadbd server
 #              (to be used in development mode: migrations are applied directly
 #              by the microservices with spring.jpa.hibernate.ddl-auto=update)
 
 DB_CHANGES_DIR="/opt/db-changes"
 DB_INIT_PROCEDURES_DIR="/opt/db-init-procedures"
 
-MIGRATION_DB=migrations
-MIGRATION_USER=migrations
-MIGRATION_PASSWORD=password
-MYSQL_HOST="${MYSQL_HOST:-database}"
+# Configurable database names — defaults preserve backward compatibility.
+# Note: all six databases must reside on the same MariaDB server.
+: ${SHANOIR_DATASETS_DB_NAME:=datasets}
+: ${SHANOIR_STUDIES_DB_NAME:=studies}
+: ${SHANOIR_IMPORT_DB_NAME:=import}
+: ${SHANOIR_USERS_DB_NAME:=users}
+: ${SHANOIR_PRECLINICAL_DB_NAME:=preclinical}
+: ${SHANOIR_MIGRATIONS_DB_NAME:=migrations}
+
+MIGRATION_DB="$SHANOIR_MIGRATIONS_DB_NAME"
+MIGRATION_USER="${SHANOIR_MIGRATIONS_DB_USER:-migrations}"
+MIGRATION_PASSWORD="${SHANOIR_MIGRATIONS_DB_PASSWORD:-password}"
+MARIADB_HOST="${MARIADB_HOST:-database}"
 
 HEADER="[Shanoir Entrypoint]"
 
-MYSQL="mysql           -h$MYSQL_HOST -u$MIGRATION_USER -p$MIGRATION_PASSWORD"
-MYSQLADMIN="mysqladmin -h$MYSQL_HOST -u$MIGRATION_USER -p$MIGRATION_PASSWORD"
+MARIADB="mariadb            -h$MARIADB_HOST -u$MIGRATION_USER -p$MIGRATION_PASSWORD"
+MARIADBADMIN="mariadb-admin -h$MARIADB_HOST -u$MIGRATION_USER -p$MIGRATION_PASSWORD"
 
-# wait until the mysqld server is ready
-wait_mysqld()
+# Map a db-changes directory name to the configured database name
+get_db_for_dir()
 {
-	echo "$HEADER wait mysqld"
+	case "$1" in
+		datasets)    echo "$SHANOIR_DATASETS_DB_NAME" ;;
+		studies)     echo "$SHANOIR_STUDIES_DB_NAME" ;;
+		import)      echo "$SHANOIR_IMPORT_DB_NAME" ;;
+		users)       echo "$SHANOIR_USERS_DB_NAME" ;;
+		preclinical) echo "$SHANOIR_PRECLINICAL_DB_NAME" ;;
+		migrations)  echo "$SHANOIR_MIGRATIONS_DB_NAME" ;;
+		*)           echo "ERROR: no DB name mapping for directory '$1'" >&2; return 1 ;;
+	esac
+}
+
+# Substitute hardcoded database names in SQL content with configured names.
+# Database names must only contain alphanumeric characters and underscores.
+# Limitation: plain text substitution — also rewrites names inside comments and
+# string literals, and won't match backtick-quoted identifiers (`datasets`.table).
+apply_db_name_substitutions()
+{
+	sed \
+		-e "s/\bdatasets\./${SHANOIR_DATASETS_DB_NAME}./g" \
+		-e "s/\bstudies\./${SHANOIR_STUDIES_DB_NAME}./g" \
+		-e "s/\bimport\./${SHANOIR_IMPORT_DB_NAME}./g" \
+		-e "s/\busers\./${SHANOIR_USERS_DB_NAME}./g" \
+		-e "s/\bpreclinical\./${SHANOIR_PRECLINICAL_DB_NAME}./g" \
+		-e "s/\bmigrations\./${SHANOIR_MIGRATIONS_DB_NAME}./g" \
+		-e "s/[Uu][Ss][Ee] \+datasets\b/USE ${SHANOIR_DATASETS_DB_NAME}/g" \
+		-e "s/[Uu][Ss][Ee] \+studies\b/USE ${SHANOIR_STUDIES_DB_NAME}/g" \
+		-e "s/[Uu][Ss][Ee] \+import\b/USE ${SHANOIR_IMPORT_DB_NAME}/g" \
+		-e "s/[Uu][Ss][Ee] \+users\b/USE ${SHANOIR_USERS_DB_NAME}/g" \
+		-e "s/[Uu][Ss][Ee] \+preclinical\b/USE ${SHANOIR_PRECLINICAL_DB_NAME}/g" \
+		-e "s/[Uu][Ss][Ee] \+migrations\b/USE ${SHANOIR_MIGRATIONS_DB_NAME}/g"
+}
+
+# wait until the mariadbd server is ready
+wait_mariadbd()
+{
+	echo "$HEADER wait mariadbd"
 	for i in {30..0} ; do
-		if $MYSQLADMIN ping --silent; then
-			echo "$HEADER wait mysqld done"
+		if $MARIADBADMIN ping --silent; then
+			echo "$HEADER wait mariadbd done"
 			break
 		fi
 		echo "$HEADER Waiting for server"
 		sleep 1
 	done
 	if [ "$i" = 0 ] ; then
-		echo >&2 "$HEADER Timeout during MySQL init  at $MYSQL_HOST."
+		echo >&2 "$HEADER Timeout during MariaDB init  at $MARIADB_HOST."
 		exit 1
 	fi
 }
@@ -64,7 +108,7 @@ wait_mysqld()
 # return true if the migrations table exists
 check_migrations_db()
 {
-	local tbs="`$MYSQL "$MIGRATION_DB" -e "SHOW TABLES LIKE 'migrations';"`" || exit 1
+	local tbs="`$MARIADB "$MIGRATION_DB" -e "SHOW TABLES LIKE 'migrations';"`" || exit 1
 	if [ -n "$tbs" ] ; then
 		echo "$HEADER migration table exists"
 		return 0
@@ -85,7 +129,7 @@ list_all_migrations()
 # in the 'migrations' table)
 list_applied_migrations()
 {
-	$MYSQL "$MIGRATION_DB" --skip-column-names -e 'select script from migrations;' || exit 1
+	$MARIADB "$MIGRATION_DB" --skip-column-names -e 'select script from migrations;' || exit 1
 }
 
 # initialise the migrations table
@@ -106,7 +150,7 @@ init_migrations()
 			comma=,
 		done
 		echo ';'
-	) | $MYSQL "$MIGRATION_DB" || return 1
+	) | $MARIADB "$MIGRATION_DB" || return 1
 	echo "$HEADER done migrations init"
 	return 0
 }
@@ -134,10 +178,10 @@ apply_migrations()
 			echo "    $migration..."
 
 			[[ "$migration" =~ ^([^/]+)/ ]] || return 1
-			db="${BASH_REMATCH[1]}"
+			db=$(get_db_for_dir "${BASH_REMATCH[1]}") || return 1
 
-			if $MYSQL "$db" <"$DB_CHANGES_DIR/$migration" &&
-			   $MYSQL "$MIGRATION_DB" -e "INSERT INTO migrations VALUES ('$migration');"
+			if apply_db_name_substitutions <"$DB_CHANGES_DIR/$migration" | $MARIADB "$db" &&
+			   $MARIADB "$MIGRATION_DB" -e "INSERT INTO migrations VALUES ('$migration');"
 			then
 				status=done
 			else
@@ -159,19 +203,20 @@ apply_init_procedures()
 
   for sql_file in $(find "$DB_INIT_PROCEDURES_DIR" -name "*.sql" | sort); do
     echo "    $sql_file..."
-    # extract the target DB from the USE statement in the file
-    db=$(grep -i '^\s*USE\s' "$sql_file" | head -1 | sed 's/[Uu][Ss][Ee]\s*//;s/;//;s/\s//g')
-    if [ -z "$db" ]; then
+    # extract the target DB from the USE statement in the file and map to configured name
+    db_dir=$(grep -i '^\s*USE\s' "$sql_file" | head -1 | sed 's/[Uu][Ss][Ee]\s*//;s/;//;s/\s//g')
+    if [ -z "$db_dir" ]; then
       echo "$HEADER error: could not determine target DB for $sql_file" >&2
       return 1
     fi
-    if ! $MYSQL "$db" < "$sql_file"; then
+    db=$(get_db_for_dir "$db_dir") || return 1
+    if ! apply_db_name_substitutions < "$sql_file" | $MARIADB "$db"; then
       echo "$HEADER error: failed to apply $sql_file" >&2
       return 1
     fi
-    done
-    echo "$HEADER done applying init procedures"
-    return 0
+  done
+  echo "$HEADER done applying init procedures"
+  return 0
 }
 
 echo "$HEADER Shanoir NG migrations entrypoint"
@@ -184,7 +229,7 @@ init)
   # - create the procedures
   # - exit
 
-  wait_mysqld
+  wait_mariadbd
   init_migrations
   apply_init_procedures
   exit $?
@@ -198,7 +243,7 @@ auto)
   # automatic mode
   # - execute the 'init'   tasks if the migrations table does not exist
   # - execute the 'manual' tasks if the migrations table exists
-  wait_mysqld
+  wait_mariadbd
   if check_migrations_db ; then
     apply_migrations
   else
@@ -211,12 +256,16 @@ manual)
   # manual mode
   # - apply migrations
   # - exit
-  wait_mysqld
+  wait_mariadbd
   apply_migrations
   exit $?
   ;;
 dev)
-  echo "$HEADER mode '$SHANOIR_MIGRATION': nothing to do, exiting"
+  # dev mode
+  # - create the procedures
+  # - exit
+  echo "$HEADER mode '$SHANOIR_MIGRATION': apply init procedures"
+  apply_init_procedures
   exit 0
   ;;
 '')

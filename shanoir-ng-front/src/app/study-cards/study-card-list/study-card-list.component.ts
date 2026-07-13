@@ -30,7 +30,7 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
     selector: 'study-card-list',
     templateUrl: 'study-card-list.component.html',
     styleUrls: ['study-card-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class StudyCardListComponent extends BrowserPaginEntityListComponent<StudyCard> {
 
