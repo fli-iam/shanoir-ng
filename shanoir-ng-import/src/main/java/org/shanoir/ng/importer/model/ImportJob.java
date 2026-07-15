@@ -436,7 +436,7 @@ public class ImportJob implements Serializable {
     public Serie getFirstSerieWithInstitutionAndEquipment() {
         if (CollectionUtils.isNotEmpty(selectedSeries)) {
             for (Serie serie : selectedSeries) {
-                if (serie.getInstitution() != null && serie.getEquipment() != null) {
+                if (serie.getInstitution().isKnown() && serie.getEquipment().isKnown()) {
                     return serie;
                 }
             }

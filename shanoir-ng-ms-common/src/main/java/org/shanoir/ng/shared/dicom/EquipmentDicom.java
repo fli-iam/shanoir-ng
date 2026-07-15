@@ -119,6 +119,17 @@ public class EquipmentDicom {
             && StringUtils.isNotEmpty(this.modality);
     }
 
+    @JsonIgnore
+    public boolean isKnown() {
+        return isKnown(manufacturer)
+            && isKnown(manufacturerModelName)
+            && isKnown(modality);
+    }
+
+    private boolean isKnown(String value) {
+        return value != null && !UNKNOWN.equals(value);
+    }
+
     @Override
     public String toString() {
         return "EquipmentDicom [manufacturer=" + manufacturer + ", manufacturerModelname = " + manufacturerModelName

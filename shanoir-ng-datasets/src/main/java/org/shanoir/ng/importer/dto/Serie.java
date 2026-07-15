@@ -114,13 +114,7 @@ public class Serie {
         sequenceName = DicomUtils.getDicomSequenceName(attributes, isEnhanced);
         isSpectroscopy = Boolean.FALSE;
         isCompressed = Boolean.FALSE;
-        final EquipmentDicom equipmentDicom = new EquipmentDicom(
-                attributes.getString(Tag.Manufacturer),
-                attributes.getString(Tag.ManufacturerModelName),
-                modality,
-                attributes.getString(Tag.DeviceSerialNumber),
-                attributes.getString(Tag.StationName),
-                attributes.getString(Tag.MagneticFieldStrength));
+        final EquipmentDicom equipmentDicom = new EquipmentDicom(attributes);
         setEquipment(equipmentDicom);
     }
 
