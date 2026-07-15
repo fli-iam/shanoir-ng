@@ -14,17 +14,13 @@
 
 package org.shanoir.ng.shared.dicom;
 
-
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.utils.Utils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * @author yyao
- *
- */
 public class InstitutionDicom {
 
     private static final String UNKNOWN = "unknown";
@@ -35,7 +31,8 @@ public class InstitutionDicom {
     @JsonProperty("institutionAddress")
     private String institutionAddress;
 
-    public InstitutionDicom() { }
+    public InstitutionDicom() {
+    }
 
     public InstitutionDicom(Attributes attributes) {
         this.institutionName = Utils.getOrSetToDefault(attributes, Tag.InstitutionName, UNKNOWN);
@@ -56,6 +53,15 @@ public class InstitutionDicom {
 
     public void setInstitutionAddress(String institutionAddress) {
         this.institutionAddress = institutionAddress;
+    }
+
+    @JsonIgnore
+    public boolean isKnown() {
+        return isKnown(institutionName) && isKnown(institutionAddress);
+    }
+
+    private boolean isKnown(String value) {
+        return value != null && !UNKNOWN.equals(value);
     }
 
 }

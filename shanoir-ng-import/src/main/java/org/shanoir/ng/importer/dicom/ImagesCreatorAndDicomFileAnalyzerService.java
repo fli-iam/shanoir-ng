@@ -277,7 +277,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
             checkStudyData(study, attributes);
             checkSerieData(serie, attributes);
             addSeriesEquipment(serie, attributes);
-            addSeriesCenter(serie, attributes);
+            addSeriesInstitution(serie, attributes);
         } catch (IOException e) {
             LOG.error("Error during processing of DICOM file " + dicomFile.getAbsolutePath() + ":", e);
         }
@@ -360,7 +360,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param serie
      * @param datasetAttributes
      */
-    public void addSeriesCenter(Serie serie, Attributes attributes) {
+    public void addSeriesInstitution(Serie serie, Attributes attributes) {
         if (serie.getInstitution() == null) {
             InstitutionDicom institution = new InstitutionDicom(attributes);
             serie.setInstitution(institution);
