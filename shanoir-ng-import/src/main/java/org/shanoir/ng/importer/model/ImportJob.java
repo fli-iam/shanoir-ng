@@ -416,7 +416,7 @@ public class ImportJob implements Serializable {
     @JsonIgnore
     public Serie getFirstSerie() {
         if (CollectionUtils.isNotEmpty(selectedSeries)) {
-            return selectedSeries.iterator().next();
+            return selectedSeries.getFirst();
         }
         return null;
     }
@@ -440,6 +440,8 @@ public class ImportJob implements Serializable {
                     return serie;
                 }
             }
+            // In case all are unknown, return first
+            return selectedSeries.getFirst();
         }
         return null;
     }
