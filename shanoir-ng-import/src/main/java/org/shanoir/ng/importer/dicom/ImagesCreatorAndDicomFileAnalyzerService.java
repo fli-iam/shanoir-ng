@@ -41,7 +41,6 @@ import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,8 +71,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
     private static final String SLASH = "/";
 
     private static final String SUFFIX_DCM = ".dcm";
-
-    private static final String UNKNOWN = "unknown";
 
     private static final String YES = "YES";
 
@@ -344,12 +341,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      */
     private void addSeriesEquipment(Serie serie, Attributes attributes) {
         if (serie.getEquipment() == null || !serie.getEquipment().isComplete()) {
-            String manufacturer = Utils.getOrSetToDefault(attributes, Tag.Manufacturer, UNKNOWN);
-            String manufacturerModelName = Utils.getOrSetToDefault(attributes, Tag.ManufacturerModelName, UNKNOWN);
-            String deviceSerialNumber = Utils.getOrSetToDefault(attributes, Tag.DeviceSerialNumber, UNKNOWN);
-            String stationName = Utils.getOrSetToDefault(attributes, Tag.StationName, UNKNOWN);
-            String magneticFieldStrength = Utils.getOrSetToDefault(attributes, Tag.MagneticFieldStrength, UNKNOWN);
-            serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, serie.getModality(), deviceSerialNumber, stationName, magneticFieldStrength));
+            serie.setEquipment(new EquipmentDicom(attributes));
         }
     }
 
