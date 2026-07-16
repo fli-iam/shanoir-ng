@@ -12,31 +12,38 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
-import { Router } from "@angular/router";
 import { fromEvent, Subscription } from 'rxjs';
+import { Router, RouterLink, RouterLinkActive } from "@angular/router";
 import shajs from 'sha.js';
+import { NgTemplateOutlet } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+import { VarDirective } from 'src/app/utils/ng-var.directive';
 
 import { Task, TaskStatus } from '../../../async-tasks/task.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import * as AppUtils from '../../../utils/app.utils';
 import { isDarkColor } from "../../../utils/app.utils";
-import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { GlobalService } from '../../services/global.service';
 import { SessionService } from '../../services/session.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
+import { CheckboxComponent } from '../../checkbox/checkbox.component';
+import { MultiSelectComponent } from '../../multi-select/multi-select.component';
+import { LoadingBarComponent } from '../loading-bar/loading-bar.component';
 
-import { ColumnDefinition } from './column.definition.type';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
+import { ColumnDefinition } from './column.definition.type';
+import { TableSearchComponent } from './search/search.component';
+import { PagerComponent } from './pager/pager.component';
 
 @Component({
     selector: 'shanoir-table',
     templateUrl: 'table.component.html',
     styleUrls: ['table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [slideDown],
-    standalone: false
+    imports: [VarDirective, RouterLink, RouterLinkActive, CheckboxComponent, FormsModule, MultiSelectComponent, LoadingBarComponent, TableSearchComponent, NgTemplateOutlet, PagerComponent]
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() getPage: (pageable: Pageable, forceRefresh?: boolean, eager?: boolean) => Promise<Page<any>> | Page<any>;
@@ -189,7 +196,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
 
     onRowClick(item: any) {
-        if (this.rowClick.observers.length > 0 && !this.rowDisabled(item)) this.rowClick.emit(item);
+        if (this.rowClick.observed && !this.rowDisabled(item)) this.rowClick.emit(item);
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }
 

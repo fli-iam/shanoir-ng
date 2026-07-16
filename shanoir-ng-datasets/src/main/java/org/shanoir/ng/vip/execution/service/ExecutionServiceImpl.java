@@ -31,6 +31,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
+import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.shanoir.ng.vip.executionMonitoring.service.ExecutionMonitoringServiceImpl;
 import org.shanoir.ng.vip.processingResource.service.ProcessingResourceServiceImpl;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
@@ -44,6 +45,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -66,6 +69,9 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     @Value("${vip.uri}")
     private String vipUrl;
+
+    @Value("${vip.sleep-time}")
+    private long sleepTime;
 
     @Autowired
     private ExecutionMonitoringServiceImpl executionMonitoringService;
@@ -97,11 +103,25 @@ public class ExecutionServiceImpl implements ExecutionService {
         shanoirURIScheme = (shanoirURISchemeLocal.contains(".") ? shanoirURISchemeLocal.substring(0, shanoirURISchemeLocal.indexOf('.')).replaceAll("-", "") : "local") + ":/";
     }
 
+    /**
+     * This MUST run outside any transaction (hence {@link Propagation#NEVER}). VIP fetches the input datasets by
+     * calling back our /carmin-data/path endpoint, which resolves the resourceId -> datasets mappings on a separate
+     * DB connection. With no enclosing transaction, each save below auto-commits, so those mappings are already
+     * committed (and thus visible to VIP) by the time we POST. Running this inside a transaction would defer the
+     * commit until after the POST, and the download would fail with HTTP 400.
+     */
+    @Transactional(propagation = Propagation.NEVER)
     public IdName createExecutions(List<ExecutionCandidateDTO> candidates) throws SecurityException, EntityNotFoundException, RestServiceException {
         ExecutionMonitoring executionMonitoring = executionMonitoringService.createExecutionMonitoring(candidates.getFirst());
-        //executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.VALID);
-        VipExecutionDTO createdExecution = createVipExecution(candidates, executionMonitoring);
-        //executionTrackingService.updateTrackingFile(executionMonitoring, ExecutionTrackingServiceImpl.ExecStatus.SENT);
+        VipExecutionDTO dto = buildVipExecutionDTO(candidates, executionMonitoring);
+
+        // Processing resources are committed: submit the execution to VIP.
+        VipExecutionDTO createdExecution = createExecution(dto)
+                .onErrorMap(WebClientResponseException.BadRequest.class, ex ->
+                        new RuntimeException("HTTP Error while communicating with VIP :  - " + ex.getResponseBodyAsString()))
+                .block();
+        createdExecution.setInputValues(dto.getInputValues());
+
         return updateAndStartExecutionMonitoring(executionMonitoring, createdExecution);
     }
 
@@ -183,6 +203,27 @@ public class ExecutionServiceImpl implements ExecutionService {
                 });
     }
 
+    public ExecutionStatus getExecutionStatusFromVipIdentifier(String identifier) {
+
+        try {
+            int attempts = 1;
+
+            while (attempts < 3) {
+                VipExecutionDTO dto = getExecutionAsServiceAccount(attempts, identifier).block();
+
+                if (dto == null) {
+                    attempts++;
+                    Thread.sleep(sleepTime);
+                } else {
+                    return dto.getStatus();
+                }
+            }
+        } catch (ResultHandlerException | SecurityException | InterruptedException | NullPointerException e) {
+            LOG.error("Failed to get VIP execution status for execution : " + identifier);
+        }
+        return null;
+    }
+
     /**
      * Update monitoring with vip execution details and persist it in DB
      */
@@ -196,9 +237,10 @@ public class ExecutionServiceImpl implements ExecutionService {
     }
 
     /**
-     * Create execution into VIP and return created execution
+     * Build the VIP request DTO and create the processing resources (resourceId -> datasets mappings) it references.
+     * This performs the DB writes that must be committed before the execution is submitted to VIP.
      */
-    private VipExecutionDTO createVipExecution(List<ExecutionCandidateDTO> candidates, ExecutionMonitoring executionMonitoring) throws EntityNotFoundException {
+    private VipExecutionDTO buildVipExecutionDTO(List<ExecutionCandidateDTO> candidates, ExecutionMonitoring executionMonitoring) throws EntityNotFoundException {
         ExecutionCandidateDTO sample = candidates.getFirst();
 
         VipExecutionDTO dto = new VipExecutionDTO();
@@ -209,14 +251,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         dto.setResultsLocation(getResultsLocationUri(executionMonitoring.getResultsLocation(), sample));
         dto.setInputValues(getInputValues(executionMonitoring, candidates));
 
-        VipExecutionDTO vipExecutionDTO = createExecution(dto)
-                .onErrorMap(WebClientResponseException.BadRequest.class, ex ->
-                        new RuntimeException("HTTP Error while communicating with VIP :  - " + ex.getResponseBodyAsString()))
-                .block();
-
-        vipExecutionDTO.setInputValues(dto.getInputValues());
-
-        return vipExecutionDTO;
+        return dto;
     }
 
     /**

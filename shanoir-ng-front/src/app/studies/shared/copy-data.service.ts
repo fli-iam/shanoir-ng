@@ -13,6 +13,7 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 import { ConsoleService } from 'src/app/shared/console/console.service';
 
@@ -33,8 +34,7 @@ export class CopyDataService {
     }
     
     private copyData(data: DataCopyDTO): Promise<any> {
-        return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', data, { responseType: 'text' as 'json' })
-            .toPromise();
+        return firstValueFrom(this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', data, { responseType: 'text' as 'json' }));
     }
 
     private buildCopyDataDTO(copyData: CopyData): DataCopyDTO {

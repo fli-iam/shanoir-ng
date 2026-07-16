@@ -22,8 +22,7 @@ import { PathologyModelService } from '../preclinical/pathologies/pathologyModel
 
 @Component({
     selector: 'files',
-    templateUrl: 'files.component.html',
-    standalone: false
+    templateUrl: 'files.component.html'
 })
 
 export class FilesComponent {

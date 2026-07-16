@@ -71,10 +71,18 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) throws EntityNotFoundException, SecurityException, JsonProcessingException {
-        try {
+        try { // Execution resumption
             SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             List<ExecutionMonitoring> runningMonitorings = executionMonitoringRepository.findByStatus(ExecutionStatus.RUNNING);
             for (ExecutionMonitoring monitoring : runningMonitorings) {
+                if (monitoring.getIdentifier() == null) {
+                    // No VIP identifier yet, so there is nothing to poll: skip it. This is NOT necessarily a dead
+                    // execution. ExecutionTemplateRunner also runs at startup and launches auto-executions for newly
+                    // imported acquisitions; such an execution is briefly RUNNING with a null identifier until VIP
+                    // returns it. We must leave it alone (do not mark it failed) or we would kill a live execution.
+                    LOG.debug("Skipping resumption of monitoring [{}]: no VIP identifier yet (not submitted, or being launched concurrently).", monitoring.getName());
+                    continue;
+                }
                 List<ShanoirEvent> events;
                 String eventsAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXECUTION_MONITORING_TASK, monitoring.getId());
                 if (eventsAsString == null || eventsAsString.isEmpty()) {
@@ -94,7 +102,7 @@ public class ExecutionMonitoringResumptionRunner implements ApplicationRunner {
                 }
             }
         } catch (Exception ignored) {
-            //Try-catch is only for dodging container shutdown if exception is raised (due to @Component state)
+             //Try-catch is only for dodging container shutdown if exception is raised (due to @Component state)
         }
     }
 }

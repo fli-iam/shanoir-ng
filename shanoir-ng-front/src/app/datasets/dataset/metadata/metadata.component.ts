@@ -33,7 +33,7 @@ import { DicomMetadata } from "./dicom-metadata.model";
     selector: 'dicom-metadata',
     templateUrl: 'metadata.component.html',
     styleUrls: ['metadata.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 
 export class MetadataComponent implements OnDestroy {

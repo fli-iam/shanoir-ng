@@ -229,7 +229,7 @@ public class DicomImporterService {
         Serie serie = new Serie(attributes);
         if (!DicomUtils.checkSerieIsIgnored(attributes)) { // do nothing for files of ignored series
             Long subjectId = manageSubject(attributes, study);
-            Long centerId = manageCenter(attributes, study.getId());
+            Long centerId = manageCenter(serie.getInstitution(), study.getId());
             Examination examination = manageExamination(attributes, study, subjectId, centerId);
             DatasetAcquisition acquisition = manageAcquisitionAndEquipment(attributes, examination, centerId, serie);
             Dataset dataset = manageDataset(attributes, studyId, subjectId, acquisition, serie);
@@ -442,18 +442,17 @@ public class DicomImporterService {
      * center, we only keep it in MS Datasets to increase performance
      * and not too lose any significant value.
      *
-     * @param institutionDicom
+     * @param institution
      * @param studyId
      * @return
      * @throws JsonProcessingException
      * @throws AmqpException
      * @throws RestServiceException
      */
-    private Long manageCenter(Attributes attributes, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
-        InstitutionDicom institutionDicom = new InstitutionDicom(attributes);
+    private Long manageCenter(InstitutionDicom institution, Long studyId) throws JsonProcessingException, AmqpException, RestServiceException {
         Center center = null;
         Optional<StudyCenter> studyCenterOpt = null;
-        Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institutionDicom.getInstitutionName());
+        Optional<Center> centerOpt = centerRepository.findFirstByNameContainingOrderByIdAsc(institution.getInstitutionName());
         if (!centerOpt.isEmpty()) {
             center = centerOpt.get();
             studyCenterOpt = studyCenterRepository.findByStudy_IdAndCenter_Id(studyId, center.getId());
@@ -462,7 +461,7 @@ public class DicomImporterService {
             // Communicate with MS Studies here, if not existing or not yet in study
             CreateCenterForStudyMessage message = new CreateCenterForStudyMessage();
             message.setStudyId(studyId);
-            message.setInstitutionDicom(institutionDicom);
+            message.setInstitutionDicom(institution);
             String returnMessage = (String) rabbitTemplate.convertSendAndReceive(
                     RabbitMQConfiguration.CENTER_CREATE_QUEUE,
                     objectMapper.writeValueAsString(message));
@@ -473,11 +472,11 @@ public class DicomImporterService {
             String[] parts = returnMessage.split(DELIMITER);
             Long centerId = Long.parseLong(parts[0]);
             Long studyCenterId = Long.parseLong(parts[1]);
-            LOG.info("Center created or added to MS Studies with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
+            LOG.info("Center created or added to MS Studies with ID: {}, Name: {}, Study ID: {}", centerId, institution.getInstitutionName(), studyId);
             if (center == null) {
                 center = new Center();
                 center.setId(centerId);
-                center.setName(institutionDicom.getInstitutionName());
+                center.setName(institution.getInstitutionName());
                 isCenterInStudy(studyId, center, studyCenterId);
                 centerRepository.save(center);
             } else {
@@ -485,7 +484,7 @@ public class DicomImporterService {
                     centerRepository.save(center);
                 }
             }
-            LOG.info("Center created or added to MS Datasets with ID: {}, Name: {}, Study ID: {}", centerId, institutionDicom.getInstitutionName(), studyId);
+            LOG.info("Center created or added to MS Datasets with ID: {}, Name: {}, Study ID: {}", centerId, institution.getInstitutionName(), studyId);
             return centerId;
         } else {
             return studyCenterOpt.get().getCenter().getId();

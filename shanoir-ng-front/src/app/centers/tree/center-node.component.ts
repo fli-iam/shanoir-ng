@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-
+import { RouterLink } from '@angular/router';
 
 import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
 import { CoilService } from 'src/app/coils/shared/coil.service';
@@ -24,12 +24,17 @@ import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { AcquisitionEquipmentNode, CenterNode, CoilNode, UNLOADED } from '../../tree/tree.model';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { EquipmentNodeComponent } from '../../acquisition-equipments/tree/equipment-node.component';
+import { CoilNodeComponent } from '../../coils/coil/tree/coil-node.component';
 
 
 @Component({
     selector: 'center-node',
     templateUrl: 'center-node.component.html',
-    standalone: false
+    imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, EquipmentNodeComponent, CoilNodeComponent]
 })
 
 export class CenterNodeComponent extends TreeNodeAbstractComponent<CenterNode> implements OnChanges {

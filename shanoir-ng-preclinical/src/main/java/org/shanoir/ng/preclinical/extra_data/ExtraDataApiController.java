@@ -266,7 +266,7 @@ public class ExtraDataApiController implements ExtraDataApi {
                     return;
                 }
                 try (InputStream is = resource.getInputStream()) {
-                    response.setHeader("Content-Disposition", "attachment;filename=" + extraData.getFilename());
+                    response.setHeader("Content-Disposition", "attachment;filename=\"" + extraData.getFilename() + "\"");
                     response.setContentType(contentType);
                     response.setContentLengthLong(resource.contentLength());
                     org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());

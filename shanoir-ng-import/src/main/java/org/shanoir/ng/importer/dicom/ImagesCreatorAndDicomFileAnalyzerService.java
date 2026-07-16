@@ -26,7 +26,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.dcm4che3.data.UID;
 import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
@@ -42,7 +41,6 @@ import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,8 +71,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
     private static final String SLASH = "/";
 
     private static final String SUFFIX_DCM = ".dcm";
-
-    private static final String UNKNOWN = "unknown";
 
     private static final String YES = "YES";
 
@@ -277,8 +273,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
             checkPatientData(patient, attributes);
             checkStudyData(study, attributes);
             checkSerieData(serie, attributes);
+            addSeriesInstitution(serie, attributes);
             addSeriesEquipment(serie, attributes);
-            addSeriesCenter(serie, attributes);
         } catch (IOException e) {
             LOG.error("Error during processing of DICOM file " + dicomFile.getAbsolutePath() + ":", e);
         }
@@ -293,10 +289,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      */
     private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
         final String sopClassUID = attributes.getString(Tag.SOPClassUID);
-        if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-                || UID.EnhancedMRColorImageStorage.equals(sopClassUID)
-                || UID.EnhancedCTImageStorage.equals(sopClassUID)
-                || UID.EnhancedPETImageStorage.equals(sopClassUID)) {
+        if (MultiframeExtractor.isSupportedSOPClass(sopClassUID)) {
             MultiframeExtractor emf = new MultiframeExtractor();
             attributes = emf.extract(attributes, 0);
         }
@@ -347,13 +340,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param attributes
      */
     private void addSeriesEquipment(Serie serie, Attributes attributes) {
-        if (serie.getEquipment() == null || !serie.getEquipment().isComplete()) {
-            String manufacturer = Utils.getOrSetToDefault(attributes, Tag.Manufacturer, UNKNOWN);
-            String manufacturerModelName = Utils.getOrSetToDefault(attributes, Tag.ManufacturerModelName, UNKNOWN);
-            String deviceSerialNumber = Utils.getOrSetToDefault(attributes, Tag.DeviceSerialNumber, UNKNOWN);
-            String stationName = Utils.getOrSetToDefault(attributes, Tag.StationName, UNKNOWN);
-            String magneticFieldStrength = Utils.getOrSetToDefault(attributes, Tag.MagneticFieldStrength, UNKNOWN);
-            serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, serie.getModality(), deviceSerialNumber, stationName, magneticFieldStrength));
+        if (!serie.getEquipment().isKnown()) {
+            serie.setEquipment(new EquipmentDicom(attributes));
         }
     }
 
@@ -364,8 +352,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param serie
      * @param datasetAttributes
      */
-    public void addSeriesCenter(Serie serie, Attributes attributes) {
-        if (serie.getInstitution() == null) {
+    public void addSeriesInstitution(Serie serie, Attributes attributes) {
+        if (!serie.getInstitution().isKnown()) {
             InstitutionDicom institution = new InstitutionDicom(attributes);
             serie.setInstitution(institution);
         }

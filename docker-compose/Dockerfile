@@ -287,7 +287,10 @@ ENV KC_DB="mariadb" \
 #
 FROM keycloak-base AS keycloak-builder
 
-COPY keycloak/shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
+# note: mtime is overriden to prevent unwanted rebuilds at runtime
+# see: https://www.keycloak.org/server/containers#_known_issues_with_docker
+COPY --chown=keycloak:keycloak --chmod=644 keycloak/shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
+RUN touch -m --date=@1743465600 /opt/keycloak/providers/*
 
 WORKDIR /opt/keycloak
 RUN /opt/keycloak/bin/kc.sh build
@@ -312,7 +315,7 @@ CMD []
 
 ################ nginx #####################################################
 
-FROM ohif/app:v3.11.0 AS nginx-viewer
+FROM ohif/app:v3.12.5 AS nginx-viewer
 
 FROM nginx AS nginx
 
@@ -323,6 +326,8 @@ COPY --link \
     nginx/shanoir.template.conf \
     nginx/shanoir.template.dev.conf \
     nginx/shanoir.template.prod.conf \
+    nginx/shanoir.template.keycloak-full.conf \
+    nginx/shanoir.template.keycloak-limited.conf \
     /etc/nginx/
 
 COPY --link \
@@ -347,7 +352,7 @@ FROM node:lts-alpine3.21 AS front-dev
 
 WORKDIR /app
 
-RUN npm install -g @angular/cli@20.3.7
+RUN npm install -g @angular/cli@21.2.8
 
 
 

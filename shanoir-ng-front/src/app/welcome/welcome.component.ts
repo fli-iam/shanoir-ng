@@ -10,6 +10,7 @@ import {
   ViewEncapsulation,
   DOCUMENT
 } from '@angular/core';
+import { SlicePipe, TitleCasePipe } from '@angular/common';
 
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { ImagesUrlUtil } from "../shared/utils/images-url.util";
@@ -26,7 +27,7 @@ import { isDarkColor } from "../utils/app.utils";
     templateUrl: './welcome.component.html',
     styleUrls: ['./welcome.component.css'],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [SlicePipe, TitleCasePipe]
 })
 export class WelcomeComponent implements OnInit {
 
@@ -59,6 +60,11 @@ export class WelcomeComponent implements OnInit {
     }
 
     addSchemaToDOM(): void {
+        const isTerabyte = this.storageSize >= 1000;
+        const storageValue = isTerabyte ? (this.storageSize / 1000).toFixed(2) : this.storageSize.toFixed(2);
+        const unitCode = isTerabyte ? 'E33' : 'E34';   // E33 = Terabyte, E34 = Gigabyte (codes UN/CEFACT)
+        const unitText = isTerabyte ? 'Terabyte' : 'Gigabyte';
+
         const script = this._renderer2.createElement('script');
         script.type = `application/ld+json`;
 
@@ -100,7 +106,7 @@ export class WelcomeComponent implements OnInit {
             }
         })
 
-        // schema.org DataCatalog + Datasets
+        // JSON-LD annotation script that describes the Shanoir platform and its content, following the Bioschemas DataCatalog profile
         script.text = `
         {
             "@context": {
@@ -234,11 +240,11 @@ export class WelcomeComponent implements OnInit {
                   "dqv:computedOn": { "@id": "` + shanoirUrl + `" },
                   "dqv:isMeasurementOf": { "@id": "Storage Volume" },
                   "schema:value": {
-                  "@value": "` + this.storageSize + `",
-                  "@type": "xsd:decimal"
+                      "@value": "${storageValue}",
+                      "@type": "xsd:decimal"
                   },
-                  "schema:unitCode": "E34", 
-                  "schema:unitText": "Gigabyte"
+                  "schema:unitCode": "${unitCode}",
+                  "schema:unitText": "${unitText}"
                   },
                 {
                   "@id": "Users",
@@ -337,20 +343,6 @@ export class WelcomeComponent implements OnInit {
         this._renderer2.appendChild(this._document.head, script);
 	}
 
-    private fetchUsersCount() {
-        //count all users
-        this.userService.countAllUsers().then(count => {
-            this.usersCount = count;
-        });
-    }
-
-    private fetchEventsCount() {
-        // count all users events during last month
-        this.userService.countLastMonthEvents().then(count => {
-            this.eventsCount = count;
-        });
-    }
-
     private fetchOverallStats() {
         // get public studies data
         this.fetchPublicStudies();
@@ -360,11 +352,30 @@ export class WelcomeComponent implements OnInit {
             this.subjectsCount = stats.subjectsCount;
             this.datasetAcquisitionsCount = stats.datasetAcquisitionsCount;
             this.storageSize = stats.storageSize;
-            this.fetchUsersCount();
-            this.fetchEventsCount();
-            this.addSchemaToDOM();
+            Promise.all([this.fetchUsersCount(), this.fetchEventsCount()])
+                .then(() => this.addSchemaToDOM());
         });
+    }
 
+    private fetchUsersCount(): Promise<void> {
+        //count all users
+        return this.userService.countAllUsers().then(count => {
+            this.usersCount = count;
+        });
+    }
+
+    private fetchEventsCount(): Promise<void> {
+        // count all users events during last month
+        return this.userService.countLastMonthEvents().then(count => {
+            this.eventsCount = count;
+        });
+    }
+
+    get formattedStorageSize(): string {
+        if (this.storageSize >= 1000) {
+            return (this.storageSize / 1000).toFixed(2) + ' TB';
+        }
+        return this.storageSize.toFixed(2) + ' GB';
     }
 
 	private fetchPublicStudies() {

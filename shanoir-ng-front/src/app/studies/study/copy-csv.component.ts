@@ -29,11 +29,10 @@ import { TreeService } from './tree.service';
             <input #input hidden type="file" (change)="copyDatasetsTo($event)" accept=".csv, .tsv"/>
         </button>
     `,
-    standalone: false
 })
 
 export class CopyFromCsvComponent {
-    
+
     @Input() studyId: any;
     @ViewChild('input') inputEl: ElementRef;
     private copyDataService: CopyDataService = inject(CopyDataService);
@@ -76,9 +75,8 @@ export class CopyFromCsvComponent {
     private parseCsvTsv(input: string): string[][] {
         const lines = input
             .trim()
-            .split(/\r?\n/)
+            .split(/\r\n|\r|\n/)
             .filter(l => l.trim().length > 0);
-
         if (lines.length === 0) return [];
         const firstLine = lines[0];
         const delimiter = firstLine.includes("\t") ? "\t" : ",";

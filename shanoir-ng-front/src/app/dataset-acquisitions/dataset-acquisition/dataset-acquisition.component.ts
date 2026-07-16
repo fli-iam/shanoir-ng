@@ -11,9 +11,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -32,12 +32,20 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
+import { MrProtocolComponent } from '../modality/mr/mr-protocol.component';
+import { CtProtocolComponent } from '../modality/ct/ct-protocol.component';
+import { PetProtocolComponent } from '../modality/pet/pet-protocol.component';
+import { XaProtocolComponent } from '../modality/xa/xa-protocol.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
     selector: 'dataset-acquisition-detail',
     templateUrl: 'dataset-acquisition.component.html',
     styleUrls: ['dataset-acquisition.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, RouterLink, MrProtocolComponent, CtProtocolComponent, PetProtocolComponent, XaProtocolComponent, LoadingBarComponent, LocalDateFormatPipe, AcquisitionEquipmentPipe]
 })
 export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisition> {
 
@@ -48,6 +56,8 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     noDatasets: boolean = false;
     hasDicom: boolean = false;
     protected downloadState: TaskState = new TaskState();
+    @ViewChild('input') private fileInput: ElementRef;
+    files: File[] = [];
 
     constructor(
             private route: ActivatedRoute,
@@ -132,5 +142,59 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     downloadAll() {
         this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, this.downloadState);
+    }
+
+    public setFile() {
+        this.fileInput.nativeElement.click();
+    }
+
+    public attachNewFile(event: any) {
+        for (const newFile of Array.from(event.target.files as FileList)) {
+            if (this.datasetAcquisition.extraDataFilePathList.includes(newFile.name)) {
+                this.consoleService.log('warn', 'A file named "' + newFile.name + '" is already attached and was skipped.');
+                continue;
+            }
+            this.datasetAcquisition.extraDataFilePathList.push(newFile.name);
+            this.files.push(newFile);
+        }
+        event.target.value = null;
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
+    }
+
+    public deleteFile(file: any) {
+        this.datasetAcquisition.extraDataFilePathList = this.datasetAcquisition.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
+        this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
+    }
+
+    getFileName(element): string {
+        return element.split('\\').pop().split('/').pop();
+    }
+
+    downloadFile(file) {
+        this.datasetAcquisitionService.downloadFile(file, this.datasetAcquisition.id, this.downloadState);
+    }
+
+    public save(): Promise<DatasetAcquisition> {
+        return super.save(() => {
+            const uploads: Promise<void>[] = [];
+            // Once the acquisition is saved, save associated extra-data files
+            for (const file of this.files) {
+                uploads.push(
+                    this.datasetAcquisitionService.postFile(file, this.entity.id).catch(error => {
+                        // 409: a file with the same name already exists on the server; keep the
+                        // existing one and skip this upload instead of failing the whole save.
+                        if (error?.status === 409) {
+                            this.consoleService.log('warn', 'A file named "' + file.name + '" already exists on this acquisition and was not re-uploaded.');
+                            return;
+                        }
+                        throw error;
+                    })
+                );
+            }
+            return Promise.all(uploads).then(() => null);
+        });
     }
 }

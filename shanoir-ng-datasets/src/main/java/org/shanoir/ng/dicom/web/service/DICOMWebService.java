@@ -567,16 +567,14 @@ public class DICOMWebService {
         try (CloseableHttpResponse response = httpClient.execute(post)) {
             if (HttpStatus.OK.value() == response.getCode()) {
                 LOG.debug("Rejected from PACS: " + post);
+            } else if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
+                // No DICOM instance present in PACS, nothing to reject: we continue with deletion
+                LOG.warn(response.getCode() + ": No instance to reject in PACS for rejectURL: " + url);
             } else {
                 LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
                         + " for rejectURL: " + url);
-                // in case one URL is Not Found (no DICOM instance present), we continue with deletion
-                if (response.getCode() == 404 && response.getReasonPhrase().startsWith("Not Found")) {
-                    return;
-                } else {
-                    throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
-                            + " for rejectURL: " + url);
-                }
+                throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
+                        + " for rejectURL: " + url);
             }
         } catch (IOException e) {
             LOG.error("Could not reject instance from PACS: for rejectURL: " + url, e);

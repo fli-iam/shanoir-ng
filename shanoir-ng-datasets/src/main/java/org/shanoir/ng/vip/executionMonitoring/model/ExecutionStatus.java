@@ -17,8 +17,6 @@ package org.shanoir.ng.vip.executionMonitoring.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import java.util.Objects;
-
 /**
  * Execution Status
  *
@@ -41,13 +39,11 @@ public enum ExecutionStatus {
 
     @JsonCreator
     public static ExecutionStatus fromRestLabel(String restlabel) {
-        String label = restlabel.substring(0, 1).toUpperCase() + restlabel.substring(1).toLowerCase();
-        if (Objects.equals("Completed", label)) {
-            label = "Finished";
+        if ("Completed".equalsIgnoreCase(restlabel)) {
+            return FINISHED;
         }
-
         for (ExecutionStatus status : values()) {
-            if (status.restLabel.equals(label)) {
+            if (status.restLabel.equalsIgnoreCase(restlabel)) {
                 return status;
             }
         }
