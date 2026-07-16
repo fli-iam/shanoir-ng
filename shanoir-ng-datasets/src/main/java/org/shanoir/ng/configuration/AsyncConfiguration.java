@@ -21,6 +21,7 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 @EnableAsync
@@ -35,5 +36,14 @@ public class AsyncConfiguration implements AsyncConfigurer {
         executor.setThreadNamePrefix("AsyncThread-");
         executor.initialize();
         return new DelegatingSecurityContextAsyncTaskExecutor(executor);
+    }
+
+
+    @Bean("buffer500")
+    public WebClient webClientBuilder() {
+        return WebClient.builder().codecs(configurer -> configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(500 * 1024 * 1024))
+                .build();
     }
 }

@@ -51,6 +51,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -126,7 +127,8 @@ public class WADODownloaderService {
     private static final String CONTENT_TYPE = "&contentType";
 
     @Autowired
-    private WebClient.Builder webClientBuilder;
+    @Qualifier("buffer500")
+    private WebClient webClient;
 
     @Autowired
     private WADOURLHandler wadoURLHandler;
