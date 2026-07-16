@@ -19,6 +19,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { ConsoleService } from 'src/app/shared/console/console.service';
 
+import mailSupplierBlacklists from '../../../assets/mail_supplier_blacklist.json';
 import * as AppUtils from '../../utils/app.utils';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { User } from '../shared/user.model';
@@ -36,6 +37,7 @@ import { ConsoleComponent } from '../../shared/console/console.component';
 
 export class AccountRequestComponent implements OnInit {
 
+
     public form: UntypedFormGroup;
 
     public requestSent: boolean = false;
@@ -47,6 +49,9 @@ export class AccountRequestComponent implements OnInit {
     function: string; // optional : operator/researcher
     language: 'english' | 'french' = 'english';
     loading: boolean = false;
+    public mailSupplierBlacklistConfig: string = AppUtils.MAIL_SUPPLIER_BLACK_LIST;
+    public mailSupplierBlacklist: string[] = [];
+
 
     constructor(
             private fb: UntypedFormBuilder,
@@ -61,6 +66,7 @@ export class AccountRequestComponent implements OnInit {
             }
 
     ngOnInit(): void {
+        this.loadMailSupplierBlackList();
         this.buildForm();
     }
 
@@ -69,7 +75,7 @@ export class AccountRequestComponent implements OnInit {
         this.form = this.fb.group({
             'firstName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
             'lastName': ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), this.nonSpecialCharsValidator()]],
-            'email': ['', [Validators.required, Validators.pattern(emailRegex)]],
+            'email': ['', [Validators.required, Validators.pattern(emailRegex), this.nonBlacklistedValidator()]],
             'accountRequestInfo': [new AccountRequestInfo(), [this.validateARInfo]]
         });
     }
@@ -145,5 +151,23 @@ export class AccountRequestComponent implements OnInit {
                 return /^[\p{L}\p{M}\s'-]+$/u.test(control.value) ? null : { invalidName: true };            }
             return null;
         };
+    }
+
+    private nonBlacklistedValidator(): ValidatorFn {
+        return (control: AbstractControl): ValidationErrors | null => {
+            if (control.value != undefined && this.mailSupplierBlacklist.length > 0) {
+                const domain: string = control.value.split('@')[1]?.toLowerCase();
+                if (domain && this.mailSupplierBlacklist.some(supplier => domain === supplier || domain.endsWith('.' + supplier))) {
+                    return { blacklist: true };
+                }
+            }
+            return null;
+        };
+    }
+
+    private loadMailSupplierBlackList() {
+        if (this.mailSupplierBlacklistConfig) {
+            this.mailSupplierBlacklist = (mailSupplierBlacklists as Record<string, string[]>)[this.mailSupplierBlacklistConfig] || [];
+        }
     }
 }

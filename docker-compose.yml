@@ -430,6 +430,7 @@ services:
       - SHANOIR_KEYCLOAK_API
       - VIP_URL_SCHEME
       - VIP_URL_HOST
+      - MAIL_SUPPLIER_BLACK_LIST
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro

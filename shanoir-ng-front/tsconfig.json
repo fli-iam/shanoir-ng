@@ -9,6 +9,7 @@
             "wicg-file-system-access": ["@types/wicg-file-system-access"]
         },
         "esModuleInterop": true,
+        "resolveJsonModule": true,
         "sourceMap": true,
         "declaration": false,
         "experimentalDecorators": true,
