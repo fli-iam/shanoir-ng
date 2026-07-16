@@ -54,7 +54,7 @@ delete from datasets.dataset_acquisition where id in (select id from garbage_acq
 
 create temporary table garbage_examinations as (select e.id from examination e where e.subject_id is null or not exists (select 1 from datasets.dataset_acquisition acq where acq.examination_id = e.id) or e.subject_id in (select id from duplicate_subjects)); -- 1517 on neurinfo / 4324 on ofsep
 
-delete from datasets.extra_data_file_path where examination_id in (select id from garbage_examinations); -- 159 on neurinfo / 2 on ofsep
+delete from datasets.examination_extra_data_file_path where examination_id in (select id from garbage_examinations); -- 159 on neurinfo / 2 on ofsep
 delete from datasets.examination where id in (select id from garbage_examinations); -- 1517 on neurinfo / 4324 on ofsep
 
 delete from datasets.subject where id in (select id from duplicate_subjects); -- 4 on neurinfo / 0 on ofsep
