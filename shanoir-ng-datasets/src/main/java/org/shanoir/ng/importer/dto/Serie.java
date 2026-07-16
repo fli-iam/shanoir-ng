@@ -64,6 +64,9 @@ public class Serie {
     @JsonProperty("sopClassUID")
     private String sopClassUID = null;
 
+    @JsonProperty("institution")
+    private InstitutionDicom institution = null;
+
     @JsonProperty("equipment")
     private EquipmentDicom equipment = null;
 
@@ -115,6 +118,7 @@ public class Serie {
         sequenceName = DicomUtils.getDicomSequenceName(attributes, isEnhanced);
         isSpectroscopy = Boolean.FALSE;
         isCompressed = Boolean.FALSE;
+        institution = new InstitutionDicom(attributes);
         equipment = new EquipmentDicom(attributes);
     }
 
