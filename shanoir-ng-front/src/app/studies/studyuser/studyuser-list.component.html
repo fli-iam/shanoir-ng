@@ -166,6 +166,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </span>
                             </li>
                             <li>
+                                <label>Can annotate</label>
+                                <span class="right-col">
+                                    <checkbox
+                                        [mode]="mode == 'view' ? mode : 'edit'"
+                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ANNOTATE)"
+                                        (userChange)="onEditRight(StudyUserRight.CAN_ANNOTATE, pannelStudyUser, $event)"
+                                        [disabled]="study.isDraft"></checkbox>
+                                </span>
+                            </li>
+                            <li>
+                                <label>Can review</label>
+                                <span class="right-col">
+                                    <checkbox
+                                        [mode]="mode == 'view' ? mode : 'edit'"
+                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_REVIEW)"
+                                        (userChange)="onEditRight(StudyUserRight.CAN_REVIEW, pannelStudyUser, $event)"
+                                        [disabled]="study.isDraft"></checkbox>
+                                </span>
+                            </li>
+                            <li>
                                 <label>Can administrate</label>
                                 <span class="right-col">
                                     <checkbox

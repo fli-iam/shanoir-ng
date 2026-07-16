@@ -20,7 +20,9 @@ export enum StudyUserRight {
     CAN_DOWNLOAD = "CAN_DOWNLOAD",
     CAN_IMPORT = "CAN_IMPORT",
     CAN_ADMINISTRATE = "CAN_ADMINISTRATE",
-    CAN_EXECUTE = "CAN_EXECUTE"
+    CAN_EXECUTE = "CAN_EXECUTE",
+    CAN_ANNOTATE = "CAN_ANNOTATE",
+    CAN_REVIEW = "CAN_REVIEW"
 
 } export namespace StudyUserRight {
     
@@ -29,7 +31,9 @@ export enum StudyUserRight {
         { value: StudyUserRight.CAN_DOWNLOAD, label: "Can download datasets from this study" },
         { value: StudyUserRight.CAN_IMPORT, label: "Can import datasets in this study" },
         { value: StudyUserRight.CAN_ADMINISTRATE, label: "Can edit the study parameters" },
-        { value: StudyUserRight.CAN_EXECUTE, label: "Can execute pipelines with data from this study" }
+        { value: StudyUserRight.CAN_EXECUTE, label: "Can execute pipelines with data from this study" },
+        { value: StudyUserRight.CAN_ANNOTATE, label: "Can annotate data in this study" },
+        { value: StudyUserRight.CAN_REVIEW, label: "Can review data in this study" }
     ];
     
     export function all(): StudyUserRight[] {
