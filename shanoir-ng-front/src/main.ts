@@ -96,6 +96,7 @@ import { DatasetCopyDialogService } from './app/shared/components/dataset-copy-d
 import { CopyDataService } from './app/studies/shared/copy-data.service';
 import { DownloadUtilsService } from './app/shared/mass-download/download.utils.service';
 import { ExecutionTemplateService } from './app/vip/execution-template/execution-template.service';
+import { ExecutionTemplateFilterService } from './app/vip/execution-template/filter/execution-template-filter.service';
 
 registerLocaleData(localeFr);
 registerLocaleData(localeDe);
@@ -198,6 +199,7 @@ const options = {
         CopyDataService,
         DownloadUtilsService,
         ExecutionTemplateService,
+        ExecutionTemplateFilterService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi()),
     ]

@@ -29,7 +29,7 @@ public class PerformanceTests extends AbstractTest {
         int numberOfCalls = 100;
         for (int i = 0; i < numberOfCalls; i++) {
             long startTime = System.currentTimeMillis();
-            shUpClient.findStudies();
+            adminClient.findStudies();
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
             totalTime += elapsedTime;
@@ -45,7 +45,7 @@ public class PerformanceTests extends AbstractTest {
         int numberOfCalls = 100;
         for (int i = 0; i < numberOfCalls; i++) {
             long startTime = System.currentTimeMillis();
-            shUpClient.findStudiesNamesAndCenters();
+            adminClient.findStudiesNamesAndCenters();
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
             totalTime += elapsedTime;
@@ -61,7 +61,7 @@ public class PerformanceTests extends AbstractTest {
         int numberOfCalls = 100;
         for (int i = 0; i < numberOfCalls; i++) {
             long startTime = System.currentTimeMillis();
-            shUpClient.findStudiesPublicData();
+            adminClient.findStudiesPublicData();
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
             totalTime += elapsedTime;
@@ -77,7 +77,7 @@ public class PerformanceTests extends AbstractTest {
         int numberOfCalls = 100;
         for (int i = 0; i < numberOfCalls; i++) {
             long startTime = System.currentTimeMillis();
-            shUpClient.findStudyCards();
+            adminClient.findStudyCards();
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
             totalTime += elapsedTime;
@@ -93,7 +93,7 @@ public class PerformanceTests extends AbstractTest {
         int numberOfCalls = 100;
         for (int i = 0; i < numberOfCalls; i++) {
             long startTime = System.currentTimeMillis();
-            shUpClient.findSubjects();
+            expertClient.findSubjects();
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
             totalTime += elapsedTime;
@@ -109,7 +109,7 @@ public class PerformanceTests extends AbstractTest {
         int numberOfCalls = 100;
         for (int i = 0; i < numberOfCalls; i++) {
             long startTime = System.currentTimeMillis();
-            shUpClient.findExaminations();
+            expertClient.findExaminations();
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
             totalTime += elapsedTime;
@@ -125,7 +125,7 @@ public class PerformanceTests extends AbstractTest {
         int numberOfCalls = 100;
         for (int i = 0; i < numberOfCalls; i++) {
             long startTime = System.currentTimeMillis();
-            shUpClient.findAcquisitions();
+            expertClient.findAcquisitions();
             long stopTime = System.currentTimeMillis();
             long elapsedTime = stopTime - startTime;
             totalTime += elapsedTime;

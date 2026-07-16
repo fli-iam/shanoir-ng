@@ -30,18 +30,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <button class="dl-button" type="button" (click)="goToProcessing()" [disabled]="selectionEmpty" title="process selection">
         <i class="fas fa-rocket"></i>
     </button>
-    <button
-        class="dl-button"
-        type="button"
-        (click)="openInViewer()"
-        [disabled]="!loaded || (!canOpenDicomSingleExam && !canOpenDicomMultiExam)"
-        [title]="
-            loaded && canOpenDicomMultiExam
-                ? 'view DICOM images for the selected acquisitions/examinations'
-                : 'view selected DICOM images for the one examination selected'
-        ">
-        <double-awesome main="fas fa-eye" [sub]="loaded && canOpenDicomMultiExam ? 'far fa-copy' : 'far fa-file'"></double-awesome>
-    </button>
+    @if (treeService.canDownloadStudy) {
+        <button
+            class="dl-button"
+            type="button"
+            (click)="openInViewer()"
+            [disabled]="!loaded || (!canOpenDicomSingleExam && !canOpenDicomMultiExam)"
+            [title]="
+                loaded && canOpenDicomMultiExam
+                    ? 'view DICOM images for the selected acquisitions/examinations'
+                    : 'view selected DICOM images for the one examination selected'
+            ">
+            <double-awesome main="fas fa-eye" [sub]="loaded && canOpenDicomMultiExam ? 'far fa-copy' : 'far fa-file'"></double-awesome>
+        </button>
+    }
     <button class="dl-button" type="button" (click)="resetSelection()" [disabled]="selectionEmpty" title="unselect all">
         <i class="fas fa-broom"></i>
     </button>
