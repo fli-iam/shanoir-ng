@@ -115,26 +115,26 @@ public class ImportFinishActionListener implements ActionListener {
             }
             String magneticFieldStrength = mainWindow.importDialog.mriMagneticFieldStrengthText.getText();
             // Check that magnetic field strength is a number value if modality is not CT or XA
-			      if (importJob.getFirstSelectedSerie().getModality() != null
-					    && !importJob.getFirstSelectedSerie().getModality().equals("CT")
-					    && !importJob.getFirstSelectedSerie().getModality().equals("XA")) {
-				    String regex = "\\d+(\\.\\d+)?";
-				    Pattern pattern = Pattern.compile(regex);
+			if (importJob.getFirstSerie().getModality() != null
+					&& !importJob.getFirstSerie().getModality().equals("CT")
+					&& !importJob.getFirstSerie().getModality().equals("XA")) {
+				String regex = "\\d+(\\.\\d+)?";
+				Pattern pattern = Pattern.compile(regex);
         		Matcher matcher = pattern.matcher(magneticFieldStrength);
-				    if (!matcher.find()) {
-					    JOptionPane.showMessageDialog(mainWindow.frame,
+				if (!matcher.find()) {
+					JOptionPane.showMessageDialog(mainWindow.frame,
 					    mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.equipment.magnetic.field"),
 					    "Error", JOptionPane.ERROR_MESSAGE);
-					    return;
-				      }
-			      }
+					return;
+				}
+			}
             InstitutionDicom institutionDicom = new InstitutionDicom();
             institutionDicom.setInstitutionName(mainWindow.importDialog.mriCenterText.getText());
             institutionDicom.setInstitutionAddress(mainWindow.importDialog.mriCenterAddressText.getText());
             Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(institutionDicom, study.getId());
             if (center != null) {
                 centerId = center.getId();
-                EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
+                EquipmentDicom equipmentDicom = importJob.getFirstSerieWithInstitutionAndEquipment().getEquipment();
                 equipmentDicom.setManufacturer(mainWindow.importDialog.mriManufacturerText.getText());
                 equipmentDicom.setManufacturerModelName(mainWindow.importDialog.mriManufacturersModelNameText.getText());
                 equipmentDicom.setMagneticFieldStrength(mainWindow.importDialog.mriMagneticFieldStrengthText.getText());

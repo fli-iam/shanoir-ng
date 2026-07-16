@@ -80,7 +80,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 @if (!report && !buildingReport) {
     <div>
-        <button class="right-icon" (click)="callBidsValidator()" [disabled]="task && task.progress < 1">Call BIDS Validator</button>
+        <button type="button" class="right-icon" (click)="callBidsValidator()" [disabled]="task && task.progress < 1">Call BIDS Validator</button>
     </div>
 } @else {
     <div class="json-report">
