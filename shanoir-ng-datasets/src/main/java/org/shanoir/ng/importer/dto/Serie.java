@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -62,6 +63,9 @@ public class Serie {
 
     @JsonProperty("sopClassUID")
     private String sopClassUID = null;
+
+    @JsonProperty("institution")
+    private InstitutionDicom institution = null;
 
     @JsonProperty("equipment")
     private EquipmentDicom equipment = null;
@@ -114,14 +118,8 @@ public class Serie {
         sequenceName = DicomUtils.getDicomSequenceName(attributes, isEnhanced);
         isSpectroscopy = Boolean.FALSE;
         isCompressed = Boolean.FALSE;
-        final EquipmentDicom equipmentDicom = new EquipmentDicom(
-                attributes.getString(Tag.Manufacturer),
-                attributes.getString(Tag.ManufacturerModelName),
-                modality,
-                attributes.getString(Tag.DeviceSerialNumber),
-                attributes.getString(Tag.StationName),
-                attributes.getString(Tag.MagneticFieldStrength));
-        setEquipment(equipmentDicom);
+        institution = new InstitutionDicom(attributes);
+        equipment = new EquipmentDicom(attributes);
     }
 
     public Boolean getSelected() {
@@ -202,6 +200,14 @@ public class Serie {
 
     public void setEquipment(EquipmentDicom equipment) {
         this.equipment = equipment;
+    }
+
+    public InstitutionDicom getInstitution() {
+        return institution;
+    }
+
+    public void setInstitution(InstitutionDicom institution) {
+        this.institution = institution;
     }
 
     public Boolean getIsCompressed() {
