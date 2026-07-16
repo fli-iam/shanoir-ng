@@ -340,7 +340,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param attributes
      */
     private void addSeriesEquipment(Serie serie, Attributes attributes) {
-        if (serie.getEquipment() == null || !serie.getEquipment().isComplete()) {
+        if (!serie.getEquipment().isKnown()) {
             serie.setEquipment(new EquipmentDicom(attributes));
         }
     }
@@ -353,7 +353,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param datasetAttributes
      */
     public void addSeriesInstitution(Serie serie, Attributes attributes) {
-        if (serie.getInstitution() == null) {
+        if (!serie.getInstitution().isKnown()) {
             InstitutionDicom institution = new InstitutionDicom(attributes);
             serie.setInstitution(institution);
         }

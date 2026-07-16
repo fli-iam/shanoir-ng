@@ -123,6 +123,7 @@ public class EquipmentDicom {
     public boolean isKnown() {
         return isKnown(manufacturer)
             && isKnown(manufacturerModelName)
+            && isKnown(deviceSerialNumber)
             && isKnown(modality);
     }
 
