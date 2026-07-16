@@ -39,6 +39,7 @@ import org.shanoir.ng.vip.shared.service.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.Builder;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
@@ -93,7 +93,8 @@ public class ExecutionServiceImpl implements ExecutionService {
     private DatasetProcessingRepository datasetProcessingRepository;
 
     @Autowired
-    private ShanoirWebClient shanoirWebClient;
+    @Qualifier("buffer500")
+    private WebClient webClient;
 
     @Autowired
     private Utils utils;
@@ -313,7 +314,7 @@ public class ExecutionServiceImpl implements ExecutionService {
      */
     private Mono<VipExecutionDTO> createExecution(VipExecutionDTO execution) {
         return webClient.post()
-                .uri(vipExecutionUri)
+                .uri(vipUrl + vipExecutionUri)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
                 .bodyValue(execution)
                 .retrieve()
