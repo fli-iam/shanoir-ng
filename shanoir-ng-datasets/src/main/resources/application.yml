@@ -111,6 +111,11 @@ front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
 
+# public base URL of the DICOMWeb facade, as seen by the OHIF viewer
+# (nginx vhost of the viewer proxies /dicomweb/ to this microservice)
+viewer:
+  ohif.url.base: ${SHANOIR_VIEWER_OHIF_URL_SCHEME:https}://${SHANOIR_VIEWER_OHIF_URL_HOST:${SHANOIR_URL_HOST:localhost}}/dicomweb
+
 solr.host: http://${SHANOIR_SOLR_HOST:${SHANOIR_PREFIX}solr}:8983/solr/shanoir
 
 storage:
