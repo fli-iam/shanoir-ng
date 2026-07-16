@@ -26,7 +26,7 @@ public class EquipmentDicom {
 
     private static final String UNKNOWN = "unknown";
 
-    private static final String _0_0 = "0.0";
+    private static final String MAGNETIC_FIELD_STRENGTH_DEFAULT = "0.0";
 
     @JsonProperty("manufacturer")
     private String manufacturer;
@@ -55,7 +55,8 @@ public class EquipmentDicom {
         this.manufacturerModelName = Utils.getOrSetToDefault(attributes, Tag.ManufacturerModelName, UNKNOWN);
         this.deviceSerialNumber = Utils.getOrSetToDefault(attributes, Tag.DeviceSerialNumber, UNKNOWN);
         this.stationName = Utils.getOrSetToDefault(attributes, Tag.StationName, UNKNOWN);
-        this.magneticFieldStrength = Utils.getOrSetToDefault(attributes, Tag.MagneticFieldStrength, _0_0);
+        this.magneticFieldStrength = Utils.getOrSetToDefault(attributes, Tag.MagneticFieldStrength,
+                MAGNETIC_FIELD_STRENGTH_DEFAULT);
     }
 
     public String getManufacturer() {
