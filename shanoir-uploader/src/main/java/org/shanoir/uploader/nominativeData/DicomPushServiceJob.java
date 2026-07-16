@@ -155,7 +155,7 @@ public class DicomPushServiceJob {
                             seriesUID = currentSeriesUID;
                             Serie serie = new Serie(dicomAttributes);
                             //We set the Institution attributes
-                            dicomFileAnalyzer.addSeriesCenter(serie, dicomAttributes);
+                            dicomFileAnalyzer.addSeriesInstitution(serie, dicomAttributes);
                             incomingSeries.add(serie);
                             // if we have multiple series in the same folder (is it possible ?),
                         } else if (!seriesUID.equals(currentSeriesUID)) {

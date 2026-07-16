@@ -163,6 +163,14 @@ export class StudyTreeComponent implements OnDestroy {
     }
 
     openInViewer() {
+        const deniedNodes = [...(this.selectedExaminationNodes || []), ...(this.selectedAcquisitionNodes || [])]
+            .filter(node => !node.canDownload);
+        if (deniedNodes.length > 0) {
+            this.dialogService.error('error', 'Sorry, you don\'t have the right to view all the data you have selected.'
+                + ' You must have DOWNLOAD right on all the studies of the selected examinations and acquisitions to open them in the viewer.'
+            );
+            return;
+        }
         const studies: Set<string> = new Set();
         const series: Set<string> = new Set();
         if (this.selectedExaminationNodes?.length > 0) {
