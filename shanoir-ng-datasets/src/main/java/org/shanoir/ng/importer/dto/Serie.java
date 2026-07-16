@@ -202,6 +202,14 @@ public class Serie {
         this.equipment = equipment;
     }
 
+    public InstitutionDicom getInstitution() {
+        return institution;
+    }
+
+    public void setInstitution(InstitutionDicom institution) {
+        this.institution = institution;
+    }
+
     public Boolean getIsCompressed() {
         return isCompressed;
     }
