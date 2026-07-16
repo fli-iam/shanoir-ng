@@ -273,8 +273,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
             checkPatientData(patient, attributes);
             checkStudyData(study, attributes);
             checkSerieData(serie, attributes);
-            addSeriesEquipment(serie, attributes);
             addSeriesInstitution(serie, attributes);
+            addSeriesEquipment(serie, attributes);
         } catch (IOException e) {
             LOG.error("Error during processing of DICOM file " + dicomFile.getAbsolutePath() + ":", e);
         }
