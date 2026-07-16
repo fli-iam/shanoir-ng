@@ -20,6 +20,7 @@ import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
@@ -165,48 +166,57 @@ public class SerieTreeNode implements DicomTreeNode {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.shanoir.dicom.model.DicomTreeNode#getDisplayString()
-     */
     @XmlTransient
     public String getDisplayString() {
-        String result = "";
+        StringBuilder result = new StringBuilder();
+
         final String seriesNumber = this.serie.getSeriesNumber();
-        if (seriesNumber != null && !seriesNumber.isEmpty()) {
-            result += seriesNumber + " ";
+        if (StringUtils.isNotEmpty(seriesNumber)) {
+            result.append(seriesNumber).append(" ");
         }
+
         final String modality = this.serie.getModality();
-        if (modality != null && !"".equals(modality)) {
-            result += "[" + modality + "] ";
+        if (StringUtils.isNotEmpty(modality)) {
+            result.append("[").append(modality).append("] ");
         }
+
         final String description = this.serie.getSeriesDescription();
-        final String id = this.serie.getSeriesInstanceUID();
-        if (description != null && !"".equals(description)) {
-            result += description;
-        } else if (id != null && !id.equals("")) {
-            result += id;
+        if (StringUtils.isNotEmpty(description)) {
+            result.append(description);
         }
-        Integer numberOfSeriesRelatedInstances = this.serie.getNumberOfSeriesRelatedInstances();
-        if (numberOfSeriesRelatedInstances != 0) {
-            result += " (" + numberOfSeriesRelatedInstances + ")";
+
+        final Integer numberOfSeriesRelatedInstances = this.serie.getNumberOfSeriesRelatedInstances();
+        if (numberOfSeriesRelatedInstances != null && numberOfSeriesRelatedInstances != 0) {
+            result.append(" (").append(numberOfSeriesRelatedInstances).append(")");
         }
-        EquipmentDicom equipment = this.serie.getEquipment();
-        if (equipment != null) {
-            String stationName = equipment.getStationName();
-            if (stationName != null && !"".equals(stationName)) {
-                result += " [ " + stationName + " , ";
+
+        String stationName = null;
+        final EquipmentDicom equipment = this.serie.getEquipment();
+        if (equipment != null && StringUtils.isNotEmpty(equipment.getStationName())) {
+            stationName = equipment.getStationName();
+        }
+
+        String institutionName = null;
+        final InstitutionDicom institution = this.serie.getInstitution();
+        if (institution != null && StringUtils.isNotEmpty(institution.getInstitutionName())) {
+            institutionName = institution.getInstitutionName();
+        }
+
+        if (stationName != null || institutionName != null) {
+            result.append(" [");
+            if (stationName != null) {
+                result.append(stationName);
             }
-        }
-        InstitutionDicom institution = this.serie.getInstitution();
-        if (institution != null) {
-            String institutionName = institution.getInstitutionName();
-            if (institutionName != null && !"".equals(institutionName)) {
-                result += institutionName + " ] ";
+            if (stationName != null && institutionName != null) {
+                result.append(" , ");
             }
+            if (institutionName != null) {
+                result.append(institutionName);
+            }
+            result.append("]");
         }
-        return result;
+
+        return result.toString().trim();
     }
 
     /**
