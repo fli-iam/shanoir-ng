@@ -202,16 +202,16 @@ public class SerieTreeNode implements DicomTreeNode {
             institutionName = institution.getInstitutionName();
         }
 
-        if (stationName != null || institutionName != null) {
+        if (institutionName != null || stationName != null) {
             result.append(" [");
-            if (stationName != null) {
-                result.append(stationName);
-            }
-            if (stationName != null && institutionName != null) {
-                result.append(" , ");
-            }
             if (institutionName != null) {
                 result.append(institutionName);
+            }
+            if (institutionName != null && stationName != null) {
+                result.append(", ");
+            }
+            if (stationName != null) {
+                result.append(stationName);
             }
             result.append("]");
         }

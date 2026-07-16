@@ -132,8 +132,8 @@ public class Serie implements Cloneable {
         isMultiFrame = Boolean.FALSE;
         isSpectroscopy = Boolean.FALSE;
         isCompressed = Boolean.FALSE;
-        final EquipmentDicom equipmentDicom = new EquipmentDicom(attributes);
-        setEquipment(equipmentDicom);
+        institution = new InstitutionDicom(attributes);
+        equipment = new EquipmentDicom(attributes);
     }
 
     public Object clone() throws CloneNotSupportedException {
