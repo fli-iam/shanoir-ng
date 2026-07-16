@@ -94,7 +94,7 @@ public class ImportTests extends AbstractTest {
                 org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, studyWithStudyCards);
                 org.shanoir.ng.importer.model.Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
                 Examination examination = createExaminationFromDicomStudy(studyWithStudyCards, dicomStudy, subject);
-                startImportJobFromZip(importJob, subject, examination.getId(), studyWithStudyCards);
+                startImportJobFromZip(importJob, subject, examination, studyWithStudyCards);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -184,7 +184,7 @@ public class ImportTests extends AbstractTest {
                 org.shanoir.uploader.model.rest.Subject subject = createSubjectNoStudyCard(importJob, studyNoStudyCards);
                 org.shanoir.ng.importer.model.Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
                 Examination examination = createExaminationNoStudyCard(studyNoStudyCards, dicomStudy, subject);
-                startImportJobFromZipNoStudyCard(importJob, subject, examination.getId(), studyNoStudyCards);
+                startImportJobFromZipNoStudyCard(importJob, subject, examination, studyNoStudyCards, equipment.getId());
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -396,7 +396,7 @@ public class ImportTests extends AbstractTest {
     }
 
     private void startImportJobFromZip(ImportJob importJob, org.shanoir.uploader.model.rest.Subject subjectREST,
-            Long examinationId, org.shanoir.uploader.model.rest.Study study)
+            Examination examination, org.shanoir.uploader.model.rest.Study study)
             throws JsonProcessingException, Exception {
         importJob.setStudyId(study.getId());
         importJob.setStudyName(study.getName());
@@ -404,7 +404,8 @@ public class ImportTests extends AbstractTest {
         importJob.setStudyCardId(studyCard.getId());
         importJob.setStudyCardName(studyCard.getName());
         importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipment().getId());
-        importJob.setExaminationId(examinationId);
+        importJob.setExaminationId(examination.getId());
+        importJob.setStudyInstanceUID(examination.getStudyInstanceUID());
         if (ShUpConfig.isModeSubjectNameManual()) {
             importJob.setAnonymisationProfileToUse("Profile Neurinfo");
         } else {
@@ -422,14 +423,15 @@ public class ImportTests extends AbstractTest {
      */
     private void startImportJobFromZipNoStudyCard(ImportJob importJob,
             org.shanoir.uploader.model.rest.Subject subjectREST,
-            Long examinationId, org.shanoir.uploader.model.rest.Study study)
+            Examination examination, org.shanoir.uploader.model.rest.Study study, Long acquisitionEquipmentId)
             throws JsonProcessingException, Exception {
         importJob.setStudyId(study.getId());
         importJob.setStudyName(study.getName());
         importJob.setStudyCardId(null);
         importJob.setStudyCardName(null);
-        importJob.setAcquisitionEquipmentId(null);
-        importJob.setExaminationId(examinationId);
+        importJob.setAcquisitionEquipmentId(acquisitionEquipmentId);
+        importJob.setExaminationId(examination.getId());
+        importJob.setStudyInstanceUID(examination.getStudyInstanceUID());
         if (ShUpConfig.isModeSubjectNameManual()) {
             importJob.setAnonymisationProfileToUse("Profile Neurinfo");
         } else {
