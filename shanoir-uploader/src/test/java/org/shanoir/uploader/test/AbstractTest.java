@@ -362,7 +362,7 @@ public abstract class AbstractTest {
         studyUserUser.setUserId(userClient.getUserId());
         studyUserUser.setUserName(userClient.getUserName());
         studyUserUser.setConfirmed(true);
-        studyUserUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+        studyUserUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT));
         studyUserUser = adminClient.addStudyUser(study.getId(), studyUserUser);
         Assertions.assertNotNull(studyUserUser);
         LOG.info("StudyUser {} added to study: {}", studyUserUser.getUserName(), study.getName());
