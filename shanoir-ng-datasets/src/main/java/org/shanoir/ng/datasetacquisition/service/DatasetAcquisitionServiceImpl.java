@@ -17,7 +17,6 @@ package org.shanoir.ng.datasetacquisition.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,8 +35,6 @@ import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository
 import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -54,6 +51,7 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
@@ -79,6 +77,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     private SolrService solrService;
 
     @Autowired
+    @Lazy
     private DatasetService datasetService;
 
     @Autowired

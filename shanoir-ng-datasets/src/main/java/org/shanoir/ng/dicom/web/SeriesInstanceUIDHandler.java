@@ -27,7 +27,7 @@ import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
@@ -35,6 +35,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.processing.model.DatasetProcessing;
@@ -83,10 +84,13 @@ public class SeriesInstanceUIDHandler {
     private DatasetAcquisitionService acquisitionService;
 
     @Autowired
-    private DatasetService datasetService;
+    private DatasetRepository datasetRepository;
 
     @Autowired
     private DatasetProcessingRepository datasetProcessingRepository;
+
+    @Autowired
+    private DatasetAcquisitionRepository acquisitionRepository;
 
     /**
      * The viewer requests the metadata of each serie of an examination
@@ -174,7 +178,7 @@ public class SeriesInstanceUIDHandler {
         if (entry != null && System.currentTimeMillis() - entry.creationTime() < EXAMINATION_SERIES_TTL_MS) {
             return entry.seriesToVirtualUIDs();
         }
-        List<DatasetAcquisition> acquisitions = acquisitionService.findByExamination(examinationId);
+        List<DatasetAcquisition> acquisitions = acquisitionRepository.findByExaminationId(examinationId);
         Map<String, String> seriesToVirtualUIDs = Collections.unmodifiableMap(buildSeriesToVirtualUIDs(acquisitions));
         examinationToSeriesVirtualUIDsCache.put(examinationId,
                 new ExaminationSeriesCacheEntry(System.currentTimeMillis(), seriesToVirtualUIDs));
@@ -330,7 +334,7 @@ public class SeriesInstanceUIDHandler {
         String seriesInstanceUID = virtualUIDToSeriesInstanceUIDCache.get(datasetUID);
         if (seriesInstanceUID == null) {
             Long datasetId = extractDatasetId(datasetUID);
-            Dataset dataset = datasetService.findById(datasetId);
+            Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
             if (dataset != null) {
                 seriesInstanceUID = findSeriesInstanceUID(dataset);
                 if (seriesInstanceUID != null) {

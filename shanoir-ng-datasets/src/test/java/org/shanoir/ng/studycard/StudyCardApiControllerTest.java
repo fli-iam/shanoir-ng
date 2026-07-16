@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.importer.service.DicomImporterService;
@@ -90,6 +91,9 @@ public class StudyCardApiControllerTest {
 
     @MockBean
     private DatasetAcquisitionService datasetAcquisitionServiceMock;
+
+    @MockBean
+    private DatasetAcquisitionRepository acquisitionRepositoryMock;
 
     @MockBean
     private WADODownloaderService downloaderMock;

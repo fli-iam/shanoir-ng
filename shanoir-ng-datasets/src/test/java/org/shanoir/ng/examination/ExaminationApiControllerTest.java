@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,14 +35,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.examination.controler.ExaminationApiController;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.service.DicomImporterService;
-import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -49,7 +47,6 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
-import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -98,12 +95,6 @@ public class ExaminationApiControllerTest {
 
     private String tempFolderPath;
 
-    @MockBean
-    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
-
-    @MockBean
-    private DicomImporterService dicomImporterService;
-
     @BeforeEach
     public void beforeClass() {
         tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
@@ -111,7 +102,6 @@ public class ExaminationApiControllerTest {
     }
 
     private static final String REQUEST_PATH = "/examinations";
-    private static final String REQUEST_PATH_COUNT = REQUEST_PATH + "/count";
     private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
     @Autowired
@@ -124,31 +114,22 @@ public class ExaminationApiControllerTest {
     private ExaminationService examinationServiceMock;
 
     @MockBean
+    private ShanoirEventService eventService;
+
+    @MockBean
+    private StorageService storageService;
+
+    @MockBean
     private SubjectRepository subjectRepository;
 
     @MockBean
     private CenterRepository centerRepository;
 
     @MockBean
-    private Pageable pageable;
-
-    @MockBean
-    private BIDSService bidsService;
-
-    @MockBean
-    private ShanoirEventService eventService;
-
-    @MockBean
-    private StudyRepository studyRepository;
+    private ExaminationRepository examinationRepository;
 
     @MockBean
     private RabbitTemplate rabbitTemplate;
-
-    @MockBean
-    private ExaminationRepository examRepo;
-
-    @MockBean
-    private StorageService storageService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -213,7 +194,7 @@ public class ExaminationApiControllerTest {
     @Test
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void findExaminationByIdTest() throws Exception {
-        given(examinationServiceMock.findById(1L)).willReturn(new Examination());
+        given(examinationRepository.findByIdWithAcquisitions(1L)).willReturn(Optional.of(new Examination()));
 
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());

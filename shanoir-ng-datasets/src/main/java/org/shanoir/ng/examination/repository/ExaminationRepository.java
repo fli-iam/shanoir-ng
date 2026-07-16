@@ -21,13 +21,11 @@ import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.util.Pair;
 
 /**
  * Repository for examination.
@@ -108,10 +106,10 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
      *
      * @return list of examinations.
      */
-    @Query("SELECT e FROM Examination e " +
-            "LEFT JOIN FETCH e.datasetAcquisitions da " +
-            "LEFT JOIN FETCH da.datasets " +
-            "WHERE e.id = :id ")
+    @Query("SELECT e FROM Examination e "
+            + "LEFT JOIN FETCH e.datasetAcquisitions da "
+            + "LEFT JOIN FETCH da.datasets "
+            + "WHERE e.id = :id ")
     List<Examination> findAllWithAcqAndDatasets();
 
     /**
@@ -167,9 +165,9 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
     @Query("SELECT distinct(acq.examination.id) FROM DatasetAcquisition acq WHERE acq.id in :ids")
     List<Long> findIdsByAcquisitionIds(List<Long> ids);
 
-    @Query("SELECT e FROM Examination e " +
-            "LEFT JOIN FETCH e.datasetAcquisitions da " +
-            "WHERE e.id = :id " +
-            "ORDER BY COALESCE(da.sortingIndex, da.rank, 0)")
+    @Query("SELECT e FROM Examination e "
+            + "LEFT JOIN FETCH e.datasetAcquisitions da "
+            + "WHERE e.id = :id "
+            + "ORDER BY COALESCE(da.sortingIndex, da.rank, 0)")
     Optional<Examination> findByIdWithAcquisitions(Long id);
 }

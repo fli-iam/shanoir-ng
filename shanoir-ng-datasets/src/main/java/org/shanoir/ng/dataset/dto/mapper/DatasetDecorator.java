@@ -14,20 +14,14 @@
 
 package org.shanoir.ng.dataset.dto.mapper;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
-import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTO;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -50,6 +44,9 @@ public abstract class DatasetDecorator implements DatasetMapper {
     @Autowired
     protected EegDatasetMapper eegMapper;
 
+    @Autowired
+    protected DatasetMetadataMapper metadataMapper;
+
     @Override
     public PageImpl<DatasetDTO> datasetToDatasetDTO(Page<Dataset> page) {
         Page<DatasetDTO> mappedPage = page.map(new Function<Dataset, DatasetDTO>() {
@@ -64,5 +61,33 @@ public abstract class DatasetDecorator implements DatasetMapper {
             }
         });
         return new PageImpl<>(mappedPage);
+    }
+
+    @Override
+    public DatasetDTO datasetLightToDatasetLightDTO(Dataset dataset) {
+        if (dataset == null) {
+            return null;
+        }
+
+        DatasetDTO datasetDTO = new DatasetDTO();
+
+        datasetDTO.setCreationDate(dataset.getCreationDate());
+        datasetDTO.setGroupOfSubjectsId(dataset.getGroupOfSubjectsId());
+        datasetDTO.setId(dataset.getId());
+        datasetDTO.setOriginMetadata(metadataMapper.datasetMetadataToDatasetMetadataDTO(dataset.getOriginMetadata()));
+        datasetDTO.setStudyId(dataset.getStudyId());
+        datasetDTO.setSubjectId(dataset.getSubjectId());
+        datasetDTO.setUpdatedMetadata(metadataMapper.datasetMetadataToDatasetMetadataDTO(dataset.getUpdatedMetadata()));
+        datasetDTO.setName(dataset.getName());
+        if (dataset.getType() != null) {
+            datasetDTO.setType(dataset.getType().name());
+        }
+        datasetDTO.setCenterId(dataset.getCenterId());
+        datasetDTO.setInPacs(dataset.getInPacs());
+        datasetDTO.setTags(null);
+        datasetDTO.setSource(null);
+        datasetDTO.setCopies(null);
+
+        return datasetDTO;
     }
 }

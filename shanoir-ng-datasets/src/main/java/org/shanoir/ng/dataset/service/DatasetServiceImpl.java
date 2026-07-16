@@ -23,7 +23,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.mail.MessagingException;
@@ -130,6 +129,7 @@ public class DatasetServiceImpl implements DatasetService {
     private DatasetProcessingService processingService;
 
     @Autowired
+    @Lazy
     private DatasetService datasetService;
 
     @Autowired
@@ -259,10 +259,15 @@ public class DatasetServiceImpl implements DatasetService {
     @Override
     public Dataset findById(final Long id) throws EntityNotFoundException {
         Dataset dataset = repository.findByIdWithProcessingAncestorsAndExamination(id).orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+        if (dataset.getDatasetProcessing() != null) {
+            dataset.setDatasetAcquisition(dataset.getDatasetProcessing().getInputDatasets().stream().map(Dataset::getDatasetAcquisition).filter(Objects::nonNull).findFirst().orElse(null));
+        }
         populateInPacs(List.of(dataset));
         populateCenterId(List.of(dataset));
         return dataset;
     }
+
+    private Dataset findWithDatasetAcqu
 
     @Override
     public int countByStudyId(Long studyId) {

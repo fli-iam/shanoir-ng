@@ -27,14 +27,9 @@ import org.shanoir.ng.tag.model.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 @Component
 public class StudyServiceImpl implements StudyService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(StudyService.class);
 
     @Autowired
     private StudyRepository repository;

@@ -49,6 +49,19 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
         return datasetAcquisitionDTO;
     }
 
+    @Override
+    public List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(
+            final List<DatasetAcquisition> datasetAcquisitions) {
+        if (datasetAcquisitions == null) {
+            return null;
+        }
+        final List<ExaminationDatasetAcquisitionDTO> list = new ArrayList<>(datasetAcquisitions.size());
+        for (final DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
+            list.add(datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition));
+        }
+        return list;
+    }
+
     /**
      * Get dataset acquisition name. If all the datasets have the same name,
      * then return the name of the datasets. Else if all the datasets have the

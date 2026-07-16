@@ -119,4 +119,16 @@ public interface DatasetMapper {
     default Dataset mapSourceFromLong(Long source) {
         return null;
     }
+
+
+    //TEMPO
+    /**
+     * Map a @Dataset to a @DatasetDTO.
+     *
+     * @param dataset dataset to map
+     *            .
+     * @return dataset DTO.
+     */
+    DatasetDTO datasetLightToDatasetLightDTO(Dataset dataset);
+
 }

@@ -470,6 +470,7 @@ public class DatasetApiSecurityTest {
         // dataset 1
         Dataset dataset1 = mockDataset(1L, 1L, 1L, 1L, 1L);
         given(datasetRepository.findById(1L)).willReturn(Optional.of(dataset1));
+        given(datasetRepository.findBySubjectId(1L)).willReturn(Arrays.asList(dataset1));
         DatasetRightsDTO drv = mockDatasetRightsDTO(100L, 2L, 1L);
         given(datasetRepository.findRightsDtoBaseById(dataset1.getId())).willReturn(drv);
         given(datasetRepository.findByExaminationIdWithProcessingAncestorsAndExamination(1L)).willReturn(Arrays.asList(dataset1));

@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.vip.executionTemplate.dto.mapper;
 
-import org.mapstruct.DecoratedWith;
 import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Named;

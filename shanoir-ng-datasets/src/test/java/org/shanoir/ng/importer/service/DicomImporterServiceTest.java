@@ -107,7 +107,7 @@ public class DicomImporterServiceTest {
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(USER_NAME);
             RestServiceException exception = assertThrows(RestServiceException.class,
-                    () -> dicomImporterService.importDicom(metaInformationAttributes, attributes, "MR"));
+                    () -> dicomImporterService.importDicom(metaInformationAttributes, attributes));
             assertEquals(HttpStatus.FORBIDDEN.value(), exception.getErrorModel().getCode());
         }
         verifyNoInteractions(subjectService);
@@ -123,7 +123,7 @@ public class DicomImporterServiceTest {
         // No center found and RabbitMQ answers null: proves the import continued
         // after the rights check, until the center creation
         RestServiceException exception = assertThrows(RestServiceException.class,
-                () -> dicomImporterService.importDicom(metaInformationAttributes, attributes, "MR"));
+                () -> dicomImporterService.importDicom(metaInformationAttributes, attributes));
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.getErrorModel().getCode());
         verify(subjectService).findByNameAndStudyId("subject01", STUDY_ID);
     }

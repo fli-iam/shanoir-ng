@@ -16,7 +16,6 @@ package org.shanoir.ng.dataset.controler;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,20 +31,19 @@ import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetDownloadDataInput;
 import org.shanoir.ng.dataset.dto.DatasetLight;
-import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.CsvCopyService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
+
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
@@ -64,10 +62,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
-import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -90,9 +85,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -239,7 +232,7 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public ResponseEntity<DatasetWithDependenciesDTOInterface> findDatasetById(
+    public ResponseEntity<DatasetDTO> findDatasetById(
             final Long datasetId) throws EntityNotFoundException {
 
         final Dataset dataset = datasetService.findById(datasetId);
@@ -253,7 +246,7 @@ public class DatasetApiController implements DatasetApi {
         } else if (dataset instanceof EegDataset) {
             return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(datasetMapper.datasetToDatasetWithParentsAndProcessingsDTO(dataset), HttpStatus.OK);
+            return new ResponseEntity<>(datasetMapper.datasetLightToDatasetLightDTO(dataset), HttpStatus.OK);
         }
     }
 

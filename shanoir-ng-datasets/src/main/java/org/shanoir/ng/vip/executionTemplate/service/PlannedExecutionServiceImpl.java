@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.vip.executionTemplate.service;
 
-import com.fasterxml.jackson.core.ObjectCodec;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.service.TransactionRunner;
 import org.shanoir.ng.dataset.model.Dataset;

@@ -28,7 +28,6 @@ import org.shanoir.ng.tag.model.StudyTag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -223,94 +222,98 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Query("SELECT DISTINCT de.dataset.id FROM DatasetExpression de WHERE de.dataset.id IN :ids")
     Set<Long> findDatasetIdsHavingExpressions(List<Long> ids);
 
-    @Query("SELECT dataset FROM Dataset dataset " +
-            "JOIN FETCH dataset.datasetProcessing AS dp " +
-            "JOIN FETCH dp.inputDatasets " +
-            "WHERE dataset.id = :id")
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "JOIN FETCH dataset.datasetProcessing AS dp "
+            + "JOIN FETCH dp.inputDatasets "
+            + "WHERE dataset.id = :id")
     Dataset findByIdWithProcessingAncestors(Long id);
 
-    @Query("SELECT dataset FROM Dataset dataset " +
-            "JOIN FETCH dataset.datasetProcessing AS dp " +
-            "JOIN FETCH dp.inputDatasets " +
-            "WHERE dataset.id in :ids")
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "JOIN FETCH dataset.datasetProcessing AS dp "
+            + "JOIN FETCH dp.inputDatasets "
+            + "WHERE dataset.id in :ids")
     List<Dataset> findByIdsWithProcessingAncestors(List<Long> ids);
 
-    @Query("SELECT dataset FROM Dataset dataset " +
-            "JOIN FETCH dataset.relatedStudies " +
-            "JOIN FETCH dataset.datasetProcessing " +
-            "JOIN FETCH dataset.datasetAcquisition AS acq " +
-            "JOIN FETCH acq.examination " +
-            "WHERE dataset.id = :id")
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "JOIN FETCH dataset.relatedStudies "
+            + "JOIN FETCH dataset.datasetProcessing "
+            + "JOIN FETCH dataset.datasetAcquisition AS acq "
+            + "JOIN FETCH acq.examination "
+            + "WHERE dataset.id = :id")
     Dataset findByIdWithExaminationRelationsAndRelatedStudies(Long id);
 
-    @EntityGraph(attributePaths = {"datasetProcessing"})
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "LEFT JOIN FETCH dataset.datasetProcessing "
+            + "WHERE dataset.subjectId = :subjectId")
     Dataset findByIdWithDatasetProcessing(Long id);
 
-    @EntityGraph(attributePaths = {"tags"})
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "LEFT JOIN FETCH dataset.tags "
+            + "WHERE dataset.subjectId = :subjectId")
     Dataset findByIdWithTags(Long id);
 
     boolean existsBySourceId(Long sourceId);
 
-    @Query("SELECT dataset FROM Dataset dataset " +
-            "WHERE dataset.subjectId = :subjectId")
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "WHERE dataset.subjectId = :subjectId")
     List<Dataset> findBySubjectId(Long subjectId);
 
-    @Query("SELECT dataset FROM Dataset dataset " +
-            "JOIN FETCH dataset.datasetProcessing AS dp " +
-            "JOIN FETCH dp.inputDatasets " +
-            "JOIN FETCH dataset.datasetAcquisition AS acq " +
-            "JOIN FETCH acq.examination " +
-            "WHERE dataset.id in :ids")
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "LEFT JOIN FETCH dataset.datasetProcessing AS dp "
+            + "LEFT JOIN FETCH dp.inputDatasets "
+            + "LEFT JOIN FETCH dataset.datasetAcquisition AS acq "
+            + "LEFT JOIN FETCH acq.examination "
+            + "WHERE dataset.id = :id")
     Optional<Dataset> findByIdWithProcessingAncestorsAndExamination(Long id);
 
-    @Query("SELECT dataset FROM Dataset dataset " +
-            "JOIN FETCH dataset.datasetProcessing AS dp " +
-            "JOIN FETCH dp.inputDatasets " +
-            "JOIN FETCH dataset.datasetAcquisition AS acq " +
-            "JOIN FETCH acq.examination " +
-            "WHERE dataset.id in :ids")
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "JOIN FETCH dataset.datasetProcessing AS dp "
+            + "JOIN FETCH dp.inputDatasets "
+            + "JOIN FETCH dataset.datasetAcquisition AS acq "
+            + "JOIN FETCH acq.examination "
+            + "WHERE dataset.id in :ids")
     List<Dataset> findByIdsWithProcessingAncestorsAndExamination(List<Long> ids);
 
-    @Query("SELECT dataset FROM Dataset dataset " +
-            "JOIN FETCH dataset.datasetProcessing AS dp " +
-            "JOIN FETCH dp.inputDatasets " +
-            "JOIN FETCH dataset.datasetAcquisition AS acq " +
-            "JOIN FETCH acq.examination e " +
-            "WHERE acq.studyCard.id = :acquisitionId")
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "JOIN FETCH dataset.datasetProcessing AS dp "
+            + "JOIN FETCH dp.inputDatasets "
+            + "JOIN FETCH dataset.datasetAcquisition AS acq "
+            + "JOIN FETCH acq.examination e "
+            + "WHERE acq.studyCard.id = :acquisitionId")
     List<Dataset> findByAcquisitionIdWithProcessingAncestorsAndExamination(Long acquisitionId);
 
-    @Query("SELECT dataset FROM Dataset dataset " +
-            "JOIN FETCH dataset.datasetProcessing AS dp " +
-            "JOIN FETCH dp.inputDatasets " +
-            "JOIN FETCH dataset.datasetAcquisition AS acq " +
-            "JOIN FETCH acq.examination e " +
-            "WHERE acq.id = :studyCardId")
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "JOIN FETCH dataset.datasetProcessing AS dp "
+            + "JOIN FETCH dp.inputDatasets "
+            + "JOIN FETCH dataset.datasetAcquisition AS acq "
+            + "JOIN FETCH acq.examination e "
+            + "WHERE acq.id = :studyCardId")
     List<Dataset> findByStudyCardIdWithProcessingAncestorsAndExamination(Long studyCardId);
 
-    @Query("SELECT dataset FROM Dataset dataset " +
-            "JOIN FETCH dataset.datasetProcessing AS dp " +
-            "JOIN FETCH dp.inputDatasets " +
-            "JOIN FETCH dataset.datasetAcquisition AS acq " +
-            "JOIN FETCH acq.examination e " +
-            "WHERE acq.id = :studyCardId " +
-            "AND e.study.id IN :studyIds")
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "JOIN FETCH dataset.datasetProcessing AS dp "
+            + "JOIN FETCH dp.inputDatasets "
+            + "JOIN FETCH dataset.datasetAcquisition AS acq "
+            + "JOIN FETCH acq.examination e "
+            + "WHERE acq.id = :studyCardId "
+            + "AND e.study.id IN :studyIds")
     List<Dataset> findByStudyCardIdAndStudyIdsWithProcessingAncestorsAndExamination(Long studyCardId, List<Long> studyIds);
 
-    @Query("SELECT dataset FROM Dataset dataset " +
-            "JOIN FETCH dataset.datasetProcessing AS dp " +
-            "JOIN FETCH dp.inputDatasets " +
-            "JOIN FETCH dataset.datasetAcquisition AS acq " +
-            "JOIN FETCH acq.examination e " +
-            "WHERE e.id = :examinationId")
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "JOIN FETCH dataset.datasetProcessing AS dp "
+            + "JOIN FETCH dp.inputDatasets "
+            + "JOIN FETCH dataset.datasetAcquisition AS acq "
+            + "JOIN FETCH acq.examination e "
+            + "WHERE e.id = :examinationId")
     List<Dataset> findByExaminationIdWithProcessingAncestorsAndExamination(Long examinationId);
 
-    @Query("SELECT dataset FROM Dataset dataset " +
-            "JOIN FETCH dataset.datasetProcessing AS dp " +
-            "JOIN FETCH dp.inputDatasets " +
-            "JOIN FETCH dataset.datasetAcquisition AS acq " +
-            "JOIN FETCH acq.examination e " +
-            "WHERE e.study.id IN :study_ids " +
-            "ANd dataset.id IN :ids")
+    @Query("SELECT dataset FROM Dataset dataset "
+            + "JOIN FETCH dataset.datasetProcessing AS dp "
+            + "JOIN FETCH dp.inputDatasets "
+            + "JOIN FETCH dataset.datasetAcquisition AS acq "
+            + "JOIN FETCH acq.examination e "
+            + "WHERE e.study.id IN :study_ids "
+            + "ANd dataset.id IN :ids")
     List<Dataset> findByIdsAndStudyIdsWithProcessingAncestorsAndExamination(List<Long> studyIds, List<Long> ids);
 
     @Query(value = "SELECT d.id FROM Dataset d",

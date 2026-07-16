@@ -44,6 +44,8 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
 
     List<DatasetAcquisition> findBySourceId(Long sourceId);
 
+    List<DatasetAcquisition> findByExaminationId(Long examinationId);
+
     DatasetAcquisition findBySourceIdAndExaminationStudy_Id(Long sourceId, Long studyId);
 
     @Query(value = "SELECT id FROM dataset_acquisition acq "

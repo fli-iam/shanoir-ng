@@ -51,6 +51,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
@@ -134,6 +135,7 @@ public class WADODownloaderService {
     private WebClient webClient;
 
     @Autowired
+    @Lazy
     private DatasetService datasetService;
 
     @PostConstruct

@@ -14,22 +14,10 @@
 
 package org.shanoir.ng.download;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.dicom.WADOURLHandler;
-import org.shanoir.ng.examination.model.Examination;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The parameterized type is the type for the uid keys

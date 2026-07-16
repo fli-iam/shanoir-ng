@@ -21,7 +21,6 @@ import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetDownloadDataInput;
 import org.shanoir.ng.dataset.dto.DatasetLight;
-import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
@@ -111,7 +110,7 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "500", description = "unexpected error")})
     @GetMapping(value = "/{datasetId}", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL'))")
-    ResponseEntity<DatasetWithDependenciesDTOInterface> findDatasetById(
+    ResponseEntity<DatasetDTO> findDatasetById(
             @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId) throws EntityNotFoundException;
 
     @Operation(summary = "", description = "Updates a dataset")

@@ -26,6 +26,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -101,9 +102,11 @@ public class STOWRSMultipartRequestFilter extends GenericFilterBean {
     private static final String DICOM_MODALITY_NM = "NM";
 
     @Autowired
+    @Lazy
     private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
     @Autowired
+    @Lazy
     private DicomImporterService dicomImporterService;
 
     @Override

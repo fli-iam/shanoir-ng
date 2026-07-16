@@ -234,18 +234,6 @@ public class HttpService {
         }
     }
 
-    public CloseableHttpResponse delete(String string) throws Exception {
-        try {
-            HttpDelete httpDelete = new HttpDelete(string);
-            httpDelete.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
-            CloseableHttpResponse response = httpClient.execute(httpDelete, context);
-            return response;
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
     public CloseableHttpResponse delete(String url) throws Exception {
         try {
             HttpDelete httpDelete = new HttpDelete(url);

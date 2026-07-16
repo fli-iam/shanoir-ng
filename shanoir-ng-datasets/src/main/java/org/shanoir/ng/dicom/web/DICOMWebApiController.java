@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -93,6 +94,9 @@ public class DICOMWebApiController implements DICOMWebApi {
 
     @Autowired
     private ExaminationService examinationService;
+
+    @Autowired
+    private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
     @Autowired
     private DICOMWebService dicomWebService;

@@ -141,7 +141,7 @@ public class ExaminationApiSecurityTest {
     }
 
 
-    private void testAll(String role) throws ShanoirException, RestServiceException {
+    private void testAll(String role) throws ShanoirException {
         /**
          * -> study 1 [CAN_SEE_ALL]
          *     -> subject 1
@@ -185,18 +185,22 @@ public class ExaminationApiSecurityTest {
         // exam 1 is in center 1
         Examination exam1 = mockExam(1L, 1L, 1L);
         given(examinationRepository.findById(1L)).willReturn(Optional.of(exam1));
+        given(examinationRepository.findByIdWithAcquisitions(1L)).willReturn(Optional.of(exam1));
         ExaminationDTO examDTO1 = mockExaminationDTO(1L, 1L, 1L, 1L);
         // exam 2 is in center 2
         Examination exam2 = mockExam(2L, 2L, 2L);
         given(examinationRepository.findById(2L)).willReturn(Optional.of(exam2));
+        given(examinationRepository.findByIdWithAcquisitions(2L)).willReturn(Optional.of(exam2));
         ExaminationDTO examDTO2 = mockExaminationDTO(2L, 2L, 2L, 2L);
         // exam 3 is in center 3
         Examination exam3 = mockExam(3L, 3L, 1L);
         given(examinationRepository.findById(3L)).willReturn(Optional.of(exam3));
+        given(examinationRepository.findByIdWithAcquisitions(3L)).willReturn(Optional.of(exam3));
         ExaminationDTO examDTO3 = mockExaminationDTO(3L, 1L, 1L, 3L);
         // exam 4 is in center 4
         Examination exam4 = mockExam(4L, 4L, 4L);
         given(examinationRepository.findById(4L)).willReturn(Optional.of(exam4));
+        given(examinationRepository.findByIdWithAcquisitions(4L)).willReturn(Optional.of(exam4));
         ExaminationDTO examDTO4 = mockExaminationDTO(4L, 4L, 4L, 4L);
         // exam 1 & 3 are in study 1 > subject 1 (but in different centers)
         given(examinationRepository.findBySubjectIdAndStudy_Id(1L, 1L)).willReturn(Utils.toList(exam1, exam3));

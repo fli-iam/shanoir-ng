@@ -208,6 +208,7 @@ public class ImporterServiceTest {
             when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(qualityCard)); // TODO perform quality card tests
             when(qualityService.checkQuality(Mockito.eq(datasetAcq), Mockito.eq(acquisitionAttributes), Mockito.eq(Utils.toList(qualityCard)))).thenReturn(qualityResult);
             when(datasetAcquisitionService.createAll(any())).thenReturn(Utils.toList(datasetAcq));
+            when(examinationRepository.findByIdWithAcquisitions(examination.getId())).thenReturn(Optional.of(examination));
 
             // WHEN we treat this importjob
             service.createAllDatasetAcquisition(importJob, 1L);

@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.dataset.modality;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 
 import org.shanoir.ng.shared.core.model.IdName;
