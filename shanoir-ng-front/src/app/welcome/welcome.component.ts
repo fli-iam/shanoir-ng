@@ -31,18 +31,19 @@ import { isDarkColor } from "../utils/app.utils";
 })
 export class WelcomeComponent implements OnInit {
 
-	public githubLogoUrl: string = ImagesUrlUtil.GITHUB_WHITE_LOGO_PATH;
+    public contactMail: string = "mailto:" + AppUtils.SHANOIR_CONTACT_EMAIL;
+    public githubLogoUrl: string = ImagesUrlUtil.GITHUB_WHITE_LOGO_PATH;
 	public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
-	public email: string = "mailto:developers_shanoir-request@inria.fr";
 	public publicStudies: StudyLight[] = [];
-  public usersCount: number = 0;
-  public eventsCount: number = 0;
-  public studiesCount: number = 0;
-  public datasetAcquisitionsCount: number = 0;
-  public subjectsCount: number = 0;
-  public storageSize: number = 0;
+    public usersCount: number = 0;
+    public eventsCount: number = 0;
+    public studiesCount: number = 0;
+    public datasetAcquisitionsCount: number = 0;
+    public subjectsCount: number = 0;
+    public storageSize: number = 0;
 	public StudyType = StudyType;
 	public show: number = 10;
+
   public welcomeIntroduction: string = AppUtils.FRONTEND_WELCOME_INTRODUCTION;
 	@ViewChild('showMore', { static: false }) showMore: ElementRef<HTMLElement>;
 
