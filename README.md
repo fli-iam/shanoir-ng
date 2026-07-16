@@ -234,20 +234,20 @@ Shanoir is configured with environment variables. It is mostly handled with a a
 set of *facade* variables named `SHANOIR_*` (which cover the most typical
 setups).
 
-Name                  | Value             | Description                             |
---------------------- | ----------------- | --------------------------------------- | 
-`SHANOIR_URL_HOST`    | *hostname*        | hostname where shanoir is reachable     |
-`SHANOIR_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED) |
-`SHANOIR_SMTP_HOST`   | *hostname*        | SMTP relay for outgoing e-mails         |
-`SHANOIR_ADMIN_EMAIL` | *e-mail address*  | contact address of the administrator (for outgoing e-mails) |
-`SHANOIR_ADMIN_NAME`  | *name*            | name of the administrator (for outgoing e-mails) |
-`SHANOIR_PREFIX`      | *slug* (optional) | prefix for container names (needed if you deploy multiple shanoir instances on the same host) |
+Name                  | Value             | Description                                                                                                                                                                         |
+--------------------- | ----------------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| 
+`SHANOIR_URL_HOST`    | *hostname*        | hostname where shanoir is reachable                                                                                                                                                 |
+`SHANOIR_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED)                                                                                                                                |
+`SHANOIR_SMTP_HOST`   | *hostname*        | SMTP relay for outgoing e-mails                                                                                                                                                     |
+`SHANOIR_NOTIFICATION_EMAIL` | *e-mail address*  | contact address for the notifications (for outgoing e-mails)                                                                                                                        |
+`SHANOIR_NOTIFICATION_NAME`  | *name*            | name of the notification people (for outgoing e-mails)                                                                                                                              |
+`SHANOIR_PREFIX`      | *slug* (optional) | prefix for container names (needed if you deploy multiple shanoir instances on the same host)                                                                                       |
 `SHANOIR_X_FORWARDED` | `generate\|trust`  | configures whether the nginx container generates the `X-Forwarded-*` HTTP headers (if running stand-alone) or trusts the existing headers (if located behind another reverse-proxy) |
-`SHANOIR_CERTIFICATE` | `auto\|manual`     | auto-generates a self-signed TLS certificate (NOT RECOMMENDED) or use a manually installed certificate |
-`SHANOIR_MIGRATION`   | `auto\|init\|never\|manual\|export\|import` | Normal runs should use `auto` in development and `never` in production. Other values are for controlling deployment and migrations (see below). |
-`SHANOIR_KEYCLOAK_USER`<br>`SHANOIR_KEYCLOAK_PASSWORD` | *username/password* | Keycloak admin account used by shanoir for managing user accounts |
-`SHANOIR_VIEWER_OHIF_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED) |
-`SHANOIR_VIEWER_OHIF_URL_HOST`    | *hostname*         | hostname where the OHFI-Viewer is reachable     |
+`SHANOIR_CERTIFICATE` | `auto\|manual`     | auto-generates a self-signed TLS certificate (NOT RECOMMENDED) or use a manually installed certificate                                                                              |
+`SHANOIR_MIGRATION`   | `auto\|init\|never\|manual\|export\|import` | Normal runs should use `auto` in development and `never` in production. Other values are for controlling deployment and migrations (see below).                                     |
+`SHANOIR_KEYCLOAK_USER`<br>`SHANOIR_KEYCLOAK_PASSWORD` | *username/password* | Keycloak admin account used by shanoir for managing user accounts                                                                                                                   |
+`SHANOIR_VIEWER_OHIF_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED)                                                                                                                                |
+`SHANOIR_VIEWER_OHIF_URL_HOST`    | *hostname*         | hostname where the OHFI-Viewer is reachable                                                                                                                                         |
 
 **Notes**
 * You must ensure that the hostname `SHANOIR_URL_HOST` can be resolved from the
