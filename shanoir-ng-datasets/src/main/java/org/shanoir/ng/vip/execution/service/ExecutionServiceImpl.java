@@ -27,7 +27,6 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
-import org.shanoir.ng.utils.ShanoirWebClient;
 import org.shanoir.ng.vip.execution.dto.ExecutionCandidateDTO;
 import org.shanoir.ng.vip.execution.dto.VipExecutionDTO;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
@@ -40,6 +39,7 @@ import org.shanoir.ng.vip.shared.service.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,6 +47,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
@@ -89,7 +90,8 @@ public class ExecutionServiceImpl implements ExecutionService {
     private DatasetProcessingRepository datasetProcessingRepository;
 
     @Autowired
-    private ShanoirWebClient shanoirWebClient;
+    @Qualifier("buffer500")
+    private WebClient webClient;
 
     @Autowired
     private Utils utils;
@@ -131,7 +133,7 @@ public class ExecutionServiceImpl implements ExecutionService {
 
     public Mono<VipExecutionDTO> getExecution(String identifier) {
         String url = vipExecutionUri + "/" + identifier;
-        return shanoirWebClient.get()
+        return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
                 .retrieve()
@@ -146,7 +148,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         DatasetProcessingRepository.IdentificationData identificationData = datasetProcessingRepository.findIdentificationDataFromProcessingId(processingId);
 
         String url = vipUrl + vipExecutionUri + "/" + identificationData.getMonitoringIdentifier() + "/jobs/" + identificationData.getMonitoringIndex() + "/stderr";
-        return shanoirWebClient.get()
+        return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
                 .retrieve()
@@ -161,7 +163,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         DatasetProcessingRepository.IdentificationData identificationData = datasetProcessingRepository.findIdentificationDataFromProcessingId(processingId);
 
         String url = vipUrl + vipExecutionUri + "/" + identificationData.getMonitoringIdentifier() + "/jobs/" + identificationData.getMonitoringIndex() + "/stdout";
-        return shanoirWebClient.get()
+        return webClient.get()
                 .uri(url)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
                 .retrieve()
@@ -181,7 +183,7 @@ public class ExecutionServiceImpl implements ExecutionService {
         String url = vipUrl + vipExecutionUri + "/" + identifier + "/summary";
         HttpHeaders headers = getServiceAccountHttpHeaders();
 
-        return shanoirWebClient.get()
+        return webClient.get()
                 .uri(url)
                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                 .retrieve()
@@ -308,7 +310,7 @@ public class ExecutionServiceImpl implements ExecutionService {
      * @return ExecutionDTO
      */
     private Mono<VipExecutionDTO> createExecution(VipExecutionDTO execution) {
-        return shanoirWebClient.post()
+        return webClient.post()
                 .uri(vipUrl + vipExecutionUri)
                 .headers(headers -> headers.addAll(utils.getUserHttpHeaders()))
                 .bodyValue(execution)
