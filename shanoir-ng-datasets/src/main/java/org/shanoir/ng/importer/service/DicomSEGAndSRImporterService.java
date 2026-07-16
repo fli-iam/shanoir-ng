@@ -41,6 +41,7 @@ import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.STOWRSMultipartRequestFilter;
+import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -91,6 +92,9 @@ public class DicomSEGAndSRImporterService {
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Autowired
+    private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
+    @Autowired
     private DicomImporterService dicomImporterService;
 
     @Transactional
@@ -99,7 +103,7 @@ public class DicomSEGAndSRImporterService {
         String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
         Examination examination = nonOhifRequest
                 ? examinationRepository.findByStudyInstanceUID(studyInstanceUID).orElse(null)
-                : modifyDicom(datasetAttributes);
+                : modifyDicom(datasetAttributes, modality);
         if (examination == null) {
             LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
             return false;
@@ -126,7 +130,9 @@ public class DicomSEGAndSRImporterService {
      * and searches the corresponding examination and returns it:
      * - use user name as person name, who created the measurement
      * - replace with correct study instance UID from pacs for correct storage
-     * - add subject name according to shanoir, as viewer sends a strange P-000001.
+     * - add subject name according to shanoir, as viewer sends a strange P-000001
+     * - replace virtual series UIDs in source series references with the real
+     *   SeriesInstanceUIDs from pacs, for correct storage and dataset lookup.
      *
      * Note: the approach to replace the newly created SeriesInstanceUID
      * with the referenced SeriesInstanceUID, available via CurrentRequested-
@@ -135,8 +141,9 @@ public class DicomSEGAndSRImporterService {
      * an error in the viewer.
      *
      * @param datasetAttributes
+     * @param modality
      */
-    private Examination modifyDicom(Attributes datasetAttributes) {
+    private Examination modifyDicom(Attributes datasetAttributes, String modality) {
         String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
         Examination examination = null;
         if (studyInstanceUID.contains(StudyInstanceUIDAndSubjectNameHandler.PREFIX)) {
@@ -169,6 +176,10 @@ public class DicomSEGAndSRImporterService {
             Attributes itemContentSequence = contentSequence.get(1);
             itemContentSequence.setString(Tag.PersonName, VR.PN, userName);
         }
+        // the viewer only knows virtual series UIDs (acquisitionUID/datasetUID)
+        // and references the source series with them: replace with the real
+        // SeriesInstanceUIDs, as in the PACS, before storage and dataset lookup
+        resolveVirtualSeriesReferences(datasetAttributes, modality);
         return examination;
     }
 
@@ -232,6 +243,42 @@ public class DicomSEGAndSRImporterService {
             sOPInstanceUID = itemReferencedInstanceSequence.getString(Tag.ReferencedSOPInstanceUID);
         }
         return findDatasetByUIDs(examination, studyInstanceUID, seriesInstanceUID, sOPInstanceUID);
+    }
+
+    /**
+     * Replaces each virtual series UID (acquisitionUID/datasetUID), referenced
+     * as source series by a DICOM SEG or SR created in the viewer, with the
+     * real SeriesInstanceUID in the PACS.
+     *
+     * @param datasetAttributes
+     * @param modality
+     */
+    private void resolveVirtualSeriesReferences(Attributes datasetAttributes, String modality) {
+        if (STOWRSMultipartRequestFilter.DICOM_MODALITY_SEG.equals(modality)) {
+            // DICOM SEG: ReferencedSeriesSequence on top level
+            resolveVirtualSeriesReferences(datasetAttributes.getSequence(Tag.ReferencedSeriesSequence));
+        } else {
+            // DICOM SR: CurrentRequestedProcedureEvidenceSequence -> ReferencedSeriesSequence
+            Sequence evidenceSequence = datasetAttributes.getSequence(Tag.CurrentRequestedProcedureEvidenceSequence);
+            if (evidenceSequence != null) {
+                for (Attributes itemEvidenceSequence : evidenceSequence) {
+                    resolveVirtualSeriesReferences(itemEvidenceSequence.getSequence(Tag.ReferencedSeriesSequence));
+                }
+            }
+        }
+    }
+
+    private void resolveVirtualSeriesReferences(Sequence referencedSeriesSequence) {
+        if (referencedSeriesSequence == null) {
+            return;
+        }
+        for (Attributes itemReferencedSeriesSequence : referencedSeriesSequence) {
+            String seriesInstanceUID = itemReferencedSeriesSequence.getString(Tag.SeriesInstanceUID);
+            String realSeriesInstanceUID = seriesInstanceUIDHandler.resolveSeriesInstanceUID(seriesInstanceUID);
+            if (realSeriesInstanceUID != null && !realSeriesInstanceUID.equals(seriesInstanceUID)) {
+                itemReferencedSeriesSequence.setString(Tag.SeriesInstanceUID, VR.UI, realSeriesInstanceUID);
+            }
+        }
     }
 
     /**

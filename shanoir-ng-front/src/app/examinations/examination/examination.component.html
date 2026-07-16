@@ -23,13 +23,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <i class="fas fa-download"></i>
                         </button>
                     }
-                    @if (mode == 'view') {
+                    @if (mode == 'view' && hasDownloadRight) {
                         <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openViewer()">
                             View DICOM
                             <i class="fa fa-eye"></i>
                         </button>
                     }
-                    @if (mode == 'view') {
+                    @if (mode == 'view' && hasDownloadRight) {
                         <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="openSegmentationViewer()">
                             View for segmentation
                             <i class="fa fa-eye"></i>
