@@ -147,7 +147,7 @@ public class CurrentUploadsWindowTable implements Observer {
     }
 
     private void addRow(DefaultTableModel model, String key, ImportJob nominativeDataImportJob) {
-        Serie firstSelectedSerie = nominativeDataImportJob.getFirstSelectedSerie();
+        Serie firstSerie = nominativeDataImportJob.getFirstSerieWithInstitutionAndEquipment();
         String actionImport = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import");
         String actionDelete = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete");
         Object[] row = switch (nominativeDataImportJob.getUploadState()) {
@@ -157,7 +157,7 @@ public class CurrentUploadsWindowTable implements Observer {
                 nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(), // Was firstname and lastname from nominativeDataUploadJob, check if firstname still present
                 nominativeDataImportJob.getPatient().getPatientID(),
                 nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
-                firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")", // was e.g Philips (serial number)
+                firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")", // was e.g Philips (serial number)
                 nominativeDataImportJob.getUploadState().toString(),
                 actionImport,
                 actionDelete
@@ -168,7 +168,7 @@ public class CurrentUploadsWindowTable implements Observer {
                 nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
                 nominativeDataImportJob.getPatient().getPatientID(),
                 nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
-                firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
+                firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")",
                 nominativeDataImportJob.getUploadPercentage().toString(),
                 "",
                 ""
@@ -179,7 +179,7 @@ public class CurrentUploadsWindowTable implements Observer {
                 nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
                 nominativeDataImportJob.getPatient().getPatientID(),
                 nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
-                firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
+                firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")",
                 nominativeDataImportJob.getUploadPercentage().toString(),
                 "",
                 actionDelete
@@ -190,7 +190,7 @@ public class CurrentUploadsWindowTable implements Observer {
                 nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
                 nominativeDataImportJob.getPatient().getPatientID(),
                 nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
-                firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
+                firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")",
                 nominativeDataImportJob.getUploadPercentage().toString(),
                 "",
                 ""
