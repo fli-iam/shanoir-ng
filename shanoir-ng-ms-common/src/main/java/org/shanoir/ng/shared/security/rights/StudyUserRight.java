@@ -46,7 +46,17 @@ public enum StudyUserRight {
     /**
      * The member can send the study data to a processing pipeline.
      */
-    CAN_EXECUTE(5);
+    CAN_EXECUTE(5),
+
+    /**
+     * The member can create and edit annotations (e.g. measurements, segmentations) on the study's data.
+     */
+    CAN_ANNOTATE(6),
+
+    /**
+     * The member can review the study's data.
+     */
+    CAN_REVIEW(7);
 
 
     private int id;
