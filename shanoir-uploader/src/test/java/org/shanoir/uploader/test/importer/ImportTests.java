@@ -17,12 +17,15 @@ package org.shanoir.uploader.test.importer;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -76,6 +79,12 @@ public class ImportTests extends AbstractTest {
 
     private static final long CONSISTENCY_CHECK_POLL_INTERVAL_MILLIS = 5 * 1000; // 5 sec
 
+    // Local folder where a copy of every import-job JSON sent is dumped
+    private static final File IMPORT_JOB_DUMP_DIR = new File("target/import-job-dumps");
+
+    private static final DateTimeFormatter IMPORT_JOB_DUMP_TIMESTAMP_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
+
     private static Study studyWithStudyCards;
 
     private static Study studyNoStudyCards;
@@ -94,7 +103,7 @@ public class ImportTests extends AbstractTest {
                 org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, studyWithStudyCards);
                 org.shanoir.ng.importer.model.Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
                 Examination examination = createExaminationFromDicomStudy(studyWithStudyCards, dicomStudy, subject);
-                startImportJobFromZip(importJob, subject, examination, studyWithStudyCards);
+                startImportJobFromDicomZip(importJob, subject, examination, studyWithStudyCards);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -162,7 +171,7 @@ public class ImportTests extends AbstractTest {
         importJobJsonFile.createNewFile();
         Util.mapper.writeValue(importJobJsonFile, importJob);
 
-        startImportJobFromShanoirUploader(importJob, uploadFolder);
+        startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromShanoirUploader");
 
         // Local files here were pseudonymized before upload, exactly like the
         // server-side copy, so a full tag comparison is meaningful.
@@ -184,7 +193,7 @@ public class ImportTests extends AbstractTest {
                 org.shanoir.uploader.model.rest.Subject subject = createSubjectNoStudyCard(importJob, studyNoStudyCards);
                 org.shanoir.ng.importer.model.Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
                 Examination examination = createExaminationNoStudyCard(studyNoStudyCards, dicomStudy, subject);
-                startImportJobFromZipNoStudyCard(importJob, subject, examination, studyNoStudyCards, equipment.getId());
+                startImportJobFromDicomZipNoStudyCard(importJob, subject, examination, studyNoStudyCards, equipment.getId());
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -254,7 +263,7 @@ public class ImportTests extends AbstractTest {
         importJobJsonFile.createNewFile();
         Util.mapper.writeValue(importJobJsonFile, importJob);
 
-        startImportJobFromShanoirUploader(importJob, uploadFolder);
+        startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromShanoirUploaderNoStudyCard");
 
         waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
     }
@@ -372,16 +381,15 @@ public class ImportTests extends AbstractTest {
         return subjectREST;
     }
 
-    private void startImportJobFromShanoirUploader(ImportJob importJob, File uploadFolder) throws Exception {
+    private void startImportJobFromShanoirUploader(ImportJob importJob, File uploadFolder, String label)
+            throws Exception {
         File[] dicomFiles = uploadFolder.listFiles(
                 (dir, name) -> name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX));
         Assertions.assertNotNull(dicomFiles);
         Assertions.assertTrue(dicomFiles.length > 0, "No anonymized DICOM files found in upload folder.");
-
         String tempDirId = userClient.createTempDir();
         Assertions.assertNotNull(tempDirId);
         logger.info("Upload: tempDirId for import: " + tempDirId);
-
         int i = 0;
         for (File file : dicomFiles) {
             i++;
@@ -389,13 +397,13 @@ public class ImportTests extends AbstractTest {
             logger.debug("Uploaded file {}/{}: {}", i, dicomFiles.length, file.getName());
         }
         logger.info("Upload: " + dicomFiles.length + " uploaded files to tempDirId: " + tempDirId);
-
         importJob.setWorkFolder(tempDirId);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
+        dumpImportJobJson(importJobJson, tempDirId, label);
         userClient.startImportJob(importJobJson);
     }
 
-    private void startImportJobFromZip(ImportJob importJob, org.shanoir.uploader.model.rest.Subject subjectREST,
+    private void startImportJobFromDicomZip(ImportJob importJob, org.shanoir.uploader.model.rest.Subject subjectREST,
             Examination examination, org.shanoir.uploader.model.rest.Study study)
             throws JsonProcessingException, Exception {
         importJob.setStudyId(study.getId());
@@ -412,6 +420,7 @@ public class ImportTests extends AbstractTest {
             importJob.setAnonymisationProfileToUse("Profile OFSEP");
         }
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
+        dumpImportJobJson(importJobJson, importJob.getWorkFolder(), "testImportFromDicomZip");
         userClient.startImportJob(importJobJson);
     }
 
@@ -421,7 +430,7 @@ public class ImportTests extends AbstractTest {
      * are left {@code null} instead of being populated from a (non-existent)
      * study card.
      */
-    private void startImportJobFromZipNoStudyCard(ImportJob importJob,
+    private void startImportJobFromDicomZipNoStudyCard(ImportJob importJob,
             org.shanoir.uploader.model.rest.Subject subjectREST,
             Examination examination, org.shanoir.uploader.model.rest.Study study, Long acquisitionEquipmentId)
             throws JsonProcessingException, Exception {
@@ -438,6 +447,7 @@ public class ImportTests extends AbstractTest {
             importJob.setAnonymisationProfileToUse("Profile OFSEP");
         }
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
+        dumpImportJobJson(importJobJson, importJob.getWorkFolder(), "testImportFromDicomZipNoStudyCard");
         userClient.startImportJob(importJobJson);
     }
 
@@ -518,6 +528,20 @@ public class ImportTests extends AbstractTest {
             logger.error("Error while reading file: ", e);
         }
         return null;
+    }
+
+    private void dumpImportJobJson(String importJobJson, String workFolder, String label) {
+        try {
+            Files.createDirectories(IMPORT_JOB_DUMP_DIR.toPath());
+            String timestamp = LocalDateTime.now().format(IMPORT_JOB_DUMP_TIMESTAMP_FORMATTER);
+            String workFolderPart = (workFolder != null && !workFolder.isEmpty()) ? workFolder : "no-workfolder";
+            File dumpFile = new File(IMPORT_JOB_DUMP_DIR, timestamp + "_" + workFolderPart + "_" + label + ".json");
+            Files.writeString(dumpFile.toPath(), importJobJson, StandardCharsets.UTF_8);
+            logger.info("Dumped import-job JSON sent to server to: {}", dumpFile.getAbsolutePath());
+        } catch (Exception e) {
+            // This is a debugging convenience only — never fail the test because of it.
+            logger.warn("Could not dump import-job JSON for manual inspection: {}", e.getMessage());
+        }
     }
 
 }

@@ -399,8 +399,6 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         }
 
         logger.info("Prepare import job in thread: pseudonymize DICOM files, write import-job.json");
-        importJob.setDicomQuery(null); // clean up, as not necessary anymore
-        importJob.setPatientVerification(null); // avoid sending patient info to server
         ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(),
             examination.getId(), examination.getStudyInstanceUID(), studyREST, studyCard, equipment);
         File importJobFile = new File(importJob.getWorkFolder() + File.separator + ShUpConfig.IMPORT_JOB_JSON);

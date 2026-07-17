@@ -258,6 +258,15 @@ public class ImportUtils {
         studiesImportJob.add(studyImportJob);
         patient.setStudies(studiesImportJob);
         importJob.setPatients(patients);
+        // Attention: the below lines are important to reduce the size
+        // of the import-job.json by 50% (send to and processed on the server).
+        // The server ignores today the selectedSeries in ImportJob, only used
+        // today inside ShUp.
+        importJob.setSelectedSeries(null);
+        // clean up, as not necessary anymore
+        importJob.setDicomQuery(null);
+        // avoid sending patient info to server
+        importJob.setPatientVerification(null);
         return importJob;
     }
 
