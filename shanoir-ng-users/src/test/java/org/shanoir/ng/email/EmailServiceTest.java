@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.email;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 
@@ -142,6 +143,39 @@ public class EmailServiceTest {
         emailService.notifyStudyManagerDataImported(mail);
         // THEN an email is sent to the administrators
         assertReceivedMessageContains("[Shanoir] Data imported to StudyName", "imported data to study");
+    }
+
+    @Test
+    public void sendMassEmailTest() throws IOException, MessagingException {
+        final User first = massEmailUser("first@test.shanoir.fr");
+        final User second = massEmailUser("second@test.shanoir.fr");
+
+        emailService.sendMassEmail(Arrays.asList(first, second), "[Shanoir] Maintenance",
+                "Service unavailable <tomorrow>.\nSorry for the inconvenience.");
+
+        final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+        assertEquals(2, receivedMessages.length);
+        assertTrue(receivedMessages[0].getSubject().contains("[Shanoir] Maintenance"));
+        final String content = (String) receivedMessages[0].getContent();
+        assertTrue(content.contains("Dear"));
+        // markup of the announcement is escaped, line breaks are rendered
+        assertTrue(content.contains("Service unavailable &lt;tomorrow&gt;.<br/>Sorry for the inconvenience."));
+    }
+
+    @Test
+    public void sendMassEmailSkipsFailingRecipientTest() {
+        final User failing = massEmailUser(null);
+        final User valid = massEmailUser("valid@test.shanoir.fr");
+
+        emailService.sendMassEmail(Arrays.asList(failing, valid), "[Shanoir] Maintenance", "Service unavailable.");
+
+        assertEquals(1, greenMail.getReceivedMessages().length);
+    }
+
+    private User massEmailUser(final String email) {
+        final User user = ModelsUtil.createUser();
+        user.setEmail(email);
+        return user;
     }
 
     private void assertReceivedMessageContains(final String expectedSubject, final String expectedContent)
