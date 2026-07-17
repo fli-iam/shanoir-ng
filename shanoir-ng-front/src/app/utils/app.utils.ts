@@ -15,7 +15,7 @@
 import { HttpResponse } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { environment } from '../../environments/environment';
+import { environment } from '@env/environment';
 
 // Emails
 export const SHANOIR_DPO_EMAIL = environment.dpoMail;
@@ -337,7 +337,7 @@ function deepEquals(x, y) {
         }
         return true;
     }
-};
+}
 
 export function objectsEqual(value1, value2) {
     if (value1 === value2) return true;
@@ -360,7 +360,7 @@ export function isDarkColor(colorInp: string): boolean {
 }
 
 export function getSizeStr(size: number): string {
-    if (size == null || size == undefined){
+    if (size == null) {
         return "";
     }
     const base: number = 1024;
