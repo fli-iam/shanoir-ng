@@ -334,8 +334,8 @@ public class QueryPACSService {
         DicomParam patientBirthDate = initDicomParam(Tag.PatientBirthDate, dicomQuery.getPatientBirthDate());
         DicomParam studyDescription = initDicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription());
         DicomParam studyDate = initDicomParam(Tag.StudyDate, dicomQuery.getStudyDate());
-        DicomParam[] params = { modality, patientName, patientID, patientBirthDate,
-                new DicomParam(Tag.PatientBirthName), new DicomParam(Tag.PatientSex), studyDescription, studyDate };
+        DicomParam[] params = {modality, patientName, patientID, patientBirthDate,
+                new DicomParam(Tag.PatientBirthName), new DicomParam(Tag.PatientSex), studyDescription, studyDate};
         List<Attributes> patientsAttr = queryCFind(association, params, QueryRetrieveLevel.PATIENT);
         if (patientsAttr != null) {
             List<Patient> patients = new ArrayList<Patient>();
@@ -382,11 +382,11 @@ public class QueryPACSService {
         DicomParam patientName = initDicomParam(Tag.PatientName, dicomQuery.getPatientName());
         DicomParam patientID = initDicomParam(Tag.PatientID, dicomQuery.getPatientID());
         DicomParam patientBirthDate = initDicomParam(Tag.PatientBirthDate, dicomQuery.getPatientBirthDate());
-        DicomParam[] params = { modality, studyDescription, studyDate, new DicomParam(Tag.PatientName),
+        DicomParam[] params = {modality, studyDescription, studyDate, new DicomParam(Tag.PatientName),
                 new DicomParam(Tag.PatientID), new DicomParam(Tag.PatientBirthDate),
                 new DicomParam(Tag.PatientBirthName),
                 new DicomParam(Tag.PatientSex), new DicomParam(Tag.StudyInstanceUID), patientName, patientID,
-                patientBirthDate };
+                patientBirthDate};
         List<Attributes> studies = queryCFind(association, params, QueryRetrieveLevel.STUDY);
         // list of all corresponding DICOM studies received
         if (studies != null) {
