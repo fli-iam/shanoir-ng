@@ -18,11 +18,16 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.shanoir.ng.massemail.controller.MassEmailApiController;
 import org.shanoir.ng.massemail.model.RecipientGroup;
 import org.shanoir.ng.massemail.service.MassEmailService;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -59,6 +64,8 @@ public class MassEmailApiControllerTest {
     static class MethodSecurityConfiguration {
     }
 
+    private static final String SEND_PATH = "/massemail";
+
     private static final String COUNT_PATH = "/massemail/count";
 
     @Autowired
@@ -92,6 +99,66 @@ public class MassEmailApiControllerTest {
         // the platform-wide GlobalExceptionHandler maps type mismatches to 500
         mvc.perform(MockMvcRequestBuilders.get(COUNT_PATH).param("group", "NOT_A_GROUP")
                 .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void sendMassEmailTest() throws Exception {
+        final List<User> recipients = List.of(ModelsUtil.createUser(1L), ModelsUtil.createUser(2L));
+        given(massEmailService.resolveRecipients(RecipientGroup.ACTIVE)).willReturn(recipients);
+
+        mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"recipientGroup\":\"ACTIVE\",\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
+                .andExpect(status().isAccepted())
+                .andExpect(content().string("2"));
+
+        Mockito.verify(massEmailService).sendMassEmail(recipients, "Maintenance", "Down tomorrow.");
+    }
+
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void sendMassEmailBlankSubjectTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"recipientGroup\":\"ALL\",\"subject\":\" \",\"content\":\"Down tomorrow.\"}"))
+                .andExpect(status().isUnprocessableEntity());
+
+        Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void sendMassEmailMissingGroupTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @WithMockUser(authorities = { "ROLE_USER" })
+    public void sendMassEmailForbiddenToNonAdminTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"recipientGroup\":\"ALL\",\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
+                .andExpect(status().isForbidden());
+
+        Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void sendMassEmailKeycloakErrorTest() throws Exception {
+        given(massEmailService.resolveRecipients(RecipientGroup.INACTIVE))
+                .willThrow(new SecurityException("keycloak unreachable"));
+
+        mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"recipientGroup\":\"INACTIVE\",\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
                 .andExpect(status().isInternalServerError());
     }
 
