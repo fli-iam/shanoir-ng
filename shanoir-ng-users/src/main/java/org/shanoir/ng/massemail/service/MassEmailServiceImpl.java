@@ -18,12 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.massemail.model.RecipientGroup;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.utils.KeycloakClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
@@ -39,6 +41,9 @@ public class MassEmailServiceImpl implements MassEmailService {
 
     @Autowired
     private KeycloakClient keycloakClient;
+
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public List<User> resolveRecipients(final RecipientGroup recipientGroup) throws SecurityException {
@@ -64,6 +69,12 @@ public class MassEmailServiceImpl implements MassEmailService {
     @Override
     public int countRecipients(final RecipientGroup recipientGroup) throws SecurityException {
         return resolveRecipients(recipientGroup).size();
+    }
+
+    @Override
+    @Async("massEmailExecutor")
+    public void sendMassEmail(final List<User> recipients, final String subject, final String content) {
+        emailService.sendMassEmail(recipients, subject, content);
     }
 
     /**

@@ -53,4 +53,17 @@ public interface MassEmailService {
      */
     int countRecipients(RecipientGroup recipientGroup) throws SecurityException;
 
+    /**
+     * Send the announcement to the given users asynchronously, on the mass
+     * email executor. Returns immediately; the outcome is only logged.
+     *
+     * @param recipients
+     *            the users to email.
+     * @param subject
+     *            the email subject.
+     * @param content
+     *            the plain text announcement.
+     */
+    void sendMassEmail(List<User> recipients, String subject, String content);
+
 }
