@@ -1,0 +1,84 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+package org.shanoir.ng.massemail.service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.shanoir.ng.massemail.model.RecipientGroup;
+import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.repository.UserRepository;
+import org.shanoir.ng.user.utils.KeycloakClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+/**
+ * Implementation of mass email recipient resolution.
+ *
+ * @author afragkiadakis
+ */
+@Component
+public class MassEmailServiceImpl implements MassEmailService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private KeycloakClient keycloakClient;
+
+    @Override
+    public List<User> resolveRecipients(final RecipientGroup recipientGroup) throws SecurityException {
+        final List<User> emailableUsers = new ArrayList<>();
+        for (User user : userRepository.findAll()) {
+            if (isEmailable(user)) {
+                emailableUsers.add(user);
+            }
+        }
+        if (RecipientGroup.ALL == recipientGroup) {
+            return emailableUsers;
+        }
+        final Map<String, Boolean> enabledByKeycloakId = keycloakClient.getUsersEnabledStatus();
+        final List<User> recipients = new ArrayList<>();
+        for (User user : emailableUsers) {
+            if (isActive(user, enabledByKeycloakId) == (RecipientGroup.ACTIVE == recipientGroup)) {
+                recipients.add(user);
+            }
+        }
+        return recipients;
+    }
+
+    @Override
+    public int countRecipients(final RecipientGroup recipientGroup) throws SecurityException {
+        return resolveRecipients(recipientGroup).size();
+    }
+
+    /**
+     * Users without an email address cannot be reached and users with a
+     * pending account request were never approved: both are excluded from
+     * every recipient group.
+     */
+    private boolean isEmailable(final User user) {
+        return user.getEmail() != null && !user.getEmail().isBlank()
+                && (user.isAccountRequestDemand() == null || !user.isAccountRequestDemand());
+    }
+
+    private boolean isActive(final User user, final Map<String, Boolean> enabledByKeycloakId) {
+        return user.getKeycloakId() != null
+                && Boolean.TRUE.equals(enabledByKeycloakId.get(user.getKeycloakId()));
+    }
+
+}
