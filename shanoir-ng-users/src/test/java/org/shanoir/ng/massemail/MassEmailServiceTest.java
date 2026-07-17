@@ -29,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.massemail.model.RecipientGroup;
 import org.shanoir.ng.massemail.service.MassEmailServiceImpl;
 import org.shanoir.ng.shared.exception.SecurityException;
@@ -50,6 +51,9 @@ public class MassEmailServiceTest {
 
     @Mock
     private KeycloakClient keycloakClient;
+
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private MassEmailServiceImpl massEmailService;
@@ -75,8 +79,9 @@ public class MassEmailServiceTest {
         noEmailUser = user(5L, null, "kc-noemail", null);
         pendingAccountRequestUser = user(6L, "pending@shanoir.fr", "kc-pending", Boolean.TRUE);
 
-        given(userRepository.findAll()).willReturn(List.of(enabledUser, disabledUser, unknownToKeycloakUser,
-                noKeycloakIdUser, noEmailUser, pendingAccountRequestUser));
+        // lenient: the sendMassEmail delegation test does not resolve recipients
+        Mockito.lenient().when(userRepository.findAll()).thenReturn(List.of(enabledUser, disabledUser,
+                unknownToKeycloakUser, noKeycloakIdUser, noEmailUser, pendingAccountRequestUser));
     }
 
     @Test
@@ -114,6 +119,15 @@ public class MassEmailServiceTest {
         assertEquals(4, massEmailService.countRecipients(RecipientGroup.ALL));
         assertEquals(1, massEmailService.countRecipients(RecipientGroup.ACTIVE));
         assertEquals(3, massEmailService.countRecipients(RecipientGroup.INACTIVE));
+    }
+
+    @Test
+    public void sendMassEmailDelegatesToEmailServiceTest() {
+        final List<User> recipients = List.of(enabledUser);
+
+        massEmailService.sendMassEmail(recipients, "[Shanoir] Maintenance", "Service unavailable.");
+
+        Mockito.verify(emailService).sendMassEmail(recipients, "[Shanoir] Maintenance", "Service unavailable.");
     }
 
     @Test
