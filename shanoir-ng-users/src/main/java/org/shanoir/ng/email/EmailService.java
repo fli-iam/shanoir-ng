@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.email;
 
+import java.util.List;
+
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
@@ -151,5 +153,19 @@ public interface EmailService {
     void notifyUserRefusedFromStudy(AccessRequest refusedRequest);
 
     public void notifyDuaDraftCreation(DuaDraftWrapper mail);
+
+    /**
+     * Send an administrator announcement to each of the given users as an
+     * individual email. A failure on one recipient is logged and does not
+     * prevent sending to the others.
+     *
+     * @param recipients
+     *            the users to email.
+     * @param subject
+     *            the email subject.
+     * @param content
+     *            the plain text announcement, rendered with its line breaks.
+     */
+    void sendMassEmail(List<User> recipients, String subject, String content);
 
 }
