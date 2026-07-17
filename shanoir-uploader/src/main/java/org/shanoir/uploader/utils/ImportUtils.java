@@ -263,9 +263,10 @@ public class ImportUtils {
         // The server ignores today the selectedSeries in ImportJob, only used
         // today inside ShUp.
         importJob.setSelectedSeries(null);
-        // clean up, as not necessary anymore
+        // Clean up, as not necessary anymore
         importJob.setDicomQuery(null);
-        // avoid sending patient info to server
+        // Avoid sending patient info to server
+        importJob.setPatient(null);
         importJob.setPatientVerification(null);
         return importJob;
     }
