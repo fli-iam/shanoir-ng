@@ -42,6 +42,7 @@ import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Manufacturer;
 import org.shanoir.uploader.model.rest.ManufacturerModel;
+import org.shanoir.uploader.model.rest.Profile;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
@@ -76,8 +77,6 @@ public abstract class AbstractTest {
 
     public static Properties testProperties = new Properties();
 
-    private static final String PROFILE = "profile";
-
     private static final String ADMIN_NAME = "shanoir.client.admin.name";
 
     private static final String ADMIN_PASSWORD = "shanoir.client.admin.password";
@@ -91,6 +90,12 @@ public abstract class AbstractTest {
     private static final String USER_PASSWORD = "shanoir.client.user.password";
 
     private static final String IN_PROGRESS = "IN_PROGRESS";
+
+    // Local profile: which server instance to target
+    private static final String PROFILE = "profile";
+
+    // Pseudonymization profile
+    private static final String PROFILE_NEURINFO = "Profile Neurinfo";
 
     // -------------------------------------------------------------------------
     // Role-specific authenticated clients
@@ -390,6 +395,7 @@ public abstract class AbstractTest {
         study.setIsDraft(Boolean.FALSE);
         study.setStudyStatus(IN_PROGRESS);
         study.setStudyCardPolicy(StudyCardPolicy.MANDATORY.name());
+        study.setProfile(new Profile(1L, PROFILE_NEURINFO));
 
         Date today = new Date();
         Calendar cal = Calendar.getInstance();
