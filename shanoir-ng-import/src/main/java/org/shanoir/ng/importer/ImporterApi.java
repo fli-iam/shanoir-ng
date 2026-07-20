@@ -18,6 +18,7 @@ import java.io.IOException;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
@@ -143,6 +144,29 @@ public interface ImporterApi {
               + "(hasAnyRole('EXPERT', 'USER') and "
               + "@importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT')))")
     ResponseEntity<Void> startImportJob(@Parameter(name = "ImportJob", required = true) @RequestBody ImportJob importJob) throws RestServiceException;
+
+    /**
+     * New endpoint to start the migration to a new ImportJob structure,
+     * that is only related to one DICOM study: ImportJobBase.
+     *
+     * @param importJob
+     * @return
+     * @throws RestServiceException
+     */
+    // used by ShanoirUploader!!! 3. step
+    @Operation(summary = "Start import job", description = "Start import job")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "import job started"),
+            @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "/start_import_job_base/", consumes = { "application/json" }, produces = { "application/json" })
+    @PreAuthorize("!@importSecurityService.isDraftStudy(#importJob.getStudyId()) and "
+            + "(hasRole('ADMIN') or "
+            + "(hasAnyRole('EXPERT', 'USER') and "
+            + "@importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT')))")
+    ResponseEntity<Void> startImportJobBase(
+            @Parameter(name = "ImportJob", required = true) @RequestBody ImportJobBase importJob)
+            throws RestServiceException;
 
     @Operation(summary = "Start analysis of EEG job", description = "Start analysis eeg job")
     @ApiResponses(value = {

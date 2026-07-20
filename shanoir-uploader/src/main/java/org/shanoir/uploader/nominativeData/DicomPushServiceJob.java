@@ -72,12 +72,10 @@ public class DicomPushServiceJob {
 
     private final File workFolder = ShUpOnloadConfig.getWorkFolder();
 
-
     public void setDownloadOrCopyActionListener(MainWindow mainWindow) {
         this.dOCAL = mainWindow.dOCAL;
         this.dicomFileAnalyzer = mainWindow.dicomFileAnalyzer;
     }
-
 
     @Scheduled(fixedRate = JOB_RATE)
     public void execute() {
@@ -220,6 +218,7 @@ public class DicomPushServiceJob {
         }
         return true;
     }
+
     /**
      * Prepare the import job for the DICOM push identified complete examination
      * @param patient

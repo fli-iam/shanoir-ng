@@ -14,9 +14,25 @@
 
 package org.shanoir.ng.importer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.Valid;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
@@ -29,7 +45,16 @@ import org.shanoir.ng.importer.eeg.brainvision.BrainVisionReader;
 import org.shanoir.ng.importer.eeg.edf.EDFAnnotation;
 import org.shanoir.ng.importer.eeg.edf.EDFParser;
 import org.shanoir.ng.importer.eeg.edf.EDFParserResult;
-import org.shanoir.ng.importer.model.*;
+import org.shanoir.ng.importer.model.Channel;
+import org.shanoir.ng.importer.model.EegDataset;
+import org.shanoir.ng.importer.model.EegImportJob;
+import org.shanoir.ng.importer.model.Event;
+import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -59,14 +84,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.file.Files;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 /**
  * This is the main component of the import of Shanoir-NG. The front-end in
@@ -145,7 +166,7 @@ public class ImporterApiController implements ImporterApi {
         File tempFile = null;
         try {
             /**
-             * 1. STEP: Handle file management. Always create a userId specific folder in
+             * STEP: Handle file management. Always create a userId specific folder in
              * the import work folder (the root of everything): split imports to clearly
              * separate them into separate folders for each user
              */
@@ -155,9 +176,7 @@ public class ImporterApiController implements ImporterApi {
             if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
                 createDicomDir = true;
             }
-
             File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
-
             if (createDicomDir) {
                 LOG.info("DICOMDIR missing from zip file, generating one.");
                 final File dicomDir = new File(importJobDir, DICOMDIR);
@@ -168,19 +187,13 @@ public class ImporterApiController implements ImporterApi {
             }
 
             /**
-             * 2. STEP: prepare patients list to be put into ImportJob: read DICOMDIR and
-             * complete with meta-data from files
+             * STEP: prepare patients list to be put into ImportJob: read DICOMDIR and
+             * complete with meta-data from files.
              */
             List<Patient> patients = preparePatientsForImportJob(importJobDir);
 
             /**
-             * 3. STEP: split instances into non-images and images and get additional meta-data
-             * from first dicom file of each serie, meta-data missing in dicomdir.
-             */
-            imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, null, false);
-
-            /**
-             * . STEP: create ImportJob
+             * STEP: create ImportJob
              */
             ImportJob importJob = new ImportJob();
             importJob.setFromDicomZip(true);
@@ -188,6 +201,17 @@ public class ImporterApiController implements ImporterApi {
             // Work folder is always relative to general import directory
             importJob.setWorkFolder(importJobDir.getName());
             importJob.setPatients(patients);
+
+            // Work-around during migration time: remove later
+            List<Serie> series = importerManagerService.handleLegacySeries(importJob);
+            importJob.setSeries(series);
+
+            /**
+             * STEP: split instances into non-images and images and get additional meta-data
+             * from first dicom file of each serie, meta-data missing in dicomdir.
+             */
+            imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), false, null, false);
+
             return new ResponseEntity<>(importJob, HttpStatus.OK);
         } catch (Exception e) {
             // If there is an exception, we should delete the temporary folder
@@ -203,7 +227,7 @@ public class ImporterApiController implements ImporterApi {
     /**
      * 1. STEP: read DICOMDIR and create Shanoir model from it (== Dicom model):
      * Patient - Study - Serie - Instance 2. STEP: split instances into non-images
-     * and images and get additional meta-data from first dicom file of each serie,
+     * and images and get additional meta-data from first DICOM file of each serie,
      * meta-data missing in dicomdir.
      *
      * @param dirWithDicomDir
@@ -232,8 +256,31 @@ public class ImporterApiController implements ImporterApi {
         if (importJobDir.exists()) {
             importJob.setWorkFolder(importJobDir.getAbsolutePath());
             LOG.info("============== NEW IMPORT ===========================");
-            LOG.info("Starting import job for user {} (userId: {}) with import job folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
+            LOG.info("Starting import job for user {} (userId: {}) with folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
             importerManagerService.manageImportJob(importJob);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            LOG.error("Missing importJobDir.");
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Missing importJobDir.", null));
+        }
+    }
+
+    @Override
+    public ResponseEntity<Void> startImportJobBase(
+            @Parameter(name = "ImportJob", required = true) @Valid @RequestBody final ImportJobBase importJob)
+            throws RestServiceException {
+        File userImportDir = ImportUtils.getUserImportDir(importDir);
+        final Long userId = KeycloakUtil.getTokenUserId();
+        importJob.setUserId(userId);
+        String tempDirId = importJob.getWorkFolder();
+        final File importJobDir = new File(userImportDir, tempDirId);
+        if (importJobDir.exists()) {
+            importJob.setWorkFolder(importJobDir.getAbsolutePath());
+            LOG.info("============== NEW IMPORT ===========================");
+            LOG.info("Starting import job base for user {} (userId: {}) with folder: {}",
+                    KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
+            importerManagerService.manageImportJobBase(importJob);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             LOG.error("Missing importJobDir.");

@@ -114,7 +114,7 @@ public class DownloadOrCopyRunnable implements Runnable {
                  * 2. Fill MRI information into all series from first DICOM file of each serie
                  */
                 for (Serie serie : selectedSeries) {
-                    dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), null,
+                    dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), importJob.getPatient(),
                             importJob.getStudy(), serie, isFromPACS);
                 }
             } catch (FileNotFoundException e) {

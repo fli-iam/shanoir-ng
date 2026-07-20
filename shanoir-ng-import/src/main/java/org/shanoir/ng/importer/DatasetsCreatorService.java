@@ -27,10 +27,8 @@ import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.DatasetFile;
 import org.shanoir.ng.importer.model.ExpressionFormat;
 import org.shanoir.ng.importer.model.Image;
-import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -59,33 +57,29 @@ public class DatasetsCreatorService {
     private String seriesProperties;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    public void createDatasets(Patient patient, File importJobDir, ImportJob importJob) throws ShanoirException {
+    public void createDatasets(ImportJobBase importJob, File importJobDir) throws ShanoirException {
         File seriesFolderFile = new File(importJobDir.getAbsolutePath() + File.separator + SERIES);
         if (!seriesFolderFile.exists()) {
             seriesFolderFile.mkdirs();
         } else {
             throw new ShanoirException("Error while creating series folder: folder already exists.");
         }
-        List<Study> studies = patient.getStudies();
-        for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-            Study study = studiesIt.next();
-            List<Serie> series = study.getSelectedSeries();
-            for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
-                Serie serie = seriesIt.next();
-                File serieIDFolderFile = createSerieIDFolderAndMoveFiles(importJobDir, seriesFolderFile, serie);
-                boolean serieIdentifiedForNotSeparating;
-                try {
-                    serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
-                    // if the serie is not one of the series, that should not be separated, please separate the series,
-                    // otherwise just do not separate the series and keep all images for one nii conversion
-                    serie.setDatasets(new ArrayList<Dataset>());
-                    constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
-                } catch (NoSuchFieldException | SecurityException e) {
-                    LOG.error(e.getMessage());
-                }
-                // as images/non-images are migrated to datasets, clear the list now
-                serie.getImages().clear();
+        List<Serie> series = importJob.getSeries();
+        for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
+            Serie serie = seriesIt.next();
+            File serieIDFolderFile = createSerieIDFolderAndMoveFiles(importJobDir, seriesFolderFile, serie);
+            boolean serieIdentifiedForNotSeparating;
+            try {
+                serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
+                // if the serie is not one of the series, that should not be separated, please separate the series,
+                // otherwise just do not separate the series and keep all images for one nii conversion
+                serie.setDatasets(new ArrayList<Dataset>());
+                constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
+            } catch (NoSuchFieldException | SecurityException e) {
+                LOG.error(e.getMessage());
             }
+            // as images/non-images are migrated to datasets, clear the list now
+            serie.getImages().clear();
         }
     }
 
