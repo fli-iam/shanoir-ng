@@ -336,11 +336,11 @@ public class ImporterApiController implements ImporterApi {
         }
     }
 
-    @Override
     /**
      * This method load an EEG file, unzip it and load an import job with the
      * informations collected
      */
+    @Override
     public ResponseEntity<EegImportJob> uploadEEGZipFile(
             @Parameter(name = "file detail") @RequestPart("file") final MultipartFile eegFile)
                     throws RestServiceException {
@@ -355,7 +355,7 @@ public class ImporterApiController implements ImporterApi {
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
             }
             /**
-             * 1. STEP: Handle file management. Always create a userId specific folder in
+             * STEP: Handle file management. Always create a userId specific folder in
              * the import work folder (the root of everything): split imports to clearly
              * separate them into separate folders for each user
              */
