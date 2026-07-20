@@ -203,12 +203,13 @@ public class ImporterApiController implements ImporterApi {
             importJob.setPatients(patients);
 
             // Work-around during migration time: remove later
-            List<Serie> series = importerManagerService.handleLegacySeries(importJob);
-            importJob.setSeries(series);
+            importerManagerService.handleLegacySubjectAndSeries(importJob);
 
             /**
              * STEP: split instances into non-images and images and get additional meta-data
-             * from first dicom file of each serie, meta-data missing in dicomdir.
+             * from first DICOM file of each serie, meta-data missing in DICOMDIR.
+             * As the user has made no serie(s) selection yet, we create Images for
+             * all series.
              */
             imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), false, null, false);
 

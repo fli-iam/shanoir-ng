@@ -123,18 +123,18 @@ public class ImporterManagerService {
             if (!userImportDir.exists()) {
                 userImportDir.mkdirs(); // create if not yet existing, e.g. in case of PACS import
             }
-            List<Serie> series = handleLegacySeries(importJob);
+            handleLegacySubjectAndSeries(importJob);
             // 1. call to cleanSeries: remove ignored series, that have been detected to be ignored by the
             // uploadDicomZipFile (DicomDirToModelService) or the QueryPACSService (either from ShUp or the
             // web-gui-pacs import), see usage of DicomSerieAndInstanceAnalyzer and e.g. missing instances
-            cleanSeries(series);
+            cleanSeries(importJob.getSeries());
             // In PACS import the dicom files are still in the PACS, we have to download them first
             // and then analyze them: what gives us a list of images for each serie.
             final File importJobDir;
             if (importJob.isFromPacs()) {
                 importJobDir = createImportJobDir(userImportDir.getAbsolutePath());
                 // at first all dicom files arrive normally in /tmp/shanoir-dcmrcv (see config DicomStoreSCPServer)
-                downloadAndMoveDicomFilesToImportJobDir(importJobDir, importJob.getStudyInstanceUID(), series, event);
+                downloadAndMoveDicomFilesToImportJobDir(importJobDir, importJob.getStudyInstanceUID(), importJob.getSeries(), event);
                 // convert instances to images, as already done after zip file upload
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), true, event, false);
             } else if (importJob.isFromShanoirUploader()) {
@@ -151,7 +151,7 @@ public class ImporterManagerService {
             // has been run and correctly classified everything. So no need to check afterwards for erroneous series.
             // So two possibilities to remove series: 1. call, via the info from the dicomdir or the info from the pacs
             // 2. call, via analysis of dicom files itself and their content
-            cleanSeries(series);
+            cleanSeries(importJob.getSeries());
 
             event.setProgress(0.25F);
             eventService.publishEvent(event);
@@ -175,19 +175,19 @@ public class ImporterManagerService {
         }
     }
 
-    public List<Serie> handleLegacySeries(final ImportJob importJob) {
-        // Get series from legacy location and put into new location
-        List<Serie> series = null;
+    public void handleLegacySubjectAndSeries(final ImportJob importJob) {
+        // Get subject and series from legacy location and put into new locations
         for (Iterator<Patient> patientIt = importJob.getPatients().iterator(); patientIt.hasNext();) {
             Patient patient = patientIt.next();
+            importJob.setSubject(patient.getSubject());
             List<Study> studies = patient.getStudies();
             for (Iterator<Study> studyIt = studies.iterator(); studyIt.hasNext();) {
                 Study study = studyIt.next();
-                series = study.getSelectedSeries();
+                // As this is called from uploadDicomZipFile,
+                // we have to take all series (not yet selected)
+                importJob.setSeries(study.getSeries());
             }
         }
-        importJob.setSeries(series);
-        return series;
     }
 
     @Async
