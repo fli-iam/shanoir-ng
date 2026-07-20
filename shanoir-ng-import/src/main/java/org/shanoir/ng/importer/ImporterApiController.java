@@ -874,6 +874,6 @@ public class ImporterApiController implements ImporterApi {
                     "The file could not be correctly unziped on the server. Please check consistency.", e));
         }
         return new ResponseEntity<ImportJob>(job, HttpStatus.OK);
-
     }
+
 }
