@@ -345,7 +345,6 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
-      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
