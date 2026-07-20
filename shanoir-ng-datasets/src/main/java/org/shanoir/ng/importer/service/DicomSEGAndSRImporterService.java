@@ -33,6 +33,7 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
@@ -45,14 +46,18 @@ import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,6 +81,8 @@ public class DicomSEGAndSRImporterService {
 
     private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
 
+    private static final String MISSING_CAN_ANNOTATE_RIGHT_ERROR = "Missing right CAN_ANNOTATE on study, import refused: ";
+
     @Autowired
     private ExaminationRepository examinationRepository;
 
@@ -84,6 +91,9 @@ public class DicomSEGAndSRImporterService {
 
     @Autowired
     private DatasetService datasetService;
+
+    @Autowired
+    private DatasetSecurityService datasetSecurityService;
 
     @Autowired
     private SubjectRepository subjectRepository;
@@ -98,7 +108,7 @@ public class DicomSEGAndSRImporterService {
     private DicomImporterService dicomImporterService;
 
     @Transactional
-    public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality, boolean nonOhifRequest) {
+    public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality, boolean nonOhifRequest) throws RestServiceException {
         // Retrieve examination; adjust datasetAttributes if received from OHIF
         String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
         Examination examination = nonOhifRequest
@@ -107,6 +117,12 @@ public class DicomSEGAndSRImporterService {
         if (examination == null) {
             LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
             return false;
+        }
+        if (!datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ANNOTATE.name())) {
+            LOG.error("User {} misses the right CAN_ANNOTATE on study with ID: {}, import refused.",
+                    KeycloakUtil.getTokenUserName(), examination.getStudyId());
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.FORBIDDEN.value(), MISSING_CAN_ANNOTATE_RIGHT_ERROR + examination.getStudyId(), null));
         }
 
         // Find related dataset
