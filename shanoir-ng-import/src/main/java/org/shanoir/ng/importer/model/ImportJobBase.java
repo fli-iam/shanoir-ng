@@ -380,7 +380,7 @@ public class ImportJobBase implements Serializable {
         boolean enhanced = false;
         if (CollectionUtils.isNotEmpty(series)) {
             numberOfSeries = series.size();
-            Serie serie = study.getSeries().get(0);
+            Serie serie = series.get(0);
             modality = serie.getModality();
             enhanced = serie.getIsEnhanced();
             for (Iterator<Serie> iterator = series.iterator(); iterator.hasNext();) {
