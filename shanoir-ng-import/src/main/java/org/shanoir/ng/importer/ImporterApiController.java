@@ -274,7 +274,7 @@ public class ImporterApiController implements ImporterApi {
             LOG.info("============== NEW IMPORT ===========================");
             LOG.info("Starting import job for user {} (userId: {}) with folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
             handleLegacySubjectAndSeries(importJob);
-            importerManagerService.manageImportJobBase(importJob);
+            importerManagerService.manageImportJob(importJob);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             LOG.error("Missing importJobDir.");
@@ -312,7 +312,7 @@ public class ImporterApiController implements ImporterApi {
             LOG.info("============== NEW IMPORT ===========================");
             LOG.info("Starting import job base for user {} (userId: {}) with folder: {}",
                     KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
-            importerManagerService.manageImportJobBase(importJob);
+            importerManagerService.manageImportJob(importJob);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             LOG.error("Missing importJobDir.");
