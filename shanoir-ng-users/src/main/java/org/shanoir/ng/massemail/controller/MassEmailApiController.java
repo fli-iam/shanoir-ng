@@ -48,6 +48,10 @@ public class MassEmailApiController implements MassEmailApi {
 
     @Override
     public ResponseEntity<Integer> countRecipients(final RecipientGroup group) throws RestServiceException {
+        if (RecipientGroup.STUDY == group) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "The STUDY group cannot be counted here; its recipients are resolved by the caller."));
+        }
         try {
             return new ResponseEntity<>(massEmailService.countRecipients(group), HttpStatus.OK);
         } catch (SecurityException e) {
@@ -66,7 +70,9 @@ public class MassEmailApiController implements MassEmailApi {
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
         }
         try {
-            final List<User> recipients = massEmailService.resolveRecipients(request.getRecipientGroup());
+            final List<User> recipients = RecipientGroup.STUDY == request.getRecipientGroup()
+                    ? massEmailService.resolveRecipients(request.getRecipientUserIds())
+                    : massEmailService.resolveRecipients(request.getRecipientGroup());
             massEmailService.sendMassEmail(recipients, request.getSubject(), request.getContent());
             LOG.info("Mass email '{}' to the {} group queued for {} recipients", request.getSubject(),
                     request.getRecipientGroup(), recipients.size());
