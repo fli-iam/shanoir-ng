@@ -532,7 +532,7 @@ public class ImportTests extends AbstractTest {
             String workFolderPart = (workFolder != null && !workFolder.isEmpty()) ? workFolder : "no-workfolder";
             File dumpFile = new File(IMPORT_JOB_DUMP_DIR, timestamp + "_" + workFolderPart + "_" + label + ".json");
             Files.writeString(dumpFile.toPath(), importJobJson, StandardCharsets.UTF_8);
-            logger.info("Dumped import-job JSON sent to server to: {}", dumpFile.getAbsolutePath());
+            logger.info("Dumped import-job JSON to: {}", dumpFile.getAbsolutePath());
         } catch (Exception e) {
             // This is a debugging convenience only — never fail the test because of it.
             logger.warn("Could not dump import-job JSON for manual inspection: {}", e.getMessage());

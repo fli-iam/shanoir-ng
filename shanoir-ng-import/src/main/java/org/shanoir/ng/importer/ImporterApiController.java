@@ -272,7 +272,7 @@ public class ImporterApiController implements ImporterApi {
         if (importJobDir.exists()) {
             importJob.setWorkFolder(importJobDir.getAbsolutePath());
             LOG.info("============== NEW IMPORT ===========================");
-            LOG.info("Starting import job for user {} (userId: {}) with folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
+            LOG.info("Starting import job (old) for user {} (userId: {}) with folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
             handleLegacySubjectAndSeries(importJob);
             importerManagerService.manageImportJob(importJob);
             return new ResponseEntity<>(HttpStatus.OK);

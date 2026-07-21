@@ -156,7 +156,7 @@ public class ImporterService {
                     }
                     generatedAcquisitions = new HashSet<>(datasetAcquisitionService.createAll(generatedAcquisitions));
                     try {
-                        persistPatientInPacs(importJob.getSeries(), event);
+                        persistSeriesInPacs(importJob.getSeries(), event);
                     } catch (Exception e) { // if error in pacs
                         // revert dataset acquisitions
                         for (DatasetAcquisition acquisition : generatedAcquisitions) {
@@ -332,14 +332,14 @@ public class ImporterService {
      * Persist DICOM images in the Shanoir Pacs
      * @throws Exception
      */
-    private void persistPatientInPacs(List<Serie> series, ShanoirEvent event) throws Exception {
+    private void persistSeriesInPacs(List<Serie> series, ShanoirEvent event) throws Exception {
         float progress = 0.75f;
         for (Serie serie : series) {
             if (serie.getSelected() != null && serie.getSelected()) {
                 persistSerieInPacs(serie);
             }
             progress += 0.25f / series.size();
-            event.setMessage("Saving serie " + serie.getSeriesDescription() + " into pacs");
+            event.setMessage("Saving serie " + serie.getSeriesDescription() + " into PACS.");
             event.setProgress(progress);
             eventService.publishEvent(event);
         }
