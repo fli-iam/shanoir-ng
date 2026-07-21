@@ -207,6 +207,13 @@ public class ImportUtils {
         importJob.setExaminationId(examinationId);
         importJob.setStudyInstanceUID(studyInstanceUID);
 
+        // Handle subject
+        org.shanoir.ng.importer.model.Subject subject = new org.shanoir.ng.importer.model.Subject();
+        subject.setId(subjectId);
+        subject.setName(subjectName);
+        importJob.setSubjectName(subjectName);
+        importJob.setSubject(subject);
+
         final List<Serie> series = new ArrayList<>(importJob.getSeries());
         for (Serie serie : series) {
             List<Instance> instances = serie.getInstances();
