@@ -214,8 +214,7 @@ public class ImportUtils {
         importJob.setSubjectName(subjectName);
         importJob.setSubject(subject);
 
-        final List<Serie> series = new ArrayList<>(importJob.getSeries());
-        for (Serie serie : series) {
+        for (Serie serie : importJob.getSeries()) {
             List<Instance> instances = serie.getInstances();
             if (instances == null || instances.isEmpty()) {
                 serie.setIgnored(true);
@@ -241,7 +240,7 @@ public class ImportUtils {
         // We sort again here, even if the QueryPACSService or the DicomDirToModelService sort already
         // The user select after both components in the tree GUI of ShanoirUploader, where a linked list
         // is used, therefore as the user can click and series on his behalf, we sort again here.
-        series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
+        importJob.getSeries().sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
 
         // Clean up, as not necessary anymore
         importJob.setDicomQuery(null);
