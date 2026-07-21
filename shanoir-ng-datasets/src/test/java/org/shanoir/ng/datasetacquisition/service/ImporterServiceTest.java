@@ -53,9 +53,7 @@ import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
-import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.importer.service.DatasetAcquisitionContext;
 import org.shanoir.ng.importer.service.DicomPersisterService;
 import org.shanoir.ng.importer.service.ImporterMailService;
@@ -138,10 +136,6 @@ public class ImporterServiceTest {
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void createAllDatasetAcquisition() throws Exception {
         // GIVEN an importJob with series and patients
-        List<Patient> patients = new ArrayList<Patient>();
-        Patient patient = new Patient();
-        List<Study> studies = new ArrayList<Study>();
-        Study study = new Study();
         List<Serie> series = new ArrayList<Serie>();
         Serie serie = new Serie();
         serie.setSelected(Boolean.TRUE);
@@ -162,13 +156,9 @@ public class ImporterServiceTest {
         serie.setDatasets(datasets);
         serie.setIsEnhanced(Boolean.FALSE);
         series.add(serie);
-        study.setSeries(series);
-        studies.add(study);
-        patient.setStudies(studies);
-        patients.add(patient);
 
         ImportJob importJob = new ImportJob();
-        importJob.setPatients(patients);
+        importJob.setSeries(series);
         importJob.setArchive("/tmp/bruker/convert/brucker/blabla.zip");
         importJob.setExaminationId(Long.valueOf(2));
         importJob.setSubjectName("subjectName");
