@@ -119,6 +119,57 @@ public class MassEmailApiControllerTest {
 
     @Test
     @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void sendMassEmailToStudyTest() throws Exception {
+        final List<User> recipients = List.of(ModelsUtil.createUser(1L), ModelsUtil.createUser(2L));
+        given(massEmailService.resolveRecipients(List.of(1L, 2L))).willReturn(recipients);
+
+        mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"recipientGroup\":\"STUDY\",\"recipientUserIds\":[1,2],"
+                        + "\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
+                .andExpect(status().isAccepted())
+                .andExpect(content().string("2"));
+
+        Mockito.verify(massEmailService).sendMassEmail(recipients, "Maintenance", "Down tomorrow.");
+    }
+
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void sendMassEmailStudyWithoutRecipientUserIdsTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"recipientGroup\":\"STUDY\",\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
+                .andExpect(status().isUnprocessableEntity());
+
+        Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void sendMassEmailNonStudyGroupWithRecipientUserIdsTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"recipientGroup\":\"ALL\",\"recipientUserIds\":[1],"
+                        + "\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
+                .andExpect(status().isUnprocessableEntity());
+
+        Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
+    public void countRecipientsStudyGroupTest() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get(COUNT_PATH).param("group", "STUDY")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnprocessableEntity());
+
+        Mockito.verifyNoInteractions(massEmailService);
+    }
+
+    @Test
+    @WithMockUser(authorities = { "ROLE_ADMIN" })
     public void sendMassEmailBlankSubjectTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
