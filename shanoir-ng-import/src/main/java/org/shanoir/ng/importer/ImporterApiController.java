@@ -191,6 +191,15 @@ public class ImporterApiController implements ImporterApi {
              * complete with meta-data from files.
              */
             List<Patient> patients = preparePatientsForImportJob(importJobDir);
+            if (patients.size() > 1) {
+                throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "ZIP with multiple DICOM patients not supported.", null));
+            }
+            Patient patient = patients.get(0);
+            if (patient.getStudies().size() > 1) {
+                throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                        "ZIP with multiple DICOM studies not supported.", null));
+            }
 
             /**
              * STEP: create ImportJob
@@ -200,7 +209,12 @@ public class ImporterApiController implements ImporterApi {
             importJob.setUserId(KeycloakUtil.getTokenUserId());
             // Work folder is always relative to general import directory
             importJob.setWorkFolder(importJobDir.getName());
-            importJob.setPatients(patients);
+            if (!patients.isEmpty()) {
+                // @todo: remove later, when single-patient only
+                importJob.setPatients(patients);
+                importJob.setPatient(patient);
+                importJob.setStudy(patient.getStudies().get(0));
+            }
 
             // Work-around during migration time: remove later
             importerManagerService.handleLegacySubjectAndSeries(importJob);

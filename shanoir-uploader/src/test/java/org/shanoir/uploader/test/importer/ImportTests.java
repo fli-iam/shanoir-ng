@@ -100,11 +100,11 @@ public class ImportTests extends AbstractTest {
         logger.info("......................................................");
         try {
             studyWithStudyCards = createStudyAndCenterAndStudyCardAndAddMembers();
-            ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
-            if (!importJob.getPatients().isEmpty()) {
+            ImportJobBase importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
+            if (!importJob.getSeries().isEmpty()) {
                 selectAllSeriesForImport(importJob);
                 org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, studyWithStudyCards);
-                org.shanoir.ng.importer.model.Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
+                org.shanoir.ng.importer.model.Study dicomStudy = importJob.getStudy();
                 Examination examination = createExaminationFromDicomStudy(studyWithStudyCards, dicomStudy, subject);
                 startImportJobFromDicomZip(importJob, subject, examination, studyWithStudyCards);
             }
@@ -130,13 +130,11 @@ public class ImportTests extends AbstractTest {
         Patient patient = patients.get(0);
         Assertions.assertFalse(patient.getStudies().isEmpty(), "No studies found for parsed patient.");
         org.shanoir.ng.importer.model.Study dicomStudy = patient.getStudies().get(0);
-        selectAllSeriesForImport(patient);
 
         List<Serie> selectedSeries = new ArrayList<>();
         for (Serie serie : dicomStudy.getSeries()) {
-            if (serie.getSelected()) {
-                selectedSeries.add(serie);
-            }
+            serie.setSelected(true);
+            selectedSeries.add(serie);
         }
         Assertions.assertFalse(selectedSeries.isEmpty(), "No series selected for import.");
 
@@ -194,11 +192,11 @@ public class ImportTests extends AbstractTest {
             equipment = createEquipment(
                     studyNoStudyCards.getStudyCenterList().get(0).getCenter());
             Assertions.assertNotNull(equipment);
-            ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
-            if (!importJob.getPatients().isEmpty()) {
+            ImportJobBase importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
+            if (!importJob.getSeries().isEmpty()) {
                 selectAllSeriesForImport(importJob);
                 org.shanoir.uploader.model.rest.Subject subject = createSubjectNoStudyCard(importJob, studyNoStudyCards);
-                org.shanoir.ng.importer.model.Study dicomStudy = importJob.getPatients().get(0).getStudies().get(0);
+                org.shanoir.ng.importer.model.Study dicomStudy = importJob.getStudy();
                 Examination examination = createExaminationNoStudyCard(studyNoStudyCards, dicomStudy, subject);
                 startImportJobFromDicomZipNoStudyCard(importJob, subject, examination, studyNoStudyCards, equipment.getId());
             }
@@ -224,13 +222,11 @@ public class ImportTests extends AbstractTest {
         Patient patient = patients.get(0);
         Assertions.assertFalse(patient.getStudies().isEmpty(), "No studies found for parsed patient.");
         org.shanoir.ng.importer.model.Study dicomStudy = patient.getStudies().get(0);
-        selectAllSeriesForImport(patient);
 
         List<Serie> selectedSeries = new ArrayList<>();
         for (Serie serie : dicomStudy.getSeries()) {
-            if (serie.getSelected()) {
-                selectedSeries.add(serie);
-            }
+            serie.setSelected(true);
+            selectedSeries.add(serie);
         }
         Assertions.assertFalse(selectedSeries.isEmpty(), "No series selected for import.");
 
@@ -412,7 +408,7 @@ public class ImportTests extends AbstractTest {
         userClient.startImportJob(importJobJson);
     }
 
-    private void startImportJobFromDicomZip(ImportJob importJob, org.shanoir.uploader.model.rest.Subject subjectREST,
+    private void startImportJobFromDicomZip(ImportJobBase importJob, org.shanoir.uploader.model.rest.Subject subjectREST,
             Examination examination, org.shanoir.uploader.model.rest.Study study)
             throws JsonProcessingException, Exception {
         importJob.setStudyId(study.getId());
@@ -439,7 +435,7 @@ public class ImportTests extends AbstractTest {
      * are left {@code null} instead of being populated from a (non-existent)
      * study card.
      */
-    private void startImportJobFromDicomZipNoStudyCard(ImportJob importJob,
+    private void startImportJobFromDicomZipNoStudyCard(ImportJobBase importJob,
             org.shanoir.uploader.model.rest.Subject subjectREST,
             Examination examination, org.shanoir.uploader.model.rest.Study study, Long acquisitionEquipmentId)
             throws JsonProcessingException, Exception {
@@ -460,10 +456,10 @@ public class ImportTests extends AbstractTest {
         userClient.startImportJob(importJobJson);
     }
 
-    private org.shanoir.uploader.model.rest.Subject createSubject(ImportJob importJob,
+    private org.shanoir.uploader.model.rest.Subject createSubject(ImportJobBase importJob,
             org.shanoir.uploader.model.rest.Study study)
             throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, ParseException {
-        Patient patient = importJob.getPatients().get(0);
+        Patient patient = importJob.getPatient();
         final String randomPatientName = "Subject-" + UUID.randomUUID().toString();
         Subject subject = ImportUtils.createSubjectFromPatient(patient, pseudonymizer, identifierCalculator);
         org.shanoir.uploader.model.rest.Subject subjectREST = ImportUtils.manageSubject(
@@ -486,10 +482,10 @@ public class ImportTests extends AbstractTest {
      * {@link org.shanoir.uploader.model.rest.AcquisitionEquipment}, matching
      * the "no study card" import path.
      */
-    private org.shanoir.uploader.model.rest.Subject createSubjectNoStudyCard(ImportJob importJob,
+    private org.shanoir.uploader.model.rest.Subject createSubjectNoStudyCard(ImportJobBase importJob,
             org.shanoir.uploader.model.rest.Study study)
             throws UnsupportedEncodingException, NoSuchAlgorithmException, PseudonymusException, ParseException {
-        Patient patient = importJob.getPatients().get(0);
+        Patient patient = importJob.getPatient();
         final String randomPatientName = "Subject-" + UUID.randomUUID().toString();
         Subject subject = ImportUtils.createSubjectFromPatient(patient, pseudonymizer, identifierCalculator);
         org.shanoir.uploader.model.rest.Subject subjectREST = ImportUtils.manageSubject(
@@ -505,24 +501,10 @@ public class ImportTests extends AbstractTest {
         return subjectREST;
     }
 
-    private void selectAllSeriesForImport(ImportJob importJob) {
-        List<Patient> patients = importJob.getPatients();
-        for (Patient patient : patients) {
-            List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
-            for (org.shanoir.ng.importer.model.Study study : studies) {
-                List<Serie> series = study.getSeries();
-                for (Serie serie : series) {
-                    serie.setSelected(true);
-                }
-            }
-        }
-    }
-
-    private void selectAllSeriesForImport(Patient patient) {
-        for (org.shanoir.ng.importer.model.Study study : patient.getStudies()) {
-            for (Serie serie : study.getSeries()) {
-                serie.setSelected(true);
-            }
+    private void selectAllSeriesForImport(ImportJobBase importJob) {
+        List<Serie> series = importJob.getSeries();
+        for (Serie serie : series) {
+            serie.setSelected(true);
         }
     }
 
