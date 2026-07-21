@@ -121,20 +121,13 @@ public class QualityUtils {
      */
     private static org.shanoir.ng.importer.dto.ImportJob convertImportJob(ImportJob importJob) {
         org.shanoir.ng.importer.dto.ImportJob importJobDto = new org.shanoir.ng.importer.dto.ImportJob();
-        List<Patient> patients = new ArrayList<>();
-        Patient patient = new Patient();
-        List<Study> studies = new ArrayList<>();
-        // Until modifications of ImportUtils.java are done (get rid of Patients List), we browse the DICOM tree
-        studies.add(StudyMapper.INSTANCE.toDto(importJob.getPatients().get(0).getStudies().get(0)));
-        patient.setStudies(studies);
-        patients.add(patient);
         importJobDto.setExaminationId(importJob.getExaminationId());
         importJobDto.setTimestamp(importJob.getTimestamp());
         importJobDto.setFromDicomZip(importJob.isFromDicomZip());
         importJobDto.setFromShanoirUploader(Boolean.TRUE);
         importJobDto.setFromPacs(importJob.isFromPacs());
         importJobDto.setWorkFolder(importJob.getWorkFolder());
-        importJobDto.setPatients(patients);
+        importJobDto.setStudy(StudyMapper.INSTANCE.toDto(importJob.getStudy()));
         importJobDto.setUserId(importJob.getUserId());
         importJobDto.setUsername(importJob.getUsername());
         return importJobDto;
