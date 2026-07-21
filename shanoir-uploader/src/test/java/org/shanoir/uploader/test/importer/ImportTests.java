@@ -41,6 +41,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
@@ -94,7 +95,9 @@ public class ImportTests extends AbstractTest {
     @Test
     @Order(1)
     public void testImportFromDicomZip() {
-        logger.info("START testImportFromDicomZip...................");
+        logger.info("......................................................");
+        logger.info("START testImportFromDicomZip..........................");
+        logger.info("......................................................");
         try {
             studyWithStudyCards = createStudyAndCenterAndStudyCardAndAddMembers();
             ImportJob importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
@@ -114,7 +117,9 @@ public class ImportTests extends AbstractTest {
     @Test
     @Order(2)
     public void testImportFromShanoirUploader() throws Exception {
+        logger.info("......................................................");
         logger.info("START testImportFromShanoirUploader...................");
+        logger.info("......................................................");
         URL resource = getClass().getClassLoader().getResource(ACR_PHANTOM_T1_DIR);
         Assertions.assertNotNull(resource, "Test resource folder " + ACR_PHANTOM_T1_DIR + " not found.");
         File dicomSourceDir = new File(resource.toURI());
@@ -135,8 +140,8 @@ public class ImportTests extends AbstractTest {
         }
         Assertions.assertFalse(selectedSeries.isEmpty(), "No series selected for import.");
 
-        ImportJob importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
-        importJob.setSelectedSeries(selectedSeries);
+        ImportJobBase importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
+        importJob.setSeries(selectedSeries);
 
         org.shanoir.uploader.model.rest.Subject subject = createSubjectFromLocalPatient(patient, studyWithStudyCards);
         importJob.setSubject(patient.getSubject());
@@ -181,7 +186,9 @@ public class ImportTests extends AbstractTest {
     @Test
     @Order(3)
     public void testImportFromDicomZipNoStudyCard() {
-        logger.info("START testImportFromDicomZipNoStudyCard...................");
+        logger.info("......................................................");
+        logger.info("START testImportFromDicomZipNoStudyCard...............");
+        logger.info("......................................................");
         try {
             studyNoStudyCards = createStudyAndCenterWithoutStudyCard();
             equipment = createEquipment(
@@ -204,7 +211,9 @@ public class ImportTests extends AbstractTest {
     @Test
     @Order(4)
     public void testImportFromShanoirUploaderNoStudyCard() throws Exception {
-        logger.info("START testImportFromShanoirUploaderNoStudyCard...................");
+        logger.info("......................................................");
+        logger.info("START testImportFromShanoirUploaderNoStudyCard........");
+        logger.info("......................................................");
         URL resource = getClass().getClassLoader().getResource(ACR_PHANTOM_T1_DIR);
         Assertions.assertNotNull(resource, "Test resource folder " + ACR_PHANTOM_T1_DIR + " not found.");
         File dicomSourceDir = new File(resource.toURI());
@@ -225,8 +234,8 @@ public class ImportTests extends AbstractTest {
         }
         Assertions.assertFalse(selectedSeries.isEmpty(), "No series selected for import.");
 
-        ImportJob importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
-        importJob.setSelectedSeries(selectedSeries);
+        ImportJobBase importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
+        importJob.setSeries(selectedSeries);
 
         org.shanoir.uploader.model.rest.Subject subject = createSubjectFromLocalPatientNoStudyCard(patient,
                 studyNoStudyCards);
@@ -381,7 +390,7 @@ public class ImportTests extends AbstractTest {
         return subjectREST;
     }
 
-    private void startImportJobFromShanoirUploader(ImportJob importJob, File uploadFolder, String label)
+    private void startImportJobFromShanoirUploader(ImportJobBase importJob, File uploadFolder, String label)
             throws Exception {
         File[] dicomFiles = uploadFolder.listFiles(
                 (dir, name) -> name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX));

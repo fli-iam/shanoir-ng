@@ -22,6 +22,7 @@ import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.SeriesNumberOrAcquisitionTimeOrDescriptionSorter;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
@@ -191,7 +192,7 @@ public class ImportUtils {
      * @throws DatabindException
      * @throws StreamReadException
      */
-    public static ImportJob prepareImportJob(ImportJob importJob, String subjectName, Long subjectId, Long examinationId, String studyInstanceUID, Study study, StudyCard studyCard, AcquisitionEquipment equipment) {
+    public static ImportJobBase prepareImportJob(ImportJobBase importJob, String subjectName, Long subjectId, Long examinationId, String studyInstanceUID, Study study, StudyCard studyCard, AcquisitionEquipment equipment) {
         // Handle study and study card
         importJob.setStudyId(study.getId());
         importJob.setStudyName(study.getName());
@@ -206,27 +207,7 @@ public class ImportUtils {
         importJob.setExaminationId(examinationId);
         importJob.setStudyInstanceUID(studyInstanceUID);
 
-        /**
-         * @todo: refactor to remove patients list from import job.
-         * for the moment, to finish the first refactor, keep the
-         * current structure required by the server: patients -
-         * patient - subject - study - series (selected)
-         */
-        List<Patient> patients = new ArrayList<>();
-        // handle patient and subject
-        Patient patient = new Patient();
-        patient.setPatientID(importJob.getSubject().getIdentifier());
-        org.shanoir.ng.importer.model.Subject subject = new org.shanoir.ng.importer.model.Subject();
-        subject.setId(subjectId);
-        subject.setName(subjectName);
-        importJob.setSubjectName(subjectName);
-        patient.setSubject(subject);
-        patients.add(patient);
-        // handle study dicom == examination in Shanoir
-        List<org.shanoir.ng.importer.model.Study> studiesImportJob = new ArrayList<org.shanoir.ng.importer.model.Study>();
-        org.shanoir.ng.importer.model.Study studyImportJob = new org.shanoir.ng.importer.model.Study();
-        // handle series for study now coming from job itself
-        final List<Serie> series = new ArrayList<>(importJob.getSelectedSeries());
+        final List<Serie> series = new ArrayList<>(importJob.getSeries());
         for (Serie serie : series) {
             List<Instance> instances = serie.getInstances();
             if (instances == null || instances.isEmpty()) {
@@ -254,18 +235,10 @@ public class ImportUtils {
         // The user select after both components in the tree GUI of ShanoirUploader, where a linked list
         // is used, therefore as the user can click and series on his behalf, we sort again here.
         series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
-        studyImportJob.setSeries(series);
-        studiesImportJob.add(studyImportJob);
-        patient.setStudies(studiesImportJob);
-        importJob.setPatients(patients);
-        // Attention: the below lines are important to reduce the size
-        // of the import-job.json by 50% (send to and processed on the server).
-        // The server ignores today the selectedSeries in ImportJob, only used
-        // today inside ShUp.
-        importJob.setSelectedSeries(null);
+
         // Clean up, as not necessary anymore
         importJob.setDicomQuery(null);
-        // Avoid sending patient info to server
+        // Avoid sending patient information to server
         importJob.setPatient(null);
         importJob.setPatientVerification(null);
         return importJob;
