@@ -19,6 +19,8 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+import { IdName } from '../../shared/models/id-name.model';
+import { StudyService } from '../../studies/shared/study.service';
 
 import { MassEmailRequest, RecipientGroup } from './mass-email.model';
 import { MassEmailService } from './mass-email.service';
@@ -34,6 +36,7 @@ export class SendEmailComponent {
     form: UntypedFormGroup;
     counts: Partial<Record<RecipientGroup, number>> = {};
     sending: boolean = false;
+    studies: IdName[] = [];
     readonly groups: { value: RecipientGroup, label: string }[] = [
         { value: 'ALL', label: 'All users' },
         { value: 'ACTIVE', label: 'Active users' },
@@ -44,6 +47,7 @@ export class SendEmailComponent {
             private confirmDialogService: ConfirmDialogService,
             private msgBoxService: MsgBoxService,
             private breadcrumbsService: BreadcrumbsService,
+            private studyService: StudyService,
             private formBuilder: UntypedFormBuilder) {
 
         setTimeout(() => {
@@ -52,11 +56,13 @@ export class SendEmailComponent {
         });
         this.buildForm();
         this.loadCounts();
+        this.loadStudies();
     }
 
     buildForm(): void {
         this.form = this.formBuilder.group({
             'recipientGroup': ['ALL', [Validators.required]],
+            'studyId': [null],
             'subject': ['', [Validators.required, Validators.maxLength(255)]],
             'content': ['', [Validators.required]],
         });
@@ -68,6 +74,10 @@ export class SendEmailComponent {
                 .then(count => this.counts[group.value] = count)
                 .catch(() => { /* count stays unknown, displayed as (?) */ });
         }
+    }
+
+    private loadStudies(): void {
+        this.studyService.getStudiesNames().then(studies => this.studies = studies);
     }
 
     countLabel(group: RecipientGroup): string {

@@ -26,6 +26,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             {{ group.label }} {{ countLabel(group.value) }}
                         </label>
                     }
+                    <label>
+                        <input type="radio" formControlName="recipientGroup" value="STUDY" />
+                        Members of a study
+                    </label>
+                    @if (form.get('recipientGroup').value === 'STUDY') {
+                        <select formControlName="studyId">
+                            <option [ngValue]="null" disabled>Select a study</option>
+                            @for (study of studies; track study.id) {
+                                <option [ngValue]="study.id">{{ study.name }}</option>
+                            }
+                        </select>
+                    }
                 </span>
                 <tool-tip>Active users are the users whose account is enabled. The email is sent individually to each user of the selected group.</tool-tip>
             </li>
