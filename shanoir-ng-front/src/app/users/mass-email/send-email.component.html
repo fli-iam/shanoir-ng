@@ -37,6 +37,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <option [ngValue]="study.id">{{ study.name }}</option>
                             }
                         </select>
+                        @if (form.get('studyId').value) {
+                            {{ studyMemberCountLabel() }}
+                        }
                     }
                 </span>
                 <tool-tip>Active users are the users whose account is enabled. The email is sent individually to each user of the selected group.</tool-tip>

@@ -37,6 +37,8 @@ export class SendEmailComponent {
     counts: Partial<Record<RecipientGroup, number>> = {};
     sending: boolean = false;
     studies: IdName[] = [];
+    studyMemberUserIds: number[] = [];
+    studyMemberCount: number | undefined;
     readonly groups: { value: RecipientGroup, label: string }[] = [
         { value: 'ALL', label: 'All users' },
         { value: 'ACTIVE', label: 'Active users' },
@@ -57,6 +59,8 @@ export class SendEmailComponent {
         this.buildForm();
         this.loadCounts();
         this.loadStudies();
+        this.form.get('recipientGroup').valueChanges.subscribe(group => this.onRecipientGroupChange(group));
+        this.form.get('studyId').valueChanges.subscribe(studyId => this.onStudySelected(studyId));
     }
 
     buildForm(): void {
@@ -80,14 +84,42 @@ export class SendEmailComponent {
         this.studyService.getStudiesNames().then(studies => this.studies = studies);
     }
 
+    /** Only the STUDY group requires picking a study; switching group clears any previous selection. */
+    private onRecipientGroupChange(group: RecipientGroup): void {
+        const studyIdControl = this.form.get('studyId');
+        studyIdControl.setValidators(group === 'STUDY' ? [Validators.required] : null);
+        studyIdControl.setValue(null);
+        studyIdControl.updateValueAndValidity();
+    }
+
+    private onStudySelected(studyId: number): void {
+        this.studyMemberUserIds = [];
+        this.studyMemberCount = undefined;
+        if (studyId == null) return;
+        this.studyService.getStudyUserFromStudyId(studyId)
+            .then(studyUsers => {
+                this.studyMemberUserIds = studyUsers.map(studyUser => studyUser.userId);
+                this.studyMemberCount = this.studyMemberUserIds.length;
+            })
+            .catch(() => { /* count stays unknown, displayed as (?) */ });
+    }
+
+    studyMemberCountLabel(): string {
+        return '(' + (this.studyMemberCount !== undefined ? this.studyMemberCount : '?') + ')';
+    }
+
     countLabel(group: RecipientGroup): string {
         return '(' + (this.counts[group] !== undefined ? this.counts[group] : '?') + ')';
     }
 
     send(): void {
         const group: RecipientGroup = this.form.get('recipientGroup').value;
-        const groupLabel: string = this.groups.find(g => g.value == group).label.toLowerCase();
-        const countTxt: string = this.counts[group] !== undefined ? this.counts[group] + ' users' : 'the users';
+        const isStudy: boolean = group === 'STUDY';
+        const groupLabel: string = isStudy
+            ? this.studies.find(study => study.id == this.form.get('studyId').value)?.name ?? 'the selected study'
+            : this.groups.find(g => g.value == group).label.toLowerCase();
+        const knownCount: number = isStudy ? this.studyMemberCount : this.counts[group];
+        const countTxt: string = knownCount !== undefined ? knownCount + ' users' : 'the users';
         this.confirmDialogService.confirm('Send mass email',
                 'This email will be sent to ' + countTxt + ' (' + groupLabel + '). Proceed?')
             .then(confirmed => {
@@ -97,10 +129,13 @@ export class SendEmailComponent {
                 request.recipientGroup = group;
                 request.subject = this.form.get('subject').value;
                 request.content = this.form.get('content').value;
+                if (isStudy) {
+                    request.recipientUserIds = this.studyMemberUserIds;
+                }
                 this.massEmailService.sendMassEmail(request)
                     .then(count => {
                         this.msgBoxService.log('info', 'Email queued for ' + count + ' users');
-                        this.form.reset({ recipientGroup: 'ALL', subject: '', content: '' });
+                        this.form.reset({ recipientGroup: 'ALL', studyId: null, subject: '', content: '' });
                     })
                     .catch(() => this.msgBoxService.log('error', 'The email could not be sent'))
                     .finally(() => this.sending = false);
