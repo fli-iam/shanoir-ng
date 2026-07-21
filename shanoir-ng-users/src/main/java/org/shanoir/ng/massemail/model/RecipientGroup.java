@@ -30,6 +30,9 @@ public enum RecipientGroup {
     ACTIVE,
 
     /** Users whose Keycloak account is disabled or missing. */
-    INACTIVE;
+    INACTIVE,
+
+    /** Explicit set of users, submitted as recipientUserIds. Used to target the members of a study. */
+    STUDY;
 
 }

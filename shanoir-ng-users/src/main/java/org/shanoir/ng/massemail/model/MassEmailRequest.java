@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.massemail.model;
 
+import java.util.List;
+
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -33,6 +36,8 @@ public class MassEmailRequest {
     @NotBlank
     private String content;
 
+    private List<Long> recipientUserIds;
+
     /**
      * @return the recipientGroup
      */
@@ -46,6 +51,33 @@ public class MassEmailRequest {
      */
     public void setRecipientGroup(RecipientGroup recipientGroup) {
         this.recipientGroup = recipientGroup;
+    }
+
+    /**
+     * @return the recipientUserIds
+     */
+    public List<Long> getRecipientUserIds() {
+        return recipientUserIds;
+    }
+
+    /**
+     * @param recipientUserIds
+     *            the recipientUserIds to set
+     */
+    public void setRecipientUserIds(List<Long> recipientUserIds) {
+        this.recipientUserIds = recipientUserIds;
+    }
+
+    /**
+     * recipientUserIds must be provided, and non-empty, when targeting the STUDY
+     * group, and must be absent for every other group, which are resolved server-side.
+     *
+     * @return whether recipientUserIds is consistent with recipientGroup
+     */
+    @AssertTrue(message = "recipientUserIds is required when recipientGroup is STUDY, and must not be set otherwise")
+    public boolean isRecipientUserIdsConsistent() {
+        final boolean hasIds = recipientUserIds != null && !recipientUserIds.isEmpty();
+        return (RecipientGroup.STUDY == recipientGroup) == hasIds;
     }
 
     /**
