@@ -28,6 +28,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -217,7 +218,7 @@ public class ImporterApiController implements ImporterApi {
             }
 
             // Work-around during migration time: remove later
-            importerManagerService.handleLegacySubjectAndSeries(importJob);
+            handleLegacySubjectAndSeries(importJob);
 
             /**
              * STEP: split instances into non-images and images and get additional meta-data
@@ -272,12 +273,28 @@ public class ImporterApiController implements ImporterApi {
             importJob.setWorkFolder(importJobDir.getAbsolutePath());
             LOG.info("============== NEW IMPORT ===========================");
             LOG.info("Starting import job for user {} (userId: {}) with folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
-            importerManagerService.manageImportJob(importJob);
+            handleLegacySubjectAndSeries(importJob);
+            importerManagerService.manageImportJobBase(importJob);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
             LOG.error("Missing importJobDir.");
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Missing importJobDir.", null));
+        }
+    }
+
+    public void handleLegacySubjectAndSeries(final ImportJob importJob) {
+        // Get subject and series from legacy location and put into new locations
+        for (Iterator<Patient> patientIt = importJob.getPatients().iterator(); patientIt.hasNext();) {
+            Patient patient = patientIt.next();
+            importJob.setSubject(patient.getSubject());
+            List<Study> studies = patient.getStudies();
+            for (Iterator<Study> studyIt = studies.iterator(); studyIt.hasNext();) {
+                Study study = studyIt.next();
+                // As this is called from uploadDicomZipFile,
+                // we have to take all series (not yet selected)
+                importJob.setSeries(study.getSeries());
+            }
         }
     }
 

@@ -28,12 +28,9 @@ import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.query.DicomStoreSCPServer;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.Image;
-import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Instance;
-import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailBase;
@@ -109,92 +106,11 @@ public class ImporterManagerService {
     private String importDir;
 
     @Async
-    public void manageImportJob(final ImportJob importJob) {
-        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
-        event.setTimestamp(importJob.getTimestamp());
-        eventService.publishEvent(event);
-        importJob.setShanoirEvent(event);
-        importJob.setUsername(KeycloakUtil.getTokenUserName());
-        try {
-            // Always create a userId specific folder in the import work folder (the root of everything):
-            // split imports to clearly separate them into separate folders for each user
-            final String userImportDirFilePath = importDir + File.separator + Long.toString(importJob.getUserId());
-            final File userImportDir = new File(userImportDirFilePath);
-            if (!userImportDir.exists()) {
-                userImportDir.mkdirs(); // create if not yet existing, e.g. in case of PACS import
-            }
-            handleLegacySubjectAndSeries(importJob);
-            // 1. call to cleanSeries: remove ignored series, that have been detected to be ignored by the
-            // uploadDicomZipFile (DicomDirToModelService) or the QueryPACSService (either from ShUp or the
-            // web-gui-pacs import), see usage of DicomSerieAndInstanceAnalyzer and e.g. missing instances
-            cleanSeries(importJob.getSeries());
-            // In PACS import the dicom files are still in the PACS, we have to download them first
-            // and then analyze them: what gives us a list of images for each serie.
-            final File importJobDir;
-            if (importJob.isFromPacs()) {
-                importJobDir = createImportJobDir(userImportDir.getAbsolutePath());
-                // at first all dicom files arrive normally in /tmp/shanoir-dcmrcv (see config DicomStoreSCPServer)
-                downloadAndMoveDicomFilesToImportJobDir(importJobDir, importJob.getStudyInstanceUID(), importJob.getSeries(), event);
-                // convert instances to images, as already done after zip file upload
-                imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), true, event, false);
-            } else if (importJob.isFromShanoirUploader()) {
-                importJobDir = new File(importJob.getWorkFolder());
-                // convert instances to images, as already done after zip file upload
-                imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), false, event, false);
-            } else if (importJob.isFromDicomZip()) {
-                // images creation and analyze of dicom files has been done after upload already
-                importJobDir = new File(importJob.getWorkFolder());
-            } else {
-                throw new ShanoirException("Unsupported type of import.");
-            }
-            // 2. call to cleanSeries: at this point we are sure for all imports, that the ImagesCreatorAndDicomFileAnalyzer
-            // has been run and correctly classified everything. So no need to check afterwards for erroneous series.
-            // So two possibilities to remove series: 1. call, via the info from the dicomdir or the info from the pacs
-            // 2. call, via analysis of dicom files itself and their content
-            cleanSeries(importJob.getSeries());
-
-            event.setProgress(0.25F);
-            eventService.publishEvent(event);
-
-            // DICOM files coming from ShUp are already pseudonymized
-            if (!importJob.isFromShanoirUploader()) {
-                pseudonymize(importJob, event, importJobDir);
-            }
-            datasetsCreatorService.createDatasets(importJob, importJobDir);
-
-            this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
-            long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());
-            LOG.info("user=" + KeycloakUtil.getTokenUserName() + ",size=" + ImportUtils.readableFileSize(importJobDirSize) + "," + importJob.toString());
-        } catch (Exception e) {
-            LOG.error("Error during import for study {} and examination {}", importJob.getStudyId(), importJob.getExaminationId(), e);
-            event.setMessage("ERROR while importing data for study " + importJob.getStudyId() + " for examination " + importJob.getExaminationId());
-            event.setStatus(ShanoirEvent.ERROR);
-            event.setProgress(-1f);
-            eventService.publishEvent(event);
-            sendFailureMail(importJob, e.getMessage());
-        }
-    }
-
-    public void handleLegacySubjectAndSeries(final ImportJob importJob) {
-        // Get subject and series from legacy location and put into new locations
-        for (Iterator<Patient> patientIt = importJob.getPatients().iterator(); patientIt.hasNext();) {
-            Patient patient = patientIt.next();
-            importJob.setSubject(patient.getSubject());
-            List<Study> studies = patient.getStudies();
-            for (Iterator<Study> studyIt = studies.iterator(); studyIt.hasNext();) {
-                Study study = studyIt.next();
-                // As this is called from uploadDicomZipFile,
-                // we have to take all series (not yet selected)
-                importJob.setSeries(study.getSeries());
-            }
-        }
-    }
-
-    @Async
     public void manageImportJobBase(final ImportJobBase importJob) {
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT,
-                importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration",
-                ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
+                importJob.getExaminationId().toString(), importJob.getUserId(),
+                "Starting import configuration", ShanoirEvent.IN_PROGRESS,
+                0f, importJob.getStudyId());
         event.setTimestamp(importJob.getTimestamp());
         eventService.publishEvent(event);
         importJob.setShanoirEvent(event);
@@ -223,27 +139,26 @@ public class ImporterManagerService {
                 // (see config DicomStoreSCPServer)
                 downloadAndMoveDicomFilesToImportJobDir(importJobDir,
                         importJob.getStudyInstanceUID(), importJob.getSeries(), event);
-                // convert instances to images, as already done after zip file upload
+                // Convert instances to images, as already done after zip file upload
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
                         importJobDir.getAbsolutePath(), true, event, false);
             } else if (importJob.isFromShanoirUploader()) {
                 importJobDir = new File(importJob.getWorkFolder());
-                // convert instances to images, as already done after zip file upload
+                // Convert instances to images, as already done after zip file upload
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
                         importJobDir.getAbsolutePath(), false, event, false);
             } else if (importJob.isFromDicomZip()) {
-                // images creation and analyze of dicom files has been done after upload already
+                // Images creation and analyze of dicom files has been done after upload already
                 importJobDir = new File(importJob.getWorkFolder());
             } else {
                 throw new ShanoirException("Unsupported type of import.");
             }
             // 2. call to cleanSeries: at this point we are sure for all imports, that the
-            // ImagesCreatorAndDicomFileAnalyzer
-            // has been run and correctly classified everything. So no need to check
-            // afterwards for erroneous series.
-            // So two possibilities to remove series: 1. call, via the info from the
-            // dicomdir or the info from the pacs
-            // 2. call, via analysis of dicom files itself and their content
+            // ImagesCreatorAndDicomFileAnalyzer has been run and correctly classified
+            // everything. So no need to check afterwards for erroneous series.
+            // So two possibilities to remove series:
+            // 1. call above, via the info from the DICOMDIR or the info from the pacs
+            // 2. call, via analysis of DICOM files itself and their content (PACS)
             cleanSeries(importJob.getSeries());
 
             event.setProgress(0.25F);
