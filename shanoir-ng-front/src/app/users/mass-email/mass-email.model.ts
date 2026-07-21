@@ -12,10 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-export type RecipientGroup = 'ALL' | 'ACTIVE' | 'INACTIVE';
+export type RecipientGroup = 'ALL' | 'ACTIVE' | 'INACTIVE' | 'STUDY';
 
 export class MassEmailRequest {
     recipientGroup: RecipientGroup;
     subject: string;
     content: string;
+    recipientUserIds?: number[];
 }
