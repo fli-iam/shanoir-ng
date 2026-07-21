@@ -39,6 +39,7 @@ import org.dcm4che3.io.DicomInputStream;
 import org.json.JSONObject;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.studycard.model.QualityCard;
@@ -855,12 +856,12 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
-    public ImportJob uploadDicom(File file) throws Exception {
+    public ImportJobBase uploadDicom(File file) throws Exception {
         try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterUploadDicom, file)) {
             try (response) {
                 int code = response.getCode();
                 if (code == HttpStatus.SC_OK) {
-                    ImportJob importJob = Util.getMappedObject(response, ImportJob.class);
+                    ImportJobBase importJob = Util.getMappedObject(response, ImportJobBase.class);
                     return importJob;
                 } else {
                     LOG.error("Error in uploadDicom: "

@@ -424,6 +424,8 @@ public class ImportTests extends AbstractTest {
         } else {
             importJob.setAnonymisationProfileToUse("Profile OFSEP");
         }
+        importJob.setPatient(null);
+        importJob.setStudy(null);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         dumpImportJobJson(importJobJson, importJob.getWorkFolder(), "testImportFromDicomZip");
         userClient.startImportJob(importJobJson);
@@ -451,6 +453,8 @@ public class ImportTests extends AbstractTest {
         } else {
             importJob.setAnonymisationProfileToUse("Profile OFSEP");
         }
+        importJob.setPatient(null);
+        importJob.setStudy(null);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         dumpImportJobJson(importJobJson, importJob.getWorkFolder(), "testImportFromDicomZipNoStudyCard");
         userClient.startImportJob(importJobJson);
@@ -508,7 +512,7 @@ public class ImportTests extends AbstractTest {
         }
     }
 
-    private ImportJob uploadDicomZip(final String fileName) {
+    private ImportJobBase uploadDicomZip(final String fileName) {
         try {
             URL resource = getClass().getClassLoader().getResource(fileName);
             if (resource != null) {
