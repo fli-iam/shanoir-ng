@@ -56,6 +56,7 @@ import { LoadingBarComponent } from "../../shared/components/loading-bar/loading
 import { TagCreatorComponent } from "../../tags/tag.creator.component";
 import { SubjectStudyListComponent } from "../../shared/components/subject-study-list/subject-study-list.component";
 import { StudyUserListComponent } from "../studyuser/studyuser-list.component";
+import { StudyEmailMembersComponent } from "../email-members/study-email-members.component";
 import { QualityControlComponent } from "../../quality-control/quality-control.component";
 import { BidsTreeComponent } from "../../bids/tree/bids-tree.component";
 import { StudyHistoryComponent } from "../study-history/study-history.component";
@@ -69,8 +70,8 @@ import { CopyFromCsvComponent } from "./copy-csv.component";
     selector: 'study-detail',
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
-    imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent, 
-        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent]
+    imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent,
+        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent]
 })
 
 export class StudyComponent extends EntityComponent<Study> {

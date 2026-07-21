@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<form [formGroup]="form" novalidate>
+<div [formGroup]="form">
     @if (memberCount > 0) {
         <ol>
             <li>
@@ -46,4 +46,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     } @else {
         <p>This study has no members to email.</p>
     }
-</form>
+</div>
