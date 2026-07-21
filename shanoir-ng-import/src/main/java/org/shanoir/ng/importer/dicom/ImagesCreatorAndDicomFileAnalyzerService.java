@@ -105,6 +105,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                         handleError(event, nbSeries, cpt, serie, e);
                     }
                 }
+                // We clean instances here, as now transformed to images
+                serie.setInstances(null);
             }
             cpt++;
         }
@@ -172,8 +174,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                 serie.setIgnored(true);
                 serie.setSelected(false);
             }
-            // We clean instances here, as now transformed to images
-            serie.setInstances(null);
         }
     }
 
