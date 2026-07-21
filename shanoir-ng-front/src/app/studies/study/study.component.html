@@ -826,7 +826,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </fieldset>
                 @if (keycloakService.isUserAdmin() && mode == 'view') {
                     <fieldset [class.hidden-tab]="activeTab != 'email'" tab="email">
-                        <legend>Email members</legend>
+                        <legend>Send email to members</legend>
                         <study-email-members [study]="study"></study-email-members>
                     </fieldset>
                 }
