@@ -471,7 +471,7 @@ public class ImportTests extends AbstractTest {
         org.shanoir.ng.importer.model.Subject subjectForImportJob = new org.shanoir.ng.importer.model.Subject();
         subjectForImportJob.setId(subjectREST.getId());
         subjectForImportJob.setName(subjectREST.getName());
-        patient.setSubject(subjectForImportJob);
+        importJob.setSubject(subjectForImportJob);
         importJob.setSubjectName(subjectREST.getName());
         return subjectREST;
     }
@@ -496,7 +496,7 @@ public class ImportTests extends AbstractTest {
         org.shanoir.ng.importer.model.Subject subjectForImportJob = new org.shanoir.ng.importer.model.Subject();
         subjectForImportJob.setId(subjectREST.getId());
         subjectForImportJob.setName(subjectREST.getName());
-        patient.setSubject(subjectForImportJob);
+        importJob.setSubject(subjectForImportJob);
         importJob.setSubjectName(subjectREST.getName());
         return subjectREST;
     }
