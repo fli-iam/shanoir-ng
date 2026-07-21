@@ -43,6 +43,19 @@ public interface MassEmailService {
     List<User> resolveRecipients(RecipientGroup recipientGroup) throws SecurityException;
 
     /**
+     * Resolve the given users directly, without any group-based filtering or
+     * Keycloak lookup. Users without an email address and users whose account
+     * request was never approved are excluded, the same as for named groups.
+     * Used to target an explicit set of recipients, e.g. the members of a
+     * study, already resolved by the caller.
+     *
+     * @param userIds
+     *            the ids of the users to resolve.
+     * @return the users to email.
+     */
+    List<User> resolveRecipients(List<Long> userIds);
+
+    /**
      * Count the users belonging to the given recipient group.
      *
      * @param recipientGroup

@@ -67,6 +67,17 @@ public class MassEmailServiceImpl implements MassEmailService {
     }
 
     @Override
+    public List<User> resolveRecipients(final List<Long> userIds) {
+        final List<User> recipients = new ArrayList<>();
+        for (User user : userRepository.findAllById(userIds)) {
+            if (isEmailable(user)) {
+                recipients.add(user);
+            }
+        }
+        return recipients;
+    }
+
+    @Override
     public int countRecipients(final RecipientGroup recipientGroup) throws SecurityException {
         return resolveRecipients(recipientGroup).size();
     }
