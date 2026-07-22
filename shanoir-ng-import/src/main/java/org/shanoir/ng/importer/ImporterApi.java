@@ -19,6 +19,7 @@ import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
@@ -132,7 +133,7 @@ public interface ImporterApi {
     ResponseEntity<ImportJob> importDicomZipFile(@Parameter(name = "file path") @RequestBody String dicomZipFilename)
             throws RestServiceException;
 
-    // used by ShanoirUploader!!! 3. step
+    // used by ShanoirUploader!!!
     @Operation(summary = "Start import job", description = "Start import job")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "import job started"),
@@ -153,7 +154,7 @@ public interface ImporterApi {
      * @return
      * @throws RestServiceException
      */
-    // used by ShanoirUploader!!! 3. step
+    // used by ShanoirUploader!!!
     @Operation(summary = "Start import job", description = "Start import job")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "import job started"),
@@ -167,6 +168,18 @@ public interface ImporterApi {
     ResponseEntity<Void> startImportJobBase(
             @Parameter(name = "ImportJob", required = true) @RequestBody ImportJobBase importJob)
             throws RestServiceException;
+
+    // used by ShanoirUploader!!!
+    @Operation(summary = "Get import job status", description = "Poll the current state of an async import, and the final ImportJob once finished")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "status found"),
+            @ApiResponse(responseCode = "404", description = "no status found for this id"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden")})
+    @GetMapping(value = "/status/{tempDirId}", produces = {"application/json"})
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
+    ResponseEntity<ImportJobStatus> getImportJobStatus(
+            @Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId);
 
     @Operation(summary = "Start analysis of EEG job", description = "Start analysis eeg job")
     @ApiResponses(value = {

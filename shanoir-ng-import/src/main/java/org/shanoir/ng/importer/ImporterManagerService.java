@@ -100,6 +100,9 @@ public class ImporterManagerService {
     private DatasetsCreatorService datasetsCreatorService;
 
     @Autowired
+    private ImportJobStatusService importJobStatusService;
+
+    @Autowired
     private StudyUserRightsRepository studyUserRightRepo;
 
     @Value("${shanoir.import.directory}")
@@ -107,9 +110,12 @@ public class ImporterManagerService {
 
     @Async
     public void manageImportJob(final ImportJobBase importJob) {
+        final String statusKey = ImportJobStatusService.keyOf(importJob.getWorkFolder());
+        importJobStatusService.setInProgress(statusKey, "Starting import");
+
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT,
                 importJob.getExaminationId().toString(), importJob.getUserId(),
-                "Starting import configuration", ShanoirEvent.IN_PROGRESS,
+                "Starting import", ShanoirEvent.IN_PROGRESS,
                 0f, importJob.getStudyId());
         event.setTimestamp(importJob.getTimestamp());
         eventService.publishEvent(event);
@@ -163,12 +169,14 @@ public class ImporterManagerService {
 
             event.setProgress(0.25F);
             eventService.publishEvent(event);
+            importJobStatusService.setInProgress(statusKey, "Pseudonymizing and creating datasets");
 
-            // DICOM files coming from ShUp are already pseudonymized
             if (!importJob.isFromShanoirUploader()) {
                 pseudonymize(importJob, event, importJobDir);
             }
             datasetsCreatorService.createDatasets(importJob, importJobDir);
+
+            importJobStatusService.setFinished(statusKey, importJob);
 
             this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET,
                     objectMapper.writeValueAsString(importJob));
@@ -183,6 +191,7 @@ public class ImporterManagerService {
             event.setStatus(ShanoirEvent.ERROR);
             event.setProgress(-1f);
             eventService.publishEvent(event);
+            importJobStatusService.setError(statusKey, event.getMessage());
             sendFailureMail(importJob, e.getMessage());
         }
     }

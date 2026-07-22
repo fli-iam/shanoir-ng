@@ -52,6 +52,7 @@ import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.Event;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
@@ -151,6 +152,9 @@ public class ImporterApiController implements ImporterApi {
 
     @Autowired
     private ShanoirEventService eventService;
+
+    @Autowired
+    private ImportJobStatusService importJobStatusService;
 
     @Override
     public ResponseEntity<ImportJob> uploadDicomZipFile(
@@ -271,6 +275,7 @@ public class ImporterApiController implements ImporterApi {
         final File importJobDir = new File(userImportDir, tempDirId);
         if (importJobDir.exists()) {
             importJob.setWorkFolder(importJobDir.getAbsolutePath());
+            importJobStatusService.setInProgress(tempDirId, "Import job received, queued for processing.");
             LOG.info("============== NEW IMPORT ===========================");
             LOG.info("Starting import job (old) for user {} (userId: {}) with folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
             handleLegacySubjectAndSeries(importJob);
@@ -309,6 +314,7 @@ public class ImporterApiController implements ImporterApi {
         final File importJobDir = new File(userImportDir, tempDirId);
         if (importJobDir.exists()) {
             importJob.setWorkFolder(importJobDir.getAbsolutePath());
+            importJobStatusService.setInProgress(tempDirId, "Import job received, queued for processing.");
             LOG.info("============== NEW IMPORT ===========================");
             LOG.info("Starting import job base for user {} (userId: {}) with folder: {}",
                     KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
@@ -319,6 +325,15 @@ public class ImporterApiController implements ImporterApi {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Missing importJobDir.", null));
         }
+    }
+
+    @Override
+    public ResponseEntity<ImportJobStatus> getImportJobStatus(@PathVariable("tempDirId") String tempDirId) {
+        ImportJobStatus status = importJobStatusService.getStatus(tempDirId);
+        if (status == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(status, HttpStatus.OK);
     }
 
     @Override

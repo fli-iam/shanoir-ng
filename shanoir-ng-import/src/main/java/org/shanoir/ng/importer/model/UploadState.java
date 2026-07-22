@@ -30,6 +30,7 @@ public enum UploadState {
     READY, // Is it used ?
     UPLOADING_IMAGES, // Is it used ?
     UPLOADING_JOB_FILE, // Is it used ?
+    SERVER_PROCESSING,
     FINISHED, //
     ERROR,
     CHECK_OK,

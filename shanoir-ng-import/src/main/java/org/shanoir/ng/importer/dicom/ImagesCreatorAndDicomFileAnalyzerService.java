@@ -110,12 +110,14 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
             }
             cpt++;
         }
-        /*
-            * We apply an additional sort here on the series list to base everything on seriesNumbers finally.
-            * It might happen, while using ShanoirUploader, that some PACS will not share the seriesNumber, so
-            * we can not correctly sort in ShanoirUploader without going into the files itself, what we do not
-            * do, therefore we have the ImagesCreatorAndDicomFileAnalyzerService, that is called on the server.
-            */
+        /**
+         * We apply an additional sort here on the series list to base everything on
+         * seriesNumbers finally. It might happen, while using ShanoirUploader, that
+         * some PACS will not share the seriesNumber, so we can not correctly sort in
+         * ShanoirUploader without going into the files itself, what we do not do,
+         * therefore we have the ImagesCreatorAndDicomFileAnalyzerService, that is
+         * called on the server.
+         */
         importJob.getSeries().sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
     }
 
