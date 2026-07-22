@@ -29,6 +29,8 @@ public interface StorageService {
 
     public static final String EXAMINATION = "examination-";
 
+    public static final String ACQUISITION = "acquisition-";
+
     public static final String PATHOLOGY_MODEL = "pathology-model-";
 
     public static final String DERIVATIVES = "processed-dataset";
@@ -43,11 +45,17 @@ public interface StorageService {
 
     boolean existsExtraData(Long examinationId, String fileName) throws StorageException;
 
+    boolean existsAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException;
+
     String storeStudyData(Long studyId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException;
 
     String storeExtraData(Long examinationId, String fileName,
+            InputStream inputStream, String contentType, long size)
+            throws StorageException;
+
+    String storeAcquisitionExtraData(Long acquisitionId, String fileName,
             InputStream inputStream, String contentType, long size)
             throws StorageException;
 
@@ -73,6 +81,8 @@ public interface StorageService {
 
     Resource loadExtraData(Long examinationId, String fileName) throws StorageException;
 
+    Resource loadAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException;
+
     Resource loadDatasetsData(String path) throws StorageException;
 
     Resource loadPreclinicalExtraData(Long examinationId, String fileName) throws StorageException;
@@ -83,7 +93,11 @@ public interface StorageService {
 
     String getDirectoryExtraData(Long examinationId) throws StorageException;
 
+    String getDirectoryAcquisitionExtraData(Long acquisitionId) throws StorageException;
+
     long getFileSizeExtraData(Long examinationId, String fileName) throws StorageException;
+
+    long getFileSizeAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException;
 
     String getPublicLocationStudies(String directory, String fileName) throws StorageException;
 
@@ -95,6 +109,8 @@ public interface StorageService {
 
     void deleteExtraData(Long examinationId, String fileName) throws StorageException;
 
+    void deleteAcquisitionExtraData(Long acquisitionId, String fileName) throws StorageException;
+
     void deletePreclinicalExtraData(Long examinationId, String fileName) throws StorageException;
 
     void deletePathologyModelData(Long pathologyModelId, String fileName) throws StorageException;
@@ -102,6 +118,8 @@ public interface StorageService {
     void deleteDirectoryStudyData(Long studyId) throws StorageException;
 
     void deleteDirectoryExtraData(Long examinationId) throws StorageException;
+
+    void deleteDirectoryAcquisitionExtraData(Long acquisitionId) throws StorageException;
 
     void deleteDirectoryPreclinicalExtraData(Long examinationId) throws StorageException;
 

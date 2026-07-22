@@ -375,6 +375,21 @@ public interface StudyApi {
             @Parameter(description = "id of the user", required = true) @PathVariable("userId") Long userId)
             throws IOException;
 
+    @Operation(summary = "", description = "Adds an user to a study with the given rights")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "user added to study"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "404", description = "no study or user found"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "studyUser/{studyId}", produces = { "application/json" }, consumes = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+    ResponseEntity<StudyUser> addStudyUser(
+            @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(description = "study-user relationship to create", required = true) @RequestBody @Valid StudyUser studyUser)
+            throws RestServiceException;
+
     @Operation(summary = "", description = "If exists, returns the studies that are publicly available for a given user")
     @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),

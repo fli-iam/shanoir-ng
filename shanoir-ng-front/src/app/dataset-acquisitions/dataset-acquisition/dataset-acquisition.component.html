@@ -188,6 +188,40 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 }
                             </span>
                         </li>
+                        <li>
+                            <label>Extra data</label>
+                            <span class="right-col">
+                                @switch (mode) {
+                                    @case ('view') {
+                                        <ul>
+                                            @for (file of datasetAcquisition.extraDataFilePathList; track file) {
+                                                <li>
+                                                    {{ getFileName(file) }}
+                                                    <button type="button" class="dl-button" (click)="downloadFile(file)">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                    @default {
+                                        <input #input hidden multiple type="file" (change)="attachNewFile($event)" />
+                                        <button type="button" (click)="setFile()" class="left-icon">
+                                            <i class="fas fa-upload"></i>
+                                            Choose file
+                                        </button>
+                                        <ul>
+                                            @for (file of datasetAcquisition.extraDataFilePathList; track file) {
+                                                <li>
+                                                    {{ getFileName(file) }}
+                                                    <button type="button" (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                }
+                            </span>
+                        </li>
                         @if (mode == 'view' && datasetAcquisition.copies?.length > 0 && hasAdministrateRight) {
                             <li>
                                 <label>This acquisition has been copied :</label>
