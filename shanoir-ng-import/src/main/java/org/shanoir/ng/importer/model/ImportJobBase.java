@@ -361,8 +361,7 @@ public class ImportJobBase implements Serializable {
         this.uploadPercentage = uploadPercentage;
     }
 
-    @Override
-    public String toString() {
+    public String getImportType() {
         String importType;
         if (fromDicomZip) {
             importType = "ZIP";
@@ -373,6 +372,11 @@ public class ImportJobBase implements Serializable {
         } else {
             importType = "UNSUPPORTED";
         }
+        return importType;
+    }
+
+    @Override
+    public String toString() {
         int numberOfSeries = 0;
         StringBuffer seriesNames = new StringBuffer();
         seriesNames.append("[");
@@ -392,7 +396,7 @@ public class ImportJobBase implements Serializable {
                 }
             }
         }
-        return "userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType
+        return "userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + getImportType()
                 + ",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality
                 + ",enhanced=" + enhanced
                 + ",subjectName=" + subjectName + ",examinationId=" + examinationId + ",StudyInstanceUID="

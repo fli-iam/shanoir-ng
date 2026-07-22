@@ -277,8 +277,9 @@ public class ImporterApiController implements ImporterApi {
             importJob.setWorkFolder(importJobDir.getAbsolutePath());
             importJobStatusService.setInProgress(tempDirId, "Import job received, queued for processing.");
             LOG.info("============== NEW IMPORT ===========================");
-            LOG.info("Starting import job (old) for user {} (userId: {}) with folder: {}",
-                    KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
+            LOG.info("Import job (old) for user {} ({})", KeycloakUtil.getTokenUserName(), userId);
+            LOG.info("Import type: {}", importJob.getImportType());
+            LOG.info("WorkFolder: {}", importJob.getWorkFolder());
             handleLegacySubjectAndSeries(importJob);
             importerManagerService.manageImportJob(importJob);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -317,8 +318,9 @@ public class ImporterApiController implements ImporterApi {
             importJob.setWorkFolder(importJobDir.getAbsolutePath());
             importJobStatusService.setInProgress(tempDirId, "Import job received, queued for processing.");
             LOG.info("============== NEW IMPORT ===========================");
-            LOG.info("Starting import job base for user {} (userId: {}) with folder: {}",
-                    KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
+            LOG.info("Import job (base) for user {} ({})", KeycloakUtil.getTokenUserName(), userId);
+            LOG.info("Import type: {}", importJob.getImportType());
+            LOG.info("WorkFolder: {}", importJob.getWorkFolder());
             importerManagerService.manageImportJob(importJob);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {

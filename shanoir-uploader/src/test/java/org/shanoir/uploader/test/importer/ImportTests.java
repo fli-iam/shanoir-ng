@@ -327,7 +327,8 @@ public class ImportTests extends AbstractTest {
                 if (status.getState() == ImportJobStatus.State.FINISHED) {
                     logger.info("Server reported FINISHED for tempDirId {}.", tempDirId);
                     ImportJobBase importJob = status.getImportJob();
-                    dumpImportJobJson(importJob.toString(), tempDirId, "end-of-ms-import");
+                    String importJobJson = Util.objectWriter.writeValueAsString(importJob);
+                    dumpImportJobJson(importJobJson, tempDirId, "end-of-ms-import");
                     return status;
                 } else if (status.getState() == ImportJobStatus.State.ERROR) {
                     Assertions.fail("Import failed on server for tempDirId " + tempDirId + ": " + status.getMessage());
