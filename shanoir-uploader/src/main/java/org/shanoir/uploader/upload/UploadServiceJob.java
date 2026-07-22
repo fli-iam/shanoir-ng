@@ -116,30 +116,27 @@ public class UploadServiceJob {
     private void processFolderForServer(final File folder, final NominativeDataImportJobManager importJobManager,
             final ImportJob importJob, CurrentNominativeDataController currentNominativeDataController) {
         final List<File> filesToTransfer = new ArrayList<File>();
-        /**
-         * Get all files from uploadFolder (importJob) and send them.
-         * No reading of job content. Files from seriesInstanceUID folders
-         * are transferred as a flat list and the list in the import-job.json
-         * is flat as well.
-         */
         final Collection<File> files = Util.listFiles(folder, null, true);
-        for (Iterator<File> filesIt = files.iterator(); filesIt.hasNext();) {
-            final File file = (File) filesIt.next();
+        for (File file : files) {
             if (file.getName().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
                 filesToTransfer.add(file);
             }
         }
-        if (importJobManager != null) {
-            final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
-            if (uploadState.equals(org.shanoir.ng.importer.model.UploadState.START) || uploadState.equals(org.shanoir.ng.importer.model.UploadState.START_AUTOIMPORT)) {
-                long startTime = System.currentTimeMillis();
-                processStartForServer(folder, filesToTransfer, importJob, importJobManager, currentNominativeDataController);
-                long stopTime = System.currentTimeMillis();
-                long elapsedTime = stopTime - startTime;
-                LOG.info("Upload of files in folder: " + folder.getAbsolutePath() + " finished in duration (ms): " + elapsedTime);
-            }
-        } else {
+        if (importJobManager == null) {
             LOG.error("importJobManager is null.");
+            return;
+        }
+        final UploadState uploadState = importJob.getUploadState();
+        if (uploadState.equals(UploadState.START) || uploadState.equals(UploadState.START_AUTOIMPORT)) {
+            long startTime = System.currentTimeMillis();
+            processStartForServer(folder, filesToTransfer, importJob, importJobManager,
+                    currentNominativeDataController);
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            LOG.info("Upload of files in folder: " + folder.getAbsolutePath() + " finished in duration (ms): "
+                    + elapsedTime);
+        } else if (uploadState.equals(UploadState.SERVER_PROCESSING)) {
+            processServerProcessingForServer(folder, filesToTransfer, importJob, importJobManager,
+                    currentNominativeDataController);
         }
     }
 
@@ -156,48 +153,78 @@ public class UploadServiceJob {
         try {
             String tempDirId = shanoirUploaderServiceClient.createTempDir();
             LOG.info("Upload: tempDirId for import: " + tempDirId);
-            /**
-             * Upload all DICOM files, one by one.
-             */
             int i = 0;
-            for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
-                File file = (File) iterator.next();
+            for (File file : allFiles) {
                 i++;
-                LOG.debug("UploadServiceJob started to upload file: " + file.getName());
                 shanoirUploaderServiceClient.uploadFile(tempDirId, file);
-                LOG.debug("UploadServiceJob finished to upload file: " + file.getName());
                 uploadPercentage = i * 100 / allFiles.size() + " %";
-                // following 2 lines are doing same thing ?
                 importJob.setUploadPercentage(uploadPercentage);
                 currentNominativeDataController.updateNominativeDataPercentage(folder, uploadPercentage);
                 nominativeDataImportJobManager.writeImportJob(importJob);
-                LOG.debug("Upload percentage of folder " + folder.getName() + " = " + uploadPercentage + ".");
             }
             LOG.info("Upload: " + allFiles.size() + " uploaded files to tempDirId: " + tempDirId);
 
-            /**
-             * Start job on server
-             */
             setTempDirIdAndStartImport(tempDirId, importJob);
+
+            // Server (ms-import) still has to pseudonymize/create datasets and hand
+            // off to ms-datasets. Don't mark FINISHED yet — switch state and let
+            // the next scheduled tick(s) poll the server instead of blocking here.
             currentNominativeDataController.updateNominativeDataPercentage(folder,
-                    org.shanoir.ng.importer.model.UploadState.FINISHED.toString());
-            importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.FINISHED);
+                    UploadState.SERVER_PROCESSING.toString());
+            importJob.setUploadState(UploadState.SERVER_PROCESSING);
             importJob.setTimestamp(System.currentTimeMillis());
             nominativeDataImportJobManager.writeImportJob(importJob);
-
-            // Delete DICOM files, if check.on.server is false
-            String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
-            boolean checkOnServer = Boolean.parseBoolean(value);
-            if (!checkOnServer) {
-                // Clean all DICOM files after successful import to server
-                deleteAllDicomFiles(folder, allFiles);
-            }
         } catch (Exception e) {
-            currentNominativeDataController.updateNominativeDataPercentage(folder, org.shanoir.ng.importer.model.UploadState.ERROR.toString());
-            importJob.setUploadState(org.shanoir.ng.importer.model.UploadState.ERROR);
+            currentNominativeDataController.updateNominativeDataPercentage(folder, UploadState.ERROR.toString());
+            importJob.setUploadState(UploadState.ERROR);
             importJob.setTimestamp(System.currentTimeMillis());
             nominativeDataImportJobManager.writeImportJob(importJob);
             LOG.error("An error occurred during upload to server: " + e.getMessage());
+        }
+    }
+
+    private void processServerProcessingForServer(final File folder, final List<File> allFiles,
+            final ImportJob importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
+            final CurrentNominativeDataController currentNominativeDataController) {
+        String tempDirId = importJob.getWorkFolder(); // set to tempDirId in setTempDirIdAndStartImport
+        try {
+            ImportJobStatus status = shanoirUploaderServiceClient.getImportJobStatus(tempDirId);
+            if (status == null) {
+                LOG.debug("No status yet on server for tempDirId {}, will retry in 5s.", tempDirId);
+                return;
+            }
+            switch (status.getState()) {
+                case FINISHED:
+                    LOG.info("Import finished on server for tempDirId {} (folder {}).", tempDirId, folder.getName());
+                    currentNominativeDataController.updateNominativeDataPercentage(folder,
+                            UploadState.FINISHED.toString());
+                    importJob.setUploadState(UploadState.FINISHED);
+                    importJob.setTimestamp(System.currentTimeMillis());
+                    nominativeDataImportJobManager.writeImportJob(importJob);
+
+                    String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
+                    if (!Boolean.parseBoolean(value)) {
+                        deleteAllDicomFiles(folder, allFiles);
+                    }
+                    break;
+                case ERROR:
+                    LOG.error("Import failed on server for tempDirId {} (folder {}): {}",
+                            tempDirId, folder.getName(), status.getMessage());
+                    currentNominativeDataController.updateNominativeDataPercentage(folder,
+                            UploadState.ERROR.toString());
+                    importJob.setUploadState(UploadState.ERROR);
+                    importJob.setTimestamp(System.currentTimeMillis());
+                    nominativeDataImportJobManager.writeImportJob(importJob);
+                    break;
+                case IN_PROGRESS:
+                default:
+                    LOG.debug("Import still in progress on server for tempDirId {}: {}", tempDirId,
+                            status.getMessage());
+                    break;
+            }
+        } catch (Exception e) {
+            // transient (network/server) error: stay SERVER_PROCESSING, retry next tick
+            LOG.warn("Could not poll import status for tempDirId {}: {}", tempDirId, e.getMessage());
         }
     }
 

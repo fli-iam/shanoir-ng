@@ -175,6 +175,7 @@ public class ImportTests extends AbstractTest {
         Util.mapper.writeValue(importJobJsonFile, importJob);
 
         startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromShanoirUploader");
+        waitForServerImportJobStatus(importJob.getWorkFolder());
 
         // Local files here were pseudonymized before upload, exactly like the
         // server-side copy, so a full tag comparison is meaningful.
@@ -269,7 +270,7 @@ public class ImportTests extends AbstractTest {
         Util.mapper.writeValue(importJobJsonFile, importJob);
 
         startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromShanoirUploaderNoStudyCard");
-
+        waitForServerImportJobStatus(importJob.getWorkFolder());
         waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
     }
 
@@ -313,6 +314,26 @@ public class ImportTests extends AbstractTest {
         }
         Assertions.fail("DICOM instances were not consistent with the server within timeout for examination "
                 + examinationId + (lastError != null ? ": " + lastError.getMessage() : ""));
+    }
+
+    private ImportJobStatus waitForServerImportJobStatus(String tempDirId) throws Exception {
+        long deadline = System.currentTimeMillis() + CONSISTENCY_CHECK_TIMEOUT_MILLIS;
+        while (System.currentTimeMillis() < deadline) {
+            ImportJobStatus status = userClient.getImportJobStatus(tempDirId);
+            if (status != null) {
+                if (status.getState() == ImportJobStatus.State.FINISHED) {
+                    logger.info("Server reported FINISHED for tempDirId {}.", tempDirId);
+                    ImportJobBase importJob = status.getImportJob();
+                    dumpImportJobJson(importJob, importJob.getWorkFolder(), "endOfMSImport");
+                    return status;
+                } else if (status.getState() == ImportJobStatus.State.ERROR) {
+                    Assertions.fail("Import failed on server for tempDirId " + tempDirId + ": " + status.getMessage());
+                }
+            }
+            Thread.sleep(CONSISTENCY_CHECK_POLL_INTERVAL_MILLIS);
+        }
+        Assertions.fail("Import did not reach FINISHED on server within timeout for tempDirId " + tempDirId);
+        return null;
     }
 
     private Examination createExaminationFromDicomStudy(Study study,
@@ -429,6 +450,7 @@ public class ImportTests extends AbstractTest {
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         dumpImportJobJson(importJobJson, importJob.getWorkFolder(), "testImportFromDicomZip");
         userClient.startImportJob(importJobJson);
+        waitForServerImportJobStatus(importJob.getWorkFolder());
     }
 
     /**
@@ -458,6 +480,7 @@ public class ImportTests extends AbstractTest {
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         dumpImportJobJson(importJobJson, importJob.getWorkFolder(), "testImportFromDicomZipNoStudyCard");
         userClient.startImportJob(importJobJson);
+        waitForServerImportJobStatus(importJob.getWorkFolder());
     }
 
     private org.shanoir.uploader.model.rest.Subject createSubject(ImportJobBase importJob,

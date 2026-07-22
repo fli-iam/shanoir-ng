@@ -139,6 +139,8 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_IMPORTER_START_IMPORT_JOB = "service.importer.start.import.job";
 
+    private static final String SERVICE_IMPORTER_STATUS = "service.importer.status";
+
     private static final String SERVICE_IMPORTER_UPLOAD_DICOM = "service.importer.upload.dicom";
 
     private static final String SERVICE_EXAMINATIONS_BY_SUBJECT_ID = "service.examinations.find.by.subject.id";
@@ -206,6 +208,8 @@ public class ShanoirUploaderServiceClient {
     private String serviceURLImporterCreateTempDir;
 
     private String serviceURLImporterStartImportJob;
+
+    private String serviceURLImporterStatus;
 
     private String serviceURLImporterUploadDicom;
 
@@ -289,6 +293,8 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_CREATE_TEMP_DIR);
         this.serviceURLImporterStartImportJob = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_START_IMPORT_JOB);
+        this.serviceURLImporterStatus = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_STATUS);
         this.serviceURLImporterUploadDicom = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_UPLOAD_DICOM);
         this.serviceURLExaminationsBySubjectId = this.serverURL
@@ -883,6 +889,22 @@ public class ShanoirUploaderServiceClient {
                 LOG.error("Error in startImportJob: with json " + importJobJsonStr + " (status code: " + code
                         + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
                 throw new Exception("Error in startImportJob");
+            }
+        }
+    }
+
+    public ImportJobStatus getImportJobStatus(String tempDirId) throws Exception {
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLImporterStatus + tempDirId)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, ImportJobStatus.class);
+            } else if (code == HttpStatus.SC_NOT_FOUND) {
+                return null;
+            } else {
+                LOG.error("Could not get import job status for tempDirId " + tempDirId
+                        + " (status code: " + code + ", message: "
+                        + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                throw new Exception("Error in getImportJobStatus");
             }
         }
     }
