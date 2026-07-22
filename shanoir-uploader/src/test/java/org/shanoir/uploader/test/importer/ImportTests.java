@@ -42,6 +42,7 @@ import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
@@ -324,7 +325,7 @@ public class ImportTests extends AbstractTest {
                 if (status.getState() == ImportJobStatus.State.FINISHED) {
                     logger.info("Server reported FINISHED for tempDirId {}.", tempDirId);
                     ImportJobBase importJob = status.getImportJob();
-                    dumpImportJobJson(importJob, importJob.getWorkFolder(), "endOfMSImport");
+                    dumpImportJobJson(importJob.toString(), importJob.getWorkFolder(), "endOfMSImport");
                     return status;
                 } else if (status.getState() == ImportJobStatus.State.ERROR) {
                     Assertions.fail("Import failed on server for tempDirId " + tempDirId + ": " + status.getMessage());

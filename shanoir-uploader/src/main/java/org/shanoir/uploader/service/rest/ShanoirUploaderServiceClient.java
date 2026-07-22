@@ -40,6 +40,7 @@ import org.json.JSONObject;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.studycard.model.QualityCard;

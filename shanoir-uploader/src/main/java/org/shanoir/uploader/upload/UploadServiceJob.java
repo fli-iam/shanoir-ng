@@ -25,6 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
