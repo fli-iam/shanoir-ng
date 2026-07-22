@@ -246,6 +246,10 @@ Name                  | Value             | Description                         
 `SHANOIR_CERTIFICATE` | `auto\|manual`     | auto-generates a self-signed TLS certificate (NOT RECOMMENDED) or use a manually installed certificate                                                                              |
 `SHANOIR_MIGRATION`   | `auto\|init\|never\|manual\|export\|import` | Normal runs should use `auto` in development and `never` in production. Other values are for controlling deployment and migrations (see below).                                     |
 `SHANOIR_KEYCLOAK_USER`<br>`SHANOIR_KEYCLOAK_PASSWORD` | *username/password* | Keycloak admin account used by shanoir for managing user accounts                                                                                                                   |
+`SHANOIR_KEYCLOAK_URL` | *url* (optional)  | **public** base URL of the Keycloak server, as reached by browsers. This is also the URL used to validate the `iss` claim of incoming tokens, so it must match the issuer Keycloak puts in them. Defaults to `${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth` (the embedded Keycloak). |
+`SHANOIR_KEYCLOAK_INTERNAL_URL` | *url* (optional)  | base URL of the Keycloak server as reached **from inside the containers** (JWKS download, admin API). Defaults to the value of `SHANOIR_KEYCLOAK_URL`; the shipped `.env` sets it to `http://keycloak:8080/auth` so that the microservices talk to the Keycloak container directly instead of looping through nginx. |
+`SHANOIR_KEYCLOAK_ADAPTER_MODE` | `check-sso\|login-required` | authentication mode of the javascript adapter. `check-sso` (default) is fast but relies on a hidden iframe and tends to break when Keycloak is served from a different hostname; `login-required` redirects and is slower but reliable. |
+`SHANOIR_KEYCLOAK_API` | `limited\|full`   | which parts of the Keycloak API nginx exposes under `/auth/`. `limited` (default) exposes only what ordinary users of the `shanoir-ng` realm need; `full` also exposes the master realm and the admin console. |
 `SHANOIR_VIEWER_OHIF_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED)                                                                                                                                |
 `SHANOIR_VIEWER_OHIF_URL_HOST`    | *hostname*         | hostname where the OHFI-Viewer is reachable                                                                                                                                         |
 
@@ -263,6 +267,26 @@ Name                  | Value             | Description                         
       `shanoir-ng-nginx`)
   * in production, you should have a the relevant A/AAAA configured in your DNS
     zone
+* Keycloak is addressed through two separate variables because browsers and
+  containers do not reach it the same way:
+  * `SHANOIR_KEYCLOAK_URL` is the **public** URL. It is handed to the browser
+    (through `assets/env.js` and the OHIF viewer config) and is used by the
+    microservices as the expected token issuer. The value must be exactly the
+    issuer that Keycloak writes into the `iss` claim, otherwise every
+    authenticated request is rejected.
+  * `SHANOIR_KEYCLOAK_INTERNAL_URL` is the URL the containers use for
+    server-to-server calls (JWKS, admin API). It never reaches the browser.
+  * Both default to the embedded Keycloak, so a standard deployment does not
+    need to set either of them.
+  * Pointing these at an **external** Keycloak server is experimental. It is
+    not enough to change the URLs: the `shanoir-ng` realm has to be imported
+    on that server, the `shanoir-ng-keycloak-auth.jar` provider has to be
+    installed there (the realm's authentication flows reference the
+    `shanoir-ng-post-auth` authenticator), the redirect URIs of every client
+    have to be updated, and that server must be reachable from the containers
+    while itself being able to reach the users microservice. Expect to also
+    set `SHANOIR_KEYCLOAK_ADAPTER_MODE=login-required`, since Keycloak will be
+    on a different hostname.
 * If docker is not running natively and thus you are using docker-machine
   (windows/macos users), you will need to tune the virtualbox machine:
     * increase the amount of allocated RAM
