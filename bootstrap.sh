@@ -56,6 +56,27 @@ wait_tcp_ready()
 	"
 }
 
+# MariaDB's first-boot entrypoint can answer on localhost while it is still
+# cycling through its init server (temporary instance -> shutdown -> real
+# server). Wait until the DB accepts connections from a peer on the compose
+# network before starting Keycloak, which exits on the first JDBC failure.
+wait_db_network_ready()
+{
+	local db_host="$1"
+	local via_container="${2:-database}"
+	local i=0
+	while [ $i -lt 120 ]; do
+		if docker compose exec -T "$via_container" mariadb-admin ping \
+			-h "$db_host" -u root -ppassword >/dev/null 2>&1; then
+			echo "${db_host} accepts connections from ${via_container}"
+			return 0
+		fi
+		i=$((i + 1))
+		sleep 2
+	done
+	die "timeout waiting for ${db_host} from ${via_container}"
+}
+
 die()
 {
 	echo "error: $*" >&2
@@ -162,6 +183,7 @@ if [ -n "$deploy" ] ; then
 		step "init: keycloak-database"
 		docker compose up -d keycloak-database
 		wait_tcp_ready keycloak-database 3306
+		wait_db_network_ready keycloak-database database
 		
 		step "init: keycloak"
 		docker compose run --rm -e SHANOIR_MIGRATION=init keycloak
