@@ -100,8 +100,9 @@ public class ImportTests extends AbstractTest {
         logger.info("START testImportFromDicomZip..........................");
         logger.info("......................................................");
         try {
-            studyWithStudyCards = createStudyAndCenterAndStudyCardAndAddMembers();
             ImportJobBase importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
+            logger.info("TempDirId: {}", importJob.getWorkFolder());
+            studyWithStudyCards = createStudyAndCenterAndStudyCardAndAddMembers();
             if (!importJob.getSeries().isEmpty()) {
                 selectAllSeriesForImport(importJob);
                 org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, studyWithStudyCards);
@@ -190,11 +191,12 @@ public class ImportTests extends AbstractTest {
         logger.info("START testImportFromDicomZipNoStudyCard...............");
         logger.info("......................................................");
         try {
+            ImportJobBase importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
+            logger.info("TempDirId: {}", importJob.getWorkFolder());
             studyNoStudyCards = createStudyAndCenterWithoutStudyCard();
             equipment = createEquipment(
                     studyNoStudyCards.getStudyCenterList().get(0).getCenter());
             Assertions.assertNotNull(equipment);
-            ImportJobBase importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
             if (!importJob.getSeries().isEmpty()) {
                 selectAllSeriesForImport(importJob);
                 org.shanoir.uploader.model.rest.Subject subject = createSubjectNoStudyCard(importJob, studyNoStudyCards);
@@ -325,7 +327,7 @@ public class ImportTests extends AbstractTest {
                 if (status.getState() == ImportJobStatus.State.FINISHED) {
                     logger.info("Server reported FINISHED for tempDirId {}.", tempDirId);
                     ImportJobBase importJob = status.getImportJob();
-                    dumpImportJobJson(importJob.toString(), importJob.getWorkFolder(), "endOfMSImport");
+                    dumpImportJobJson(importJob.toString(), tempDirId, "end-of-ms-import");
                     return status;
                 } else if (status.getState() == ImportJobStatus.State.ERROR) {
                     Assertions.fail("Import failed on server for tempDirId " + tempDirId + ": " + status.getMessage());
@@ -425,9 +427,10 @@ public class ImportTests extends AbstractTest {
         }
         logger.info("Upload: " + dicomFiles.length + " uploaded files to tempDirId: " + tempDirId);
         importJob.setWorkFolder(tempDirId);
+        logger.info("TempDirId: {}", importJob.getWorkFolder());
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         dumpImportJobJson(importJobJson, tempDirId, label);
-        userClient.startImportJob(importJobJson);
+        userClient.startImportJob(tempDirId, importJobJson);
     }
 
     private void startImportJobFromDicomZip(ImportJobBase importJob, org.shanoir.uploader.model.rest.Subject subjectREST,
@@ -450,7 +453,7 @@ public class ImportTests extends AbstractTest {
         importJob.setStudy(null);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         dumpImportJobJson(importJobJson, importJob.getWorkFolder(), "testImportFromDicomZip");
-        userClient.startImportJob(importJobJson);
+        userClient.startImportJob(importJob.getWorkFolder(), importJobJson);
         waitForServerImportJobStatus(importJob.getWorkFolder());
     }
 
@@ -480,7 +483,7 @@ public class ImportTests extends AbstractTest {
         importJob.setStudy(null);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         dumpImportJobJson(importJobJson, importJob.getWorkFolder(), "testImportFromDicomZipNoStudyCard");
-        userClient.startImportJob(importJobJson);
+        userClient.startImportJob(importJob.getWorkFolder(), importJobJson);
         waitForServerImportJobStatus(importJob.getWorkFolder());
     }
 
@@ -556,10 +559,10 @@ public class ImportTests extends AbstractTest {
             String workFolderPart = (workFolder != null && !workFolder.isEmpty()) ? workFolder : "no-workfolder";
             File dumpFile = new File(IMPORT_JOB_DUMP_DIR, timestamp + "_" + workFolderPart + "_" + label + ".json");
             Files.writeString(dumpFile.toPath(), importJobJson, StandardCharsets.UTF_8);
-            logger.info("Dumped import-job JSON to: {}", dumpFile.getAbsolutePath());
+            logger.info("Dumped import-job to: {}", dumpFile.getAbsolutePath());
         } catch (Exception e) {
-            // This is a debugging convenience only — never fail the test because of it.
-            logger.warn("Could not dump import-job JSON for manual inspection: {}", e.getMessage());
+            // This is a debugging convenience only - never fail the test because of it.
+            logger.warn("Could not dump import-job for manual inspection: {}", e.getMessage());
         }
     }
 

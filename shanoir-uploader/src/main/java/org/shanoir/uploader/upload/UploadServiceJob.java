@@ -233,7 +233,7 @@ public class UploadServiceJob {
             throws IOException, JsonParseException, JsonMappingException, JsonProcessingException, Exception {
         importJob.setWorkFolder(tempDirId);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-        shanoirUploaderServiceClient.startImportJob(importJobJson);
+        shanoirUploaderServiceClient.startImportJob(tempDirId, importJobJson);
     }
 
     private void deleteAllDicomFiles(File importJobFolder, List<File> files) {

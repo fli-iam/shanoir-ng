@@ -108,13 +108,13 @@ import jakarta.validation.Valid;
 @Controller
 public class ImporterApiController implements ImporterApi {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ImporterApiController.class);
+
     private static final String WRONG_CONTENT_FILE_UPLOAD = "Wrong content type of file upload, .zip required.";
 
     private static final String ERROR_WHILE_SAVING_UPLOADED_FILE = "Error while saving uploaded file.";
 
     private static final String NO_FILE_UPLOADED = "No file uploaded.";
-
-    private static final Logger LOG = LoggerFactory.getLogger(ImporterApiController.class);
 
     private static final String DICOMDIR = "DICOMDIR";
 
@@ -277,7 +277,8 @@ public class ImporterApiController implements ImporterApi {
             importJob.setWorkFolder(importJobDir.getAbsolutePath());
             importJobStatusService.setInProgress(tempDirId, "Import job received, queued for processing.");
             LOG.info("============== NEW IMPORT ===========================");
-            LOG.info("Starting import job (old) for user {} (userId: {}) with folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
+            LOG.info("Starting import job (old) for user {} (userId: {}) with folder: {}",
+                    KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
             handleLegacySubjectAndSeries(importJob);
             importerManagerService.manageImportJob(importJob);
             return new ResponseEntity<>(HttpStatus.OK);

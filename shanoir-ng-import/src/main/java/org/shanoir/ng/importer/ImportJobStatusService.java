@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.importer.model.ImportJobStatus.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -33,6 +35,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ImportJobStatusService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ImportJobStatusService.class);
+
     private final Map<String, ImportJobStatus> statuses = new ConcurrentHashMap<>();
 
     public void setInProgress(String tempDirId, String message) {
@@ -40,6 +44,7 @@ public class ImportJobStatusService {
         status.setState(State.IN_PROGRESS);
         status.setMessage(message);
         statuses.put(tempDirId, status);
+        LOG.debug("ImportJobStatus put: {}, message: {}", tempDirId, message);
     }
 
     public void setFinished(String tempDirId, ImportJobBase importJob) {
@@ -47,6 +52,7 @@ public class ImportJobStatusService {
         status.setState(State.FINISHED);
         status.setMessage("Import finished in MS Import, handed off to MS Datasets.");
         status.setImportJob(importJob);
+        LOG.debug("ImportJobStatus finished: {}", tempDirId);
     }
 
     public void setError(String tempDirId, String message) {

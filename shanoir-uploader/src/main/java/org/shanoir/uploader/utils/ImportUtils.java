@@ -343,7 +343,7 @@ public class ImportUtils {
             if (subjectREST == null) {
                 return null;
             } else {
-                logger.info("Subject created on server: " + subjectREST.toString());
+                logger.info("Subject created on server: {} ({})", subjectREST.toString(), subjectREST.getId());
             }
         } else {
             logger.info("Subject used on server with Id: {}, Name: {}", subjectREST.getId(), subjectREST.getName());

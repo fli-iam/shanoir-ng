@@ -880,12 +880,12 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
-    public void startImportJob(String importJobJsonStr) throws Exception {
+    public void startImportJob(String tempDirId, String importJobJsonStr) throws Exception {
         try (CloseableHttpResponse response = httpService.post(this.serviceURLImporterStartImportJob, importJobJsonStr,
                 false)) {
             int code = response.getCode();
             if (code == HttpStatus.SC_OK) {
-                LOG.info("Import job successfully started on server.");
+                LOG.info("Import job started on server: {}", tempDirId);
             } else {
                 LOG.error("Error in startImportJob: with json " + importJobJsonStr + " (status code: " + code
                         + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
