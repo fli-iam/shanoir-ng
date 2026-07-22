@@ -5,7 +5,8 @@
 #
 # Differences from a typical hospital deployment:
 #   - Mailhog as SMTP sink (no real mail relay)
-#   - Internal HTTP issuer URI for Spring Resource Server (JWT from Keycloak inside Docker network)
+#   - JWT issuer URI aligned with Keycloak's frontend hostname (Keycloak puts
+#     https://shanoir-ng-nginx/... in the iss claim since hostname v2 / NG_v2.13)
 #   - Relaxed console log levels for CI
 #   - java.security.egd=/dev/./urandom to avoid SecureRandom stalls in CI
 #   - create-keycloak-user.sh may set sslRequired=NONE on the realm when CI=true
@@ -47,7 +48,7 @@ services:
       - SHANOIR_SMTP_PORT=1025
       - SHANOIR_CONSOLE_LOG_LEVEL=INFO
       - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=https://shanoir-ng-nginx/auth/realms/shanoir-ng
     depends_on:
       smtp-sink:
         condition: service_started
@@ -55,23 +56,23 @@ services:
     environment:
       - SHANOIR_CONSOLE_LOG_LEVEL=INFO
       - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=https://shanoir-ng-nginx/auth/realms/shanoir-ng
   datasets:
     environment:
       - VIP_URL_HOST=localhost
       - SHANOIR_CONSOLE_LOG_LEVEL=INFO
       - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=https://shanoir-ng-nginx/auth/realms/shanoir-ng
   import:
     environment:
       - SHANOIR_CONSOLE_LOG_LEVEL=INFO
       - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=https://shanoir-ng-nginx/auth/realms/shanoir-ng
   preclinical:
     environment:
       - SHANOIR_CONSOLE_LOG_LEVEL=INFO
       - JAVA_TOOL_OPTIONS=-Djava.security.egd=file:/dev/./urandom
-      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/auth/realms/shanoir-ng
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=https://shanoir-ng-nginx/auth/realms/shanoir-ng
   nifti-conversion:
     environment:
       - SHANOIR_CONSOLE_LOG_LEVEL=INFO
