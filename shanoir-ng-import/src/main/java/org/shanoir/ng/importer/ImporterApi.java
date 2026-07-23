@@ -90,7 +90,7 @@ public interface ImporterApi {
             produces = {"application/json"},
             consumes = {"multipart/form-data"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<ImportJob> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
+    ResponseEntity<ImportJobBase> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
             @Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
             @Parameter(name = "studyCardId") @PathVariable("studyCardId") Long studyCardId,

@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
@@ -125,6 +126,8 @@ public class ImporterApiController implements ImporterApi {
 
     /** The Constant BUFFER_SIZE. */
     private static final int BUFFER_SIZE = 10 * KB;
+
+    private static final UIDGeneration UID_GENERATOR = new UIDGeneration();
 
     @Value("${shanoir.import.directory}")
     private String importDir;
@@ -781,7 +784,7 @@ public class ImporterApiController implements ImporterApi {
                 .body(resource);
     }
 
-    public ResponseEntity<ImportJob> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
+    public ResponseEntity<ImportJobBase> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
             @Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
             @Parameter(name = "studyCardId") @PathVariable("studyCardId") Long studyCardId,
@@ -794,7 +797,7 @@ public class ImporterApiController implements ImporterApi {
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
         }
 
-        ImportJob job = null;
+        ImportJobBase job = null;
 
         try {
             File userImportDir = ImportUtils.getUserImportDir(importDir);
@@ -854,8 +857,8 @@ public class ImporterApiController implements ImporterApi {
                 // STEP 4.1 Get informations about center / study card
                 // Get equipment id
                 Long equipmentIdFromDicom = null;
-                if (job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber() != null) {
-                    equipmentIdFromDicom = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber());
+                if (job.getSeries().get(0).getEquipment().getDeviceSerialNumber() != null) {
+                    equipmentIdFromDicom = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getSeries().get(0).getEquipment().getDeviceSerialNumber());
                     if (equipmentIdFromDicom != null) {
                         if (studyCardId != 0L) {
                             Properties props = new Properties();
@@ -878,7 +881,10 @@ public class ImporterApiController implements ImporterApi {
                     job.setStudyCardId(studyCardId);
 
                 // STEP 4.2 Create examination
-                ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examFolder.getName(), job.getPatients().get(0).getStudies().get(0).getStudyDate(), subject.getName());
+                ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examFolder.getName(),
+                        job.getStudy().getStudyDate(), subject.getName());
+                String studyInstanceUID = UID_GENERATOR.getNewUID();
+                examination.setStudyInstanceUID(studyInstanceUID);
 
                 // Create multiple examinations for every session folder
                 Long examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
@@ -900,15 +906,12 @@ public class ImporterApiController implements ImporterApi {
                 job.setStudyName(studyName);
                 job.setAcquisitionEquipmentId(equipmentId);
                 job.setAnonymisationProfileToUse(anonymizationProfile);
-                for (Patient pat : job.getPatients()) {
-                    pat.setSubject(subject);
-                }
+                job.setSubject(subject);
+                job.setStudyInstanceUID(studyInstanceUID);
 
                 // STEP 4.4 Select all series
-                for (Study study : job.getPatients().get(0).getStudies()) {
-                    for (Serie serie : study.getSeries()) {
-                        serie.setSelected(true);
-                    }
+                for (Serie serie : job.getSeries()) {
+                    serie.setSelected(true);
                 }
 
                 // STEP 4.4 Send to dataset for logical import
@@ -921,7 +924,7 @@ public class ImporterApiController implements ImporterApi {
             throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The file could not be correctly unziped on the server. Please check consistency.", e));
         }
-        return new ResponseEntity<ImportJob>(job, HttpStatus.OK);
+        return new ResponseEntity<ImportJobBase>(job, HttpStatus.OK);
     }
 
 }
