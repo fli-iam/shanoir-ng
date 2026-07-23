@@ -787,7 +787,7 @@ public class ImporterApiController implements ImporterApi {
             @Parameter(name = "studyCardId") @PathVariable("studyCardId") Long studyCardId,
             @Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
             @Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException {
-        LOG.warn("Multiple examination import.");
+        LOG.info("Multiple examination import for study {} ({})", studyName, studyId);
         // STEP 1: Unzip file
         if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
             throw new RestServiceException(
@@ -837,7 +837,7 @@ public class ImporterApiController implements ImporterApi {
 
                 // STEP 4.0 "Fake" upload file to get create the dicomdir and temporary folder
                 job = this.uploadDicomZipFile(mockedFile).getBody();
-                Patient patient = job.getPatients().get(0);
+                Patient patient = job.getPatient();
 
                 // Create subject only once.
                 if (subject == null) {
@@ -889,7 +889,6 @@ public class ImporterApiController implements ImporterApi {
                 eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 
                 // STEP 4.3 Complete importJob with subject / study /examination
-
                 String anonymizationProfile = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, studyId);
 
                 job.setSubjectName(subjectName);
@@ -913,7 +912,7 @@ public class ImporterApiController implements ImporterApi {
                 }
 
                 // STEP 4.4 Send to dataset for logical import
-                this.startImportJob(job);
+                this.startImportJobBase(job);
             }
 
             // STEP 5 delete temporary file
