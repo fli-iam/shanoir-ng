@@ -291,10 +291,11 @@ public abstract class AbstractTest {
         StudyCard studyCard = new StudyCard();
         studyCard.setName("Study-Card-" + UUID.randomUUID());
         studyCard.setAcquisitionEquipmentId(createdEquipment.getId());
-        studyCard.setAcquisitionEquipment(createdEquipment);
         studyCard.setCenterId(createdCenter.getId());
         studyCard.setStudyId(study.getId());
         studyCard = expertClient.createStudyCard(studyCard);
+        studyCard.setAcquisitionEquipment(createdEquipment);
+        studyCard.setCenterId(createdCenter.getId());
         Assertions.assertNotNull(studyCard);
 
         List<StudyCard> studyCards = new ArrayList<>();
