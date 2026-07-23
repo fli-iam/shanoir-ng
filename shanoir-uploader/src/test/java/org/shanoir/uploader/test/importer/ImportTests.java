@@ -44,6 +44,7 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJobStatus;
+import org.shanoir.ng.importer.ImportJobStatusService;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
@@ -307,7 +308,8 @@ public class ImportTests extends AbstractTest {
                 importJob.getExaminationId());
 
         if (importJob.getWorkFolder() != null && !importJob.getWorkFolder().isEmpty()) {
-            waitForServerImportJobStatus(importJob.getWorkFolder());
+            final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
+            waitForServerImportJobStatus(tempDirId);
         }
     }
 
@@ -338,8 +340,8 @@ public class ImportTests extends AbstractTest {
                 importJob.getExaminationId());
 
         if (importJob.getWorkFolder() != null && !importJob.getWorkFolder().isEmpty()) {
-            waitForServerImportJobStatus(importJob.getWorkFolder());
-        }
+            final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
+            waitForServerImportJobStatus(tempDirId);        }
     }
 
     @Test
