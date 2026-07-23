@@ -377,6 +377,7 @@ public class ImportTests extends AbstractTest {
 
         analyzedJob.setExaminationId(examination.getId());
         analyzedJob.setStudyId(studyWithStudyCards.getId());
+        analyzedJob.setAcquisitionEquipmentId(equipment.getId());
 
         userClient.startImportEEGJob(analyzedJob);
     }
