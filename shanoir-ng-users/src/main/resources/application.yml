@@ -19,8 +19,8 @@ server:
     whitelabel:
       enabled: false
   display-name: Shanoir
-  administrator.name: ${SHANOIR_ADMIN_NAME}
-  administrator.email: ${SHANOIR_ADMIN_EMAIL}
+  notification.name: ${SHANOIR_NOTIFICATION_NAME:"Unknown"}
+  notification.email: ${SHANOIR_NOTIFICATION_EMAIL:"Unknown mail"}
 ##### Database #####
 spring:
   datasource:

@@ -24,7 +24,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <i class="fa-solid fa-circle-info"></i>
                 More info
             </button>
-            <a href="mailto:developers_shanoir@inria.fr">
+            <a [href]="contactMail">
                 <button class="left-icon" type="button">
                     <i class="fa-solid fa-paper-plane"></i>
                     Contact
@@ -76,7 +76,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             {{ usersCount || 'no' }} active user@if (usersCount > 1) {s}
         </strong>
         @if (eventsCount) {
-            and 
+            and
             <strong>{{ eventsCount }} {{ eventsCount === 1 ? 'query ' : 'queries ' }}</strong>
             @if (eventsCount === 1) {
                 was
