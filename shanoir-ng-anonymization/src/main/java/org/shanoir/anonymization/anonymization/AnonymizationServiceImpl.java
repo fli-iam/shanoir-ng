@@ -20,10 +20,11 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -48,9 +49,18 @@ public class AnonymizationServiceImpl implements AnonymizationService {
     private static final Logger LOG = LoggerFactory.getLogger(AnonymizationServiceImpl.class);
 
     private static final String PRIVATE_TAGS = "0xggggeeee";
+
     private static final String CURVE_DATA_TAGS = "0x50xxxxxx";
+
     private static final String OVERLAY_COMMENTS_TAGS = "0x60xx4000";
+
     private static final String OVERLAY_DATA_TAGS = "0x60xx3000";
+
+    private static final char[] STUDY_ID_CHARS = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    private static final UIDGeneration UID_GENERATOR = new UIDGeneration();
 
     private Random rand = new Random();
 
@@ -74,7 +84,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         for (int i = 0; i < dicomFiles.size(); ++i) {
             final File file = dicomFiles.get(i);
             // Perform the anonymization
-            performAnonymization(file, anonymizationMap, false, "", "", null, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds);
+            performAnonymization(file, anonymizationMap, false, "", "", null, seriesInstanceUIDs, frameOfReferenceUIDs,
+                    studyInstanceUIDs, studyIds);
             current++;
             final int currentPercent = current * 100 / totalAmount;
             LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
@@ -84,17 +95,18 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
     @Override
     public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName,
-                                    String patientFirstName, String patientID, String studyInstanceUID) throws Exception {
+            String patientFirstName, String patientID, String studyInstanceUID) throws Exception {
         String patientName = patientLastName + "^" + patientFirstName + "^^^";
         anonymizeForShanoir(dicomFiles, profile, patientName, patientID, studyInstanceUID);
     }
 
     @Override
-    public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID, String studyInstanceUID) throws Exception {
+    public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID,
+            String studyInstanceUID) throws Exception {
         long startTime = System.currentTimeMillis();
         final int totalAmount = dicomFiles.size();
         LOG.info("Start anonymization, for {} DICOM files.", totalAmount);
-        LOG.info("StudyInstanceUID used from ImportJob: " + studyInstanceUID);
+        LOG.info("StudyInstanceUID used from ImportJob: {}", studyInstanceUID);
         Map<String, Profile> profiles = AnonymizationRulesSingleton.getInstance().getProfiles();
         Map<String, String> anonymizationMap = profiles.get(profile).getAnonymizationMap();
         tagsToDeleteForManufacturer = AnonymizationRulesSingleton.getInstance().getTagsToDeleteForManufacturer();
@@ -109,7 +121,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         for (int i = 0; i < dicomFiles.size(); ++i) {
             final File file = dicomFiles.get(i);
             // Perform the anonymization
-            performAnonymization(file, anonymizationMap, true, patientName, patientID, studyInstanceUID, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds);
+            performAnonymization(file, anonymizationMap, true, patientName, patientID, studyInstanceUID,
+                    seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds);
             current++;
             final int currentPercent = current * 100 / totalAmount;
             LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
@@ -124,7 +137,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
     }
 
     private void anonymizePatientMetaData(Attributes attributes, String patientName, String patientID,
-                                          String patientBirthDate) {
+            String patientBirthDate) {
         anonymizeTagAccordingToVR(attributes, Tag.PatientName, patientName);
         anonymizeTagAccordingToVR(attributes, Tag.PatientID, patientID);
 
@@ -153,14 +166,16 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * UIDGeneration code.
      *
      * @param dicomFile
-     *            the image path
+     *                  the image path
      * @param profile
-     *            anonymization profile
+     *                  anonymization profile
      * @throws Exception
      */
-    public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap, boolean isShanoirAnonymization,
-                                     String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs, Map<String, String> frameOfReferenceUIDs,
-                                     Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) throws Exception {
+    public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap,
+            boolean isShanoirAnonymization,
+            String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs,
+            Map<String, String> frameOfReferenceUIDs,
+            Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) throws Exception {
         DicomInputStream din = null;
         DicomOutputStream dos = null;
         try {
@@ -171,7 +186,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
              */
             Attributes metaInformationAttributes = din.readFileMetaInformation();
             for (int tagInt : metaInformationAttributes.tags()) {
-                String tagString = String.format("0x%08x", Integer.valueOf(tagInt));
+                String tagString = tagToHexString(tagInt);
                 if (anonymizationMap.containsKey(tagString)) {
                     final String action = anonymizationMap.get(tagString);
                     anonymizeTag(tagInt, action, metaInformationAttributes);
@@ -181,10 +196,12 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                     .getString(Tag.MediaStorageSOPInstanceUID);
 
             /**
-             * MK: Read entire dataset with PixelData. Attention: do NOT change here to only
-             * readDatasetUntilPixelData(), as the modified DICOM image will MISS the PixelData!
-             * It writes into the image, what has been read from the image, that is why we read
-             * the entire dataset here (I made the mistake already twice...).
+             * MK: Read entire dataset with PixelData. Attention: do NOT change here
+             * to only readDatasetUntilPixelData(), as the modified DICOM image will
+             * MISS the PixelData!
+             * It writes into the image, what has been read from the image,
+             * that is why we read the entire dataset here
+             * (I made the mistake already twice...).
              */
             Attributes datasetAttributes = din.readDataset();
 
@@ -208,49 +225,57 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
             String studyInstanceUIDVendor = datasetAttributes.getString(Tag.StudyInstanceUID);
             if (studyInstanceUID != null && !studyInstanceUID.isEmpty()) {
-                LOG.debug("StudyInstanceUID used from ImportJob: " + studyInstanceUID);
+                LOG.debug("StudyInstanceUID used from ImportJob: {}", studyInstanceUID);
                 studyInstanceUIDs.put(studyInstanceUIDVendor, studyInstanceUID);
             }
 
+            String manufacturer = datasetAttributes.getString(Tag.Manufacturer);
+            Set<String> tagsToDeleteForCurrentManufacturer = getTagsToDeleteForManufacturer(manufacturer);
+
             // anonymize DICOM files according to selected profile
             for (int tagInt : datasetAttributes.tags()) {
-                String tagString = String.format("0x%08X", Integer.valueOf(tagInt));
-                String gggg = tagString.substring(2, 6);
-                Integer intgggg = Integer.decode("0x" + gggg);
-                // odd: for private tags
-                if (intgggg % 2 == 1) {
+                // Group number is the top 16 bits of the tag; odd group => private tag.
+                // Avoids String.format + substring + Integer.decode per tag.
+                int group = tagInt >>> 16;
+                if ((group & 1) == 1) {
                     String action = anonymizationMap.get(PRIVATE_TAGS);
                     String value = datasetAttributes.getString(tagInt);
                     // only act below in case of K: keep, if X: delete for private tags, no need
                     if (value != null && !value.isEmpty() && action.equals("K")) {
-                        action = checkForPHIInPrivateTags(patientNameArrayAttr, patientIDAttr, patientBirthNameAttr, patientBirthDateAttr, tagInt, value, action);
-                        action = handleTagsToDeleteForManufacturer(datasetAttributes, tagString, action);
+                        action = checkForPHIInPrivateTags(patientNameArrayAttr, patientIDAttr, patientBirthNameAttr,
+                                patientBirthDateAttr, tagInt, value, action);
+                        action = handleTagsToDeleteForManufacturer(tagToHexString(tagInt),
+                                tagsToDeleteForCurrentManufacturer, action);
                     }
                     anonymizeTag(tagInt, action, datasetAttributes);
                     // even: public tags
-                } else if (anonymizationMap.containsKey(tagString)) {
-                    switch (tagInt) {
-                        case Tag.SOPInstanceUID ->
+                } else {
+                    String tagString = tagToHexString(tagInt);
+                    if (anonymizationMap.containsKey(tagString)) {
+                        switch (tagInt) {
+                            case Tag.SOPInstanceUID ->
                                 anonymizeSOPInstanceUID(tagInt, datasetAttributes, mediaStorageSOPInstanceUIDGenerated);
-                        case Tag.SeriesInstanceUID -> anonymizeUID(tagInt, datasetAttributes, seriesInstanceUIDs);
-                        case Tag.FrameOfReferenceUID -> anonymizeUID(tagInt, datasetAttributes, frameOfReferenceUIDs);
-                        case Tag.StudyInstanceUID -> anonymizeUID(tagInt, datasetAttributes, studyInstanceUIDs);
-                        case Tag.StudyID -> anonymizeStudyId(tagInt, datasetAttributes, studyIds);
-                        default -> {
-                            final String action = anonymizationMap.get(tagString);
+                            case Tag.SeriesInstanceUID -> anonymizeUID(tagInt, datasetAttributes, seriesInstanceUIDs);
+                            case Tag.FrameOfReferenceUID ->
+                                anonymizeUID(tagInt, datasetAttributes, frameOfReferenceUIDs);
+                            case Tag.StudyInstanceUID -> anonymizeUID(tagInt, datasetAttributes, studyInstanceUIDs);
+                            case Tag.StudyID -> anonymizeStudyId(tagInt, datasetAttributes, studyIds);
+                            default -> {
+                                final String action = anonymizationMap.get(tagString);
+                                anonymizeTag(tagInt, action, datasetAttributes);
+                            }
+                        }
+                    } else {
+                        if (0x50000000 <= tagInt && tagInt <= 0x50FFFFFF) {
+                            final String action = anonymizationMap.get(CURVE_DATA_TAGS);
+                            anonymizeTag(tagInt, action, datasetAttributes);
+                        } else if (0x60004000 <= tagInt && tagInt <= 0x60FF4000) {
+                            final String action = anonymizationMap.get(OVERLAY_COMMENTS_TAGS);
+                            anonymizeTag(tagInt, action, datasetAttributes);
+                        } else if (0x60003000 <= tagInt && tagInt <= 0x60FF3000) {
+                            final String action = anonymizationMap.get(OVERLAY_DATA_TAGS);
                             anonymizeTag(tagInt, action, datasetAttributes);
                         }
-                    }
-                } else {
-                    if (0x50000000 <= tagInt && tagInt <= 0x50FFFFFF) {
-                        final String action = anonymizationMap.get(CURVE_DATA_TAGS);
-                        anonymizeTag(tagInt, action, datasetAttributes);
-                    } else if (0x60004000 <= tagInt && tagInt <= 0x60FF4000) {
-                        final String action = anonymizationMap.get(OVERLAY_COMMENTS_TAGS);
-                        anonymizeTag(tagInt, action, datasetAttributes);
-                    } else if (0x60003000 <= tagInt && tagInt <= 0x60FF3000) {
-                        final String action = anonymizationMap.get(OVERLAY_DATA_TAGS);
-                        anonymizeTag(tagInt, action, datasetAttributes);
                     }
                 }
             }
@@ -279,39 +304,49 @@ public class AnonymizationServiceImpl implements AnonymizationService {
     }
 
     /**
+     * Builds the "0xAAAABBBB" hex representation of a tag.
+     * NOTE: uppercase hex digits are used deliberately, to match the casing of
+     * the tag keys defined in the anonymization properties files
+     * (AnonymizationRulesSingleton).
+     */
+    private static String tagToHexString(int tagInt) {
+        String hex = Integer.toHexString(tagInt).toUpperCase();
+        StringBuilder sb = new StringBuilder(10).append("0x");
+        for (int i = hex.length(); i < 8; i++) {
+            sb.append('0');
+        }
+        return sb.append(hex).toString();
+    }
+
+    /**
+     * Resolves the set of tags to delete for a given manufacturer once, so the
+     * per-tag hot path only does an O(1) Set lookup instead of a List scan plus
+     * repeated Attributes.getString(Manufacturer) calls.
+     */
+    private Set<String> getTagsToDeleteForManufacturer(String manufacturer) {
+        List<String> tagsToDelete = tagsToDeleteForManufacturer.get(manufacturer);
+        return tagsToDelete != null ? new HashSet<>(tagsToDelete) : null;
+    }
+
+    /**
      * Handle tags to delete for manufacturer here
      *
-     * @param datasetAttributes
      * @param tagString
+     * @param tagsToDeleteForCurrentManufacturer
      * @param action
      * @return
      */
-    private String handleTagsToDeleteForManufacturer(Attributes datasetAttributes, String tagString, String action) {
-        String manufacturer = datasetAttributes.getString(Tag.Manufacturer);
-        List<String> tagsToDelete = tagsToDeleteForManufacturer.get(manufacturer);
-        if (tagsToDelete != null) {
-            for (Iterator<String> iterator = tagsToDelete.iterator(); iterator.hasNext();) {
-                String tagToDelete = iterator.next();
-                if (tagString.equals(tagToDelete)) {
-                    action = "X";
-                    break;
-                }
-            }
+    private String handleTagsToDeleteForManufacturer(String tagString, Set<String> tagsToDeleteForCurrentManufacturer,
+            String action) {
+        if (tagsToDeleteForCurrentManufacturer != null && tagsToDeleteForCurrentManufacturer.contains(tagString)) {
+            return "X";
         }
         return action;
     }
 
-    /**
-     * @param patientNameArrayAttr
-     * @param patientIDAttr
-     * @param patientBirthNameAttr
-     * @param patientBirthDateAttr
-     * @param tagInt
-     * @param value
-     * @throws Exception
-     */
-    private String checkForPHIInPrivateTags(String[] patientNameArrayAttr, String patientIDAttr, String patientBirthNameAttr,
-                                            String patientBirthDateAttr, int tagInt, String value, String action) throws Exception {
+    private String checkForPHIInPrivateTags(String[] patientNameArrayAttr, String patientIDAttr,
+            String patientBirthNameAttr,
+            String patientBirthDateAttr, int tagInt, String value, String action) throws Exception {
         // check for patient name elements
         for (int i = 0; i < patientNameArrayAttr.length; i++) {
             String patientNamePart = patientNameArrayAttr[i];
@@ -327,14 +362,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         return action;
     }
 
-    /**
-     * @param tagInt
-     * @param value
-     * @param compareValuePHI
-     * @throws Exception
-     */
     private boolean checkTagContainsValuePHI(int tagInt, String value, String compareValuePHI) throws Exception {
-        if (compareValuePHI != null && !compareValuePHI.isEmpty() && compareValuePHI.length() > 2 && value.contains(compareValuePHI)) {
+        if (compareValuePHI != null && !compareValuePHI.isEmpty() && compareValuePHI.length() > 2
+                && value.contains(compareValuePHI)) {
             LOG.warn("Potential PHI found in private tag (--> remove/delete): " + tagInt + ": " + value);
             return true;
         }
@@ -345,11 +375,11 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * Tag Anonymization
      *
      * @param tagInt
-     *            : the tag to anonymize
+     *                   : the tag to anonymize
      * @param action
-     *            : the action letter to apply
+     *                   : the action letter to apply
      * @param attributes
-     *            : the list of dicom attributes to modify
+     *                   : the list of dicom attributes to modify
      */
     private void anonymizeTag(Integer tagInt, String action, Attributes attributes) {
         String value = getFinalValueForTag(action);
@@ -369,14 +399,12 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         if (studyIds != null && studyIds.size() != 0 && studyIds.get(attributes.getString(tagInt)) != null) {
             value = studyIds.get(attributes.getString(tagInt));
         } else {
-            char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(10);
             for (int i = 0; i < 10; i++) {
-                char c = chars[rand.nextInt(chars.length)];
+                char c = STUDY_ID_CHARS[rand.nextInt(STUDY_ID_CHARS.length)];
                 sb.append(c);
             }
-            String output = sb.toString();
-            value = output.toString();
+            value = sb.toString();
             LOG.info("New StudyID generated for DICOM study/exam: {}", value);
             studyIds.put(attributes.getString(tagInt), value);
         }
@@ -387,7 +415,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * Get the anonymized value of the tag
      *
      * @param action
-     *            : the action letter to apply
+     *               : the action letter to apply
      * @return
      */
     private String getFinalValueForTag(final String action) {
@@ -398,13 +426,11 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             } else if (action.equals("Z")) {
                 result = "";
             } else if (action.equals("D")) {
-                SecureRandom random = new SecureRandom();
-                result = new BigInteger(130, random).toString(32);
+                result = new BigInteger(130, SECURE_RANDOM).toString(32);
             } else if (action.equals("U")) {
-                UIDGeneration generator = new UIDGeneration();
                 String newUID = null;
                 try {
-                    newUID = generator.getNewUID();
+                    newUID = UID_GENERATOR.getNewUID();
                 } catch (Exception e) {
                     LOG.error(e.getMessage());
                 }
@@ -420,11 +446,11 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * anonymize Tag According To its VR
      *
      * @param attributes
-     *            : the list of dicom attributes to modify
+     *                   : the list of dicom attributes to modify
      * @param tag
-     *            : the tag to anonymize
+     *                   : the tag to anonymize
      * @param value
-     *            : the new value of the tag after anonymization
+     *                   : the new value of the tag after anonymization
      */
     private void anonymizeTagAccordingToVR(Attributes attributes, int tag, String value) {
         VR vr = attributes.getVR(tag);
@@ -491,10 +517,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                 LOG.debug("Existing StudyInstanceUID reused: {}", value);
             }
         } else {
-            UIDGeneration generator = new UIDGeneration();
             String newUID = null;
             try {
-                newUID = generator.getNewUID();
+                newUID = UID_GENERATOR.getNewUID();
             } catch (Exception e) {
                 LOG.error(e.getMessage());
             }
