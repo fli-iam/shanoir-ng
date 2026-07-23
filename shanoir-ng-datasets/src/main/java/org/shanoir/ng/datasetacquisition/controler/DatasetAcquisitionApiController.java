@@ -132,12 +132,15 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    @Transactional
     public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         EegImportJob importJob = objectMapper.readValue(importJobAsString.getBody(), EegImportJob.class);
         eegImporterService.createEegDataset(importJob);
-        importerService.cleanTempFiles(importJob.getWorkFolder());
+        try {
+            importerService.cleanTempFiles(importJob.getWorkFolder());
+        } catch (Exception e) {
+            LOG.warn("Could not clean temp files for workFolder {}: {}", importJob.getWorkFolder(), e.getMessage());
+        }
         return HttpStatus.OK.value();
     }
 

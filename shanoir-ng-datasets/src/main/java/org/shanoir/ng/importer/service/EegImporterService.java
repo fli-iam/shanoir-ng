@@ -55,6 +55,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class EegImporterService {
 
@@ -79,8 +81,8 @@ public class EegImporterService {
      * Create a dataset acquisition, and associated dataset.
      * @param importJob the import job from importer MS.
      */
+    @Transactional
     public void createEegDataset(final EegImportJob importJob) throws IOException {
-
         Long userId = KeycloakUtil.getTokenUserId();
         ShanoirEvent event;
         if (Objects.isNull(importJob.getShanoirEvent())) {
