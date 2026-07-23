@@ -42,6 +42,7 @@ import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
@@ -74,6 +75,10 @@ public class ImportTests extends AbstractTest {
     private static final String ACR_PHANTOM_T1_ZIP = "acr_phantom_t1.zip";
 
     private static final String ACR_PHANTOM_T1_DIR = "acr_phantom_t1/";
+
+    private static final String TEST_MULTIPLE_EXAM_ZIP = "TEST_MET_0001.zip";
+
+    private static final String TEST_EEG_ZIP = "testEDF.zip";
 
     // The server-side import is asynchronous: give it time to appear before
     // declaring the consistency check failed.
@@ -275,6 +280,103 @@ public class ImportTests extends AbstractTest {
         startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromShanoirUploaderNoStudyCard");
         waitForServerImportJobStatus(importJob.getWorkFolder());
         waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
+    }
+
+    @Test
+    @Order(5)
+    public void testImportMultipleDicomZipWithStudyCard() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportMultipleDicomZipWithStudyCard.........");
+        logger.info("......................................................");
+        URL resource = getClass().getClassLoader().getResource(TEST_MULTIPLE_EXAM_ZIP);
+        Assertions.assertNotNull(resource, "Test resource " + TEST_MULTIPLE_EXAM_ZIP + " not found.");
+        File file = new File(resource.toURI());
+
+        StudyCard studyCard = studyWithStudyCards.getStudyCards().get(0);
+        ImportJobBase importJob = userClient.uploadMultipleDicom(file,
+                studyWithStudyCards.getId(),
+                studyWithStudyCards.getName(),
+                studyCard.getId(),
+                studyCard.getCenterId(),
+                studyCard.getAcquisitionEquipment().getId());
+
+        Assertions.assertNotNull(importJob, "Multiple-examination import returned no import job.");
+        Assertions.assertNotNull(importJob.getExaminationId(),
+                "Multiple-examination import did not create/return an examination id.");
+        logger.info("Multiple-examination import (with study card) created examination: {}",
+                importJob.getExaminationId());
+
+        if (importJob.getWorkFolder() != null && !importJob.getWorkFolder().isEmpty()) {
+            waitForServerImportJobStatus(importJob.getWorkFolder());
+        }
+    }
+
+    @Test
+    @Order(6)
+    public void testImportMultipleDicomZipNoStudyCard() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportMultipleDicomZipNoStudyCard...........");
+        logger.info("......................................................");
+        URL resource = getClass().getClassLoader().getResource(TEST_MULTIPLE_EXAM_ZIP);
+        Assertions.assertNotNull(resource, "Test resource " + TEST_MULTIPLE_EXAM_ZIP + " not found.");
+        File file = new File(resource.toURI());
+
+        Long centerId = studyNoStudyCards.getStudyCenterList().get(0).getCenter().getId();
+        // studyCardId 0L: mirrors the SC_DISABLED / "no study card" policy of this
+        // study.
+        ImportJobBase importJob = userClient.uploadMultipleDicom(file,
+                studyNoStudyCards.getId(),
+                studyNoStudyCards.getName(),
+                0L,
+                centerId,
+                equipment.getId());
+
+        Assertions.assertNotNull(importJob, "Multiple-examination import returned no import job.");
+        Assertions.assertNotNull(importJob.getExaminationId(),
+                "Multiple-examination import did not create/return an examination id.");
+        logger.info("Multiple-examination import (no study card) created examination: {}",
+                importJob.getExaminationId());
+
+        if (importJob.getWorkFolder() != null && !importJob.getWorkFolder().isEmpty()) {
+            waitForServerImportJobStatus(importJob.getWorkFolder());
+        }
+    }
+
+    @Test
+    @Order(7)
+    public void testImportEEG() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportEEG...................................");
+        logger.info("......................................................");
+        URL resource = getClass().getClassLoader().getResource(TEST_EEG_ZIP);
+        Assertions.assertNotNull(resource, "Test resource " + TEST_EEG_ZIP + " not found.");
+        File file = new File(resource.toURI());
+
+        // 1. Upload the EEG zip: server unzips it and returns a first, near-empty job.
+        EegImportJob uploadedJob = userClient.uploadEEGZip(file);
+        Assertions.assertNotNull(uploadedJob, "EEG upload did not return an import job.");
+        Assertions.assertNotNull(uploadedJob.getWorkFolder(), "EEG upload did not return a work folder.");
+        logger.info("EEG file uploaded, workFolder: {}", uploadedJob.getWorkFolder());
+
+        // 2. Analyze the uploaded file(s) to build channels/events/datasets.
+        EegImportJob analyzedJob = userClient.analyzeEegZipFile(uploadedJob);
+        Assertions.assertNotNull(analyzedJob, "EEG analysis did not return an import job.");
+        Assertions.assertNotNull(analyzedJob.getDatasets(), "EEG analysis did not return any datasets.");
+        Assertions.assertFalse(analyzedJob.getDatasets().isEmpty(), "EEG analysis returned an empty dataset list.");
+        logger.info("EEG file analyzed, {} dataset(s) found.", analyzedJob.getDatasets().size());
+
+        // 3. Create the subject/examination that will receive the dataset(s), then
+        // start the import.
+        org.shanoir.uploader.model.rest.Subject subject = createSubject(studyWithStudyCards);
+        Assertions.assertNotNull(subject, "Subject could not be created for EEG import.");
+        Examination examination = createExamination(studyWithStudyCards.getId(), subject.getId(),
+                studyWithStudyCards.getStudyCards().get(0).getCenterId());
+        Assertions.assertNotNull(examination, "Examination could not be created for EEG import.");
+
+        analyzedJob.setExaminationId(examination.getId());
+        analyzedJob.setStudyId(studyWithStudyCards.getId());
+
+        userClient.startImportEEGJob(analyzedJob);
     }
 
     /**

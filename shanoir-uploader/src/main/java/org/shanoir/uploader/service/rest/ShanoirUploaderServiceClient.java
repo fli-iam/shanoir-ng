@@ -40,6 +40,7 @@ import org.json.JSONObject;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
@@ -144,6 +145,14 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_IMPORTER_UPLOAD_DICOM = "service.importer.upload.dicom";
 
+    private static final String SERVICE_IMPORTER_UPLOAD_MULTIPLE_DICOM = "service.importer.upload.multiple.dicom";
+
+    private static final String SERVICE_IMPORTER_UPLOAD_EEG = "service.importer.upload.eeg";
+
+    private static final String SERVICE_IMPORTER_ANALYZE_EEG = "service.importer.analyze.eeg";
+
+    private static final String SERVICE_IMPORTER_START_IMPORT_EEG_JOB = "service.importer.start.import.eeg.job";
+
     private static final String SERVICE_EXAMINATIONS_BY_SUBJECT_ID = "service.examinations.find.by.subject.id";
 
     private static final String SERVICE_EXAMINATIONS = "service.examinations.find";
@@ -213,6 +222,14 @@ public class ShanoirUploaderServiceClient {
     private String serviceURLImporterStatus;
 
     private String serviceURLImporterUploadDicom;
+
+    private String serviceURLImporterUploadMultipleDicom;
+
+    private String serviceURLImporterUploadEeg;
+
+    private String serviceURLImporterAnalyzeEeg;
+
+    private String serviceURLImporterStartImportEegJob;
 
     private String serviceURLExaminationsBySubjectId;
 
@@ -298,6 +315,14 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_STATUS);
         this.serviceURLImporterUploadDicom = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_UPLOAD_DICOM);
+        this.serviceURLImporterUploadMultipleDicom = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_UPLOAD_MULTIPLE_DICOM);
+        this.serviceURLImporterUploadEeg = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_UPLOAD_EEG);
+        this.serviceURLImporterAnalyzeEeg = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_ANALYZE_EEG);
+        this.serviceURLImporterStartImportEegJob = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_START_IMPORT_EEG_JOB);
         this.serviceURLExaminationsBySubjectId = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
         this.serviceURLExaminationsFind = this.serverURL
@@ -876,6 +901,89 @@ public class ShanoirUploaderServiceClient {
                             + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
                     throw new Exception("Error in uploadDicom");
                 }
+            }
+        }
+    }
+
+    /**
+     * Calls the "upload multiple examinations" endpoint: a single subject
+     * folder containing several exam sub-folders, each zipped and imported
+     * (subject/examination creation and import job start) directly server-side.
+     * Response is parsed as {@link ImportJobBase} to stay consistent with the
+     * rest of the client, even though the endpoint's declared return type is
+     * the richer {@code ImportJob}.
+     */
+    public ImportJobBase uploadMultipleDicom(File file, Long studyId, String studyName, Long studyCardId,
+            Long centerId, Long equipmentId) throws Exception {
+        StringBuilder url = new StringBuilder(this.serviceURLImporterUploadMultipleDicom);
+        url.append(studyId)
+                .append("/studyName/").append(URLEncoder.encode(studyName, "UTF-8"))
+                .append("/studyCard/").append(studyCardId)
+                .append("/center/").append(centerId)
+                .append("/equipment/").append(equipmentId)
+                .append("/");
+        try (CloseableHttpResponse response = httpService.postFile(url.toString(), file)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, ImportJobBase.class);
+            } else {
+                LOG.error("Error in uploadMultipleDicom: studyId={} (status code: {}, message: {})",
+                        studyId, code, apiResponseMessages.getOrDefault(code, "unknown status code"));
+                throw new Exception("Error in uploadMultipleDicom");
+            }
+        }
+    }
+
+    /**
+     * 1st EEG import step: uploads and unzips the EEG archive server-side and
+     * gets back a first, mostly-empty {@link EegImportJob} (workFolder, archive
+     * name, user info).
+     */
+    public EegImportJob uploadEEGZip(File file) throws Exception {
+        try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterUploadEeg, file)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, EegImportJob.class);
+            } else {
+                LOG.error("Error in uploadEEGZip (status code: {}, message: {})",
+                        code, apiResponseMessages.getOrDefault(code, "unknown status code"));
+                throw new Exception("Error in uploadEEGZip");
+            }
+        }
+    }
+
+    /**
+     * 2nd EEG import step: analyzes the uploaded .vhdr/.edf file(s) to fill in
+     * channels, events and datasets on the {@link EegImportJob}.
+     */
+    public EegImportJob analyzeEegZipFile(EegImportJob importJob) throws Exception {
+        String json = Util.objectWriter.writeValueAsString(importJob);
+        try (CloseableHttpResponse response = httpService.post(this.serviceURLImporterAnalyzeEeg, json, false)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, EegImportJob.class);
+            } else {
+                LOG.error("Error in analyzeEegZipFile (status code: {}, message: {})",
+                        code, apiResponseMessages.getOrDefault(code, "unknown status code"));
+                throw new Exception("Error in analyzeEegZipFile");
+            }
+        }
+    }
+
+    /**
+     * 3rd EEG import step: sends the completed {@link EegImportJob} (with
+     * examination/study set) to trigger the actual dataset creation.
+     */
+    public void startImportEEGJob(EegImportJob importJob) throws Exception {
+        String json = Util.objectWriter.writeValueAsString(importJob);
+        try (CloseableHttpResponse response = httpService.post(this.serviceURLImporterStartImportEegJob, json, false)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                LOG.info("EEG import job started on server for examination: {}", importJob.getExaminationId());
+            } else {
+                LOG.error("Error in startImportEEGJob (status code: {}, message: {})",
+                        code, apiResponseMessages.getOrDefault(code, "unknown status code"));
+                throw new Exception("Error in startImportEEGJob");
             }
         }
     }

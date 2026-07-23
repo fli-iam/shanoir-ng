@@ -294,7 +294,7 @@ public abstract class AbstractTest {
         studyCard.setAcquisitionEquipment(createdEquipment);
         studyCard.setCenterId(createdCenter.getId());
         studyCard.setStudyId(study.getId());
-        expertClient.createStudyCard(studyCard);
+        studyCard = expertClient.createStudyCard(studyCard);
         Assertions.assertNotNull(studyCard);
 
         List<StudyCard> studyCards = new ArrayList<>();
