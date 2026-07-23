@@ -74,6 +74,8 @@ public class ExaminationApiController implements ExaminationApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExaminationApiController.class);
 
+    private static UIDGeneration UID_GENERATOR = new UIDGeneration();
+
     @Autowired
     private ExaminationMapper examinationMapper;
 
@@ -374,8 +376,7 @@ public class ExaminationApiController implements ExaminationApi {
      * @param examination
      */
     private void generateStudyInstanceUID(Examination examination) {
-        UIDGeneration generator = new UIDGeneration();
-        String newUID = generator.getNewUID();
+        String newUID = UID_GENERATOR.getNewUID();
         examination.setStudyInstanceUID(newUID);
     }
 
