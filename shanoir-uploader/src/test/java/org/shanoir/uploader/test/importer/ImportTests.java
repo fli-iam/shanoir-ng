@@ -183,7 +183,7 @@ public class ImportTests extends AbstractTest {
         Util.mapper.writeValue(importJobJsonFile, importJob);
 
         startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromShanoirUploader");
-        waitForServerImportJobStatus(importJob.getWorkFolder());
+        waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportFromShanoirUploader-before-ds");
 
         // Local files here were pseudonymized before upload, exactly like the
         // server-side copy, so a full tag comparison is meaningful.
@@ -279,7 +279,7 @@ public class ImportTests extends AbstractTest {
         Util.mapper.writeValue(importJobJsonFile, importJob);
 
         startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromShanoirUploaderNoStudyCard");
-        waitForServerImportJobStatus(importJob.getWorkFolder());
+        waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportFromShanoirUploaderNoStudyCard-before-ds");
         waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
     }
 
@@ -309,7 +309,7 @@ public class ImportTests extends AbstractTest {
 
         if (importJob.getWorkFolder() != null && !importJob.getWorkFolder().isEmpty()) {
             final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
-            waitForServerImportJobStatus(tempDirId);
+            waitForServerImportJobStatus(tempDirId, "testImportMultipleDicomZipWithStudyCard-before-ds");
         }
     }
 
@@ -341,7 +341,8 @@ public class ImportTests extends AbstractTest {
 
         if (importJob.getWorkFolder() != null && !importJob.getWorkFolder().isEmpty()) {
             final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
-            waitForServerImportJobStatus(tempDirId);        }
+            waitForServerImportJobStatus(tempDirId, "testImportMultipleDicomZipNoStudyCard-before-ds");
+        }
     }
 
     @Test
@@ -380,6 +381,10 @@ public class ImportTests extends AbstractTest {
         analyzedJob.setAcquisitionEquipmentId(equipment.getId());
 
         userClient.startImportEEGJob(analyzedJob);
+        if (analyzedJob.getWorkFolder() != null && !analyzedJob.getWorkFolder().isEmpty()) {
+            final String tempDirId = ImportJobStatusService.keyOf(analyzedJob.getWorkFolder());
+            waitForServerImportJobStatus(tempDirId, "testImportEEG-before-ds");
+        }
     }
 
     /**
@@ -424,7 +429,7 @@ public class ImportTests extends AbstractTest {
                 + examinationId + (lastError != null ? ": " + lastError.getMessage() : ""));
     }
 
-    private ImportJobStatus waitForServerImportJobStatus(String tempDirId) throws Exception {
+    private ImportJobStatus waitForServerImportJobStatus(String tempDirId, String label) throws Exception {
         long deadline = System.currentTimeMillis() + CONSISTENCY_CHECK_TIMEOUT_MILLIS;
         while (System.currentTimeMillis() < deadline) {
             ImportJobStatus status = userClient.getImportJobStatus(tempDirId);
@@ -433,7 +438,7 @@ public class ImportTests extends AbstractTest {
                     logger.info("Server reported FINISHED for tempDirId {}.", tempDirId);
                     ImportJobBase importJob = status.getImportJob();
                     String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-                    dumpImportJobJson(importJobJson, tempDirId, "end-of-ms-import");
+                    dumpImportJobJson(importJobJson, tempDirId, label);
                     return status;
                 } else if (status.getState() == ImportJobStatus.State.ERROR) {
                     Assertions.fail("Import failed on server for tempDirId " + tempDirId + ": " + status.getMessage());
@@ -560,7 +565,7 @@ public class ImportTests extends AbstractTest {
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         dumpImportJobJson(importJobJson, importJob.getWorkFolder(), "testImportFromDicomZip");
         userClient.startImportJob(importJob.getWorkFolder(), importJobJson);
-        waitForServerImportJobStatus(importJob.getWorkFolder());
+        waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportFromDicomZip-before-ds");
     }
 
     /**
@@ -590,7 +595,7 @@ public class ImportTests extends AbstractTest {
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         dumpImportJobJson(importJobJson, importJob.getWorkFolder(), "testImportFromDicomZipNoStudyCard");
         userClient.startImportJob(importJob.getWorkFolder(), importJobJson);
-        waitForServerImportJobStatus(importJob.getWorkFolder());
+        waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportFromDicomZipNoStudyCard-before-ds");
     }
 
     private org.shanoir.uploader.model.rest.Subject createSubject(ImportJobBase importJob,
