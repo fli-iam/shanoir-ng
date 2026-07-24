@@ -203,6 +203,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
                 credential.setType(CredentialRepresentation.PASSWORD);
 
                 final boolean devMode = isDevMode();
+                LOG.info("devMode={} (use UsersDefaultPassword)", devMode);
                 final String newPassword = devMode ? devUsersDefaultPassword : PasswordUtils.generatePassword();
                 credential.setValue(newPassword);
                 credential.setTemporary(!devMode);
