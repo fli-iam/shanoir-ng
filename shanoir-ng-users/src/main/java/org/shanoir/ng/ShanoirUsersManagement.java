@@ -167,15 +167,15 @@ public class ShanoirUsersManagement implements ApplicationRunner {
     }
 
     private boolean isDevMode() {
-        return "dev".equalsIgnoreCase(shanoirMigration) && !StringUtils.isBlank(devUsersDefaultPassword);
+        return ("init".equalsIgnoreCase(shanoirMigration)
+                || "dev".equalsIgnoreCase(shanoirMigration))
+                && !StringUtils.isBlank(devUsersDefaultPassword);
     }
 
     private void initKeycloakAdminClient() {
-
         if (this.keycloak != null) {
             return;
         }
-
         this.keycloak = Keycloak.getInstance(
             kcAdminClientServerUrl,
             kcAdminClientRealm,
@@ -203,7 +203,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
                 credential.setType(CredentialRepresentation.PASSWORD);
 
                 final boolean devMode = isDevMode();
-                LOG.info("devMode={} (use UsersDefaultPassword)", devMode);
+                LOG.info("devMode={} (if true: use UsersDefaultPassword)", devMode);
                 final String newPassword = devMode ? devUsersDefaultPassword : PasswordUtils.generatePassword();
                 credential.setValue(newPassword);
                 credential.setTemporary(!devMode);
