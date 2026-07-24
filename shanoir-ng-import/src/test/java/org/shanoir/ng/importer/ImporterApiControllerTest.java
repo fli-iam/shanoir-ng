@@ -137,6 +137,7 @@ public class ImporterApiControllerTest {
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 
         EegImportJob importJob = new EegImportJob();
+        importJob.setWorkFolder("/tmp/2/12341234");
         EegDataset dataset = new EegDataset();
         importJob.setExaminationId(1L);
         importJob.setDatasets(Collections.singletonList(dataset));
