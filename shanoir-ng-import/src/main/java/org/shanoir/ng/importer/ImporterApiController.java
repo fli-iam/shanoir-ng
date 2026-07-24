@@ -441,7 +441,6 @@ public class ImporterApiController implements ImporterApi {
 
             LOG.error(dataFileDir.getAbsolutePath());
 
-
             // Get .VHDR file
             File[] bvMatchingFiles = dataFileDir.listFiles(new FilenameFilter() {
                 @Override
