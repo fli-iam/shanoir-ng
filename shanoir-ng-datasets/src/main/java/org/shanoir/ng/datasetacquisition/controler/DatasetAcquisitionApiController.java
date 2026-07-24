@@ -273,8 +273,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
     }
 
-
-
     @Override
     public ResponseEntity<Void> updateDatasetAcquisition(
               Long datasetAcquisitionId,
@@ -290,7 +288,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
 
     @Override
     public ResponseEntity<Void> addExtraData(
@@ -350,4 +347,5 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             throw new RestServiceException(error);
         }
     }
+
 }
