@@ -701,12 +701,19 @@ public class ImporterApiController implements ImporterApi {
             importJob.setUsername(KeycloakUtil.getTokenUserName());
             ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
             importJob.setShanoirEvent(event);
+            cleanUpImportJob(importJob);
             Integer integg = (Integer) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_EEG_QUEUE, objectMapper.writeValueAsString(importJob));
             return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));
         } catch (Exception e) {
             LOG.error("Error during EEG import", e);
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private void cleanUpImportJob(final ImportJobBase importJob) {
+        // Clean up to send smaller json
+        importJob.setPatient(null);
+        importJob.setStudy(null);
     }
 
     @Override
@@ -759,13 +766,11 @@ public class ImporterApiController implements ImporterApi {
     @Override
     public ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required = true)  @RequestParam(value = "path", required = true) String path)
             throws RestServiceException, IOException {
-
         final File userImportDir = ImportUtils.getUserImportDir(importDir);
         String pathInfo = userImportDir.getAbsolutePath() + File.separator + path;
         URL url = new URL("file:///" + pathInfo);
         final URLConnection uCon = url.openConnection();
         final InputStream is = uCon.getInputStream();
-
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int nRead;
         byte[] data = new byte[BUFFER_SIZE];
@@ -886,7 +891,7 @@ public class ImporterApiController implements ImporterApi {
                 String studyInstanceUID = UID_GENERATOR.getNewUID();
                 examination.setStudyInstanceUID(studyInstanceUID);
 
-                // Create multiple examinations for every session folder
+                // Create one examination for every session folder
                 Long examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
 
                 if (examId == null) {
@@ -914,7 +919,8 @@ public class ImporterApiController implements ImporterApi {
                     serie.setSelected(true);
                 }
 
-                // STEP 4.4 Send to dataset for logical import
+                // STEP 4.5 Send to dataset for logical import
+                cleanUpImportJob(job);
                 this.startImportJobBase(job);
             }
 

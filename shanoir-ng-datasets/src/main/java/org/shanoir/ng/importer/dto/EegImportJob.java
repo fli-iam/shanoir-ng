@@ -52,4 +52,5 @@ public class EegImportJob extends ImportJob {
     public void setSubjectId(Long subjectId) {
         this.subjectId = subjectId;
     }
+
 }

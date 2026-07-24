@@ -49,8 +49,6 @@ public class ImportJob implements Serializable {
 
     private Long acquisitionEquipmentId;
 
-    private String anonymisationProfileToUse;
-
     private Long converterId;
 
     private String archive;
@@ -184,14 +182,6 @@ public class ImportJob implements Serializable {
 
     public void setConverterId(Long converterId) {
         this.converterId = converterId;
-    }
-
-    public String getAnonymisationProfileToUse() {
-        return anonymisationProfileToUse;
-    }
-
-    public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
-        this.anonymisationProfileToUse = anonymisationProfileToUse;
     }
 
     public String getStudyInstanceUID() {
