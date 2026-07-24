@@ -695,6 +695,8 @@ public class ImporterApiController implements ImporterApi {
     public ResponseEntity<Void> startImportEEGJob(
             @Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob)
             throws RestServiceException {
+        final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
+        importJobStatusService.setInProgress(tempDirId, "Import job received, queued for processing.");
         // Comment: Anonymisation is not necessary for pure brainvision EEGs data
         try {
             importJob.setUsername(KeycloakUtil.getTokenUserName());
@@ -702,6 +704,7 @@ public class ImporterApiController implements ImporterApi {
             importJob.setShanoirEvent(event);
             cleanUpImportJob(importJob);
             Integer integg = (Integer) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_EEG_QUEUE, objectMapper.writeValueAsString(importJob));
+            importJobStatusService.setFinished(tempDirId, importJob);
             return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));
         } catch (Exception e) {
             LOG.error("Error during EEG import", e);
