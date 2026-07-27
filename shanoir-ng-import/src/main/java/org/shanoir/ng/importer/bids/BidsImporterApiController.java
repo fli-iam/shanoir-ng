@@ -141,7 +141,6 @@ public class BidsImporterApiController implements BidsImporterApi {
                 throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NOT_SUBJECT_BASED_SUBJECT, null));
             }
 
-
             // STEP 3: Examination level, check if there are session, otherwise create examinations
             Map<String, LocalDate> examDates = BidsTsvDateParser.readDatesFromSessionsFile(subjectFile);
             // Filter out scans.tsv and sessions.tsv files

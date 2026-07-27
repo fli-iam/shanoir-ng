@@ -38,7 +38,6 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.io.DicomInputStream;
 import org.json.JSONObject;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJobStatus;
@@ -129,6 +128,8 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_DATASETS = "service.datasets";
 
+    private static final String SERVICE_DATASETS_IMPORTER_BIDS = "service.datasets.importer.bids";
+
     private static final String SERVICE_DATASETS_DICOM_WEB_STUDIES = "service.datasets.dicom.web.studies";
 
     private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
@@ -211,6 +212,8 @@ public class ShanoirUploaderServiceClient {
 
     private String serviceURLDatasets;
 
+    private String serviceURLDatasetsImporterBids;
+    
     private String serviceURLDatasetsDicomWebStudies;
 
     private String serviceURLExaminationsCreate;
@@ -297,6 +300,8 @@ public class ShanoirUploaderServiceClient {
         this.serviceURLSubjectsFindBySubjectNameAndStudy = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_NAME_AND_STUDY);
         this.serviceURLDatasets = this.serverURL + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS);
+        this.serviceURLDatasetsImporterBids = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_IMPORTER_BIDS);
         this.serviceURLDatasetsDicomWebStudies = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_DICOM_WEB_STUDIES);
         this.serviceURLSubjectsCreate = this.serverURL
@@ -1439,6 +1444,33 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
+    /**
+     * Uploads a BIDS-formatted subject folder (zipped) for import. This hits
+     * the datasets microservice directly (org.shanoir.ng.importer.bids.BidsImporterApi),
+     * not the importer microservice used by the other upload* methods.
+     *
+     * Note: the server-side controller always returns a null body with 200 OK
+     * and processes the import asynchronously via RabbitMQ, without exposing a
+     * workFolder/tempDirId we could poll via ImporterStatus. So this method (and
+     * any test using it) can only confirm the upload was accepted, not that the
+     * subject/examination/datasets were actually created server-side.
+     */
+    public void uploadBIDSDataset(File file, Long studyId, String studyName, Long centerId) throws Exception {
+        StringBuilder url = new StringBuilder(this.serviceURLDatasetsImporterBids);
+        url.append(studyId)
+                .append("/").append(URLEncoder.encode(studyName, "UTF-8"))
+                .append("/").append(centerId)
+                .append("/");
+        try (CloseableHttpResponse response = httpService.postFile(url.toString(), file)) {
+            int code = response.getCode();
+            if (code != HttpStatus.SC_OK) {
+                LOG.error("Error in uploadBIDSDataset: studyId={} (status code: {}, message: {})",
+                        studyId, code, apiResponseMessages.getOrDefault(code, "unknown status code"));
+                throw new Exception("Error in uploadBIDSDataset");
+            }
+        }
+    }
+    
     public Long getUserId() {
         return userId;
     }

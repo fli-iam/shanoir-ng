@@ -39,12 +39,11 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
-import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.ImportJobBase;
-import org.shanoir.ng.importer.model.EegImportJob;
-import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.importer.ImportJobStatusService;
+import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
+import org.shanoir.ng.importer.model.EegImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
@@ -79,7 +78,9 @@ public class ImportTests extends AbstractTest {
 
     private static final String TEST_MULTIPLE_EXAM_ZIP = "TEST_MET_0001.zip";
 
-    private static final String TEST_EEG_ZIP = "testEDF.zip";
+    private static final String TEST_EEG_ZIP = "test-EDF.zip";
+
+    private static final String TEST_BIDS_ZIP = "test-BIDS.zip";
 
     // The server-side import is asynchronous: give it time to appear before
     // declaring the consistency check failed.
@@ -387,6 +388,27 @@ public class ImportTests extends AbstractTest {
         }
     }
 
+    @Test
+    @Order(8)
+    public void testImportBIDS() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportBIDS...................................");
+        logger.info("......................................................");
+        URL resource = getClass().getClassLoader().getResource(TEST_BIDS_ZIP);
+        Assertions.assertNotNull(resource, "Test resource " + TEST_BIDS_ZIP + " not found.");
+        File file = new File(resource.toURI());
+
+        Long centerId = studyWithStudyCards.getStudyCards().get(0).getCenterId();
+
+        // Unlike the DICOM/EEG import paths, the BIDS import endpoint (datasets
+        // microservice) responds with an empty 200 OK and processes the subject/
+        // examination/dataset creation asynchronously over RabbitMQ. There is no
+        // workFolder/tempDirId returned, so we cannot poll ImporterStatus here as
+        // the other tests do - this only verifies the server accepted the upload.
+        userClient.uploadBIDSDataset(file, studyWithStudyCards.getId(), studyWithStudyCards.getName(), centerId);
+        logger.info("BIDS dataset upload accepted by server for study: {}", studyWithStudyCards.getId());
+    }
+    
     /**
      * Polls the server until the local DICOM files match their remote,
      * persisted counterparts for the given examination, or a timeout is
