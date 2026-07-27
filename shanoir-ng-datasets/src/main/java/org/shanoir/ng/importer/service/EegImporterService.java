@@ -156,7 +156,7 @@ public class EegImporterService {
                                 contentType = "application/octet-stream";
                             }
                             String path = storageService.storeDatasetsData(
-                                    importJob.getStudyId(), importJob.getSubjectId(), importJob.getExaminationId(),
+                                    importJob.getStudyId(), examination.getSubject().getId(), importJob.getExaminationId(),
                                     BidsDataType.EEG.getFolderName(), file.getName(),
                                     is, contentType, file.length());
                             // Create datasetExpression => Files
@@ -200,7 +200,7 @@ public class EegImporterService {
                 datasetToCreate.setDatasetAcquisition(datasetAcquisition);
                 datasetToCreate.setOriginMetadata(originMetadata);
                 datasetToCreate.setUpdatedMetadata(originMetadata);
-                datasetToCreate.setSubjectId(importJob.getSubjectId());
+                datasetToCreate.setSubjectId(examination.getSubject().getId());
                 datasetToCreate.setSamplingFrequency(datasetDto.getSamplingFrequency());
                 datasetToCreate.setCoordinatesSystem(datasetDto.getCoordinatesSystem());
 

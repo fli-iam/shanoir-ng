@@ -377,10 +377,12 @@ public class ImportTests extends AbstractTest {
                 studyWithStudyCards.getStudyCards().get(0).getCenterId());
         Assertions.assertNotNull(examination, "Examination could not be created for EEG import.");
 
+        analyzedJob.setSubjectName(subject.getName());
         analyzedJob.setExaminationId(examination.getId());
         analyzedJob.setStudyId(studyWithStudyCards.getId());
         analyzedJob.setAcquisitionEquipmentId(equipment.getId());
 
+        // MS Import is only relaying the job to MS Datasets
         userClient.startImportEEGJob(analyzedJob);
         if (analyzedJob.getWorkFolder() != null && !analyzedJob.getWorkFolder().isEmpty()) {
             final String tempDirId = ImportJobStatusService.keyOf(analyzedJob.getWorkFolder());

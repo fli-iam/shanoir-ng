@@ -102,7 +102,6 @@ public class EegImporterServiceTest {
 
         dataset.setChannels(Collections.singletonList(chan));
         dataset.setEvents(Collections.singletonList(event));
-        importJob.setSubjectId(Long.valueOf(1));
         importJob.setStudyId(Long.valueOf(1));
         importJob.setExaminationId(Long.valueOf(1));
         importJob.setAcquisitionEquipmentId(Long.valueOf(1));
