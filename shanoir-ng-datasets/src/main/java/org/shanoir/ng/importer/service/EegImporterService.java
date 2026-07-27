@@ -105,6 +105,15 @@ public class EegImporterService {
 
             // Get examination
             Examination examination = examinationService.findById(importJob.getExaminationId());
+            if (examination == null) {
+                event.setStatus(ShanoirEvent.ERROR);
+                event.setMessage("EEG import: no examination found with id " + importJob.getExaminationId());
+                event.setProgress(-1f);
+                eventService.publishEvent(event);
+                return;
+            }
+            LOG.info("Start EEG import for examination {} and subject {} ({})",
+                    examination.getId(), importJob.getSubjectName(), examination.getSubject().getId());
 
             datasetAcquisition.setExamination(examination);
             datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
