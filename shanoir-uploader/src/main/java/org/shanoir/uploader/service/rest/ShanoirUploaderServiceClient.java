@@ -128,8 +128,6 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_DATASETS = "service.datasets";
 
-    private static final String SERVICE_DATASETS_IMPORTER_BIDS = "service.datasets.importer.bids";
-
     private static final String SERVICE_DATASETS_DICOM_WEB_STUDIES = "service.datasets.dicom.web.studies";
 
     private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
@@ -153,6 +151,8 @@ public class ShanoirUploaderServiceClient {
     private static final String SERVICE_IMPORTER_ANALYZE_EEG = "service.importer.analyze.eeg";
 
     private static final String SERVICE_IMPORTER_START_IMPORT_EEG_JOB = "service.importer.start.import.eeg.job";
+
+    private static final String SERVICE_IMPORTER_BIDS = "service.importer.bids";
 
     private static final String SERVICE_EXAMINATIONS_BY_SUBJECT_ID = "service.examinations.find.by.subject.id";
 
@@ -212,7 +212,7 @@ public class ShanoirUploaderServiceClient {
 
     private String serviceURLDatasets;
 
-    private String serviceURLDatasetsImporterBids;
+    private String serviceURLImporterBids;
     
     private String serviceURLDatasetsDicomWebStudies;
 
@@ -300,8 +300,6 @@ public class ShanoirUploaderServiceClient {
         this.serviceURLSubjectsFindBySubjectNameAndStudy = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_NAME_AND_STUDY);
         this.serviceURLDatasets = this.serverURL + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS);
-        this.serviceURLDatasetsImporterBids = this.serverURL
-                + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_IMPORTER_BIDS);
         this.serviceURLDatasetsDicomWebStudies = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_DICOM_WEB_STUDIES);
         this.serviceURLSubjectsCreate = this.serverURL
@@ -328,6 +326,8 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_ANALYZE_EEG);
         this.serviceURLImporterStartImportEegJob = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_START_IMPORT_EEG_JOB);
+        this.serviceURLImporterBids = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_BIDS);
         this.serviceURLExaminationsBySubjectId = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
         this.serviceURLExaminationsFind = this.serverURL
@@ -1456,7 +1456,7 @@ public class ShanoirUploaderServiceClient {
      * subject/examination/datasets were actually created server-side.
      */
     public void uploadBIDSDataset(File file, Long studyId, String studyName, Long centerId) throws Exception {
-        StringBuilder url = new StringBuilder(this.serviceURLDatasetsImporterBids);
+        StringBuilder url = new StringBuilder(this.serviceURLImporterBids);
         url.append(studyId)
                 .append("/").append(URLEncoder.encode(studyName, "UTF-8"))
                 .append("/").append(centerId)
