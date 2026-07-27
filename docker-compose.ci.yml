@@ -26,13 +26,14 @@ services:
     profiles: ["dcm4chee"]
   dcm4chee-arc:
     profiles: ["dcm4chee"]
-  keycloak-database:
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
   database-migrations:
   database:
+    # Only the TIMING is relaxed here — CI runners are slower and more heavily
+    # loaded than a deployment host, so the base file's 3s/10-retry budget can
+    # expire before MariaDB finishes its first-boot initialisation. The probe
+    # command itself is inherited from docker-compose.yml on purpose: if the
+    # base healthcheck is wrong, CI must fail, not paper over it.
     healthcheck:
-      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
       interval: 5s
       timeout: 5s
       retries: 20

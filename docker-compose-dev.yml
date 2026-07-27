@@ -129,7 +129,7 @@ services:
       - shanoir_ng_network
     depends_on:
       database:
-        condition: service_healthy  # wait for MySQL to be ready
+        condition: service_healthy  # wait for MariaDB to be ready
     restart: "no" # don't restart after it exits cleanly
   #
   # Users microservice

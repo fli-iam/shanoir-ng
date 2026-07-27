@@ -82,12 +82,13 @@ on:
     branches: [develop, master]
     paths:
       - "docker-compose.yml"
+      - "docker-compose-dev.yml"
       - "docker-compose.ci.yml"
+      - "docker-compose/**"
+      - ".env"
       - "bootstrap.sh"
       - ".github/workflows/deployment-test.yaml"
-      - ".github/workflows/hospital-*.yml"
       - ".github/scripts/**"
-      - "hospital-validation/**"
 
 concurrency:
   group: deployment-test-${{ github.ref }}
