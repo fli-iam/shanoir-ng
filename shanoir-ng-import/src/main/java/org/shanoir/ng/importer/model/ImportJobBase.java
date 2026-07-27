@@ -361,6 +361,7 @@ public class ImportJobBase implements Serializable {
         this.uploadPercentage = uploadPercentage;
     }
 
+    @JsonIgnore
     public String getImportType() {
         String importType;
         if (fromDicomZip) {
