@@ -78,9 +78,9 @@ public class ImportTests extends AbstractTest {
 
     private static final String TEST_MULTIPLE_EXAM_ZIP = "TEST_MET_0001.zip";
 
-    private static final String TEST_EEG_ZIP = "test-EDF.zip";
+    private static final String TEST_EEG_ZIP = "testEDF.zip";
 
-    private static final String TEST_BIDS_ZIP = "test-BIDS.zip";
+    private static final String TEST_BIDS_ZIP = "testBIDS.zip";
 
     // The server-side import is asynchronous: give it time to appear before
     // declaring the consistency check failed.
