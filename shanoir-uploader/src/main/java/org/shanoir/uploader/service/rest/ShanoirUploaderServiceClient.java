@@ -38,8 +38,8 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.io.DicomInputStream;
 import org.json.JSONObject;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.EegImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
@@ -1459,8 +1459,7 @@ public class ShanoirUploaderServiceClient {
         StringBuilder url = new StringBuilder(this.serviceURLImporterBids);
         url.append(studyId)
                 .append("/").append(URLEncoder.encode(studyName, "UTF-8"))
-                .append("/").append(centerId)
-                .append("/");
+                .append("/").append(centerId);
         try (CloseableHttpResponse response = httpService.postFile(url.toString(), file)) {
             int code = response.getCode();
             if (code != HttpStatus.SC_OK) {
