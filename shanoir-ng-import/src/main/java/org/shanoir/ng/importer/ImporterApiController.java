@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -868,12 +867,13 @@ public class ImporterApiController implements ImporterApi {
                     equipmentIdFromDicom = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getSeries().get(0).getEquipment().getDeviceSerialNumber());
                     if (equipmentIdFromDicom != null) {
                         if (studyCardId != 0L) {
-                            Properties props = new Properties();
-                            props.setProperty("EQUIPMENT_ID_PROPERTY", "" + equipmentIdFromDicom);
-                            props.setProperty("STUDY_ID_PROPERTY", "" + studyId);
-                            props.setProperty("STUDYCARD_ID_PROPERTY", "" + studyCardId);
-
-                            Long newStudyCardId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_STUDY_CARD_QUEUE, props);
+                            java.util.Map<String, String> params = new java.util.HashMap<>();
+                            params.put("EQUIPMENT_ID_PROPERTY", "" + equipmentIdFromDicom);
+                            params.put("STUDY_ID_PROPERTY", "" + studyId);
+                            params.put("STUDYCARD_ID_PROPERTY", "" + studyCardId);
+                            Long newStudyCardId = (Long) this.rabbitTemplate.convertSendAndReceive(
+                                    RabbitMQConfiguration.IMPORT_STUDY_CARD_QUEUE,
+                                    objectMapper.writeValueAsString(params));
                             if (newStudyCardId != null) {
                                 studyCardId = newStudyCardId;
                             }
