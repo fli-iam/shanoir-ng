@@ -269,7 +269,7 @@ public abstract class AbstractTest {
     }
 
     public static Study createStudyAndCenterAndStudyCardAndAddMembers() {
-        Study study = buildMinimalStudy();
+        Study study = buildMinimalStudy("Study-SC-");
 
         List<StudyCenter> studyCenterList = new ArrayList<>();
         StudyCenter studyCenter = new StudyCenter();
@@ -322,7 +322,7 @@ public abstract class AbstractTest {
      * {@link AcquisitionEquipment} to {@code ImportUtils}.
      */
     public static Study createStudyAndCenterWithoutStudyCard() {
-        Study study = buildMinimalStudy();
+        Study study = buildMinimalStudy("Study-No-SC-");
         study.setStudyCardPolicy(StudyCardPolicy.DISABLED.name());
 
         List<StudyCenter> studyCenterList = new ArrayList<>();
@@ -381,7 +381,7 @@ public abstract class AbstractTest {
      * deliberately
      * omits the study-card (not needed for the approval flow under test).
      */
-    public static Study buildMinimalStudy() {
+    public static Study buildMinimalStudy(String prefix) {
         StudyExtraDetails extraDetails = new StudyExtraDetails();
         extraDetails.setExpectedNbOfSubjects(5L);
         extraDetails.setExpectedNbOfCenters(1L);
@@ -390,7 +390,7 @@ public abstract class AbstractTest {
 
         Study study = new Study();
         study.setExtraDetails(extraDetails);
-        study.setName("Study-" + UUID.randomUUID());
+        study.setName(prefix + UUID.randomUUID());
         // isDraft will be overridden server-side for non-admin callers, but we
         // set it explicitly to make the intention of this test clear.
         study.setIsDraft(Boolean.FALSE);
