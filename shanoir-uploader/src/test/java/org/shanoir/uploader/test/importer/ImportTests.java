@@ -483,7 +483,7 @@ public class ImportTests extends AbstractTest {
                     examination.getId(), examination.getStudyInstanceUID(), studyWithStudyCards, studyCard,
                     studyCard.getAcquisitionEquipment());
             importJob.setFromDicomZip(false);
-            importJob.setFromPacs(true);
+            importJob.setFromPacs(false);
             importJob.setFromShanoirUploader(true);
 
             Anonymizer anonymizer = new Anonymizer();
