@@ -118,8 +118,9 @@ public class DicomSEGAndSRImporterService {
             LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
             return false;
         }
-        if (!datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ANNOTATE.name())
-                && !datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_IMPORT.name())) {
+        boolean canAnnotate = datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ANNOTATE.name());
+        boolean canImport = datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_IMPORT.name());
+        if (!canAnnotate && !canImport) {
             LOG.error("User {} misses DICOMWeb importation rights on study with ID: {}, import refused.",
                     KeycloakUtil.getTokenUserName(), examination.getStudyId());
             throw new RestServiceException(
@@ -133,7 +134,7 @@ public class DicomSEGAndSRImporterService {
             return false;
         }
         try {
-            createDataset(modality, examination, dataset, datasetAttributes);
+            createDataset(modality, examination, dataset, datasetAttributes, canAnnotate);
             dicomImporterService.sendToPacs(metaInformationAttributes, datasetAttributes);
         } catch (Exception e) {
             LOG.error("Error during import of DICOM SEG/SR.", e);
@@ -344,10 +345,11 @@ public class DicomSEGAndSRImporterService {
      * @param examination
      * @param dataset
      * @param datasetAttributes
+     * @param canAnnotate whether the importing user holds the CAN_ANNOTATE right
      * @throws MalformedURLException
      * @throws ShanoirException
      */
-    private void createDataset(String modality, Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException, IOException, SolrServerException, ShanoirException {
+    private void createDataset(String modality, Examination examination, Dataset dataset, Attributes datasetAttributes, boolean canAnnotate) throws MalformedURLException, IOException, SolrServerException, ShanoirException {
         Dataset newMsOrSegDataset = null;
         if (STOWRSMultipartRequestFilter.DICOM_MODALITY_SEG.equals(modality)) {
             newMsOrSegDataset = new SegmentationDataset();
@@ -359,6 +361,10 @@ public class DicomSEGAndSRImporterService {
         newMsOrSegDataset.setStudyId(examination.getStudyId());
         newMsOrSegDataset.setSubjectId(examination.getSubject().getId());
         newMsOrSegDataset.setCreationDate(LocalDate.now());
+        // record the annotator as owner, but only when imported with the CAN_ANNOTATE right
+        if (canAnnotate) {
+            newMsOrSegDataset.setUsername(KeycloakUtil.getTokenUserName());
+        }
         // for rights check: keep link to original acquisition
         newMsOrSegDataset.setDatasetAcquisition(dataset.getDatasetAcquisition());
         createMetadata(datasetAttributes, dataset.getOriginMetadata().getDatasetModalityType(), newMsOrSegDataset);
