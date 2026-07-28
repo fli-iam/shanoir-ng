@@ -16,7 +16,9 @@ package org.shanoir.ng.dicom;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.Set;
@@ -68,7 +70,17 @@ public class DicomProcessing {
     public static LocalDateTime parseAcquisitionStartTime(String acqDate, String acqTime) {
         if (acqDate != null && acqTime != null) {
             try {
-                return LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(acqDate), DateTimeUtils.stringToLocalTime(acqTime));
+                /**
+                 * Both helpers return null for an empty value: a DICOM date/time tag can be
+                 * present but empty (type 2). Check before LocalDateTime.of, that throws a
+                 * NullPointerException on a null argument and would fail the entire import.
+                 */
+                LocalDate localDate = DateTimeUtils.pacsStringToLocalDate(acqDate);
+                LocalTime localTime = DateTimeUtils.stringToLocalTime(acqTime);
+                if (localDate == null || localTime == null) {
+                    return null;
+                }
+                return LocalDateTime.of(localDate, localTime);
             } catch (DateTimeParseException e) {
                 LOG.warn("could not parse the acquisition date : " + acqDate + " and time : " + acqTime);
                 return null;
