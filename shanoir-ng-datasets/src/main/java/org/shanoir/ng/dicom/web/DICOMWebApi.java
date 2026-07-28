@@ -97,7 +97,7 @@ public interface DICOMWebApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/metadata", produces = { "application/dicom+json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL') and @datasetSecurityService.hasRightToVisualizeSeries(#serieInstanceUID))")
     ResponseEntity<String> findSerieMetadataOfStudy(
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
             @Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
@@ -125,7 +125,7 @@ public interface DICOMWebApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_DOWNLOAD'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_DOWNLOAD') and @datasetSecurityService.hasRightToVisualizeSeries(#serieInstanceUID))")
     ResponseEntity findInstance(
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
             @Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
@@ -140,7 +140,7 @@ public interface DICOMWebApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}/frames/{frame}")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_DOWNLOAD'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_DOWNLOAD') and @datasetSecurityService.hasRightToVisualizeSeries(#serieInstanceUID))")
     ResponseEntity findFrameOfStudyOfSerieOfInstance(
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
             @Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
@@ -156,7 +156,7 @@ public interface DICOMWebApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}/bulkdata/**")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_DOWNLOAD'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_DOWNLOAD') and @datasetSecurityService.hasRightToVisualizeSeries(#serieInstanceUID))")
     ResponseEntity findBulkDataOfStudyOfSerieOfInstance(
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
             @Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,

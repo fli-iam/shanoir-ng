@@ -32,6 +32,7 @@ import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
@@ -91,6 +92,9 @@ public class DatasetSecurityService {
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Autowired
+    private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
+    @Autowired
     private RabbitTemplate rabbitTemplate;
 
     /**
@@ -108,6 +112,62 @@ public class DatasetSecurityService {
             return false;
         }
         return studyRightsService.hasRightOnStudy(studyId, rightStr);
+    }
+
+    /**
+     * Check that the connected user is allowed to visualize the series requested
+     * by the viewer. A series that carries a dataset-level virtual UID, e.g. a
+     * SEG or SR annotation, is subject to the per-dataset visualization rule
+     * (see {@link #hasRightToVisualizeDataset(Long)}); any other series, e.g. a
+     * regular acquisition, is left to the examination-level rights check.
+     *
+     * @param seriesOrDatasetUID the virtual UID requested by the viewer
+     * @return true or false
+     */
+    public boolean hasRightToVisualizeSeries(String seriesOrDatasetUID) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        if (!seriesInstanceUIDHandler.isDatasetUID(seriesOrDatasetUID)) {
+            return true;
+        }
+        return hasRightToVisualizeDataset(seriesInstanceUIDHandler.extractDatasetId(seriesOrDatasetUID));
+    }
+
+    /**
+     * Check that the connected user is allowed to visualize the given dataset
+     * in the viewer.
+     *
+     * The CAN_DOWNLOAD right is required in every case, but it is already
+     * enforced upstream by the viewer endpoints (see DICOMWebApi), so this
+     * method only adds the ownership rule on top: when the dataset has no owner
+     * (username is null), any user who reached this point can open it; when it
+     * is owned, e.g. an annotation imported with the CAN_ANNOTATE right, only
+     * its owner (who still needs the CAN_ANNOTATE right) or a user with the
+     * CAN_REVIEW right can open it.
+     *
+     * @param datasetId the dataset id
+     * @return true or false
+     */
+    @Transactional
+    public boolean hasRightToVisualizeDataset(Long datasetId) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
+        if (dataset == null) {
+            return false;
+        }
+        String owner = dataset.getUsername();
+        if (owner == null) {
+            return true;
+        }
+        Long studyId = dataset.getStudyId();
+        if (owner.equals(KeycloakUtil.getTokenUserName())
+                && hasRightOnStudy(studyId, StudyUserRight.CAN_ANNOTATE.name())) {
+            return true;
+        }
+        return hasRightOnStudy(studyId, StudyUserRight.CAN_REVIEW.name());
     }
 
     /**
