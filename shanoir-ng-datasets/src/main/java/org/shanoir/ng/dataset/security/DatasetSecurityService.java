@@ -843,6 +843,41 @@ public class DatasetSecurityService {
     }
 
     /**
+     * Filter out the annotation datasets, e.g. displayed in the study tree, that
+     * the connected user is not allowed to see, mirroring the per-dataset
+     * visualization rule of the viewer (see {@link #hasRightToVisualizeDataset(Long)}):
+     * an annotation with no owner (username null) stays visible to everyone, while
+     * an owned one is kept only for its owner (with the CAN_ANNOTATE right) or for
+     * a user with the CAN_REVIEW right. Non-annotation datasets carry no owner and
+     * are never removed here.
+     *
+     * @param list the datasets to filter in place
+     * @return true
+     */
+    public boolean filterAnnotationDatasetList(List<Dataset> list) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        String userName = KeycloakUtil.getTokenUserName();
+        UserRights userRights = studyRightsService.getUserRights();
+        Set<Dataset> toRemove = new HashSet<>();
+        list.forEach((Dataset ds) -> {
+            String owner = ds.getUsername();
+            if (owner != null) {
+                Long studyId = ds.getStudyId();
+                boolean reviewer = userRights.hasStudyRights(studyId, StudyUserRight.CAN_REVIEW.name());
+                boolean ownAnnotator = owner.equals(userName)
+                        && userRights.hasStudyRights(studyId, StudyUserRight.CAN_ANNOTATE.name());
+                if (!reviewer && !ownAnnotator) {
+                    toRemove.add(ds);
+                }
+            }
+        });
+        list.removeAll(toRemove);
+        return true;
+    }
+
+    /**
      * Filter examinations in that page checking the connected user has the right on those examinations.
      *
      * @param page the page
