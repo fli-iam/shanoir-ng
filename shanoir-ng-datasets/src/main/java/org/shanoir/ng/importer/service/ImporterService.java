@@ -160,7 +160,7 @@ public class ImporterService {
                     } catch (Exception e) { // if error in pacs
                         // revert dataset acquisitions
                         for (DatasetAcquisition acquisition : generatedAcquisitions) {
-                            datasetAcquisitionService.deleteById(acquisition.getId(), null);
+                            datasetAcquisitionService.deleteById(acquisition.getId(), event);
                         }
                         // revert quality tag
                         if (subject != null) {
