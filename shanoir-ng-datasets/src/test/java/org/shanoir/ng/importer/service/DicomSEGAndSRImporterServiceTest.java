@@ -65,7 +65,7 @@ import org.springframework.http.HttpStatus;
 /**
  * Tests for the CAN_ANNOTATE rights check on study level in DicomSEGAndSRImporterService.
  *
- * @author afragkia
+ * @author Adam Fragkiadakis
  */
 @ExtendWith(MockitoExtension.class)
 public class DicomSEGAndSRImporterServiceTest {

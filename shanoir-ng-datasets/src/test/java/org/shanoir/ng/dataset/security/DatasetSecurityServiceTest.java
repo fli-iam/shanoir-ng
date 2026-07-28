@@ -40,7 +40,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
  * an unowned dataset is visible to anyone who reached the check, while an owned
  * annotation is visible only to its owner (with CAN_ANNOTATE) or to a reviewer.
  *
- * @author afragkia
+ * @author Adam Fragkiadakis
  */
 @ExtendWith(MockitoExtension.class)
 public class DatasetSecurityServiceTest {
