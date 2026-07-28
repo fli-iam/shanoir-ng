@@ -474,10 +474,10 @@ public class ImportTests extends AbstractTest {
                     selectedSeries, uploadFolder);
             Assertions.assertNotNull(retrievedFiles);
             Assertions.assertFalse(retrievedFiles.isEmpty(), "No DICOM files retrieved via C-MOVE.");
-            ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
             
             ImportJobBase importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
             importJob.setSeries(selectedSeries);
+            ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
             for (Serie serie : selectedSeries) {
                 dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), importJob.getPatient(),
                         importJob.getStudy(), serie, true);
