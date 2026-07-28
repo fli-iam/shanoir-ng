@@ -114,8 +114,7 @@ public class ImportFinishActionListener implements ActionListener {
                 return;
             }
             String magneticFieldStrength = mainWindow.importDialog.mriMagneticFieldStrengthText.getText();
-            // Check that magnetic field strength is a number value if modality is not CT or
-            // XA
+            // Check that magnetic field strength is a number value if modality is not CT or XA
             String modality = importJob.getFirstSelectedSerie().getModality();
             if (modality != null
                     && !modality.equals("CT")
@@ -131,13 +130,14 @@ public class ImportFinishActionListener implements ActionListener {
                     return;
                 }
             }
+
             InstitutionDicom institutionDicom = new InstitutionDicom();
             institutionDicom.setInstitutionName(mainWindow.importDialog.mriCenterText.getText());
             institutionDicom.setInstitutionAddress(mainWindow.importDialog.mriCenterAddressText.getText());
             Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(institutionDicom, study.getId());
             if (center != null) {
                 centerId = center.getId();
-                EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
+                EquipmentDicom equipmentDicom = importJob.getFirstSerieWithInstitutionAndEquipment().getEquipment();
                 equipmentDicom.setManufacturer(mainWindow.importDialog.mriManufacturerText.getText());
                 equipmentDicom.setManufacturerModelName(mainWindow.importDialog.mriManufacturersModelNameText.getText());
                 equipmentDicom.setMagneticFieldStrength(mainWindow.importDialog.mriMagneticFieldStrengthText.getText());

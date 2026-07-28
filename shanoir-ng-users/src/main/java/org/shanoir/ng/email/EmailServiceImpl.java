@@ -112,11 +112,11 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private UserRepository userRepository;
 
-    @Value("${server.administrator.email}")
-    private String administratorEmail;
+    @Value("${server.notification.email}")
+    private String notificationEmail;
 
-    @Value("${server.administrator.name}")
-    private String administratorName;
+    @Value("${server.notification.name}")
+    private String noticationName;
 
     @Value("${front.server.address}")
     private String shanoirServerAddress;
@@ -128,7 +128,7 @@ public class EmailServiceImpl implements EmailService {
 
     private void setFromAdministrator(MimeMessageHelper messageHelper)
             throws UnsupportedEncodingException, MessagingException {
-        messageHelper.setFrom(new InternetAddress(administratorEmail, administratorName));
+        messageHelper.setFrom(new InternetAddress(notificationEmail, noticationName));
     }
 
     private void setFromUser(MimeMessageHelper messageHelper, User user)
@@ -141,7 +141,7 @@ public class EmailServiceImpl implements EmailService {
         // Note: we put the user email in 'Reply-To' instead of 'From' to avoid
         // sending emails with a source address in a foreign domain
         messageHelper.setFrom(new InternetAddress(
-                administratorEmail,
+                notificationEmail,
                 String.format("%s %s (via %s)", user.getFirstName(), user.getLastName(), host)));
         messageHelper.setReplyTo(user.getEmail());
     }
@@ -418,7 +418,7 @@ public class EmailServiceImpl implements EmailService {
             messageHelper.setTo(user.getEmail());
             messageHelper.setSubject("DENIED: Your Shanoir account request has been denied");
             final Map<String, Object> variables = new HashMap<>();
-            variables.put("administratorEmail", administratorEmail);
+            variables.put("administratorEmail", notificationEmail);
             variables.put(FIRSTNAME, user.getFirstName());
             variables.put(LASTNAME, user.getLastName());
             variables.put(SERVER_ADDRESS, shanoirServerAddress);
@@ -565,13 +565,13 @@ public class EmailServiceImpl implements EmailService {
                 MimeMessagePreparator messagePreparator = mimeMessage -> {
                     final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
                     this.setFromAdministrator(messageHelper);
-                    messageHelper.setCc(user != null ? user.getEmail() : administratorEmail);
+                    messageHelper.setCc(user != null ? user.getEmail() : notificationEmail);
                     messageHelper.setTo(studyAdmin.getEmail());
                     messageHelper.setSubject("[Shanoir] Member(s) added to " + email.getStudyName());
                     final Map<String, Object> variables = new HashMap<>();
                     variables.put(FIRSTNAME, studyAdmin.getFirstName());
                     variables.put(LASTNAME, studyAdmin.getLastName());
-                    variables.put(EMAIL, user != null ? user.getEmail() : administratorEmail);
+                    variables.put(EMAIL, user != null ? user.getEmail() : notificationEmail);
                     variables.put(STUDY_NAME, email.getStudyName());
                     variables.put(STUDY_USERS, newStudyUsers);
                     variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
@@ -624,7 +624,7 @@ public class EmailServiceImpl implements EmailService {
                     final Map<String, Object> variables = new HashMap<>();
                     variables.put(FIRSTNAME, studyAdmin.getFirstName());
                     variables.put(LASTNAME, studyAdmin.getLastName());
-                    variables.put(EMAIL, user != null ? user.getEmail() : administratorEmail);
+                    variables.put(EMAIL, user != null ? user.getEmail() : notificationEmail);
                     variables.put(STUDY_NAME, createdRequest.getStudyName());
                     variables.put(MOTIVATION, createdRequest.getMotivation());
                     variables.put(USERNAME, createdRequest.getUser().getUsername());

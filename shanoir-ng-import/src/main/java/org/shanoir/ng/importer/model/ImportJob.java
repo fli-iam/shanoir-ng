@@ -34,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * so the model has to be kept:
  * 1 ImportJob (1 DICOM study/exam) - 1 subject relation
  *                                  - 1 exam relation
- * IF in an ImportJob contains a subject object, it means to create one
+ * If an ImportJob contains a subject object, it means to create one
  * in ms studies during the import.
  * If it contains a subjectName, an existing subject is to use.
  * Same logic for the exams.
@@ -403,9 +403,34 @@ public class ImportJob implements Serializable {
     }
 
     @JsonIgnore
-    public Serie getFirstSelectedSerie() {
+    public Serie getFirstSerie() {
         if (CollectionUtils.isNotEmpty(selectedSeries)) {
-            return selectedSeries.iterator().next();
+            return selectedSeries.getFirst();
+        }
+        return null;
+    }
+
+    /**
+     * Some reconstructed DICOM series do not carry the institution and/or
+     * equipment information in their DICOM files (both can be null on such
+     * a Serie). As these values are the same for all series of one DICOM
+     * study/exam, we do not simply take the first selected serie, but look
+     * for the first selected serie that actually contains both, an
+     * InstitutionDicom and an EquipmentDicom.
+     *
+     * @return the first selected Serie with both institution and equipment
+     *         set, or null if none of the selected series contains both.
+     */
+    @JsonIgnore
+    public Serie getFirstSerieWithInstitutionAndEquipment() {
+        if (CollectionUtils.isNotEmpty(selectedSeries)) {
+            for (Serie serie : selectedSeries) {
+                if (serie.getInstitution().isKnown() && serie.getEquipment().isKnown()) {
+                    return serie;
+                }
+            }
+            // In case all are unknown, return first
+            return selectedSeries.getFirst();
         }
         return null;
     }
@@ -425,4 +450,5 @@ public class ImportJob implements Serializable {
     public void setExaminationDataReuseAgreement(Boolean examinationDataReuseAgreement) {
         this.examinationDataReuseAgreement = examinationDataReuseAgreement;
     }
+
 }

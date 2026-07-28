@@ -261,7 +261,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         if (studyCard == null) {
             if (centerId == null) {
                 Center center = ImportUtils.findOrCreateCenterWithInstitutionDicom(
-                        importJob.getFirstSelectedSerie().getInstitution(), studyREST.getId());
+                        importJob.getFirstSerieWithInstitutionAndEquipment().getInstitution(), studyREST.getId());
                 centerId = center.getId();
             }
             equipment = ImportUtils.findOrCreateEquipmentWithEquipmentDicom(equipmentDicom, centerId);
@@ -415,7 +415,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
     }
 
     private EquipmentDicom getAndCheckEquipmentDicom(ImportJob importJob) {
-        EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
+        EquipmentDicom equipmentDicom = importJob.getFirstSerieWithInstitutionAndEquipment().getEquipment();
         String manufacturerName = equipmentDicom.getManufacturer();
         String manufacturerModelName = equipmentDicom.getManufacturerModelName();
         String deviceSerialNumber = equipmentDicom.getDeviceSerialNumber();

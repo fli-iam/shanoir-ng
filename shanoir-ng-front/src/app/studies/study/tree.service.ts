@@ -592,7 +592,7 @@ export class TreeService {
                 this.studyPromise.resolve(study);
             });
 
-            const rightsPromise: Promise<StudyUserRight[]> = (this.keycloakService.isUserAdmin
+            const rightsPromise: Promise<StudyUserRight[]> = (this.keycloakService.isUserAdmin()
                 ? Promise.resolve(StudyUserRight.all())
                 : this.studyRightsService.getMyRightsForStudy(id)
             ).then(rights => {
