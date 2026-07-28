@@ -27,8 +27,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 
 import javax.swing.JProgressBar;
@@ -49,6 +51,7 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.check.DicomInstanceConsistencyChecker;
+import org.shanoir.uploader.dicom.DicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.exception.PseudonymusException;
@@ -81,6 +84,10 @@ public class ImportTests extends AbstractTest {
     private static final String TEST_EEG_ZIP = "testEDF.zip";
 
     private static final String TEST_BIDS_ZIP = "testBIDS.zip";
+    
+    private static final String TEST_PACS_AET = "TEST_PACS";
+
+    private static final int TEST_PACS_PORT = 11121;
 
     // The server-side import is asynchronous: give it time to appear before
     // declaring the consistency check failed.
@@ -411,6 +418,92 @@ public class ImportTests extends AbstractTest {
         logger.info("BIDS dataset upload accepted by server for study: {}", studyWithStudyCards.getId());
     }
     
+    @Test
+    @Order(9)
+    public void testImportFromPACS() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportFromPACS..............................");
+        logger.info("......................................................");
+
+        URL resource = getClass().getClassLoader().getResource(ACR_PHANTOM_T1_DIR);
+        Assertions.assertNotNull(resource, "Test resource folder " + ACR_PHANTOM_T1_DIR + " not found.");
+        File dicomSourceDir = new File(resource.toURI());
+
+        File pacsStorageRoot = Files.createTempDirectory("shanoir-uploader-test-pacs-storage-").toFile();
+        TestDicomServer pacs = new TestDicomServer(TEST_PACS_AET, TEST_PACS_PORT, pacsStorageRoot);
+        pacs.addRemoteConnection("SHANOIR-UPLOADER", "127.0.0.1", 44105);
+        pacs.start();
+        try {
+            // Seed the fake PACS exactly once, via a real C-STORE - mirrors data
+            // that would already sit on a real PACS before ShUp queries it.
+            TestDicomServerSeeder.seed(dicomSourceDir, "SEEDER", TEST_PACS_AET, "127.0.0.1", TEST_PACS_PORT);
+
+            Properties dicomServerProperties = new Properties();
+            dicomServerProperties.setProperty("dicom.server.host", "127.0.0.1");
+            dicomServerProperties.setProperty("dicom.server.port", String.valueOf(TEST_PACS_PORT));
+            dicomServerProperties.setProperty("dicom.server.aet.called", TEST_PACS_AET);
+            dicomServerProperties.setProperty("local.dicom.server.aet.calling", "SHANOIR-UPLOADER");
+            dicomServerProperties.setProperty("local.dicom.server.host", "127.0.0.1");
+            dicomServerProperties.setProperty("local.dicom.server.port", "44105");
+
+            File workFolder = Files.createTempDirectory("shanoir-uploader-test-pacs-work-").toFile();
+            DicomServerClient dicomServerClient = new DicomServerClient(dicomServerProperties, workFolder);
+
+            List<Patient> patients = dicomServerClient.queryDicomServer(
+                    true, "MR", "*", "", "", "", "");
+            Assertions.assertNotNull(patients);
+            Assertions.assertFalse(patients.isEmpty(), "PACS C-FIND returned no patients.");
+
+            Patient patient = patients.get(0);
+            org.shanoir.ng.importer.model.Study dicomStudy = patient.getStudies().get(0);
+            List<Serie> selectedSeries = new ArrayList<>();
+            for (Serie serie : dicomStudy.getSeries()) {
+                serie.setSelected(true);
+                selectedSeries.add(serie);
+            }
+            Assertions.assertFalse(selectedSeries.isEmpty(), "No series returned by PACS C-FIND.");
+
+            File uploadFolder = ImportUtils.createUploadFolder(workFolder, "pacs-test-subject");
+            List<String> retrievedFiles = dicomServerClient.retrieveDicomFiles(
+                    new JProgressBar(), new StringBuilder(), dicomStudy.getStudyInstanceUID(),
+                    selectedSeries, uploadFolder);
+            Assertions.assertNotNull(retrievedFiles);
+            Assertions.assertFalse(retrievedFiles.isEmpty(), "No DICOM files retrieved via C-MOVE.");
+
+            ImportJobBase importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
+            importJob.setSeries(selectedSeries);
+
+            org.shanoir.uploader.model.rest.Subject subject =
+                    createSubjectFromLocalPatient(patient, studyWithStudyCards);
+            importJob.setSubject(patient.getSubject());
+            Examination examination = createExaminationFromDicomStudy(studyWithStudyCards, dicomStudy, subject);
+
+            StudyCard studyCard = studyWithStudyCards.getStudyCards().get(0);
+            importJob = ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(),
+                    examination.getId(), examination.getStudyInstanceUID(), studyWithStudyCards, studyCard,
+                    studyCard.getAcquisitionEquipment());
+            importJob.setFromDicomZip(false);
+            importJob.setFromPacs(true);
+            importJob.setFromShanoirUploader(true);
+
+            Anonymizer anonymizer = new Anonymizer();
+            String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
+            boolean anonymizationSuccess = anonymizer.pseudonymize(
+                    uploadFolder, anonymizationProfile, subject.getName(), examination.getStudyInstanceUID());
+            Assertions.assertTrue(anonymizationSuccess, "Local anonymization of PACS-retrieved DICOM files failed.");
+
+            File importJobJsonFile = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
+            importJobJsonFile.createNewFile();
+            Util.mapper.writeValue(importJobJsonFile, importJob);
+
+            startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromPACS");
+            waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportFromPACS-before-ds");
+            waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
+        } finally {
+            pacs.stop();
+        }
+    }
+    
     /**
      * Polls the server until the local DICOM files match their remote,
      * persisted counterparts for the given examination, or a timeout is
@@ -547,10 +640,13 @@ public class ImportTests extends AbstractTest {
 
     private void startImportJobFromShanoirUploader(ImportJobBase importJob, File uploadFolder, String label)
             throws Exception {
-        File[] dicomFiles = uploadFolder.listFiles(
-                (dir, name) -> name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX));
+        Collection<File> dicomFiles = Util.listFiles(
+                uploadFolder,
+                (dir, name) -> name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX),
+                true
+        );
         Assertions.assertNotNull(dicomFiles);
-        Assertions.assertTrue(dicomFiles.length > 0, "No anonymized DICOM files found in upload folder.");
+        Assertions.assertTrue(dicomFiles.size() > 0, "No anonymized DICOM files found in upload folder.");
         String tempDirId = userClient.createTempDir();
         Assertions.assertNotNull(tempDirId);
         logger.info("Upload: tempDirId for import: " + tempDirId);
@@ -558,9 +654,9 @@ public class ImportTests extends AbstractTest {
         for (File file : dicomFiles) {
             i++;
             userClient.uploadFile(tempDirId, file);
-            logger.debug("Uploaded file {}/{}: {}", i, dicomFiles.length, file.getName());
+            logger.debug("Uploaded file {}/{}: {}", i, dicomFiles.size(), file.getName());
         }
-        logger.info("Upload: " + dicomFiles.length + " uploaded files to tempDirId: " + tempDirId);
+        logger.info("Upload: " + dicomFiles.size() + " uploaded files to tempDirId: " + tempDirId);
         importJob.setWorkFolder(tempDirId);
         logger.info("TempDirId: {}", importJob.getWorkFolder());
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
