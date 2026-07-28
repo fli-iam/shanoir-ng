@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.JProgressBar;
@@ -428,15 +429,19 @@ public class ImportTests extends AbstractTest {
         URL resource = getClass().getClassLoader().getResource(ACR_PHANTOM_T1_DIR);
         Assertions.assertNotNull(resource, "Test resource folder " + ACR_PHANTOM_T1_DIR + " not found.");
         File dicomSourceDir = new File(resource.toURI());
+        Set<String[]> sopClassesAndTransferSyntaxes =
+                TestDicomServerSeeder.scanSopClassesAndTransferSyntaxes(dicomSourceDir);
 
         File pacsStorageRoot = Files.createTempDirectory("shanoir-uploader-test-pacs-storage-").toFile();
-        TestDicomServer pacs = new TestDicomServer(TEST_PACS_AET, TEST_PACS_PORT, pacsStorageRoot);
+        TestDicomServer pacs = new TestDicomServer(TEST_PACS_AET, TEST_PACS_PORT, pacsStorageRoot,
+                sopClassesAndTransferSyntaxes);
         pacs.addRemoteConnection("SHANOIR-UPLOADER", "127.0.0.1", 44105);
         pacs.start();
         try {
             // Seed the fake PACS exactly once, via a real C-STORE - mirrors data
             // that would already sit on a real PACS before ShUp queries it.
-            TestDicomServerSeeder.seed(dicomSourceDir, "SEEDER", TEST_PACS_AET, "127.0.0.1", TEST_PACS_PORT);
+            TestDicomServerSeeder.seed(dicomSourceDir, sopClassesAndTransferSyntaxes,
+                    "SEEDER", TEST_PACS_AET, "127.0.0.1", TEST_PACS_PORT);
 
             Properties dicomServerProperties = new Properties();
             dicomServerProperties.setProperty("dicom.server.host", "127.0.0.1");
@@ -469,9 +474,14 @@ public class ImportTests extends AbstractTest {
                     selectedSeries, uploadFolder);
             Assertions.assertNotNull(retrievedFiles);
             Assertions.assertFalse(retrievedFiles.isEmpty(), "No DICOM files retrieved via C-MOVE.");
-
+            ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
+            
             ImportJobBase importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
             importJob.setSeries(selectedSeries);
+            for (Serie serie : selectedSeries) {
+                dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), importJob.getPatient(),
+                        importJob.getStudy(), serie, true);
+            }
 
             org.shanoir.uploader.model.rest.Subject subject =
                     createSubjectFromLocalPatient(patient, studyWithStudyCards);
@@ -482,9 +492,9 @@ public class ImportTests extends AbstractTest {
             importJob = ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(),
                     examination.getId(), examination.getStudyInstanceUID(), studyWithStudyCards, studyCard,
                     studyCard.getAcquisitionEquipment());
+            importJob.setFromShanoirUploader(true);
             importJob.setFromDicomZip(false);
             importJob.setFromPacs(false);
-            importJob.setFromShanoirUploader(true);
 
             Anonymizer anonymizer = new Anonymizer();
             String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);

@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.dcm4che3.data.UID;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.net.ApplicationEntity;
 import org.dcm4che3.net.Connection;
@@ -38,8 +37,8 @@ import org.dcm4che3.tool.storescu.StoreSCU;
  */
 public class TestDicomServerSeeder {
 
-    public static void seed(File dicomSourceDir, String callingAet,
-                             String pacsAet, String pacsHost, int pacsPort) throws Exception {
+    public static void seed(File dicomSourceDir, Set<String[]> sopClassesAndTransferSyntaxes,
+            String callingAet, String pacsAet, String pacsHost, int pacsPort) throws Exception {
         Device device = new Device("test-dicom-server-seeder");
         Connection conn = new Connection();
         device.addConnection(conn);
@@ -58,9 +57,8 @@ public class TestDicomServerSeeder {
         rq.setCallingAET(callingAet);
         rq.setCalledAET(pacsAet);
 
-        for (String[] cuidTsuid : distinctSopClassesAndSyntaxes(dicomSourceDir)) {
-            storeSCU.addOfferedStorageSOPClass(cuidTsuid[0],
-                    UID.ExplicitVRLittleEndian, UID.ImplicitVRLittleEndian);
+        for (String[] cuidTsuid : sopClassesAndTransferSyntaxes) {
+            storeSCU.addOfferedStorageSOPClass(cuidTsuid[0], cuidTsuid[1]); // exact match only, no alternatives
         }
 
         List<String> files = new ArrayList<>();
@@ -84,25 +82,27 @@ public class TestDicomServerSeeder {
 
     /** Walks the folder once to find every distinct SOP Class UID present, so we can
      *  offer matching presentation contexts instead of hard coding e.g. MR Image Storage. */
-    private static Set<String[]> distinctSopClassesAndSyntaxes(File dir) throws IOException {
+    public static Set<String[]> scanSopClassesAndTransferSyntaxes(File dir) throws IOException {
         Set<String[]> found = new LinkedHashSet<>();
-        Set<String> seenCuids = new LinkedHashSet<>();
+        Set<String> seen = new LinkedHashSet<>();
         File[] files = dir.listFiles();
         if (files == null) return found;
         for (File f : files) {
             if (f.isDirectory()) {
-                found.addAll(distinctSopClassesAndSyntaxes(f));
+                found.addAll(scanSopClassesAndTransferSyntaxes(f));
                 continue;
             }
             try (DicomInputStream in = new DicomInputStream(f)) {
                 in.setIncludeBulkData(DicomInputStream.IncludeBulkData.NO);
                 Attributes ds = in.readDataset(Tag.SOPInstanceUID + 1);
                 String cuid = ds.getString(Tag.SOPClassUID);
-                if (cuid != null && seenCuids.add(cuid)) {
-                    found.add(new String[]{cuid});
+                String tsuid = in.getTransferSyntax(); // the file's ACTUAL encoding
+                String key = cuid + "|" + tsuid;
+                if (cuid != null && tsuid != null && seen.add(key)) {
+                    found.add(new String[]{cuid, tsuid});
                 }
             } catch (Exception notDicom) {
-                // skip DICOMDIR and any non-DICOM files silently
+                // skip DICOMDIR and non-DICOM files
             }
         }
         return found;

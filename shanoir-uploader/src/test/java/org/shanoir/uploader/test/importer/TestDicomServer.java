@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.GeneralSecurityException;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,7 +43,8 @@ public class TestDicomServer {
     
     private final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
-    public TestDicomServer(String aeTitle, int port, File dicomDirStorageRoot) throws IOException {
+    public TestDicomServer(String aeTitle, int port, File dicomDirStorageRoot,
+            Set<String[]> storageSopClassesAndTransferSyntaxes) throws IOException {
         this.qrscp = new DcmQRSCP();
 
         // Same defaults DcmQRSCP's own CLI uses when no --filepath/--fs-* options are given.
@@ -56,7 +58,7 @@ public class TestDicomServer {
 
         ApplicationEntity ae = device.getApplicationEntities().iterator().next();
         ae.setAETitle(aeTitle);
-        addTransferCapabilities(ae);
+        addTransferCapabilities(ae, storageSopClassesAndTransferSyntaxes);
 
         openDicomDirViaReflection();
 
@@ -64,16 +66,15 @@ public class TestDicomServer {
         device.setScheduledExecutor(scheduledExecutor);
     }
 
-    private void addTransferCapabilities(ApplicationEntity ae) {
+    private void addTransferCapabilities(ApplicationEntity ae, Set<String[]> storageSopClassesAndTransferSyntaxes) {
         ae.addTransferCapability(new TransferCapability(null,
                 UID.Verification, TransferCapability.Role.SCP, UID.ImplicitVRLittleEndian));
-        // Storage, both directions: SCP to accept the seeding C-STORE from
-        // TestDicomServerSeeder, SCU so DcmQRSCP can push files out again during the
-        // C-MOVE sub-association back to ShUp's receiver.
-        ae.addTransferCapability(new TransferCapability(null,
-                "*", TransferCapability.Role.SCP, "*"));
-        ae.addTransferCapability(new TransferCapability(null,
-                "*", TransferCapability.Role.SCU, "*"));
+        for (String[] cuidTsuid : storageSopClassesAndTransferSyntaxes) {
+            ae.addTransferCapability(new TransferCapability(null,
+                    cuidTsuid[0], TransferCapability.Role.SCP, cuidTsuid[1])); // receive seeding store
+            ae.addTransferCapability(new TransferCapability(null,
+                    cuidTsuid[0], TransferCapability.Role.SCU, cuidTsuid[1])); // forward on C-MOVE
+        }
         ae.addTransferCapability(new TransferCapability(null,
                 UID.StudyRootQueryRetrieveInformationModelFind, TransferCapability.Role.SCP,
                 UID.ImplicitVRLittleEndian, UID.ExplicitVRLittleEndian));
