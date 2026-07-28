@@ -109,8 +109,9 @@ public class DicomSEGAndSRImporterServiceTest {
     }
 
     @Test
-    public void importDicomSEGAndSRRefusedWithoutCanAnnotateRight() {
+    public void importDicomSEGAndSRRefusedWithoutCanAnnotateOrCanImportRight() {
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_IMPORT.name())).thenReturn(false);
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(USER_NAME);
             RestServiceException exception = assertThrows(RestServiceException.class,
@@ -129,6 +130,20 @@ public class DicomSEGAndSRImporterServiceTest {
         boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, "SEG", true);
         assertFalse(result);
         verify(datasetSecurityService).hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name());
+        // The source dataset was not found, so nothing is persisted
+        verifyNoInteractions(datasetService);
+    }
+
+    @Test
+    public void importDicomSEGAndSRProceedsWithCanImportRightOnly() throws Exception {
+        // A user with CAN_IMPORT but not CAN_ANNOTATE is also allowed to import annotations
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_IMPORT.name())).thenReturn(true);
+        // No ReferencedSeriesSequence in the SEG: the import continues past the rights
+        // check and only stops later, when the source dataset cannot be found (returns false)
+        boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, "SEG", true);
+        assertFalse(result);
+        verify(datasetSecurityService).hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_IMPORT.name());
         // The source dataset was not found, so nothing is persisted
         verifyNoInteractions(datasetService);
     }

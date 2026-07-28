@@ -81,7 +81,7 @@ public class DicomSEGAndSRImporterService {
 
     private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
 
-    private static final String MISSING_CAN_ANNOTATE_RIGHT_ERROR = "Missing right CAN_ANNOTATE on study, import refused: ";
+    private static final String MISSING_DICOMWEB_IMPORT_RIGHT_ERROR = "Missing DICOMWeb importation rights on study, import refused: ";
 
     @Autowired
     private ExaminationRepository examinationRepository;
@@ -118,11 +118,12 @@ public class DicomSEGAndSRImporterService {
             LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
             return false;
         }
-        if (!datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ANNOTATE.name())) {
-            LOG.error("User {} misses the right CAN_ANNOTATE on study with ID: {}, import refused.",
+        if (!datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ANNOTATE.name())
+                && !datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_IMPORT.name())) {
+            LOG.error("User {} misses DICOMWeb importation rights on study with ID: {}, import refused.",
                     KeycloakUtil.getTokenUserName(), examination.getStudyId());
             throw new RestServiceException(
-                    new ErrorModel(HttpStatus.FORBIDDEN.value(), MISSING_CAN_ANNOTATE_RIGHT_ERROR + examination.getStudyId(), null));
+                    new ErrorModel(HttpStatus.FORBIDDEN.value(), MISSING_DICOMWEB_IMPORT_RIGHT_ERROR + examination.getStudyId(), null));
         }
 
         // Find related dataset
