@@ -119,7 +119,7 @@ public class DownloadOrCopyRunnable implements Runnable {
                 }
             } catch (FileNotFoundException e) {
                 LOG.error(e.getMessage(), e);
-                // as exception occured, we set allFileNames to null, to force ERROR state of import
+                // as exception occurred, we set allFileNames to null, to force ERROR state of import
                 allFileNames = null;
             }
 
