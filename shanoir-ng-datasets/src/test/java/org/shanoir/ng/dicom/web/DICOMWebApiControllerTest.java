@@ -36,6 +36,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -144,12 +145,19 @@ public class DICOMWebApiControllerTest {
     @MockBean
     private DicomImporterService dicomImporterServiceMock;
 
+    @MockBean
+    private DatasetSecurityService datasetSecurityServiceMock;
+
     @BeforeEach
     public void setup() throws IOException {
         // the handlers are real beans shared over all tests of this class: clear
         // their caches to keep each test independent of the execution order
         seriesInstanceUIDHandler.clearVirtualUIDCaches();
         studyInstanceUIDAndSubjectNameHandler.clearCaches();
+
+        // by default every series is visible: the per-annotation visualization
+        // rule is exercised in DatasetSecurityServiceTest, not here
+        given(datasetSecurityServiceMock.hasRightToVisualizeSeries(anyString())).willReturn(true);
 
         Examination examination = new Examination();
         examination.setId(42L);
