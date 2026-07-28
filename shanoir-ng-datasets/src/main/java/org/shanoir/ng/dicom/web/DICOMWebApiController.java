@@ -19,11 +19,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -98,6 +98,9 @@ public class DICOMWebApiController implements DICOMWebApi {
 
     @Autowired
     private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
+    @Autowired
+    private DatasetSecurityService datasetSecurityService;
 
     @Autowired
     private ObjectMapper mapper;
@@ -220,7 +223,7 @@ public class DICOMWebApiController implements DICOMWebApi {
             String response = dicomWebService.findSeriesOfStudy(studyInstanceUID, includefield, seriesInstanceUID);
             if (response != null) {
                 JsonNode root = mapper.readTree(response);
-                root = filterAndSortSeries(root, seriesToVirtualUIDs.keySet());
+                root = filterAndSortSeries(root, seriesToVirtualUIDs);
                 studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUIDAndPatientInfo(root, examinationUID, false, subjectName);
                 seriesInstanceUIDHandler.replaceSeriesInstanceUIDs(root, seriesToVirtualUIDs);
                 return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
@@ -232,7 +235,7 @@ public class DICOMWebApiController implements DICOMWebApi {
         }
     }
 
-    private JsonNode filterAndSortSeries(JsonNode root, Set<String> allowedSeriesInstanceUIDs) {
+    private JsonNode filterAndSortSeries(JsonNode root, Map<String, String> seriesToVirtualUIDs) {
         if (root.isArray()) {
             ArrayNode arrayNode = (ArrayNode) root;
             List<JsonNode> jsonNodes = new ArrayList<>();
@@ -240,7 +243,12 @@ public class DICOMWebApiController implements DICOMWebApi {
             List<JsonNode> filteredAndSorted = jsonNodes.stream()
                     .filter(node -> {
                         String seriesInstanceUID = node.path(SERIES_INSTANCE_UID_TAG).path(VALUE).path(0).asText();
-                        return allowedSeriesInstanceUIDs.contains(seriesInstanceUID);
+                        String virtualUID = seriesToVirtualUIDs.get(seriesInstanceUID);
+                        // keep only series of this exam (in the map) the user is
+                        // allowed to visualize: an owned annotation, e.g. a SEG/SR,
+                        // is hidden from the list for everyone but its annotator or
+                        // a reviewer
+                        return virtualUID != null && datasetSecurityService.hasRightToVisualizeSeries(virtualUID);
                     })
                     .sorted(Comparator.comparingInt(
                             node -> node.path(SERIES_NUMBER).path(VALUE).path(0).asInt(Integer.MAX_VALUE)))
