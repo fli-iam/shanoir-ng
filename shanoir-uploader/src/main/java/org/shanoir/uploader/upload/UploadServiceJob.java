@@ -16,7 +16,6 @@ package org.shanoir.uploader.upload;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -116,13 +115,11 @@ public class UploadServiceJob {
      */
     private void processFolderForServer(final File folder, final NominativeDataImportJobManager importJobManager,
             final ImportJob importJob, CurrentNominativeDataController currentNominativeDataController) {
-        final List<File> filesToTransfer = new ArrayList<File>();
-        final Collection<File> files = Util.listFiles(folder, null, true);
-        for (File file : files) {
-            if (file.getName().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
-                filesToTransfer.add(file);
-            }
-        }
+        Collection<File> filesToTransfer = Util.listFiles(
+                folder,
+                (dir, name) -> name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX),
+                true
+        );
         if (importJobManager == null) {
             LOG.error("importJobManager is null.");
             return;
@@ -148,7 +145,7 @@ public class UploadServiceJob {
      * @param allFiles
      * @param uploadJob
      */
-    private void processStartForServer(final File folder, final List<File> allFiles,
+    private void processStartForServer(final File folder, final Collection<File> allFiles,
             final ImportJob importJob, NominativeDataImportJobManager nominativeDataImportJobManager,
             CurrentNominativeDataController currentNominativeDataController) {
         try {
@@ -184,7 +181,7 @@ public class UploadServiceJob {
         }
     }
 
-    private void processServerProcessingForServer(final File folder, final List<File> allFiles,
+    private void processServerProcessingForServer(final File folder, final Collection<File> allFiles,
             final ImportJob importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
             final CurrentNominativeDataController currentNominativeDataController) {
         String tempDirId = importJob.getWorkFolder(); // set to tempDirId in setTempDirIdAndStartImport
@@ -236,7 +233,7 @@ public class UploadServiceJob {
         shanoirUploaderServiceClient.startImportJob(tempDirId, importJobJson);
     }
 
-    private void deleteAllDicomFiles(File importJobFolder, List<File> files) {
+    private void deleteAllDicomFiles(File importJobFolder, Collection<File> files) {
         for (Iterator<File> iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
             // from-disk: delete files directly
