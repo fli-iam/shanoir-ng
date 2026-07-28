@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -53,11 +54,18 @@ public class DatasetSecurityServiceTest {
 
     private static final String OTHER_USER = "otherUser";
 
+    private static final String DATASET_UID = "1.4.9.12.34.1.8527.0.100";
+
+    private static final String ACQUISITION_UID = "1.4.9.12.34.1.8527.42";
+
     @Mock
     private DatasetRepository datasetRepository;
 
     @Mock
     private StudyRightsService studyRightsService;
+
+    @Mock
+    private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
 
     @InjectMocks
     private DatasetSecurityService datasetSecurityService;
@@ -161,6 +169,55 @@ public class DatasetSecurityServiceTest {
             keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
             keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OTHER_USER);
             assertFalse(datasetSecurityService.hasRightToVisualizeDataset(DATASET_ID));
+        }
+    }
+
+    @Test
+    public void seriesVisualizationAllowedForAdmin() {
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(true);
+            assertTrue(datasetSecurityService.hasRightToVisualizeSeries(DATASET_UID));
+        }
+        // admin bypasses before any UID resolution
+        verifyNoInteractions(seriesInstanceUIDHandler);
+        verifyNoInteractions(datasetRepository);
+    }
+
+    @Test
+    public void seriesVisualizationAllowedForNonDatasetUID() {
+        // an ordinary acquisition series carries no per-dataset ownership rule
+        when(seriesInstanceUIDHandler.isDatasetUID(ACQUISITION_UID)).thenReturn(false);
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
+            assertTrue(datasetSecurityService.hasRightToVisualizeSeries(ACQUISITION_UID));
+        }
+        verifyNoInteractions(datasetRepository);
+        verifyNoInteractions(studyRightsService);
+    }
+
+    @Test
+    public void seriesVisualizationDelegatesToDatasetRuleWhenAllowed() {
+        // a dataset-level UID is resolved to its dataset and follows the dataset rule
+        when(seriesInstanceUIDHandler.isDatasetUID(DATASET_UID)).thenReturn(true);
+        when(seriesInstanceUIDHandler.extractDatasetId(DATASET_UID)).thenReturn(DATASET_ID);
+        when(datasetRepository.findById(DATASET_ID)).thenReturn(Optional.of(unownedDataset()));
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
+            assertTrue(datasetSecurityService.hasRightToVisualizeSeries(DATASET_UID));
+        }
+    }
+
+    @Test
+    public void seriesVisualizationDelegatesToDatasetRuleWhenDenied() {
+        // owned annotation, requester is neither the owner nor a reviewer
+        when(seriesInstanceUIDHandler.isDatasetUID(DATASET_UID)).thenReturn(true);
+        when(seriesInstanceUIDHandler.extractDatasetId(DATASET_UID)).thenReturn(DATASET_ID);
+        when(datasetRepository.findById(DATASET_ID)).thenReturn(Optional.of(ownedDataset()));
+        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OTHER_USER);
+            assertFalse(datasetSecurityService.hasRightToVisualizeSeries(DATASET_UID));
         }
     }
 
