@@ -14,11 +14,14 @@
 
 package org.shanoir.ng.dataset.security;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -34,6 +37,7 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
+import org.shanoir.ng.study.rights.UserRights;
 import org.shanoir.ng.utils.KeycloakUtil;
 
 /**
@@ -81,6 +85,13 @@ public class DatasetSecurityServiceTest {
         Dataset dataset = new MrDataset();
         dataset.setStudyId(STUDY_ID);
         dataset.setUsername(null);
+        return dataset;
+    }
+
+    private Dataset datasetOwnedBy(String owner) {
+        Dataset dataset = new MrDataset();
+        dataset.setStudyId(STUDY_ID);
+        dataset.setUsername(owner);
         return dataset;
     }
 
@@ -219,6 +230,87 @@ public class DatasetSecurityServiceTest {
             keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OTHER_USER);
             assertFalse(datasetSecurityService.hasRightToVisualizeSeries(DATASET_UID));
         }
+    }
+
+    @Test
+    public void filterKeepsEveryAnnotationForAdmin() {
+        List<Dataset> datasets = new ArrayList<>(List.of(datasetOwnedBy(OWNER), datasetOwnedBy(OTHER_USER)));
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(true);
+            assertTrue(datasetSecurityService.filterAnnotationDatasetList(datasets));
+        }
+        assertEquals(2, datasets.size());
+        verifyNoInteractions(studyRightsService);
+    }
+
+    @Test
+    public void filterKeepsUnownedDatasets() {
+        UserRights userRights = Mockito.mock(UserRights.class);
+        when(studyRightsService.getUserRights()).thenReturn(userRights);
+        List<Dataset> datasets = new ArrayList<>(List.of(unownedDataset(), unownedDataset()));
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OWNER);
+            assertTrue(datasetSecurityService.filterAnnotationDatasetList(datasets));
+        }
+        // no owner: the per-study rights are never consulted
+        assertEquals(2, datasets.size());
+    }
+
+    @Test
+    public void filterKeepsEveryAnnotationForReviewer() {
+        UserRights userRights = Mockito.mock(UserRights.class);
+        when(studyRightsService.getUserRights()).thenReturn(userRights);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(true);
+        List<Dataset> datasets = new ArrayList<>(List.of(datasetOwnedBy(OWNER), datasetOwnedBy(OTHER_USER)));
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OTHER_USER);
+            assertTrue(datasetSecurityService.filterAnnotationDatasetList(datasets));
+        }
+        assertEquals(2, datasets.size());
+    }
+
+    @Test
+    public void filterKeepsOwnAndUnownedRemovesOthersForAnnotator() {
+        UserRights userRights = Mockito.mock(UserRights.class);
+        when(studyRightsService.getUserRights()).thenReturn(userRights);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(true);
+        Dataset own = datasetOwnedBy(OWNER);
+        Dataset other = datasetOwnedBy(OTHER_USER);
+        Dataset unowned = unownedDataset();
+        List<Dataset> datasets = new ArrayList<>(List.of(own, other, unowned));
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OWNER);
+            assertTrue(datasetSecurityService.filterAnnotationDatasetList(datasets));
+        }
+        // the annotator keeps his own annotation and the unowned one, loses the other's
+        assertEquals(2, datasets.size());
+        assertTrue(datasets.contains(own));
+        assertTrue(datasets.contains(unowned));
+        assertFalse(datasets.contains(other));
+    }
+
+    @Test
+    public void filterRemovesOwnedAnnotationForUserWithoutAnnotateNorReview() {
+        UserRights userRights = Mockito.mock(UserRights.class);
+        when(studyRightsService.getUserRights()).thenReturn(userRights);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
+        Dataset own = datasetOwnedBy(OWNER);
+        Dataset unowned = unownedDataset();
+        List<Dataset> datasets = new ArrayList<>(List.of(own, unowned));
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OWNER);
+            assertTrue(datasetSecurityService.filterAnnotationDatasetList(datasets));
+        }
+        // even his own annotation is removed without the CAN_ANNOTATE right; unowned stays
+        assertEquals(1, datasets.size());
+        assertTrue(datasets.contains(unowned));
+        assertFalse(datasets.contains(own));
     }
 
 }
