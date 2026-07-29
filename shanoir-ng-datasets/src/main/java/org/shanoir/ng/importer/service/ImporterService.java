@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.DicomProcessing;
@@ -89,6 +90,9 @@ public class ImporterService {
     private ImporterMailService mailService;
 
     @Autowired
+    private DatasetsImportStatusService datasetsImportStatusService;
+
+    @Autowired
     private StudyCardRepository studyCardRepository;
 
     @Autowired
@@ -112,6 +116,7 @@ public class ImporterService {
         ShanoirEvent event = importJob.getShanoirEvent();
         event.setMessage("Creating datasets...");
         eventService.publishEvent(event);
+        datasetsImportStatusService.markInProgress(importJob.getExaminationId());
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         Set<DatasetAcquisition> generatedAcquisitions = null;
         try {
@@ -182,6 +187,13 @@ public class ImporterService {
                     + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
 
+            List<Long> createdDatasetIds = generatedAcquisitions == null ? List.of()
+                    : generatedAcquisitions.stream()
+                        .flatMap(a -> a.getDatasets().stream())
+                        .map(Dataset::getId)
+                        .toList();
+            datasetsImportStatusService.markFinished(importJob.getExaminationId(), createdDatasetIds);
+
             // Manage archive
             if (importJob.getArchive() != null) {
                 // Copy archive
@@ -218,6 +230,7 @@ public class ImporterService {
             LOG.warn(msg, e);
             // Send mail
             mailService.sendFailureMail(importJob, userId, msg);
+            datasetsImportStatusService.markError(importJob.getExaminationId(), msg);
             throw new ShanoirException(msg, e);
         } catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);
@@ -227,6 +240,7 @@ public class ImporterService {
             LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e);
             // Send mail
             mailService.sendFailureMail(importJob, userId, e.getMessage());
+            datasetsImportStatusService.markError(importJob.getExaminationId(), e.getMessage());
             throw new ShanoirException(event.getMessage(), e);
         }
     }
