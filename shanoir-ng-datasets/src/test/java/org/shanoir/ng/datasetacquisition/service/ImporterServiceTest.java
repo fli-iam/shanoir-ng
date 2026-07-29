@@ -122,7 +122,7 @@ public class ImporterServiceTest {
 
     @Mock
     private SubjectService subjectService;
-    
+
     @Mock
     private DatasetsImportStatusService datasetsImportStatusService;
 
