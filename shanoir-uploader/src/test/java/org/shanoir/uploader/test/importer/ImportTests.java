@@ -15,6 +15,7 @@
 package org.shanoir.uploader.test.importer;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -29,13 +30,21 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.swing.JProgressBar;
 
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -57,6 +66,8 @@ import org.shanoir.uploader.dicom.anonymize.Anonymizer;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.DatasetLight;
+import org.shanoir.uploader.model.rest.DatasetsImportStatus;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
@@ -95,6 +106,10 @@ public class ImportTests extends AbstractTest {
     private static final long CONSISTENCY_CHECK_TIMEOUT_MILLIS = 2 * 60 * 1000; // 2 min
 
     private static final long CONSISTENCY_CHECK_POLL_INTERVAL_MILLIS = 5 * 1000; // 5 sec
+    
+    private static final long DATASET_STATUS_TIMEOUT_MILLIS = 2 * 60 * 1000;
+
+    private static final long DATASET_STATUS_POLL_INTERVAL_MILLIS = 5 * 1000;
 
     // Local folder where a copy of every import-job JSON sent is dumped
     private static final File IMPORT_JOB_DUMP_DIR = new File("target/import-job-dumps");
@@ -197,6 +212,7 @@ public class ImportTests extends AbstractTest {
         // Local files here were pseudonymized before upload, exactly like the
         // server-side copy, so a full tag comparison is meaningful.
         waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
+        downloadAndCompareDatasetsZip(examination.getId(), uploadFolder, "testImportFromShanoirUploader");
     }
 
     @Test
@@ -290,6 +306,7 @@ public class ImportTests extends AbstractTest {
         startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromShanoirUploaderNoStudyCard");
         waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportFromShanoirUploaderNoStudyCard-before-ds");
         waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
+        downloadAndCompareDatasetsZip(examination.getId(), uploadFolder, "testImportFromShanoirUploaderNoStudyCard");
     }
 
     @Test
@@ -320,6 +337,9 @@ public class ImportTests extends AbstractTest {
             final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
             waitForServerImportJobStatus(tempDirId, "testImportMultipleDicomZipWithStudyCard-before-ds");
         }
+        File multiExamExtractDir = Files.createTempDirectory("shanoir-multi-exam-source-").toFile();
+        unzip(file, multiExamExtractDir);
+        downloadAndCompareDatasetsZip(importJob.getExaminationId(), multiExamExtractDir, "testImportMultipleDicomZipWithStudyCard");
     }
 
     @Test
@@ -352,6 +372,9 @@ public class ImportTests extends AbstractTest {
             final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
             waitForServerImportJobStatus(tempDirId, "testImportMultipleDicomZipNoStudyCard-before-ds");
         }
+        File multiExamExtractDir = Files.createTempDirectory("shanoir-multi-exam-source-").toFile();
+        unzip(file, multiExamExtractDir);
+        downloadAndCompareDatasetsZip(importJob.getExaminationId(), multiExamExtractDir, "testImportMultipleDicomZipNoStudyCard");
     }
 
     @Test
@@ -510,6 +533,7 @@ public class ImportTests extends AbstractTest {
             startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportFromPACS");
             waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportFromPACS-before-ds");
             waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
+            downloadAndCompareDatasetsZip(examination.getId(), uploadFolder, "testImportFromPACS");
         } finally {
             pacs.stop();
         }
@@ -806,6 +830,124 @@ public class ImportTests extends AbstractTest {
             // This is a debugging convenience only - never fail the test because of it.
             logger.warn("Could not dump import-job for manual inspection: {}", e.getMessage());
         }
+    }
+
+    /**
+     * Polls MS Datasets' new import-status endpoint until dataset creation
+     * for this examination is FINISHED (or fails/times out). This is
+     * necessary because dataset/acquisition creation happens asynchronously
+     * over RabbitMQ, and ExaminationApi (another microservice) has no
+     * visibility into whether that step has completed.
+     */
+    private void waitForDatasetImportFinished(Long examinationId, String label) throws Exception {
+        long deadline = System.currentTimeMillis() + DATASET_STATUS_TIMEOUT_MILLIS;
+        while (System.currentTimeMillis() < deadline) {
+            DatasetsImportStatus status = userClient.findImportStatusByExaminationId(examinationId);
+            if (status != null) {
+                if (status.getState() == DatasetsImportStatus.State.FINISHED) {
+                    logger.info("[{}] Dataset creation FINISHED for examination {}", label, examinationId);
+                    return;
+                } else if (status.getState() == DatasetsImportStatus.State.ERROR) {
+                    Assertions.fail("[" + label + "] Dataset creation failed for examination " + examinationId
+                            + ": " + status.getMessage());
+                }
+            }
+            Thread.sleep(DATASET_STATUS_POLL_INTERVAL_MILLIS);
+        }
+        Assertions.fail("[" + label + "] Dataset creation did not reach FINISHED within timeout for examination "
+                + examinationId);
+    }
+
+    /**
+     * Downloads the zip produced by POST /datasets/datasets/massiveDownload
+     * for all datasets of an examination, extracts it, and compares the
+     * DICOM files it contains (by SOPInstanceUID) against the local DICOM
+     * files used as the source of the import.
+     *
+     * @param examinationId   examination whose datasets should be checked
+     * @param localDicomFolder folder containing the original/local DICOM
+     *                         files used for this import (searched recursively)
+     * @param label           label used for logging / dumped artifact naming
+     */
+    private void downloadAndCompareDatasetsZip(Long examinationId, File localDicomFolder, String label) throws Exception {
+        waitForDatasetImportFinished(examinationId, label);
+
+        List<DatasetLight> datasets = userClient.findDatasetsByExaminationId(examinationId);
+        Assertions.assertNotNull(datasets, "[" + label + "] findDatasetsByExaminationId returned null.");
+        Assertions.assertFalse(datasets.isEmpty(),
+                "[" + label + "] No datasets found for examination " + examinationId + ".");
+        List<Long> datasetIds = datasets.stream().map(DatasetLight::getId).toList();
+
+        File downloadedZip = File.createTempFile("shanoir-massive-download-" + examinationId + "-", ".zip");
+        try (CloseableHttpResponse response = userClient.downloadDatasetsByIds(datasetIds, "dcm")) {
+            Assertions.assertNotNull(response, "[" + label + "] massiveDownload returned no response.");
+            HttpEntity entity = response.getEntity();
+            Assertions.assertNotNull(entity, "[" + label + "] massiveDownload returned no entity.");
+            try (var out = new java.io.FileOutputStream(downloadedZip)) {
+                entity.writeTo(out);
+            }
+        }
+        Assertions.assertTrue(downloadedZip.length() > 0,
+                "[" + label + "] Downloaded massiveDownload zip is empty.");
+
+        File extractDir = Files.createTempDirectory("shanoir-massive-download-extract-").toFile();
+        unzip(downloadedZip, extractDir);
+
+        Set<String> remoteSopInstanceUIDs = collectSopInstanceUIDs(extractDir);
+        Set<String> localSopInstanceUIDs = collectSopInstanceUIDs(localDicomFolder);
+
+        Assertions.assertFalse(remoteSopInstanceUIDs.isEmpty(),
+                "[" + label + "] No DICOM instances found in downloaded zip for examination " + examinationId + ".");
+        Assertions.assertFalse(localSopInstanceUIDs.isEmpty(),
+                "[" + label + "] No local DICOM instances found to compare against for examination " + examinationId + ".");
+
+        Assertions.assertEquals(localSopInstanceUIDs, remoteSopInstanceUIDs,
+                "[" + label + "] SOPInstanceUIDs of downloaded datasets (" + remoteSopInstanceUIDs.size()
+                        + ") do not match local DICOM files (" + localSopInstanceUIDs.size()
+                        + ") for examination " + examinationId + ".");
+
+        logger.info("[{}] massiveDownload check OK: {} DICOM instance(s) matched for examination {}.",
+                label, remoteSopInstanceUIDs.size(), examinationId);
+    }
+
+    private void unzip(File zipFile, File targetDir) throws IOException {
+        try (ZipInputStream zis = new ZipInputStream(new java.io.FileInputStream(zipFile))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                File outFile = new File(targetDir, entry.getName());
+                if (entry.isDirectory()) {
+                    outFile.mkdirs();
+                    continue;
+                }
+                outFile.getParentFile().mkdirs();
+                try (var out = new java.io.FileOutputStream(outFile)) {
+                    zis.transferTo(out);
+                }
+            }
+        }
+    }
+
+    /**
+     * Recursively walks a folder, tries to read every regular file as DICOM,
+     * and collects the SOPInstanceUID of each one that parses successfully.
+     * Non-DICOM files (manifests, json reports, etc.) are silently skipped.
+     */
+    private Set<String> collectSopInstanceUIDs(File folder) throws IOException {
+        Set<String> uids = new HashSet<>();
+        try (var stream = Files.walk(folder.toPath())) {
+            for (java.nio.file.Path path : (Iterable<java.nio.file.Path>) stream.filter(Files::isRegularFile)::iterator) {
+                try (DicomInputStream dis = new DicomInputStream(path.toFile())) {
+                    Attributes attrs = dis.readDataset();
+                    String sopInstanceUID = attrs.getString(Tag.SOPInstanceUID);
+                    if (sopInstanceUID != null) {
+                        uids.add(sopInstanceUID);
+                    }
+                } catch (Exception notDicomOrUnreadable) {
+                    // expected for non-DICOM files in the zip/folder (manifest, json, etc.)
+                }
+            }
+        }
+        return uids;
     }
 
 }

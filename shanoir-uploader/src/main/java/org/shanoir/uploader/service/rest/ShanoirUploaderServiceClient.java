@@ -49,6 +49,8 @@ import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.model.dto.StudyCardOnStudyResultDTO;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
+import org.shanoir.uploader.model.rest.DatasetLight;
+import org.shanoir.uploader.model.rest.DatasetsImportStatus;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.Manufacturer;
@@ -129,6 +131,10 @@ public class ShanoirUploaderServiceClient {
     private static final String SERVICE_DATASETS = "service.datasets";
 
     private static final String SERVICE_DATASETS_DICOM_WEB_STUDIES = "service.datasets.dicom.web.studies";
+    
+    private static final String SERVICE_DATASETS_IMPORT_STATUS = "service.datasets.import.status";
+    
+    private static final String SERVICE_DATASETS_FIND_BY_EXAMINATION = "service.datasets.find.by.examination";
 
     private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
 
@@ -211,6 +217,10 @@ public class ShanoirUploaderServiceClient {
     private String serviceURLSubjectsFindBySubjectNameAndStudy;
 
     private String serviceURLDatasets;
+
+    private String serviceURLDatasetsImportStatus;
+
+    private String serviceURLDatasetsFindByExamination;
 
     private String serviceURLImporterBids;
     
@@ -302,6 +312,10 @@ public class ShanoirUploaderServiceClient {
         this.serviceURLDatasets = this.serverURL + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS);
         this.serviceURLDatasetsDicomWebStudies = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_DICOM_WEB_STUDIES);
+        this.serviceURLDatasetsImportStatus = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_IMPORT_STATUS);
+        this.serviceURLDatasetsFindByExamination = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_FIND_BY_EXAMINATION);
         this.serviceURLSubjectsCreate = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_CREATE);
         this.serviceURLSubjectsFind = this.serverURL
@@ -1466,6 +1480,36 @@ public class ShanoirUploaderServiceClient {
                 LOG.error("Error in uploadBIDSDataset: studyId={} (status code: {}, message: {})",
                         studyId, code, apiResponseMessages.getOrDefault(code, "unknown status code"));
                 throw new Exception("Error in uploadBIDSDataset");
+            }
+        }
+    }
+    
+    public DatasetsImportStatus findImportStatusByExaminationId(Long examinationId) throws Exception {
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLDatasetsImportStatus + examinationId)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, DatasetsImportStatus.class);
+            } else if (code == HttpStatus.SC_NOT_FOUND) {
+                return null; // not started/known yet on server side
+            } else {
+                LOG.error("Could not get dataset import status for examinationId " + examinationId
+                        + " (status code: " + code + ")");
+                throw new Exception("Error in findImportStatusByExaminationId");
+            }
+        }
+    }
+
+    public List<DatasetLight> findDatasetsByExaminationId(Long examinationId) throws Exception {
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLDatasetsFindByExamination + examinationId)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedList(response, DatasetLight.class);
+            } else if (code == HttpStatus.SC_NO_CONTENT) {
+                return List.of();
+            } else {
+                LOG.error("Could not get datasets for examinationId " + examinationId
+                        + " (status code: " + code + ")");
+                throw new Exception("Error in findDatasetsByExaminationId");
             }
         }
     }
