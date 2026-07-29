@@ -55,6 +55,7 @@ import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.service.DatasetAcquisitionContext;
+import org.shanoir.ng.importer.service.DatasetsImportStatusService;
 import org.shanoir.ng.importer.service.DicomPersisterService;
 import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.importer.service.ImporterService;
@@ -121,6 +122,9 @@ public class ImporterServiceTest {
 
     @Mock
     private SubjectService subjectService;
+    
+    @Mock
+    private DatasetsImportStatusService datasetsImportStatusService;
 
     private Examination exam;
 
