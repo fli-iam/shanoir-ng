@@ -1063,14 +1063,13 @@ public class ShanoirUploaderServiceClient {
             }
             b.addParameter("format", format);
             URL url = b.build().toURL();
-            try (CloseableHttpResponse response = httpService.post(url.toString(), "", false)) {
-                int code = response.getCode();
-                if (code == HttpStatus.SC_OK) {
-                    return response;
-                } else {
-                    LOG.error("Could not get dataset ids " + datasetIds + " (status code: " + code + ", message: "
-                            + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
-                }
+            CloseableHttpResponse response = httpService.post(url.toString(), "", false);
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return response;
+            } else {
+                LOG.error("Could not get dataset ids " + datasetIds + " (status code: " + code + ", message: "
+                        + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
             }
         }
         return null;
