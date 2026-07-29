@@ -1057,10 +1057,13 @@ public class ShanoirUploaderServiceClient {
 
     public CloseableHttpResponse downloadDatasetsByIds(List<Long> datasetIds, String format) throws Exception {
         if (datasetIds != null) {
-            String datasetIdsString = datasetIds.stream().map(Object::toString).collect(Collectors.joining(","));
-            String url = this.serviceURLDatasets + "massiveDownload?datasetIds=" + datasetIdsString + "&format="
-                    + format;
-            try (CloseableHttpResponse response = httpService.get(url.toString())) {
+            URIBuilder b = new URIBuilder(this.serviceURLDatasets + "massiveDownload");
+            for (Long datasetId : datasetIds) {
+                b.addParameter("datasetIds", String.valueOf(datasetId));
+            }
+            b.addParameter("format", format);
+            URL url = b.build().toURL();
+            try (CloseableHttpResponse response = httpService.post(url.toString(), "", false)) {
                 int code = response.getCode();
                 if (code == HttpStatus.SC_OK) {
                     return response;

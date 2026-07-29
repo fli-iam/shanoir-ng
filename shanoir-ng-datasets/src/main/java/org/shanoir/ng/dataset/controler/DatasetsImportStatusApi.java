@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@RequestMapping("/datasets/importstatus")
+@RequestMapping("/importstatus")
 public interface DatasetsImportStatusApi {
 
     @GetMapping(value = "/{examinationId}", produces = {"application/json"})

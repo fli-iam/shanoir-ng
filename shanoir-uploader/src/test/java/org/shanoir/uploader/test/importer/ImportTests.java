@@ -879,13 +879,12 @@ public class ImportTests extends AbstractTest {
         List<Long> datasetIds = datasets.stream().map(DatasetLight::getId).toList();
 
         File downloadedZip = File.createTempFile("shanoir-massive-download-" + examinationId + "-", ".zip");
-        try (CloseableHttpResponse response = userClient.downloadDatasetsByIds(datasetIds, "dcm")) {
-            Assertions.assertNotNull(response, "[" + label + "] massiveDownload returned no response.");
-            HttpEntity entity = response.getEntity();
-            Assertions.assertNotNull(entity, "[" + label + "] massiveDownload returned no entity.");
-            try (var out = new java.io.FileOutputStream(downloadedZip)) {
-                entity.writeTo(out);
-            }
+        CloseableHttpResponse response = userClient.downloadDatasetsByIds(datasetIds, "dcm");
+        Assertions.assertNotNull(response, "[" + label + "] massiveDownload returned no response.");
+        HttpEntity entity = response.getEntity();
+        Assertions.assertNotNull(entity, "[" + label + "] massiveDownload returned no entity.");
+        try (var out = new java.io.FileOutputStream(downloadedZip)) {
+            entity.writeTo(out);
         }
         Assertions.assertTrue(downloadedZip.length() > 0,
                 "[" + label + "] Downloaded massiveDownload zip is empty.");
@@ -893,8 +892,8 @@ public class ImportTests extends AbstractTest {
         File extractDir = Files.createTempDirectory("shanoir-massive-download-extract-").toFile();
         unzip(downloadedZip, extractDir);
 
-        Set<String> remoteSopInstanceUIDs = collectSopInstanceUIDs(extractDir);
-        Set<String> localSopInstanceUIDs = collectSopInstanceUIDs(localDicomFolder);
+        Set<String> remoteSopInstanceUIDs = collectSOPInstanceUIDs(extractDir);
+        Set<String> localSopInstanceUIDs = collectSOPInstanceUIDs(localDicomFolder);
 
         Assertions.assertFalse(remoteSopInstanceUIDs.isEmpty(),
                 "[" + label + "] No DICOM instances found in downloaded zip for examination " + examinationId + ".");
@@ -932,7 +931,7 @@ public class ImportTests extends AbstractTest {
      * and collects the SOPInstanceUID of each one that parses successfully.
      * Non-DICOM files (manifests, json reports, etc.) are silently skipped.
      */
-    private Set<String> collectSopInstanceUIDs(File folder) throws IOException {
+    private Set<String> collectSOPInstanceUIDs(File folder) throws IOException {
         Set<String> uids = new HashSet<>();
         try (var stream = Files.walk(folder.toPath())) {
             for (java.nio.file.Path path : (Iterable<java.nio.file.Path>) stream.filter(Files::isRegularFile)::iterator) {
