@@ -115,7 +115,7 @@ public class ImportFinishActionListener implements ActionListener {
             }
             String magneticFieldStrength = mainWindow.importDialog.mriMagneticFieldStrengthText.getText();
             // Check that magnetic field strength is a number value if modality is not CT or XA
-            String modality = importJob.getFirstSelectedSerie().getModality();
+            String modality = importJob.getFirstSerie().getModality();
             if (modality != null
                     && !modality.equals("CT")
                     && !modality.equals("XA")) {
