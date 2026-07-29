@@ -379,15 +379,16 @@ public class ImportTests extends AbstractTest {
 
         // 3. Create the subject/examination that will receive the dataset(s), then
         // start the import.
-        org.shanoir.uploader.model.rest.Subject subject = createSubject(studyWithStudyCards);
+        org.shanoir.uploader.model.rest.Subject subject = createSubject(studyNoStudyCards);
         Assertions.assertNotNull(subject, "Subject could not be created for EEG import.");
         Examination examination = createExamination(studyWithStudyCards.getId(), subject.getId(),
                 studyWithStudyCards.getStudyCards().get(0).getCenterId());
         Assertions.assertNotNull(examination, "Examination could not be created for EEG import.");
 
+        analyzedJob.setStudyId(studyNoStudyCards.getId());
+        analyzedJob.setStudyName(studyNoStudyCards.getName());
         analyzedJob.setSubjectName(subject.getName());
         analyzedJob.setExaminationId(examination.getId());
-        analyzedJob.setStudyId(studyWithStudyCards.getId());
         analyzedJob.setAcquisitionEquipmentId(equipment.getId());
 
         // MS Import is only relaying the job to MS Datasets
