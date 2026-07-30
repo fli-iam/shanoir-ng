@@ -115,6 +115,13 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     	this.emitEvent(this.physioData);
     }
 
+    deleteFile() {
+        this.fileToUpload = null;
+        this.physioData.filename = null;
+        this.physioData.physiologicalDataFile = null;
+        this.emitEvent(this.physioData);
+    }
+
     isYesOrNo(value:boolean): string{
         if(value) return 'Yes';
         return 'No';
