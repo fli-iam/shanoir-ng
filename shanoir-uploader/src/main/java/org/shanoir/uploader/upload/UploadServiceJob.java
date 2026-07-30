@@ -19,6 +19,12 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
@@ -56,23 +62,26 @@ public class UploadServiceJob {
 
     public static final ReentrantLock LOCK = new ReentrantLock();
 
+    /** Number of files uploaded to the server concurrently, per folder being processed. */
+    private static final int UPLOAD_PARALLELISM = 4;
+    
     @Autowired
     private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
     @Autowired
     private CurrentNominativeDataController currentNominativeDataController;
 
-    private String uploadPercentage = "";
-
     @Scheduled(fixedRate = 5000)
     public void execute() throws Exception {
-        if (!LOCK.isLocked()) {
-            LOG.debug("UploadServiceJob started...");
-            LOCK.lock();
-            File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
-            processWorkFolder(workFolder, currentNominativeDataController);
-            LOCK.unlock();
-            LOG.debug("UploadServiceJob ended...");
+        if (LOCK.tryLock()) {
+            try {
+                LOG.debug("UploadServiceJob started...");
+                File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
+                processWorkFolder(workFolder, currentNominativeDataController);
+            } finally {
+                LOCK.unlock();
+                LOG.debug("UploadServiceJob ended...");
+            }
         }
     }
 
@@ -151,15 +160,10 @@ public class UploadServiceJob {
         try {
             String tempDirId = shanoirUploaderServiceClient.createTempDir();
             LOG.info("Upload: tempDirId for import: " + tempDirId);
-            int i = 0;
-            for (File file : allFiles) {
-                i++;
-                shanoirUploaderServiceClient.uploadFile(tempDirId, file);
-                uploadPercentage = i * 100 / allFiles.size() + " %";
-                importJob.setUploadPercentage(uploadPercentage);
-                currentNominativeDataController.updateNominativeDataPercentage(folder, uploadPercentage);
-                nominativeDataImportJobManager.writeImportJob(importJob);
-            }
+
+            uploadFilesInParallel(folder, allFiles, tempDirId, importJob, nominativeDataImportJobManager,
+                    currentNominativeDataController);
+
             LOG.info("Upload: " + allFiles.size() + " uploaded files to tempDirId: " + tempDirId);
 
             setTempDirIdAndStartImport(tempDirId, importJob);
@@ -178,6 +182,68 @@ public class UploadServiceJob {
             importJob.setTimestamp(System.currentTimeMillis());
             nominativeDataImportJobManager.writeImportJob(importJob);
             LOG.error("An error occurred during upload to server: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Uploads all files of one folder to the server concurrently, using a
+     * small bounded pool. Fails fast: if any single file upload throws, the
+     * remaining not-yet-started uploads are cancelled and the exception is
+     * propagated to the caller, matching the previous sequential behavior.
+     */
+    private void uploadFilesInParallel(final File folder, final Collection<File> allFiles, final String tempDirId,
+            final ImportJob importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
+            final CurrentNominativeDataController currentNominativeDataController) throws Exception {
+
+        final int total = allFiles.size();
+        final AtomicInteger completedCount = new AtomicInteger(0);
+        // Guards importJob mutation + the write-to-disk of the progress file,
+        // since multiple upload threads finish concurrently and both touch
+        // the same ImportJob instance / import-job.json file.
+        final Object progressLock = new Object();
+
+        ExecutorService uploadExecutor = Executors.newFixedThreadPool(
+                Math.min(UPLOAD_PARALLELISM, Math.max(1, total)));
+        try {
+            List<Future<Void>> futures = allFiles.stream()
+                    .map(file -> (Callable<Void>) () -> {
+                        shanoirUploaderServiceClient.uploadFile(tempDirId, file);
+                        int done = completedCount.incrementAndGet();
+                        synchronized (progressLock) {
+                            String percentage = (done * 100 / total) + " %";
+                            importJob.setUploadPercentage(percentage);
+                            currentNominativeDataController.updateNominativeDataPercentage(folder, percentage);
+                            nominativeDataImportJobManager.writeImportJob(importJob);
+                        }
+                        return null;
+                    })
+                    .map(uploadExecutor::submit)
+                    .toList();
+
+            // Wait for all uploads; on the first failure, cancel the rest
+            // and re-throw so processStartForServer's catch block marks
+            // the folder ERROR, exactly as the sequential version did.
+            Exception firstFailure = null;
+            for (Future<Void> future : futures) {
+                try {
+                    future.get();
+                } catch (ExecutionException e) {
+                    if (firstFailure == null) {
+                        firstFailure = (e.getCause() instanceof Exception cause) ? cause : e;
+                        // Cancel remaining/queued uploads; already-running
+                        // ones will finish but their results are ignored.
+                        futures.forEach(f -> f.cancel(true));
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw e;
+                }
+            }
+            if (firstFailure != null) {
+                throw firstFailure;
+            }
+        } finally {
+            uploadExecutor.shutdown();
         }
     }
 
