@@ -56,7 +56,7 @@ public enum StudyUserRight {
     /**
      * The member can review the study's data.
      */
-    CAN_REVIEW(7);
+    CAN_ANNOTATE_REVIEW(7);
 
 
     private int id;

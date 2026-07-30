@@ -144,7 +144,7 @@ public class DatasetSecurityService {
      * (username is null), any user who reached this point can open it; when it
      * is owned, e.g. an annotation imported with the CAN_ANNOTATE right, only
      * its owner (who still needs the CAN_ANNOTATE right), a user with the
-     * CAN_REVIEW right, or a study administrator (CAN_ADMINISTRATE) can open it.
+     * CAN_ANNOTATE_REVIEW right, or a study administrator (CAN_ADMINISTRATE) can open it.
      *
      * @param datasetId the dataset id
      * @return true or false
@@ -167,7 +167,7 @@ public class DatasetSecurityService {
                 && hasRightOnStudy(studyId, StudyUserRight.CAN_ANNOTATE.name())) {
             return true;
         }
-        return hasRightOnStudy(studyId, StudyUserRight.CAN_REVIEW.name())
+        return hasRightOnStudy(studyId, StudyUserRight.CAN_ANNOTATE_REVIEW.name())
                 || hasRightOnStudy(studyId, StudyUserRight.CAN_ADMINISTRATE.name());
     }
 
@@ -849,7 +849,7 @@ public class DatasetSecurityService {
      * visualization rule of the viewer (see {@link #hasRightToVisualizeDataset(Long)}):
      * an annotation with no owner (username null) stays visible to everyone, while
      * an owned one is kept only for its owner (with the CAN_ANNOTATE right), a
-     * user with the CAN_REVIEW right, or a study administrator (CAN_ADMINISTRATE).
+     * user with the CAN_ANNOTATE_REVIEW right, or a study administrator (CAN_ADMINISTRATE).
      * Non-annotation datasets carry no owner and are never removed here.
      *
      * @param list the datasets to filter in place
@@ -866,7 +866,7 @@ public class DatasetSecurityService {
             String owner = ds.getUsername();
             if (owner != null) {
                 Long studyId = ds.getStudyId();
-                boolean canSeeAllAnnotations = userRights.hasStudyRights(studyId, StudyUserRight.CAN_REVIEW.name())
+                boolean canSeeAllAnnotations = userRights.hasStudyRights(studyId, StudyUserRight.CAN_ANNOTATE_REVIEW.name())
                         || userRights.hasStudyRights(studyId, StudyUserRight.CAN_ADMINISTRATE.name());
                 boolean ownAnnotator = owner.equals(userName)
                         && userRights.hasStudyRights(studyId, StudyUserRight.CAN_ANNOTATE.name());

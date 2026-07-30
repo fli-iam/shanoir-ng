@@ -141,7 +141,7 @@ public class DatasetSecurityServiceTest {
     public void ownerWithoutCanAnnotateCannotVisualizeAsOwnerButCanAsReviewer() {
         when(datasetRepository.findById(DATASET_ID)).thenReturn(Optional.of(ownedDataset()));
         when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
-        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(true);
+        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(true);
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
             keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OWNER);
@@ -153,7 +153,7 @@ public class DatasetSecurityServiceTest {
     public void ownerWithoutCanAnnotateNorCanReviewCannotVisualize() {
         when(datasetRepository.findById(DATASET_ID)).thenReturn(Optional.of(ownedDataset()));
         when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
-        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
             keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OWNER);
@@ -164,7 +164,7 @@ public class DatasetSecurityServiceTest {
     @Test
     public void reviewerWhoIsNotOwnerCanVisualize() {
         when(datasetRepository.findById(DATASET_ID)).thenReturn(Optional.of(ownedDataset()));
-        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(true);
+        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(true);
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
             keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OTHER_USER);
@@ -175,7 +175,7 @@ public class DatasetSecurityServiceTest {
     @Test
     public void administratorWhoIsNotOwnerCanVisualize() {
         when(datasetRepository.findById(DATASET_ID)).thenReturn(Optional.of(ownedDataset()));
-        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
         when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ADMINISTRATE.name())).thenReturn(true);
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
@@ -187,7 +187,7 @@ public class DatasetSecurityServiceTest {
     @Test
     public void nonOwnerWithoutCanReviewCannotVisualize() {
         when(datasetRepository.findById(DATASET_ID)).thenReturn(Optional.of(ownedDataset()));
-        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
             keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OTHER_USER);
@@ -236,7 +236,7 @@ public class DatasetSecurityServiceTest {
         when(seriesInstanceUIDHandler.isDatasetUID(DATASET_UID)).thenReturn(true);
         when(seriesInstanceUIDHandler.extractDatasetId(DATASET_UID)).thenReturn(DATASET_ID);
         when(datasetRepository.findById(DATASET_ID)).thenReturn(Optional.of(ownedDataset()));
-        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
             keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OTHER_USER);
@@ -273,7 +273,7 @@ public class DatasetSecurityServiceTest {
     public void filterKeepsEveryAnnotationForReviewer() {
         UserRights userRights = Mockito.mock(UserRights.class);
         when(studyRightsService.getUserRights()).thenReturn(userRights);
-        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(true);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(true);
         List<Dataset> datasets = new ArrayList<>(List.of(datasetOwnedBy(OWNER), datasetOwnedBy(OTHER_USER)));
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
@@ -287,7 +287,7 @@ public class DatasetSecurityServiceTest {
     public void filterKeepsEveryAnnotationForAdministrator() {
         UserRights userRights = Mockito.mock(UserRights.class);
         when(studyRightsService.getUserRights()).thenReturn(userRights);
-        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
         when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ADMINISTRATE.name())).thenReturn(true);
         List<Dataset> datasets = new ArrayList<>(List.of(datasetOwnedBy(OWNER), datasetOwnedBy(OTHER_USER)));
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
@@ -302,7 +302,7 @@ public class DatasetSecurityServiceTest {
     public void filterKeepsOwnAndUnownedRemovesOthersForAnnotator() {
         UserRights userRights = Mockito.mock(UserRights.class);
         when(studyRightsService.getUserRights()).thenReturn(userRights);
-        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
         when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ADMINISTRATE.name())).thenReturn(false);
         when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(true);
         Dataset own = datasetOwnedBy(OWNER);
@@ -325,7 +325,7 @@ public class DatasetSecurityServiceTest {
     public void filterRemovesOwnedAnnotationForUserWithoutAnnotateNorReview() {
         UserRights userRights = Mockito.mock(UserRights.class);
         when(studyRightsService.getUserRights()).thenReturn(userRights);
-        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
         when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ADMINISTRATE.name())).thenReturn(false);
         when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
         Dataset own = datasetOwnedBy(OWNER);

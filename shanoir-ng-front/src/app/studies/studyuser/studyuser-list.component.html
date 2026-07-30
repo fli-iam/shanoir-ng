@@ -180,8 +180,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <span class="right-col">
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
-                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_REVIEW)"
-                                        (userChange)="onEditRight(StudyUserRight.CAN_REVIEW, pannelStudyUser, $event)"
+                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ANNOTATE_REVIEW)"
+                                        (userChange)="onEditRight(StudyUserRight.CAN_ANNOTATE_REVIEW, pannelStudyUser, $event)"
                                         [disabled]="study.isDraft"></checkbox>
                                 </span>
                             </li>
