@@ -52,6 +52,7 @@ public class CurrentUploadsWindowTable implements Observer {
     public String readyUploadState = UploadState.READY.toString();
     public String startUploadState = UploadState.START.toString();
     public String startAutoImportUploadState = UploadState.START_AUTOIMPORT.toString();
+    public String serverProcessingUploadState = UploadState.SERVER_PROCESSING.toString();    
     public String finishedUploadState = UploadState.FINISHED.toString();
     public String errorUploadState = UploadState.ERROR.toString();
     public String checkOKUploadState = UploadState.CHECK_OK.toString();
@@ -267,7 +268,8 @@ public class CurrentUploadsWindowTable implements Observer {
                 } else {
                     if (entry.getValue().getUploadPercentage().equals(finishedUploadState)
                             || entry.getValue().getUploadPercentage().equals(checkOKUploadState)
-                            || entry.getValue().getUploadPercentage().equals(checkKOUploadState)) {
+                            || entry.getValue().getUploadPercentage().equals(checkKOUploadState)
+                            || entry.getValue().getUploadPercentage().equals(serverProcessingUploadState)) {
                         totalUploadPercent += 100;
                         nbFinishUpload++;
                     } else if (entry.getValue().getUploadPercentage().equals(errorUploadState)) {
