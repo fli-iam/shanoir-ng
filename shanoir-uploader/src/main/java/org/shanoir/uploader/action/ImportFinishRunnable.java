@@ -69,7 +69,7 @@ public class ImportFinishRunnable implements Runnable {
                 importJob.setUploadState(UploadState.START_AUTOIMPORT);
                 NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
                 importJobManager.writeImportJob(importJob);
-                logger.info(uploadFolder.getName() + ": DICOM files scheduled for upload.");
+                logger.info(uploadFolder.getName() + " scheduled for upload.");
             } else {
                 logger.error(uploadFolder.getName() + ": Error during anonymization.");
             }

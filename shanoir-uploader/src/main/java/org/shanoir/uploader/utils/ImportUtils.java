@@ -48,8 +48,6 @@ import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
-import org.shanoir.uploader.upload.UploadJobManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,53 +126,6 @@ public class ImportUtils {
         return importJob;
     }
 
-    // The following 3 methods are used to retrieve informations from the xml files
-    // used previously to store upload jobs informations.
-    // These are supposed to be deleted in the future.
-
-    public static String getUploadStateFromUploadJob(File folder) throws IOException {
-        final File uploadJobFile = new File(folder.getAbsolutePath() + File.separator + ShUpConfig.UPLOAD_JOB_XML);
-        if (uploadJobFile.exists()) {
-            UploadJobManager uploadJobManager = new UploadJobManager(uploadJobFile);
-            return uploadJobManager.readUploadJob().getUploadState().toString();
-        }
-        return null;
-    }
-
-    public static String getUploadPercentageFromNominativeDataJob(String filepath) {
-        final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
-        if (nominativeDataJobFile.exists()) {
-            NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
-            return nominativeDataJobManager.readUploadDataJob().getUploadPercentage();
-        }
-        return null;
-    }
-
-    public static Patient getPatientFromNominativeDataJob(String filepath) {
-        final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
-        Patient patient = new Patient();
-        if (nominativeDataJobFile.exists()) {
-            NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
-            //the whole name retrieved from xml file is put in patient firstname as it is just to display it in ui
-            patient.setPatientFirstName(nominativeDataJobManager.readUploadDataJob().getPatientName());
-            patient.setPatientLastName("");
-            patient.setPatientID(nominativeDataJobManager.readUploadDataJob().getIPP());
-            return patient;
-        }
-        return patient;
-    }
-
-    public static org.shanoir.ng.importer.model.Study getStudyFromNominativeDataJob(String filepath) {
-        final File nominativeDataJobFile = new File(filepath + File.separator + ShUpConfig.NOMINATIVE_DATA_JOB_XML);
-        org.shanoir.ng.importer.model.Study study = new org.shanoir.ng.importer.model.Study();
-        if (nominativeDataJobFile.exists()) {
-            NominativeDataUploadJobManager nominativeDataJobManager = new NominativeDataUploadJobManager(nominativeDataJobFile);
-            study.setStudyDate(Util.convertStringToLocalDate(nominativeDataJobManager.readUploadDataJob().getStudyDate()));
-            return study;
-        }
-        return study;
-    }
-
     /**
      * subjectId and examinationId are created in the window of ImportDialog and are not known before.
      * In this method selectedSeries as attribute of ImportJob are copied into patient - study - serie
@@ -241,11 +192,6 @@ public class ImportUtils {
         // is used, therefore as the user can click and series on his behalf, we sort again here.
         importJob.getSeries().sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
 
-        // Clean up, as not necessary anymore
-        importJob.setDicomQuery(null);
-        // Avoid sending patient information to server
-        importJob.setPatient(null);
-        importJob.setPatientVerification(null);
         return importJob;
     }
 

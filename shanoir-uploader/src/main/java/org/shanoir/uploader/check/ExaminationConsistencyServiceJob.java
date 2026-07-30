@@ -26,7 +26,6 @@ import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.upload.UploadServiceJob;
-import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,12 +82,6 @@ public class ExaminationConsistencyServiceJob {
                 if (importJobFolder.listFiles().length > 1) {
                     NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
                     final ImportJobBase importJob = importJobManager.readImportJob();
-                    // In case of previous importJobs (without uploadState) we look for uploadState
-                    // value from upload-job.xml file
-                    if (importJob.getUploadState() == null) {
-                        String uploadState = ImportUtils.getUploadStateFromUploadJob(importJobFolder);
-                        importJob.setUploadState(UploadState.fromString(uploadState));
-                    }
                     final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
                     if (uploadState.equals(org.shanoir.ng.importer.model.UploadState.FINISHED)) {
                         long timestamp = importJob.getTimestamp();

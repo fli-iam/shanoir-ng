@@ -246,21 +246,6 @@ public class CurrentNominativeDataController {
         if (importJobManager != null) {
             final ImportJobBase importJob = importJobManager.readImportJob();
             if (importJob != null) {
-                // In case of previous ShUp version imports, Patient and Study data were stored in xml files
-                if (importJob.getPatient() == null || importJob.getStudy() == null) {
-                    Patient patient = ImportUtils.getPatientFromNominativeDataJob(importJob.getWorkFolder());
-                    importJob.setPatient(patient);
-                    Study study = ImportUtils.getStudyFromNominativeDataJob(importJob.getWorkFolder());
-                    importJob.setStudy(study);
-                    // We write the json file so that we can open ImportDialog for this old import
-                    importJobManager.writeImportJob(importJob);
-                }
-                // In case of previous version importJobs
-                // (without uploadState) we look for uploadState value from upload-job.xml file
-                if (importJob.getUploadState() == null) {
-                    String uploadJobState = ImportUtils.getUploadStateFromUploadJob(folder);
-                    importJob.setUploadState(UploadState.fromString(uploadJobState));
-                }
                 final UploadState uploadState = importJob.getUploadState();
                 String uploadPercentage = importJob.getUploadPercentage();
                 if (uploadPercentage == null || uploadPercentage.equals("")) {
@@ -305,6 +290,8 @@ public class CurrentNominativeDataController {
     public void updateNominativeDataPercentage(File folder, String uploadPercentage) {
         if (uploadPercentage.equals(UploadState.FINISHED.toString())) {
             uploadPercentage = UploadState.FINISHED.toString();
+        } else if (uploadPercentage.equals(UploadState.SERVER_PROCESSING.toString())) {
+            uploadPercentage = UploadState.SERVER_PROCESSING.toString();
         }
         currentNominativeDataModel.updateUploadPercentage(folder.getAbsolutePath(), uploadPercentage);
     }

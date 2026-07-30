@@ -38,7 +38,6 @@ import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.DicomPushServiceJob;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.upload.UploadServiceJob;
-import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.PropertiesUtil;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
@@ -148,12 +147,6 @@ public class ReadyState implements State {
             }
             if (dataJobManager != null) {
                 final ImportJobBase importJob = dataJobManager.readImportJob();
-                // in case of previous importJobs (without uploadPercentage)
-                // we look for uploadPercentage value from nominative-data-job.xml file
-                if (importJob.getUploadPercentage() == null) {
-                    String percentage = ImportUtils.getUploadPercentageFromNominativeDataJob(importJob.getWorkFolder());
-                    importJob.setUploadPercentage(percentage);
-                }
                 String uploadPercentage = importJob.getUploadPercentage();
                 LOG.debug(" upload percentage before launching Jobs "
                         + uploadPercentage);

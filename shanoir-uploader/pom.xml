@@ -264,17 +264,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		    <version>${jackson.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>jakarta.xml.bind</groupId>
-		    <artifactId>jakarta.xml.bind-api</artifactId>
-		    <version>4.0.0</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.sun.xml.bind</groupId>
-		    <artifactId>jaxb-impl</artifactId>
-		    <version>4.0.0</version>
-		    <scope>runtime</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>${lombok.version}</version>

@@ -17,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
@@ -31,7 +32,6 @@ import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.QualityUtils;
 import org.slf4j.Logger;

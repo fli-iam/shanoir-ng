@@ -36,7 +36,6 @@ import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,11 +99,6 @@ public class UploadServiceJob {
             if (importJobFile.exists()) {
                 NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
                 final ImportJobBase importJob = importJobManager.readImportJob();
-                // In case of previous importJobs (without uploadState) we look for uploadState value from upload-job.xml file
-                if (importJob.getUploadState() == null) {
-                    String uploadState = ImportUtils.getUploadStateFromUploadJob(folder);
-                    importJob.setUploadState(UploadState.fromString(uploadState));
-                }
                 final org.shanoir.ng.importer.model.UploadState uploadState = importJob.getUploadState();
                 // Avoid reading all files (a lot) in case of finished upload
                 if (!uploadState.equals(org.shanoir.ng.importer.model.UploadState.FINISHED)) {
@@ -180,7 +174,7 @@ public class UploadServiceJob {
             importJob.setUploadState(UploadState.ERROR);
             importJob.setTimestamp(System.currentTimeMillis());
             nominativeDataImportJobManager.writeImportJob(importJob);
-            LOG.error("An error occurred during upload to server: " + e.getMessage());
+            LOG.error(e.getMessage(), e);
         }
     }
 
