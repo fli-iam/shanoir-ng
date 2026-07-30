@@ -120,7 +120,8 @@ public class DicomSEGAndSRImporterService {
         }
         boolean canAnnotate = datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ANNOTATE.name());
         boolean canImport = datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_IMPORT.name());
-        if (!canAnnotate && !canImport) {
+        boolean canAdministrate = datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ADMINISTRATE.name());
+        if (!canAnnotate && !canImport && !canAdministrate) {
             LOG.error("User {} misses DICOMWeb importation rights on study with ID: {}, import refused.",
                     KeycloakUtil.getTokenUserName(), examination.getStudyId());
             throw new RestServiceException(
