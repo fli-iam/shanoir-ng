@@ -38,7 +38,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.UploadState;
@@ -147,7 +147,7 @@ public class CurrentNominativeDataController {
                         String importJobFilePath = (String) cuw.table.getModel().getValueAt(modelRow, 0) + File.separator + ShUpConfig.IMPORT_JOB_JSON;
                         File importJobFile = new File(importJobFilePath);
                         importJobManager = new NominativeDataImportJobManager(importJobFile);
-                        ImportJob importJob = importJobManager.readImportJob();
+                        ImportJobBase importJob = importJobManager.readImportJob();
                         cuw.frame.getImportDialogOpener().openImportDialog(importJob, importJobFile.getParentFile());
                     }
                 }
@@ -225,9 +225,9 @@ public class CurrentNominativeDataController {
     private void processWorkFolder(File workFolder) throws IOException {
         List<File> folders = Util.listFolders(workFolder);
         LOG.info("Found " + folders.size() + " folders in workFolder.");
-        Map<String, ImportJob> currentUploads = new LinkedHashMap<String, ImportJob>();
+        Map<String, ImportJobBase> currentUploads = new LinkedHashMap<String, ImportJobBase>();
         for (File f : folders) {
-            ImportJob nominativeDataImportJob = processFolder(f);
+            ImportJobBase nominativeDataImportJob = processFolder(f);
             if (nominativeDataImportJob != null)
                 currentUploads.put(f.getAbsolutePath(), nominativeDataImportJob);
         }
@@ -239,12 +239,12 @@ public class CurrentNominativeDataController {
      *
      * @param folder
      */
-    private ImportJob processFolder(final File folder) throws IOException {
+    private ImportJobBase processFolder(final File folder) throws IOException {
         LOG.info("Started processing folder " + folder.getName());
         // Check if the folder contains an import-job.json file
         initNominativeDataImportJobManager(folder);
         if (importJobManager != null) {
-            final ImportJob importJob = importJobManager.readImportJob();
+            final ImportJobBase importJob = importJobManager.readImportJob();
             if (importJob != null) {
                 // In case of previous ShUp version imports, Patient and Study data were stored in xml files
                 if (importJob.getPatient() == null || importJob.getStudy() == null) {
@@ -309,7 +309,7 @@ public class CurrentNominativeDataController {
         currentNominativeDataModel.updateUploadPercentage(folder.getAbsolutePath(), uploadPercentage);
     }
 
-    public void addNewNominativeData(File folder, ImportJob nominativeDataImportJob) {
+    public void addNewNominativeData(File folder, ImportJobBase nominativeDataImportJob) {
         currentNominativeDataModel.addUpload(folder.getAbsolutePath(), nominativeDataImportJob);
     }
 

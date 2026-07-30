@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
@@ -86,7 +86,7 @@ public class ImportFinishActionListener implements ActionListener {
             return;
         }
 
-        ImportJob importJob = null;
+        ImportJobBase importJob = null;
         try {
             importJob = ImportUtils.readImportJob(uploadFolder);
         } catch (IOException e) {
@@ -258,7 +258,7 @@ public class ImportFinishActionListener implements ActionListener {
                     ShUpConfig.resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
         }
 
-        final ImportJob finalImportJob = importJob;
+        final ImportJobBase finalImportJob = importJob;
         final String finalSubjectName = subjectREST.getName();
 
         // Submit to the bounded pool. The completion callback (always run,

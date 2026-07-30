@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
-import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.importer.model.UploadState;
@@ -100,7 +99,7 @@ public class UploadServiceJob {
             // file could be missing in case of downloadOrCopy ongoing
             if (importJobFile.exists()) {
                 NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
-                final ImportJob importJob = importJobManager.readImportJob();
+                final ImportJobBase importJob = importJobManager.readImportJob();
                 // In case of previous importJobs (without uploadState) we look for uploadState value from upload-job.xml file
                 if (importJob.getUploadState() == null) {
                     String uploadState = ImportUtils.getUploadStateFromUploadJob(folder);
@@ -123,7 +122,7 @@ public class UploadServiceJob {
      * @param folder
      */
     private void processFolderForServer(final File folder, final NominativeDataImportJobManager importJobManager,
-            final ImportJob importJob, CurrentNominativeDataController currentNominativeDataController) {
+            final ImportJobBase importJob, CurrentNominativeDataController currentNominativeDataController) {
         Collection<File> filesToTransfer = Util.listFiles(
                 folder,
                 (dir, name) -> name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX),
@@ -155,7 +154,7 @@ public class UploadServiceJob {
      * @param uploadJob
      */
     private void processStartForServer(final File folder, final Collection<File> allFiles,
-            final ImportJob importJob, NominativeDataImportJobManager nominativeDataImportJobManager,
+            final ImportJobBase importJob, NominativeDataImportJobManager nominativeDataImportJobManager,
             CurrentNominativeDataController currentNominativeDataController) {
         try {
             String tempDirId = shanoirUploaderServiceClient.createTempDir();
@@ -192,7 +191,7 @@ public class UploadServiceJob {
      * propagated to the caller, matching the previous sequential behavior.
      */
     private void uploadFilesInParallel(final File folder, final Collection<File> allFiles, final String tempDirId,
-            final ImportJob importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
+            final ImportJobBase importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
             final CurrentNominativeDataController currentNominativeDataController) throws Exception {
 
         final int total = allFiles.size();
@@ -248,7 +247,7 @@ public class UploadServiceJob {
     }
 
     private void processServerProcessingForServer(final File folder, final Collection<File> allFiles,
-            final ImportJob importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
+            final ImportJobBase importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
             final CurrentNominativeDataController currentNominativeDataController) {
         String tempDirId = importJob.getWorkFolder(); // set to tempDirId in setTempDirIdAndStartImport
         try {

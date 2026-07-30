@@ -27,7 +27,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
@@ -147,7 +147,7 @@ public class ReadyState implements State {
                 }
             }
             if (dataJobManager != null) {
-                final ImportJob importJob = dataJobManager.readImportJob();
+                final ImportJobBase importJob = dataJobManager.readImportJob();
                 // in case of previous importJobs (without uploadPercentage)
                 // we look for uploadPercentage value from nominative-data-job.xml file
                 if (importJob.getUploadPercentage() == null) {

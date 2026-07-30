@@ -21,7 +21,6 @@ import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.SeriesNumberOrAcquisitionTimeOrDescriptionSorter;
-import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -96,18 +95,18 @@ public class ImportUtils {
         return uploadFolder;
     }
 
-    public static ImportJob readImportJob(File uploadFolder) throws StreamReadException, DatabindException, IOException {
+    public static ImportJobBase readImportJob(File uploadFolder) throws StreamReadException, DatabindException, IOException {
         File importJobJsonFile = new File(uploadFolder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
         if (importJobJsonFile.exists()) {
-            ImportJob importJob = objectMapper.readValue(importJobJsonFile, ImportJob.class);
+            ImportJobBase importJob = objectMapper.readValue(importJobJsonFile, ImportJobBase.class);
             return importJob;
         } else {
             throw new IOException(ShUpConfig.IMPORT_JOB_JSON + " missing in folder: " + uploadFolder.getAbsolutePath());
         }
     }
 
-    public static ImportJob createNewImportJob(Patient patient, org.shanoir.ng.importer.model.Study study) {
-        ImportJob importJob = new ImportJob();
+    public static ImportJobBase createNewImportJob(Patient patient, org.shanoir.ng.importer.model.Study study) {
+        ImportJobBase importJob = new ImportJobBase();
         importJob.setFromShanoirUploader(true);
         // create new patient here, that tree remains untouched
         Patient newPatientForJob = new Patient();
@@ -125,7 +124,7 @@ public class ImportUtils {
         newStudyForJob.setStudyInstanceUID(study.getStudyInstanceUID());
         newStudyForJob.setStudyDescription(study.getStudyDescription());
         importJob.setStudy(newStudyForJob);
-        importJob.setSelectedSeries(new ArrayList<Serie>());
+        importJob.setSeries(new ArrayList<Serie>());
         return importJob;
     }
 

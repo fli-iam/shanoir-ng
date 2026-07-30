@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
@@ -70,7 +70,7 @@ public class ImportDialogOpener {
         this.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
     }
 
-    public void openImportDialog(ImportJob importJob, File importFolder) {
+    public void openImportDialog(ImportJobBase importJob, File importFolder) {
         try {
             Date studyDate = ShUpConfig.FORMATTER.parse(Util.convertLocalDateToString(importJob.getStudy().getStudyDate()));
             Subject subject = null;
@@ -117,7 +117,7 @@ public class ImportDialogOpener {
      * @param equipmentDicom
      * @throws Exception
      */
-    private List<Study> getStudiesWithStudyCards(final ImportJob importJob,
+    private List<Study> getStudiesWithStudyCards(final ImportJobBase importJob,
             List<AcquisitionEquipment> acquisitionEquipments) throws Exception {
         List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
         if (studies != null) {
@@ -211,7 +211,7 @@ public class ImportDialogOpener {
         importDialog.studyCB.setValueSet(false);
     }
 
-    private Subject getSubject(final ImportJob importJob) throws Exception {
+    private Subject getSubject(final ImportJobBase importJob) throws Exception {
         String identifier = importJob.getSubject().getIdentifier();
         if (identifier != null) {
             return shanoirUploaderServiceClient

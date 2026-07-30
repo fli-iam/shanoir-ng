@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
@@ -82,7 +82,7 @@ public class ExaminationConsistencyServiceJob {
                 // already imported folders, as they do not contain any DICOM anymore
                 if (importJobFolder.listFiles().length > 1) {
                     NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(importJobFile);
-                    final ImportJob importJob = importJobManager.readImportJob();
+                    final ImportJobBase importJob = importJobManager.readImportJob();
                     // In case of previous importJobs (without uploadState) we look for uploadState
                     // value from upload-job.xml file
                     if (importJob.getUploadState() == null) {

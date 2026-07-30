@@ -23,7 +23,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * Legacy import job model, kept alive to operate ongoing legacy imports
+ * Attention: still used and necessary for ImportFromTableRunner, where
+ * we need to work with multiple-patients coming back from DICOM server.
+ *
+ * (Legacy) import job model, kept alive to operate ongoing legacy imports
  * while new code is migrated to {@link ImportJobBase}. In addition to
  * everything in {@link ImportJobBase}, this class still carries:
  * <ul>

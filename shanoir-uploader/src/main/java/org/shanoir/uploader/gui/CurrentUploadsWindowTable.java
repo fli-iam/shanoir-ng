@@ -31,7 +31,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
@@ -135,18 +135,18 @@ public class CurrentUploadsWindowTable implements Observer {
         table.getColumnModel().getColumn(deleteColumn).setCellRenderer(new BackgroundRenderer());
     }
 
-    public void fillTable(Map<String, ImportJob> initialUploads) {
+    public void fillTable(Map<String, ImportJobBase> initialUploads) {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
-        for (Map.Entry<String, ImportJob> entry : initialUploads.entrySet()) {
+        for (Map.Entry<String, ImportJobBase> entry : initialUploads.entrySet()) {
             if (entry.getValue() != null) {
                 String key = entry.getKey();
-                ImportJob nominativeDataImportJob = (ImportJob) entry.getValue();
+                ImportJobBase nominativeDataImportJob = (ImportJobBase) entry.getValue();
                 addRow(model, key, nominativeDataImportJob);
             }
         }
     }
 
-    private void addRow(DefaultTableModel model, String key, ImportJob nominativeDataImportJob) {
+    private void addRow(DefaultTableModel model, String key, ImportJobBase nominativeDataImportJob) {
         Serie firstSerie = nominativeDataImportJob.getFirstSerieWithInstitutionAndEquipment();
         String actionImport = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import");
         String actionDelete = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete");
@@ -199,7 +199,7 @@ public class CurrentUploadsWindowTable implements Observer {
         model.addRow(row);
     }
 
-    public void addLineToTable(String absolutePath, ImportJob nominativeDataImportJob) {
+    public void addLineToTable(String absolutePath, ImportJobBase nominativeDataImportJob) {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         addRow(model, absolutePath, nominativeDataImportJob);
     }
@@ -257,7 +257,7 @@ public class CurrentUploadsWindowTable implements Observer {
         int nbStartUpload = 0;
         int nbErrorUpload = 0;
         int totalUploadPercent = 0;
-        for (Map.Entry<String, ImportJob> entry : currentNominativeDataModel.getCurrentUploads()
+        for (Map.Entry<String, ImportJobBase> entry : currentNominativeDataModel.getCurrentUploads()
                 .entrySet()) {
             if (entry.getValue() != null) {
                 if (entry.getValue().getUploadPercentage() == null

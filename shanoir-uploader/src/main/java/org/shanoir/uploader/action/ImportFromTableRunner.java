@@ -25,6 +25,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PatientVerification;
 import org.shanoir.ng.importer.model.Serie;
@@ -204,7 +205,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         // DownloadOrCopyRunnable sets patient and study to NULL: reduce size of import-job.json
         LocalDate studyDate = importJob.getStudy().getStudyDate();
         String studyDescription = importJob.getStudy().getStudyDescription();
-        HashMap<String, ImportJob> downloadImportJobs = new HashMap<String, ImportJob>();
+        HashMap<String, ImportJobBase> downloadImportJobs = new HashMap<String, ImportJobBase>();
         downloadImportJobs.put(importJob.getStudy().getStudyInstanceUID(), importJob);
         Runnable downloadOrCopyRunnable = new DownloadOrCopyRunnable(true, true, importFromTableWindow.frame, importFromTableWindow.downloadProgressBar,  dicomServerClient, dicomFileAnalyzer,  null, downloadImportJobs);
         Thread downloadThread = new Thread(downloadOrCopyRunnable);
@@ -412,7 +413,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         return true;
     }
 
-    private EquipmentDicom getAndCheckEquipmentDicom(ImportJob importJob) {
+    private EquipmentDicom getAndCheckEquipmentDicom(ImportJobBase importJob) {
         EquipmentDicom equipmentDicom = importJob.getFirstSerieWithInstitutionAndEquipment().getEquipment();
         String manufacturerName = equipmentDicom.getManufacturer();
         String manufacturerModelName = equipmentDicom.getManufacturerModelName();

@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.uploader.ShUpConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,13 +84,13 @@ public class NominativeDataImportJobManager {
         this.nominativeDataJobFile = importJobFile;
     }
 
-    public ImportJob readImportJob() {
+    public ImportJobBase readImportJob() {
         ReentrantLock lock = getLock();
         lock.lock();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
-            return objectMapper.readValue(this.nominativeDataJobFile, ImportJob.class);
+            return objectMapper.readValue(this.nominativeDataJobFile, ImportJobBase.class);
         } catch (IOException e) {
             LOG.error("Error during import-job.json reading: {}", e.getMessage(), e);
             return null;
@@ -99,7 +99,7 @@ public class NominativeDataImportJobManager {
         }
     }
 
-    public void writeImportJob(ImportJob importJob) {
+    public void writeImportJob(ImportJobBase importJob) {
         ReentrantLock lock = getLock();
         lock.lock();
         try {
