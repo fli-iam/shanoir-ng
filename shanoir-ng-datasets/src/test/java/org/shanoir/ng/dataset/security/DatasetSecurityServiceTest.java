@@ -173,6 +173,18 @@ public class DatasetSecurityServiceTest {
     }
 
     @Test
+    public void administratorWhoIsNotOwnerCanVisualize() {
+        when(datasetRepository.findById(DATASET_ID)).thenReturn(Optional.of(ownedDataset()));
+        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ADMINISTRATE.name())).thenReturn(true);
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OTHER_USER);
+            assertTrue(datasetSecurityService.hasRightToVisualizeDataset(DATASET_ID));
+        }
+    }
+
+    @Test
     public void nonOwnerWithoutCanReviewCannotVisualize() {
         when(datasetRepository.findById(DATASET_ID)).thenReturn(Optional.of(ownedDataset()));
         when(studyRightsService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
@@ -272,10 +284,26 @@ public class DatasetSecurityServiceTest {
     }
 
     @Test
+    public void filterKeepsEveryAnnotationForAdministrator() {
+        UserRights userRights = Mockito.mock(UserRights.class);
+        when(studyRightsService.getUserRights()).thenReturn(userRights);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ADMINISTRATE.name())).thenReturn(true);
+        List<Dataset> datasets = new ArrayList<>(List.of(datasetOwnedBy(OWNER), datasetOwnedBy(OTHER_USER)));
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::isAdmin).thenReturn(false);
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(OTHER_USER);
+            assertTrue(datasetSecurityService.filterAnnotationDatasetList(datasets));
+        }
+        assertEquals(2, datasets.size());
+    }
+
+    @Test
     public void filterKeepsOwnAndUnownedRemovesOthersForAnnotator() {
         UserRights userRights = Mockito.mock(UserRights.class);
         when(studyRightsService.getUserRights()).thenReturn(userRights);
         when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ADMINISTRATE.name())).thenReturn(false);
         when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(true);
         Dataset own = datasetOwnedBy(OWNER);
         Dataset other = datasetOwnedBy(OTHER_USER);
@@ -298,6 +326,7 @@ public class DatasetSecurityServiceTest {
         UserRights userRights = Mockito.mock(UserRights.class);
         when(studyRightsService.getUserRights()).thenReturn(userRights);
         when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_REVIEW.name())).thenReturn(false);
+        when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ADMINISTRATE.name())).thenReturn(false);
         when(userRights.hasStudyRights(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
         Dataset own = datasetOwnedBy(OWNER);
         Dataset unowned = unownedDataset();
