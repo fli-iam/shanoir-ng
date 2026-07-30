@@ -23,5 +23,7 @@ public interface ExecutionTemplateRepository extends CrudRepository<ExecutionTem
 
     List<ExecutionTemplate> findByStudyId(Long studyId);
 
+    List<ExecutionTemplate> findByOfflineTokenNotNull();
+
     void delete(ExecutionTemplate executionTemplate);
 }

@@ -45,6 +45,7 @@ import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.StudyCardPolicy;
 import org.shanoir.uploader.model.rest.StudyCenter;
 import org.shanoir.uploader.model.rest.StudyExtraDetails;
 import org.shanoir.uploader.model.rest.StudyUser;
@@ -127,8 +128,8 @@ public abstract class AbstractTest {
         Assumptions.assumeTrue(anyClientAvailable,
                 "Skipping tests: no role credentials configured or server unavailable.");
 
-        ShanoirUploaderServiceClient defaultClient = expertClient != null ? expertClient
-                : adminClient != null ? adminClient : userClient;
+        ShanoirUploaderServiceClient defaultClient = userClient != null ? userClient
+                : expertClient != null ? expertClient : adminClient;
         ShUpOnloadConfig.setShanoirUploaderServiceClient(defaultClient);
 
         // Pseudonymizer – only needed when the mode is active
@@ -231,7 +232,7 @@ public abstract class AbstractTest {
     public static Center createCenter() {
         String centerUUID = UUID.randomUUID().toString();
         Center center = new Center();
-        center.setName("Center-Name-" + centerUUID);
+        center.setName("Center-" + centerUUID);
         center.setCity("Rennes");
         center.setStreet("Center-Street-" + centerUUID);
         center.setCountry("Center-Country-" + centerUUID);
@@ -262,7 +263,7 @@ public abstract class AbstractTest {
         return expertClient.createEquipment(equipment);
     }
 
-    public static Study createStudyAndCenterAndStudyCard() {
+    public static Study createStudyAndCenterAndStudyCardAndAddMembers() {
         Study study = buildMinimalStudy();
 
         List<StudyCenter> studyCenterList = new ArrayList<>();
@@ -277,16 +278,7 @@ public abstract class AbstractTest {
         Assertions.assertNotNull(study);
         LOG.info("New study {} ({}) created.", study.getName(), study.getId());
 
-        StudyUser studyUser = new StudyUser();
-        studyUser.setStudyId(study.getId());
-        studyUser.setUserId(expertClient.getUserId());
-        studyUser.setUserName(expertClient.getUserName());
-        studyUser.setConfirmed(true);
-        studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD,
-                    StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE));
-        studyUser = adminClient.addStudyUser(study.getId(), studyUser);
-        Assertions.assertNotNull(studyUser);
-        LOG.info("StudyUser {} added to study: {}", studyUser.getUserName(), study.getName());
+        addExpertAndUserStudyUsers(study);
 
         AcquisitionEquipment createdEquipment = createEquipment(createdCenter);
         Assertions.assertNotNull(createdEquipment);
@@ -307,9 +299,80 @@ public abstract class AbstractTest {
     }
 
     /**
+     * Creates a study with the study card policy set to {@link Study#SC_DISABLED}
+     * and a center + confirmed study-users (expert and user), but
+     * <strong>without</strong> creating any {@link StudyCard}.
+     *
+     * Used to cover the "no study card" import scenario: some studies do not
+     * require (and never get) a study card during DICOM import, as opposed to
+     * {@link #createStudyAndCenterAndStudyCardAndAddMembers()} which covers the
+     * {@link Study#SC_MANDATORY} scenario.
+     *
+     * The study's {@link Study#getStudyCards()} is set to an empty list, and
+     * callers should rely on {@link Study#getStudyCenterList()} (not a study
+     * card) to resolve the center for examination creation. See
+     * {@code ImportTests} for the corresponding no-study-card import flow,
+     * which passes {@code null} instead of a {@link StudyCard} /
+     * {@link AcquisitionEquipment} to {@code ImportUtils}.
+     */
+    public static Study createStudyAndCenterWithoutStudyCard() {
+        Study study = buildMinimalStudy();
+        study.setStudyCardPolicy(StudyCardPolicy.DISABLED.name());
+
+        List<StudyCenter> studyCenterList = new ArrayList<>();
+        StudyCenter studyCenter = new StudyCenter();
+        Center createdCenter = createCenter();
+        Assertions.assertNotNull(createdCenter);
+        studyCenter.setCenter(createdCenter);
+        studyCenterList.add(studyCenter);
+        study.setStudyCenterList(studyCenterList);
+
+        study = adminClient.createStudy(study);
+        Assertions.assertNotNull(study);
+        LOG.info("New study {} ({}) created with SC_DISABLED (no study card) policy.",
+                study.getName(), study.getId(), study.isWithStudyCards());
+
+        addExpertAndUserStudyUsers(study);
+
+        // Deliberately no AcquisitionEquipment / StudyCard creation here:
+        // this study's policy is SC_DISABLED, so import must succeed without one.
+        study.setStudyCards(new ArrayList<>());
+        return study;
+    }
+
+    /**
+     * Adds the standard expert (full rights) and user (see-all + import)
+     * study-users to the given, already-persisted study. Shared by both the
+     * mandatory-study-card and no-study-card study setup helpers.
+     */
+    private static void addExpertAndUserStudyUsers(Study study) {
+        StudyUser studyUserExpert = new StudyUser();
+        studyUserExpert.setStudyId(study.getId());
+        studyUserExpert.setUserId(expertClient.getUserId());
+        studyUserExpert.setUserName(expertClient.getUserName());
+        studyUserExpert.setConfirmed(true);
+        studyUserExpert.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD,
+                StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE));
+        studyUserExpert = adminClient.addStudyUser(study.getId(), studyUserExpert);
+        Assertions.assertNotNull(studyUserExpert);
+        LOG.info("StudyUser {} added to study: {}", studyUserExpert.getUserName(), study.getName());
+
+        StudyUser studyUserUser = new StudyUser();
+        studyUserUser.setStudyId(study.getId());
+        studyUserUser.setUserId(userClient.getUserId());
+        studyUserUser.setUserName(userClient.getUserName());
+        studyUserUser.setConfirmed(true);
+        studyUserUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
+        studyUserUser = adminClient.addStudyUser(study.getId(), studyUserUser);
+        Assertions.assertNotNull(studyUserUser);
+        LOG.info("StudyUser {} added to study: {}", studyUserUser.getUserName(), study.getName());
+    }
+
+    /**
      * Builds a minimal valid {@link Study} payload suitable for a POST to the
      * studies endpoint. Mirrors the structure used in
-     * {@link AbstractTest#createStudyAndCenterAndStudyCard()} but deliberately
+     * {@link AbstractTest#createStudyAndCenterAndStudyCardAndAddMembers()} but
+     * deliberately
      * omits the study-card (not needed for the approval flow under test).
      */
     public static Study buildMinimalStudy() {
@@ -326,7 +389,7 @@ public abstract class AbstractTest {
         // set it explicitly to make the intention of this test clear.
         study.setIsDraft(Boolean.FALSE);
         study.setStudyStatus(IN_PROGRESS);
-        study.setStudyCardPolicy(Study.SC_MANDATORY);
+        study.setStudyCardPolicy(StudyCardPolicy.MANDATORY.name());
 
         Date today = new Date();
         Calendar cal = Calendar.getInstance();
@@ -367,7 +430,6 @@ public abstract class AbstractTest {
         examination.setComment("examinationComment");
         return expertClient.createExamination(examination);
     }
-
 
     /**
      * Builds a {@link StudyUser} candidate for the given study and user ids with

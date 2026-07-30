@@ -17,6 +17,7 @@ package org.shanoir.ng.processing.repository;
 import java.util.List;
 import java.util.Optional;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -42,6 +43,16 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      * @return
      */
     List<DatasetProcessing> findAllByInputDatasets_Id(Long datasetId);
+
+    /**
+     * Find all processings that are linked to the given datasets through INPUT_OF_DATASET_PROCESSING
+     * table, in one single query, with the output datasets fetched along
+     *
+     * @param datasetIds
+     * @return
+     */
+    @EntityGraph(attributePaths = "outputDatasets")
+    List<DatasetProcessing> findAllByInputDatasets_IdIn(List<Long> datasetIds);
 
     /**
      * Find all processings that are linked to given monitoring through parent_id column

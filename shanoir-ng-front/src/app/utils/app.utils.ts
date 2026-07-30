@@ -17,6 +17,9 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 import { environment } from '../../environments/environment';
 
+// Emails
+export const SHANOIR_DPO_EMAIL = environment.dpoMail;
+export const SHANOIR_CONTACT_EMAIL = environment.contactMail;
 
 // Base urls
 const url = window.location;

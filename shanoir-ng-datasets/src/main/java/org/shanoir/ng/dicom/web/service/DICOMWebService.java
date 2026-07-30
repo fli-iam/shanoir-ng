@@ -248,6 +248,48 @@ public class DICOMWebService {
         return null;
     }
 
+    /**
+     * This method is used by the viewer OHIF to retrieve the bulkdata of an
+     * instance, e.g. overlay data (60xx3000), that the PACS does not inline
+     * in the serie metadata, but only references with a BulkDataURI.
+     *
+     * @param studyInstanceUID
+     * @param serieInstanceUID
+     * @param sopInstanceUID
+     * @param bulkDataPath path after /bulkdata/, e.g. a tag path like 60003000
+     * @return
+     */
+    public ResponseEntity findBulkDataOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
+            String sopInstanceUID, String bulkDataPath) {
+        try {
+            String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/"
+                    + sopInstanceUID + "/bulkdata/" + bulkDataPath;
+            HttpGet httpGet = new HttpGet(url);
+            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+                HttpEntity entity = response.getEntity();
+                if (response.getCode() == HttpStatus.OK.value() && entity != null) {
+                    byte[] bulkDataBytes = EntityUtils.toByteArray(entity);
+                    ByteArrayResource byteArrayResource = new ByteArrayResource(bulkDataBytes);
+                    HttpHeaders responseHeaders = new HttpHeaders();
+                    // the PACS answers with multipart/related and a boundary,
+                    // that has to arrive unchanged in the viewer
+                    if (entity.getContentType() != null) {
+                        responseHeaders.set(HttpHeaders.CONTENT_TYPE, entity.getContentType());
+                    }
+                    responseHeaders.setContentLength(bulkDataBytes.length);
+                    return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
+                } else {
+                    LOG.error("DICOMWeb: findBulkDataOfStudyOfSerieOfInstance: status {} for url {}",
+                            response.getCode(), url);
+                    return ResponseEntity.status(response.getCode()).build();
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private byte[] modifyDicomPatientInfo(byte[] dicomBytes, String subjectName) throws Exception {
         try (ByteArrayInputStream bais = new ByteArrayInputStream(dicomBytes);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
