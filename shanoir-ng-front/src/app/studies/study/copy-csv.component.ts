@@ -74,9 +74,8 @@ export class CopyFromCsvComponent {
     private parseCsvTsv(input: string): string[][] {
         const lines = input
             .trim()
-            .split(/\r?\n/)
+            .split(/\r\n|\r|\n/)
             .filter(l => l.trim().length > 0);
-
         if (lines.length === 0) return [];
         const firstLine = lines[0];
         const delimiter = firstLine.includes("\t") ? "\t" : ",";

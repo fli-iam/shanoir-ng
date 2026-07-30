@@ -40,7 +40,7 @@ public final class KeycloakUtil {
 
     private KeycloakUtil() { }
 
-    private static final String PREFERRED_USERNAME = "preferred_username";
+    public static final String PREFERRED_USERNAME = "preferred_username";
 
     private static final String CAN_IMPORT_FROM_PACS = "canImportFromPACS";
 

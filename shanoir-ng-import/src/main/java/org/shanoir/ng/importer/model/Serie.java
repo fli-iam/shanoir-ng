@@ -132,14 +132,8 @@ public class Serie implements Cloneable {
         isMultiFrame = Boolean.FALSE;
         isSpectroscopy = Boolean.FALSE;
         isCompressed = Boolean.FALSE;
-        final EquipmentDicom equipmentDicom = new EquipmentDicom(
-                attributes.getString(Tag.Manufacturer),
-                attributes.getString(Tag.ManufacturerModelName),
-                modality,
-                attributes.getString(Tag.DeviceSerialNumber),
-                attributes.getString(Tag.StationName),
-                attributes.getString(Tag.MagneticFieldStrength));
-        setEquipment(equipmentDicom);
+        institution = new InstitutionDicom(attributes);
+        equipment = new EquipmentDicom(attributes);
     }
 
     public Object clone() throws CloneNotSupportedException {

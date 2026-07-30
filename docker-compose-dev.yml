@@ -41,8 +41,8 @@ services:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
     environment:
-      - SHANOIR_ADMIN_EMAIL
-      - SHANOIR_ADMIN_NAME
+      - SHANOIR_NOTIFICATION_EMAIL
+      - SHANOIR_NOTIFICATION_NAME
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
@@ -50,6 +50,7 @@ services:
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
+      - SHANOIR_KEYCLOAK_URL
       - SHANOIR_ALLOWED_ADMIN_IPS
       - SHANOIR_SMTP_HOST
       - SHANOIR_SMTP_PORT
@@ -141,10 +142,12 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_URL
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
-      - SHANOIR_ADMIN_EMAIL
-      - SHANOIR_ADMIN_NAME
+      - SHANOIR_NOTIFICATION_EMAIL
+      - SHANOIR_NOTIFICATION_NAME
       - SHANOIR_CERTIFICATE
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
@@ -179,6 +182,8 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_URL
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_MIGRATION
       - SHANOIR_STORAGE_TYPE
       - S3_ENDPOINT
@@ -218,6 +223,8 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_URL
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -253,6 +260,8 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_URL
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_MIGRATION
@@ -301,6 +310,8 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_URL
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_MIGRATION
       - SHANOIR_STORAGE_TYPE
       - S3_ENDPOINT
@@ -332,6 +343,7 @@ services:
   #
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
+    platform: linux/x86_64
     build:
       context: docker-compose
       target: nifti-conversion
@@ -445,9 +457,13 @@ services:
       - SHANOIR_INSTANCE_COLOR
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
+      - SHANOIR_KEYCLOAK_URL
       - SHANOIR_KEYCLOAK_ADAPTER_MODE
+      - SHANOIR_KEYCLOAK_API
       - VIP_URL_SCHEME
       - VIP_URL_HOST
+      - SHANOIR_DPO_EMAIL
+      - SHANOIR_CONTACT_EMAIL
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro

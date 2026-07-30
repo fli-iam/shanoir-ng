@@ -87,7 +87,8 @@ public class Examination extends HalEntity {
 
     /** List of extra files directly attached to the examinations. */
     @ElementCollection
-    @CollectionTable(name = "extra_data_file_path")
+    @CollectionTable(name = "examination_extra_data_file_path",
+            joinColumns = @JoinColumn(name = "examination_id"))
     @Column(name = "path")
     private List<String> extraDataFilePathList;
 

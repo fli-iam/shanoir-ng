@@ -92,7 +92,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
+          issuer-uri: ${SHANOIR_KEYCLOAK_URL}/realms/shanoir-ng
+          jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL}/realms/shanoir-ng/protocol/openid-connect/certs
 
 springdoc:
   api-docs:
@@ -109,6 +110,11 @@ springdoc:
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
+
+# public base URL of the DICOMWeb facade, as seen by the OHIF viewer
+# (nginx vhost of the viewer proxies /dicomweb/ to this microservice)
+viewer:
+  ohif.url.base: ${SHANOIR_VIEWER_OHIF_URL_SCHEME:https}://${SHANOIR_VIEWER_OHIF_URL_HOST:${SHANOIR_URL_HOST:localhost}}/dicomweb
 
 solr.host: http://${SHANOIR_SOLR_HOST:${SHANOIR_PREFIX}solr}:8983/solr/shanoir
 
@@ -176,7 +182,7 @@ vip:
 # Service account
 service-account:
   token:
-    uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng/protocol/openid-connect/token
+    uri: ${SHANOIR_KEYCLOAK_URL}/realms/shanoir-ng/protocol/openid-connect/token
   client:
     id: service-account
     credential-secret: ${VIP_CLIENT_SECRET}

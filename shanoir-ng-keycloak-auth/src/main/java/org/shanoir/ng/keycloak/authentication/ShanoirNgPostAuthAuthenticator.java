@@ -175,7 +175,7 @@ public class ShanoirNgPostAuthAuthenticator implements Authenticator {
         // update last login date
         // (runs in every authentication flow except 'reset-credentials')
         //
-        if (flowPath != "reset-credentials") {
+        if (!"reset-credentials".equals(flowPath)) {
 
             final HttpClient client = HttpClientBuilder.create().build();
             try {

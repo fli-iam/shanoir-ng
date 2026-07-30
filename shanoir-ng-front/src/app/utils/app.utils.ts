@@ -15,11 +15,16 @@
 import { HttpResponse } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
 
+import { environment } from '../../environments/environment';
+
+// Emails
+export const SHANOIR_DPO_EMAIL = environment.dpoMail;
+export const SHANOIR_CONTACT_EMAIL = environment.contactMail;
 
 // Base urls
 const url = window.location;
 export const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
-export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
+export const KEYCLOAK_BASE_URL = environment.keycloakUrl;
 export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/welcome";
 export const LOGIN_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
 export const SILENT_CHECK_SSO_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/assets/silent-check-sso.html";

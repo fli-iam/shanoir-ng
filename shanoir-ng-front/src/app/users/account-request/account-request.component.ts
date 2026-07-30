@@ -37,7 +37,7 @@ import { ConsoleComponent } from '../../shared/console/console.component';
 export class AccountRequestComponent implements OnInit {
 
     public form: UntypedFormGroup;
-
+    public dpoMail: string = AppUtils.SHANOIR_DPO_EMAIL;
     public requestSent: boolean = false;
     public errorOnRequest: boolean = false;
     infoValid: boolean = false;

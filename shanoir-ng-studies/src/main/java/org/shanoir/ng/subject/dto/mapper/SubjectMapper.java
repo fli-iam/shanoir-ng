@@ -39,13 +39,8 @@ import org.springframework.data.domain.Page;
 public interface SubjectMapper {
 
     @Named("subjectWithStudyList")
-    @Mappings({ @Mapping(target = "studyId", source = "study.id")})
+    @Mappings({ @Mapping(target = "studyId", source = "study.id"), @Mapping(target = "study", ignore = true)})
     SubjectDTO subjectToSubjectDTO(Subject subject);
-
-    @Named("subjectWithoutStudyList")
-    @Mappings({ @Mapping(target = "studyId", source = "study.id"),
-        @Mapping(target = "subjectStudyList", ignore = true) })
-    SubjectDTO subjectToSubjectDTONoStudies(Subject subject);
 
     @IterableMapping(qualifiedByName = "subjectWithStudyList")
     List<SubjectDTO> subjectsToSubjectDTOs(List<Subject> subjects);

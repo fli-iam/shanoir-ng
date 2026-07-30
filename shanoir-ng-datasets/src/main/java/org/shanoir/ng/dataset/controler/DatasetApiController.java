@@ -594,7 +594,7 @@ public class DatasetApiController implements DatasetApi {
             ByteArrayResource resource = new ByteArrayResource(data);
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename = " + zipFile.getName())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + zipFile.getName() + "\"")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .contentLength(data.length)
                     .body(resource);
