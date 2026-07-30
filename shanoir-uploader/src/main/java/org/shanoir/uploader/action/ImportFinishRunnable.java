@@ -17,62 +17,67 @@ import org.slf4j.LoggerFactory;
  * but does not call the server itself.
  *
  * @author mkain
- *
  */
 public class ImportFinishRunnable implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ImportFinishRunnable.class);
 
-    private File uploadFolder;
+    private final File uploadFolder;
 
-    private ImportJob importJob;
+    private final ImportJob importJob;
+    
+    private final String subjectName;
+    
+    private final Anonymizer anonymizer = new Anonymizer();
 
-    private String subjectName;
-
-    private Anonymizer anonymizer = new Anonymizer();
+    /** Invoked exactly once, on whatever thread this Runnable finishes on,
+     *  whether anonymization succeeded or failed. Used by the caller to
+     *  release its per-folder in-progress guard and restore UI state. */
+    private final Runnable onDone;
 
     public ImportFinishRunnable(final File uploadFolder, final ImportJob importJob, final String subjectName) {
+        this(uploadFolder, importJob, subjectName, null);
+    }
+
+    public ImportFinishRunnable(final File uploadFolder, final ImportJob importJob, final String subjectName,
+            final Runnable onDone) {
         this.uploadFolder = uploadFolder;
         this.importJob = importJob;
         this.subjectName = subjectName;
+        this.onDone = onDone;
     }
 
     public void run() {
-        /**
-         * Anonymize the DICOM files
-         */
-        boolean anonymizationSuccess = false;
         try {
-            String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
-            anonymizationSuccess = anonymizer.pseudonymize(uploadFolder, anonymizationProfile, subjectName, importJob.getStudyInstanceUID());
-        } catch (IOException e) {
-            logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
-        }
-
-        if (anonymizationSuccess) {
-            /**
-             * Write import-job.json to disk
-             */
+            boolean anonymizationSuccess = false;
             try {
-                File importJobJson = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
-                importJobJson.createNewFile();
-                Util.mapper.writeValue(importJobJson, importJob);
+                String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
+                anonymizationSuccess = anonymizer.pseudonymize(uploadFolder, anonymizationProfile, subjectName, importJob.getStudyInstanceUID());
             } catch (IOException e) {
                 logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
             }
 
-            /**
-             * Write the ImportJob and schedule upload
-             * We keep ImportJob here to start the upload and handle errors without
-             * developing something new with shanoir-exchange.json
-             */
-            importJob.setUploadState(UploadState.START_AUTOIMPORT);
-            NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
-            importJobManager.writeImportJob(importJob);
-            logger.info(uploadFolder.getName() + ": DICOM files scheduled for upload.");
-        } else {
-            // NOTIFY THAT ANONYMIZATION HAS FAILED.
-            logger.error(uploadFolder.getName() + ": Error during anonymization.");
+            if (anonymizationSuccess) {
+                try {
+                    File importJobJson = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
+                    importJobJson.createNewFile();
+                    Util.mapper.writeValue(importJobJson, importJob);
+                } catch (IOException e) {
+                    logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+                }
+
+                importJob.setUploadState(UploadState.START_AUTOIMPORT);
+                NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
+                importJobManager.writeImportJob(importJob);
+                logger.info(uploadFolder.getName() + ": DICOM files scheduled for upload.");
+            } else {
+                logger.error(uploadFolder.getName() + ": Error during anonymization.");
+            }
+        } finally {
+            // Always release the guard/UI state, even on unexpected exceptions.
+            if (onDone != null) {
+                onDone.run();
+            }
         }
     }
 
