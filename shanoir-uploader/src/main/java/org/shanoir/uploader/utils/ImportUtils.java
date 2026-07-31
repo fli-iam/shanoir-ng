@@ -26,7 +26,6 @@ import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
@@ -47,6 +46,7 @@ import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +142,7 @@ public class ImportUtils {
      * @throws DatabindException
      * @throws StreamReadException
      */
-    public static ImportJobBase prepareImportJob(ImportJobBase importJob, String subjectName, Long subjectId, Long examinationId, String studyInstanceUID, Study study, StudyCard studyCard, AcquisitionEquipment equipment) {
+    public static ImportJobBase prepareImportJob(ImportJobBase importJob, Subject subjectREST, Long examinationId, String studyInstanceUID, Study study, StudyCard studyCard, AcquisitionEquipment equipment) {
         // Handle study and study card
         importJob.setStudyId(study.getId());
         importJob.setStudyName(study.getName());
@@ -159,9 +159,10 @@ public class ImportUtils {
 
         // Handle subject
         org.shanoir.ng.importer.model.Subject subject = new org.shanoir.ng.importer.model.Subject();
-        subject.setId(subjectId);
-        subject.setName(subjectName);
-        importJob.setSubjectName(subjectName);
+        subject.setId(subject.getId());
+        subject.setName(subject.getName());
+        subject.setIdentifier(subject.getIdentifier());
+        importJob.setSubjectName(subject.getName());
         importJob.setSubject(subject);
 
         for (Serie serie : importJob.getSeries()) {
@@ -275,7 +276,7 @@ public class ImportUtils {
         return allFileNames;
     }
 
-    public static org.shanoir.uploader.model.rest.Subject manageSubject(org.shanoir.uploader.model.rest.Subject subjectREST, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String studyIdentifier, Study study, AcquisitionEquipment equipment) {
+    public static Subject manageSubject(Subject subjectREST, org.shanoir.ng.importer.model.Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom, SubjectType subjectType, boolean existingSubjectInStudy, boolean isPhysicallyInvolved, String studyIdentifier, Study study, AcquisitionEquipment equipment) {
         if (subjectREST == null) {
             try {
                 subjectREST = fillSubjectREST(study, subject, subjectName, category, languageHemDom, manualHemDom, studyIdentifier, subjectType, isPhysicallyInvolved);
@@ -296,9 +297,9 @@ public class ImportUtils {
         return subjectREST;
     }
 
-    public static org.shanoir.uploader.model.rest.Subject fillSubjectREST(final Study study, Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom,
+    public static Subject fillSubjectREST(final Study study, org.shanoir.ng.importer.model.Subject subject, String subjectName, ImagedObjectCategory category, String languageHemDom, String manualHemDom,
             String studyIdentifier, SubjectType subjectType, boolean physicallyInvolved) throws ParseException {
-        org.shanoir.uploader.model.rest.Subject subjectREST = new org.shanoir.uploader.model.rest.Subject();
+        Subject subjectREST = new Subject();
         subjectREST.setStudy(new IdName(study.getId(), study.getName()));
         subjectREST.setIdentifier(subject.getIdentifier());
         subjectREST.setBirthDate(subject.getBirthDate());
@@ -500,13 +501,13 @@ public class ImportUtils {
         return null;
     }
 
-    public static Subject createSubjectFromPatient(Patient patient, Pseudonymizer pseudonymizer, IdentifierCalculator identifierCalculator) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
+    public static org.shanoir.ng.importer.model.Subject createSubjectFromPatient(Patient patient, Pseudonymizer pseudonymizer, IdentifierCalculator identifierCalculator) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
         // E.g. phantom images: set to 01.01.this-year
         if (patient.getPatientBirthDate() == null) {
             LocalDate firstDayOfOngoingYear = LocalDate.of(LocalDate.now().getYear(), 1, 1);
             patient.setPatientBirthDate(firstDayOfOngoingYear);
         } // if present: we need to use original patient birth date for hash calculation
-        Subject subject = new Subject();
+        org.shanoir.ng.importer.model.Subject subject = new org.shanoir.ng.importer.model.Subject();
         String identifier;
         // OFSEP mode
         if (ShUpConfig.isModePseudonymus()) {

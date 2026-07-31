@@ -222,7 +222,7 @@ public class ImportFinishActionListener implements ActionListener {
             logger.info("Examination used on server with ID: " + examination.getId());
         }
 
-        ImportUtils.prepareImportJob(importJob, subjectREST.getName(), subjectREST.getId(), examination.getId(), examination.getStudyInstanceUID(),
+        ImportUtils.prepareImportJob(importJob, subjectREST, examination.getId(), examination.getStudyInstanceUID(),
                 (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem(), equipment);
 
         // Quality Check if the Study selected has Quality Cards to be checked at import

@@ -236,9 +236,9 @@ public class DatasetsCreatorService {
             serieIDFolderFile.mkdirs();
         } else {
             throw new ShanoirException("Error creating serie: "
-                + serie.getSeriesDescription()
-                + " (serieID:" + serieID + ")"
-                + ": folder already exists.");
+                    + serie.getSeriesDescription()
+                    + " (serieID:" + serieID + ")"
+                    + ": folder already exists.");
         }
         List<Image> images = serie.getImages();
         moveFiles(importJobDir, serieIDFolderFile, images);

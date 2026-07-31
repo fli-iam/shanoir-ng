@@ -178,7 +178,7 @@ public class ImportTests extends AbstractTest {
         Examination examination = createExaminationFromDicomStudy(studyWithStudyCards, dicomStudy, subject);
 
         StudyCard studyCard = studyWithStudyCards.getStudyCards().get(0);
-        importJob = ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(),
+        importJob = ImportUtils.prepareImportJob(importJob, subject,
                 examination.getId(), examination.getStudyInstanceUID(), studyWithStudyCards, studyCard,
                 studyCard.getAcquisitionEquipment());
         importJob.setFromDicomZip(false);
@@ -276,7 +276,7 @@ public class ImportTests extends AbstractTest {
         // No study card for this study (SC_DISABLED policy): pass null instead
         // of a StudyCard/AcquisitionEquipment, mirroring the client-side "no
         // study card" import path.
-        importJob = ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(),
+        importJob = ImportUtils.prepareImportJob(importJob, subject,
                 examination.getId(), examination.getStudyInstanceUID(), studyNoStudyCards, null, equipment);
         importJob.setFromDicomZip(false);
         importJob.setFromPacs(false);
@@ -511,7 +511,7 @@ public class ImportTests extends AbstractTest {
             Examination examination = createExaminationFromDicomStudy(studyWithStudyCards, dicomStudy, subject);
 
             StudyCard studyCard = studyWithStudyCards.getStudyCards().get(0);
-            importJob = ImportUtils.prepareImportJob(importJob, subject.getName(), subject.getId(),
+            importJob = ImportUtils.prepareImportJob(importJob, subject,
                     examination.getId(), examination.getStudyInstanceUID(), studyWithStudyCards, studyCard,
                     studyCard.getAcquisitionEquipment());
             importJob.setFromShanoirUploader(true);
