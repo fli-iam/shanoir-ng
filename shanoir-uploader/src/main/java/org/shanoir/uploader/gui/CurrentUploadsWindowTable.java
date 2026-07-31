@@ -45,10 +45,10 @@ public class CurrentUploadsWindowTable implements Observer {
     public final JTable table;
     Object[] columnNames;
     Object[] paths;
-    public int importColumn = 7;
-    public int deleteColumn = 8;
+    public int importColumn = 8;
+    public int deleteColumn = 9;
     public int patientNameColumn = 2;
-    public int uploadStateColumn = 6;
+    public int uploadStateColumn = 7;
     public String readyUploadState = UploadState.READY.toString();
     public String startImportJobUploadState = UploadState.START_IMPORT_JOB.toString();
     public String serverProcessingUploadState = UploadState.SERVER_PROCESSING.toString();    
@@ -71,6 +71,7 @@ public class CurrentUploadsWindowTable implements Observer {
             frame.resourceBundle.getString("shanoir.uploader.currentUploads.IPP"),
             frame.resourceBundle.getString("shanoir.uploader.currentUploads.studyDate"),
             frame.resourceBundle.getString("shanoir.uploader.currentUploads.mri"),
+            frame.resourceBundle.getString("shanoir.uploader.currentUploads.subjectName"),
             frame.resourceBundle.getString("shanoir.uploader.currentUploads.importState"),
             frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import"),
             frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete")
@@ -114,9 +115,10 @@ public class CurrentUploadsWindowTable implements Observer {
         table.getColumnModel().getColumn(1).setPreferredWidth(150);
         table.getColumnModel().getColumn(2).setPreferredWidth(150);
         table.getColumnModel().getColumn(5).setPreferredWidth(100);
-        table.getColumnModel().getColumn(6).setPreferredWidth(40);
+        table.getColumnModel().getColumn(6).setPreferredWidth(150);
         table.getColumnModel().getColumn(7).setPreferredWidth(40);
-        table.getColumnModel().getColumn(8).setPreferredWidth(50);
+        table.getColumnModel().getColumn(8).setPreferredWidth(40);
+        table.getColumnModel().getColumn(9).setPreferredWidth(50);
 
         // Resize and center the JTable header
         table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
@@ -148,6 +150,8 @@ public class CurrentUploadsWindowTable implements Observer {
 
     private void addRow(DefaultTableModel model, String key, ImportJobBase nominativeDataImportJob) {
         Serie firstSerie = nominativeDataImportJob.getFirstSerieWithInstitutionAndEquipment();
+        String subjectName = nominativeDataImportJob.getSubjectName();
+        if (subjectName == null) subjectName = "";
         String actionImport = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import");
         String actionDelete = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete");
         Object[] row = switch (nominativeDataImportJob.getUploadState()) {
@@ -158,6 +162,7 @@ public class CurrentUploadsWindowTable implements Observer {
                 nominativeDataImportJob.getPatient().getPatientID(),
                 nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
                 firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")", // was e.g Philips (serial number)
+                subjectName,
                 nominativeDataImportJob.getUploadState().toString(),
                 actionImport,
                 actionDelete
@@ -169,6 +174,7 @@ public class CurrentUploadsWindowTable implements Observer {
                 nominativeDataImportJob.getPatient().getPatientID(),
                 nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
                 firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")",
+                subjectName,
                 nominativeDataImportJob.getUploadPercentage().toString(),
                 "",
                 ""
@@ -180,6 +186,7 @@ public class CurrentUploadsWindowTable implements Observer {
                 nominativeDataImportJob.getPatient().getPatientID(),
                 nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
                 firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")",
+                subjectName,
                 nominativeDataImportJob.getUploadPercentage().toString(),
                 "",
                 actionDelete
@@ -191,6 +198,7 @@ public class CurrentUploadsWindowTable implements Observer {
                 nominativeDataImportJob.getPatient().getPatientID(),
                 nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
                 firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")",
+                subjectName,
                 nominativeDataImportJob.getUploadPercentage().toString(),
                 "",
                 ""
