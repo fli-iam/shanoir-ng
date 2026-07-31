@@ -33,6 +33,7 @@ import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
+import org.shanoir.uploader.model.rest.DatasetsImportStatus;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -162,8 +163,9 @@ public class UploadServiceJob {
             setTempDirIdAndStartImport(tempDirId, importJob);
 
             // Server (ms-import) still has to pseudonymize/create datasets and hand
-            // off to ms-datasets. Don't mark FINISHED yet — switch state and let
-            // the next scheduled tick(s) poll the server instead of blocking here.
+            // off to ms-datasets, which itself still has to create the datasets.
+            // Don't mark FINISHED yet — switch state and let the next scheduled
+            // tick(s) poll both servers instead of blocking here.
             currentNominativeDataController.updateNominativeDataPercentage(folder,
                     UploadState.SERVER_PROCESSING.toString());
             importJob.setUploadState(UploadState.SERVER_PROCESSING);
@@ -242,48 +244,126 @@ public class UploadServiceJob {
         }
     }
 
+    /**
+     * Polls the server side of the import while in {@link UploadState#SERVER_PROCESSING}.
+     * This state actually covers two sequential server-side phases that we do NOT
+     * expose as separate {@link UploadState} values (to keep the state machine and
+     * the GUI simple):
+     * <ol>
+     *   <li>ms-import: pseudonymizes and hands the job off to ms-datasets
+     *       ({@link ShanoirUploaderServiceClient#getImportJobStatus(String)}).</li>
+     *   <li>ms-datasets: actually creates the datasets
+     *       ({@link ShanoirUploaderServiceClient#findImportStatusByExaminationId(Long)}).</li>
+     * </ol>
+     * The import is only declared {@link UploadState#FINISHED} once BOTH phases
+     * report FINISHED. Re-checking ms-import on every tick (even after it already
+     * reported FINISHED) is intentional and cheap: it keeps this method stateless
+     * with respect to "which phase are we in", at the cost of one extra GET per
+     * 5s tick once ms-import is done.
+     */
     private void processServerProcessingForServer(final File folder, final Collection<File> allFiles,
             final ImportJobBase importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
             final CurrentNominativeDataController currentNominativeDataController) {
         String tempDirId = importJob.getWorkFolder(); // set to tempDirId in setTempDirIdAndStartImport
         try {
-            ImportJobStatus status = shanoirUploaderServiceClient.getImportJobStatus(tempDirId);
-            if (status == null) {
-                LOG.debug("No status yet on server for tempDirId {}, will retry in 5s.", tempDirId);
+            ImportJobStatus msImportStatus = shanoirUploaderServiceClient.getImportJobStatus(tempDirId);
+            if (msImportStatus == null) {
+                LOG.debug("No status yet on server (ms-import) for tempDirId {}, will retry in 5s.", tempDirId);
                 return;
             }
-            switch (status.getState()) {
+            switch (msImportStatus.getState()) {
                 case FINISHED:
-                    LOG.info("Import finished on server for tempDirId {} (folder {}).", tempDirId, folder.getName());
-                    currentNominativeDataController.updateNominativeDataPercentage(folder,
-                            UploadState.FINISHED.toString());
-                    importJob.setUploadState(UploadState.FINISHED);
-                    importJob.setTimestamp(System.currentTimeMillis());
-                    nominativeDataImportJobManager.writeImportJob(importJob);
-                    String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
-                    if (!Boolean.parseBoolean(value)) {
-                        deleteAllDicomFiles(folder, allFiles);
-                    }
+                    // ms-import is done and has handed off to ms-datasets: the import
+                    // is NOT finished yet, ms-datasets still has to create the datasets.
+                    LOG.debug("ms-import finished for tempDirId {} (folder {}), checking ms-datasets.",
+                            tempDirId, folder.getName());
+                    processMsDatasetsStatus(folder, allFiles, importJob, nominativeDataImportJobManager,
+                            currentNominativeDataController);
                     break;
                 case ERROR:
-                    LOG.error("Import failed on server for tempDirId {} (folder {}): {}",
-                            tempDirId, folder.getName(), status.getMessage());
-                    currentNominativeDataController.updateNominativeDataPercentage(folder,
-                            UploadState.ERROR.toString());
-                    importJob.setUploadState(UploadState.ERROR);
-                    importJob.setTimestamp(System.currentTimeMillis());
-                    nominativeDataImportJobManager.writeImportJob(importJob);
+                    LOG.error("Import failed on server (ms-import) for tempDirId {} (folder {}): {}",
+                            tempDirId, folder.getName(), msImportStatus.getMessage());
+                    markError(folder, importJob, nominativeDataImportJobManager, currentNominativeDataController);
                     break;
                 case IN_PROGRESS:
                 default:
-                    LOG.debug("Import still in progress on server for tempDirId {}: {}", tempDirId,
-                            status.getMessage());
+                    LOG.debug("Import still in progress on server (ms-import) for tempDirId {}: {}", tempDirId,
+                            msImportStatus.getMessage());
                     break;
             }
         } catch (Exception e) {
             // transient (network/server) error: stay SERVER_PROCESSING, retry next tick
-            LOG.warn("Could not poll import status for tempDirId {}: {}", tempDirId, e.getMessage());
+            LOG.warn("Could not poll import status (ms-import) for tempDirId {}: {}", tempDirId, e.getMessage());
         }
+    }
+
+    /**
+     * Second half of the {@link UploadState#SERVER_PROCESSING} phase: once ms-import
+     * reports FINISHED, poll ms-datasets by examinationId until it reports FINISHED
+     * (dataset creation actually done) or ERROR.
+     */
+    private void processMsDatasetsStatus(final File folder, final Collection<File> allFiles,
+            final ImportJobBase importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
+            final CurrentNominativeDataController currentNominativeDataController) {
+        Long examinationId = importJob.getExaminationId();
+        if (examinationId == null) {
+            LOG.warn("ms-import reports FINISHED but importJob has no examinationId (folder {}); "
+                    + "cannot verify ms-datasets completion yet, will retry.", folder.getName());
+            return;
+        }
+        try {
+            DatasetsImportStatus datasetsStatus =
+                    shanoirUploaderServiceClient.findImportStatusByExaminationId(examinationId);
+            if (datasetsStatus == null) {
+                LOG.debug("No status yet on server (ms-datasets) for examinationId {}, will retry in 5s.",
+                        examinationId);
+                return;
+            }
+            switch (datasetsStatus.getState()) {
+                case FINISHED:
+                    LOG.info("Import finished on server (ms-datasets) for examinationId {} (folder {}).",
+                            examinationId, folder.getName());
+                    markFinished(folder, allFiles, importJob, nominativeDataImportJobManager,
+                            currentNominativeDataController);
+                    break;
+                case ERROR:
+                    LOG.error("Import failed on server (ms-datasets) for examinationId {} (folder {}): {}",
+                            examinationId, folder.getName(), datasetsStatus.getMessage());
+                    markError(folder, importJob, nominativeDataImportJobManager, currentNominativeDataController);
+                    break;
+                case IN_PROGRESS:
+                default:
+                    LOG.debug("Import still in progress on server (ms-datasets) for examinationId {}: {}",
+                            examinationId, datasetsStatus.getMessage());
+                    break;
+            }
+        } catch (Exception e) {
+            // transient (network/server) error: stay SERVER_PROCESSING, retry next tick
+            LOG.warn("Could not poll import status (ms-datasets) for examinationId {}: {}",
+                    examinationId, e.getMessage());
+        }
+    }
+
+    private void markFinished(final File folder, final Collection<File> allFiles, final ImportJobBase importJob,
+            final NominativeDataImportJobManager nominativeDataImportJobManager,
+            final CurrentNominativeDataController currentNominativeDataController) {
+        currentNominativeDataController.updateNominativeDataPercentage(folder, UploadState.FINISHED.toString());
+        importJob.setUploadState(UploadState.FINISHED);
+        importJob.setTimestamp(System.currentTimeMillis());
+        nominativeDataImportJobManager.writeImportJob(importJob);
+        String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
+        if (!Boolean.parseBoolean(value)) {
+            deleteAllDicomFiles(folder, allFiles);
+        }
+    }
+
+    private void markError(final File folder, final ImportJobBase importJob,
+            final NominativeDataImportJobManager nominativeDataImportJobManager,
+            final CurrentNominativeDataController currentNominativeDataController) {
+        currentNominativeDataController.updateNominativeDataPercentage(folder, UploadState.ERROR.toString());
+        importJob.setUploadState(UploadState.ERROR);
+        importJob.setTimestamp(System.currentTimeMillis());
+        nominativeDataImportJobManager.writeImportJob(importJob);
     }
 
     private void setTempDirIdAndStartImport(String tempDirId, ImportJobBase importJob)
