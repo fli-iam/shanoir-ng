@@ -215,8 +215,6 @@ public class ImportFinishActionListener implements ActionListener {
                 showErrorAndReset(startButton, folderKey,
                         "shanoir.uploader.systemErrorDialog.error.wsdl.createmrexamination");
                 return;
-            } else {
-                logger.info("Examination created on server with ID: " + examination.getId());
             }
         // If the user wants to use an existing examination
         } else {
