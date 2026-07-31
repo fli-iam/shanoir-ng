@@ -107,6 +107,21 @@ class DICOMWebServiceTest {
     }
 
     @Test
+    void findInstanceForwardsPacsErrorStatusInsteadOfAnEmptyOk() throws Exception {
+        CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
+        when(httpResponse.getCode()).thenReturn(HttpStatus.NOT_FOUND.value());
+        when(httpResponse.getEntity()).thenReturn(new ByteArrayEntity(new byte[0], null));
+        when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
+
+        // OHIF and ShanoirUploader read the answer as a DICOM instance: an error
+        // of the PACS must not reach them disguised as a 200 with a broken body
+        ResponseEntity<?> response = dicomWebService.findInstance("1.2.3", "4.5.6", "7.8.9", null);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+    }
+
+    @Test
     void findFrameForwardsPacsContentTypeToTheViewer() throws Exception {
         mockPacsFrameResponse(HttpStatus.OK.value(), PIXEL_DATA, ContentType.parse(JLS_CONTENT_TYPE));
 
@@ -178,6 +193,7 @@ class DICOMWebServiceTest {
     private void mockPacsInstanceResponse(byte[] dicomBytes) throws Exception {
         CloseableHttpResponse httpResponse = mock(CloseableHttpResponse.class);
         ByteArrayEntity entity = new ByteArrayEntity(dicomBytes, null);
+        when(httpResponse.getCode()).thenReturn(HttpStatus.OK.value());
         when(httpResponse.getEntity()).thenReturn(entity);
         when(httpClient.execute(any(HttpGet.class))).thenReturn(httpResponse);
     }

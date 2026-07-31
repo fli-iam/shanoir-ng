@@ -342,7 +342,8 @@ public class DICOMWebService {
             HttpGet httpGet = new HttpGet(url);
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 HttpEntity entity = response.getEntity();
-                if (entity != null) {
+                HttpStatusCode statusCode = HttpStatusCode.valueOf(response.getCode());
+                if (statusCode.is2xxSuccessful() && entity != null) {
                     byte[] dicomBytes = EntityUtils.toByteArray(entity);
                     if (subjectName != null && !subjectName.trim().isEmpty()) {
                         dicomBytes = modifyDicomPatientInfo(dicomBytes, subjectName);
@@ -350,15 +351,18 @@ public class DICOMWebService {
                     ByteArrayResource byteArrayResource = new ByteArrayResource(dicomBytes);
                     HttpHeaders responseHeaders = new HttpHeaders();
                     responseHeaders.setContentLength(dicomBytes.length);
-                    return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
+                    return new ResponseEntity(byteArrayResource, responseHeaders, statusCode);
                 } else {
-                    LOG.error("DICOMWeb: findInstance: empty response entity.");
+                    // an error of the PACS answered as 200 leaves the caller with
+                    // an error page, that it tries to read as a DICOM instance
+                    LOG.error("DICOMWeb: findInstance: status {} for url {}", response.getCode(), url);
+                    return ResponseEntity.status(statusCode).build();
                 }
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        return null;
+        return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws ShanoirException {
