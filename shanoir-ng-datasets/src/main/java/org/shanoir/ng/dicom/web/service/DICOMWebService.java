@@ -221,14 +221,21 @@ public class DICOMWebService {
      * @param serieInstanceUID
      * @param sopInstanceUID
      * @param frame
+     * @param accept the media types accepted by the viewer, may be null
      * @return
      */
     public ResponseEntity findFrameOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
-            String sopInstanceUID, String frame) {
+            String sopInstanceUID, String frame, String accept) {
         try {
             String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/"
                     + sopInstanceUID + "/frames/" + frame;
             HttpGet httpGet = new HttpGet(url);
+            // without an Accept header the PACS decides alone, which transfer
+            // syntax it sends: forward the one of the viewer, that knows best,
+            // what its decoders are able to read
+            if (accept != null && !accept.isEmpty()) {
+                httpGet.setHeader(HttpHeaders.ACCEPT, accept);
+            }
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 HttpEntity entity = response.getEntity();
                 HttpStatusCode statusCode = HttpStatusCode.valueOf(response.getCode());
