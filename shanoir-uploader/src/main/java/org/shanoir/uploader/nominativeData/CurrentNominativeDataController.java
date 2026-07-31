@@ -295,6 +295,10 @@ public class CurrentNominativeDataController {
         currentNominativeDataModel.addUpload(folder.getAbsolutePath(), nominativeDataImportJob);
     }
 
+    public void setNominativeDataSubjectName(File folder, String subjectName) {
+        currentNominativeDataModel.setSubjectName(folder.getAbsolutePath(), subjectName);
+    }
+
     public class DeleteRenderer extends DefaultTableCellRenderer {
         
         DeleteRenderer() { }

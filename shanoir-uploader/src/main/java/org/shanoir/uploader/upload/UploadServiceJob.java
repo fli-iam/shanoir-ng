@@ -132,6 +132,7 @@ public class UploadServiceJob {
             long startTime = System.currentTimeMillis();
             processStartForServer(folder, filesToTransfer, importJob, importJobManager,
                     currentNominativeDataController);
+            currentNominativeDataController.setNominativeDataSubjectName(folder, importJob.getSubjectName());
             long elapsedTime = System.currentTimeMillis() - startTime;
             LOG.info("Upload of files in folder: " + folder.getAbsolutePath() + " finished in duration (ms): "
                     + elapsedTime);

@@ -45,6 +45,7 @@ public class CurrentUploadsWindowTable implements Observer {
     public final JTable table;
     Object[] columnNames;
     Object[] paths;
+    public int subjectNameColumn = 6;
     public int importColumn = 8;
     public int deleteColumn = 9;
     public int patientNameColumn = 2;
@@ -221,6 +222,16 @@ public class CurrentUploadsWindowTable implements Observer {
             }
         }
     }
+    
+    public void updateSubjectName(String path, String subjectName) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        int nbRow = model.getRowCount();
+        for (int i = 0; i < nbRow; i++) {
+            if (model.getValueAt(i, 0).equals(path)) {
+                model.setValueAt(subjectName, i, subjectNameColumn);
+            }
+        }
+    }
 
     /**
      * Create the GUI and show it. For thread safety, this method should be invoked
@@ -320,11 +331,12 @@ public class CurrentUploadsWindowTable implements Observer {
             if (msg[0].equals("UpdatePercent")) {
                 updatePercent(msg[1], msg[2]);
             }
-
+            if (msg[0].equals("SubjectName")) {
+                updateSubjectName(msg[1], msg[2]);
+            }
             if (msg[0].equals("add")) {
                 addLineToTable(msg[1], currentNominativeDataModel.getCurrentUploads().get(msg[1]));
             }
-
         } else if (msg[0].equals("fill")) {
             DefaultTableModel model = (DefaultTableModel) table.getModel();
             int nbRow = model.getRowCount();

@@ -72,7 +72,14 @@ public class CurrentNominativeDataModel extends Observable {
         setChanged();
         notifyObservers(msg);
     }
-
+    
+    public void setSubjectName(String absolutePath, String subjectName) {
+        currentUploads.get(absolutePath).setSubjectName(subjectName);
+        String[] msg = {"SubjectName", absolutePath, subjectName};
+        setChanged();
+        notifyObservers(msg);
+    }
+    
     public String getHashKey() {
         return hashKey;
     }
