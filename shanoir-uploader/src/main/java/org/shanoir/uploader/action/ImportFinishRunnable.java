@@ -8,7 +8,6 @@ import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
 import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
-import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +25,6 @@ public class ImportFinishRunnable implements Runnable {
 
     private final ImportJobBase importJob;
     
-    private final String subjectName;
-    
     private final Anonymizer anonymizer = new Anonymizer();
 
     /** Invoked exactly once, on whatever thread this Runnable finishes on,
@@ -35,15 +32,14 @@ public class ImportFinishRunnable implements Runnable {
      *  release its per-folder in-progress guard and restore UI state. */
     private final Runnable onDone;
 
-    public ImportFinishRunnable(final File uploadFolder, final ImportJobBase importJob, final String subjectName) {
-        this(uploadFolder, importJob, subjectName, null);
+    public ImportFinishRunnable(final File uploadFolder, final ImportJobBase importJob) {
+        this(uploadFolder, importJob, null);
     }
 
-    public ImportFinishRunnable(final File uploadFolder, final ImportJobBase importJob, final String subjectName,
+    public ImportFinishRunnable(final File uploadFolder, final ImportJobBase importJob,
             final Runnable onDone) {
         this.uploadFolder = uploadFolder;
         this.importJob = importJob;
-        this.subjectName = subjectName;
         this.onDone = onDone;
     }
 
@@ -52,23 +48,19 @@ public class ImportFinishRunnable implements Runnable {
             boolean anonymizationSuccess = false;
             try {
                 String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
-                anonymizationSuccess = anonymizer.pseudonymize(uploadFolder, anonymizationProfile, subjectName, importJob.getStudyInstanceUID());
+                anonymizationSuccess = anonymizer.pseudonymize(uploadFolder, anonymizationProfile, importJob.getSubjectName(), importJob.getStudyInstanceUID());
             } catch (IOException e) {
                 logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
             }
 
             if (anonymizationSuccess) {
                 try {
-                    File importJobJson = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
-                    importJobJson.createNewFile();
-                    Util.mapper.writeValue(importJobJson, importJob);
-                } catch (IOException e) {
+                    importJob.setUploadState(UploadState.START_IMPORT_JOB);
+                    NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
+                    importJobManager.writeImportJob(importJob);
+                } catch (Exception e) {
                     logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
                 }
-
-                importJob.setUploadState(UploadState.START_IMPORT_JOB);
-                NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
-                importJobManager.writeImportJob(importJob);
                 logger.info(uploadFolder.getName() + " scheduled for upload.");
             } else {
                 logger.error(uploadFolder.getName() + ": Error during anonymization.");

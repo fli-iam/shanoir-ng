@@ -403,7 +403,7 @@ public class ImportFromTableRunner extends SwingWorker<Void, Integer> {
         ImportUtils.prepareImportJob(importJob, subjectREST,
             examination.getId(), examination.getStudyInstanceUID(), studyREST, studyCard, equipment);
         File importJobFile = new File(importJob.getWorkFolder() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
-        Runnable importRunnable = new ImportFinishRunnable(importJobFile.getParentFile(), importJob, subjectREST.getName());
+        Runnable importRunnable = new ImportFinishRunnable(importJobFile.getParentFile(), importJob);
         Thread importThread = new Thread(importRunnable);
         importThread.start();
         while (importThread.isAlive()) {

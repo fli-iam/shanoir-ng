@@ -95,10 +95,8 @@ public class ImportJobBase implements Serializable {
     // subject: use already existing
     private String subjectName;
 
-    // subject: create new subject in ms studies based on these values
     private Subject subject;
 
-    // examination: use already existing
     private Long examinationId;
 
     private String examinationComment;

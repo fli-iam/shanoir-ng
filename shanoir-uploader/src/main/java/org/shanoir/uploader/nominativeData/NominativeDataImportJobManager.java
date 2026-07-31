@@ -37,25 +37,21 @@ public class NominativeDataImportJobManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(NominativeDataImportJobManager.class);
 
-    private File nominativeDataJobFile;
-
     /**
      * Lock for synchronizing access to the import job file.
      */
     private static final Map<String, ReentrantLock> FILE_LOCKS = new ConcurrentHashMap<>();
+    
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
-    /**
-     * Initialize ImportJobManager empty and reset importJobFile
-     * with method setImportJobFile.
-     */
-    public NominativeDataImportJobManager() {
-    }
+    private File nominativeDataJobFile;
 
     /**
      * Initialize MoninativeDataImportJobManager with current nominative data folder path.
      * @param importFolderPath
      */
     public NominativeDataImportJobManager(final String importFolderPath) {
+        objectMapper.registerModule(new JavaTimeModule());
         this.nominativeDataJobFile = new File(
             importFolderPath
             + File.separatorChar
@@ -68,6 +64,7 @@ public class NominativeDataImportJobManager {
      * @param importJobFile
      */
     public NominativeDataImportJobManager(final File importJobFile) {
+        objectMapper.registerModule(new JavaTimeModule());
         this.nominativeDataJobFile = importJobFile;
         LOG.debug("ImportJobManager initialized with file: " + this.nominativeDataJobFile.getAbsolutePath());
     }
@@ -88,8 +85,6 @@ public class NominativeDataImportJobManager {
         ReentrantLock lock = getLock();
         lock.lock();
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule());
             return objectMapper.readValue(this.nominativeDataJobFile, ImportJobBase.class);
         } catch (IOException e) {
             LOG.error("Error during import-job.json reading: {}", e.getMessage(), e);
@@ -103,8 +98,6 @@ public class NominativeDataImportJobManager {
         ReentrantLock lock = getLock();
         lock.lock();
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule());
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(this.nominativeDataJobFile, importJob);
         } catch (IOException e) {
             LOG.error("Error during import-job.json writing: {}", e.getMessage(), e);

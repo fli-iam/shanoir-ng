@@ -256,13 +256,10 @@ public class ImportFinishActionListener implements ActionListener {
                     ShUpConfig.resourceBundle.getString("shanoir.uploader.select.error.title"), JOptionPane.ERROR_MESSAGE);
         }
 
-        final ImportJobBase finalImportJob = importJob;
-        final String finalSubjectName = subjectREST.getName();
-
         // Submit to the bounded pool. The completion callback (always run,
         // success or failure) is where we release the guard and restore
         // the UI -- NOT immediately after submission.
-        IMPORT_FINISH_EXECUTOR.submit(new ImportFinishRunnable(uploadFolder, finalImportJob, finalSubjectName,
+        IMPORT_FINISH_EXECUTOR.submit(new ImportFinishRunnable(uploadFolder, importJob,
                 () -> onImportFinishDone(folderKey)));
 
         JOptionPane.showMessageDialog(mainWindow.frame,
