@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 public enum UploadState {
     READY,
     START_IMPORT_JOB,
-    UPLOADING_IMAGES,
     SERVER_PROCESSING,
     FINISHED,
     ERROR,

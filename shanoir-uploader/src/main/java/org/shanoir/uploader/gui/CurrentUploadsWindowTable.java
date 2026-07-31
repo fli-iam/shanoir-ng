@@ -51,7 +51,6 @@ public class CurrentUploadsWindowTable implements Observer {
     public int uploadStateColumn = 6;
     public String readyUploadState = UploadState.READY.toString();
     public String startImportJobUploadState = UploadState.START_IMPORT_JOB.toString();
-    public String uploadingImagesUploadState = UploadState.UPLOADING_IMAGES.toString();
     public String serverProcessingUploadState = UploadState.SERVER_PROCESSING.toString();    
     public String finishedUploadState = UploadState.FINISHED.toString();
     public String errorUploadState = UploadState.ERROR.toString();

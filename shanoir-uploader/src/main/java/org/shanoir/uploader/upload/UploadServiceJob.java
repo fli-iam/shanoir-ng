@@ -190,8 +190,6 @@ public class UploadServiceJob {
             final ImportJobBase importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
             final CurrentNominativeDataController currentNominativeDataController) throws Exception {
 
-        importJob.setUploadState(UploadState.UPLOADING_IMAGES);
-
         final int total = allFiles.size();
         final AtomicInteger completedCount = new AtomicInteger(0);
         // Guards importJob mutation + the write-to-disk of the progress file,
