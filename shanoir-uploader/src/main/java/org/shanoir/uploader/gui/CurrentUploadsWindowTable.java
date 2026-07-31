@@ -162,7 +162,7 @@ public class CurrentUploadsWindowTable implements Observer {
                 actionImport,
                 actionDelete
             };
-            case UPLOADING_IMAGES, FINISHED -> new Object[] {
+            case FINISHED -> new Object[] {
                 key,
                 nominativeDataImportJob.getSubject().getIdentifier(),
                 nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
