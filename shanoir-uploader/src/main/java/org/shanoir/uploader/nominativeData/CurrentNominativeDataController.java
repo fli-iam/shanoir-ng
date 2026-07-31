@@ -39,13 +39,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import org.shanoir.ng.importer.model.ImportJobBase;
-import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.DeleteDirectory;
 import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
-import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,8 +173,7 @@ public class CurrentNominativeDataController {
                         cuw.frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete.confirmation.title"), 1)
                         == JOptionPane.YES_OPTION) {
                     String uploadState = (String) cuw.table.getModel().getValueAt(row, cuw.uploadStateColumn);
-                    if (!uploadState.startsWith(cuw.startUploadState)
-                            && !uploadState.startsWith(cuw.startAutoImportUploadState)) {
+                    if (!uploadState.startsWith(cuw.startImportJobUploadState)) {
                         DeleteDirectory dt = new DeleteDirectory();
                         model.getValueAt(row, 0);
                         dt.delete((String) model.getValueAt(row, 0));
@@ -253,8 +249,7 @@ public class CurrentNominativeDataController {
                 }
                 if (uploadState.toString().equals(UploadState.FINISHED.toString())) {
                     importJob.setUploadPercentage(UploadState.FINISHED.toString());
-                } else if (uploadState.toString().equals(UploadState.START.toString())
-                        || uploadState.toString().equals(UploadState.START_AUTOIMPORT.toString())) {
+                } else if (uploadState.toString().equals(UploadState.START_IMPORT_JOB.toString())) {
                     importJob.setUploadPercentage(uploadPercentage);
                 } else {
                     importJob.setUploadPercentage((String) uploadState.toString());

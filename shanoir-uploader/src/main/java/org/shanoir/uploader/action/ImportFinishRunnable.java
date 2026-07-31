@@ -66,7 +66,7 @@ public class ImportFinishRunnable implements Runnable {
                     logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
                 }
 
-                importJob.setUploadState(UploadState.START_AUTOIMPORT);
+                importJob.setUploadState(UploadState.START_IMPORT_JOB);
                 NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
                 importJobManager.writeImportJob(importJob);
                 logger.info(uploadFolder.getName() + " scheduled for upload.");

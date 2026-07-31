@@ -50,8 +50,8 @@ public class CurrentUploadsWindowTable implements Observer {
     public int patientNameColumn = 2;
     public int uploadStateColumn = 6;
     public String readyUploadState = UploadState.READY.toString();
-    public String startUploadState = UploadState.START.toString();
-    public String startAutoImportUploadState = UploadState.START_AUTOIMPORT.toString();
+    public String startImportJobUploadState = UploadState.START_IMPORT_JOB.toString();
+    public String uploadingImagesUploadState = UploadState.UPLOADING_IMAGES.toString();
     public String serverProcessingUploadState = UploadState.SERVER_PROCESSING.toString();    
     public String finishedUploadState = UploadState.FINISHED.toString();
     public String errorUploadState = UploadState.ERROR.toString();
@@ -163,7 +163,7 @@ public class CurrentUploadsWindowTable implements Observer {
                 actionImport,
                 actionDelete
             };
-            case FINISHED -> new Object[] {
+            case UPLOADING_IMAGES, FINISHED -> new Object[] {
                 key,
                 nominativeDataImportJob.getSubject().getIdentifier(),
                 nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),

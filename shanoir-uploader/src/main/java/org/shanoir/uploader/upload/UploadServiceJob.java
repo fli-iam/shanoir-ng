@@ -127,7 +127,7 @@ public class UploadServiceJob {
             return;
         }
         final UploadState uploadState = importJob.getUploadState();
-        if (uploadState.equals(UploadState.START) || uploadState.equals(UploadState.START_AUTOIMPORT)) {
+        if (uploadState.equals(UploadState.START_IMPORT_JOB)) {
             long startTime = System.currentTimeMillis();
             processStartForServer(folder, filesToTransfer, importJob, importJobManager,
                     currentNominativeDataController);
@@ -187,6 +187,8 @@ public class UploadServiceJob {
     private void uploadFilesInParallel(final File folder, final Collection<File> allFiles, final String tempDirId,
             final ImportJobBase importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
             final CurrentNominativeDataController currentNominativeDataController) throws Exception {
+
+        importJob.setUploadState(UploadState.UPLOADING_IMAGES);
 
         final int total = allFiles.size();
         final AtomicInteger completedCount = new AtomicInteger(0);
@@ -258,7 +260,6 @@ public class UploadServiceJob {
                     importJob.setUploadState(UploadState.FINISHED);
                     importJob.setTimestamp(System.currentTimeMillis());
                     nominativeDataImportJobManager.writeImportJob(importJob);
-
                     String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
                     if (!Boolean.parseBoolean(value)) {
                         deleteAllDicomFiles(folder, allFiles);
@@ -303,7 +304,7 @@ public class UploadServiceJob {
                 FileUtils.deleteQuietly(file.getParentFile());
             }
         }
-        LOG.info("All DICOM files deleted after successful upload to server.");
+        LOG.info("All DICOM files deleted after upload to server.");
     }
 
 }
