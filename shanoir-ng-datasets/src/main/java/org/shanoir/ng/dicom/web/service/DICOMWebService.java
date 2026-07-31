@@ -50,6 +50,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -230,22 +231,33 @@ public class DICOMWebService {
             HttpGet httpGet = new HttpGet(url);
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 HttpEntity entity = response.getEntity();
-                if (entity != null) {
+                HttpStatusCode statusCode = HttpStatusCode.valueOf(response.getCode());
+                // the PACS answers 206 in case only a part of the frames could be
+                // retrieved, so accept all 2xx here and forward the code as it is
+                if (statusCode.is2xxSuccessful() && entity != null) {
                     byte[] dicomBytes = EntityUtils.toByteArray(entity);
                     ByteArrayResource byteArrayResource = new ByteArrayResource(dicomBytes);
                     HttpHeaders responseHeaders = new HttpHeaders();
+                    // the PACS answers with multipart/related, a boundary and the
+                    // transfer syntax of the pixel data: the viewer selects its
+                    // decoder from this header, so it has to arrive unchanged
+                    if (entity.getContentType() != null) {
+                        responseHeaders.set(HttpHeaders.CONTENT_TYPE, entity.getContentType());
+                    }
                     if (!entity.isChunked() && entity.getContentLength() >= 0) {
                         responseHeaders.setContentLength(dicomBytes.length);
                     }
-                    return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
+                    return new ResponseEntity(byteArrayResource, responseHeaders, statusCode);
                 } else {
-                    LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: empty response entity.");
+                    LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: status {} for url {}",
+                            response.getCode(), url);
+                    return ResponseEntity.status(statusCode).build();
                 }
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        return null;
+        return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
