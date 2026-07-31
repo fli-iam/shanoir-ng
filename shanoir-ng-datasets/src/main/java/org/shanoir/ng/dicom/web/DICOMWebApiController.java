@@ -271,6 +271,10 @@ public class DICOMWebApiController implements DICOMWebApi {
             for (Map.Entry<String, String> seriesToVirtualUID : seriesToVirtualUIDs.entrySet()) {
                 seriesInstanceUIDHandler.replaceSeriesInstanceUID(root, seriesToVirtualUID.getKey(), seriesToVirtualUID.getValue());
             }
+            // the study is referenced from within sequences as well, e.g. by an
+            // RT Structure Set in the RTReferencedStudySequence, and the viewer
+            // only knows the examinationUID
+            studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUID(root, studyInstanceUID, examinationUID);
             rewriteBulkDataURIs(root, studyInstanceUID, examinationUID, serieInstanceUID, serieId);
             return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
         } else {
