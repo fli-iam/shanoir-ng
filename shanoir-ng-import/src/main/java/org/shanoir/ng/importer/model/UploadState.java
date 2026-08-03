@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 @JsonFormat(shape = JsonFormat.Shape.STRING)
 public enum UploadState {
     READY,
+    START_AUTOIMPORT, // Keep only for retro-compatibility, remove later
     START_IMPORT_JOB,
     SERVER_PROCESSING,
     FINISHED,
