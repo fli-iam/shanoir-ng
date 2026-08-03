@@ -129,7 +129,7 @@ public class ImporterService {
                 examination.getDatasetAcquisitions().addAll(generatedAcquisitions);
                 generatedAcquisitions = new HashSet<>(datasetAcquisitionService.createAll(generatedAcquisitions));
                 try {
-                    persistPatientInPacs(importJob.getPatients(), event);
+                    persistSeriesInPacs(importJob.getSeries(), event);
                 } catch (Exception e) { // if error in pacs
                     // revert dataset acquisitions
                     for (DatasetAcquisition acquisition : generatedAcquisitions) {
@@ -220,13 +220,8 @@ public class ImporterService {
         QualityCardResult qualityResult = new QualityCardResult();
         List<String> qualityCardNames = Collections.emptyList();
         int rank = 0;
-        // We use flatMap to get all selected series from all patients and studies in
-        // the import job
-        // as for now each importJob contains only one patient
-        List<Serie> selectedSeries = importJob.getPatients().stream()
-                .flatMap(patient -> patient.getStudies().stream())
-                .flatMap(study -> study.getSelectedSeries().stream())
-                .toList();
+
+        List<Serie> selectedSeries = importJob.getStudy().getSelectedSeries().stream().toList();
 
         int totalSeries = selectedSeries.size();
 
@@ -242,7 +237,7 @@ public class ImporterService {
                 }
                 manageStudyInstanceUIDs(examination, importJob, dicomAttributes);
 
-                    // Generate acquisition object with all sub objects : datasets, protocols,
+                // Generate acquisition object with all sub objects : datasets, protocols,
                 // expressions, ...
                 DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob,
                         dicomAttributes);
@@ -287,11 +282,6 @@ public class ImporterService {
                 event.setProgress(0.5f + (0.25f * rank / totalSeries));
                 eventService.publishEvent(event);
             }
-            rank++;
-            progress += 0.25f / importJob.getSelectedSeries().size();
-            event.setMessage("Generating Shanoir data from serie " + serie.getSeriesDescription() + " to examination " + importJob.getExaminationId());
-            event.setProgress(progress);
-            eventService.publishEvent(event);
         }
         // If all series to be imported are in error we consider that the whole import failed
         if (generatedAcquisitions.isEmpty()) {

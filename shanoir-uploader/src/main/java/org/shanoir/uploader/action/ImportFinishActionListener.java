@@ -234,7 +234,7 @@ public class ImportFinishActionListener implements ActionListener {
                 JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult),
                 ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
                 // set status ERROR if all series were unselected from importJob due to Quality Control errors
-                if (importJob.getSelectedSeries().isEmpty()) {
+                if (importJob.getSeries().isEmpty()) {
                     seriesToBeImported = false;
                     ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder,
                         UploadState.ERROR.toString());

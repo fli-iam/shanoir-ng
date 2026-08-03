@@ -34,8 +34,6 @@ import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.importer.DatasetsCreatorService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.service.QualityService;
@@ -46,6 +44,7 @@ import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.mapper.SerieMapper;
+import org.shanoir.uploader.model.mapper.StudyMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,38 +93,37 @@ public class QualityUtils {
         imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), isImportFromPACS, null, true);
 
         // Construct Dicom datasets from images
-        for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
-            List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
-            for (Iterator<org.shanoir.ng.importer.model.Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-                org.shanoir.ng.importer.model.Study study = studiesIt.next();
-                List<Serie> series = study.getSelectedSeries();
-                for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
-                    Serie serie = seriesIt.next();
-                    try {
-                        serie.setDatasets(new ArrayList<>());
-                        datasetsCreatorService.constructDicom(null, serie, true);
-                        org.shanoir.ng.importer.dto.Serie serieDto = SerieMapper.INSTANCE.toDto(serie);
-                        AcquisitionAttributes<String> dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serieDto);
+        org.shanoir.ng.importer.model.Patient patient = importJob.getPatient();
+        List<org.shanoir.ng.importer.model.Study> studies = patient.getStudies();
+        for (Iterator<org.shanoir.ng.importer.model.Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
+            org.shanoir.ng.importer.model.Study study = studiesIt.next();
+            List<Serie> series = study.getSelectedSeries();
+            for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
+                Serie serie = seriesIt.next();
+                try {
+                    serie.setDatasets(new ArrayList<>());
+                    datasetsCreatorService.constructDicom(null, serie, true);
+                    org.shanoir.ng.importer.dto.Serie serieDto = SerieMapper.INSTANCE.toDto(serie);
+                    AcquisitionAttributes<String> dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serieDto);
 
-                        DatasetAcquisition datasetAcquisition = generateDatasetAcquisitionForQualityCheck(study, serie);
+                    DatasetAcquisition datasetAcquisition = generateDatasetAcquisitionForQualityCheck(study, serie);
 
-                        QualityCardResult serieQualityCardResult = qualityService.checkQuality(datasetAcquisition, dicomAttributes, cardsToCheck);
-                        // We retrieve the worst quality tag associated with the datasetAcquisition
-                        QualityTag worstTagSet = serieQualityCardResult.getUpdatedDatasetAcquisitions().get(0).getQualityTag();
-                        // if quality card result contains an ERROR tag, we remove the serie from the selection
-                        if (!serieQualityCardResult.isEmpty() && serieQualityCardResult.hasError()) {
-                            serie.setSelected(false);
-                            importJob.getSelectedSeries().remove(serie);
-                            LOG.info("Quality Control At Import - Serie with description " + serie.getSeriesDescription() + " did not pass quality control and will not be imported.");
-                        // Handle the case where the serie passes quality control : we set the quality tag to the serie
-                        // Even if a rule with a VALID tag is fulfilled, if a failed valid is found we don't set the VALID tag
-                        } else if (!serieQualityCardResult.hasFailedValid() || QualityTag.WARNING.equals(worstTagSet)) {
-                            serie.setQualityTag(worstTagSet);
-                        }
-                        qualityCardResult.merge(serieQualityCardResult);
-                    } catch (SecurityException e) {
-                        LOG.error(e.getMessage());
+                    QualityCardResult serieQualityCardResult = qualityService.checkQuality(datasetAcquisition, dicomAttributes, cardsToCheck);
+                    // We retrieve the worst quality tag associated with the datasetAcquisition
+                    QualityTag worstTagSet = serieQualityCardResult.getUpdatedDatasetAcquisitions().get(0).getQualityTag();
+                    // if quality card result contains an ERROR tag, we remove the serie from the selection
+                    if (!serieQualityCardResult.isEmpty() && serieQualityCardResult.hasError()) {
+                        serie.setSelected(false);
+                        importJob.getSeries().remove(serie);
+                        LOG.info("Quality Control At Import - Serie with description " + serie.getSeriesDescription() + " did not pass quality control and will not be imported.");
+                    // Handle the case where the serie passes quality control : we set the quality tag to the serie
+                    // Even if a rule with a VALID tag is fulfilled, if a failed valid is found we don't set the VALID tag
+                    } else if (!serieQualityCardResult.hasFailedValid() || QualityTag.WARNING.equals(worstTagSet)) {
+                        serie.setQualityTag(worstTagSet);
                     }
+                    qualityCardResult.merge(serieQualityCardResult);
+                } catch (SecurityException e) {
+                    LOG.error(e.getMessage());
                 }
             }
         }

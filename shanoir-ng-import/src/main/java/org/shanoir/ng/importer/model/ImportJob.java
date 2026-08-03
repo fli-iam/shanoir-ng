@@ -19,8 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.shanoir.ng.importer.dicom.query.DicomQuery;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -56,92 +54,6 @@ public class ImportJob extends ImportJobBase implements Serializable {
     // series selected for import with this (legacy) import job
     private List<Serie> selectedSeries;
 
-    // Shanoir study
-    private Long studyId;
-
-    private String studyName;
-
-    private Long studyCardId;
-
-    private String studyCardName;
-
-    private Long acquisitionEquipmentId;
-
-    // subject: use already existing
-    private String subjectName;
-
-    // subject: create new subject in ms studies based on these values
-    private Subject subject;
-
-    // examination: use already existing
-    private Long examinationId;
-
-    private String examinationComment;
-
-    private Boolean examinationDataReuseAgreement;
-
-    private String anonymisationProfileToUse;
-
-    private String archive;
-
-    private ShanoirEvent shanoirEvent;
-
-    private Long userId;
-
-    private String username;
-
-    private Long centerId;
-
-    private String errorMessage;
-
-    // Used by ShanoirUploader to store the upload state
-    private UploadState uploadState;
-
-    // Used by ShanoirUploader to store the upload percentage
-    private String uploadPercentage;
-
-    private String studyInstanceUID;
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public String getArchive() {
-        return archive;
-    }
-
-    public void setArchive(final String archive) {
-        this.archive = archive;
-    }
-
-    public boolean isFromDicomZip() {
-        return fromDicomZip;
-    }
-
-    public void setFromDicomZip(final boolean fromDicomZip) {
-        this.fromDicomZip = fromDicomZip;
-    }
-
-    public boolean isFromShanoirUploader() {
-        return fromShanoirUploader;
-    }
-
-    public void setFromShanoirUploader(final boolean fromShanoirUploader) {
-        this.fromShanoirUploader = fromShanoirUploader;
-    }
-
-    public boolean isFromPacs() {
-        return fromPacs;
-    }
-
-    public void setFromPacs(final boolean fromPacs) {
-        this.fromPacs = fromPacs;
-    }
-
     public List<Patient> getPatients() {
         return patients;
     }
@@ -156,54 +68,6 @@ public class ImportJob extends ImportJobBase implements Serializable {
 
     public void setSelectedSeries(List<Serie> selectedSeries) {
         this.selectedSeries = selectedSeries;
-    }
-
-    public DicomQuery getDicomQuery() {
-        return dicomQuery;
-    }
-
-    public void setDicomQuery(DicomQuery dicomQuery) {
-        this.dicomQuery = dicomQuery;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
-
-    public String getExaminationComment() {
-        return examinationComment;
-    }
-
-    public void setExaminationComment(String examinationComment) {
-        this.examinationComment = examinationComment;
-    }
-
-    public PatientVerification getPatientVerification() {
-        return patientVerification;
-    }
-
-    public void setPatientVerification(PatientVerification patientVerification) {
-        this.patientVerification = patientVerification;
-    }
-
-    public UploadState getUploadState() {
-        return uploadState;
-    }
-
-    public void setUploadState(UploadState uploadState) {
-        this.uploadState = uploadState;
-    }
-
-    public String getUploadPercentage() {
-        return uploadPercentage;
-    }
-
-    public void setUploadPercentage(String uploadPercentage) {
-        this.uploadPercentage = uploadPercentage;
     }
 
     @Override
