@@ -140,7 +140,7 @@ public class DatasetApiSecurityTest {
         given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
         Set<Long> ids = Mockito.anySet();
         given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
-        assertAccessDenied(api::deleteDataset, 1L);
+        assertAccessDenied(api::deleteDataset, 1L, false);
         assertAccessDenied(api::findDatasetById, 1L);
         assertAccessDenied(api::findDatasets, PageRequest.of(0, 10));
         assertAccessDenied(api::downloadDatasetById, 1L, 1L, "dcm", new MockHttpServletResponse());
@@ -164,7 +164,7 @@ public class DatasetApiSecurityTest {
     @Test
     @WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
     public void testAsAdmin() throws ShanoirException, RestServiceException {
-        assertAccessAuthorized(api::deleteDataset, 1L);
+        assertAccessAuthorized(api::deleteDataset, 1L, false);
         assertAccessAuthorized(api::findDatasetById, 1L);
         assertAccessAuthorized(api::findDatasets, PageRequest.of(0, 10));
         assertAccessAuthorized(api::downloadDatasetById, 1L, 1L, "dcm", new MockHttpServletResponse());
@@ -175,11 +175,11 @@ public class DatasetApiSecurityTest {
         //deleteDataset(Long)
         given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
         if ("ROLE_USER".equals(role)) {
-            assertAccessDenied(api::deleteDataset, 1L);
+            assertAccessDenied(api::deleteDataset, 1L, false);
         } else if ("ROLE_EXPERT".equals(role)) {
             DatasetRightsDTO drv = mockDatasetRightsDTO(100L, 1L, 1L);
             given(datasetRepository.findRightsDtoBaseById(1L)).willReturn(drv);
-            assertAccessAuthorized(api::deleteDataset, 1L);
+            assertAccessAuthorized(api::deleteDataset, 1L, false);
         }
 
         //deleteDatasets(List<Long>)
@@ -190,10 +190,17 @@ public class DatasetApiSecurityTest {
         su1.setCenterIds(Arrays.asList(new Long[]{1L}));
         given(rightsService.getUserRights()).willReturn(new UserRights(Arrays.asList(su1)));
         if ("ROLE_USER".equals(role)) {
-            assertAccessDenied(api::deleteDatasets, Utils.toList(1L, 2L, 3L, 4L));
-            assertAccessDenied(api::deleteDatasets, Utils.toList(1L, 3L));
+            assertAccessDenied(api::deleteDatasets, Utils.toList(1L, 2L, 3L, 4L), false);
+            assertAccessDenied(api::deleteDatasets, Utils.toList(1L, 3L), false);
         } else if ("ROLE_EXPERT".equals(role)) {
-            assertAccessAuthorized(api::deleteDatasets, Utils.toList(1L));
+            assertAccessAuthorized(api::deleteDatasets, Utils.toList(1L), false);
+        }
+
+        //findAcquisitionsLeftEmptyBy(List<Long>)
+        if ("ROLE_USER".equals(role)) {
+            assertAccessDenied(api::findAcquisitionsLeftEmptyBy, Utils.toList(1L, 2L, 3L, 4L));
+        } else if ("ROLE_EXPERT".equals(role)) {
+            assertAccessAuthorized(api::findAcquisitionsLeftEmptyBy, Utils.toList(1L));
         }
 
         //findDatasetById(Long)

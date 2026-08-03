@@ -19,10 +19,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -174,7 +176,7 @@ public class DatasetApiController implements DatasetApi {
 
     @Override
     public ResponseEntity<Void> deleteDataset(
-            final Long datasetId) throws EntityNotFoundException, RestServiceException {
+            final Long datasetId, final boolean deleteEmptyAcquisitions) throws EntityNotFoundException, RestServiceException {
         try {
             Dataset ds = datasetService.findById(datasetId);
             if (ds == null) {
@@ -182,8 +184,12 @@ public class DatasetApiController implements DatasetApi {
             }
             LOG.info("Deletion of dataset with ID: " + ds.getId());
             Long studyId = datasetService.getStudyId(ds);
+            Long acquisitionId = ds.getDatasetAcquisition() != null ? ds.getDatasetAcquisition().getId() : null;
             datasetService.deleteById(datasetId);
             solrService.deleteFromIndex(datasetId);
+            if (deleteEmptyAcquisitions && acquisitionId != null) {
+                removeAcquisitionsLeftEmpty(Collections.singleton(acquisitionId));
+            }
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException | RestServiceException e) {
@@ -197,21 +203,51 @@ public class DatasetApiController implements DatasetApi {
     @Override
     public ResponseEntity<Void> deleteDatasets(
             @Parameter(description = "ids of the datasets", required = true) @Valid
-            @RequestBody List<Long> datasetIds)
+            @RequestBody List<Long> datasetIds, final boolean deleteEmptyAcquisitions)
             throws RestServiceException {
         try {
             if (datasetIds.size() > DATASET_LIMIT) {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.FORBIDDEN.value(), "This selection includes " + datasetIds.size() + " datasets. You can't delete more than " + DATASET_LIMIT + " datasets."));
             }
+            // the parents have to be collected before their datasets are gone
+            Set<Long> acquisitionIds = deleteEmptyAcquisitions ? findParentAcquisitionIds(datasetIds) : Collections.emptySet();
             datasetService.deleteByIdIn(datasetIds);
             solrService.deleteFromIndex(datasetIds);
+            removeAcquisitionsLeftEmpty(acquisitionIds);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RestServiceException e) {
             throw e;
         } catch (Exception e) {
             ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while deleting dataset. Please check DICOM server configuration.", e.getMessage());
             throw new RestServiceException(e, error);
+        }
+    }
+
+    private Set<Long> findParentAcquisitionIds(List<Long> datasetIds) {
+        return datasetService.findByIdIn(datasetIds).stream()
+                .map(Dataset::getDatasetAcquisition)
+                .filter(Objects::nonNull)
+                .map(DatasetAcquisition::getId)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Removes the acquisitions that the deletion has just left empty, once and for all of them.
+     * A failure here does not fail the deletion: the datasets are already gone, only their now
+     * empty parent is left behind.
+     *
+     * @param acquisitionIds the acquisitions the deleted datasets belonged to
+     */
+    private void removeAcquisitionsLeftEmpty(Collection<Long> acquisitionIds) {
+        for (Long acquisitionId : acquisitionIds) {
+            try {
+                if (datasetAcquisitionService.isEmptyAndRemovable(acquisitionId)) {
+                    datasetAcquisitionService.deleteEmptyAcquisition(acquisitionId);
+                }
+            } catch (Exception e) {
+                LOG.warn("Could not remove the dataset acquisition {} left empty by the deletion of its datasets", acquisitionId, e);
+            }
         }
     }
 
