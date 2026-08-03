@@ -100,6 +100,18 @@ public interface DatasetAcquisitionService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
     void deleteEmptyAcquisition(Long id) throws EntityNotFoundException, RestServiceException;
 
+    /**
+     * Finds the acquisitions that would not hold any dataset anymore once the given datasets are
+     * deleted, and that may then be removed automatically. Acquisitions holding extra data or
+     * copied to another study are left out: they are meant to survive the deletion.
+     *
+     * @param datasetIds the datasets about to be deleted
+     * @return the acquisitions that the deletion would leave empty and removable
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_ADMINISTRATE')")
+    List<DatasetAcquisition> findAcquisitionsLeftEmptyBy(List<Long> datasetIds);
+
     boolean existsByStudyCardId(Long studyCardId);
 
     Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);

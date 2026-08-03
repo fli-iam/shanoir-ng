@@ -388,6 +388,33 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return CollectionUtils.isEmpty(repository.findBySourceId(entity.getId()));
     }
 
+    @Override
+    public List<DatasetAcquisition> findAcquisitionsLeftEmptyBy(List<Long> datasetIds) {
+        if (CollectionUtils.isEmpty(datasetIds)) {
+            return Collections.emptyList();
+        }
+        // number of datasets about to be deleted, per acquisition
+        Map<Long, Long> deletedCountByAcquisitionId = new HashMap<>();
+        for (Dataset dataset : datasetRepository.findAllById(datasetIds)) {
+            if (dataset.getDatasetAcquisition() != null) {
+                deletedCountByAcquisitionId.merge(dataset.getDatasetAcquisition().getId(), 1L, Long::sum);
+            }
+        }
+        if (deletedCountByAcquisitionId.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<DatasetAcquisition> leftEmpty = new ArrayList<>();
+        for (Object[] count : datasetRepository.countByDatasetAcquisitionIdIn(new ArrayList<>(deletedCountByAcquisitionId.keySet()))) {
+            Long acquisitionId = (Long) count[0];
+            Long datasetsHeld = (Long) count[1];
+            // the acquisition is left empty when all the datasets it holds are being deleted
+            if (datasetsHeld.equals(deletedCountByAcquisitionId.get(acquisitionId))) {
+                repository.findById(acquisitionId).filter(this::isRemovable).ifPresent(leftEmpty::add);
+            }
+        }
+        return leftEmpty;
+    }
+
     /**
      * Deletes an acquisition that does not hold any dataset anymore. Contrary to
      * {@link #deleteById(Long, ShanoirEvent)} this does not reject the series from the pacs:

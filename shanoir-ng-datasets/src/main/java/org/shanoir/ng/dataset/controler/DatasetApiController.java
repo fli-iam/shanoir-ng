@@ -43,7 +43,10 @@ import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.CsvCopyService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -84,6 +87,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -159,6 +163,12 @@ public class DatasetApiController implements DatasetApi {
     @Autowired
     private StorageService storageService;
 
+    @Autowired
+    private DatasetAcquisitionService datasetAcquisitionService;
+
+    @Autowired
+    private ExaminationDatasetAcquisitionMapper examinationDatasetAcquisitionMapper;
+
     /** Number of downloadable datasets. */
     private static final int DATASET_LIMIT = 500;
 
@@ -203,6 +213,19 @@ public class DatasetApiController implements DatasetApi {
             ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while deleting dataset. Please check DICOM server configuration.", e.getMessage());
             throw new RestServiceException(e, error);
         }
+    }
+
+    @Override
+    public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findAcquisitionsLeftEmptyBy(
+            @Parameter(description = "ids of the datasets about to be deleted", required = true) @Valid
+            @RequestBody List<Long> datasetIds) {
+        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findAcquisitionsLeftEmptyBy(datasetIds);
+        if (CollectionUtils.isEmpty(acquisitions)) {
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(
+                examinationDatasetAcquisitionMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(acquisitions),
+                HttpStatus.OK);
     }
 
     @Override
