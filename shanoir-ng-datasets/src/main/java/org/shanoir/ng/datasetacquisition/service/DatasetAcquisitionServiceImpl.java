@@ -415,6 +415,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return leftEmpty;
     }
 
+    @Override
+    public List<DatasetAcquisition> findEmptyAcquisitions(Long studyId) {
+        List<DatasetAcquisition> empty = studyId != null ? repository.findEmptyByStudyId(studyId) : repository.findEmpty();
+        return empty.stream().filter(this::isRemovable).toList();
+    }
+
     /**
      * Deletes an acquisition that does not hold any dataset anymore. Contrary to
      * {@link #deleteById(Long, ShanoirEvent)} this does not reject the series from the pacs:

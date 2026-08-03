@@ -16,6 +16,8 @@ package org.shanoir.ng.datasetacquisition.controler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -63,6 +65,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -251,6 +254,30 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             LOG.error("Error while deleting dataset acquisition: ", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findEmptyDatasetAcquisitions(Long studyId) {
+        List<DatasetAcquisition> empty = datasetAcquisitionService.findEmptyAcquisitions(studyId);
+        if (CollectionUtils.isEmpty(empty)) {
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(empty), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<Long>> deleteEmptyDatasetAcquisitions(Long studyId) {
+        List<Long> deleted = new ArrayList<>();
+        for (DatasetAcquisition acquisition : datasetAcquisitionService.findEmptyAcquisitions(studyId)) {
+            try {
+                datasetAcquisitionService.deleteEmptyAcquisition(acquisition.getId());
+                deleted.add(acquisition.getId());
+            } catch (EntityNotFoundException | RestServiceException e) {
+                LOG.warn("Could not remove the empty dataset acquisition {}", acquisition.getId(), e);
+            }
+        }
+        LOG.info("Clean up of empty dataset acquisitions: {} removed", deleted.size());
+        return new ResponseEntity<>(deleted, HttpStatus.OK);
     }
 
     @Override

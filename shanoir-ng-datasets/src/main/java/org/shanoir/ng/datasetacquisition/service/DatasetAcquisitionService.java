@@ -112,6 +112,16 @@ public interface DatasetAcquisitionService {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_ADMINISTRATE')")
     List<DatasetAcquisition> findAcquisitionsLeftEmptyBy(List<Long> datasetIds);
 
+    /**
+     * Finds the acquisitions that hold no dataset at all and that may be removed. Meant for the
+     * clean up of the acquisitions emptied before their removal was proposed on deletion.
+     *
+     * @param studyId the study to look into, or null to look into all of them
+     * @return the empty and removable acquisitions
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    List<DatasetAcquisition> findEmptyAcquisitions(Long studyId);
+
     boolean existsByStudyCardId(Long studyCardId);
 
     Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);

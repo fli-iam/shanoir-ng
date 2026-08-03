@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -85,6 +86,30 @@ public interface DatasetAcquisitionApi {
     ResponseEntity<Void> deleteDatasetAcquisition(
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
             throws RestServiceException;
+
+    @Operation(summary = "", description = "Returns the dataset acquisitions that hold no dataset at all and that may be removed. Dry run of the deletion below.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @RequestMapping(value = "/datasetacquisition/empty", produces = {"application/json"}, method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findEmptyDatasetAcquisitions(
+            @Parameter(description = "id of the study to clean up, all of them when not given")
+            @RequestParam(value = "studyId", required = false) Long studyId);
+
+    @Operation(summary = "", description = "Deletes the dataset acquisitions that hold no dataset at all and that may be removed")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "dataset acquisitions deleted"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @RequestMapping(value = "/datasetacquisition/empty", produces = {"application/json"}, method = RequestMethod.DELETE)
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<List<Long>> deleteEmptyDatasetAcquisitions(
+            @Parameter(description = "id of the study to clean up, all of them when not given")
+            @RequestParam(value = "studyId", required = false) Long studyId);
 
     @Operation(summary = "", description = "If exists, returns the datasetAcquisition corresponding to the given id")
     @ApiResponses(value = {
