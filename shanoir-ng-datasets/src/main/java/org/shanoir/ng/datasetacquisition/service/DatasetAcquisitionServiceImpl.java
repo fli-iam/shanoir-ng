@@ -29,6 +29,7 @@ import java.util.stream.StreamSupport;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
@@ -97,6 +98,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired
+    private DatasetRepository datasetRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
 
@@ -358,6 +362,68 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
         repository.deleteById(id);
         shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+    }
+
+    @Override
+    public boolean isEmptyAndRemovable(Long id) throws EntityNotFoundException {
+        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        if (entity == null) {
+            throw new EntityNotFoundException("Cannot find entity with id = " + id);
+        }
+        return datasetRepository.countByDatasetAcquisitionId(id) == 0 && isRemovable(entity);
+    }
+
+    /**
+     * An emptied acquisition may only be removed automatically when it does not carry any data
+     * of its own: extra-data files are uploaded on the acquisition itself and would be lost,
+     * and a copy keeps a reference to the acquisition it was copied from.
+     *
+     * @param entity the acquisition
+     * @return true when nothing but datasets is attached to this acquisition
+     */
+    private boolean isRemovable(DatasetAcquisition entity) {
+        if (!CollectionUtils.isEmpty(entity.getExtraDataFilePathList())) {
+            return false;
+        }
+        return CollectionUtils.isEmpty(repository.findBySourceId(entity.getId()));
+    }
+
+    /**
+     * Deletes an acquisition that does not hold any dataset anymore. Contrary to
+     * {@link #deleteById(Long, ShanoirEvent)} this does not reject the series from the pacs:
+     * every dataset of the acquisition has already been deleted one by one, and each of those
+     * deletions rejected its own files, so nothing is left in the pacs to reject here.
+     */
+    @Override
+    @Transactional
+    public void deleteEmptyAcquisition(Long id) throws EntityNotFoundException, RestServiceException {
+        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        if (entity == null) {
+            throw new EntityNotFoundException("Cannot find entity with id = " + id);
+        }
+        if (datasetRepository.countByDatasetAcquisitionId(id) != 0) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This datasetAcquisition still holds datasets, it can not be removed as an empty one."
+                    ));
+        }
+        if (!isRemovable(entity)) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This datasetAcquisition holds extra data or has been copied, it can not be removed automatically."
+                    ));
+        }
+        Long studyId = entity.getExamination() != null ? entity.getExamination().getStudyId() : null;
+        try {
+            storageService.deleteDirectoryAcquisitionExtraData(id);
+        } catch (StorageException e) {
+            LOG.warn("Could not delete extra-data directory for dataset acquisition {}", id, e);
+        }
+        repository.deleteById(id);
+        LOG.info("Empty dataset acquisition with id {} has been removed", id);
+        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
     }
 
     @Override

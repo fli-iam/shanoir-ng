@@ -81,6 +81,25 @@ public interface DatasetAcquisitionService {
 
     void deleteByIdCascade(Long id, ShanoirEvent event) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException, RestServiceException;
 
+    /**
+     * Tells whether an acquisition holds no dataset anymore and may be removed automatically.
+     * An acquisition is only removable when it carries no data of its own: no extra-data file
+     * uploaded on the acquisition itself, and no copy pointing to it as its source.
+     *
+     * @param id the acquisition id
+     * @return true when the acquisition is empty and may be removed
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
+    boolean isEmptyAndRemovable(Long id) throws EntityNotFoundException;
+
+    /**
+     * Deletes an acquisition that does not hold any dataset anymore.
+     *
+     * @param id the acquisition id
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
+    void deleteEmptyAcquisition(Long id) throws EntityNotFoundException, RestServiceException;
+
     boolean existsByStudyCardId(Long studyCardId);
 
     Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);
