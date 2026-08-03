@@ -155,6 +155,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>dcm4che-dcmr</artifactId>
 			<version>${dcm4che.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>org.dcm4che.tool</groupId>
+            <artifactId>dcm4che-tool-dcmqrscp</artifactId>
+            <version>${dcm4che.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.dcm4che.tool</groupId>
+            <artifactId>dcm4che-tool-storescu</artifactId>
+            <version>${dcm4che.version}</version>
+            <scope>test</scope>
+        </dependency>
 		<!-- Used by local DICOM server: DICOM Weasis Tools, based on dcm4che3 -->
 		<dependency>
 			<groupId>org.weasis</groupId>
@@ -257,17 +269,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		    <version>${jackson.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>jakarta.xml.bind</groupId>
-		    <artifactId>jakarta.xml.bind-api</artifactId>
-		    <version>4.0.0</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.sun.xml.bind</groupId>
-		    <artifactId>jaxb-impl</artifactId>
-		    <version>4.0.0</version>
-		    <scope>runtime</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<version>${lombok.version}</version>
@@ -340,19 +341,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	</dependencies>
 
 	<repositories>
-		<repository>
-			<id>jboss</id>
-			<name>JBoss Release Repository</name>
-			<url>https://repository.jboss.org/maven2</url>
-		</repository>
-		<repository>
-			<id>dcm4che-snapshots</id>
-			<name>Dcm4Che Snapshots</name>
-			<url>https://www.dcm4che.org/maven2/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
+        <repository>
+            <id>dcm4che-maven2</id>
+            <name>dcm4che Repository</name>
+            <url>https://maven.dcm4che.org/</url>
+        </repository>
 		<repository>
 			<id>mvn-repo-master</id>
 			<url>https://raw.github.com/nroduit/mvn-repo/master/</url>

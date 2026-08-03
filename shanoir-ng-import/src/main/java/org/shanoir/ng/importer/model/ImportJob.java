@@ -25,59 +25,35 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * One ImportJob is related to the import of ONE DICOM STUDY,
- * which equals ONE EXAM in Shanoir. We are doing this, as one
- * DICOM study can have a size of up to 10Gb nowadays. This means
- * we process already a huge amount of data for one import, that
- * can take up to 30-45 minutes. There is no sense in extending this
- * further for the future to anything like multi-exam in one import,
- * so the model has to be kept:
- * 1 ImportJob (1 DICOM study/exam) - 1 subject relation
- *                                  - 1 exam relation
- * If an ImportJob contains a subject object, it means to create one
- * in ms studies during the import.
- * If it contains a subjectName, an existing subject is to use.
- * Same logic for the exams.
+ * Attention: still used and necessary for ImportFromTableRunner, where
+ * we need to work with multiple-patients coming back from DICOM server.
  *
- * Therefore one ImportJob contains as well the DICOM StudyInstanceUID
- * of the DICOM study (== examination in Shanoir). This is required to
- * use the same UID in MS Import (pseudo) and in MS Datasets (exam).
+ * (Legacy) import job model, kept alive to operate ongoing legacy imports
+ * while new code is migrated to {@link ImportJobBase}. In addition to
+ * everything in {@link ImportJobBase}, this class still carries:
+ * <ul>
+ * <li>{@code patients}: legacy list, kept only because some old code
+ * paths still read the DICOM hierarchy through it (@todo: remove
+ * once those callers are migrated to {@code series}/{@code study})</li>
+ * <li>{@code selectedSeries}: still populated by the legacy import
+ * flow; equivalent in purpose to {@link ImportJobBase#getSeries()}
+ * but kept separate until legacy callers are migrated</li>
+ * </ul>
  *
- * @todo: later we will remove the patients list from here, that is a
- * legacy error, that has to be corrected, e.g. move the subject out into
- * import job as written above.
+ * Once all legacy imports have migrated to the {@code ImportJobBase}
+ * shape, this class can be deleted and {@code ImportJobBase} renamed
+ * to {@code ImportJob}.
  *
  * @author mkain
  */
-public class ImportJob implements Serializable {
+public class ImportJob extends ImportJobBase implements Serializable {
 
-    private static final long serialVersionUID = 8804929608059674037L;
-
-    private long timestamp;
-
-    /* DicomQuery, that has been used to extract the DICOM study = ImportJob */
-    private DicomQuery dicomQuery;
-
-    private boolean fromDicomZip;
-
-    private boolean fromShanoirUploader;
-
-    private boolean fromPacs;
-
-    private String workFolder;
+    private static final long serialVersionUID = 1L;
 
     // @todo: remove this list here later
     private List<Patient> patients;
 
-    // DICOM patient for this import job
-    private Patient patient;
-
-    private PatientVerification patientVerification;
-
-    // DICOM study for this import job
-    private Study study;
-
-    // series to import with this import job
+    // series selected for import with this (legacy) import job
     private List<Serie> selectedSeries;
 
     // Shanoir study
@@ -174,134 +150,6 @@ public class ImportJob implements Serializable {
         this.patients = patients;
     }
 
-    public Long getExaminationId() {
-        return examinationId;
-    }
-
-    public void setExaminationId(final Long examinationId) {
-        this.examinationId = examinationId;
-    }
-
-    public String getWorkFolder() {
-        return workFolder;
-    }
-
-    public void setWorkFolder(String workFolder) {
-        this.workFolder = workFolder;
-    }
-
-    public Long getStudyId() {
-        return studyId;
-    }
-
-    public void setStudyId(final Long studyId) {
-        this.studyId = studyId;
-    }
-
-    public String getStudyCardName() {
-        return studyCardName;
-    }
-
-    public void setStudyCardName(String studyCardName) {
-        this.studyCardName = studyCardName;
-    }
-
-    public Long getAcquisitionEquipmentId() {
-        return acquisitionEquipmentId;
-    }
-
-    public void setAcquisitionEquipmentId(final Long acquisitionEquipmentId) {
-        this.acquisitionEquipmentId = acquisitionEquipmentId;
-    }
-
-    public Long getStudyCardId() {
-        return studyCardId;
-    }
-
-    public void setStudyCardId(Long studyCardId) {
-        this.studyCardId = studyCardId;
-    }
-
-    public String getAnonymisationProfileToUse() {
-        return anonymisationProfileToUse;
-    }
-
-    public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
-        this.anonymisationProfileToUse = anonymisationProfileToUse;
-    }
-
-    public String getSubjectName() {
-        return subjectName;
-    }
-
-    public void setSubjectName(String subjectName) {
-        this.subjectName = subjectName;
-    }
-
-    public String getStudyName() {
-        return studyName;
-    }
-
-    public void setStudyName(String studyName) {
-        this.studyName = studyName;
-    }
-
-    public ShanoirEvent getShanoirEvent() {
-        return shanoirEvent;
-    }
-
-    public void setShanoirEvent(ShanoirEvent shanoirEvent) {
-        this.shanoirEvent = shanoirEvent;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public Long getCenterId() {
-        return centerId;
-    }
-
-    public void setCenterId(Long centerId) {
-        this.centerId = centerId;
-    }
-
-    public Subject getSubject() {
-        return subject;
-    }
-
-    public void setSubject(Subject subject) {
-        this.subject = subject;
-    }
-
-    public Study getStudy() {
-        return study;
-    }
-
-    public void setStudy(Study study) {
-        this.study = study;
-    }
-
-    public Patient getPatient() {
-        return patient;
-    }
-
-    public void setPatient(Patient patient) {
-        this.patient = patient;
-    }
-
     public List<Serie> getSelectedSeries() {
         return selectedSeries;
     }
@@ -361,11 +209,11 @@ public class ImportJob implements Serializable {
     @Override
     public String toString() {
         String importType;
-        if (fromDicomZip) {
+        if (isFromDicomZip()) {
             importType = "ZIP";
-        } else if (fromShanoirUploader) {
+        } else if (isFromShanoirUploader()) {
             importType = "SHUP";
-        } else if (fromPacs) {
+        } else if (isFromPacs()) {
             importType = "PACS";
         } else {
             importType = "UNSUPPORTED";
@@ -396,12 +244,16 @@ public class ImportJob implements Serializable {
                 }
             }
         }
-        return     "userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType
-            +     ",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced
-            +     ",subjectName=" + subjectName + ",examinationId=" + examinationId + ",StudyInstanceUID=" + studyInstanceUID + ",numberOfSeries=" + numberOfSeries
-            +     ",seriesNames=" + seriesNames.toString();
+        return "userId=" + getUserId() + ",studyName=" + getStudyName() + ",studyCardId=" + getStudyCardId() + ",type="
+                + importType
+                + ",workFolder=" + getWorkFolder() + ",pseudoProfile=" + getAnonymisationProfileToUse() + ",modality="
+                + modality + ",enhanced=" + enhanced
+                + ",subjectName=" + getSubjectName() + ",examinationId=" + getExaminationId() + ",StudyInstanceUID="
+                + getStudyInstanceUID() + ",numberOfSeries=" + numberOfSeries
+                + ",seriesNames=" + seriesNames.toString();
     }
 
+    @Override
     @JsonIgnore
     public Serie getFirstSerie() {
         if (CollectionUtils.isNotEmpty(selectedSeries)) {
@@ -411,16 +263,14 @@ public class ImportJob implements Serializable {
     }
 
     /**
-     * Some reconstructed DICOM series do not carry the institution and/or
-     * equipment information in their DICOM files (both can be null on such
-     * a Serie). As these values are the same for all series of one DICOM
-     * study/exam, we do not simply take the first selected serie, but look
-     * for the first selected serie that actually contains both, an
-     * InstitutionDicom and an EquipmentDicom.
+     * Legacy variant: looks up the first serie with institution and
+     * equipment set within {@code selectedSeries} rather than the
+     * {@code series} field used by {@link ImportJobBase}.
      *
      * @return the first selected Serie with both institution and equipment
      *         set, or null if none of the selected series contains both.
      */
+    @Override
     @JsonIgnore
     public Serie getFirstSerieWithInstitutionAndEquipment() {
         if (CollectionUtils.isNotEmpty(selectedSeries)) {
@@ -433,22 +283,6 @@ public class ImportJob implements Serializable {
             return selectedSeries.getFirst();
         }
         return null;
-    }
-
-    public String getStudyInstanceUID() {
-        return studyInstanceUID;
-    }
-
-    public void setStudyInstanceUID(String studyInstanceUID) {
-        this.studyInstanceUID = studyInstanceUID;
-    }
-
-    public Boolean getExaminationDataReuseAgreement() {
-        return examinationDataReuseAgreement;
-    }
-
-    public void setExaminationDataReuseAgreement(Boolean examinationDataReuseAgreement) {
-        this.examinationDataReuseAgreement = examinationDataReuseAgreement;
     }
 
 }

@@ -26,7 +26,7 @@ import javax.swing.JOptionPane;
 
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -48,8 +48,11 @@ public class DownloadOrCopyActionListener implements ActionListener {
     private static final Logger LOG = LoggerFactory.getLogger(DownloadOrCopyActionListener.class);
 
     private MainWindow mainWindow;
+    
     private ResourceBundle resourceBundle;
+    
     public Pseudonymizer pseudonymizer;
+    
     public IdentifierCalculator identifierCalculator;
 
     // Introduced here to inject into DownloadOrCopyRunnable
@@ -76,9 +79,9 @@ public class DownloadOrCopyActionListener implements ActionListener {
         if (mainWindow.dicomTree == null) {
             return;
         }
-        final Map<String, ImportJob> importJobs = mainWindow.getSAL().getImportJobs();
-        for (ImportJob importJob : importJobs.values()) {
-            if (importJob.getSelectedSeries() == null || importJob.getSelectedSeries().isEmpty()) {
+        final Map<String, ImportJobBase> importJobs = mainWindow.getSAL().getImportJobs();
+        for (ImportJobBase importJob : importJobs.values()) {
+            if (importJob.getSeries() == null || importJob.getSeries().isEmpty()) {
                 JOptionPane.showMessageDialog(mainWindow.frame,
                         "No serie selected.",
                         resourceBundle.getString("shanoir.uploader.select.error.title"),
@@ -93,7 +96,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
         Patient patient = null;
         Patient firstPatient = null;
         Subject firstSubject = null;
-        for (ImportJob importJob : importJobs.values()) {
+        for (ImportJobBase importJob : importJobs.values()) {
             // for the moment: one patient verification, extend later for n-patient verification
             patient = adjustPatientWithPatientVerificationGUIValues(importJob.getPatient());
             if (firstPatient == null) {
@@ -162,7 +165,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 
     /**
      * This method reads the data entered by the user with the GUI
-     * and puts it into a Patient object to ajdust the already existing
+     * and puts it into a Patient object to adjust the already existing
      * values coming from the DICOM, when the user clicks on the download or copy button.
      *
      * @param Patient patient

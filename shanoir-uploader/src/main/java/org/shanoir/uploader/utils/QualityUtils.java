@@ -35,6 +35,8 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.importer.DatasetsCreatorService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Dataset;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.service.QualityService;
 import org.shanoir.ng.shared.quality.QualityTag;
@@ -62,7 +64,7 @@ public class QualityUtils {
 
     private static final DatasetsCreatorService datasetsCreatorService = new DatasetsCreatorService();
 
-    public static QualityCardResult checkQualityAtImport(ImportJob importJob, boolean isImportFromPACS) throws Exception {
+    public static QualityCardResult checkQualityAtImport(ImportJobBase importJob, boolean isImportFromPACS) throws Exception {
 
         QualityCardResult qualityCardResult = new QualityCardResult();
         List<QualityCard> qualityCards = new ArrayList<>();
@@ -89,7 +91,7 @@ public class QualityUtils {
         }
 
         // Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
-        imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob.getPatients(), importJobDir.getAbsolutePath(), isImportFromPACS, null, true);
+        imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), isImportFromPACS, null, true);
 
         // Construct Dicom datasets from images
         for (org.shanoir.ng.importer.model.Patient patient : importJob.getPatients()) {
@@ -145,6 +147,25 @@ public class QualityUtils {
         scrollPane.setPreferredSize(new Dimension(800, 300));
 
         return scrollPane;
+    }
+
+    /**
+     * Convert ImportJob from import ms as used by Shanoir Uploader into Datasets ImportJob needed to call the ImporterService.checkQuality() method
+     * @param importJob
+     * @return
+     */
+    private static org.shanoir.ng.importer.dto.ImportJob convertImportJob(ImportJobBase importJob) {
+        org.shanoir.ng.importer.dto.ImportJob importJobDto = new org.shanoir.ng.importer.dto.ImportJob();
+        importJobDto.setExaminationId(importJob.getExaminationId());
+        importJobDto.setTimestamp(importJob.getTimestamp());
+        importJobDto.setFromDicomZip(importJob.isFromDicomZip());
+        importJobDto.setFromShanoirUploader(Boolean.TRUE);
+        importJobDto.setFromPacs(importJob.isFromPacs());
+        importJobDto.setWorkFolder(importJob.getWorkFolder());
+        importJobDto.setStudy(StudyMapper.INSTANCE.toDto(importJob.getStudy()));
+        importJobDto.setUserId(importJob.getUserId());
+        importJobDto.setUsername(importJob.getUsername());
+        return importJobDto;
     }
 
     public static String getQualityControlreport(QualityCardResult qualityCardResult) {
