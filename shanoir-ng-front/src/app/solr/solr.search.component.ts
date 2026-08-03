@@ -13,6 +13,7 @@
  */
 import { Clipboard } from '@angular/cdk/clipboard';
 import { formatDate } from '@angular/common';
+import { HttpParams } from '@angular/common/http';
 import { AfterContentInit, AfterViewChecked, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -34,6 +35,7 @@ import { ConsoleService } from '../shared/console/console.service';
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { MassDownloadService } from '../shared/mass-download/mass-download.service';
+import { IdName } from '../shared/models/id-name.model';
 import { Range } from '../shared/models/range.model';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
@@ -54,7 +56,7 @@ export type TextualFacet = typeof TextualFacetNames[number];
     selector: 'solr-search',
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, SolrPagingCriterionComponent, DatepickerComponent, SolrRangeCriterionComponent, SolrTextSearchComponent, 
+    imports: [FormsModule, ReactiveFormsModule, SolrPagingCriterionComponent, DatepickerComponent, SolrRangeCriterionComponent, SolrTextSearchComponent,
         SolrTextSearchModeComponent, LoadingBarComponent, TableComponent]
 })
 
@@ -410,32 +412,41 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     protected openDeleteConfirmDialog = (solrDocument: SolrDocument) => {
-        this.confirmDialogService
+
+        const datasetId: number = parseInt(solrDocument.datasetId);
+        this.datasetService.getAcquisitionsLeftEmptyBy([datasetId])
+            .catch(() => [] as IdName[])
+            .then(emptied => this.confirmDialogService
             .confirm(
                 'Delete dataset',
                 'Are you sure you want to delete the dataset "'
                     + solrDocument.datasetName
                     + '" with id n° ' + solrDocument.datasetId + ' ?'
+                    + (emptied.length > 0 ? this.datasetService.getEmptyAcquisitionsMessage(emptied) : '')
             ).then(res => {
                 if (res) {
-                    this.datasetService.delete(parseInt(solrDocument.datasetId)).then(() => {
-                        this.selectedDatasetIds.delete(parseInt(solrDocument.datasetId));
+                    this.datasetService.delete(datasetId, new HttpParams().set('deleteEmptyAcquisitions', emptied.length > 0)).then(() => {
+                        this.selectedDatasetIds.delete(datasetId);
                         this.table.refresh().then(() => {
                             this.consoleService.log('info', 'Dataset n°' + solrDocument.datasetId + 'was sucessfully deleted');
                         });
                     });
                 }
-            })
+            }))
     }
 
     protected openDeleteSelectedConfirmDialog = () => {
-        this.confirmDialogService
+        const datasetIds: number[] = [...this.selectedDatasetIds];
+        this.datasetService.getAcquisitionsLeftEmptyBy(datasetIds)
+            .catch(() => [] as IdName[])
+            .then(emptied => this.confirmDialogService
             .confirm(
                 'Delete dataset',
                 'Are you sure you want to delete ' + this.selectedDatasetIds.size + ' dataset(s) ?'
+                    + (emptied.length > 0 ? this.datasetService.getEmptyAcquisitionsMessage(emptied) : '')
             ).then(res => {
                 if (res) {
-                    this.datasetService.deleteAll([...this.selectedDatasetIds]).then(() => {
+                    this.datasetService.deleteAll(datasetIds, emptied.length > 0).then(() => {
                         this.selectedDatasetIds = new Set();
                         if (this.tab == 'selected') this.selectionTable.refresh();
                         this.table.refresh().then(() => {
@@ -456,7 +467,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                         } else throw Error(reason);
                     });
                 }
-            });
+            }));
     }
 
     protected openApplyStudyCard = () => {

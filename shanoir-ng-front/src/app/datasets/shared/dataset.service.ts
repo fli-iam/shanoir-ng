@@ -19,6 +19,7 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 import { DownloadUtilsService } from 'src/app/shared/mass-download/download.utils.service';
 
 import { BidsElement } from "../../bids/model/bidsElement.model";
+import { Entity } from '../../shared/components/entity/entity.abstract';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
@@ -56,8 +57,47 @@ export class DatasetService extends EntityService<Dataset> {
 
     private errorService: ErrorHandler  = inject(ErrorHandler);
 
-    deleteAll(ids: number[]) {
-        return firstValueFrom(this.http.request<void>('delete', this.API_URL + '/delete', { body: JSON.stringify(ids) }));
+    deleteAll(ids: number[], deleteEmptyAcquisitions: boolean = false) {
+        return firstValueFrom(this.http.request<void>('delete', this.API_URL + '/delete', {
+            body: JSON.stringify(ids),
+            params: new HttpParams().set('deleteEmptyAcquisitions', deleteEmptyAcquisitions)
+        }));
+    }
+
+    /**
+     * The acquisitions that the deletion of the given datasets would leave empty, and that the
+     * backend would then be able to remove. An empty list means the deletion leaves nothing behind.
+     */
+    getAcquisitionsLeftEmptyBy(datasetIds: number[]): Promise<IdName[]> {
+        return firstValueFrom(this.http.post<IdName[]>(this.API_URL + '/emptyAcquisitionsPreview', datasetIds, this.httpOptions));
+    }
+
+    /**
+     * Deleting the last dataset of an acquisition removes the acquisition as well, so the user has
+     * to be told about it before confirming, and has to be the one asking for it.
+     */
+    override deleteWithConfirmDialog(name: string, entity: Entity, customMsg?: string): Promise<boolean> {
+        return this.getAcquisitionsLeftEmptyBy([entity.id])
+            .catch(() => [] as IdName[])
+            .then(emptied => {
+                if (emptied.length == 0) {
+                    return super.deleteWithConfirmDialog(name, entity, customMsg);
+                }
+                const msg: string = (customMsg || 'Are you sure you want to finally delete the ' + name
+                    + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?')
+                    + this.getEmptyAcquisitionsMessage(emptied);
+                return super.deleteWithConfirmDialog(name, entity, msg,
+                    new HttpParams().set('deleteEmptyAcquisitions', true));
+            });
+    }
+
+    getEmptyAcquisitionsMessage(acquisitions: IdName[]): string {
+        if (acquisitions.length == 1) {
+            return '<br/><br/>It is the last dataset of the acquisition "' + acquisitions[0].name
+                + '", which will be removed as well.';
+        }
+        return '<br/><br/>They are the last datasets of the following acquisitions, which will be removed as well : '
+            + acquisitions.map(acquisition => '"' + acquisition.name + '"').join(', ') + '.';
     }
 
     getBidsStructure(studyId: number): Promise<BidsElement> {
