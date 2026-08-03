@@ -28,7 +28,7 @@ import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * This class represents a serie based on DICOM as used in Shanoir.
+ * This class represents a DICOM serie.
  *
  * @author atouboul
  * @author mkain

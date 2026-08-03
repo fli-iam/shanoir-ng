@@ -373,7 +373,7 @@ public class DICOMWebService {
                     "sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
         }
         File[] dicomFiles = directoryWithDicomFiles.listFiles();
-        LOG.info("Start: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: "
+        LOG.debug("Start: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: "
                 + directoryWithDicomFiles.getAbsolutePath());
         MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
         multipartEntityBuilder.setBoundary(BOUNDARY);
@@ -384,7 +384,7 @@ public class DICOMWebService {
         }
         HttpEntity entity = multipartEntityBuilder.build();
         sendMultipartRequest(entity);
-        LOG.info("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: "
+        LOG.debug("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: "
                 + directoryWithDicomFiles.getAbsolutePath());
     }
 
