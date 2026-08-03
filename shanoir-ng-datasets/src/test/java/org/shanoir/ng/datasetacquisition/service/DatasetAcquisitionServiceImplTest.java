@@ -157,6 +157,27 @@ class DatasetAcquisitionServiceImplTest {
         assertTrue(service.findAcquisitionsLeftEmptyBy(Collections.emptyList()).isEmpty());
     }
 
+    @Test
+    void findEmptyAcquisitionsLeavesOutTheOnesThatMustBeKept() {
+        DatasetAcquisition holdingExtraData = new GenericDatasetAcquisition();
+        holdingExtraData.setId(456L);
+        holdingExtraData.setExtraDataFilePathList(List.of("protocol.pdf"));
+        when(repository.findEmpty()).thenReturn(List.of(acquisition, holdingExtraData));
+
+        List<DatasetAcquisition> empty = service.findEmptyAcquisitions(null);
+
+        assertEquals(1, empty.size());
+        assertEquals(ACQ_ID, empty.get(0).getId());
+    }
+
+    @Test
+    void findEmptyAcquisitionsScopesToTheGivenStudy() {
+        when(repository.findEmptyByStudyId(STUDY_ID)).thenReturn(List.of(acquisition));
+
+        assertEquals(1, service.findEmptyAcquisitions(STUDY_ID).size());
+        verify(repository, never()).findEmpty();
+    }
+
     /**
      * The acquisition under test holds datasetsHeld datasets in total, among which the given ones
      * are about to be deleted.
