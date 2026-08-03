@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, firstValueFrom } from 'rxjs';
 
@@ -73,6 +73,26 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
 
     getAllForExamination(examinationId: number): Promise<ExaminationDatasetAcquisitionDTO[]> { // TODO : services shouldn't return dtos
         return firstValueFrom(this.http.get<ExaminationDatasetAcquisitionDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/examination/' + examinationId));
+    }
+
+    /**
+     * The acquisitions that hold no dataset at all and that may be removed. Dry run of the
+     * clean up below, admin only.
+     */
+    getEmpty(studyId?: number): Promise<ExaminationDatasetAcquisitionDTO[]> {
+        return firstValueFrom(this.http.get<ExaminationDatasetAcquisitionDTO[]>(
+            AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/empty',
+            studyId ? { params: new HttpParams().set('studyId', studyId) } : {}));
+    }
+
+    /**
+     * Removes the acquisitions left empty before their removal was proposed on deletion.
+     * Returns the ids of those actually removed, admin only.
+     */
+    deleteEmpty(studyId?: number): Promise<number[]> {
+        return firstValueFrom(this.http.delete<number[]>(
+            AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/empty',
+            studyId ? { params: new HttpParams().set('studyId', studyId) } : {}));
     }
 
     getAllForDatasets(datasetIds: number[]): Promise<DatasetAcquisition[]> {
