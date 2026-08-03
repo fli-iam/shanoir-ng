@@ -15,6 +15,8 @@
 package org.shanoir.ng.dataset;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,10 +24,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
+import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -131,7 +136,7 @@ public class DatasetApiControllerTest {
     private MockMvc mvc;
 
     @Test
-    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
     public void testFindAcquisitionsLeftEmptyBy() throws Exception {
         DatasetAcquisition acquisition = new GenericDatasetAcquisition();
         acquisition.setId(1L);
@@ -154,7 +159,78 @@ public class DatasetApiControllerTest {
     }
 
     @Test
-    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
+    public void testDeleteDatasetRemovesTheAcquisitionItLeavesEmpty() throws Exception {
+        given(datasetService.findById(11L)).willReturn(datasetOfAcquisition(11L, 1L));
+        given(datasetAcquisitionService.isEmptyAndRemovable(1L)).willReturn(true);
+
+        mvc.perform(MockMvcRequestBuilders.delete("/datasets/11").param("deleteEmptyAcquisitions", "true"))
+                .andExpect(status().isNoContent());
+
+        verify(datasetService).deleteById(11L);
+        verify(datasetAcquisitionService).deleteEmptyAcquisition(1L);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
+    public void testDeleteDatasetKeepsTheAcquisitionThatIsNotRemovable() throws Exception {
+        given(datasetService.findById(11L)).willReturn(datasetOfAcquisition(11L, 1L));
+        given(datasetAcquisitionService.isEmptyAndRemovable(1L)).willReturn(false);
+
+        mvc.perform(MockMvcRequestBuilders.delete("/datasets/11").param("deleteEmptyAcquisitions", "true"))
+                .andExpect(status().isNoContent());
+
+        verify(datasetService).deleteById(11L);
+        verify(datasetAcquisitionService, never()).deleteEmptyAcquisition(Mockito.anyLong());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
+    public void testDeleteDatasetLeavesTheAcquisitionAloneByDefault() throws Exception {
+        given(datasetService.findById(11L)).willReturn(datasetOfAcquisition(11L, 1L));
+
+        mvc.perform(MockMvcRequestBuilders.delete("/datasets/11"))
+                .andExpect(status().isNoContent());
+
+        verify(datasetService).deleteById(11L);
+        verify(datasetAcquisitionService, never()).isEmptyAndRemovable(Mockito.anyLong());
+        verify(datasetAcquisitionService, never()).deleteEmptyAcquisition(Mockito.anyLong());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
+    public void testDeleteDatasetsChecksEachParentAcquisitionOnce() throws Exception {
+        given(datasetService.findByIdIn(List.of(11L, 12L, 21L))).willReturn(List.of(
+                datasetOfAcquisition(11L, 1L),
+                datasetOfAcquisition(12L, 1L),
+                datasetOfAcquisition(21L, 2L)));
+        given(datasetAcquisitionService.isEmptyAndRemovable(1L)).willReturn(true);
+        given(datasetAcquisitionService.isEmptyAndRemovable(2L)).willReturn(false);
+
+        mvc.perform(MockMvcRequestBuilders.delete("/datasets/delete")
+                        .param("deleteEmptyAcquisitions", "true")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[11, 12, 21]"))
+                .andExpect(status().isNoContent());
+
+        verify(datasetService).deleteByIdIn(List.of(11L, 12L, 21L));
+        verify(datasetAcquisitionService).isEmptyAndRemovable(1L);
+        verify(datasetAcquisitionService).isEmptyAndRemovable(2L);
+        verify(datasetAcquisitionService).deleteEmptyAcquisition(1L);
+        verify(datasetAcquisitionService, never()).deleteEmptyAcquisition(2L);
+    }
+
+    private Dataset datasetOfAcquisition(Long datasetId, Long acquisitionId) {
+        DatasetAcquisition acquisition = new GenericDatasetAcquisition();
+        acquisition.setId(acquisitionId);
+        Dataset dataset = new MrDataset();
+        dataset.setId(datasetId);
+        dataset.setDatasetAcquisition(acquisition);
+        return dataset;
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
     public void testFindAcquisitionsLeftEmptyByWithNoAcquisitionLeftEmpty() throws Exception {
         given(datasetAcquisitionService.findAcquisitionsLeftEmptyBy(List.of(11L)))
                 .willReturn(Collections.emptyList());
