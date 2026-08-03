@@ -14,14 +14,13 @@
 
 package org.shanoir.ng.email.model;
 
-import java.util.List;
-
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * Request sent by an administrator to email a group of users.
+ * Request to email a group of users: a platform-wide group for an administrator,
+ * or the members of a single study for its administrators.
  *
  * @author afragkiadakis
  */
@@ -36,7 +35,7 @@ public class MassEmailRequest {
     @NotBlank
     private String content;
 
-    private List<Long> recipientUserIds;
+    private Long studyId;
 
     /**
      * @return the recipientGroup
@@ -54,30 +53,30 @@ public class MassEmailRequest {
     }
 
     /**
-     * @return the recipientUserIds
+     * @return the studyId
      */
-    public List<Long> getRecipientUserIds() {
-        return recipientUserIds;
+    public Long getStudyId() {
+        return studyId;
     }
 
     /**
-     * @param recipientUserIds
-     *            the recipientUserIds to set
+     * @param studyId
+     *            the studyId to set
      */
-    public void setRecipientUserIds(List<Long> recipientUserIds) {
-        this.recipientUserIds = recipientUserIds;
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
     }
 
     /**
-     * recipientUserIds must be provided, and non-empty, when targeting the STUDY
-     * group, and must be absent for every other group, which are resolved server-side.
+     * studyId must be provided when targeting the STUDY group, and must be
+     * absent for every other group. The recipients themselves are always
+     * resolved server side, never sent by the caller.
      *
-     * @return whether recipientUserIds is consistent with recipientGroup
+     * @return whether studyId is consistent with recipientGroup
      */
-    @AssertTrue(message = "recipientUserIds is required when recipientGroup is STUDY, and must not be set otherwise")
-    public boolean isRecipientUserIdsConsistent() {
-        final boolean hasIds = recipientUserIds != null && !recipientUserIds.isEmpty();
-        return (RecipientGroup.STUDY == recipientGroup) == hasIds;
+    @AssertTrue(message = "studyId is required when recipientGroup is STUDY, and must not be set otherwise")
+    public boolean isStudyIdConsistent() {
+        return (RecipientGroup.STUDY == recipientGroup) == (studyId != null);
     }
 
     /**

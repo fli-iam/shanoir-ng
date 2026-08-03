@@ -93,6 +93,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
     protected hasCopyRight: boolean;
+    protected hasEmailMembersRight: boolean;
     accessRequests: AccessRequest[];
     isStudyAdmin: boolean;
     subjectTagsInUse: Tag[] = [];
@@ -189,6 +190,9 @@ export class StudyComponent extends EntityComponent<Study> {
                 || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_DOWNLOAD));
             this.hasCopyRight = this.keycloakService.isUserAdmin()
                 || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
+            // mirrors the backend rule: an administrator, or any study administrator, for their own study
+            this.hasEmailMembersRight = this.keycloakService.isUserAdmin()
+                || rights.includes(StudyUserRight.CAN_ADMINISTRATE);
         })
 
         this.setLabeledSizes(this.study);

@@ -35,7 +35,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
- * Api for administrator mass emails.
+ * Api for mass emails. An administrator reaches any platform-wide recipient
+ * group, a study administrator only the members of a study they administrate.
  *
  * @author afragkiadakis
  */
@@ -62,7 +63,8 @@ public interface MassEmailApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and #request.recipientGroup?.name() == 'STUDY'"
+            + " and @shanoirUsersManagement.hasRightOnStudy(#request.studyId, 'CAN_ADMINISTRATE'))")
     @PostMapping(value = "", produces = { "application/json" }, consumes = { "application/json" })
     ResponseEntity<Integer> sendMassEmail(
             @Parameter(name = "mass email to send", required = true) @RequestBody @Valid MassEmailRequest request,

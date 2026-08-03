@@ -55,15 +55,14 @@ export class StudyEmailMembersComponent {
     }
 
     send(): void {
-        const recipientUserIds: number[] = this.study.studyUserList.map(studyUser => studyUser.userId);
         this.confirmDialogService.confirm('Send mass email',
-                'This email will be sent to the ' + recipientUserIds.length + ' members of ' + this.study.name + '. Proceed?')
+                'This email will be sent to the ' + this.memberCount + ' members of ' + this.study.name + '. Proceed?')
             .then(confirmed => {
                 if (!confirmed) return;
                 this.sending = true;
                 const request = new MassEmailRequest();
                 request.recipientGroup = 'STUDY';
-                request.recipientUserIds = recipientUserIds;
+                request.studyId = this.study.id;
                 request.subject = this.form.get('subject').value;
                 request.content = this.form.get('content').value;
                 this.massEmailService.sendMassEmail(request)

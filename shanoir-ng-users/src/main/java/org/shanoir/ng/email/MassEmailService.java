@@ -22,7 +22,7 @@ import org.shanoir.ng.user.model.User;
 import org.springframework.stereotype.Service;
 
 /**
- * Resolution of the users targeted by an administrator mass email.
+ * Resolution of the users targeted by a mass email.
  *
  * @author afragkiadakis
  */
@@ -43,17 +43,17 @@ public interface MassEmailService {
     List<User> resolveRecipients(RecipientGroup recipientGroup) throws SecurityException;
 
     /**
-     * Resolve the given users directly, without any group-based filtering or
-     * Keycloak lookup. Users without an email address and users whose account
-     * request was never approved are excluded, the same as for named groups.
-     * Used to target an explicit set of recipients, e.g. the members of a
-     * study, already resolved by the caller.
+     * Resolve the members of the given study, without any Keycloak lookup. The
+     * members are read server side, so that a study administrator can only ever
+     * reach the users of a study they administrate. Users without an email
+     * address and users whose account request was never approved are excluded,
+     * the same as for named groups.
      *
-     * @param userIds
-     *            the ids of the users to resolve.
+     * @param studyId
+     *            the id of the study whose members to resolve.
      * @return the users to email.
      */
-    List<User> resolveRecipients(List<Long> userIds);
+    List<User> resolveStudyRecipients(Long studyId);
 
     /**
      * Count the users belonging to the given recipient group.

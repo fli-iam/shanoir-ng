@@ -70,7 +70,7 @@ public class MassEmailApiController implements MassEmailApi {
         }
         try {
             final List<User> recipients = RecipientGroup.STUDY == request.getRecipientGroup()
-                    ? massEmailService.resolveRecipients(request.getRecipientUserIds())
+                    ? massEmailService.resolveStudyRecipients(request.getStudyId())
                     : massEmailService.resolveRecipients(request.getRecipientGroup());
             massEmailService.sendMassEmail(recipients, request.getSubject(), request.getContent());
             LOG.info("Mass email '{}' to the {} group queued for {} recipients", request.getSubject(),

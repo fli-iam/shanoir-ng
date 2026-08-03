@@ -18,5 +18,5 @@ export class MassEmailRequest {
     recipientGroup: RecipientGroup;
     subject: string;
     content: string;
-    recipientUserIds?: number[];
+    studyId?: number;
 }

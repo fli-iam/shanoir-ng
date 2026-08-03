@@ -31,6 +31,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.shanoir.ng.email.model.RecipientGroup;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.utils.KeycloakClient;
@@ -52,6 +54,9 @@ public class MassEmailServiceTest {
 
     @Mock
     private EmailService emailService;
+
+    @Mock
+    private StudyUserRightsRepository studyUserRightsRepository;
 
     @InjectMocks
     private MassEmailServiceImpl massEmailService;
@@ -129,15 +134,26 @@ public class MassEmailServiceTest {
     }
 
     @Test
-    public void resolveRecipientsByIdTest() {
+    public void resolveStudyRecipientsTest() {
+        given(studyUserRightsRepository.findByStudyId(7L))
+                .willReturn(List.of(studyUser(1L), studyUser(5L), studyUser(6L)));
         given(userRepository.findAllById(List.of(1L, 5L, 6L)))
                 .willReturn(List.of(enabledUser, noEmailUser, pendingAccountRequestUser));
 
-        final List<User> recipients = massEmailService.resolveRecipients(List.of(1L, 5L, 6L));
+        final List<User> recipients = massEmailService.resolveStudyRecipients(7L);
 
         // no email and pending account request are excluded, like for named groups
         assertEquals(List.of(1L), ids(recipients));
         Mockito.verifyNoInteractions(keycloakClient);
+    }
+
+    @Test
+    public void resolveStudyRecipientsWithoutMemberTest() {
+        given(studyUserRightsRepository.findByStudyId(7L)).willReturn(List.of());
+
+        assertEquals(List.of(), massEmailService.resolveStudyRecipients(7L));
+
+        Mockito.verify(userRepository, Mockito.never()).findAllById(Mockito.anyList());
     }
 
     @Test
@@ -154,6 +170,12 @@ public class MassEmailServiceTest {
 
     private List<Long> ids(final List<User> users) {
         return users.stream().map(User::getId).sorted().collect(Collectors.toList());
+    }
+
+    private StudyUser studyUser(final Long userId) {
+        final StudyUser studyUser = new StudyUser();
+        studyUser.setUserId(userId);
+        return studyUser;
     }
 
     private User user(final Long id, final String email, final String keycloakId, final Boolean accountRequestDemand) {

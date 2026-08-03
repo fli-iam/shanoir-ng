@@ -37,7 +37,6 @@ export class SendEmailComponent {
     counts: Partial<Record<RecipientGroup, number>> = {};
     sending: boolean = false;
     studies: IdName[] = [];
-    studyMemberUserIds: number[] = [];
     studyMemberCount: number | undefined;
     readonly groups: { value: RecipientGroup, label: string }[] = [
         { value: 'ALL', label: 'All users' },
@@ -93,14 +92,10 @@ export class SendEmailComponent {
     }
 
     private onStudySelected(studyId: number): void {
-        this.studyMemberUserIds = [];
         this.studyMemberCount = undefined;
         if (studyId == null) return;
         this.studyService.getStudyUserFromStudyId(studyId)
-            .then(studyUsers => {
-                this.studyMemberUserIds = studyUsers.map(studyUser => studyUser.userId);
-                this.studyMemberCount = this.studyMemberUserIds.length;
-            })
+            .then(studyUsers => this.studyMemberCount = studyUsers.length)
             .catch(() => { /* count stays unknown, displayed as (?) */ });
     }
 
@@ -130,7 +125,7 @@ export class SendEmailComponent {
                 request.subject = this.form.get('subject').value;
                 request.content = this.form.get('content').value;
                 if (isStudy) {
-                    request.recipientUserIds = this.studyMemberUserIds;
+                    request.studyId = this.form.get('studyId').value;
                 }
                 this.massEmailService.sendMassEmail(request)
                     .then(count => {

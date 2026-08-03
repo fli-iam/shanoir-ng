@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.shanoir.ng.email.model.RecipientGroup;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.utils.KeycloakClient;
@@ -40,6 +42,9 @@ public class MassEmailServiceImpl implements MassEmailService {
 
     @Autowired
     private KeycloakClient keycloakClient;
+
+    @Autowired
+    private StudyUserRightsRepository studyUserRightsRepository;
 
     @Autowired
     private EmailService emailService;
@@ -66,9 +71,16 @@ public class MassEmailServiceImpl implements MassEmailService {
     }
 
     @Override
-    public List<User> resolveRecipients(final List<Long> userIds) {
+    public List<User> resolveStudyRecipients(final Long studyId) {
+        final List<Long> memberIds = new ArrayList<>();
+        for (StudyUser studyUser : studyUserRightsRepository.findByStudyId(studyId)) {
+            memberIds.add(studyUser.getUserId());
+        }
         final List<User> recipients = new ArrayList<>();
-        for (User user : userRepository.findAllById(userIds)) {
+        if (memberIds.isEmpty()) {
+            return recipients;
+        }
+        for (User user : userRepository.findAllById(memberIds)) {
             if (isEmailable(user)) {
                 recipients.add(user);
             }

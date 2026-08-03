@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.shanoir.ng.ShanoirUsersManagement;
 import org.shanoir.ng.email.model.RecipientGroup;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
@@ -72,6 +73,10 @@ public class MassEmailApiControllerTest {
     @MockBean
     private MassEmailService massEmailService;
 
+    /** Referenced by the @PreAuthorize of the send endpoint to check CAN_ADMINISTRATE. */
+    @MockBean(name = "shanoirUsersManagement")
+    private ShanoirUsersManagement shanoirUsersManagement;
+
     @Test
     @WithMockUser(authorities = { "ROLE_ADMIN" })
     public void countRecipientsTest() throws Exception {
@@ -119,11 +124,11 @@ public class MassEmailApiControllerTest {
     @WithMockUser(authorities = { "ROLE_ADMIN" })
     public void sendMassEmailToStudyTest() throws Exception {
         final List<User> recipients = List.of(ModelsUtil.createUser(1L), ModelsUtil.createUser(2L));
-        given(massEmailService.resolveRecipients(List.of(1L, 2L))).willReturn(recipients);
+        given(massEmailService.resolveStudyRecipients(3L)).willReturn(recipients);
 
         mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"recipientGroup\":\"STUDY\",\"recipientUserIds\":[1,2],"
+                .content("{\"recipientGroup\":\"STUDY\",\"studyId\":3,"
                         + "\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
                 .andExpect(status().isAccepted())
                 .andExpect(content().string("2"));
@@ -133,7 +138,7 @@ public class MassEmailApiControllerTest {
 
     @Test
     @WithMockUser(authorities = { "ROLE_ADMIN" })
-    public void sendMassEmailStudyWithoutRecipientUserIdsTest() throws Exception {
+    public void sendMassEmailStudyWithoutStudyIdTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"recipientGroup\":\"STUDY\",\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
@@ -145,15 +150,86 @@ public class MassEmailApiControllerTest {
 
     @Test
     @WithMockUser(authorities = { "ROLE_ADMIN" })
-    public void sendMassEmailNonStudyGroupWithRecipientUserIdsTest() throws Exception {
+    public void sendMassEmailNonStudyGroupWithStudyIdTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"recipientGroup\":\"ALL\",\"recipientUserIds\":[1],"
+                .content("{\"recipientGroup\":\"ALL\",\"studyId\":3,"
                         + "\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
                 .andExpect(status().isUnprocessableEntity());
 
         Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
                 Mockito.anyString());
+    }
+
+    @Test
+    @WithMockUser(authorities = { "ROLE_EXPERT" })
+    public void sendMassEmailToAdministratedStudyTest() throws Exception {
+        final List<User> recipients = List.of(ModelsUtil.createUser(1L), ModelsUtil.createUser(2L));
+        given(shanoirUsersManagement.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(true);
+        given(massEmailService.resolveStudyRecipients(3L)).willReturn(recipients);
+
+        mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"recipientGroup\":\"STUDY\",\"studyId\":3,"
+                        + "\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
+                .andExpect(status().isAccepted())
+                .andExpect(content().string("2"));
+
+        Mockito.verify(massEmailService).sendMassEmail(recipients, "Maintenance", "Down tomorrow.");
+    }
+
+    @Test
+    @WithMockUser(authorities = { "ROLE_USER" })
+    public void sendMassEmailToStudyForbiddenWithoutAdministrateRightTest() throws Exception {
+        given(shanoirUsersManagement.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(false);
+
+        mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"recipientGroup\":\"STUDY\",\"studyId\":3,"
+                        + "\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
+                .andExpect(status().isForbidden());
+
+        Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    /**
+     * A study administrator is confined to the STUDY group: the platform-wide
+     * groups stay out of reach even though they administrate a study.
+     */
+    @Test
+    @WithMockUser(authorities = { "ROLE_EXPERT" })
+    public void sendMassEmailToAllForbiddenToStudyAdminTest() throws Exception {
+        given(shanoirUsersManagement.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
+
+        mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"recipientGroup\":\"ALL\",\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
+                .andExpect(status().isForbidden());
+
+        Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
+                Mockito.anyString());
+    }
+
+    /**
+     * The study members are resolved server side, so a study administrator
+     * cannot reach a user outside of the study by naming them in the payload.
+     */
+    @Test
+    @WithMockUser(authorities = { "ROLE_EXPERT" })
+    public void sendMassEmailIgnoresCallerSuppliedRecipientsTest() throws Exception {
+        final List<User> members = List.of(ModelsUtil.createUser(1L));
+        given(shanoirUsersManagement.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(true);
+        given(massEmailService.resolveStudyRecipients(3L)).willReturn(members);
+
+        mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"recipientGroup\":\"STUDY\",\"studyId\":3,\"recipientUserIds\":[7,8],"
+                        + "\"subject\":\"Maintenance\",\"content\":\"Down tomorrow.\"}"))
+                .andExpect(status().isAccepted())
+                .andExpect(content().string("1"));
+
+        Mockito.verify(massEmailService).sendMassEmail(members, "Maintenance", "Down tomorrow.");
     }
 
     @Test
