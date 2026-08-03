@@ -12,10 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.massemail.controller;
+package org.shanoir.ng.email;
 
-import org.shanoir.ng.massemail.model.MassEmailRequest;
-import org.shanoir.ng.massemail.model.RecipientGroup;
+import org.shanoir.ng.email.model.MassEmailRequest;
+import org.shanoir.ng.email.model.RecipientGroup;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

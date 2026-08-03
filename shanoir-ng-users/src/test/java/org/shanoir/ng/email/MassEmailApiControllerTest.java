@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.massemail;
+package org.shanoir.ng.email;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -22,9 +22,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.shanoir.ng.massemail.controller.MassEmailApiController;
-import org.shanoir.ng.massemail.model.RecipientGroup;
-import org.shanoir.ng.massemail.service.MassEmailService;
+import org.shanoir.ng.email.model.RecipientGroup;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.utils.ModelsUtil;

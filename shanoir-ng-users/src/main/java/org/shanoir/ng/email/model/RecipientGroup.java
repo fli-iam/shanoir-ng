@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.massemail.model;
+package org.shanoir.ng.email.model;
 
 /**
  * Groups of users an administrator can target with a mass email.
