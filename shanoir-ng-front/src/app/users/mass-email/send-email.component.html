@@ -59,7 +59,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li>
                 <label>Message</label>
                 <span class="right-col">
-                    <textarea id="content" formControlName="content" rows="12"></textarea>
+                    <textarea id="content" formControlName="content" rows="12" style="width: 600px;"></textarea>
                     @if (hasError('content', ['required'])) {
                         <label animate.enter="slide-down-error" animate.leave="slide-up-error" class="form-validation-alert">Message is required!</label>
                     }
