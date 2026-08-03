@@ -13,7 +13,7 @@
  */
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, inject, Injectable } from '@angular/core';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { DownloadUtilsService } from 'src/app/shared/mass-download/download.utils.service';
@@ -53,6 +53,9 @@ export class DatasetService extends EntityService<Dataset> {
         super(http);
     }
 
+    /** Ids of the acquisitions removed along with the last deleted dataset, when it was their last one. */
+    public onAcquisitionsRemoved: Subject<number[]> = new Subject();
+
     private datasetDTOService: DatasetDTOService = inject(DatasetDTOService);
 
     private errorService: ErrorHandler  = inject(ErrorHandler);
@@ -87,7 +90,12 @@ export class DatasetService extends EntityService<Dataset> {
                     + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?')
                     + this.getEmptyAcquisitionsMessage(emptied);
                 return super.deleteWithConfirmDialog(name, entity, msg,
-                    new HttpParams().set('deleteEmptyAcquisitions', true));
+                    new HttpParams().set('deleteEmptyAcquisitions', true))
+                    .then(deleted => {
+                        // the acquisitions are gone as well : whoever displays them has to know
+                        if (deleted) this.onAcquisitionsRemoved.next(emptied.map(acquisition => acquisition.id));
+                        return deleted;
+                    });
             });
     }
 
