@@ -12,13 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.uploader.dicom;
+package org.shanoir.uploader.model.rest;
 
-public class StudyCard {
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+@JsonPropertyOrder({ "id", "profileName" })
+public class Profile {
 
     private Long id;
 
-    private String name;
+    private String profileName;
+
+    public Profile() {
+    }
+
+    public Profile(Long id, String profileName) {
+        this.id = id;
+        this.profileName = profileName;
+    }
 
     public Long getId() {
         return id;
@@ -28,16 +39,12 @@ public class StudyCard {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getProfileName() {
+        return profileName;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String toString() {
-        return name;
+    public void setProfileName(String profileName) {
+        this.profileName = profileName;
     }
 
 }
