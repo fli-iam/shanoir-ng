@@ -361,7 +361,14 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         delete(entity, event);
 
         repository.deleteById(id);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        shanoirEventService.publishEvent(new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                id.toString(),
+                KeycloakUtil.getTokenUserId(),
+                "Dataset acquisition " + id + " deleted.",
+                ShanoirEvent.SUCCESS,
+                1f,
+                entity.getExamination().getStudyId()));
     }
 
     @Override
@@ -456,7 +463,14 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         }
         repository.deleteById(id);
         LOG.info("Empty dataset acquisition with id {} has been removed", id);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, studyId));
+        shanoirEventService.publishEvent(new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                id.toString(),
+                KeycloakUtil.getTokenUserId(),
+                "Dataset acquisition " + id + " deleted, it did not hold any dataset anymore.",
+                ShanoirEvent.SUCCESS,
+                1f,
+                studyId));
     }
 
     @Override

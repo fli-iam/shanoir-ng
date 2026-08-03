@@ -223,6 +223,9 @@ class DatasetAcquisitionServiceImplTest {
         assertEquals(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, captor.getValue().getEventType());
         assertEquals(ACQ_ID.toString(), captor.getValue().getObjectId());
         assertEquals(STUDY_ID, captor.getValue().getStudyId());
+        // without a message and a progress, the job shows up empty and at NaN%
+        assertEquals(Float.valueOf(1f), captor.getValue().getProgress());
+        assertFalse(captor.getValue().getMessage().isEmpty());
     }
 
     @Test
@@ -277,5 +280,11 @@ class DatasetAcquisitionServiceImplTest {
         verify(repository).deleteById(ACQ_ID);
         // the emptiness of the acquisition is never even questioned on this path
         verify(datasetRepository, never()).countByDatasetAcquisitionId(Mockito.anyLong());
+
+        ArgumentCaptor<ShanoirEvent> captor = ArgumentCaptor.forClass(ShanoirEvent.class);
+        verify(shanoirEventService).publishEvent(captor.capture());
+        // without a message and a progress, the job shows up empty and at NaN%
+        assertEquals(Float.valueOf(1f), captor.getValue().getProgress());
+        assertFalse(captor.getValue().getMessage().isEmpty());
     }
 }
