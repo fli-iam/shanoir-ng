@@ -38,6 +38,8 @@ public class Study implements Comparable<Study> {
 
     private StudyExtraDetails extraDetails;
 
+    private Profile profile;
+
     public StudyExtraDetails getExtraDetails() {
         return extraDetails;
     }
@@ -151,6 +153,14 @@ public class Study implements Comparable<Study> {
 
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 
 }

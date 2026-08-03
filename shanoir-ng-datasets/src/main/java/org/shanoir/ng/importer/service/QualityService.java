@@ -58,7 +58,7 @@ public class QualityService {
         if (!hasQualityChecksAtImport(qualityCards)) {
             return new QualityCardResult();
         }
-        Study firstStudy = importJob.getFirstStudy();
+        Study firstStudy = importJob.getStudy();
         if (firstStudy == null) {
             throw new ShanoirException("The given import job does not provide any serie. Examination : " + importJob.getExaminationId());
         }

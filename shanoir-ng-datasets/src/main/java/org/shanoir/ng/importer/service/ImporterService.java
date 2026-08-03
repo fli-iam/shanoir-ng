@@ -16,9 +16,13 @@ package org.shanoir.ng.importer.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.DicomProcessing;
@@ -27,9 +31,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.ImportJob;
-import org.shanoir.ng.importer.dto.Patient;
 import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.importer.dto.Study;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -88,6 +90,9 @@ public class ImporterService {
     private ImporterMailService mailService;
 
     @Autowired
+    private DatasetsImportStatusService datasetsImportStatusService;
+
+    @Autowired
     private StudyCardRepository studyCardRepository;
 
     @Autowired
@@ -111,6 +116,7 @@ public class ImporterService {
         ShanoirEvent event = importJob.getShanoirEvent();
         event.setMessage("Creating datasets...");
         eventService.publishEvent(event);
+        datasetsImportStatusService.markInProgress(importJob.getExaminationId());
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         Set<DatasetAcquisition> generatedAcquisitions = null;
         try {
@@ -155,11 +161,11 @@ public class ImporterService {
                     }
                     generatedAcquisitions = new HashSet<>(datasetAcquisitionService.createAll(generatedAcquisitions));
                     try {
-                        persistPatientInPacs(importJob.getPatients(), event);
+                        persistSeriesInPacs(importJob.getSeries(), event);
                     } catch (Exception e) { // if error in pacs
                         // revert dataset acquisitions
                         for (DatasetAcquisition acquisition : generatedAcquisitions) {
-                            datasetAcquisitionService.deleteById(acquisition.getId(), null);
+                            datasetAcquisitionService.deleteById(acquisition.getId(), event);
                         }
                         // revert quality tag
                         if (subject != null) {
@@ -180,6 +186,13 @@ public class ImporterService {
                     + " Successfully created datasets for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
+
+            List<Long> createdDatasetIds = generatedAcquisitions == null ? List.of()
+                    : generatedAcquisitions.stream()
+                        .flatMap(a -> a.getDatasets().stream())
+                        .map(Dataset::getId)
+                        .toList();
+            datasetsImportStatusService.markFinished(importJob.getExaminationId(), createdDatasetIds);
 
             // Manage archive
             if (importJob.getArchive() != null) {
@@ -217,6 +230,7 @@ public class ImporterService {
             LOG.warn(msg, e);
             // Send mail
             mailService.sendFailureMail(importJob, userId, msg);
+            datasetsImportStatusService.markError(importJob.getExaminationId(), msg);
             throw new ShanoirException(msg, e);
         } catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);
@@ -226,6 +240,7 @@ public class ImporterService {
             LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e);
             // Send mail
             mailService.sendFailureMail(importJob, userId, e.getMessage());
+            datasetsImportStatusService.markError(importJob.getExaminationId(), e.getMessage());
             throw new ShanoirException(event.getMessage(), e);
         }
     }
@@ -234,40 +249,36 @@ public class ImporterService {
         StudyCard studyCard = getStudyCard(importJob);
         Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
         int rank = 0;
-        for (Patient patient : importJob.getPatients()) {
-            for (Study study : patient.getStudies()) {
-                float progress = 0.5f;
-                for (Serie serie : study.getSelectedSeries()) {
-                    // get dicomAttributes
-                    AcquisitionAttributes<String> dicomAttributes = null;
-                    try {
-                        dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serie);
-                    } catch (PacsException e) {
-                        throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
-                    }
-
-                    manageStudyInstanceUIDs(examination, importJob, dicomAttributes);
-
-                    // Generate acquisition object with all sub objects : datasets, protocols, expressions, ...
-                    DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob, dicomAttributes);
-
-                    // apply study card if needed
-                    if (studyCard != null) {
-                        importJob.setStudyCardName(studyCard.getName());
-                        studyCard.apply(acquisition, dicomAttributes);
-                    }
-
-                    // add acq to collection
-                    if (acquisition != null) {
-                        generatedAcquisitions.add(acquisition);
-                    }
-                    rank++;
-                    progress += 0.25f / study.getSelectedSeries().size();
-                    event.setMessage("Generating Shanoir data from serie " + serie.getSeriesDescription() + " to examination " + importJob.getExaminationId());
-                    event.setProgress(progress);
-                    eventService.publishEvent(event);
-                }
+        float progress = 0.5f;
+        for (Serie serie : importJob.getSelectedSeries()) {
+            // get dicomAttributes
+            AcquisitionAttributes<String> dicomAttributes = null;
+            try {
+                dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serie);
+            } catch (PacsException e) {
+                throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
             }
+
+            manageStudyInstanceUIDs(examination, importJob, dicomAttributes);
+
+            // Generate acquisition object with all sub objects : datasets, protocols, expressions, ...
+            DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob, dicomAttributes);
+
+            // apply study card if needed
+            if (studyCard != null) {
+                importJob.setStudyCardName(studyCard.getName());
+                studyCard.apply(acquisition, dicomAttributes);
+            }
+
+            // add acq to collection
+            if (acquisition != null) {
+                generatedAcquisitions.add(acquisition);
+            }
+            rank++;
+            progress += 0.25f / importJob.getSelectedSeries().size();
+            event.setMessage("Generating Shanoir data from serie " + serie.getSeriesDescription() + " to examination " + importJob.getExaminationId());
+            event.setProgress(progress);
+            eventService.publishEvent(event);
         }
         return generatedAcquisitions;
     }
@@ -332,23 +343,19 @@ public class ImporterService {
     }
 
      /**
-     *  Persist Dicom images in the Shanoir Pacs
+     * Persist DICOM images in the Shanoir Pacs
      * @throws Exception
      */
-    private void persistPatientInPacs(List<Patient> patients, ShanoirEvent event) throws Exception {
-        for (Patient patient : patients) {
-            for (Study study : patient.getStudies()) {
-                float progress = 0.75f;
-                for (Serie serie : study.getSelectedSeries()) {
-                    if (serie.getSelected() != null && serie.getSelected()) {
-                        persistSerieInPacs(serie);
-                    }
-                    progress += 0.25f / study.getSelectedSeries().size();
-                    event.setMessage("Saving serie " + serie.getSeriesDescription() + " into pacs");
-                    event.setProgress(progress);
-                    eventService.publishEvent(event);
-                }
+    private void persistSeriesInPacs(List<Serie> series, ShanoirEvent event) throws Exception {
+        float progress = 0.75f;
+        for (Serie serie : series) {
+            if (serie.getSelected() != null && serie.getSelected()) {
+                persistSerieInPacs(serie);
             }
+            progress += 0.25f / series.size();
+            event.setMessage("Saving serie " + serie.getSeriesDescription() + " into PACS.");
+            event.setProgress(progress);
+            eventService.publishEvent(event);
         }
     }
 

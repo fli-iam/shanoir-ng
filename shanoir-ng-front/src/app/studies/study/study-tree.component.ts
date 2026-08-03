@@ -98,8 +98,8 @@ export class StudyTreeComponent implements OnDestroy {
 
     get selectionEmpty(): boolean {
         return !this.loaded || (
-            !(this.selectedDatasetNodes?.length > 0) 
-            && !(this.selectedAcquisitionNodes?.length > 0) 
+            !(this.selectedDatasetNodes?.length > 0)
+            && !(this.selectedAcquisitionNodes?.length > 0)
             && !(this.selectedExaminationNodes?.length > 0)
         );
     }
@@ -137,7 +137,7 @@ export class StudyTreeComponent implements OnDestroy {
         });
     }
 
-    getSelectedDatasetIdsIncludingExamAndAcq(mustHaveRight?: 'download'): Promise<Set<number>> /* throws RightsError */ {        
+    getSelectedDatasetIdsIncludingExamAndAcq(mustHaveRight?: 'download'): Promise<Set<number>> /* throws RightsError */ {
         // Check directly selected datasets for download rights
         if (mustHaveRight === 'download' && this.selectedDatasetNodes.find(dsNode => !dsNode.canDownload)) {
             return Promise.reject(new RightsError());
@@ -210,16 +210,16 @@ export class StudyTreeComponent implements OnDestroy {
         this.selectedAcquisitionNodes = acqNodes;
         this.selectedExaminationNodes = examNodes;
         this.canOpenDicomMultiExam = this.canOpenDicomSingleExam = false;
- 
+
         if (this.selectedExaminationNodes.length == 0) {
             if (this.selectedAcquisitionNodes.length > 0) {
                 this.canOpenDicomSingleExam = (!this.selectedAcquisitionNodes.find(acqNode => acqNode.parent.id != this.selectedAcquisitionNodes[0]?.parent.id));
                 this.canOpenDicomMultiExam = !this.canOpenDicomSingleExam;
-            } 
+            }
         }
         else if (this.selectedExaminationNodes.length == 1) {
             if (this.selectedAcquisitionNodes.length > 0) {
-                this.canOpenDicomSingleExam = 
+                this.canOpenDicomSingleExam =
                     (!this.selectedAcquisitionNodes.find(acqNode => acqNode.parent.id != this.selectedAcquisitionNodes[0]?.parent.id || acqNode.parent.id != this.selectedExaminationNodes[0].id));
                     this.canOpenDicomMultiExam = !this.canOpenDicomSingleExam;
             } else {
@@ -229,7 +229,7 @@ export class StudyTreeComponent implements OnDestroy {
             this.canOpenDicomSingleExam = false;
             this.canOpenDicomMultiExam = true;
         }
-        
+
     }
 
     private searchSelectedInDatasetNodes(dsNodes: DatasetNode[] | 'UNLOADED'): DatasetNode[] {
@@ -263,5 +263,3 @@ export class StudyTreeComponent implements OnDestroy {
     }
 
 }
-
-

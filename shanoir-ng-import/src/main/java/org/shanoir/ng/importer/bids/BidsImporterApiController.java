@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Map;
 
+import org.shanoir.ng.importer.ImportJobStatusService;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Subject;
@@ -58,8 +59,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 @Controller
 public class BidsImporterApiController implements BidsImporterApi {
 
-    @Value("${shanoir.import.directory}")
-    private String importDir;
+    private static final Logger LOG = LoggerFactory.getLogger(BidsImporterApiController.class);
 
     private static final String WRONG_CONTENT_FILE_UPLOAD = "Wrong content type of file upload, .zip required.";
 
@@ -80,7 +80,11 @@ public class BidsImporterApiController implements BidsImporterApi {
     @Autowired
     private ShanoirEventService eventService;
 
-    private static final Logger LOG = LoggerFactory.getLogger(BidsImporterApiController.class);
+    @Autowired
+    private ImportJobStatusService importJobStatusService;
+
+    @Value("${shanoir.import.directory}")
+    private String importDir;
 
     /**
      * This method import a BIDS subject folder.
@@ -109,6 +113,8 @@ public class BidsImporterApiController implements BidsImporterApi {
         final File userImportDir = ImportUtils.getUserImportDir(importDir);
         File tempFile = ImportUtils.saveTempFile(userImportDir, bidsFile);
         File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, bidsFile, false);
+        String tempDirId = importJobDir.getName();
+        importJobStatusService.setInProgress(tempDirId, "Import job received, queued for processing.");
 
         // Get equipment from file if existing, otherwise, set the "UNKNOWN EQUIPMENT"
         importJob.setAcquisitionEquipmentId(0L);
@@ -140,7 +146,6 @@ public class BidsImporterApiController implements BidsImporterApi {
             } else {
                 throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NOT_SUBJECT_BASED_SUBJECT, null));
             }
-
 
             // STEP 3: Examination level, check if there are session, otherwise create examinations
             Map<String, LocalDate> examDates = BidsTsvDateParser.readDatesFromSessionsFile(subjectFile);
@@ -221,7 +226,7 @@ public class BidsImporterApiController implements BidsImporterApi {
                 }
             }
         }
-
+        importJobStatusService.setFinished(tempDirId, importJob);
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 

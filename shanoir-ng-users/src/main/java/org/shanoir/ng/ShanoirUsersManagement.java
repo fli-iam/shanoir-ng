@@ -113,6 +113,12 @@ public class ShanoirUsersManagement implements ApplicationRunner {
     @Value("${service-account.user.email}")
     private String vipSrvEmail;
 
+    @Value("${SHANOIR_MIGRATION:}")
+    private String shanoirMigration;
+
+    @Value("${DEV_USERS_DEFAULT_PASSWORD:}")
+    private String devUsersDefaultPassword;
+
     private Keycloak keycloak = null;
 
     @Autowired
@@ -160,12 +166,16 @@ public class ShanoirUsersManagement implements ApplicationRunner {
         }
     }
 
-    private void initKeycloakAdminClient() {
+    private boolean isDevMode() {
+        return ("init".equalsIgnoreCase(shanoirMigration)
+                || "dev".equalsIgnoreCase(shanoirMigration))
+                && !StringUtils.isBlank(devUsersDefaultPassword);
+    }
 
+    private void initKeycloakAdminClient() {
         if (this.keycloak != null) {
             return;
         }
-
         this.keycloak = Keycloak.getInstance(
             kcAdminClientServerUrl,
             kcAdminClientRealm,
@@ -191,15 +201,21 @@ public class ShanoirUsersManagement implements ApplicationRunner {
                 // Reset user password, which is stored in Keycloak only
                 final CredentialRepresentation credential = new CredentialRepresentation();
                 credential.setType(CredentialRepresentation.PASSWORD);
-                String newPassword = PasswordUtils.generatePassword();
+
+                final boolean devMode = isDevMode();
+                LOG.info("devMode={} (if true: use UsersDefaultPassword)", devMode);
+                final String newPassword = devMode ? devUsersDefaultPassword : PasswordUtils.generatePassword();
                 credential.setValue(newPassword);
-                credential.setTemporary(true);
+                credential.setTemporary(!devMode);
+
                 final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
                 userResource.resetPassword(credential);
                 final RoleResource roleResource = keycloak.realm(keycloakRealm).roles().get(user.getRole().getName());
                 userResource.roles().realmLevel().add(Arrays.asList(roleResource.toRepresentation()));
-                // Notify user
-                emailService.notifyUserResetPassword(user, newPassword);
+
+                if (!devMode) {
+                    emailService.notifyUserResetPassword(user, newPassword);
+                }
             }
         }
     }

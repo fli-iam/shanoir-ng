@@ -54,7 +54,7 @@ public class RabbitMqExaminationService {
 
     @RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    @Transactional()
+    @Transactional
     public Long createExamination(Message message) {
         try {
             Examination exam = mapper.readValue(message.getBody(), Examination.class);

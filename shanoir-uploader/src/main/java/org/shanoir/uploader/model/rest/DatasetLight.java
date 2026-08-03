@@ -12,26 +12,28 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.uploader.upload;
+package org.shanoir.uploader.model.rest;
 
-import jakarta.xml.bind.annotation.XmlType;
+public class DatasetLight {
+    
+    private Long id;
+    
+    private String name;
 
-/**
- * This class contains all states of the UploadService's
- * state engine, which is responsible to assure a secure
- * upload to the Shanoir server.
- * @author mkain
- *
- */
-@XmlType
-public enum UploadState {
-    START, //
-    START_AUTOIMPORT,
-    START_AUTOIMPORT_FAIL,
-    MISSING, // Is it used ?
-    READY, // Is it used ?
-    UPLOADING_IMAGES, // Is it used ?
-    UPLOADING_JOB_FILE, // Is it used ?
-    FINISHED_UPLOAD, //
-    ERROR //
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 }

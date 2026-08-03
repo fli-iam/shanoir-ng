@@ -42,6 +42,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -72,6 +73,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyCenterRepository;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
@@ -124,6 +126,8 @@ public class DicomImporterService {
 
     private static final String EQUIPMENT_CREATION_ERROR = "An error occured during the equipment creation, please check your rights.";
 
+    private static final String MISSING_CAN_IMPORT_RIGHT_ERROR = "Missing right CAN_IMPORT on study, import refused: ";
+
     private static final String DOUBLE_EQUAL = "==";
 
     private static final String SEMI_COLON = ";";
@@ -135,6 +139,9 @@ public class DicomImporterService {
 
     @Autowired
     private StudyService studyService;
+
+    @Autowired
+    private DatasetSecurityService datasetSecurityService;
 
     @Autowired
     private SubjectService subjectService;
@@ -225,6 +232,12 @@ public class DicomImporterService {
         if (study == null) {
             LOG.error("Shanoir study (research project) not found with ID: {}", studyId);
             return false;
+        }
+        if (!datasetSecurityService.hasRightOnStudy(studyId, StudyUserRight.CAN_IMPORT.name())) {
+            LOG.error("User {} misses the right CAN_IMPORT on study with ID: {}, import refused.",
+                    KeycloakUtil.getTokenUserName(), studyId);
+            throw new RestServiceException(
+                    new ErrorModel(HttpStatus.FORBIDDEN.value(), MISSING_CAN_IMPORT_RIGHT_ERROR + studyId, null));
         }
         Serie serie = new Serie(attributes);
         if (!DicomUtils.checkSerieIsIgnored(attributes)) { // do nothing for files of ignored series

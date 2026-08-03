@@ -132,12 +132,15 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    @Transactional
     public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         EegImportJob importJob = objectMapper.readValue(importJobAsString.getBody(), EegImportJob.class);
         eegImporterService.createEegDataset(importJob);
-        importerService.cleanTempFiles(importJob.getWorkFolder());
+        try {
+            importerService.cleanTempFiles(importJob.getWorkFolder());
+        } catch (Exception e) {
+            LOG.warn("Could not clean temp files for workFolder {}: {}", importJob.getWorkFolder(), e.getMessage());
+        }
         return HttpStatus.OK.value();
     }
 
@@ -270,8 +273,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
     }
 
-
-
     @Override
     public ResponseEntity<Void> updateDatasetAcquisition(
               Long datasetAcquisitionId,
@@ -287,7 +288,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
 
     @Override
     public ResponseEntity<Void> addExtraData(
@@ -347,4 +347,5 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             throw new RestServiceException(error);
         }
     }
+
 }
