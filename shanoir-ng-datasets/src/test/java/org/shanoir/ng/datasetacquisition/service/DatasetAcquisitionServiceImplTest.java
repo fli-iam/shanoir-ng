@@ -37,6 +37,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
@@ -123,6 +125,53 @@ class DatasetAcquisitionServiceImplTest {
         when(repository.findById(ACQ_ID)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> service.isEmptyAndRemovable(ACQ_ID));
+    }
+
+    @Test
+    void findAcquisitionsLeftEmptyByReturnsTheAcquisitionWhenAllItsDatasetsAreDeleted() {
+        givenAcquisitionHolding(2L, dataset(11L), dataset(12L));
+
+        List<DatasetAcquisition> leftEmpty = service.findAcquisitionsLeftEmptyBy(List.of(11L, 12L));
+
+        assertEquals(1, leftEmpty.size());
+        assertEquals(ACQ_ID, leftEmpty.get(0).getId());
+    }
+
+    @Test
+    void findAcquisitionsLeftEmptyByIgnoresTheAcquisitionWhenADatasetRemains() {
+        givenAcquisitionHolding(3L, dataset(11L), dataset(12L));
+
+        assertTrue(service.findAcquisitionsLeftEmptyBy(List.of(11L, 12L)).isEmpty());
+    }
+
+    @Test
+    void findAcquisitionsLeftEmptyByIgnoresTheAcquisitionWhenItHoldsExtraData() {
+        acquisition.setExtraDataFilePathList(List.of("protocol.pdf"));
+        givenAcquisitionHolding(1L, dataset(11L));
+
+        assertTrue(service.findAcquisitionsLeftEmptyBy(List.of(11L)).isEmpty());
+    }
+
+    @Test
+    void findAcquisitionsLeftEmptyByReturnsNothingWithoutAnyDataset() {
+        assertTrue(service.findAcquisitionsLeftEmptyBy(Collections.emptyList()).isEmpty());
+    }
+
+    /**
+     * The acquisition under test holds datasetsHeld datasets in total, among which the given ones
+     * are about to be deleted.
+     */
+    private void givenAcquisitionHolding(Long datasetsHeld, Dataset... deletedDatasets) {
+        when(datasetRepository.findAllById(Mockito.anyIterable())).thenReturn(List.of(deletedDatasets));
+        when(datasetRepository.countByDatasetAcquisitionIdIn(Mockito.anyList()))
+                .thenReturn(Collections.<Object[]>singletonList(new Object[] {ACQ_ID, datasetsHeld}));
+    }
+
+    private Dataset dataset(Long id) {
+        Dataset dataset = new MrDataset();
+        dataset.setId(id);
+        dataset.setDatasetAcquisition(acquisition);
+        return dataset;
     }
 
     @Test

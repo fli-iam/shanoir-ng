@@ -1,0 +1,169 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+package org.shanoir.ng.dataset;
+
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.shanoir.ng.dataset.controler.DatasetApiController;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
+import org.shanoir.ng.dataset.modality.EegDatasetMapper;
+import org.shanoir.ng.dataset.modality.MrDatasetMapper;
+import org.shanoir.ng.dataset.service.CreateStatisticsService;
+import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
+import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
+import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.service.DicomImporterService;
+import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
+import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.importer.service.ProcessedDatasetImporterService;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.service.SubjectService;
+import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageService;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+/**
+ * Tests of the dataset controller, focused on the acquisitions that a deletion would leave empty.
+ */
+@WebMvcTest(controllers = DatasetApiController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
+public class DatasetApiControllerTest {
+
+    private static final String REQUEST_PATH = "/datasets/emptyAcquisitionsPreview";
+
+    @MockBean
+    private DatasetMapper datasetMapper;
+
+    @MockBean
+    private MrDatasetMapper mrDatasetMapper;
+
+    @MockBean
+    private EegDatasetMapper eegDatasetMapper;
+
+    @MockBean
+    private DatasetService datasetService;
+
+    @MockBean
+    private CreateStatisticsService createStatisticsService;
+
+    @MockBean
+    private ExaminationService examinationService;
+
+    @MockBean
+    private SubjectService subjectService;
+
+    @MockBean
+    private ImporterService importerService;
+
+    @MockBean
+    private ProcessedDatasetImporterService processedDatasetImporterService;
+
+    @MockBean
+    private WADODownloaderService downloader;
+
+    @MockBean
+    private ShanoirEventService eventService;
+
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
+
+    @MockBean
+    private SolrService solrService;
+
+    @MockBean(name = "datasetDownloaderServiceImpl")
+    private DatasetDownloaderServiceImpl datasetDownloaderService;
+
+    @MockBean
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDAndSubjectNameHandler;
+
+    @MockBean
+    private StorageService storageService;
+
+    @MockBean
+    private DatasetAcquisitionService datasetAcquisitionService;
+
+    @MockBean
+    private ExaminationDatasetAcquisitionMapper examinationDatasetAcquisitionMapper;
+
+    /** Needed by the STOWRSMultipartRequestFilter, which is part of the web slice. */
+    @MockBean
+    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
+
+    @MockBean
+    private DicomImporterService dicomImporterService;
+
+    @Autowired
+    private MockMvc mvc;
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testFindAcquisitionsLeftEmptyBy() throws Exception {
+        DatasetAcquisition acquisition = new GenericDatasetAcquisition();
+        acquisition.setId(1L);
+        ExaminationDatasetAcquisitionDTO dto = new ExaminationDatasetAcquisitionDTO();
+        dto.setId(1L);
+        dto.setName("T1 MPRAGE (Mr)");
+
+        given(datasetAcquisitionService.findAcquisitionsLeftEmptyBy(List.of(11L, 12L)))
+                .willReturn(List.of(acquisition));
+        given(examinationDatasetAcquisitionMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(List.of(acquisition)))
+                .willReturn(List.of(dto));
+
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[11, 12]"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("T1 MPRAGE (Mr)"));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void testFindAcquisitionsLeftEmptyByWithNoAcquisitionLeftEmpty() throws Exception {
+        given(datasetAcquisitionService.findAcquisitionsLeftEmptyBy(List.of(11L)))
+                .willReturn(Collections.emptyList());
+
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[11]"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+}
