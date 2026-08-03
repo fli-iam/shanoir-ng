@@ -40,6 +40,7 @@ import org.mockito.quality.Strictness;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
@@ -49,6 +50,7 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.http.HttpStatus;
@@ -75,6 +77,12 @@ class DatasetAcquisitionServiceImplTest {
 
     @Mock
     private StorageService storageService;
+
+    @Mock
+    private DatasetService datasetService;
+
+    @Mock
+    private SolrService solrService;
 
     @InjectMocks
     private DatasetAcquisitionServiceImpl service;
@@ -246,5 +254,28 @@ class DatasetAcquisitionServiceImplTest {
         assertThrows(RestServiceException.class, () -> service.deleteEmptyAcquisition(ACQ_ID));
 
         verify(repository, never()).deleteById(ACQ_ID);
+    }
+
+    /**
+     * The cascade of an examination deletion empties its acquisitions on purpose and deletes them
+     * itself. It must not be confused with the automatic removal of the acquisitions emptied by a
+     * dataset deletion: none of the guards of that removal applies here.
+     */
+    @Test
+    void deleteByIdCascadeDeletesTheAcquisitionWhateverTheRemovalGuardsSay() throws Exception {
+        acquisition.setExtraDataFilePathList(List.of("protocol.pdf"));
+        acquisition.setDatasets(List.of(dataset(11L), dataset(12L)));
+
+        try (MockedStatic<KeycloakUtil> keycloakUtil = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtil.when(KeycloakUtil::getTokenUserId).thenReturn(1L);
+
+            service.deleteByIdCascade(ACQ_ID, null);
+        }
+
+        verify(datasetService).deleteByIdCascade(11L);
+        verify(datasetService).deleteByIdCascade(12L);
+        verify(repository).deleteById(ACQ_ID);
+        // the emptiness of the acquisition is never even questioned on this path
+        verify(datasetRepository, never()).countByDatasetAcquisitionId(Mockito.anyLong());
     }
 }
