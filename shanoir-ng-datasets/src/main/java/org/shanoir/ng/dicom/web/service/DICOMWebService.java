@@ -50,6 +50,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -220,32 +221,50 @@ public class DICOMWebService {
      * @param serieInstanceUID
      * @param sopInstanceUID
      * @param frame
+     * @param accept the media types accepted by the viewer, may be null
      * @return
      */
     public ResponseEntity findFrameOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
-            String sopInstanceUID, String frame) {
+            String sopInstanceUID, String frame, String accept) {
         try {
             String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/"
                     + sopInstanceUID + "/frames/" + frame;
             HttpGet httpGet = new HttpGet(url);
+            // without an Accept header the PACS decides alone, which transfer
+            // syntax it sends: forward the one of the viewer, that knows best,
+            // what its decoders are able to read
+            if (accept != null && !accept.isEmpty()) {
+                httpGet.setHeader(HttpHeaders.ACCEPT, accept);
+            }
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 HttpEntity entity = response.getEntity();
-                if (entity != null) {
+                HttpStatusCode statusCode = HttpStatusCode.valueOf(response.getCode());
+                // the PACS answers 206 in case only a part of the frames could be
+                // retrieved, so accept all 2xx here and forward the code as it is
+                if (statusCode.is2xxSuccessful() && entity != null) {
                     byte[] dicomBytes = EntityUtils.toByteArray(entity);
                     ByteArrayResource byteArrayResource = new ByteArrayResource(dicomBytes);
                     HttpHeaders responseHeaders = new HttpHeaders();
+                    // the PACS answers with multipart/related, a boundary and the
+                    // transfer syntax of the pixel data: the viewer selects its
+                    // decoder from this header, so it has to arrive unchanged
+                    if (entity.getContentType() != null) {
+                        responseHeaders.set(HttpHeaders.CONTENT_TYPE, entity.getContentType());
+                    }
                     if (!entity.isChunked() && entity.getContentLength() >= 0) {
                         responseHeaders.setContentLength(dicomBytes.length);
                     }
-                    return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
+                    return new ResponseEntity(byteArrayResource, responseHeaders, statusCode);
                 } else {
-                    LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: empty response entity.");
+                    LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: status {} for url {}",
+                            response.getCode(), url);
+                    return ResponseEntity.status(statusCode).build();
                 }
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        return null;
+        return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -323,7 +342,8 @@ public class DICOMWebService {
             HttpGet httpGet = new HttpGet(url);
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 HttpEntity entity = response.getEntity();
-                if (entity != null) {
+                HttpStatusCode statusCode = HttpStatusCode.valueOf(response.getCode());
+                if (statusCode.is2xxSuccessful() && entity != null) {
                     byte[] dicomBytes = EntityUtils.toByteArray(entity);
                     if (subjectName != null && !subjectName.trim().isEmpty()) {
                         dicomBytes = modifyDicomPatientInfo(dicomBytes, subjectName);
@@ -331,15 +351,18 @@ public class DICOMWebService {
                     ByteArrayResource byteArrayResource = new ByteArrayResource(dicomBytes);
                     HttpHeaders responseHeaders = new HttpHeaders();
                     responseHeaders.setContentLength(dicomBytes.length);
-                    return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
+                    return new ResponseEntity(byteArrayResource, responseHeaders, statusCode);
                 } else {
-                    LOG.error("DICOMWeb: findInstance: empty response entity.");
+                    // an error of the PACS answered as 200 leaves the caller with
+                    // an error page, that it tries to read as a DICOM instance
+                    LOG.error("DICOMWeb: findInstance: status {} for url {}", response.getCode(), url);
+                    return ResponseEntity.status(statusCode).build();
                 }
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }
-        return null;
+        return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws ShanoirException {

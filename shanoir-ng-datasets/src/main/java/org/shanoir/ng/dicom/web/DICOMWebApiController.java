@@ -84,6 +84,10 @@ public class DICOMWebApiController implements DICOMWebApi {
 
     private static final Pattern BULK_DATA_QUERY_PATTERN = Pattern.compile("(?:offset|length)=\\d+(?:&(?:offset|length)=\\d+)*");
 
+    private static final Pattern ACCEPT_HEADER_PATTERN = Pattern.compile("[\\w!#$%&'*+.^`|~/=;,\" -]+");
+
+    private static final int MAX_ACCEPT_HEADER_LENGTH = 512;
+
     @Value("${viewer.ohif.url.base}")
     private String viewerBaseUrl;
 
@@ -328,15 +332,36 @@ public class DICOMWebApiController implements DICOMWebApi {
 
     @Override
     public ResponseEntity findFrameOfStudyOfSerieOfInstance(String examinationUID, String serieInstanceUID,
-                                                            String sopInstanceUID, String frame) throws RestServiceException {
+                                                            String sopInstanceUID, String frame, String accept) throws RestServiceException {
         String studyInstanceUID = studyInstanceUIDAndSubjectNameHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
         serieInstanceUID = seriesInstanceUIDHandler.resolveSeriesInstanceUID(serieInstanceUID);
         if (!StringUtils.isEmpty(studyInstanceUID) && !StringUtils.isEmpty(serieInstanceUID)
                 && !StringUtils.isEmpty(sopInstanceUID) && !StringUtils.isEmpty(frame)) {
-            return dicomWebService.findFrameOfStudyOfSerieOfInstance(studyInstanceUID, serieInstanceUID, sopInstanceUID, frame);
+            return dicomWebService.findFrameOfStudyOfSerieOfInstance(studyInstanceUID, serieInstanceUID, sopInstanceUID,
+                    frame, sanitizeAcceptHeader(accept));
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    /**
+     * The Accept header of the viewer is forwarded to the PACS, so that the
+     * viewer can negotiate a transfer syntax it is able to decode. As the value
+     * ends up in an outgoing request, only sane media type characters are kept:
+     * anything else is dropped and the PACS applies its own default.
+     *
+     * @param accept the Accept header received from the viewer, may be null
+     * @return the header to forward or null, if there is nothing to forward
+     */
+    private String sanitizeAcceptHeader(String accept) {
+        if (StringUtils.isEmpty(accept) || accept.length() > MAX_ACCEPT_HEADER_LENGTH) {
+            return null;
+        }
+        if (!ACCEPT_HEADER_PATTERN.matcher(accept).matches()) {
+            LOG.warn("DICOMWeb: ignoring unexpected Accept header for frame request.");
+            return null;
+        }
+        return accept;
     }
 
     @Override
