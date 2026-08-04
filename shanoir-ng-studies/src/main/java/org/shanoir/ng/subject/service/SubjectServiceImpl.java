@@ -124,7 +124,7 @@ public class SubjectServiceImpl implements SubjectService {
         }
 
         Subject subject = subjectOpt.get();
-        publishSubjectEvent(subject, ShanoirEventType.DELETE_SUBJECT_EVENT);
+        ShanoirEvent event = publishSubjectEvent(subject, ShanoirEventType.DELETE_SUBJECT_EVENT);
 
         // Delete all associated study_examination
         studyExaminationRepository.deleteBySubjectId(id);
@@ -133,7 +133,16 @@ public class SubjectServiceImpl implements SubjectService {
         subjectRepository.deleteById(id);
         if (subject.isPreclinical())
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
-        rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, id.toString());
+        // The event is sent instead of the sole subject id, so that ms datasets knows which user
+        // asked for the deletion and can historize the deletions it cascades in the study.
+        try {
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE,
+                    objectMapper.writeValueAsString(event));
+        } catch (JsonProcessingException e) {
+            LOG.error("Could not request the deletion of the data of subject {}", id, e);
+            throw new IllegalStateException(
+                    "Error while communicating with MS Datasets to delete subject " + id, e);
+        }
     }
 
     @Override
@@ -577,8 +586,9 @@ public class SubjectServiceImpl implements SubjectService {
      *
      * @param subject the involved subject
      * @param eventType the type of event
+     * @return the published event
      */
-    private void publishSubjectEvent(Subject subject, String eventType) {
+    private ShanoirEvent publishSubjectEvent(Subject subject, String eventType) {
         Study study = subject.getStudy();
         String eventMsg;
 
@@ -595,14 +605,14 @@ public class SubjectServiceImpl implements SubjectService {
             default:
                 eventMsg = "Unknown subject event type: "  + eventType;
         }
-        eventService.publishEvent(
-                new ShanoirEvent(
-                        eventType,
-                        subject.getId().toString(),
-                        KeycloakUtil.getTokenUserId(),
-                        eventMsg,
-                        ShanoirEvent.SUCCESS,
-                        study.getId())
-        );
+        ShanoirEvent event = new ShanoirEvent(
+                eventType,
+                subject.getId().toString(),
+                KeycloakUtil.getTokenUserId(),
+                eventMsg,
+                ShanoirEvent.SUCCESS,
+                study.getId());
+        eventService.publishEvent(event);
+        return event;
     }
 }
