@@ -65,8 +65,6 @@ public final class ImportUtils {
 
     private static final String UPLOAD_FILE_SUFFIX = ".upload";
 
-    private static final String INTO = " into ";
-
     private static final SecureRandom RANDOM = new SecureRandom();
 
     /** The Constant KB. */
