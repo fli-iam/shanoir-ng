@@ -157,12 +157,12 @@ public class EmailServiceTest {
         final User first = massEmailUser("first@test.shanoir.fr");
         final User second = massEmailUser("second@test.shanoir.fr");
 
-        emailService.sendMassEmail(Arrays.asList(first, second), "[Shanoir] Maintenance",
+        emailService.sendMassEmail(Arrays.asList(first, second), "Maintenance",
                 "Service unavailable <tomorrow>.\nSorry for the inconvenience.", null, null);
 
         final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
         assertEquals(2, receivedMessages.length);
-        assertTrue(receivedMessages[0].getSubject().contains("[Shanoir] Maintenance"));
+        assertEquals(SUBJECT_PREFIX + "Maintenance", receivedMessages[0].getSubject());
         final String content = (String) receivedMessages[0].getContent();
         assertTrue(content.contains("Dear"));
         // markup of the announcement is escaped, line breaks are rendered
@@ -184,7 +184,7 @@ public class EmailServiceTest {
         final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
         assertEquals(1, receivedMessages.length);
         // the study name tells the members what the email relates to
-        assertEquals("[My Study] Kick-off meeting", receivedMessages[0].getSubject());
+        assertEquals(SUBJECT_PREFIX + "[My Study] Kick-off meeting", receivedMessages[0].getSubject());
         assertEquals("sender@test.shanoir.fr", ((InternetAddress) receivedMessages[0].getReplyTo()[0]).getAddress());
         final String content = (String) receivedMessages[0].getContent();
         // the members know who addressed them
@@ -199,7 +199,7 @@ public class EmailServiceTest {
         final User failing = massEmailUser(null);
         final User valid = massEmailUser("valid@test.shanoir.fr");
 
-        emailService.sendMassEmail(Arrays.asList(failing, valid), "[Shanoir] Maintenance", "Service unavailable.",
+        emailService.sendMassEmail(Arrays.asList(failing, valid), "Maintenance", "Service unavailable.",
                 null, null);
 
         assertEquals(1, greenMail.getReceivedMessages().length);

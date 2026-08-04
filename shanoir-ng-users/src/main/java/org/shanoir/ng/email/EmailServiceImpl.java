@@ -821,7 +821,8 @@ public class EmailServiceImpl implements EmailService {
         final String htmlContent = HtmlUtils.htmlEscape(content)
                 .replace("\r\n", "\n").replace("\n", "<br/>");
         // members are told which study the email is about, and who wrote to them
-        final String fullSubject = studyName == null ? subject : "[" + studyName + "] " + subject;
+        final String studySubject = studyName == null ? subject : "[" + studyName + "] " + subject;
+        final String fullSubject = subject(studySubject);
         final String senderName = sender == null ? null : sender.getFirstName() + " " + sender.getLastName();
         int sent = 0;
         for (final User recipient : recipients) {
