@@ -330,7 +330,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             dos.writeDataset(metaInformationAttributes, datasetAttributes);
             LOG.debug("finish anonymization: end storage");
         } catch (final IOException exc) {
-            LOG.error("performAnonymization : error while anonimizing file " + dicomFile.toString() + " : ", exc);
+            LOG.error("performAnonymization : error while anonymizing file " + dicomFile.toString() + " : ", exc);
         } finally {
             try {
                 if (din != null) {

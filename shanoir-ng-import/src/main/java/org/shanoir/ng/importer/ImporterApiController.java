@@ -785,18 +785,30 @@ public class ImporterApiController implements ImporterApi {
             // STEP 4: Iterate over examination folders
             for (File examFolder : sortedExamFolders) {
                 job = null;
-                // Check of it's a folder
+                // Check if it's a folder
                 if (!examFolder.isDirectory()) {
                     throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                             "The main subject folder should only contain sub-folders and not single/data files.", null));
                 }
-                boolean createDicomDir = !new File(examFolder, DICOMDIR).exists();
-                job = buildImportJobFromDirectory(examFolder, createDicomDir);
-                // examFolder is nested under userImportDir (userImportDir/<tmp>/<subject>/<exam>),
-                // not a direct child, so workFolder must be the full relative path from
-                // userImportDir, not just examFolder.getName() — otherwise startImportJobBase's
-                // `new File(userImportDir, tempDirId)` can't find it.
-                job.setWorkFolder(userImportDir.toPath().relativize(examFolder.toPath()).toString());
+                // Give this exam its own dedicated top-level folder directly under userImportDir,
+                // exactly like a normal single-exam upload gets from
+                // ImportUtils.saveTempFileCreateFolderAndUnzip. This is what keeps workFolder
+                // resolvable via `new File(userImportDir, tempDirId)` later (startImportJobBase,
+                // getDicomFilesForImportJob, etc.) and keeps each exam's files fully isolated
+                // from its siblings during later async processing.
+                File examWorkDir = new File(userImportDir, Long.toString(ImportUtils.createRandomLong()));
+                if (examWorkDir.exists()) {
+                    throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "Error while creating exam work dir: random number generated twice?", null));
+                }
+                if (!examFolder.renameTo(examWorkDir)) {
+                    throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                            "Could not move exam folder [" + examFolder.getName() + "] into its own work directory.", null));
+                }
+
+                // STEP 4.0 Build the ImportJob directly from the now-isolated exam directory
+                boolean createDicomDir = !new File(examWorkDir, DICOMDIR).exists();
+                job = buildImportJobFromDirectory(examWorkDir, createDicomDir);
                 Patient patient = job.getPatient();
 
                 // Create subject only once.
