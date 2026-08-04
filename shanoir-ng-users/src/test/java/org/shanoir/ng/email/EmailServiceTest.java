@@ -50,9 +50,14 @@ import jakarta.mail.internet.MimeMessage;
  * @author msimon
  *
  */
-@SpringBootTest(properties = "shanoir.instance.name=DEV")
+@SpringBootTest(properties = "shanoir.instance.name=" + EmailServiceTest.INSTANCE_NAME)
 @ActiveProfiles("test")
 public class EmailServiceTest {
+
+    /** The name this instance is given for the test, expected in every subject. */
+    static final String INSTANCE_NAME = "DEV";
+
+    private static final String SUBJECT_PREFIX = "[" + INSTANCE_NAME + "] ";
 
     private static final String NEW_PASSWORD = "testPwd";
 
@@ -80,45 +85,45 @@ public class EmailServiceTest {
     @Test
     public void notifyAccountWillExpireTest() throws Exception {
         emailService.notifyAccountWillExpire(ModelsUtil.createUser());
-        assertReceivedMessageContains("[QUALIF] Account Expiration", "will expire on");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "Account Expiration", "will expire on");
     }
 
     @Test
     public void notifyNewUserTest() throws Exception {
         emailService.notifyCreateUser(ModelsUtil.createUser(), "password");
-        assertReceivedMessageContains("[QUALIF] Account Creation", "Your account has been created");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "Account Creation", "Your account has been created");
     }
 
     @Test
     @WithMockKeycloakUser(id = 4, username = "phdauvergne", authorities = { "ROLE_ADMIN" })
     public void notifyAccountRequestAcceptedTest() throws Exception {
         emailService.notifyAccountRequestAccepted(ModelsUtil.createUser());
-        assertReceivedMessageContains("[QUALIF] Granted: Your account has been activated", "Your account request has been granted");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "Granted: Your account has been activated", "Your account request has been granted");
     }
 
     @Test
     public void notifyAccountRequestDeniedTest() throws Exception {
         emailService.notifyAccountRequestDenied(ModelsUtil.createUser());
-        assertReceivedMessageContains("[QUALIF] DENIED: Your account request has been denied", "has been denied");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "DENIED: Your account request has been denied", "has been denied");
     }
 
     @Test
     @WithMockKeycloakUser(id = 4, username = "phdauvergne", authorities = { "ROLE_ADMIN" })
     public void notifyExtensionRequestAcceptedTest() throws Exception {
         emailService.notifyExtensionRequestAccepted(ModelsUtil.createUser());
-        assertReceivedMessageContains("[QUALIF] Granted: Your account extension has been extended", "Your account extension request has been granted");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "Granted: Your account extension has been extended", "Your account extension request has been granted");
     }
 
     @Test
     public void notifyExtensionRequestDeniedTest() throws Exception {
         emailService.notifyExtensionRequestDenied(ModelsUtil.createUser());
-        assertReceivedMessageContains("[QUALIF] DENIED: Your account extension request has been denied", "has been denied");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "DENIED: Your account extension request has been denied", "has been denied");
     }
 
     @Test
     public void notifyUserResetPasswordTest() throws Exception {
         emailService.notifyUserResetPassword(ModelsUtil.createUser(), NEW_PASSWORD);
-        assertReceivedMessageContains("[QUALIF] Réinitialisation du mot de passe", NEW_PASSWORD);
+        assertReceivedMessageContains(SUBJECT_PREFIX + "Réinitialisation du mot de passe", NEW_PASSWORD);
     }
 
     @Test
@@ -141,7 +146,7 @@ public class EmailServiceTest {
         // WHEN we receive an event with elements stating that data was imported successfully
         emailService.notifyStudyManagerDataImported(mail);
         // THEN an email is sent to the administrators
-        assertReceivedMessageContains("[QUALIF] Data imported to StudyName", "imported data to study");
+        assertReceivedMessageContains(SUBJECT_PREFIX + "Data imported to StudyName", "imported data to study");
     }
 
     private void assertReceivedMessageContains(final String expectedSubject, final String expectedContent)
