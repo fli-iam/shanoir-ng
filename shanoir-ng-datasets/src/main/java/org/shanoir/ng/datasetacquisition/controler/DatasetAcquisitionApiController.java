@@ -276,15 +276,38 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @Override
     public ResponseEntity<List<Long>> deleteEmptyDatasetAcquisitions(Long studyId) {
+        List<DatasetAcquisition> empty = datasetAcquisitionService.findEmptyAcquisitions(studyId);
+
+        ShanoirEvent event = new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                studyId != null ? String.valueOf(studyId) : null,
+                KeycloakUtil.getTokenUserId(),
+                "Starting the clean up of " + empty.size() + " empty dataset acquisition(s)",
+                ShanoirEvent.IN_PROGRESS,
+                0f,
+                studyId);
+        eventService.publishEvent(event);
+
         List<Long> deleted = new ArrayList<>();
-        for (DatasetAcquisition acquisition : datasetAcquisitionService.findEmptyAcquisitions(studyId)) {
+        int handled = 0;
+        for (DatasetAcquisition acquisition : empty) {
             try {
                 datasetAcquisitionService.deleteEmptyAcquisition(acquisition.getId());
                 deleted.add(acquisition.getId());
             } catch (EntityNotFoundException | RestServiceException e) {
                 LOG.warn("Could not remove the empty dataset acquisition {}", acquisition.getId(), e);
             }
+            // the ones that could not be removed still make the clean up progress
+            handled++;
+            event.setProgress((float) handled / empty.size());
+            eventService.publishEvent(event);
         }
+
+        event.setMessage(deleted.size() + " empty dataset acquisition(s) deleted.");
+        event.setProgress(1f);
+        event.setStatus(ShanoirEvent.SUCCESS);
+        eventService.publishEvent(event);
+
         LOG.info("Clean up of empty dataset acquisitions: {} removed", deleted.size());
         return new ResponseEntity<>(deleted, HttpStatus.OK);
     }

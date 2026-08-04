@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.datasetacquisition;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -40,7 +41,9 @@ import org.shanoir.ng.importer.service.DicomImporterService;
 import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -185,6 +188,49 @@ public class DatasetAcquisitionApiControllerTest {
 
         // THEN the file is downloaded
         assertNotNull(result.getResponse().getContentAsString());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testDeleteEmptyDatasetAcquisitionsReportsItsProgress() throws Exception {
+        // GIVEN two acquisitions holding no dataset anymore
+        DatasetAcquisition first = new GenericDatasetAcquisition();
+        first.setId(1L);
+        DatasetAcquisition second = new GenericDatasetAcquisition();
+        second.setId(2L);
+        given(datasetAcquisitionService.findEmptyAcquisitions(null)).willReturn(List.of(first, second));
+
+        // WHEN they are cleaned up
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/empty"))
+                .andExpect(status().isOk());
+
+        // THEN both are removed and the clean up is reported as a job
+        Mockito.verify(datasetAcquisitionService).deleteEmptyAcquisition(1L);
+        Mockito.verify(datasetAcquisitionService).deleteEmptyAcquisition(2L);
+
+        ArgumentCaptor<ShanoirEvent> captor = ArgumentCaptor.forClass(ShanoirEvent.class);
+        Mockito.verify(eventService, Mockito.atLeastOnce()).publishEvent(captor.capture());
+        ShanoirEvent event = captor.getValue();
+        assertEquals(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, event.getEventType());
+        assertEquals(ShanoirEvent.SUCCESS, event.getStatus());
+        assertEquals(Float.valueOf(1f), event.getProgress());
+        assertEquals("2 empty dataset acquisition(s) deleted.", event.getMessage());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testDeleteEmptyDatasetAcquisitionsWithNothingToCleanUp() throws Exception {
+        // GIVEN no empty acquisition at all
+        given(datasetAcquisitionService.findEmptyAcquisitions(null)).willReturn(Collections.emptyList());
+
+        // WHEN the clean up runs
+        mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/empty"))
+                .andExpect(status().isOk());
+
+        // THEN the job still completes, without a division by zero on its progress
+        ArgumentCaptor<ShanoirEvent> captor = ArgumentCaptor.forClass(ShanoirEvent.class);
+        Mockito.verify(eventService, Mockito.atLeastOnce()).publishEvent(captor.capture());
+        assertEquals(Float.valueOf(1f), captor.getValue().getProgress());
     }
 
     @Test
