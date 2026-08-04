@@ -226,26 +226,24 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param nonImages
      * @param images
      */
-    private void processDicomFilePerInstanceAndCreateImage(File dicomFile, List<Image> images, String folderFileAbsolutePath, boolean isFromShUpQualityControl) throws Exception {
-        try (DicomInputStream dIS = new DicomInputStream(dicomFile)) { // keep try to finally close input stream
+    private void processDicomFilePerInstanceAndCreateImage(File dicomFile, List<Image> images,
+            String folderFileAbsolutePath, boolean isFromShUpQualityControl) throws Exception {
+        try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
             Attributes attributes = dIS.readDatasetUntilPixelData();
             // Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
             if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
                 // else do nothing here as instances list will be emptied after split between images and non-images
                 Image image = new Image();
-                String relativeFilePath = new String();
                 /**
                  * Attention: the path of each image is always relative: either to the temporary folder created
                  * with dicom zip import during the upload or with the DicomStoreSCPServer folder for PACS import.
                  * If the import is from ShanoirUploader, the path stays absolute to allow the execution of quality control.
                  */
-                if (!isFromShUpQualityControl) {
-                    relativeFilePath = dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "");
-                } else {
-                    relativeFilePath = dicomFile.getAbsolutePath();
-                }
+                String relativeFilePath = !isFromShUpQualityControl
+                        ? dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "")
+                        : dicomFile.getAbsolutePath();
                 image.setPath(relativeFilePath);
-                addImageSeparateDatasetsInfo(image, attributes);
+                addImageSeparateDatasetsInfo(image, attributes, dicomFile);
                 images.add(image);
             }
         } catch (IOException iOE) {
@@ -284,9 +282,16 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param image
      * @param datasetAttributes
      */
-    private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
+    private void addImageSeparateDatasetsInfo(Image image, Attributes attributes, File dicomFile) throws Exception {
         final String sopClassUID = attributes.getString(Tag.SOPClassUID);
         if (MultiframeExtractor.isSupportedSOPClass(sopClassUID)) {
+            // MultiframeExtractor needs the actual PixelData bytes to slice out a frame,
+            // which readDatasetUntilPixelData() deliberately omits. Re-read this file in
+            // full — but only for enhanced multi-frame instances, which are the exception,
+            // not the rule, so this doesn't undo the optimization for normal series.
+            try (DicomInputStream fullDIS = new DicomInputStream(dicomFile)) {
+                attributes = fullDIS.readDataset();
+            }
             attributes = emf.extract(attributes, 0);
         }
         String sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
