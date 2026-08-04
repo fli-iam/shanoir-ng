@@ -76,7 +76,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
     private static final String YES = "YES";
 
     private static final String SERIES_NUMBER_0 = "0";
-    
+
     private MultiframeExtractor emf = new MultiframeExtractor();
 
     @Autowired

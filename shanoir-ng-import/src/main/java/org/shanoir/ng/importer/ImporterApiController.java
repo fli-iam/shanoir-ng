@@ -63,7 +63,6 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
 import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
-import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -123,7 +122,7 @@ public class ImporterApiController implements ImporterApi {
     private static final int BUFFER_SIZE = 10 * KB;
 
     private static final UIDGeneration UID_GENERATOR = new UIDGeneration();
-    
+
     private static final Pattern PREFILTER_PATTERN =
             Pattern.compile("HP:(\\d+)k?Hz\\sLP:(\\d+)k?Hz(\\sN:(\\d+)k?Hz)?");
 
@@ -536,7 +535,7 @@ public class ImporterApiController implements ImporterApi {
             throws ShanoirImportException {
         // List the directory once instead of once per .edf file
         final File[] allFilesInDir = dataFileDir.listFiles();
-        
+
         for (File edfFile : edfMatchingFiles) {
             // Parse the file
             try (FileInputStream edfStream = new FileInputStream(edfFile)) {
@@ -608,13 +607,13 @@ public class ImporterApiController implements ImporterApi {
      * @param datasets        the list of datasets to import
      * @return a list of datasets generated from the informations of the .vhdr files
      * @throws ShanoirImportException when parsing fails
-     * @throws IOException 
+     * @throws IOException
      */
     private void readBrainvisionFiles(final File[] bvMatchingFiles, final File dataFileDir,
                                       final List<EegDataset> datasets) throws ShanoirImportException, IOException {
         // List the directory once instead of once per .vhdr file
         final File[] allFilesInDir = dataFileDir.listFiles();
-        
+
         for (File vhdrFile : bvMatchingFiles) {
 
             // Parse the file
