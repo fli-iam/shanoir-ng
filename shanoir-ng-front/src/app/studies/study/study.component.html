@@ -67,6 +67,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" replaceUrl="true">
                         <span class="members">Members</span>
                     </li>
+                    @if (hasEmailMembersRight && mode == 'view') {
+                        <li [class.active]="activeTab == 'email'" [routerLink]="'.'" [fragment]="'email'" replaceUrl="true">
+                            <span class="email">Email members</span>
+                        </li>
+                    }
                     <li class="tags" [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">
                         <span class="tags">Tags</span>
                     </li>
@@ -819,6 +824,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [study]="study"
                         [mode]="mode"></studyuser-list>
                 </fieldset>
+                @if (hasEmailMembersRight && mode == 'view') {
+                    <fieldset [class.hidden-tab]="activeTab != 'email'" tab="email">
+                        <legend>Send email to members</legend>
+                        <study-email-members [study]="study"></study-email-members>
+                    </fieldset>
+                }
                 @if (keycloakService.isUserAdmin() && accessRequests?.length > 0) {
                     <fieldset class="access-requests">
                         <legend>Pending access requests for this study</legend>

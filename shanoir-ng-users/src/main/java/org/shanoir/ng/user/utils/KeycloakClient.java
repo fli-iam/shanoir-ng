@@ -63,6 +63,11 @@ public class KeycloakClient {
      */
     private static final String OTP_CREDENTIAL_TYPE = "otp";
 
+    /**
+     * Page size used when listing all realm users.
+     */
+    private static final int USERS_PAGE_SIZE = 100;
+
     @Value("${kc.admin.client.server.url}")
     private String kcAdminClientServerUrl;
 
@@ -261,6 +266,32 @@ public class KeycloakClient {
             userResource.update(userRepresentation);
         } catch (Exception e) {
             throw new SecurityException("Could not update the enabled status for user with keycloak id " + keycloakId, e);
+        }
+    }
+
+    /**
+     * Read the enabled (activated) flag of every user of the realm in a single
+     * paginated listing, instead of one Keycloak request per user.
+     *
+     * @return a map of keycloak id to enabled flag.
+     * @throws SecurityException
+     */
+    public Map<String, Boolean> getUsersEnabledStatus() throws SecurityException {
+        try {
+            final Map<String, Boolean> enabledByKeycloakId = new HashMap<>();
+            List<UserRepresentation> page;
+            int first = 0;
+            do {
+                page = getKeycloak().realm(keycloakRealm).users().list(first, USERS_PAGE_SIZE);
+                for (UserRepresentation userRepresentation : page) {
+                    enabledByKeycloakId.put(userRepresentation.getId(),
+                            Boolean.TRUE.equals(userRepresentation.isEnabled()));
+                }
+                first += page.size();
+            } while (page.size() == USERS_PAGE_SIZE);
+            return enabledByKeycloakId;
+        } catch (Exception e) {
+            throw new SecurityException("Could not list the users enabled status from Keycloak.", e);
         }
     }
 

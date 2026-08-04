@@ -357,7 +357,8 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         delete(entity, event);
 
         repository.deleteById(id);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(),
+                "Acquisition " + id + " of examination " + entity.getExamination().getId() + " removed", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
     }
 
     @Override
