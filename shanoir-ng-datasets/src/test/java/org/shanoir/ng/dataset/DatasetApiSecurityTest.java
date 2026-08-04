@@ -196,13 +196,6 @@ public class DatasetApiSecurityTest {
             assertAccessAuthorized(api::deleteDatasets, Utils.toList(1L), false);
         }
 
-        //findAcquisitionsLeftEmptyBy(List<Long>)
-        if ("ROLE_USER".equals(role)) {
-            assertAccessDenied(api::findAcquisitionsLeftEmptyBy, Utils.toList(1L, 2L, 3L, 4L));
-        } else if ("ROLE_EXPERT".equals(role)) {
-            assertAccessAuthorized(api::findAcquisitionsLeftEmptyBy, Utils.toList(1L));
-        }
-
         //findDatasetById(Long)
         given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
         su1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));

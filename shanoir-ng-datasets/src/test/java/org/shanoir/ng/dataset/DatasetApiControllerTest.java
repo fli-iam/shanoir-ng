@@ -17,10 +17,8 @@ package org.shanoir.ng.dataset;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -34,8 +32,6 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
-import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
-import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -62,14 +58,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
- * Tests of the dataset controller, focused on the acquisitions that a deletion would leave empty.
+ * Tests of the dataset controller, focused on the removal of the acquisitions that a deletion
+ * leaves empty.
  */
 @WebMvcTest(controllers = DatasetApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class DatasetApiControllerTest {
-
-    private static final String REQUEST_PATH = "/datasets/emptyAcquisitionsPreview";
 
     @MockBean
     private DatasetMapper datasetMapper;
@@ -122,9 +117,6 @@ public class DatasetApiControllerTest {
     @MockBean
     private DatasetAcquisitionService datasetAcquisitionService;
 
-    @MockBean
-    private ExaminationDatasetAcquisitionMapper examinationDatasetAcquisitionMapper;
-
     /** Needed by the STOWRSMultipartRequestFilter, which is part of the web slice. */
     @MockBean
     private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
@@ -134,29 +126,6 @@ public class DatasetApiControllerTest {
 
     @Autowired
     private MockMvc mvc;
-
-    @Test
-    @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
-    public void testFindAcquisitionsLeftEmptyBy() throws Exception {
-        DatasetAcquisition acquisition = new GenericDatasetAcquisition();
-        acquisition.setId(1L);
-        ExaminationDatasetAcquisitionDTO dto = new ExaminationDatasetAcquisitionDTO();
-        dto.setId(1L);
-        dto.setName("T1 MPRAGE (Mr)");
-
-        given(datasetAcquisitionService.findAcquisitionsLeftEmptyBy(List.of(11L, 12L)))
-                .willReturn(List.of(acquisition));
-        given(examinationDatasetAcquisitionMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(List.of(acquisition)))
-                .willReturn(List.of(dto));
-
-        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("[11, 12]"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].name").value("T1 MPRAGE (Mr)"));
-    }
 
     @Test
     @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
@@ -227,19 +196,5 @@ public class DatasetApiControllerTest {
         dataset.setId(datasetId);
         dataset.setDatasetAcquisition(acquisition);
         return dataset;
-    }
-
-    @Test
-    @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
-    public void testFindAcquisitionsLeftEmptyByWithNoAcquisitionLeftEmpty() throws Exception {
-        given(datasetAcquisitionService.findAcquisitionsLeftEmptyBy(List.of(11L)))
-                .willReturn(Collections.emptyList());
-
-        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("[11]"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isEmpty());
     }
 }

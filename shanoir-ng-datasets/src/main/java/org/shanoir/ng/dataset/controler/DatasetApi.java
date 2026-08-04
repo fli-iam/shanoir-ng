@@ -24,7 +24,6 @@ import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTOInterface;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.OverallStatistics;
-import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -89,18 +88,6 @@ public interface DatasetApi {
             @Parameter(description = "remove the dataset acquisitions too when this deletion leaves them empty")
             @RequestParam(value = "deleteEmptyAcquisitions", defaultValue = "false") boolean deleteEmptyAcquisitions)
             throws RestServiceException;
-
-    @Operation(summary = "", description = "Returns the dataset acquisitions that the deletion of the given datasets would leave empty, and that may then be removed")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),
-        @ApiResponse(responseCode = "401", description = "unauthorized"),
-        @ApiResponse(responseCode = "403", description = "forbidden"),
-        @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @PostMapping(value = "/emptyAcquisitionsPreview", produces = {"application/json"}, consumes = {"application/json"})
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
-    ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findAcquisitionsLeftEmptyBy(
-            @Parameter(description = "ids of the datasets about to be deleted", required = true) @Valid
-            @RequestBody(required = true) List<Long> datasetIds);
 
     @Operation(summary = "", description = "Deletes nifti files from a study")
     @ApiResponses(value = {

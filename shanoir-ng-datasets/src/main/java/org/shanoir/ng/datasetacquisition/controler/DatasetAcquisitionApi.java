@@ -150,6 +150,18 @@ public interface DatasetAcquisitionApi {
     ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
             @Parameter(description = "ids of the datasets", required = true) @RequestBody Long[] datasetIds);
 
+    @Operation(summary = "", description = "Returns the dataset acquisitions that the deletion of the given datasets would leave empty, and that may then be removed")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @RequestMapping(value = "/datasetacquisition/emptiedByDatasetIds", produces = {"application/json"}, consumes = {"application/json"}, method = RequestMethod.POST)
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
+    ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionsLeftEmptyBy(
+            @Parameter(description = "ids of the datasets about to be deleted", required = true) @Valid
+            @RequestBody(required = true) List<Long> datasetIds);
+
     @Operation(summary = "", description = "Returns a dataset acquisitions page")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),

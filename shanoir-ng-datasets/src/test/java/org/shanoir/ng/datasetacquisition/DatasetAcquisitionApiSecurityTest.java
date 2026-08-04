@@ -123,6 +123,7 @@ public class DatasetAcquisitionApiSecurityTest {
         assertAccessDenied(api::deleteDatasetAcquisition, 1L);
         assertAccessDenied(api::findEmptyDatasetAcquisitions, 1L);
         assertAccessDenied(api::deleteEmptyDatasetAcquisitions, 1L);
+        assertAccessDenied(api::findDatasetAcquisitionsLeftEmptyBy, Utils.toList(1L));
     }
 
     @Test
@@ -156,6 +157,7 @@ public class DatasetAcquisitionApiSecurityTest {
         assertAccessAuthorized(api::deleteDatasetAcquisition, 4L);
         assertAccessAuthorized(api::findEmptyDatasetAcquisitions, 1L);
         assertAccessAuthorized(api::deleteEmptyDatasetAcquisitions, 1L);
+        assertAccessAuthorized(api::findDatasetAcquisitionsLeftEmptyBy, Utils.toList(1L));
     }
 
     private void testAll(String role) throws ShanoirException, RestServiceException {
@@ -241,6 +243,11 @@ public class DatasetAcquisitionApiSecurityTest {
         // findEmptyDatasetAcquisitions(Long) and deleteEmptyDatasetAcquisitions(Long), admin only
         assertAccessDenied(api::findEmptyDatasetAcquisitions, 1L);
         assertAccessDenied(api::deleteEmptyDatasetAcquisitions, 1L);
+
+        // findDatasetAcquisitionsLeftEmptyBy(List<Long>), needs the rights on the datasets themselves
+        if ("ROLE_USER".equals(role)) {
+            assertAccessDenied(api::findDatasetAcquisitionsLeftEmptyBy, Utils.toList(1L));
+        }
 
         // findDatasetAcquisitionById(Long)
         assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);

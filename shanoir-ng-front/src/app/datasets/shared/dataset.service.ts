@@ -72,7 +72,8 @@ export class DatasetService extends EntityService<Dataset> {
      * backend would then be able to remove. An empty list means the deletion leaves nothing behind.
      */
     getAcquisitionsLeftEmptyBy(datasetIds: number[]): Promise<IdName[]> {
-        return firstValueFrom(this.http.post<IdName[]>(this.API_URL + '/emptyAcquisitionsPreview', datasetIds, this.httpOptions));
+        return firstValueFrom(this.http.post<IdName[]>(
+            AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/emptiedByDatasetIds', datasetIds, this.httpOptions));
     }
 
     /**

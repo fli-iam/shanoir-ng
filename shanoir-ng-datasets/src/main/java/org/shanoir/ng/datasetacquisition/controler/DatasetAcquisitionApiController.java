@@ -257,6 +257,15 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
     }
 
     @Override
+    public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionsLeftEmptyBy(List<Long> datasetIds) {
+        List<DatasetAcquisition> leftEmpty = datasetAcquisitionService.findAcquisitionsLeftEmptyBy(datasetIds);
+        if (CollectionUtils.isEmpty(leftEmpty)) {
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(leftEmpty), HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findEmptyDatasetAcquisitions(Long studyId) {
         List<DatasetAcquisition> empty = datasetAcquisitionService.findEmptyAcquisitions(studyId);
         if (CollectionUtils.isEmpty(empty)) {

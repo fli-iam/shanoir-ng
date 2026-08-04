@@ -16,6 +16,7 @@ package org.shanoir.ng.datasetacquisition;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.google.gson.Gson;
@@ -27,6 +28,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.datasetacquisition.controler.DatasetAcquisitionApiController;
+import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionDatasetsMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
@@ -58,6 +62,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Collections;
+import java.util.List;
 
 
 @WebMvcTest(controllers = DatasetAcquisitionApiController.class)
@@ -180,5 +185,45 @@ public class DatasetAcquisitionApiControllerTest {
 
         // THEN the file is downloaded
         assertNotNull(result.getResponse().getContentAsString());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testFindDatasetAcquisitionsLeftEmptyBy() throws Exception {
+        // GIVEN datasets whose deletion would leave their acquisition empty
+        DatasetAcquisition acquisition = new GenericDatasetAcquisition();
+        acquisition.setId(1L);
+        ExaminationDatasetAcquisitionDTO dto = new ExaminationDatasetAcquisitionDTO();
+        dto.setId(1L);
+        dto.setName("T1 MPRAGE (Mr)");
+        given(datasetAcquisitionService.findAcquisitionsLeftEmptyBy(List.of(11L, 12L))).willReturn(List.of(acquisition));
+        given(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(List.of(acquisition)))
+                .willReturn(List.of(dto));
+
+        // WHEN we ask for the acquisitions that deletion would leave empty
+        // THEN they are returned
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH + "/emptiedByDatasetIds")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[11, 12]"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("T1 MPRAGE (Mr)"));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void testFindDatasetAcquisitionsLeftEmptyByWithNoneLeftEmpty() throws Exception {
+        // GIVEN a dataset whose acquisition holds other datasets
+        given(datasetAcquisitionService.findAcquisitionsLeftEmptyBy(List.of(11L))).willReturn(Collections.emptyList());
+
+        // WHEN we ask for the acquisitions that deletion would leave empty
+        // THEN none is returned
+        mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH + "/emptiedByDatasetIds")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[11]"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
     }
 }
