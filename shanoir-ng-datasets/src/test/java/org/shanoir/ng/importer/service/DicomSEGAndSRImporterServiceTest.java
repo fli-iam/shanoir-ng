@@ -63,7 +63,7 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.http.HttpStatus;
 
 /**
- * Tests for the CAN_ANNOTATE rights check on study level in DicomSEGAndSRImporterService.
+ * Tests for the CAN_ANNOTATE / CAN_ANNOTATE_REVIEW rights check on study level in DicomSEGAndSRImporterService.
  *
  * @author Adam Fragkiadakis
  */
@@ -131,6 +131,7 @@ public class DicomSEGAndSRImporterServiceTest {
     @Test
     public void importDicomSEGAndSRRefusedWithoutCanAnnotateOrCanImportRight() {
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_IMPORT.name())).thenReturn(false);
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ADMINISTRATE.name())).thenReturn(false);
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
@@ -156,9 +157,24 @@ public class DicomSEGAndSRImporterServiceTest {
     }
 
     @Test
+    public void importDicomSEGAndSRProceedsWithCanAnnotateReviewRight() throws Exception {
+        // CAN_ANNOTATE_REVIEW grants the annotation rights of CAN_ANNOTATE
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(true);
+        // No ReferencedSeriesSequence in the SEG: the import continues past the rights
+        // check and only stops later, when the source dataset cannot be found (returns false)
+        boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, "SEG", true);
+        assertFalse(result);
+        verify(datasetSecurityService).hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name());
+        // The source dataset was not found, so nothing is persisted
+        verifyNoInteractions(datasetService);
+    }
+
+    @Test
     public void importDicomSEGAndSRProceedsWithCanImportRightOnly() throws Exception {
         // A user with CAN_IMPORT but not CAN_ANNOTATE is also allowed to import annotations
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_IMPORT.name())).thenReturn(true);
         // No ReferencedSeriesSequence in the SEG: the import continues past the rights
         // check and only stops later, when the source dataset cannot be found (returns false)
@@ -173,6 +189,7 @@ public class DicomSEGAndSRImporterServiceTest {
     public void importDicomSEGAndSRProceedsWithCanAdministrateRightOnly() throws Exception {
         // a study administrator (study-scoped admin) is also allowed to import annotations
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_IMPORT.name())).thenReturn(false);
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ADMINISTRATE.name())).thenReturn(true);
         // No ReferencedSeriesSequence in the SEG: the import continues past the rights
@@ -201,9 +218,27 @@ public class DicomSEGAndSRImporterServiceTest {
     }
 
     @Test
+    public void importDicomSEGAndSRAssignsUsernameWithCanAnnotateReviewRight() throws Exception {
+        wireSourceDatasetAndSegReferences();
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(true);
+        when(datasetService.create(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        ArgumentCaptor<Dataset> datasetCaptor = ArgumentCaptor.forClass(Dataset.class);
+        try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(USER_NAME);
+            boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, "SEG", true);
+            assertTrue(result);
+        }
+        verify(datasetService).create(datasetCaptor.capture());
+        // The reviewer-annotator is recorded as the owner of the created annotation dataset
+        assertEquals(USER_NAME, datasetCaptor.getValue().getUsername());
+    }
+
+    @Test
     public void importDicomSEGAndSRDoesNotAssignUsernameWithCanImportRightOnly() throws Exception {
         wireSourceDatasetAndSegReferences();
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_IMPORT.name())).thenReturn(true);
         when(datasetService.create(any())).thenAnswer(invocation -> invocation.getArgument(0));
         ArgumentCaptor<Dataset> datasetCaptor = ArgumentCaptor.forClass(Dataset.class);
@@ -218,6 +253,7 @@ public class DicomSEGAndSRImporterServiceTest {
     public void importDicomSEGAndSRDoesNotAssignUsernameWithCanAdministrateRightOnly() throws Exception {
         wireSourceDatasetAndSegReferences();
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
+        when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_IMPORT.name())).thenReturn(false);
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ADMINISTRATE.name())).thenReturn(true);
         when(datasetService.create(any())).thenAnswer(invocation -> invocation.getArgument(0));
