@@ -96,7 +96,7 @@ front:
   server:
     address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
     url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
-##### Name of this instance, empty unless the owner chose one: the emails then name the server address instead #####
+##### Name of this instance, empty unless the owner chose one: the emails are then prefixed with [Shanoir] #####
 shanoir:
   instance:
     name: ${SHANOIR_INSTANCE_NAME:}

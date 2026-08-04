@@ -130,7 +130,7 @@ public class EmailServiceImpl implements EmailService {
      * Every email announces the instance it comes from, so that a user or an
      * administrator working with several Shanoir servers knows which one wrote
      * to them. The instance is named as its owner chose in
-     * SHANOIR_INSTANCE_NAME, by its server address when no name was chosen.
+     * SHANOIR_INSTANCE_NAME, simply "Shanoir" when no name was chosen.
      *
      * @param subject
      *            the subject of the email, without any instance marker.
@@ -138,7 +138,7 @@ public class EmailServiceImpl implements EmailService {
      */
     private String subject(final String subject) {
         final String instance = instanceName == null || instanceName.isBlank()
-                ? shanoirServerAddress
+                ? "Shanoir"
                 : instanceName;
         return "[" + instance + "] " + subject;
     }
