@@ -128,16 +128,9 @@ public class DatasetsCreatorService {
                 double[] imageOrientationPatientsDoubleArray = image.getImageOrientationPatient() == null ? null : image.getImageOrientationPatient().stream().mapToDouble(i -> i).toArray();
                 SerieToDatasetsSeparator seriesToDatasetsSeparator =
                         new SerieToDatasetsSeparator(acquisitionNumber, echoTimes, imageOrientationPatientsDoubleArray);
-                boolean found = false;
-                for (SerieToDatasetsSeparator seriesToDatasetsComparatorIterate : datasetMap.keySet()) {
-                    if (seriesToDatasetsComparatorIterate.equals(seriesToDatasetsSeparator)) {
-                        found = true;
-                        seriesToDatasetsSeparator = seriesToDatasetsComparatorIterate;
-                        break;
-                    }
-                }
+                Dataset existing = datasetMap.get(seriesToDatasetsSeparator);
                 // existing dataset has been found, just add the image/datasetFile
-                if (found) {
+                if (existing != null) {
                     DatasetFile datasetFile = createDatasetFile(image);
                     datasetMap.get(seriesToDatasetsSeparator).getExpressionFormats().get(0).getDatasetFiles().add(datasetFile);
                     datasetMap.get(seriesToDatasetsSeparator).getFlipAngles().add(Double.valueOf(image.getFlipAngle()));

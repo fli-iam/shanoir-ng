@@ -127,6 +127,9 @@ public class ImporterApiController implements ImporterApi {
     private static final int BUFFER_SIZE = 10 * KB;
 
     private static final UIDGeneration UID_GENERATOR = new UIDGeneration();
+    
+    private static final Pattern PREFILTER_PATTERN =
+            Pattern.compile("HP:(\\d+)k?Hz\\sLP:(\\d+)k?Hz(\\sN:(\\d+)k?Hz)?");
 
     @Value("${shanoir.import.directory}")
     private String importDir;
@@ -165,10 +168,6 @@ public class ImporterApiController implements ImporterApi {
         if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
-        }
-        if (!ImportUtils.isZipFile(dicomZipFile)) {
-            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                    "Wrong content type of file upload, .zip required.", null));
         }
         File tempFile = null;
         try {
@@ -555,27 +554,23 @@ public class ImporterApiController implements ImporterApi {
     private void readEdfFiles(final File[] edfMatchingFiles, final File dataFileDir, final List<EegDataset> datasets)
             throws ShanoirImportException {
         for (File edfFile : edfMatchingFiles) {
-
             // Parse the file
             try (FileInputStream edfStream = new FileInputStream(edfFile)) {
                 EDFParserResult result = EDFParser.parseEDF(edfStream);
-
                 // Create channels
                 List<Channel> channels = new ArrayList<>();
                 for (int i = 0; i < result.getHeader().getNumberOfChannels(); i++) {
                     Channel chan = new Channel();
-                    Pattern p = Pattern.compile("HP:(\\d+)k?Hz\\sLP:(\\d+)k?Hz(\\sN:(\\d+)k?Hz)?");
-                    Matcher m = p.matcher(result.getHeader().getPrefilterings()[i].trim());
+                    Matcher m = PREFILTER_PATTERN.matcher(result.getHeader().getPrefilterings()[i].trim());
                     if (m.matches()) {
                         chan.setHighCutoff(Integer.parseInt(m.group(1)));
                         chan.setLowCutoff(Integer.parseInt(m.group(2)));
-                        if (m.groupCount() > 2) {
+                        if (m.group(4) != null) {
                             chan.setNotch(Integer.parseInt(m.group(4)));
                         }
                     }
                     chan.setName(result.getHeader().getChannelLabels()[i].trim());
                     chan.setReferenceUnits(result.getHeader().getDimensions()[i].trim());
-
                     channels.add(chan);
                 }
 

@@ -76,6 +76,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
     private static final String YES = "YES";
 
     private static final String SERIES_NUMBER_0 = "0";
+    
+    private MultiframeExtractor emf = new MultiframeExtractor();
 
     @Autowired
     private ShanoirEventService eventService;
@@ -226,7 +228,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      */
     private void processDicomFilePerInstanceAndCreateImage(File dicomFile, List<Image> images, String folderFileAbsolutePath, boolean isFromShUpQualityControl) throws Exception {
         try (DicomInputStream dIS = new DicomInputStream(dicomFile)) { // keep try to finally close input stream
-            Attributes attributes = dIS.readDataset();
+            Attributes attributes = dIS.readDatasetUntilPixelData();
             // Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
             if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
                 // else do nothing here as instances list will be emptied after split between images and non-images
@@ -285,7 +287,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
     private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
         final String sopClassUID = attributes.getString(Tag.SOPClassUID);
         if (MultiframeExtractor.isSupportedSOPClass(sopClassUID)) {
-            MultiframeExtractor emf = new MultiframeExtractor();
             attributes = emf.extract(attributes, 0);
         }
         String sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
