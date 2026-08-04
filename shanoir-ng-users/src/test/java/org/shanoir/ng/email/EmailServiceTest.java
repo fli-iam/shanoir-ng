@@ -50,7 +50,7 @@ import jakarta.mail.internet.MimeMessage;
  * @author msimon
  *
  */
-@SpringBootTest
+@SpringBootTest(properties = "shanoir.instance.name=DEV")
 @ActiveProfiles("test")
 public class EmailServiceTest {
 
@@ -80,45 +80,45 @@ public class EmailServiceTest {
     @Test
     public void notifyAccountWillExpireTest() throws Exception {
         emailService.notifyAccountWillExpire(ModelsUtil.createUser());
-        assertReceivedMessageContains("Account Expiration", "will expire on");
+        assertReceivedMessageContains("[QUALIF] Account Expiration", "will expire on");
     }
 
     @Test
     public void notifyNewUserTest() throws Exception {
         emailService.notifyCreateUser(ModelsUtil.createUser(), "password");
-        assertReceivedMessageContains("Account Creation", "Your account has been created");
+        assertReceivedMessageContains("[QUALIF] Account Creation", "Your account has been created");
     }
 
     @Test
     @WithMockKeycloakUser(id = 4, username = "phdauvergne", authorities = { "ROLE_ADMIN" })
     public void notifyAccountRequestAcceptedTest() throws Exception {
         emailService.notifyAccountRequestAccepted(ModelsUtil.createUser());
-        assertReceivedMessageContains("Granted: Your account has been activated", "Your account request has been granted");
+        assertReceivedMessageContains("[QUALIF] Granted: Your account has been activated", "Your account request has been granted");
     }
 
     @Test
     public void notifyAccountRequestDeniedTest() throws Exception {
         emailService.notifyAccountRequestDenied(ModelsUtil.createUser());
-        assertReceivedMessageContains("DENIED: Your account request has been denied", "has been denied");
+        assertReceivedMessageContains("[QUALIF] DENIED: Your account request has been denied", "has been denied");
     }
 
     @Test
     @WithMockKeycloakUser(id = 4, username = "phdauvergne", authorities = { "ROLE_ADMIN" })
     public void notifyExtensionRequestAcceptedTest() throws Exception {
         emailService.notifyExtensionRequestAccepted(ModelsUtil.createUser());
-        assertReceivedMessageContains("Granted: Your account extension has been extended", "Your account extension request has been granted");
+        assertReceivedMessageContains("[QUALIF] Granted: Your account extension has been extended", "Your account extension request has been granted");
     }
 
     @Test
     public void notifyExtensionRequestDeniedTest() throws Exception {
         emailService.notifyExtensionRequestDenied(ModelsUtil.createUser());
-        assertReceivedMessageContains("DENIED: Your account extension request has been denied", "has been denied");
+        assertReceivedMessageContains("[QUALIF] DENIED: Your account extension request has been denied", "has been denied");
     }
 
     @Test
     public void notifyUserResetPasswordTest() throws Exception {
         emailService.notifyUserResetPassword(ModelsUtil.createUser(), NEW_PASSWORD);
-        assertReceivedMessageContains("Réinitialisation du mot de passe", NEW_PASSWORD);
+        assertReceivedMessageContains("[QUALIF] Réinitialisation du mot de passe", NEW_PASSWORD);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class EmailServiceTest {
         // WHEN we receive an event with elements stating that data was imported successfully
         emailService.notifyStudyManagerDataImported(mail);
         // THEN an email is sent to the administrators
-        assertReceivedMessageContains("Data imported to StudyName", "imported data to study");
+        assertReceivedMessageContains("[QUALIF] Data imported to StudyName", "imported data to study");
     }
 
     private void assertReceivedMessageContains(final String expectedSubject, final String expectedContent)
