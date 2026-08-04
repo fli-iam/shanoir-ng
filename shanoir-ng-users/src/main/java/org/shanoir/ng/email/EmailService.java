@@ -155,17 +155,24 @@ public interface EmailService {
     public void notifyDuaDraftCreation(DuaDraftWrapper mail);
 
     /**
-     * Send an administrator announcement to each of the given users as an
-     * individual email. A failure on one recipient is logged and does not
-     * prevent sending to the others.
+     * Send an announcement to each of the given users as an individual email.
+     * A failure on one recipient is logged and does not prevent sending to the
+     * others.
      *
      * @param recipients
      *            the users to email.
      * @param subject
-     *            the email subject.
+     *            the email subject, prefixed with the study name for a study
+     *            email.
      * @param content
      *            the plain text announcement, rendered with its line breaks.
+     * @param sender
+     *            the user sending the email, named in the signature and used as
+     *            reply address of a study email. May be null.
+     * @param studyName
+     *            the name of the study the members of which are emailed, null
+     *            for a platform wide announcement signed by the administrator.
      */
-    void sendMassEmail(List<User> recipients, String subject, String content);
+    void sendMassEmail(List<User> recipients, String subject, String content, User sender, String studyName);
 
 }

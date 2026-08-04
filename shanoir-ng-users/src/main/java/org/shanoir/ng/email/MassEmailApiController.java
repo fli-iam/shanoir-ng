@@ -68,11 +68,15 @@ public class MassEmailApiController implements MassEmailApi {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors)));
         }
+        final boolean isStudy = RecipientGroup.STUDY == request.getRecipientGroup();
         try {
-            final List<User> recipients = RecipientGroup.STUDY == request.getRecipientGroup()
+            final List<User> recipients = isStudy
                     ? massEmailService.resolveStudyRecipients(request.getStudyId())
                     : massEmailService.resolveRecipients(request.getRecipientGroup());
-            massEmailService.sendMassEmail(recipients, request.getSubject(), request.getContent());
+            // resolved here, on the request thread: the sending itself is asynchronous
+            final String studyName = isStudy ? massEmailService.getStudyName(request.getStudyId()) : null;
+            final User sender = isStudy ? massEmailService.getSender() : null;
+            massEmailService.sendMassEmail(recipients, request.getSubject(), request.getContent(), sender, studyName);
             LOG.info("Mass email '{}' to the {} group queued for {} recipients", request.getSubject(),
                     request.getRecipientGroup(), recipients.size());
             return new ResponseEntity<>(recipients.size(), HttpStatus.ACCEPTED);

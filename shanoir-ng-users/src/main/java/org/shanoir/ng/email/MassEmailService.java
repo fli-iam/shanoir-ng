@@ -56,6 +56,24 @@ public interface MassEmailService {
     List<User> resolveStudyRecipients(Long studyId);
 
     /**
+     * The connected user, sender of the email. Must be called on the request
+     * thread: the sending itself is asynchronous, without a security context.
+     *
+     * @return the sender, or null if they are unknown.
+     */
+    User getSender();
+
+    /**
+     * The name of the given study, asked to the studies microservice, to be
+     * shown to the members receiving the email.
+     *
+     * @param studyId
+     *            the id of the study.
+     * @return the study name, or null if it could not be read.
+     */
+    String getStudyName(Long studyId);
+
+    /**
      * Count the users belonging to the given recipient group.
      *
      * @param recipientGroup
@@ -76,7 +94,13 @@ public interface MassEmailService {
      *            the email subject.
      * @param content
      *            the plain text announcement.
+     * @param sender
+     *            the user sending the email, named in the signature of a study
+     *            email. May be null.
+     * @param studyName
+     *            the name of the study the members of which are emailed, null
+     *            for a platform wide announcement.
      */
-    void sendMassEmail(List<User> recipients, String subject, String content);
+    void sendMassEmail(List<User> recipients, String subject, String content, User sender, String studyName);
 
 }

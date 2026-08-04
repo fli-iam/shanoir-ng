@@ -15,6 +15,7 @@
 package org.shanoir.ng.email;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 
@@ -43,6 +44,7 @@ import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
 /**
@@ -151,7 +153,7 @@ public class EmailServiceTest {
         final User second = massEmailUser("second@test.shanoir.fr");
 
         emailService.sendMassEmail(Arrays.asList(first, second), "[Shanoir] Maintenance",
-                "Service unavailable <tomorrow>.\nSorry for the inconvenience.");
+                "Service unavailable <tomorrow>.\nSorry for the inconvenience.", null, null);
 
         final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
         assertEquals(2, receivedMessages.length);
@@ -160,6 +162,31 @@ public class EmailServiceTest {
         assertTrue(content.contains("Dear"));
         // markup of the announcement is escaped, line breaks are rendered
         assertTrue(content.contains("Service unavailable &lt;tomorrow&gt;.<br/>Sorry for the inconvenience."));
+        // a platform wide announcement stays signed by the administrator
+        assertTrue(content.contains("Shanoir administrator"));
+    }
+
+    @Test
+    public void sendStudyMassEmailNamesSenderAndStudyTest() throws IOException, MessagingException {
+        final User member = massEmailUser("member@test.shanoir.fr");
+        final User sender = massEmailUser("sender@test.shanoir.fr");
+        sender.setFirstName("Jane");
+        sender.setLastName("Doe");
+
+        emailService.sendMassEmail(Arrays.asList(member), "Kick-off meeting", "See you on monday.", sender,
+                "My Study");
+
+        final MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+        assertEquals(1, receivedMessages.length);
+        // the study name tells the members what the email relates to
+        assertEquals("[My Study] Kick-off meeting", receivedMessages[0].getSubject());
+        assertEquals("sender@test.shanoir.fr", ((InternetAddress) receivedMessages[0].getReplyTo()[0]).getAddress());
+        final String content = (String) receivedMessages[0].getContent();
+        // the members know who addressed them
+        assertTrue(content.contains("Jane Doe"));
+        assertTrue(content.contains("administrator of the study"));
+        assertTrue(content.contains("My Study"));
+        assertFalse(content.contains("Shanoir administrator"));
     }
 
     @Test
@@ -167,7 +194,8 @@ public class EmailServiceTest {
         final User failing = massEmailUser(null);
         final User valid = massEmailUser("valid@test.shanoir.fr");
 
-        emailService.sendMassEmail(Arrays.asList(failing, valid), "[Shanoir] Maintenance", "Service unavailable.");
+        emailService.sendMassEmail(Arrays.asList(failing, valid), "[Shanoir] Maintenance", "Service unavailable.",
+                null, null);
 
         assertEquals(1, greenMail.getReceivedMessages().length);
     }

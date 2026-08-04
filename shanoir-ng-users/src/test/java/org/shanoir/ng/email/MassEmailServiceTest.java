@@ -15,6 +15,7 @@
 package org.shanoir.ng.email;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
@@ -30,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.shanoir.ng.email.model.RecipientGroup;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -37,6 +39,8 @@ import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.utils.KeycloakClient;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 /**
  * Unit tests for {@link MassEmailServiceImpl} recipient resolution.
@@ -57,6 +61,9 @@ public class MassEmailServiceTest {
 
     @Mock
     private StudyUserRightsRepository studyUserRightsRepository;
+
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
     @InjectMocks
     private MassEmailServiceImpl massEmailService;
@@ -128,9 +135,28 @@ public class MassEmailServiceTest {
     public void sendMassEmailDelegatesToEmailServiceTest() {
         final List<User> recipients = List.of(enabledUser);
 
-        massEmailService.sendMassEmail(recipients, "[Shanoir] Maintenance", "Service unavailable.");
+        massEmailService.sendMassEmail(recipients, "[Shanoir] Maintenance", "Service unavailable.", disabledUser,
+                "My Study");
 
-        Mockito.verify(emailService).sendMassEmail(recipients, "[Shanoir] Maintenance", "Service unavailable.");
+        Mockito.verify(emailService).sendMassEmail(recipients, "[Shanoir] Maintenance", "Service unavailable.",
+                disabledUser, "My Study");
+    }
+
+    @Test
+    public void getStudyNameTest() {
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_QUEUE, 7L))
+                .willReturn("My Study");
+
+        assertEquals("My Study", massEmailService.getStudyName(7L));
+    }
+
+    @Test
+    public void getStudyNameSwallowsBrokerErrorTest() {
+        given(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_QUEUE, 7L))
+                .willThrow(new AmqpException("broker unreachable"));
+
+        // the email is still worth sending, only without the study name
+        assertNull(massEmailService.getStudyName(7L));
     }
 
     @Test

@@ -19,12 +19,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.email.model.RecipientGroup;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.utils.KeycloakClient;
+import org.shanoir.ng.utils.KeycloakUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -37,8 +42,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class MassEmailServiceImpl implements MassEmailService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MassEmailServiceImpl.class);
+
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired
     private KeycloakClient keycloakClient;
@@ -94,9 +104,27 @@ public class MassEmailServiceImpl implements MassEmailService {
     }
 
     @Override
+    public User getSender() {
+        final Long senderId = KeycloakUtil.getTokenUserId();
+        return senderId == null ? null : userRepository.findById(senderId).orElse(null);
+    }
+
+    @Override
+    public String getStudyName(final Long studyId) {
+        try {
+            return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_QUEUE, studyId);
+        } catch (Exception e) {
+            // the email is still worth sending, only without the study name
+            LOG.error("Could not read the name of the study {} from the studies microservice", studyId, e);
+            return null;
+        }
+    }
+
+    @Override
     @Async("massEmailExecutor")
-    public void sendMassEmail(final List<User> recipients, final String subject, final String content) {
-        emailService.sendMassEmail(recipients, subject, content);
+    public void sendMassEmail(final List<User> recipients, final String subject, final String content,
+            final User sender, final String studyName) {
+        emailService.sendMassEmail(recipients, subject, content, sender, studyName);
     }
 
     /**

@@ -117,14 +117,17 @@ public class MassEmailApiControllerTest {
                 .andExpect(status().isAccepted())
                 .andExpect(content().string("2"));
 
-        Mockito.verify(massEmailService).sendMassEmail(recipients, "Maintenance", "Down tomorrow.");
+        Mockito.verify(massEmailService).sendMassEmail(recipients, "Maintenance", "Down tomorrow.", null, null);
     }
 
     @Test
     @WithMockUser(authorities = { "ROLE_ADMIN" })
     public void sendMassEmailToStudyTest() throws Exception {
         final List<User> recipients = List.of(ModelsUtil.createUser(1L), ModelsUtil.createUser(2L));
+        final User sender = ModelsUtil.createUser(9L);
         given(massEmailService.resolveStudyRecipients(3L)).willReturn(recipients);
+        given(massEmailService.getStudyName(3L)).willReturn("My Study");
+        given(massEmailService.getSender()).willReturn(sender);
 
         mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -133,7 +136,9 @@ public class MassEmailApiControllerTest {
                 .andExpect(status().isAccepted())
                 .andExpect(content().string("2"));
 
-        Mockito.verify(massEmailService).sendMassEmail(recipients, "Maintenance", "Down tomorrow.");
+        // the sender and the study are carried to the email, they cannot be read on the async thread
+        Mockito.verify(massEmailService).sendMassEmail(recipients, "Maintenance", "Down tomorrow.", sender,
+                "My Study");
     }
 
     @Test
@@ -145,7 +150,7 @@ public class MassEmailApiControllerTest {
                 .andExpect(status().isUnprocessableEntity());
 
         Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
-                Mockito.anyString());
+                Mockito.anyString(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -158,15 +163,18 @@ public class MassEmailApiControllerTest {
                 .andExpect(status().isUnprocessableEntity());
 
         Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
-                Mockito.anyString());
+                Mockito.anyString(), Mockito.any(), Mockito.any());
     }
 
     @Test
     @WithMockUser(authorities = { "ROLE_EXPERT" })
     public void sendMassEmailToAdministratedStudyTest() throws Exception {
         final List<User> recipients = List.of(ModelsUtil.createUser(1L), ModelsUtil.createUser(2L));
+        final User sender = ModelsUtil.createUser(9L);
         given(shanoirUsersManagement.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(true);
         given(massEmailService.resolveStudyRecipients(3L)).willReturn(recipients);
+        given(massEmailService.getStudyName(3L)).willReturn("My Study");
+        given(massEmailService.getSender()).willReturn(sender);
 
         mvc.perform(MockMvcRequestBuilders.post(SEND_PATH).accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -175,7 +183,9 @@ public class MassEmailApiControllerTest {
                 .andExpect(status().isAccepted())
                 .andExpect(content().string("2"));
 
-        Mockito.verify(massEmailService).sendMassEmail(recipients, "Maintenance", "Down tomorrow.");
+        // the study administrator who wrote the email is named to the members
+        Mockito.verify(massEmailService).sendMassEmail(recipients, "Maintenance", "Down tomorrow.", sender,
+                "My Study");
     }
 
     @Test
@@ -190,7 +200,7 @@ public class MassEmailApiControllerTest {
                 .andExpect(status().isForbidden());
 
         Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
-                Mockito.anyString());
+                Mockito.anyString(), Mockito.any(), Mockito.any());
     }
 
     /**
@@ -208,7 +218,7 @@ public class MassEmailApiControllerTest {
                 .andExpect(status().isForbidden());
 
         Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
-                Mockito.anyString());
+                Mockito.anyString(), Mockito.any(), Mockito.any());
     }
 
     /**
@@ -229,7 +239,7 @@ public class MassEmailApiControllerTest {
                 .andExpect(status().isAccepted())
                 .andExpect(content().string("1"));
 
-        Mockito.verify(massEmailService).sendMassEmail(members, "Maintenance", "Down tomorrow.");
+        Mockito.verify(massEmailService).sendMassEmail(members, "Maintenance", "Down tomorrow.", null, null);
     }
 
     @Test
@@ -251,7 +261,7 @@ public class MassEmailApiControllerTest {
                 .andExpect(status().isUnprocessableEntity());
 
         Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
-                Mockito.anyString());
+                Mockito.anyString(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -272,7 +282,7 @@ public class MassEmailApiControllerTest {
                 .andExpect(status().isForbidden());
 
         Mockito.verify(massEmailService, Mockito.never()).sendMassEmail(Mockito.anyList(), Mockito.anyString(),
-                Mockito.anyString());
+                Mockito.anyString(), Mockito.any(), Mockito.any());
     }
 
     @Test
