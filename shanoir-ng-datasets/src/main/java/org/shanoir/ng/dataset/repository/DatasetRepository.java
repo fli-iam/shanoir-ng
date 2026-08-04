@@ -63,11 +63,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     int countByDatasetAcquisitionId(Long acquisitionId);
 
-    @Query("SELECT ds.datasetAcquisition.id, COUNT(ds.id) FROM Dataset ds "
-            + "WHERE ds.datasetAcquisition.id IN (:acquisitionIds) "
-            + "GROUP BY ds.datasetAcquisition.id")
-    List<Object[]> countByDatasetAcquisitionIdIn(List<Long> acquisitionIds);
-
     Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
 
     Iterable<Dataset> findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(Long studycardId, List<Long> studyIds);

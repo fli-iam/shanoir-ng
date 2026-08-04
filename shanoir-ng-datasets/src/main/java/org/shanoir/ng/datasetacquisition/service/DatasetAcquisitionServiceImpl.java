@@ -396,26 +396,23 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DatasetAcquisition> findAcquisitionsLeftEmptyBy(List<Long> datasetIds) {
         if (CollectionUtils.isEmpty(datasetIds)) {
             return Collections.emptyList();
         }
         // number of datasets about to be deleted, per acquisition
-        Map<Long, Long> deletedCountByAcquisitionId = new HashMap<>();
+        Map<Long, Integer> deletedCountByAcquisitionId = new HashMap<>();
         for (Dataset dataset : datasetRepository.findAllById(datasetIds)) {
             if (dataset.getDatasetAcquisition() != null) {
-                deletedCountByAcquisitionId.merge(dataset.getDatasetAcquisition().getId(), 1L, Long::sum);
+                deletedCountByAcquisitionId.merge(dataset.getDatasetAcquisition().getId(), 1, Integer::sum);
             }
         }
-        if (deletedCountByAcquisitionId.isEmpty()) {
-            return Collections.emptyList();
-        }
         List<DatasetAcquisition> leftEmpty = new ArrayList<>();
-        for (Object[] count : datasetRepository.countByDatasetAcquisitionIdIn(new ArrayList<>(deletedCountByAcquisitionId.keySet()))) {
-            Long acquisitionId = (Long) count[0];
-            Long datasetsHeld = (Long) count[1];
+        for (Map.Entry<Long, Integer> deletedCount : deletedCountByAcquisitionId.entrySet()) {
+            Long acquisitionId = deletedCount.getKey();
             // the acquisition is left empty when all the datasets it holds are being deleted
-            if (datasetsHeld.equals(deletedCountByAcquisitionId.get(acquisitionId))) {
+            if (datasetRepository.countByDatasetAcquisitionId(acquisitionId) == deletedCount.getValue()) {
                 repository.findById(acquisitionId).filter(this::isRemovable).ifPresent(leftEmpty::add);
             }
         }

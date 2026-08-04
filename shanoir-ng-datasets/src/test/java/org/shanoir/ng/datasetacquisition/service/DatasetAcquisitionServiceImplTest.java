@@ -137,7 +137,7 @@ class DatasetAcquisitionServiceImplTest {
 
     @Test
     void findAcquisitionsLeftEmptyByReturnsTheAcquisitionWhenAllItsDatasetsAreDeleted() {
-        givenAcquisitionHolding(2L, dataset(11L), dataset(12L));
+        givenAcquisitionHolding(2, dataset(11L), dataset(12L));
 
         List<DatasetAcquisition> leftEmpty = service.findAcquisitionsLeftEmptyBy(List.of(11L, 12L));
 
@@ -147,7 +147,7 @@ class DatasetAcquisitionServiceImplTest {
 
     @Test
     void findAcquisitionsLeftEmptyByIgnoresTheAcquisitionWhenADatasetRemains() {
-        givenAcquisitionHolding(3L, dataset(11L), dataset(12L));
+        givenAcquisitionHolding(3, dataset(11L), dataset(12L));
 
         assertTrue(service.findAcquisitionsLeftEmptyBy(List.of(11L, 12L)).isEmpty());
     }
@@ -155,7 +155,7 @@ class DatasetAcquisitionServiceImplTest {
     @Test
     void findAcquisitionsLeftEmptyByIgnoresTheAcquisitionWhenItHoldsExtraData() {
         acquisition.setExtraDataFilePathList(List.of("protocol.pdf"));
-        givenAcquisitionHolding(1L, dataset(11L));
+        givenAcquisitionHolding(1, dataset(11L));
 
         assertTrue(service.findAcquisitionsLeftEmptyBy(List.of(11L)).isEmpty());
     }
@@ -190,10 +190,9 @@ class DatasetAcquisitionServiceImplTest {
      * The acquisition under test holds datasetsHeld datasets in total, among which the given ones
      * are about to be deleted.
      */
-    private void givenAcquisitionHolding(Long datasetsHeld, Dataset... deletedDatasets) {
+    private void givenAcquisitionHolding(int datasetsHeld, Dataset... deletedDatasets) {
         when(datasetRepository.findAllById(Mockito.anyIterable())).thenReturn(List.of(deletedDatasets));
-        when(datasetRepository.countByDatasetAcquisitionIdIn(Mockito.anyList()))
-                .thenReturn(Collections.<Object[]>singletonList(new Object[] {ACQ_ID, datasetsHeld}));
+        when(datasetRepository.countByDatasetAcquisitionId(ACQ_ID)).thenReturn(datasetsHeld);
     }
 
     private Dataset dataset(Long id) {
