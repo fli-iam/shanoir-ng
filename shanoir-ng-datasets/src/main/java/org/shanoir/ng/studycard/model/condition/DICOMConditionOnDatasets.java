@@ -109,20 +109,25 @@ public abstract class DICOMConditionOnDatasets extends CardCondition {
             }
 
             // get all possible values, that can fulfill the condition
+            if (DicomTagType.String.equals(tagType)) {
+                String stringValue = dicomAttributes.getString(this.getDicomTag());
+                if (stringValue == null) {
+                    LOG.warn("Could not find a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                    if (report != null) report.append("\nThe condition [" + toString()
+                        + "] failed because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                    return false;
+                } else if (textualCompare(this.getOperation(), stringValue)) {
+                    if (report != null) report.append("\nThe condition [" + toString() + "] succeed on acquisition ");
+                    return true;
+                } else {
+                    if (report != null) report.append("\nThe condition [" + toString() + "] failed on dataset " + dicomAttributes.getString(Tag.SeriesDescription) + " with DICOM seriesNumber "
+                        + dicomAttributes.getString(Tag.SeriesNumber) + ", the found dicom value : " + stringValue + " matches none of the given values : ["
+                        + String.join(", ", getValues()) + "] - operator : " + getOperation() + ")");
+                    return false;
+                }
+            }
             for (String value : this.getValues()) {
-                if (DicomTagType.String.equals(tagType)) {
-                    String stringValue = dicomAttributes.getString(this.getDicomTag());
-                    if (stringValue == null) {
-                        LOG.warn("Could not find a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
-                        if (report != null) report.append("\nThe condition [" + toString()
-                            + "] failed because could not find/extract a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
-                        return false;
-                    } else if (textualCompare(this.getOperation(), stringValue, value)) {
-                        if (report != null) report.append("\nThe condition [" + toString() + "] succeed on acquisition ");
-                        return true; // as condition values are combined by OR: return if one is true
-                    } // else continue to check other values
-
-                } else if (DicomTagType.FloatArray.equals(tagType)) {
+                if (DicomTagType.FloatArray.equals(tagType)) {
                     float[] floatValues = dicomAttributes.getFloats(this.getDicomTag());
                     if (floatValues == null) {
                         if (report != null) report.append("\nThe condition [" + toString()

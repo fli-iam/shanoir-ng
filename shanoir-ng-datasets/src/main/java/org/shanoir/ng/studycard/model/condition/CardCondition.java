@@ -118,6 +118,32 @@ public abstract class CardCondition extends AbstractEntity {
         }
     }
 
+    private static final List<Operation> NEGATIVE_TEXTUAL_OPERATIONS = List.of(
+            Operation.DOES_NOT_CONTAIN, Operation.DOES_NOT_START_WITH,
+            Operation.DOES_NOT_END_WITH, Operation.NOT_EQUALS);
+
+    /**
+     * This method compares original against every candidate value of this condition,
+     * combined with the meaning of the operator: positive operators (CONTAINS, EQUALS, STARTS_WITH,
+     * ENDS_WITH) succeed if original matches ANY (= at least one) candidate (OR), while negative operators
+     * (DOES_NOT_CONTAIN, DOES_NOT_START_WITH, DOES_NOT_END_WITH, NOT_EQUALS) succeed only if
+     * original matches NONE of the candidates.
+     */
+    protected boolean textualCompare(Operation operation, String original) {
+        boolean negative = NEGATIVE_TEXTUAL_OPERATIONS.contains(operation);
+        for (String candidate : getValues()) {
+            boolean singleMatch = textualCompare(operation, original, candidate);
+            if (negative) {
+                if (!singleMatch) {
+                    return false;
+                }
+            } else if (singleMatch) {
+                return true; // OR: any positive match is enough
+            }
+        }
+        return negative;
+    }
+
     protected boolean textualCompare(Operation operation, String original, String studycardStr) {
         if (original != null) {
             if (Operation.EQUALS.equals(operation)) {
