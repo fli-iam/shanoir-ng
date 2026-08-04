@@ -80,45 +80,45 @@ public class EmailServiceTest {
     @Test
     public void notifyAccountWillExpireTest() throws Exception {
         emailService.notifyAccountWillExpire(ModelsUtil.createUser());
-        assertReceivedMessageContains("Shanoir Account Expiration", "will expire on");
+        assertReceivedMessageContains("Account Expiration", "will expire on");
     }
 
     @Test
     public void notifyNewUserTest() throws Exception {
         emailService.notifyCreateUser(ModelsUtil.createUser(), "password");
-        assertReceivedMessageContains("Shanoir Account Creation", "Your account has been created");
+        assertReceivedMessageContains("Account Creation", "Your account has been created");
     }
 
     @Test
     @WithMockKeycloakUser(id = 4, username = "phdauvergne", authorities = { "ROLE_ADMIN" })
     public void notifyAccountRequestAcceptedTest() throws Exception {
         emailService.notifyAccountRequestAccepted(ModelsUtil.createUser());
-        assertReceivedMessageContains("Granted: Your Shanoir account has been activated", "Your account request has been granted");
+        assertReceivedMessageContains("Granted: Your account has been activated", "Your account request has been granted");
     }
 
     @Test
     public void notifyAccountRequestDeniedTest() throws Exception {
         emailService.notifyAccountRequestDenied(ModelsUtil.createUser());
-        assertReceivedMessageContains("DENIED: Your Shanoir account request has been denied", "has been denied");
+        assertReceivedMessageContains("DENIED: Your account request has been denied", "has been denied");
     }
 
     @Test
     @WithMockKeycloakUser(id = 4, username = "phdauvergne", authorities = { "ROLE_ADMIN" })
     public void notifyExtensionRequestAcceptedTest() throws Exception {
         emailService.notifyExtensionRequestAccepted(ModelsUtil.createUser());
-        assertReceivedMessageContains("Granted: Your Shanoir account extension has been extended", "Your account extension request has been granted");
+        assertReceivedMessageContains("Granted: Your account extension has been extended", "Your account extension request has been granted");
     }
 
     @Test
     public void notifyExtensionRequestDeniedTest() throws Exception {
         emailService.notifyExtensionRequestDenied(ModelsUtil.createUser());
-        assertReceivedMessageContains("DENIED: Your Shanoir account extension request has been denied", "has been denied");
+        assertReceivedMessageContains("DENIED: Your account extension request has been denied", "has been denied");
     }
 
     @Test
     public void notifyUserResetPasswordTest() throws Exception {
         emailService.notifyUserResetPassword(ModelsUtil.createUser(), NEW_PASSWORD);
-        assertReceivedMessageContains("[Shanoir] Réinitialisation du mot de passe", NEW_PASSWORD);
+        assertReceivedMessageContains("Réinitialisation du mot de passe", NEW_PASSWORD);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class EmailServiceTest {
         // WHEN we receive an event with elements stating that data was imported successfully
         emailService.notifyStudyManagerDataImported(mail);
         // THEN an email is sent to the administrators
-        assertReceivedMessageContains("[Shanoir] Data imported to StudyName", "imported data to study");
+        assertReceivedMessageContains("Data imported to StudyName", "imported data to study");
     }
 
     private void assertReceivedMessageContains(final String expectedSubject, final String expectedContent)
