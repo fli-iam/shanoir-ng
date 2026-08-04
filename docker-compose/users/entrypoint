@@ -14,6 +14,7 @@ require  SHANOIR_URL_SCHEME
 
 export  SHANOIR_NOTIFICATION_EMAIL
 export	SHANOIR_NOTIFICATION_NAME
+export  DEV_USERS_DEFAULT_PASSWORD
 require	  SHANOIR_SMTP_HOST
 
 optional  SHANOIR_CERTIFICATE
@@ -34,7 +35,7 @@ dev|init)
 	;;
 esac
 
-# Rabbit MQ default environnement variable to set
+# Rabbit MQ default environment variable to set
 export SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
 
 # TLS server certificate management

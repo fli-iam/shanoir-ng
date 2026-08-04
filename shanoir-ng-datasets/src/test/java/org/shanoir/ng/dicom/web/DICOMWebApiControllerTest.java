@@ -54,6 +54,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -122,6 +123,9 @@ public class DICOMWebApiControllerTest {
 
     private static final String WADO_RS_PATH = "http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/rs/studies/"
             + STUDY_UID + "/series/%s/instances/%s";
+
+    /** the Accept header OHIF sends: any transfer syntax its decoders can read */
+    private static final String VIEWER_ACCEPT = "multipart/related;type=\"application/octet-stream\";transfer-syntax=*";
 
     @Autowired
     private MockMvc mvc;
@@ -335,6 +339,38 @@ public class DICOMWebApiControllerTest {
                         EXAMINATION_UID, DATASET_UID_500, SOP_UID_SEG))
                 .andExpect(status().isOk());
         verify(dicomWebServiceMock).findInstance(STUDY_UID, SERIES_UID_SEG_DATASET_500, SOP_UID_SEG, "");
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void findFrameForwardsViewerAcceptHeaderAndResolvesRealUIDs() throws Exception {
+        given(dicomWebServiceMock.findFrameOfStudyOfSerieOfInstance(STUDY_UID, SERIES_UID_SEG_DATASET_500,
+                SOP_UID_SEG, "1", VIEWER_ACCEPT)).willReturn(ResponseEntity.ok().build());
+        mvc.perform(MockMvcRequestBuilders
+                .get("/dicomweb/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}"
+                        + "/frames/{frame}",
+                        EXAMINATION_UID, DATASET_UID_500, SOP_UID_SEG, "1")
+                .header(HttpHeaders.ACCEPT, VIEWER_ACCEPT))
+                .andExpect(status().isOk());
+        // the PACS has to learn, which transfer syntaxes the viewer can decode
+        verify(dicomWebServiceMock).findFrameOfStudyOfSerieOfInstance(STUDY_UID, SERIES_UID_SEG_DATASET_500,
+                SOP_UID_SEG, "1", VIEWER_ACCEPT);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void findFrameDropsAnAcceptHeaderThatIsNoMediaTypeList() throws Exception {
+        given(dicomWebServiceMock.findFrameOfStudyOfSerieOfInstance(STUDY_UID, SERIES_UID_SEG_DATASET_500,
+                SOP_UID_SEG, "1", null)).willReturn(ResponseEntity.ok().build());
+        mvc.perform(MockMvcRequestBuilders
+                .get("/dicomweb/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}"
+                        + "/frames/{frame}",
+                        EXAMINATION_UID, DATASET_UID_500, SOP_UID_SEG, "1")
+                .header(HttpHeaders.ACCEPT, "multipart/related\r\nX-Injected: shanoir"))
+                .andExpect(status().isOk());
+        // nothing of the viewer ends up unchecked in the request to the PACS
+        verify(dicomWebServiceMock).findFrameOfStudyOfSerieOfInstance(STUDY_UID, SERIES_UID_SEG_DATASET_500,
+                SOP_UID_SEG, "1", null);
     }
 
     @Test

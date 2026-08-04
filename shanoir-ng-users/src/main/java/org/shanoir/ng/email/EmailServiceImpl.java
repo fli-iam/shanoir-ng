@@ -50,6 +50,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.util.HtmlUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -63,6 +64,8 @@ import org.thymeleaf.context.Context;
 public class EmailServiceImpl implements EmailService {
 
     private static final String STUDY_USERS = "studyUsers";
+
+    private static final String CONTENT = "content";
 
     private static final String EMAIL = "email";
 
@@ -789,5 +792,43 @@ public class EmailServiceImpl implements EmailService {
         variables.put("scientificAdvisor", email.getScientificAdvisor());
 
         return variables;
+    }
+
+    @Override
+    public void sendMassEmail(final List<User> recipients, final String subject, final String content,
+            final User sender, final String studyName) {
+        // escape any markup, keep only the line breaks of the announcement
+        final String htmlContent = HtmlUtils.htmlEscape(content)
+                .replace("\r\n", "\n").replace("\n", "<br/>");
+        // members are told which study the email is about, and who wrote to them
+        final String fullSubject = studyName == null ? subject : "[" + studyName + "] " + subject;
+        final String senderName = sender == null ? null : sender.getFirstName() + " " + sender.getLastName();
+        int sent = 0;
+        for (final User recipient : recipients) {
+            try {
+                final MimeMessagePreparator messagePreparator = mimeMessage -> {
+                    final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+                    setFromAdministrator(messageHelper);
+                    if (studyName != null && sender != null && sender.getEmail() != null) {
+                        // answering a study email reaches its author, not the administrators
+                        messageHelper.setReplyTo(sender.getEmail());
+                    }
+                    messageHelper.setTo(recipient.getEmail());
+                    messageHelper.setSubject(fullSubject);
+                    final Map<String, Object> variables = new HashMap<>();
+                    variables.put(FIRSTNAME, recipient.getFirstName());
+                    variables.put(LASTNAME, recipient.getLastName());
+                    variables.put(CONTENT, htmlContent);
+                    variables.put("senderName", senderName);
+                    variables.put("studyName", studyName);
+                    messageHelper.setText(build("massEmail", variables), true);
+                };
+                mailSender.send(messagePreparator);
+                sent++;
+            } catch (Exception e) {
+                LOG.error("Mass email: could not send to {}, skipping this recipient", recipient.getEmail(), e);
+            }
+        }
+        LOG.info("Mass email '{}' sent to {} of {} recipients", fullSubject, sent, recipients.size());
     }
 }
