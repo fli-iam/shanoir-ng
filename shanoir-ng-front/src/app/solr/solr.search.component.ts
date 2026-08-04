@@ -23,6 +23,7 @@ import { environment } from "../../environments/environment";
 import { TaskState } from '../async-tasks/task.model';
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
+import { ExaminationDatasetAcquisitionDTO } from '../dataset-acquisitions/shared/dataset-acquisition.dto';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetService } from '../datasets/shared/dataset.service';
 import { dateDisplay } from "../shared/./localLanguage/localDate.abstract";
@@ -35,7 +36,6 @@ import { ConsoleService } from '../shared/console/console.service';
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { MassDownloadService } from '../shared/mass-download/mass-download.service';
-import { IdName } from '../shared/models/id-name.model';
 import { Range } from '../shared/models/range.model';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
@@ -414,15 +414,15 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     protected openDeleteConfirmDialog = (solrDocument: SolrDocument) => {
 
         const datasetId: number = parseInt(solrDocument.datasetId);
-        this.datasetService.getAcquisitionsLeftEmptyBy([datasetId])
-            .catch(() => [] as IdName[])
+        this.datasetAcquisitionService.getEmptiedByDatasets([datasetId])
+            .catch(() => [] as ExaminationDatasetAcquisitionDTO[])
             .then(emptied => this.confirmDialogService
             .confirm(
                 'Delete dataset',
                 'Are you sure you want to delete the dataset "'
                     + solrDocument.datasetName
                     + '" with id n° ' + solrDocument.datasetId + ' ?'
-                    + (emptied.length > 0 ? this.datasetService.getEmptyAcquisitionsMessage(emptied) : '')
+                    + (emptied.length > 0 ? this.datasetAcquisitionService.getEmptiedByDatasetsMessage(emptied) : '')
             ).then(res => {
                 if (res) {
                     this.datasetService.delete(datasetId, new HttpParams().set('deleteEmptyAcquisitions', emptied.length > 0)).then(() => {
@@ -437,13 +437,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     protected openDeleteSelectedConfirmDialog = () => {
         const datasetIds: number[] = [...this.selectedDatasetIds];
-        this.datasetService.getAcquisitionsLeftEmptyBy(datasetIds)
-            .catch(() => [] as IdName[])
+        this.datasetAcquisitionService.getEmptiedByDatasets(datasetIds)
+            .catch(() => [] as ExaminationDatasetAcquisitionDTO[])
             .then(emptied => this.confirmDialogService
             .confirm(
                 'Delete dataset',
                 'Are you sure you want to delete ' + this.selectedDatasetIds.size + ' dataset(s) ?'
-                    + (emptied.length > 0 ? this.datasetService.getEmptyAcquisitionsMessage(emptied) : '')
+                    + (emptied.length > 0 ? this.datasetAcquisitionService.getEmptiedByDatasetsMessage(emptied) : '')
             ).then(res => {
                 if (res) {
                     this.datasetService.deleteAll(datasetIds, emptied.length > 0).then(() => {

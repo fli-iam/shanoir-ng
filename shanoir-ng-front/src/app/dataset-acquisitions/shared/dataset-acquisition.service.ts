@@ -76,6 +76,27 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
     }
 
     /**
+     * The acquisitions that the deletion of the given datasets would leave empty, and that the
+     * backend would then be able to remove. An empty list means the deletion leaves nothing behind.
+     */
+    getEmptiedByDatasets(datasetIds: number[]): Promise<ExaminationDatasetAcquisitionDTO[]> {
+        return firstValueFrom(this.http.post<ExaminationDatasetAcquisitionDTO[]>(
+            AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/emptiedByDatasetIds', datasetIds));
+    }
+
+    /**
+     * What to tell the user before deleting the datasets that would empty those acquisitions.
+     */
+    getEmptiedByDatasetsMessage(acquisitions: ExaminationDatasetAcquisitionDTO[]): string {
+        if (acquisitions.length == 1) {
+            return '<br/><br/>It is the last dataset of the acquisition "' + acquisitions[0].name
+                + '", which will be removed as well.';
+        }
+        return '<br/><br/>They are the last datasets of the following acquisitions, which will be removed as well : '
+            + acquisitions.map(acquisition => '"' + acquisition.name + '"').join(', ') + '.';
+    }
+
+    /**
      * The acquisitions that hold no dataset at all and that may be removed. Dry run of the
      * clean up below, admin only.
      */
