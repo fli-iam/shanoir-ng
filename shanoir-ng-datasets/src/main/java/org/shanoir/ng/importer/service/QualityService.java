@@ -24,7 +24,6 @@ import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.shanoir.ng.studycard.service.QualityCardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +33,6 @@ import org.springframework.stereotype.Service;
 public class QualityService {
 
     private static final Logger LOG = LoggerFactory.getLogger(QualityService.class);
-
-    @Autowired
-    private QualityCardService qualityCardService;
 
     @Autowired
     private WADODownloaderService downloader;

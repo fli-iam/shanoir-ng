@@ -133,7 +133,7 @@ public class ImporterService {
                 } catch (Exception e) { // if error in pacs
                     // revert dataset acquisitions
                     for (DatasetAcquisition acquisition : generatedAcquisitions) {
-                        datasetAcquisitionService.deleteById(acquisition.getId(), null);
+                        datasetAcquisitionService.deleteById(acquisition.getId(), event);
                     }
                     throw new ShanoirException(
                             "Error while saving data in pacs, the import is canceled and acquisitions were not saved",
