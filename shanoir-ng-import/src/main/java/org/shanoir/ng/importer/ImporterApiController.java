@@ -14,15 +14,11 @@
 
 package org.shanoir.ng.importer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -177,65 +173,12 @@ public class ImporterApiController implements ImporterApi {
              * separate them into separate folders for each user
              */
             File userImportDir = ImportUtils.getUserImportDir(importDir);
-            boolean createDicomDir = false;
             tempFile = ImportUtils.saveTempFile(userImportDir, dicomZipFile);
-            if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
-                createDicomDir = true;
-            }
+            boolean createDicomDir = !ImportUtils.checkZipContainsFile(DICOMDIR, tempFile);
             File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
-            if (createDicomDir) {
-                LOG.info("DICOMDIR missing from zip file, generating one.");
-                final File dicomDir = new File(importJobDir, DICOMDIR);
-                if (!dicomDir.exists()) {
-                    dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDir, importJobDir);
-                    LOG.info("DICOMDIR generated at path: {}", dicomDir.getAbsolutePath());
-                }
-            }
-
-            /**
-             * STEP: prepare patients list to be put into ImportJob: read DICOMDIR and
-             * complete with meta-data from files.
-             */
-            List<Patient> patients = preparePatientsForImportJob(importJobDir);
-            if (patients.size() > 1) {
-                throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                "ZIP with multiple DICOM patients not supported.", null));
-            }
-            Patient patient = patients.get(0);
-            if (patient.getStudies().size() > 1) {
-                throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                        "ZIP with multiple DICOM studies not supported.", null));
-            }
-
-            /**
-             * STEP: create ImportJob
-             */
-            ImportJob importJob = new ImportJob();
-            importJob.setFromDicomZip(true);
-            importJob.setUserId(KeycloakUtil.getTokenUserId());
-            // Work folder is always relative to general import directory
-            importJob.setWorkFolder(importJobDir.getName());
-            if (!patients.isEmpty()) {
-                // @todo: remove later, when single-patient only
-                importJob.setPatients(patients);
-                importJob.setPatient(patient);
-                importJob.setStudy(patient.getStudies().get(0));
-            }
-
-            // Work-around during migration time: remove later
-            handleLegacySubjectAndSeries(importJob);
-
-            /**
-             * STEP: split instances into non-images and images and get additional meta-data
-             * from first DICOM file of each serie, meta-data missing in DICOMDIR.
-             * As the user has made no serie(s) selection yet, we create Images for
-             * all series.
-             */
-            imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), false, null, false);
-
+            ImportJob importJob = buildImportJobFromDirectory(importJobDir, createDicomDir);
             return new ResponseEntity<>(importJob, HttpStatus.OK);
         } catch (Exception e) {
-            // If there is an exception, we should delete the temporary folder
             if (tempFile != null) {
                 FileUtils.deleteQuietly(tempFile);
             }
@@ -243,6 +186,44 @@ public class ImporterApiController implements ImporterApi {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
         }
+    }
+
+    /**
+     * Builds an ImportJob directly from a directory already present on disk —
+     * shared by the zip-upload path and by uploadMultipleDicom, which previously
+     * re-zipped and re-unzipped exam folders that never left the local filesystem.
+     */
+    private ImportJob buildImportJobFromDirectory(File importJobDir, boolean createDicomDir) throws Exception {
+        if (createDicomDir) {
+            LOG.info("DICOMDIR missing, generating one.");
+            final File dicomDir = new File(importJobDir, DICOMDIR);
+            if (!dicomDir.exists()) {
+                dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDir, importJobDir);
+                LOG.info("DICOMDIR generated at path: {}", dicomDir.getAbsolutePath());
+            }
+        }
+        List<Patient> patients = preparePatientsForImportJob(importJobDir);
+        if (patients.size() > 1) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "ZIP with multiple DICOM patients not supported.", null));
+        }
+        Patient patient = patients.get(0);
+        if (patient.getStudies().size() > 1) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "ZIP with multiple DICOM studies not supported.", null));
+        }
+        ImportJob importJob = new ImportJob();
+        importJob.setFromDicomZip(true);
+        importJob.setUserId(KeycloakUtil.getTokenUserId());
+        importJob.setWorkFolder(importJobDir.getName());
+        importJob.setPatients(patients);
+        importJob.setPatient(patient);
+        importJob.setStudy(patient.getStudies().get(0));
+
+        handleLegacySubjectAndSeries(importJob);
+        imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(
+                importJob, importJobDir.getAbsolutePath(), false, null, false);
+        return importJob;
     }
 
     /**
@@ -471,7 +452,7 @@ public class ImporterApiController implements ImporterApi {
             importJob.setUsername(KeycloakUtil.getTokenUserName());
 
             return new ResponseEntity<>(importJob, HttpStatus.OK);
-        } catch (ShanoirImportException e) {
+        } catch (Exception e) {
             throw new RestServiceException(e, new ErrorModel(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
         }
     }
@@ -553,6 +534,9 @@ public class ImporterApiController implements ImporterApi {
      */
     private void readEdfFiles(final File[] edfMatchingFiles, final File dataFileDir, final List<EegDataset> datasets)
             throws ShanoirImportException {
+        // List the directory once instead of once per .edf file
+        final File[] allFilesInDir = dataFileDir.listFiles();
+        
         for (File edfFile : edfMatchingFiles) {
             // Parse the file
             try (FileInputStream edfStream = new FileInputStream(edfFile)) {
@@ -600,17 +584,13 @@ public class ImporterApiController implements ImporterApi {
 
                 dataset.setSamplingFrequency((int) samplingfrequency);
 
-                // Get the list of file to save from reader
                 List<String> files = new ArrayList<>();
-
-                File[] filesToSave = dataFileDir.listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(final File dir, final String name) {
-                        return name.startsWith(fileNameWithOutExt);
+                if (allFilesInDir != null) {
+                    for (File fi : allFilesInDir) {
+                        if (fi.getName().startsWith(fileNameWithOutExt)) {
+                            files.add(fi.getCanonicalPath());
+                        }
                     }
-                });
-                for (File fi : filesToSave) {
-                    files.add(fi.getCanonicalPath());
                 }
                 dataset.setFiles(files);
                 datasets.add(dataset);
@@ -628,9 +608,13 @@ public class ImporterApiController implements ImporterApi {
      * @param datasets        the list of datasets to import
      * @return a list of datasets generated from the informations of the .vhdr files
      * @throws ShanoirImportException when parsing fails
+     * @throws IOException 
      */
     private void readBrainvisionFiles(final File[] bvMatchingFiles, final File dataFileDir,
-                                      final List<EegDataset> datasets) throws ShanoirImportException {
+                                      final List<EegDataset> datasets) throws ShanoirImportException, IOException {
+        // List the directory once instead of once per .vhdr file
+        final File[] allFilesInDir = dataFileDir.listFiles();
+        
         for (File vhdrFile : bvMatchingFiles) {
 
             // Parse the file
@@ -659,22 +643,13 @@ public class ImporterApiController implements ImporterApi {
                 throw new ShanoirImportException("Error while parsing file. Please contact an administrator.", e);
             }
 
-            // Get the list of file to save from reader
             List<String> files = new ArrayList<>();
-
-            File[] filesToSave = dataFileDir.listFiles(new FilenameFilter() {
-                @Override
-                public boolean accept(final File dir, final String name) {
-                    return name.startsWith(fileNameWithOutExt);
+            if (allFilesInDir != null) {
+                for (File fi : allFilesInDir) {
+                    if (fi.getName().startsWith(fileNameWithOutExt)) {
+                        files.add(fi.getCanonicalPath());
+                    }
                 }
-            });
-            try {
-                for (File fi : filesToSave) {
-                    files.add(fi.getCanonicalPath());
-
-                }
-            } catch (IOException e) {
-                throw new ShanoirImportException("Error while parsing file. Please contact an administrator.", e);
             }
             dataset.setFiles(files);
             datasets.add(dataset);
@@ -760,28 +735,16 @@ public class ImporterApiController implements ImporterApi {
      * @throws RestServiceException
      */
     @Override
-    public ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required = true)  @RequestParam(value = "path", required = true) String path)
+    public ResponseEntity<ByteArrayResource> getDicomImage(
+            @Parameter(name = "path", required = true) @RequestParam(value = "path", required = true) String path)
             throws RestServiceException, IOException {
         final File userImportDir = ImportUtils.getUserImportDir(importDir);
-        String pathInfo = userImportDir.getAbsolutePath() + File.separator + path;
-        URL url = new URL("file:///" + pathInfo);
-        final URLConnection uCon = url.openConnection();
-        final InputStream is = uCon.getInputStream();
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        int nRead;
-        byte[] data = new byte[BUFFER_SIZE];
-        while ((nRead = is.read(data, 0, data.length)) != -1) {
-            buffer.write(data, 0, nRead);
-        }
-
-        buffer.flush();
-        byte[] byteArray = buffer.toByteArray();
-
+        final File dicomFile = new File(userImportDir, path);
+        byte[] byteArray = Files.readAllBytes(dicomFile.toPath());
         ByteArrayResource resource = new ByteArrayResource(byteArray);
-
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("application/dicom"))
-                .contentLength(uCon.getContentLength())
+                .contentLength(byteArray.length)
                 .body(resource);
     }
 
@@ -834,13 +797,8 @@ public class ImporterApiController implements ImporterApi {
                     throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                             "The main subject folder should only contain sub-folders and not single/data files.", null));
                 }
-                File zippedExamFolder = new File(examFolder.getAbsolutePath() + ".zip");
-                zippedExamFolder.createNewFile();
-                Utils.zip(examFolder.getAbsolutePath(), zippedExamFolder.getAbsolutePath());
-                MockMultipartFile mockedFile = new MockMultipartFile(examFolder.getName(), zippedExamFolder.getName(), APPLICATION_ZIP, new FileInputStream(zippedExamFolder));
-
-                // STEP 4.0 "Fake" upload file to get create the dicomdir and temporary folder
-                job = this.uploadDicomZipFile(mockedFile).getBody();
+                boolean createDicomDir = !new File(examFolder, DICOMDIR).exists();
+                job = buildImportJobFromDirectory(examFolder, createDicomDir);
                 Patient patient = job.getPatient();
 
                 // Create subject only once.
@@ -923,7 +881,7 @@ public class ImporterApiController implements ImporterApi {
 
             // STEP 5 delete temporary file
             FileUtils.deleteQuietly(importJobDir);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The file could not be correctly unziped on the server. Please check consistency.", e));
         }
