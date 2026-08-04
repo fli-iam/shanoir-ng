@@ -115,12 +115,6 @@ public class ImporterApiController implements ImporterApi {
 
     private static final String APPLICATION_ZIP = "application/zip";
 
-    /** The Constant KB. */
-    private static final int KB = 1024;
-
-    /** The Constant BUFFER_SIZE. */
-    private static final int BUFFER_SIZE = 10 * KB;
-
     private static final UIDGeneration UID_GENERATOR = new UIDGeneration();
 
     private static final Pattern PREFILTER_PATTERN =
@@ -798,6 +792,11 @@ public class ImporterApiController implements ImporterApi {
                 }
                 boolean createDicomDir = !new File(examFolder, DICOMDIR).exists();
                 job = buildImportJobFromDirectory(examFolder, createDicomDir);
+                // examFolder is nested under userImportDir (userImportDir/<tmp>/<subject>/<exam>),
+                // not a direct child, so workFolder must be the full relative path from
+                // userImportDir, not just examFolder.getName() — otherwise startImportJobBase's
+                // `new File(userImportDir, tempDirId)` can't find it.
+                job.setWorkFolder(userImportDir.toPath().relativize(examFolder.toPath()).toString());
                 Patient patient = job.getPatient();
 
                 // Create subject only once.
