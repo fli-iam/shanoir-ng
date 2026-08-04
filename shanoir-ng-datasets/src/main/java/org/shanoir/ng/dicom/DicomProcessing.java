@@ -90,6 +90,32 @@ public class DicomProcessing {
         }
     }
 
+    /**
+     * Parse acquisition start time for RT IODs (RTSTRUCT, RTDOSE, RTPLAN). Those often
+     * lack AcquisitionDate/AcquisitionTime; fall back to the closest equivalent timestamps.
+     *
+     * @param attributes DICOM attributes of the serie
+     * @param modality   serie modality (RTSTRUCT, RTDOSE or RTPLAN)
+     * @return the acquisition start time, or null if none could be determined
+     */
+    public static LocalDateTime parseRtAcquisitionStartTime(Attributes attributes, String modality) {
+        LocalDateTime acquisitionStartTime = parseAcquisitionStartTime(
+                attributes.getString(Tag.AcquisitionDate), attributes.getString(Tag.AcquisitionTime));
+        if (acquisitionStartTime == null && "RTSTRUCT".equals(modality)) {
+            acquisitionStartTime = parseAcquisitionStartTime(
+                    attributes.getString(Tag.StructureSetDate), attributes.getString(Tag.StructureSetTime));
+        }
+        if (acquisitionStartTime == null) {
+            acquisitionStartTime = parseAcquisitionStartTime(
+                    attributes.getString(Tag.ContentDate), attributes.getString(Tag.ContentTime));
+        }
+        if (acquisitionStartTime == null) {
+            acquisitionStartTime = parseAcquisitionStartTime(
+                    attributes.getString(Tag.SeriesDate), attributes.getString(Tag.SeriesTime));
+        }
+        return acquisitionStartTime;
+    }
+
     public static Attributes getDicomObjectAttributes(DatasetFile image, Boolean isEnhancedMR) throws IOException {
         File dicomFile = new File(image.getPath());
         try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {

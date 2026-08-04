@@ -34,7 +34,8 @@ export enum DatasetType {
   BIDS = 'BIDS',
   Measurement = 'Measurement',
   Xa = 'Xa',
-  Sr = 'Sr'
+  Sr = 'Sr',
+  Rt = 'Rt'
 } export namespace DatasetType {
 
   export function all(): DatasetType[] {

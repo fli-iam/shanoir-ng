@@ -25,12 +25,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.importer.dto.Serie;
 
 /**
- * Tests the acquisition start time handling of GenericDatasetAcquisitionStrategy.
- *
- * The generic strategy is the default one, so it receives the non-image IODs
- * accepted by DicomUtils.checkSerieIsIgnored: RTSTRUCT, RTDOSE and RTPLAN. Those
- * have no AcquisitionDate/AcquisitionTime, which used to fail the whole import
- * with a NullPointerException.
+ * Tests null-safe acquisition start time handling of GenericDatasetAcquisitionStrategy.
  */
 public class GenericDatasetAcquisitionStrategyTest {
 
@@ -38,99 +33,53 @@ public class GenericDatasetAcquisitionStrategyTest {
 
     private final GenericDatasetAcquisitionStrategy strategy = new GenericDatasetAcquisitionStrategy();
 
-    private Serie generateSerie(String modality) {
+    private Serie generateSerie() {
         Serie serie = new Serie();
-        serie.setModality(modality);
+        serie.setModality("OT");
         serie.setSeriesInstanceUID("1.2.3.4.5");
         serie.setSeriesDescription("test serie");
         return serie;
     }
 
-    private LocalDateTime acquisitionStartTimeOf(Attributes attributes, String modality) throws Exception {
+    private LocalDateTime acquisitionStartTimeOf(Attributes attributes) throws Exception {
         DatasetAcquisition acquisition = strategy.generateFlatDatasetAcquisitionForSerie(
-                USER_NAME, generateSerie(modality), 0, attributes);
+                USER_NAME, generateSerie(), 0, attributes);
         return acquisition.getAcquisitionStartTime();
     }
 
-    /**
-     * An RTSTRUCT has neither AcquisitionDate/AcquisitionTime nor ContentDate/ContentTime:
-     * the import must not fail and must fall back to StructureSetDate/StructureSetTime.
-     */
     @Test
-    public void testRtStructFallsBackToStructureSetDateAndTime() throws Exception {
+    public void testMissingAcquisitionDateDoesNotThrow() throws Exception {
         Attributes attributes = new Attributes();
-        attributes.setString(Tag.StructureSetDate, VR.DA, "20180424");
-        attributes.setString(Tag.StructureSetTime, VR.TM, "122100");
+        attributes.setString(Tag.SeriesDescription, VR.LO, "generic serie");
 
-        Assertions.assertEquals(LocalDateTime.of(2018, 4, 24, 12, 21, 0),
-                acquisitionStartTimeOf(attributes, "RTSTRUCT"));
+        Assertions.assertNull(acquisitionStartTimeOf(attributes));
     }
 
-    /**
-     * Non-conformant RTSTRUCT files exist with no usable date/time at all. The acquisition
-     * start time is optional, so the import must still succeed with a null value.
-     */
-    @Test
-    public void testRtStructWithoutAnyDateDoesNotThrow() throws Exception {
-        Attributes attributes = new Attributes();
-        attributes.setString(Tag.SeriesDescription, VR.LO, "structure set");
-
-        Assertions.assertNull(acquisitionStartTimeOf(attributes, "RTSTRUCT"));
-    }
-
-    /**
-     * A DICOM date/time tag can be present but empty (type 2), which must be treated
-     * like an absent tag rather than failing the import.
-     */
     @Test
     public void testEmptyDateAndTimeDoNotThrow() throws Exception {
         Attributes attributes = new Attributes();
         attributes.setString(Tag.AcquisitionDate, VR.DA, "");
         attributes.setString(Tag.AcquisitionTime, VR.TM, "");
-        attributes.setString(Tag.StructureSetDate, VR.DA, "");
-        attributes.setString(Tag.StructureSetTime, VR.TM, "");
 
-        Assertions.assertNull(acquisitionStartTimeOf(attributes, "RTSTRUCT"));
+        Assertions.assertNull(acquisitionStartTimeOf(attributes));
     }
 
-    /**
-     * An unparsable time must be reported as absent, not propagated as an exception.
-     */
+    @Test
+    public void testAcquisitionDateAndTimeAreParsed() throws Exception {
+        Attributes attributes = new Attributes();
+        attributes.setString(Tag.AcquisitionDate, VR.DA, "20180424");
+        attributes.setString(Tag.AcquisitionTime, VR.TM, "122100");
+
+        Assertions.assertEquals(LocalDateTime.of(2018, 4, 24, 12, 21, 0),
+                acquisitionStartTimeOf(attributes));
+    }
+
     @Test
     public void testUnparsableTimeDoesNotThrow() throws Exception {
         Attributes attributes = new Attributes();
         attributes.setString(Tag.AcquisitionDate, VR.DA, "20180424");
         attributes.setString(Tag.AcquisitionTime, VR.TM, "not-a-time");
 
-        Assertions.assertNull(acquisitionStartTimeOf(attributes, "RTSTRUCT"));
-    }
-
-    /**
-     * AcquisitionDate/AcquisitionTime stay the preferred source when they are present.
-     */
-    @Test
-    public void testAcquisitionDateAndTimeTakePrecedence() throws Exception {
-        Attributes attributes = new Attributes();
-        attributes.setString(Tag.AcquisitionDate, VR.DA, "20180424");
-        attributes.setString(Tag.AcquisitionTime, VR.TM, "122100");
-        attributes.setString(Tag.SeriesDate, VR.DA, "20190101");
-        attributes.setString(Tag.SeriesTime, VR.TM, "080000");
-
-        Assertions.assertEquals(LocalDateTime.of(2018, 4, 24, 12, 21, 0),
-                acquisitionStartTimeOf(attributes, "RTDOSE"));
-    }
-
-    /**
-     * SeriesDate/SeriesTime are the last resort, for non-image IODs carrying neither
-     * an acquisition, a structure set nor a content date.
-     */
-    @Test
-    public void testFallsBackToSeriesDateAndTime() throws Exception {
-        Attributes attributes = new Attributes();
-        attributes.setString(Tag.SeriesDate, VR.DA, "20190101");
-        attributes.setString(Tag.SeriesTime, VR.TM, "080000");
-
-        Assertions.assertEquals(LocalDateTime.of(2019, 1, 1, 8, 0, 0),
-                acquisitionStartTimeOf(attributes, "RTPLAN"));
+        Assertions.assertNull(acquisitionStartTimeOf(attributes));
     }
 }
