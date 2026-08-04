@@ -221,7 +221,7 @@ public class ImporterService {
         List<String> qualityCardNames = Collections.emptyList();
         int rank = 0;
 
-        List<Serie> selectedSeries = importJob.getStudy().getSelectedSeries().stream().toList();
+        List<Serie> selectedSeries = importJob.getSelectedSeries();
 
         int totalSeries = selectedSeries.size();
 
