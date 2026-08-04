@@ -27,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -93,7 +94,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/datasetacquisition/empty", produces = {"application/json"}, method = RequestMethod.GET)
+    @GetMapping(value = "/datasetacquisition/empty", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findEmptyDatasetAcquisitions(
             @Parameter(description = "id of the study to clean up, all of them when not given")
@@ -105,7 +106,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/datasetacquisition/empty", produces = {"application/json"}, method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/datasetacquisition/empty", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<Long>> deleteEmptyDatasetAcquisitions(
             @Parameter(description = "id of the study to clean up, all of them when not given")
@@ -156,7 +157,7 @@ public interface DatasetAcquisitionApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @RequestMapping(value = "/datasetacquisition/emptiedByDatasetIds", produces = {"application/json"}, consumes = {"application/json"}, method = RequestMethod.POST)
+    @PostMapping(value = "/datasetacquisition/emptiedByDatasetIds", produces = {"application/json"}, consumes = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
     ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionsLeftEmptyBy(
             @Parameter(description = "ids of the datasets about to be deleted", required = true) @Valid
