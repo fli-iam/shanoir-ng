@@ -19,6 +19,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label>Recipients</label>
                 <span class="right-col">{{ memberCount }} member{{ memberCount > 1 ? 's' : '' }} of {{ study.name }}</span>
             </li>
+            <li class="info">
+                <i class="fas fa-circle-info"></i>
+                Each member gets an individual email that already opens with <b>Dear [first name] [last name],</b>
+                and is signed with your name as administrator of {{ study.name }}. Write only the body of the message,
+                no greeting and no signature. The name of the study is added at the beginning of the subject.
+            </li>
             <li>
                 <label>Subject</label>
                 <span class="right-col">

@@ -19,7 +19,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <p>Dear <span th:text="${firstname}"></span> <span th:text="${lastname}"></span>,</p>
     <!-- content is escaped by the caller, only <br/> tags remain -->
     <p th:utext="${content}"></p>
-    <p>Regards,<br/>
+    <!-- a study email is signed by the study administrator who wrote it, so that the members know who addressed them -->
+    <p th:if="${studyName != null and senderName != null}">Regards,<br/>
+    <span th:text="${senderName}"></span>, administrator of the study <span th:text="${studyName}"></span></p>
+    <p th:unless="${studyName != null and senderName != null}">Regards,<br/>
     Shanoir administrator</p>
 </body>
 </html>
