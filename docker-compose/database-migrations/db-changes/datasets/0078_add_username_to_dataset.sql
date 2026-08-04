@@ -10,4 +10,4 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-ALTER TABLE dataset ADD COLUMN username varchar(255) DEFAULT NULL;
+ALTER TABLE dataset ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT FALSE;
