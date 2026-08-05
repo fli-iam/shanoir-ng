@@ -305,6 +305,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                 }
                 if (!datasetIds.isEmpty()) solrService.deleteFromIndex(datasetIds);
             }
+            // the acquisition itself only goes once its datasets are gone, this method being
+            // called asynchronously by the acquisition deletion, its caller can not do it
+            repository.deleteById(entity.getId());
         }
     }
 
@@ -360,7 +363,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         }
         delete(entity, event);
 
-        repository.deleteById(id);
         shanoirEventService.publishEvent(new ShanoirEvent(
                 ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
                 id.toString(),

@@ -286,4 +286,17 @@ class DatasetAcquisitionServiceImplTest {
         assertEquals(Float.valueOf(1f), captor.getValue().getProgress());
         assertFalse(captor.getValue().getMessage().isEmpty());
     }
+
+    @Test
+    void deleteRemovesTheAcquisitionItselfOnceItsDatasetsAreGone() throws Exception {
+        acquisition.setDatasets(List.of(dataset(11L), dataset(12L)));
+
+        // this is the method the asynchronous acquisition deletion runs, its caller returns
+        // before it completes and can not delete the acquisition row itself
+        service.delete(acquisition, null);
+
+        verify(datasetService).deleteByIdCascade(11L);
+        verify(datasetService).deleteByIdCascade(12L);
+        verify(repository).deleteById(ACQ_ID);
+    }
 }
