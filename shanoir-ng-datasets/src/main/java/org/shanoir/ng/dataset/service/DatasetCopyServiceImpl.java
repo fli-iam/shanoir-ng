@@ -128,7 +128,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 // Set dataset.subjectId
                 newDs.setSubjectId(newDs.getDatasetAcquisition().getExamination().getSubject().getId());
                 // Save dataset without files to get an id for the dataset expressions
-                datasetRepository.saveAndFlush(newDs);
+                datasetRepository.save(newDs);
                 result.setNewDsId(newDs.getId());
                 // Copy dataset files in a super fast single query for each dataset expression
                 for (DatasetExpression dexp : ds.getDatasetExpressions()) {
