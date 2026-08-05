@@ -290,7 +290,7 @@ public interface ShanoirMetadataRepositoryCustom {
             + "proc.username as username, "
             + "null as sortingIndex, "
             + "CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed, "
-            + "da.quality_tag as qualityTag"
+            + "null as qualityTag"
             + " FROM dataset d "
             + "LEFT JOIN dataset_processing proc ON proc.id = d.dataset_processing_id "
             + "LEFT JOIN study st ON st.id = proc.study_id "
