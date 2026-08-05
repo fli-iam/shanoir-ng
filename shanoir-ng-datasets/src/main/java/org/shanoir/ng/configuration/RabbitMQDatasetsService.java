@@ -525,10 +525,10 @@ public class RabbitMQDatasetsService {
 
                 LOG.info("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
                 int t3Start = (int) System.currentTimeMillis();
-                Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
+                boolean dsExists = datasetRepository.existsBySourceIdAndStudyId(datasetParentId, studyId);
                 t3 = (int) System.currentTimeMillis() - t3Start;
 
-                if (dsCount != 0) {
+                if (dsExists) {
                     LOG.info("[CopyDatasets] Dataset already exists in this study, copy aborted.");
                     countAlreadyExist++;
                 } else {

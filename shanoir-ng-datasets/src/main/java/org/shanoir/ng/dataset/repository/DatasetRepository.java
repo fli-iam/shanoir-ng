@@ -35,11 +35,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, JpaRepository<Dataset, Long> {
 
-    @Query(value = "SELECT COUNT(*) FROM dataset as ds "
-            + "INNER JOIN dataset_acquisition as acq ON ds.dataset_acquisition_id=acq.id "
-            + "INNER JOIN examination as ex ON acq.examination_id=ex.id "
-            + "WHERE ds.source_id=:datasetParentId AND ex.study_id=:studyId", nativeQuery = true)
-    Long countDatasetsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
+    @Query(value = """
+            SELECT EXISTS (
+            SELECT 1
+            FROM dataset ds
+            JOIN dataset_acquisition acq
+                    ON acq.id = ds.dataset_acquisition_id
+            JOIN examination ex
+                    ON ex.id = acq.examination_id
+            WHERE ds.source_id = :datasetParentId
+            AND ex.study_id = :studyId
+            )
+            """, nativeQuery = true)
+    boolean existsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
 
     Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
 
