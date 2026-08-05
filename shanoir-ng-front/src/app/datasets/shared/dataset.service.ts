@@ -13,12 +13,15 @@
  */
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, inject, Injectable } from '@angular/core';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { DownloadUtilsService } from 'src/app/shared/mass-download/download.utils.service';
 
 import { BidsElement } from "../../bids/model/bidsElement.model";
+import { ExaminationDatasetAcquisitionDTO } from '../../dataset-acquisitions/shared/dataset-acquisition.dto';
+import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
+import { Entity } from '../../shared/components/entity/entity.abstract';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
@@ -52,12 +55,44 @@ export class DatasetService extends EntityService<Dataset> {
         super(http);
     }
 
+    /** Ids of the acquisitions removed along with the last deleted dataset, when it was their last one. */
+    public onAcquisitionsRemoved: Subject<number[]> = new Subject();
+
     private datasetDTOService: DatasetDTOService = inject(DatasetDTOService);
 
     private errorService: ErrorHandler  = inject(ErrorHandler);
 
-    deleteAll(ids: number[]) {
-        return firstValueFrom(this.http.request<void>('delete', this.API_URL + '/delete', { body: JSON.stringify(ids) }));
+    private datasetAcquisitionService: DatasetAcquisitionService = inject(DatasetAcquisitionService);
+
+    deleteAll(ids: number[], deleteEmptyAcquisitions: boolean = false) {
+        return firstValueFrom(this.http.request<void>('delete', this.API_URL + '/delete', {
+            body: JSON.stringify(ids),
+            params: new HttpParams().set('deleteEmptyAcquisitions', deleteEmptyAcquisitions)
+        }));
+    }
+
+    /**
+     * Deleting the last dataset of an acquisition removes the acquisition as well, so the user has
+     * to be told about it before confirming, and has to be the one asking for it.
+     */
+    override deleteWithConfirmDialog(name: string, entity: Entity, customMsg?: string): Promise<boolean> {
+        return this.datasetAcquisitionService.getEmptiedByDatasets([entity.id])
+            .catch(() => [] as ExaminationDatasetAcquisitionDTO[])
+            .then(emptied => {
+                if (emptied.length == 0) {
+                    return super.deleteWithConfirmDialog(name, entity, customMsg);
+                }
+                const msg: string = (customMsg || 'Are you sure you want to finally delete the ' + name
+                    + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?')
+                    + this.datasetAcquisitionService.getEmptiedByDatasetsMessage(emptied);
+                return super.deleteWithConfirmDialog(name, entity, msg,
+                    new HttpParams().set('deleteEmptyAcquisitions', true))
+                    .then(deleted => {
+                        // the acquisitions are gone as well : whoever displays them has to know
+                        if (deleted) this.onAcquisitionsRemoved.next(emptied.map(acquisition => acquisition.id));
+                        return deleted;
+                    });
+            });
     }
 
     getBidsStructure(studyId: number): Promise<BidsElement> {

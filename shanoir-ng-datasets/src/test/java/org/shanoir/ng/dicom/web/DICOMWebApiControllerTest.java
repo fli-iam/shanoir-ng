@@ -54,6 +54,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -97,10 +98,18 @@ public class DICOMWebApiControllerTest {
     // series of the processing output dataset 600 (input: dataset 300 of acquisition 100)
     private static final String SERIES_UID_OUTPUT_DATASET_600 = "1.4.9.12.34.1.8527.4444444444444444444444444444444444444444";
 
+    // series of the RT Structure Set dataset 700, contoured on acquisition 101
+    private static final String SERIES_UID_RTSTRUCT_DATASET_700 = "1.2.826.0.1.3680043.8.498.77777777777777777777777777777777";
+
     // series in the same PACS study, that belongs to no acquisition of the examination
     private static final String SERIES_UID_INTRUDER = "1.4.9.12.34.1.8527.9999999999999999999999999999999999999999";
 
     private static final String SOP_UID_SEG = "1.2.826.0.1.3680043.8.498.55555555555555555555555555555555";
+
+    private static final String SOP_UID_RTSTRUCT = "1.2.826.0.1.3680043.8.498.88888888888888888888888888888888";
+
+    // image of acquisition 101 referenced in the ContourImageSequence of the RTSTRUCT
+    private static final String SOP_UID_SOURCE_IMAGE = "1.4.9.12.34.1.8527.6666666666666666666666666666666666666666";
 
     private static final String ACQUISITION_UID_100 = "1.4.9.12.34.1.8527.100";
 
@@ -110,8 +119,13 @@ public class DICOMWebApiControllerTest {
 
     private static final String DATASET_UID_600 = "1.4.9.12.34.1.8527.0.600";
 
+    private static final String DATASET_UID_700 = "1.4.9.12.34.1.8527.0.700";
+
     private static final String WADO_RS_PATH = "http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/rs/studies/"
             + STUDY_UID + "/series/%s/instances/%s";
+
+    /** the Accept header OHIF sends: any transfer syntax its decoders can read */
+    private static final String VIEWER_ACCEPT = "multipart/related;type=\"application/octet-stream\";transfer-syntax=*";
 
     @Autowired
     private MockMvc mvc;
@@ -164,16 +178,19 @@ public class DICOMWebApiControllerTest {
 
         MrDataset dataset400 = createDataset(new MrDataset(), 400L, SERIES_UID_ACQ_101, "401");
         GenericDataset dataset500 = createDataset(new GenericDataset(), 500L, SERIES_UID_SEG_DATASET_500, SOP_UID_SEG);
+        GenericDataset dataset700 = createDataset(new GenericDataset(), 700L, SERIES_UID_RTSTRUCT_DATASET_700,
+                SOP_UID_RTSTRUCT);
         MrDatasetAcquisition acquisition101 = new MrDatasetAcquisition();
         acquisition101.setId(101L);
         acquisition101.setSeriesInstanceUID(SERIES_UID_ACQ_101);
-        acquisition101.setDatasets(List.of(dataset400, dataset500));
+        acquisition101.setDatasets(List.of(dataset400, dataset500, dataset700));
 
         given(datasetAcquisitionServiceMock.findByExamination(42L))
                 .willReturn(List.of(acquisition100, acquisition101));
         given(datasetAcquisitionServiceMock.findById(100L)).willReturn(acquisition100);
         given(datasetAcquisitionServiceMock.findById(101L)).willReturn(acquisition101);
         given(datasetServiceMock.findById(500L)).willReturn(dataset500);
+        given(datasetServiceMock.findById(700L)).willReturn(dataset700);
 
         GenericDataset dataset600 = createDataset(new GenericDataset(), 600L, SERIES_UID_OUTPUT_DATASET_600, "601");
         given(datasetServiceMock.findById(600L)).willReturn(dataset600);
@@ -187,6 +204,8 @@ public class DICOMWebApiControllerTest {
                 .willReturn(readFixture("dicom/seriesOfStudy.json"));
         given(dicomWebServiceMock.findSerieMetadataOfStudy(STUDY_UID, SERIES_UID_SEG_DATASET_500))
                 .willReturn(readFixture("dicom/segSerieMetadata.json"));
+        given(dicomWebServiceMock.findSerieMetadataOfStudy(STUDY_UID, SERIES_UID_RTSTRUCT_DATASET_700))
+                .willReturn(readFixture("dicom/rtStructSerieMetadata.json"));
     }
 
     private <T extends Dataset> T createDataset(T dataset, Long id, String seriesInstanceUID, String sopInstanceUID) {
@@ -275,6 +294,33 @@ public class DICOMWebApiControllerTest {
 
     @Test
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void findSerieMetadataOfStudyRewritesStudyReferencesOfRTStructNestedInSequences() throws Exception {
+        mvc.perform(MockMvcRequestBuilders
+                .get("/dicomweb/studies/{examinationUID}/series/{serieInstanceUID}/metadata",
+                        EXAMINATION_UID, DATASET_UID_700)
+                .accept(DICOM_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]['0020000D'].Value[0]").value(EXAMINATION_UID))
+                .andExpect(jsonPath("$[0]['0020000E'].Value[0]").value(DATASET_UID_700))
+                // ReferencedFrameOfReferenceSequence -> RTReferencedStudySequence:
+                // the ReferencedSOPInstanceUID carries the StudyInstanceUID of the
+                // contoured study, that the viewer only knows as examinationUID
+                .andExpect(jsonPath("$[0]['30060010'].Value[0]['30060012'].Value[0]['00081155'].Value[0]")
+                        .value(EXAMINATION_UID))
+                // RTReferencedSeriesSequence: the contoured series of acquisition 101
+                .andExpect(jsonPath("$[0]['30060010'].Value[0]['30060012'].Value[0]"
+                        + "['30060014'].Value[0]['0020000E'].Value[0]").value(ACQUISITION_UID_101))
+                // ContourImageSequence: the same tag 0008,1155 carries SOP Instance
+                // UIDs here, that are not virtualised and stay untouched
+                .andExpect(jsonPath("$[0]['30060010'].Value[0]['30060012'].Value[0]['30060014'].Value[0]"
+                        + "['30060016'].Value[0]['00081155'].Value[0]").value(SOP_UID_SOURCE_IMAGE))
+                .andExpect(content().string(not(Matchers.containsString(STUDY_UID))))
+                .andExpect(content().string(not(Matchers.containsString(SERIES_UID_ACQ_101))))
+                .andExpect(content().string(not(Matchers.containsString(SERIES_UID_RTSTRUCT_DATASET_700))));
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void findSerieMetadataOfStudyWithUnknownAcquisitionUIDReturnsNotFound() throws Exception {
         mvc.perform(MockMvcRequestBuilders
                 .get("/dicomweb/studies/{examinationUID}/series/{serieInstanceUID}/metadata",
@@ -293,6 +339,38 @@ public class DICOMWebApiControllerTest {
                         EXAMINATION_UID, DATASET_UID_500, SOP_UID_SEG))
                 .andExpect(status().isOk());
         verify(dicomWebServiceMock).findInstance(STUDY_UID, SERIES_UID_SEG_DATASET_500, SOP_UID_SEG, "");
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void findFrameForwardsViewerAcceptHeaderAndResolvesRealUIDs() throws Exception {
+        given(dicomWebServiceMock.findFrameOfStudyOfSerieOfInstance(STUDY_UID, SERIES_UID_SEG_DATASET_500,
+                SOP_UID_SEG, "1", VIEWER_ACCEPT)).willReturn(ResponseEntity.ok().build());
+        mvc.perform(MockMvcRequestBuilders
+                .get("/dicomweb/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}"
+                        + "/frames/{frame}",
+                        EXAMINATION_UID, DATASET_UID_500, SOP_UID_SEG, "1")
+                .header(HttpHeaders.ACCEPT, VIEWER_ACCEPT))
+                .andExpect(status().isOk());
+        // the PACS has to learn, which transfer syntaxes the viewer can decode
+        verify(dicomWebServiceMock).findFrameOfStudyOfSerieOfInstance(STUDY_UID, SERIES_UID_SEG_DATASET_500,
+                SOP_UID_SEG, "1", VIEWER_ACCEPT);
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+    public void findFrameDropsAnAcceptHeaderThatIsNoMediaTypeList() throws Exception {
+        given(dicomWebServiceMock.findFrameOfStudyOfSerieOfInstance(STUDY_UID, SERIES_UID_SEG_DATASET_500,
+                SOP_UID_SEG, "1", null)).willReturn(ResponseEntity.ok().build());
+        mvc.perform(MockMvcRequestBuilders
+                .get("/dicomweb/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}"
+                        + "/frames/{frame}",
+                        EXAMINATION_UID, DATASET_UID_500, SOP_UID_SEG, "1")
+                .header(HttpHeaders.ACCEPT, "multipart/related\r\nX-Injected: shanoir"))
+                .andExpect(status().isOk());
+        // nothing of the viewer ends up unchecked in the request to the PACS
+        verify(dicomWebServiceMock).findFrameOfStudyOfSerieOfInstance(STUDY_UID, SERIES_UID_SEG_DATASET_500,
+                SOP_UID_SEG, "1", null);
     }
 
     @Test
