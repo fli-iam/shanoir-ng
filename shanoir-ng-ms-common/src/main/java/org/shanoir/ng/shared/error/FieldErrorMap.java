@@ -39,14 +39,6 @@ public class FieldErrorMap extends HashMap<String, List<FieldError>> {
         super();
     }
 
-
-    /**
-     * Constructor
-     *
-     * @param {@link
-     *             BindingResult}
-     * @return {@link FieldErrorMap}
-     */
     public FieldErrorMap(BindingResult result) {
         if (result.hasErrors()) {
             for (ObjectError objectError : result.getAllErrors()) {
