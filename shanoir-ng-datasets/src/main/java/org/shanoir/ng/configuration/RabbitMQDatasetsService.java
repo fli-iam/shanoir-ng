@@ -514,6 +514,7 @@ public class RabbitMQDatasetsService {
             StudyExaminationsDTO propagatedExams = new StudyExaminationsDTO(studyId);
             List<CopyReport> cvsReports = new ArrayList<>();
             for (Long datasetParentId : datasetParentIds) {
+                start = (int) System.currentTimeMillis();
                 progress += 1f / countTotal;
                 event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + countProgress++ + "/" + countTotal);
                 event.setProgress(progress);
@@ -565,7 +566,7 @@ public class RabbitMQDatasetsService {
                     LOG.error("t1 : " + t1 + "\n"
                               + "t2 : " + t2 + "\n"
                               + "t3 : " + t3 + "\n"
-                              + "tTotal : " + (System.currentTimeMillis() - start) + "\n");
+                              + "tTotal : " + (((int) System.currentTimeMillis()) - start) + "\n");
                 }
             }
             if (!cvsReports.isEmpty()) {
