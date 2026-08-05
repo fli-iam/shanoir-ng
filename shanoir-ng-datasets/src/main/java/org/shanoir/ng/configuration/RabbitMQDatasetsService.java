@@ -453,7 +453,6 @@ public class RabbitMQDatasetsService {
         int t1 = 0;
         int t2 = 0;
         int t3 = 0;
-        int tTotal = 0;
         int start = (int) System.currentTimeMillis();
 
         Map<Long, Examination> examMap = new HashMap<>();
@@ -519,17 +518,23 @@ public class RabbitMQDatasetsService {
                 event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + countProgress++ + "/" + countTotal);
                 event.setProgress(progress);
                 event.setReport(buildReport(datasetParentIds, countProcessed, countAlreadyExist, countCopy, countSuccess, errors));
+                int t2Start = (int) System.currentTimeMillis();
                 eventService.publishEvent(event);
+                t2 = (int) System.currentTimeMillis() - t2Start;
 
                 LOG.info("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
+                int t3Start = (int) System.currentTimeMillis();
                 Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
+                t3 = (int) System.currentTimeMillis() - t3Start;
 
                 if (dsCount != 0) {
                     LOG.info("[CopyDatasets] Dataset already exists in this study, copy aborted.");
                     countAlreadyExist++;
                 } else {
                     try {
+                        int t1Start = (int) System.currentTimeMillis();
                         DatasetCopyService.DatasetCopyResult result = datasetCopyService.moveDataset(datasetParentId, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
+                        t1 = (int) System.currentTimeMillis() - t1Start;
                         Long newDsId = result.getNewDsId();
                         countProcessed += result.getCountProcessed();
                         countSuccess += result.getCountSuccess();
@@ -557,10 +562,10 @@ public class RabbitMQDatasetsService {
                         errors.add("Unexpected error during the copy of dataset " + datasetParentId + ": " + e.getMessage());
                     }
                     LOG.error("#####################################################################");
-                    LOG.error("t1 : " + t1 + "\n" +
-                              "t2 : " + t2 + "\n" +
-                              "t3 : " + t3 + "\n" +
-                              "tTotal : " + tTotal + "\n");
+                    LOG.error("t1 : " + t1 + "\n"
+                              + "t2 : " + t2 + "\n"
+                              + "t3 : " + t3 + "\n"
+                              + "tTotal : " + (System.currentTimeMillis() - start) + "\n");
                 }
             }
             if (!cvsReports.isEmpty()) {
