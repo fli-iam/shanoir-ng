@@ -40,6 +40,8 @@ import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,15 +180,15 @@ public class SeriesInstanceUIDHandler {
         if (entry != null && System.currentTimeMillis() - entry.creationTime() < EXAMINATION_SERIES_TTL_MS) {
             return entry.seriesToVirtualUIDs();
         }
-        List<DatasetAcquisition> acquisitions = acquisitionRepository.findByExaminationId(examinationId);
+        List<DatasetAcquisition> acquisitions = acquisitionRepository.findByExaminationIdWithDatasetsAndDatasetFiles(examinationId);
         Map<String, String> seriesToVirtualUIDs = Collections.unmodifiableMap(buildSeriesToVirtualUIDs(acquisitions));
         examinationToSeriesVirtualUIDsCache.put(examinationId,
                 new ExaminationSeriesCacheEntry(System.currentTimeMillis(), seriesToVirtualUIDs));
         return seriesToVirtualUIDs;
     }
 
-    public Map<String, String> findSeriesToVirtualUIDsOfAcquisition(Long acquisitionId) {
-        DatasetAcquisition acquisition = acquisitionService.findById(acquisitionId);
+    public Map<String, String> findSeriesToVirtualUIDsOfAcquisition(Long acquisitionId) throws ShanoirException {
+        DatasetAcquisition acquisition = acquisitionRepository.findByIdWithDatasetsAndDatasetFiles(acquisitionId).orElseThrow(() -> new EntityNotFoundException(DatasetAcquisition.class, acquisitionId));
         if (acquisition == null) {
             return Collections.emptyMap();
         }

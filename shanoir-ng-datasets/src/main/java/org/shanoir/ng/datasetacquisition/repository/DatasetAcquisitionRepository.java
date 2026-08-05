@@ -17,6 +17,7 @@ package org.shanoir.ng.datasetacquisition.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRightsProjection;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for dataset acquisition.
@@ -113,4 +115,30 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             + "LEFT JOIN FETCH ds.datasetExpressions "
             + "WHERE da.id IN :ids")
     List<DatasetAcquisition> findByIdsWithDatasetExpressions(List<Long> ids);
+
+    @Transactional(readOnly = true)
+    default Optional<DatasetAcquisition> findByIdWithDatasetsAndDatasetFiles(Long id) {
+        Optional<DatasetAcquisition> acquisition = findByIdWithDatasets(id);
+        acquisition.ifPresent(acq ->
+                acq.getDatasets().forEach(ds -> {
+                    Hibernate.initialize(ds.getDatasetExpressions());
+                    ds.getDatasetExpressions().forEach(de ->
+                            Hibernate.initialize(de.getDatasetFiles()));
+                })
+        );
+        return acquisition;
+    }
+
+    @Transactional(readOnly = true)
+    default List<DatasetAcquisition> findByExaminationIdWithDatasetsAndDatasetFiles(Long id) {
+        List<DatasetAcquisition> acquisitions = findByExaminationIdWithDatasets(id);
+        acquisitions.forEach(acq ->
+                acq.getDatasets().forEach(ds -> {
+                    Hibernate.initialize(ds.getDatasetExpressions());
+                    ds.getDatasetExpressions().forEach(de ->
+                            Hibernate.initialize(de.getDatasetFiles()));
+                })
+        );
+        return acquisitions;
+    }
 }

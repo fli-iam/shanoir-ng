@@ -202,10 +202,11 @@ public class DICOMWebApiControllerTest {
         acquisition101.setSeriesInstanceUID(SERIES_UID_ACQ_101);
         acquisition101.setDatasets(List.of(dataset400, dataset500, dataset700));
 
-        given(acquisitionRepository.findByExaminationId(42L))
+        given(acquisitionRepository.findByExaminationIdWithDatasetsAndDatasetFiles(42L))
                 .willReturn(List.of(acquisition100, acquisition101));
         given(datasetAcquisitionServiceMock.findById(100L)).willReturn(acquisition100);
         given(datasetAcquisitionServiceMock.findById(101L)).willReturn(acquisition101);
+        given(acquisitionRepository.findByIdWithDatasetsAndDatasetFiles(101L)).willReturn(Optional.of(acquisition101));
         given(datasetRepository.findById(500L)).willReturn(Optional.of(dataset500));
         given(datasetRepository.findById(700L)).willReturn(Optional.of(dataset700));
 

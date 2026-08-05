@@ -166,7 +166,7 @@ class SeriesInstanceUIDHandlerTest {
 
     @Test
     void findSeriesToVirtualUIDsMapsAcquisitionsDatasetsAndProcessingOutputs() {
-        when(acquisitionRepository.findByExaminationId(42L)).thenReturn(List.of(createAcquisition()));
+        when(acquisitionRepository.findByExaminationIdWithDatasetsAndDatasetFiles(42L)).thenReturn(List.of(createAcquisition()));
         DatasetProcessing processing = new DatasetProcessing();
         processing.setOutputDatasets(List.of(createDataset(new GenericDataset(), 600L,
                 "/studies/1.2.3/series/" + SERIES_UID_OUTPUT + "/instances/1.2.6")));
@@ -182,18 +182,18 @@ class SeriesInstanceUIDHandlerTest {
 
     @Test
     void findSeriesToVirtualUIDsCachesTheMapOfAnExamination() {
-        when(acquisitionRepository.findByExaminationId(42L)).thenReturn(List.of(createAcquisition()));
+        when(acquisitionRepository.findByExaminationIdWithDatasetsAndDatasetFiles(42L)).thenReturn(List.of(createAcquisition()));
 
         Map<String, String> first = handler.findSeriesToVirtualUIDs(42L);
         Map<String, String> second = handler.findSeriesToVirtualUIDs(42L);
 
         assertEquals(first, second);
         // the second call within the TTL is served from the cache
-        verify(acquisitionRepository, times(1)).findByExaminationId(42L);
+        verify(acquisitionRepository, times(1)).findByExaminationIdWithDatasetsAndDatasetFiles(42L);
 
         handler.clearVirtualUIDCaches();
         handler.findSeriesToVirtualUIDs(42L);
-        verify(acquisitionRepository, times(2)).findByExaminationId(42L);
+        verify(acquisitionRepository, times(2)).findByExaminationIdWithDatasetsAndDatasetFiles(42L);
     }
 
     private MrDatasetAcquisition createAcquisition() {

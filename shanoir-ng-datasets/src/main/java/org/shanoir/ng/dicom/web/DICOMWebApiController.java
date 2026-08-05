@@ -29,6 +29,7 @@ import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -203,7 +204,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 
     @Override
     public ResponseEntity<String> findSeriesOfStudy(String examinationUID, Map<String, String> allParams)
-            throws JsonProcessingException {
+            throws JsonProcessingException, ShanoirException {
         String includefield = "";
         String seriesInstanceUID = "";
         String studyInstanceUID = studyInstanceUIDAndSubjectNameHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
