@@ -450,6 +450,12 @@ public class RabbitMQDatasetsService {
     @RabbitHandler
     @Async
     public void copyDatasetsToStudy(final String data) {
+        int t1 = 0;
+        int t2 = 0;
+        int t3 = 0;
+        int tTotal = 0;
+        int start = (int) System.currentTimeMillis();
+
         Map<Long, Examination> examMap = new HashMap<>();
         Map<Long, DatasetAcquisition> acqMap = new HashMap<>();
         List<Long> datasetParentIds;
@@ -550,6 +556,11 @@ public class RabbitMQDatasetsService {
                         LOG.error("[CopyDatasets] Unexpected error during the copy of dataset " + datasetParentId, e);
                         errors.add("Unexpected error during the copy of dataset " + datasetParentId + ": " + e.getMessage());
                     }
+                    LOG.error("#####################################################################");
+                    LOG.error("t1 : " + t1 + "\n" +
+                              "t2 : " + t2 + "\n" +
+                              "t3 : " + t3 + "\n" +
+                              "tTotal : " + tTotal + "\n");
                 }
             }
             if (!cvsReports.isEmpty()) {
