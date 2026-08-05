@@ -165,24 +165,15 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         List<Map<String, Object>> problems = new ArrayList<>();
         inputSubjects.removeIf(subjectCopy -> {
             if (subjectCopy == null) {
-                problems.add(Map.of(
-                    "subjectId", null,
-                    "cause", "Subject copy entry is null."
-                ));
+                problems.add(Map.of("subjectId", null, "cause", "Subject copy entry is null."));
                 return true;
             }
             if (subjectCopy.getId() == null) {
-                problems.add(Map.of(
-                    "subjectId", null,
-                    "cause", "Subject copy entry has null ID."
-                ));
+                problems.add(Map.of("subjectId", null, "cause", "Subject copy entry has null ID."));
                 return true;
             }
             if (!sourceSubjects.containsKey(subjectCopy.getId())) {
-                problems.add(Map.of(
-                    "subjectId", subjectCopy.getId(),
-                    "cause", "Source subject not found."
-                ));
+                problems.add(Map.of("subjectId", subjectCopy.getId(), "cause", "Source subject not found." ));
                 return true;
             }
             return false;
