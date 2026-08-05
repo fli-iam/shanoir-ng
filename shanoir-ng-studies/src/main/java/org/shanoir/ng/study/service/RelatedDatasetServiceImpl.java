@@ -173,7 +173,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                 return true;
             }
             if (!sourceSubjects.containsKey(subjectCopy.getId())) {
-                problems.add(Map.of("subjectId", subjectCopy.getId(), "cause", "Source subject not found." ));
+                problems.add(Map.of("subjectId", subjectCopy.getId(), "cause", "Source subject not found."));
                 return true;
             }
             return false;
