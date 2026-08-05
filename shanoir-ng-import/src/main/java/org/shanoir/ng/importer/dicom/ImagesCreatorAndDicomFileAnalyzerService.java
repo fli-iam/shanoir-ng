@@ -51,10 +51,10 @@ import org.springframework.stereotype.Service;
  * This class reads all instances. A FileInputStream in form of a DicomInputStream is opened
  * to all files to read additional informations, e.g. missing in the DicomDir.
  * This class splits the instances array into two different array nodes: non-images and images,
- * on using the sop class uid. Before the instances are numbered with their instance number
+ * on using the SOPClassUID. Before the instances are numbered with their instance number
  * and added like this by DicomDirToModelReader. DicomFileAnalyzer removes/deletes
- * the instances node and creates an image. As this class
- * is reading the content of each dicom file already it adds as well the informations,
+ * the instances node and creates an image. As this class is reading the content of
+ * each dicom file already it adds as well the informations,
  * which are later necessary to separate datasets inside each serie:
  * acquisitionNumber, echoNumbers and imageOrientationsPatient.
  *
