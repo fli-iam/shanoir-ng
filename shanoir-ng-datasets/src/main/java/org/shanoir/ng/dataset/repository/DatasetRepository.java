@@ -47,7 +47,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             AND ex.study_id = :studyId
             )
             """, nativeQuery = true)
-    boolean existsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
+    Integer existsBySourceIdAndStudyId(Long datasetParentId, Long studyId);
 
     Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
 
