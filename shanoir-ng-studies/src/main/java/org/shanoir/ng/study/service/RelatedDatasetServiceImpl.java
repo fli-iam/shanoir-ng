@@ -123,7 +123,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         int i = 0;
         Map<Long, Subject> sourceSubjects = subjectRepository.findWithTagsByIdIn(subjects.stream().map(CopyData.SubjectCopy::getId).toList()).stream()
                 .collect(Collectors.toMap(Subject::getId, s -> s));
-        checkInputSubjects(subjects, sourceSubjects);
+        cleanInputSubjects(subjects, sourceSubjects, event);
 
         List<String> names = subjects.stream()
                 .map(CopyData.SubjectCopy::getNewName)
@@ -132,7 +132,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
                 .collect(Collectors.toMap(Subject::getName, s -> s));
 
         for (CopyData.SubjectCopy subjectCopy : subjects) {
-            Subject sourceSubject = sourceSubjects.get(subjectCopy.getId()); // cannot be null because of checkInputSubjects
+            Subject sourceSubject = sourceSubjects.get(subjectCopy.getId()); // cannot be null because of cleanInputSubjects
             Subject targetSubject = existingByName.get(subjectCopy.getNewName());
             if (targetSubject == null) {
                 Subject createdSubject = createNewSubjectInTargetStudy(targetStudy, sourceSubject, subjectCopy.getNewName(), false);
@@ -158,18 +158,39 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
         return subjectMapping;
     }
 
-    private void checkInputSubjects(List<CopyData.SubjectCopy> inputSubjects, Map<Long, Subject> sourceSubjects) throws IllegalArgumentException {
-        for (CopyData.SubjectCopy subjectCopy : inputSubjects) {
+    private void cleanInputSubjects(List<CopyData.SubjectCopy> inputSubjects,
+            Map<Long, Subject> sourceSubjects,
+            ShanoirEvent event) {
+
+        List<Map<String, Object>> problems = new ArrayList<>();
+        inputSubjects.removeIf(subjectCopy -> {
             if (subjectCopy == null) {
-                throw new IllegalArgumentException("Subject copy entry is null.");
+                problems.add(Map.of(
+                    "subjectId", null,
+                    "cause", "Subject copy entry is null."
+                ));
+                return true;
             }
             if (subjectCopy.getId() == null) {
-                throw new IllegalArgumentException("Subject copy entry has null ID.");
+                problems.add(Map.of(
+                    "subjectId", null,
+                    "cause", "Subject copy entry has null ID."
+                ));
+                return true;
             }
             if (!sourceSubjects.containsKey(subjectCopy.getId())) {
-                throw new IllegalArgumentException(
-                    "Copy dataset(s): source subject with ID " + subjectCopy.getId() + " not found.");
+                problems.add(Map.of(
+                    "subjectId", subjectCopy.getId(),
+                    "cause", "Source subject not found."
+                ));
+                return true;
             }
+            return false;
+        });
+        try {
+            event.setReport(objectMapper.writeValueAsString(Map.of("problems", problems)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Error while serializing problems to JSON", e);
         }
     }
 
