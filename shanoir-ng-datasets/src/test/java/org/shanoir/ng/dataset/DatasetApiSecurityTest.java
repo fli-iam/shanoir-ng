@@ -40,7 +40,6 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetRightsDTO;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
-import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
@@ -93,9 +92,6 @@ public class DatasetApiSecurityTest {
 
     @MockBean
     private StudyRightsService rightsService;
-
-    @MockBean
-    private CreateStatisticsService createStatisticsService;
 
     @MockBean
     private StudyUserRightsRepository rightsRepository;

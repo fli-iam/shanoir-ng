@@ -12,24 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.shared.mapper;
+package org.shanoir.ng.datasetacquisition.dto;
 
-import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.model.SubjectDTO;
+import java.util.List;
 
-public class SubjectDecorator implements SubjectMapper {
+import org.shanoir.ng.dataset.dto.DatasetDTO;
 
-    public SubjectDTO subjectToSubjectDTO(Subject subject) {
-        if (subject == null) {
-            return null;
-        }
+public class DatasetAcquisitionWithDatasetsDTO extends DatasetAcquisitionDTO {
 
-        final SubjectDTO subjectDTO = new SubjectDTO();
+    private List<DatasetDTO> datasets;
 
-        subjectDTO.setId(subject.getId());
-        subjectDTO.setName(subject.getName());
+    public List<DatasetDTO> getDatasets() {
+        return datasets;
+    }
 
-        return subjectDTO;
+    public void setDatasets(List<DatasetDTO> datasets) {
+        this.datasets = datasets;
     }
 
 }

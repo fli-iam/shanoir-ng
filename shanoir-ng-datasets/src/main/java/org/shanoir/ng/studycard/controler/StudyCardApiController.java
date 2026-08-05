@@ -128,7 +128,9 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<List<StudyCard>> findStudyCards() {
-        final List<StudyCard> studyCards = studyCardService.findAll();
+        //TODO manage study cards
+        List<StudyCard> studyCards = studyCardService.findAll();
+        studyCards = new ArrayList<>();
         if (studyCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

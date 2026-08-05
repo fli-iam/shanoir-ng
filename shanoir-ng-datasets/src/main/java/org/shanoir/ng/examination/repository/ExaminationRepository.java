@@ -17,6 +17,7 @@ package org.shanoir.ng.examination.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for examination.
@@ -170,4 +172,37 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
             + "WHERE e.id = :id "
             + "ORDER BY COALESCE(da.sortingIndex, da.rank, 0)")
     Optional<Examination> findByIdWithAcquisitions(Long id);
+
+    @Query("SELECT e FROM Examination e "
+            + "LEFT JOIN FETCH e.datasetAcquisitions da "
+            + "LEFT JOIN FETCH e.source source "
+            + "WHERE e.id = :id "
+            + "ORDER BY COALESCE(da.sortingIndex, da.rank, 0)")
+    Optional<Examination> findByIdWithAcquisitionsAndSource(Long id);
+
+    /**
+     * Hibernate cannot LEFT JOIN FETCH more than one bag-typed collection (unordered List) of the
+     * same entity in a single query: it raises a MultipleBagFetchException. This applies to ANY
+     * pair of bag collections on Examination (datasetAcquisitions, copies,
+     * instrumentBasedAssessmentList are all Lists) - not just a specific pair of fields. So only
+     * one bag (datasetAcquisitions) is join-fetched here; the others are initialized in a second
+     * step, within the same transaction/persistence context, so they attach to the same managed
+     * Examination instance without triggering the exception or an N+1 per collection.
+     */
+    @Transactional(readOnly = true)
+    default Optional<Examination> findByIdWithAcquisitionsAndCopiesAndSource(Long id) {
+        Optional<Examination> examination = findByIdWithAcquisitionsAndSource(id);
+        examination.ifPresent(e -> Hibernate.initialize(e.getCopies()));
+        return examination;
+    }
+
+    @Transactional(readOnly = true)
+    default Optional<Examination> findByIdWithAllRelations(Long id) {
+        Optional<Examination> examination = findByIdWithAcquisitionsAndSource(id);
+        examination.ifPresent(e -> {
+            Hibernate.initialize(e.getCopies());
+            Hibernate.initialize(e.getInstrumentBasedAssessmentList());
+        });
+        return examination;
+    }
 }

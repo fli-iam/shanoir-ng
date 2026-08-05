@@ -20,9 +20,9 @@ import org.mockito.Mockito;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.controler.ExaminationApi;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
-import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
@@ -52,11 +52,11 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.shanoir.ng.utils.assertion.AssertUtils.*;
+
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.UserRights;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 /**
  * User security service test.
@@ -241,9 +241,9 @@ public class ExaminationApiSecurityTest {
 
         // findExaminationById(Long)
         assertAccessAuthorized(api::findExaminationById, 1L);
-        assertAccessDenied(api::findExaminationById, 2L);
-        assertAccessDenied(api::findExaminationById, 3L);
-        assertAccessDenied(api::findExaminationById, 4L);
+        assertException(api::findExaminationById, 2L, EntityNotFoundException.class);
+        assertException(api::findExaminationById, 3L, EntityNotFoundException.class);
+        assertException(api::findExaminationById, 4L, EntityNotFoundException.class);
 
         // findExaminations(Pageable)
         assertAccessAuthorized(api::findExaminations, PageRequest.of(0, 10), "", "");
@@ -257,12 +257,12 @@ public class ExaminationApiSecurityTest {
         assertAccessAuthorized((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 1L, 1L);
         try {
             // either the access is denied or the body is empty, both are fine
-            ResponseEntity<List<SubjectExaminationDTO>> examsOfSubject2LStudy2L = api.findExaminationsBySubjectIdStudyId(2L,  2L);
+            ResponseEntity<List<ExaminationDTO>> examsOfSubject2LStudy2L = api.findExaminationsBySubjectIdStudyId(2L,  2L);
             assertThat(examsOfSubject2LStudy2L.getBody() == null || examsOfSubject2LStudy2L.getBody().isEmpty());
         } catch (AccessDeniedException e) { /* good */ }
         assertAccessDenied((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 4L, 4L);
         // check access denied to exam 3
-        List<SubjectExaminationDTO> examList1 = api.findExaminationsBySubjectIdStudyId(1L,  1L).getBody();
+        List<ExaminationDTO> examList1 = api.findExaminationsBySubjectIdStudyId(1L,  1L).getBody();
         assertThat(examList1.size()).isEqualTo(1);
         assertThat(examList1.get(0).getId()).isEqualTo(1L);
 

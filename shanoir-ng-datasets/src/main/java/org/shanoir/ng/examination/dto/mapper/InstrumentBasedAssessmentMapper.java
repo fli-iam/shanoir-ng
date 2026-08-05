@@ -12,22 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.datasetacquisition.dto;
+package org.shanoir.ng.examination.dto.mapper;
 
-import java.util.List;
+import org.mapstruct.Mapper;
 
-import org.shanoir.ng.dataset.dto.DatasetDTO;
+@Mapper(componentModel = "spring")
+public interface InstrumentBasedAssessmentMapper {
 
-public class DatasetAcquisitionDatasetsDTO extends DatasetAcquisitionDTO {
-
-    private List<DatasetDTO> datasets;
-
-    public List<DatasetDTO> getDatasets() {
-        return datasets;
-    }
-
-    public void setDatasets(List<DatasetDTO> datasets) {
-        this.datasets = datasets;
-    }
 
 }

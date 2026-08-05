@@ -194,7 +194,7 @@ public class ExaminationApiControllerTest {
     @Test
     @WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
     public void findExaminationByIdTest() throws Exception {
-        given(examinationRepository.findByIdWithAcquisitions(1L)).willReturn(Optional.of(new Examination()));
+        given(examinationRepository.findByIdWithAllRelations(1L)).willReturn(Optional.of(new Examination()));
 
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -218,7 +218,7 @@ public class ExaminationApiControllerTest {
         exam.setStudy(new Study());
         exam.getStudy().setId(3L);
         exam.setSubject(new Subject(1L, "1"));
-        given(examinationMapperMock.examinationDTOToExamination(Mockito.any())).willReturn(exam);
+        given(examinationMapperMock.examinationDTOToExaminationIdRelations(Mockito.any())).willReturn(exam);
         given(examinationServiceMock.findById(1L)).willReturn(exam);
         given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
 

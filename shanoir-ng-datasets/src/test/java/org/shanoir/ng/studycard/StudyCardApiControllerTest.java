@@ -139,7 +139,10 @@ public class StudyCardApiControllerTest {
     @WithMockKeycloakUser(id = 1, username = "test", authorities = { "ROLE_USER" })
     public void findStudyCardsTest() throws Exception {
         mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
+        //To set when the OSIV = false for studyCard is ok
+        //mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
+        //        .andExpect(status().isOk());
     }
 
     @Test

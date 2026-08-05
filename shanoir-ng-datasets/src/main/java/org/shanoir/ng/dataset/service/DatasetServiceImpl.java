@@ -29,6 +29,8 @@ import jakarta.mail.MessagingException;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.hibernate.Hibernate;
+import org.hibernate.SessionFactory;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
@@ -157,6 +159,9 @@ public class DatasetServiceImpl implements DatasetService {
     @Autowired
     private SubjectService subjectService;
 
+    @Autowired
+    private SessionFactory sessionFactory;
+
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -257,17 +262,40 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
-    public Dataset findById(final Long id) throws EntityNotFoundException {
-        Dataset dataset = repository.findByIdWithProcessingAncestorsAndExamination(id).orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+    @Transactional(readOnly = true)
+    public Dataset findByIdWithProcessingAncestorsAndExaminationAndMetadata(final Long id) throws EntityNotFoundException {
+        Dataset dataset = repository.findByIdWithProcessingAncestorsAndExaminationAndMetadata(id).orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
         if (dataset.getDatasetProcessing() != null) {
             dataset.setDatasetAcquisition(dataset.getDatasetProcessing().getInputDatasets().stream().map(Dataset::getDatasetAcquisition).filter(Objects::nonNull).findFirst().orElse(null));
+            if (dataset.getDatasetAcquisition() != null) {
+                Hibernate.initialize(dataset.getDatasetAcquisition().getExamination());
+
+            }
         }
         populateInPacs(List.of(dataset));
         populateCenterId(List.of(dataset));
         return dataset;
     }
 
-    private Dataset findWithDatasetAcqu
+    @Transactional(readOnly = true)
+    public Dataset findByIdWithDatasetFilesAndExaminationAndMetadata(final Long id) throws EntityNotFoundException {
+        return repository.findByIdWithDatasetFilesAndExaminationAndMetadata(id).orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Dataset> findByAcquisitionIdWithDatasetFilesAndExaminationAndMetadata(final Long id) {
+        return repository.findByAcquisitionIdWithDatasetFilesAndExaminationAndMetadata(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Dataset> findByExaminationIdWithDatasetFilesAndExaminationAndMetadata(final Long id) {
+        return repository.findByExaminationIdWithDatasetFilesAndExaminationAndMetadata(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Dataset> findByStudyIdWithDatasetFilesAndExaminationAndMetadata(final Long id) {
+        return repository.findByStudyIdWithDatasetFilesAndExaminationAndMetadata(id);
+    }
 
     @Override
     public int countByStudyId(Long studyId) {
@@ -606,6 +634,7 @@ public class DatasetServiceImpl implements DatasetService {
         return stats;
     }
 
+    @Transactional(readOnly = true)
     public List<DatasetDownloadData> getDownloadDataByAcquisitionAndExaminationIds(List<Long> acquisitionIds,
             List<Long> examinationIds) {
 
@@ -665,7 +694,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Transactional(readOnly = true)
     public String getDicomMetadataByDatasetId(Long datasetId) throws IOException, MessagingException, EntityNotFoundException {
-        final Dataset dataset = datasetService.findById(datasetId);
+        final Dataset dataset = datasetService.findByIdWithProcessingAncestorsAndExaminationAndMetadata(datasetId);
         Optional<URL> firstWADOURL = DatasetFileUtils.getFirstDatasetFilePathURL(dataset,
                 DatasetExpressionFormat.DICOM);
         if (firstWADOURL.isPresent()) {
@@ -698,7 +727,7 @@ public class DatasetServiceImpl implements DatasetService {
         datasets.forEach(d -> d.setInPacs(withExpressions.contains(d.getId())));
     }
 
-    public void populateCenterId(List<Dataset> datasets) {
+    public void  populateCenterId(List<Dataset> datasets) {
         datasets.forEach(d -> d.setCenterId(resolveCenterId(d)));
     }
 
@@ -720,7 +749,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     protected String shapeMetadataLinesForOneDicom(List<String> metadataKeys, Long datasetId, ObjectMapper mapper) throws EntityNotFoundException {
         String metadataLine = datasetId.toString();
-        final Dataset dataset = findById(datasetId);
+        final Dataset dataset = findByIdWithProcessingAncestorsAndExaminationAndMetadata(datasetId);
         metadataLine += ";" + (Objects.nonNull(dataset.getDatasetAcquisition()) ? dataset.getDatasetAcquisition().getId().toString() : "");
         JsonNode metadatas = null;
         try {

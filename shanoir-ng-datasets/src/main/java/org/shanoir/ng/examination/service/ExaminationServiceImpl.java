@@ -54,6 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
@@ -115,6 +116,10 @@ public class ExaminationServiceImpl implements ExaminationService {
     @Autowired
     private DatasetAcquisitionRepository acquisitionRepository;
 
+    @Autowired
+    @Lazy
+    private ExaminationService examinationService;
+
     @Transactional(readOnly = true)
     public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         Optional<Examination> examinationOpt = examinationRepository.findById(id);
@@ -170,7 +175,7 @@ public class ExaminationServiceImpl implements ExaminationService {
     public void deleteExaminationAsync(Long examinationId, Long studyId, ShanoirEvent event) {
         try {
             storageService.deleteDirectoryExtraData(examinationId);
-            deleteById(examinationId, event);
+            examinationService.deleteById(examinationId, event);
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_STUDY_DELETE_QUEUE, objectMapper.writeValueAsString(event));
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
         } catch (Exception e) {

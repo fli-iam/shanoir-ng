@@ -156,6 +156,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Override
     public DatasetAcquisition findById(Long id) {
         return repository.findById(id).orElse(null);
+
     }
 
     @Override

@@ -55,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -111,6 +112,10 @@ public class DatasetDownloaderServiceImpl {
     @Autowired
     private StorageService storageService;
 
+    @Qualifier("datasetDownloaderServiceImpl")
+    @Autowired
+    private DatasetDownloaderServiceImpl self;
+
     @PostConstruct
     protected void initialize() {
         // Set timeout to 5mn (consider nifti reconversion can take some time)
@@ -122,7 +127,7 @@ public class DatasetDownloaderServiceImpl {
     }
 
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId) throws RestServiceException {
-        massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, null);
+        self.massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, null);
     }
 
     @Transactional(readOnly = true)

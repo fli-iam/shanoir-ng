@@ -102,11 +102,11 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     public ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 
-        final Optional<DatasetProcessing> datasetProcessing = repository.findById(datasetProcessingId);
+        final Optional<DatasetProcessing> datasetProcessing = repository.findByIdWithInputs(datasetProcessingId);
         if (!datasetProcessing.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(datasetProcessing.get()), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingToProcessingDTOWithInputIds(datasetProcessing.get()), HttpStatus.OK);
     }
 
     @Override
@@ -115,7 +115,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings, false), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingListToProcessingDTOListWithNullRelations(datasetProcessings), HttpStatus.OK);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings, false), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingListToProcessingDTOListWithNullRelations(datasetProcessings), HttpStatus.OK);
     }
 
     public ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByMonitoring(@Parameter(description = "id of the monitoring", required = true) @PathVariable("monitoringId") Long monitoringId) {
@@ -132,7 +132,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings, true), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingListToProcessingDTOListWithNullRelations(datasetProcessings), HttpStatus.OK);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         List<Dataset> inputDatasets = datasetProcessing.getInputDatasets();
         datasetService.populateInPacs(inputDatasets);
         datasetService.populateCenterId(inputDatasets);
-        return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(inputDatasets), HttpStatus.OK);
+        return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOListWithMetadata(inputDatasets), HttpStatus.OK);
     }
 
     @Override
@@ -150,9 +150,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) throws EntityNotFoundException {
         DatasetProcessing datasetProcessing = repository.findByIdWithOutputs(datasetProcessingId).orElseThrow(() -> new EntityNotFoundException(DatasetProcessing.class, datasetProcessingId));
         List<Dataset> outputDatasets = datasetProcessing.getOutputDatasets();
-        datasetService.populateInPacs(outputDatasets);
-        datasetService.populateCenterId(outputDatasets);
-        return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(outputDatasets), HttpStatus.OK);
+        return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOListWithProcessing(outputDatasets), HttpStatus.OK);
     }
 
     @Override
@@ -168,7 +166,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
         /* Save dataset processing in db. */
         final DatasetProcessing createdDatasetProcessing = datasetProcessingService.create(datasetProcessing);
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(createdDatasetProcessing), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingToProcessingDTOWithIdRelations(createdDatasetProcessing), HttpStatus.OK);
     }
 
     @Override

@@ -78,7 +78,47 @@ public interface DatasetService {
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
-    Dataset findById(Long id) throws EntityNotFoundException;
+    Dataset findByIdWithProcessingAncestorsAndExaminationAndMetadata(Long id) throws EntityNotFoundException;
+
+    /**
+     * Find dataset by its id.
+     *
+     * @param id dataset id.
+     * @return a dataset or null.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
+    Dataset findByIdWithDatasetFilesAndExaminationAndMetadata(Long id) throws EntityNotFoundException;
+
+    /**
+     * Find dataset by its id.
+     *
+     * @param id dataset id.
+     * @return a dataset or null.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
+    List<Dataset> findByAcquisitionIdWithDatasetFilesAndExaminationAndMetadata(final Long id);
+
+    /**
+     * Find dataset by its id.
+     *
+     * @param id dataset id.
+     * @return a dataset or null.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
+    List<Dataset> findByStudyIdWithDatasetFilesAndExaminationAndMetadata(final Long id);
+
+    /**
+     * Find dataset by its id.
+     *
+     * @param id dataset id.
+     * @return a dataset or null.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    @PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnTrustedDataset(returnObject, 'CAN_SEE_ALL')")
+    List<Dataset> findByExaminationIdWithDatasetFilesAndExaminationAndMetadata(final Long id);
 
     /**
      * Find datasets by their ids.

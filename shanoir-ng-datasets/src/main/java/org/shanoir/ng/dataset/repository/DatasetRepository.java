@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.dto.DatasetForRightsProjection;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
@@ -263,8 +264,10 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "LEFT JOIN FETCH dp.inputDatasets "
             + "LEFT JOIN FETCH dataset.datasetAcquisition AS acq "
             + "LEFT JOIN FETCH acq.examination "
+            + "LEFT JOIN FETCH dataset.originMetadata "
+            + "LEFT JOIN FETCH dataset.updatedMetadata "
             + "WHERE dataset.id = :id")
-    Optional<Dataset> findByIdWithProcessingAncestorsAndExamination(Long id);
+    Optional<Dataset> findByIdWithProcessingAncestorsAndExaminationAndMetadata(Long id);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "JOIN FETCH dataset.datasetProcessing AS dp "
@@ -275,11 +278,11 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     List<Dataset> findByIdsWithProcessingAncestorsAndExamination(List<Long> ids);
 
     @Query("SELECT dataset FROM Dataset dataset "
-            + "JOIN FETCH dataset.datasetProcessing AS dp "
-            + "JOIN FETCH dp.inputDatasets "
-            + "JOIN FETCH dataset.datasetAcquisition AS acq "
-            + "JOIN FETCH acq.examination e "
-            + "WHERE acq.studyCard.id = :acquisitionId")
+            + "LEFT JOIN FETCH dataset.datasetProcessing AS dp "
+            + "LEFT JOIN FETCH dp.inputDatasets "
+            + "LEFT JOIN FETCH dataset.datasetAcquisition AS acq "
+            + "LEFT JOIN FETCH acq.examination e "
+            + "WHERE acq.id = :acquisitionId")
     List<Dataset> findByAcquisitionIdWithProcessingAncestorsAndExamination(Long acquisitionId);
 
     @Query("SELECT dataset FROM Dataset dataset "
@@ -316,6 +319,58 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
             + "ANd dataset.id IN :ids")
     List<Dataset> findByIdsAndStudyIdsWithProcessingAncestorsAndExamination(List<Long> studyIds, List<Long> ids);
 
+    @Query(value = "SELECT d FROM Dataset AS d "
+            + "LEFT JOIN FETCH d.datasetExpressions de "
+            + "LEFT JOIN FETCH d.datasetAcquisition AS acq "
+            + "LEFT JOIN FETCH acq.examination e "
+            + "LEFT JOIN FETCH d.originMetadata "
+            + "LEFT JOIN FETCH d.updatedMetadata "
+            + "WHERE d.id = :id")
+    Optional<Dataset> findByIdWithDatasetExpressionAndExaminationAndMetadata(Long id);
+
+    @Query(value = "SELECT d FROM Dataset AS d "
+            + "LEFT JOIN FETCH d.datasetExpressions de "
+            + "LEFT JOIN FETCH d.datasetAcquisition AS acq "
+            + "LEFT JOIN FETCH acq.examination e "
+            + "LEFT JOIN FETCH d.originMetadata "
+            + "LEFT JOIN FETCH d.updatedMetadata "
+            + "WHERE acq.id = :id")
+    List<Dataset> findByAcquisitionIdWithDatasetExpressionAndExaminationAndMetadata(Long id);
+
+    @Query(value = "SELECT d FROM Dataset AS d "
+            + "LEFT JOIN FETCH d.datasetExpressions de "
+            + "LEFT JOIN FETCH d.datasetAcquisition AS acq "
+            + "LEFT JOIN FETCH acq.examination e "
+            + "LEFT JOIN FETCH d.originMetadata "
+            + "LEFT JOIN FETCH d.updatedMetadata "
+            + "WHERE e.study.id = :id")
+    List<Dataset> findByStudyIdWithDatasetExpressionAndExaminationAndMetadata(Long id);
+
+    @Query(value = "SELECT d FROM Dataset AS d "
+            + "LEFT JOIN FETCH d.datasetExpressions de "
+            + "LEFT JOIN FETCH d.datasetAcquisition AS acq "
+            + "LEFT JOIN FETCH acq.examination e "
+            + "LEFT JOIN FETCH d.originMetadata "
+            + "LEFT JOIN FETCH d.updatedMetadata "
+            + "WHERE e.id = :id")
+    List<Dataset> findByExaminationIdWithDatasetExpressionAndExaminationAndMetadata(Long id);
+
+    @Query(value = "SELECT d FROM Dataset AS d "
+            + "LEFT JOIN FETCH d.datasetExpressions "
+            + "WHERE d.id IN :idList")
+    List<Dataset> findByIdsWithDatasetExpression(List<Long> idList);
+
+    @Query(value = "SELECT d FROM Dataset AS d "
+            + "LEFT JOIN FETCH d.datasetExpressions "
+            + "JOIN ProcessingResource AS p ON d.id = p.dataset.id "
+            + "WHERE p.resourceId = :resourceId")
+    List<Dataset> findByResourceIdWithDatasetExpression(String resourceId);
+
+    @Query(value = "SELECT d FROM Dataset AS d "
+            + "JOIN ProcessingResource AS p ON d.id = p.dataset.id "
+            + "WHERE p.resourceId = :resourceId")
+    List<Dataset> findByResourceId(String resourceId);
+
     @Query(value = "SELECT d.id FROM Dataset d",
             countQuery = "SELECT COUNT(d) FROM Dataset d")
     Page<Long> findAllIds(Pageable pageable);
@@ -339,4 +394,58 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
         return findByIdsAndStudyIdsWithProcessingAncestorsAndExamination(findAllIds(sort), studyIds);
     }
 
+    @Transactional(readOnly = true)
+    default List<Dataset> findByAcquisitionIdWithDatasetFilesAndExaminationAndMetadata(Long acquisitionId) {
+        List<Dataset> datasets = findByAcquisitionIdWithDatasetExpressionAndExaminationAndMetadata(acquisitionId);
+        datasets.forEach(d ->
+                d.getDatasetExpressions().forEach(de ->
+                    Hibernate.initialize(de.getDatasetFiles())
+                )
+        );
+        return datasets;
+    }
+
+    @Transactional(readOnly = true)
+    default List<Dataset> findByExaminationIdWithDatasetFilesAndExaminationAndMetadata(Long examinationId) {
+        List<Dataset> datasets = findByExaminationIdWithDatasetExpressionAndExaminationAndMetadata(examinationId);
+        datasets.forEach(d ->
+                d.getDatasetExpressions().forEach(de -> {
+                    Hibernate.initialize(de.getDatasetFiles());
+                })
+        );
+        return datasets;
+    }
+
+    @Transactional(readOnly = true)
+    default List<Dataset> findByStudyIdWithDatasetFilesAndExaminationAndMetadata(Long studyId) {
+        List<Dataset> datasets = findByStudyIdWithDatasetExpressionAndExaminationAndMetadata(studyId);
+        datasets.forEach(d ->
+                d.getDatasetExpressions().forEach(de -> {
+                    Hibernate.initialize(de.getDatasetFiles());
+                })
+        );
+        return datasets;
+    }
+
+    @Transactional(readOnly = true)
+    default Optional<Dataset> findByIdWithDatasetFilesAndExaminationAndMetadata(Long id) {
+        Optional<Dataset> dataset = findByIdWithDatasetExpressionAndExaminationAndMetadata(id);
+        dataset.ifPresent(d ->
+                d.getDatasetExpressions().forEach(de -> {
+                    Hibernate.initialize(de.getDatasetFiles());
+                })
+        );
+        return dataset;
+    }
+
+    @Transactional(readOnly = true)
+    default List<Dataset> findByIdsWithDatasetFilesAndExaminationAndMetadata(List<Long> ids) {
+        List<Dataset> datasets = findByIdsWithDatasetExpression(ids);
+        datasets.forEach(d ->
+                d.getDatasetExpressions().forEach(de -> {
+                    Hibernate.initialize(de.getDatasetFiles());
+                })
+        );
+        return datasets;
+    }
 }

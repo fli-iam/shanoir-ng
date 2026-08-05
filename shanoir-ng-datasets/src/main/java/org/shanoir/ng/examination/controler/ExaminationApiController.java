@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
-import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -126,12 +125,12 @@ public class ExaminationApiController implements ExaminationApi {
 
     @Override
     public ResponseEntity<ExaminationDTO> findExaminationById( final Long examinationId) throws EntityNotFoundException {
-        Examination examination = repository.findByIdWithAcquisitions(examinationId)
+        Examination examination = repository.findByIdWithAllRelations(examinationId)
                 .orElseThrow(() -> new EntityNotFoundException(Examination.class, examinationId));;
         if (examination == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(examination), HttpStatus.OK);
+        return new ResponseEntity<>(examinationMapper.examinationToExaminationIdRelationsDTOWithIdRelations(examination), HttpStatus.OK);
     }
 
     @Override
@@ -140,7 +139,7 @@ public class ExaminationApiController implements ExaminationApi {
         if (examinations == null || examinations.getContent().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
+        return new ResponseEntity<>(examinationMapper.examinationListToExaminationListDTOPageWithStudy(examinations), HttpStatus.OK);
     }
 
     @Override
@@ -154,18 +153,18 @@ public class ExaminationApiController implements ExaminationApi {
         if (examinations.getContent().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations), HttpStatus.OK);
+        return new ResponseEntity<>(examinationMapper.examinationPageToExaminationIdRelationsDTOPage(examinations), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
+    public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectIdStudyId(
             @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
         final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
         if (examinations.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(examinationMapper.examinationsToSubjectExaminationDTOs(examinations), HttpStatus.OK);
+        return new ResponseEntity<>(examinationMapper.examinationListToExaminationListNullRelationsDTO(examinations), HttpStatus.OK);
     }
 
     @Override
@@ -184,14 +183,14 @@ public class ExaminationApiController implements ExaminationApi {
             @Parameter(description = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
             final BindingResult result) throws RestServiceException {
         examinationService.validate(result);
-        Examination examination = examinationMapper.examinationDTOToExamination(examinationDTO);
+        Examination examination = examinationMapper.examinationDTOToExaminationIdRelations(examinationDTO);
         examinationService.generateStudyInstanceUID(examination);
         try {
             final Examination createdExamination = examinationService.save(examination);
             LOG.info("New examination created: " + createdExamination.toString());
             // NB: Message as centerId / subjectId is important in RabbitMQStudiesService
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
-            ExaminationDTO createdExaminationDTO = examinationMapper.examinationToExaminationDTO(createdExamination);
+            ExaminationDTO createdExaminationDTO = examinationMapper.examinationToExaminationDTOWithCopiesAndSourceAndStudyId(createdExamination);
             return new ResponseEntity<>(createdExaminationDTO, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
             throw new RestServiceException(
@@ -210,7 +209,7 @@ public class ExaminationApiController implements ExaminationApi {
             final BindingResult result) throws Exception {
         /* Update examination in db. */
         try {
-            examinationService.update(examinationMapper.examinationDTOToExamination(examination));
+            examinationService.update(examinationMapper.examinationDTOToExaminationIdRelations(examination));
             eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EXAMINATION_EVENT, examination.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(examination.getStudyId()));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -227,7 +226,7 @@ public class ExaminationApiController implements ExaminationApi {
         if (examinations.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(examinationMapper.examinationsToExaminationDTOs(examinations),
+        return new ResponseEntity<>(examinationMapper.examinationListToExaminationListIdRelationsDTO(examinations),
                 HttpStatus.OK);
     }
 

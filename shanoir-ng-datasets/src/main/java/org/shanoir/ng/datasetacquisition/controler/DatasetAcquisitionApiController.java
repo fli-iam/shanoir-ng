@@ -23,9 +23,9 @@ import java.util.List;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
-import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionWithDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
-import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionDatasetsMapper;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionWithDatasetsMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -100,7 +100,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
     private DatasetAcquisitionMapper dsAcqMapper;
 
     @Autowired
-    private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
+    private DatasetAcquisitionWithDatasetsMapper dsAcqDsMapper;
 
     @Autowired
     private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
@@ -180,13 +180,13 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
     }
 
     @Override
-    public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findByStudyCard(
+    public ResponseEntity<List<DatasetAcquisitionWithDatasetsDTO>> findByStudyCard(
               Long studyCardId) {
         List<DatasetAcquisition> daList = datasetAcquisitionService.findByStudyCard(studyCardId);
         if (daList == null || daList.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
+            return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionsDTOWithDatasetIds(daList), HttpStatus.OK);
         }
     }
 
@@ -201,7 +201,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
     }
 
     @Override
-    public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
+    public ResponseEntity<List<DatasetAcquisitionWithDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
             @Parameter(description = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
 
         List<DatasetAcquisition> daList = datasetAcquisitionService.findByDatasetId(datasetIds);
@@ -217,7 +217,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         if (daList.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
+            return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionsDTOWithDatasetIds(daList), HttpStatus.OK);
         }
     }
 
@@ -316,16 +316,16 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         if (datasetAcquisition == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition), HttpStatus.OK);
+        return new ResponseEntity<>(dsAcqMapper.acquisitionToAcquisitionWithExaminationDTO(datasetAcquisition), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Page<DatasetAcquisitionDTO>> findDatasetAcquisitions(final Pageable pageable) throws RestServiceException {
+    public ResponseEntity<Page<DatasetAcquisitionDTO>> findDatasetAcquisitions(final Pageable pageable) {
         Page<DatasetAcquisition> datasetAcquisitions = datasetAcquisitionService.findPage(pageable);
         if (datasetAcquisitions == null || datasetAcquisitions.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
+        return new ResponseEntity<>(dsAcqMapper.acquisitionPageToAcquisitionWithExaminationDTOPage(datasetAcquisitions), HttpStatus.OK);
     }
 
     @Override
@@ -336,7 +336,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
         validate(result);
         try {
-            datasetAcquisitionService.update(dsAcqMapper.datasetAcquisitionDTOToDatasetAcquisition(datasetAcquisition));
+            datasetAcquisitionService.update(dsAcqMapper.acquisitionDTOToAcquisitionIdRelations(datasetAcquisition));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
         } catch (EntityNotFoundException e) {

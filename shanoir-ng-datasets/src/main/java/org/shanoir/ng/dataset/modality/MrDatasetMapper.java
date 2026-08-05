@@ -14,14 +14,8 @@
 
 package org.shanoir.ng.dataset.modality;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.mapstruct.*;
-import org.shanoir.ng.dataset.dto.mapper.DatasetMetadataMapper;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
-import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMappingConfig;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
 
@@ -31,72 +25,37 @@ import org.springframework.data.domain.Page;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class, DatasetAcquisitionMapper.class })
-@DecoratedWith(MrDatasetDecorator.class)
+@Mapper(componentModel = "spring", config = DatasetMappingConfig.class)
 public interface MrDatasetMapper {
 
-    /**
-     * Map a @Dataset to a @DatasetDTO.
-     *
-     * @param dataset dataset to map
-     *
-     * @return dataset DTO.
-     */
-    @Named(value = "standard")
-    @Mappings({ @Mapping(target = "source", ignore = true), @Mapping(target = "copies", ignore = true) })
-    MrDatasetDTO datasetToDatasetDTO(MrDataset dataset);
+    //Single entity
 
-    /**
-     * Map a @Dataset to a @DatasetDTO.
-     *
-     * @param dataset dataset to map
-     *
-     * @return dataset DTO.
-     */
-    @Named(value = "withProcessings")
-    @Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
-    @Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
-    MrDatasetWithDependenciesDTO datasetToDatasetAndProcessingsDTO(MrDataset dataset);
+    @Named("idRelations")
+    @InheritConfiguration(name = "datasetToDatasetDTOWithIdRelationsPrototype")
+    @Mapping(target = "echoTime", expression = "java(null)")
+    @Mapping(target = "flipAngle", expression = "java(null)")
+    @Mapping(target = "inversionTime", expression = "java(null)")
+    @Mapping(target = "repetitionTime", expression = "java(null)")
+    MrDatasetDTO mrDatasetToMrDatasetDTOWithIdRelations(MrDataset dataset);
 
-    /**
-     * Map a @Dataset to a @DatasetDTO.
-     *
-     * @param datasets datasets to map
-     *
-     * @return dataset DTO.
-     */
-    @IterableMapping(qualifiedByName = "standard")
-    List<MrDatasetDTO> datasetToDatasetDTO(List<MrDataset> datasets);
+    @Named("withProcessingAncestorsAndExamination")
+    @InheritConfiguration(name = "datasetToDatasetDTOWithProcessingAncestorsAndExaminationPrototype")
+    @Mapping(target = "echoTime", expression = "java(null)")
+    @Mapping(target = "flipAngle", expression = "java(null)")
+    @Mapping(target = "inversionTime", expression = "java(null)")
+    @Mapping(target = "repetitionTime", expression = "java(null)")
+    MrDatasetDTO mrDatasetToMrDatasetDTOWithProcessingAncestorsAndExamination(MrDataset dataset);
 
-    /**
-     * Map a @Dataset to a @DatasetDTO.
-     *
-     * @param page paged dataset to map
-     *
-     * @return dataset DTO.
-     */
-    @IterableMapping(qualifiedByName = "standard")
-    PageImpl<MrDatasetDTO> datasetToDatasetDTO(Page<MrDataset> page);
+    @Named("withMetadata")
+    @InheritConfiguration(name = "datasetToDatasetDTOWithMetadataPrototype")
+    @Mapping(target = "echoTime", expression = "java(null)")
+    @Mapping(target = "flipAngle", expression = "java(null)")
+    @Mapping(target = "inversionTime", expression = "java(null)")
+    @Mapping(target = "repetitionTime", expression = "java(null)")
+    MrDatasetDTO mrDatasetToMrDatasetDTOWithMetadata(MrDataset dataset);
 
-    /**
-     * Map a @Dataset to a @IdNameDTO.
-     *
-     * @param dataset dataset to map.
-     *
-     * @return dataset DTO.
-     */
-    IdName datasetToIdNameDTO(MrDataset dataset);
+    ////// Pageable
 
-    default List<Long> mapCopiesFromDataset(List<Dataset> copies) {
-        if (copies == null) {
-            return null;
-        }
-        return copies.stream()
-                .map(Dataset::getId)
-                .collect(Collectors.toList());
-    }
-
-    default Long mapSourceFromDataset(Dataset source) {
-        return source != null ? source.getId() : null;
-    }
+    @IterableMapping(qualifiedByName = "idRelations")
+    PageImpl<MrDatasetDTO> mrDatasetPageToMrDatasetDTOPage(Page<MrDataset> page);
 }

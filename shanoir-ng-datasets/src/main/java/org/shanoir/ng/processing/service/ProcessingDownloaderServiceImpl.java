@@ -191,7 +191,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
     protected String getProcessingSubject(DatasetProcessing processing) throws EntityNotFoundException {
         Examination exam = null;
         for (Dataset dataset : processing.getInputDatasets()) {
-            Dataset loadedDataset = datasetRepository.findByIdWithProcessingAncestorsAndExamination(dataset.getId()).orElseThrow(() -> new EntityNotFoundException(DatasetProcessing.class, processing.getId()));
+            Dataset loadedDataset = datasetRepository.findByIdWithProcessingAncestorsAndExaminationAndMetadata(dataset.getId()).orElseThrow(() -> new EntityNotFoundException(DatasetProcessing.class, processing.getId()));
             exam = Optional.ofNullable(loadedDataset)
                     .map(Dataset::getDatasetAcquisition)
                     .map(DatasetAcquisition::getExamination)

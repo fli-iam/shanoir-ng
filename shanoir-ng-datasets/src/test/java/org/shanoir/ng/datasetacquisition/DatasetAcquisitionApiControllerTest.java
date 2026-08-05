@@ -96,7 +96,7 @@ public class DatasetAcquisitionApiControllerTest {
     private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
 
     @MockBean
-    private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
+    private DatasetAcquisitionWithDatasetsMapper dsAcqDsMapper;
 
     @MockBean
     private SolrService solrService;

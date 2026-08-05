@@ -154,7 +154,7 @@ public class DatasetApiController implements DatasetApi {
     public ResponseEntity<Void> deleteDataset(
             final Long datasetId, final boolean deleteEmptyAcquisitions) throws EntityNotFoundException, RestServiceException {
         try {
-            Dataset ds = datasetService.findById(datasetId);
+            Dataset ds = datasetService.findByIdWithProcessingAncestorsAndExaminationAndMetadata(datasetId);
             if (ds == null) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
@@ -235,18 +235,18 @@ public class DatasetApiController implements DatasetApi {
     public ResponseEntity<DatasetDTO> findDatasetById(
             final Long datasetId) throws EntityNotFoundException {
 
-        final Dataset dataset = datasetService.findById(datasetId);
+        final Dataset dataset = datasetService.findByIdWithProcessingAncestorsAndExaminationAndMetadata(datasetId);
 
         if (dataset == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         if (dataset instanceof MrDataset) {
-            return new ResponseEntity<>(mrDatasetMapper.datasetToDatasetAndProcessingsDTO((MrDataset) dataset), HttpStatus.OK);
+            return new ResponseEntity<>(mrDatasetMapper.mrDatasetToMrDatasetDTOWithProcessingAncestorsAndExamination((MrDataset) dataset), HttpStatus.OK);
         } else if (dataset instanceof EegDataset) {
-            return new ResponseEntity<>(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset), HttpStatus.OK);
+            return new ResponseEntity<>(eegDatasetMapper.eegDatasetToEegDatasetDTOWithProcessingAncestorsAndExamination((EegDataset) dataset), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(datasetMapper.datasetLightToDatasetLightDTO(dataset), HttpStatus.OK);
+            return new ResponseEntity<>(datasetMapper.datasetToDatasetDTOWithProcessingAncestorsAndExamination(dataset), HttpStatus.OK);
         }
     }
 
@@ -273,7 +273,7 @@ public class DatasetApiController implements DatasetApi {
         if (datasets.getContent().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+        return new ResponseEntity<>(datasetMapper.datasetPageToDatasetIdRelationsDTOPage(datasets), HttpStatus.OK);
     }
 
     @Override
@@ -296,7 +296,7 @@ public class DatasetApiController implements DatasetApi {
         if (datasets.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+            return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOListWithMetadata(datasets), HttpStatus.OK);
         }
     }
 
@@ -306,7 +306,7 @@ public class DatasetApiController implements DatasetApi {
         if (datasets.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+            return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOListWithProcessingAncestorsAndExamination(datasets), HttpStatus.OK);
         }
     }
 
@@ -316,7 +316,7 @@ public class DatasetApiController implements DatasetApi {
         if (datasets.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+            return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOListWithMetadata(datasets), HttpStatus.OK);
         }
     }
 
@@ -341,12 +341,12 @@ public class DatasetApiController implements DatasetApi {
     public ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectId(
             Long subjectId) {
         List<Dataset> datasets = datasetRepository.findBySubjectId(subjectId);
-        return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+        return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetListToDatasetDTOListWithMetadata(datasets), HttpStatus.OK);
     }
 
     @Override
     public void downloadDatasetById(final Long datasetId, final Long converterId, final String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException {
-        Dataset dataset = this.datasetService.findById(datasetId);
+        Dataset dataset = this.datasetService.findByIdWithDatasetFilesAndExaminationAndMetadata(datasetId);
         if (dataset == null) {
             throw new EntityNotFoundException(Dataset.class, datasetId);
         }
@@ -388,7 +388,7 @@ public class DatasetApiController implements DatasetApi {
         }
 
         // STEP 1: Retrieve all datasets all in one with only the one we can see
-        List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
+        List<Dataset> datasets = datasetRepository.findByIdsWithDatasetFilesAndExaminationAndMetadata(datasetIds);
 
         datasetDownloaderService.massiveDownload(format, datasets, response, false, converterId, false, sortingForProcessingOutputs);
     }
@@ -401,7 +401,7 @@ public class DatasetApiController implements DatasetApi {
                     new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid study id."));
         }
         // STEP 1: Retrieve all datasets all in one with only the one we can see
-        List<Dataset> datasets = datasetService.findByStudyId(studyId);
+        List<Dataset> datasets = datasetService.findByStudyIdWithDatasetFilesAndExaminationAndMetadata(studyId);
         int size = datasets.size();
 
         if (size > DATASET_LIMIT) {
@@ -420,7 +420,7 @@ public class DatasetApiController implements DatasetApi {
                     new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid examination id."));
         }
         // STEP 1: Retrieve all datasets all in one
-        List<Dataset> datasets = datasetService.findByExaminationId(examinationId);
+        List<Dataset> datasets = datasetService.findByExaminationIdWithDatasetFilesAndExaminationAndMetadata(examinationId);
 
         int size = datasets.size();
 
@@ -441,7 +441,7 @@ public class DatasetApiController implements DatasetApi {
                     new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid acquisition id."));
         }
         // STEP 1: Retrieve all datasets all in one
-        List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
+        List<Dataset> datasets = datasetService.findByAcquisitionIdWithDatasetFilesAndExaminationAndMetadata(acquisitionId);
         int size = datasets.size();
 
         if (size > DATASET_LIMIT) {

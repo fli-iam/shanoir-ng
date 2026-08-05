@@ -145,6 +145,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     }
                                     @default {
                                         <input type="text" formControlName="rank" />
+                                        @if (hasError('rank', ['pattern'])) {
+                                            <label class="form-validation-alert" i18n>Only digits.</label>
+                                        }
                                     }
                                 }
                             </span>

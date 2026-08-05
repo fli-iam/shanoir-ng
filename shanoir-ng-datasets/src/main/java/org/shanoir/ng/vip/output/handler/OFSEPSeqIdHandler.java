@@ -329,10 +329,11 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             JSONObject serie = series.getJSONObject(i);
             Long serieId = serie.getLong(ID);
 
-            List<Dataset> datasets = processingResourceRepository.findDatasetsByResourceId(resourceId)
-                        .stream().filter(ds -> ds.getDatasetAcquisition() != null
-                                && ds.getDatasetAcquisition().getId().equals(serieId))
-                        .collect(Collectors.toList());
+
+            List<Dataset> datasets = datasetRepository.findByResourceId(resourceId)
+                    .stream().filter(ds -> ds.getDatasetAcquisition() != null
+                            && ds.getDatasetAcquisition().getId().equals(serieId))
+                    .collect(Collectors.toList());
 
             if (datasets.isEmpty()) {
                 LOG.error("No dataset found for serie/acquisition [" + serieId + "]");

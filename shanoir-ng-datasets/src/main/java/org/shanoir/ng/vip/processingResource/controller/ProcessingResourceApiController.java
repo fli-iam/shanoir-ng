@@ -18,6 +18,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -48,6 +49,9 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
     private ProcessingResourceRepository processingResourceRepository;
 
     @Autowired
+    private DatasetRepository  datasetRepository;
+
+    @Autowired
     private HikariDataSource dataSource;
 
     private static final AtomicInteger NUMBER_OF_DOWNLOAD = new AtomicInteger(0);
@@ -66,7 +70,7 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                     return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
                 case "content":
                     printStats(completePath);
-                    List<Dataset> datasets = processingResourceRepository.findDatasetsByResourceId(completePath);
+                    List<Dataset> datasets = datasetRepository.findByResourceIdWithDatasetExpression(completePath);
                     NUMBER_OF_DOWNLOAD.incrementAndGet();
                     if (datasets.isEmpty()) {
                         LOG.error("No dataset found for resource id [{}]", completePath);

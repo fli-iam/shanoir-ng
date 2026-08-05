@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
-import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.shared.dto.FileEntryDTO;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -108,7 +107,7 @@ public interface ExaminationApi {
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/subject/{subjectId}/study/{studyId}", produces = { "application/json" })
-    ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
+    ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectIdStudyId(
             @Parameter(description = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
