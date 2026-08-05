@@ -164,7 +164,7 @@ public class QualityCardApiController implements QualityCardApi {
         try {
             results = cardProcessingService.applyQualityCardOnStudy(qualityCard, true);
         } catch (PacsException e) {
-            LOG.error("Error during PACS communication while applying quality card on study", e);
+            LOG.error(PACS_COMMUNICATION_ERROR, e);
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, null));
         }
@@ -184,7 +184,7 @@ public class QualityCardApiController implements QualityCardApi {
         try {
             results = cardProcessingService.applyQualityCardOnStudy(qualityCard, false);
         } catch (PacsException e) {
-            LOG.error("Error during PACS communication while applying quality card on study", e);
+            LOG.error(PACS_COMMUNICATION_ERROR, e);
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, e));
         }
@@ -206,7 +206,7 @@ public class QualityCardApiController implements QualityCardApi {
         try {
             results = cardProcessingService.applyQualityCardOnStudy(qualityCard, start, stop);
         } catch (PacsException e) {
-            LOG.error("Error during PACS communication while applying quality card on study", e);
+            LOG.error(PACS_COMMUNICATION_ERROR, e);
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), PACS_COMMUNICATION_ERROR, e));
         }
