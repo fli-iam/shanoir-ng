@@ -301,7 +301,7 @@ public interface ShanoirMetadataRepositoryCustom {
             + "             FROM input_of_dataset_processing inputs "
             + "             LEFT JOIN dataset d2 ON d2.id = inputs.dataset_id "
             + "             LEFT JOIN dataset_acquisition da ON da.id = d2.dataset_acquisition_id "
-            + "             LEFT JOIN examination e ON e.id = a.examination_id "
+            + "             LEFT JOIN examination e ON e.id = da.examination_id "
             + "             GROUP BY inputs.processing_id) reuse ON reuse.processing_id = proc.id "
             + ", dataset_metadata dm "
             + "WHERE d.origin_metadata_id = dm.id "
