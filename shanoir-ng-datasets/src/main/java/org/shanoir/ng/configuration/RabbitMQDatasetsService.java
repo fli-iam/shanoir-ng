@@ -525,7 +525,7 @@ public class RabbitMQDatasetsService {
 
                 LOG.info("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
                 int t3Start = (int) System.currentTimeMillis();
-                boolean dsExists = datasetRepository.existsBySourceIdAndStudyId(datasetParentId, studyId);
+                boolean dsExists = datasetRepository.existsBySourceIdAndStudyId(datasetParentId, studyId) != 0;
                 t3 = (int) System.currentTimeMillis() - t3Start;
 
                 if (dsExists) {
