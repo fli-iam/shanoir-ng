@@ -146,16 +146,17 @@ public class ImporterService {
             event.setProgress(1f);
             event.setStatus(ShanoirEvent.SUCCESS);
 
-            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-                    + " Successfully created datasets for subject [" + importJob.getSubjectName()
-                    + "] in examination [" + examination.getId() + "]");
-            eventService.publishEvent(event);
-
             List<Long> createdDatasetIds = generatedAcquisitions == null ? List.of()
                     : generatedAcquisitions.stream()
                         .flatMap(a -> a.getDatasets().stream())
                         .map(Dataset::getId)
                         .toList();
+
+            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
+                    + " Successfully created " + createdDatasetIds.size() + " dataset(s) for subject [" + importJob.getSubjectName()
+                    + "] in examination [" + examination.getId() + "]");
+            eventService.publishEvent(event);
+
             datasetsImportStatusService.markFinished(importJob.getExaminationId(), createdDatasetIds);
 
             // Manage archive

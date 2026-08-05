@@ -182,6 +182,9 @@ public class ImporterServiceTest {
         examination.getStudy().setId(1L);
         examination.getStudy().setSubjectStudyList(new ArrayList<>());
         DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
+        org.shanoir.ng.dataset.modality.GenericDataset createdDataset = new org.shanoir.ng.dataset.modality.GenericDataset();
+        createdDataset.setId(100L);
+        datasetAcq.setDatasets(Utils.toList(createdDataset));
 
         ExaminationData examData = new ExaminationData(examination);
 
@@ -207,6 +210,7 @@ public class ImporterServiceTest {
             when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
             when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(qualityCard)); // TODO perform quality card tests
             when(qualityService.checkQuality(Mockito.eq(datasetAcq), Mockito.eq(acquisitionAttributes), Mockito.eq(Utils.toList(qualityCard)))).thenReturn(qualityResult);
+            when(datasetAcquisitionService.createAll(any())).thenReturn(Utils.toList(datasetAcq));
 
             // WHEN we treat this importjob
             service.createAllDatasetAcquisition(importJob, 1L);
@@ -221,7 +225,7 @@ public class ImporterServiceTest {
             assertTrue(task.getStatus() == 1);
             // NOTE: This test is important as we use the message to send an mail to study admin further.
             // PLEASE do not change sucess message OR change it accordingly in emailServiceImpl.
-            assertEquals("[studyName (n°1)] Successfully created datasets for subject [subjectName] in examination [2]", task.getMessage());
+            assertEquals("[studyName (n°1)] Successfully created 1 dataset(s) for subject [subjectName] in examination [2]", task.getMessage());
 
             // THEN datasets are created
             // Check what we save at the end
