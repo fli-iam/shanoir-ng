@@ -184,7 +184,7 @@ public class QualityCardApiController implements QualityCardApi {
         if (qualityCard == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
+        LOG.info("Test quality card: name: " + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
         QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, start, stop);
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
