@@ -365,7 +365,7 @@ public class DicomSEGAndSRImporterService {
         newMsOrSegDataset.setCreationDate(LocalDate.now());
         // record the annotator as owner, but only when imported with the CAN_ANNOTATE right
         if (canAnnotate) {
-            newMsOrSegDataset.setUsername(KeycloakUtil.getTokenUserName());
+            newMsOrSegDataset.setUserId(KeycloakUtil.getTokenUserId());
         }
         // for rights check: keep link to original acquisition
         newMsOrSegDataset.setDatasetAcquisition(dataset.getDatasetAcquisition());
