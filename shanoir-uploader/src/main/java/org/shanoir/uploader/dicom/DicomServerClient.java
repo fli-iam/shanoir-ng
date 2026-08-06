@@ -178,5 +178,12 @@ public class DicomServerClient implements IDicomServerClient {
     public File getWorkFolder() {
         return workFolder;
     }
+    
+    /**
+     * Stops the local DICOM SCP server (mini-pacs) started by this client.
+     */
+    public void stopSCPServer() {
+        dcmRcvManager.stopSCPServer();
+    }
 
 }
