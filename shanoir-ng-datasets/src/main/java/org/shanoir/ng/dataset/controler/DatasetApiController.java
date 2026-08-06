@@ -288,6 +288,7 @@ public class DatasetApiController implements DatasetApi {
     @Override
     public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId, Boolean output) {
         List<Dataset> datasets;
+
         if (output) {
             datasets = datasetService.findDatasetAndOutputByExaminationId(examinationId);
         } else {

@@ -70,7 +70,7 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                     return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
                 case "content":
                     printStats(completePath);
-                    List<Dataset> datasets = datasetRepository.findByResourceIdWithDatasetExpression(completePath);
+                    List<Dataset> datasets = datasetRepository.findByResourceIdWithDatasetFiles(completePath);
                     NUMBER_OF_DOWNLOAD.incrementAndGet();
                     if (datasets.isEmpty()) {
                         LOG.error("No dataset found for resource id [{}]", completePath);

@@ -303,10 +303,10 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     List<Dataset> findByStudyCardIdAndStudyIdsWithProcessingAncestorsAndExamination(Long studyCardId, List<Long> studyIds);
 
     @Query("SELECT dataset FROM Dataset dataset "
-            + "JOIN FETCH dataset.datasetProcessing AS dp "
-            + "JOIN FETCH dp.inputDatasets "
-            + "JOIN FETCH dataset.datasetAcquisition AS acq "
-            + "JOIN FETCH acq.examination e "
+            + "LEFT JOIN FETCH dataset.datasetProcessing AS dp "
+            + "LEFT JOIN FETCH dp.inputDatasets "
+            + "LEFT JOIN FETCH dataset.datasetAcquisition AS acq "
+            + "LEFT JOIN FETCH acq.examination e "
             + "WHERE e.id = :examinationId")
     List<Dataset> findByExaminationIdWithProcessingAncestorsAndExamination(Long examinationId);
 
@@ -441,6 +441,17 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     @Transactional(readOnly = true)
     default List<Dataset> findByIdsWithDatasetFilesAndExaminationAndMetadata(List<Long> ids) {
         List<Dataset> datasets = findByIdsWithDatasetExpression(ids);
+        datasets.forEach(d ->
+                d.getDatasetExpressions().forEach(de -> {
+                    Hibernate.initialize(de.getDatasetFiles());
+                })
+        );
+        return datasets;
+    }
+
+    @Transactional(readOnly = true)
+    default List<Dataset> findByResourceIdWithDatasetFiles(String id) {
+        List<Dataset> datasets = findByResourceIdWithDatasetExpression(id);
         datasets.forEach(d ->
                 d.getDatasetExpressions().forEach(de -> {
                     Hibernate.initialize(de.getDatasetFiles());
