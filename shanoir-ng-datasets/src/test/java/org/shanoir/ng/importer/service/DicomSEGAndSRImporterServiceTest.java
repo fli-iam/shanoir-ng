@@ -74,6 +74,8 @@ public class DicomSEGAndSRImporterServiceTest {
 
     private static final String USER_NAME = "testUser";
 
+    private static final Long USER_ID = 42L;
+
     private static final String STUDY_INSTANCE_UID = "1.2.840.113619.2.1.1";
 
     private static final String SERIES_INSTANCE_UID = "1.2.840.113619.2.1.2";
@@ -202,23 +204,24 @@ public class DicomSEGAndSRImporterServiceTest {
     }
 
     @Test
-    public void importDicomSEGAndSRAssignsUsernameWithCanAnnotateRight() throws Exception {
+    public void importDicomSEGAndSRAssignsUserIdWithCanAnnotateRight() throws Exception {
         wireSourceDatasetAndSegReferences();
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(true);
         when(datasetService.create(any())).thenAnswer(invocation -> invocation.getArgument(0));
         ArgumentCaptor<Dataset> datasetCaptor = ArgumentCaptor.forClass(Dataset.class);
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(USER_NAME);
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserId).thenReturn(USER_ID);
             boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, "SEG", true);
             assertTrue(result);
         }
         verify(datasetService).create(datasetCaptor.capture());
         // The annotator is recorded as the owner of the created annotation dataset
-        assertEquals(USER_NAME, datasetCaptor.getValue().getUsername());
+        assertEquals(USER_ID, datasetCaptor.getValue().getUserId());
     }
 
     @Test
-    public void importDicomSEGAndSRAssignsUsernameWithCanAnnotateReviewRight() throws Exception {
+    public void importDicomSEGAndSRAssignsUserIdWithCanAnnotateReviewRight() throws Exception {
         wireSourceDatasetAndSegReferences();
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(true);
@@ -226,16 +229,17 @@ public class DicomSEGAndSRImporterServiceTest {
         ArgumentCaptor<Dataset> datasetCaptor = ArgumentCaptor.forClass(Dataset.class);
         try (MockedStatic<KeycloakUtil> keycloakUtilMock = Mockito.mockStatic(KeycloakUtil.class)) {
             keycloakUtilMock.when(KeycloakUtil::getTokenUserName).thenReturn(USER_NAME);
+            keycloakUtilMock.when(KeycloakUtil::getTokenUserId).thenReturn(USER_ID);
             boolean result = dicomSEGAndSRImporterService.importDicomSEGAndSR(metaInformationAttributes, datasetAttributes, "SEG", true);
             assertTrue(result);
         }
         verify(datasetService).create(datasetCaptor.capture());
         // The reviewer-annotator is recorded as the owner of the created annotation dataset
-        assertEquals(USER_NAME, datasetCaptor.getValue().getUsername());
+        assertEquals(USER_ID, datasetCaptor.getValue().getUserId());
     }
 
     @Test
-    public void importDicomSEGAndSRDoesNotAssignUsernameWithCanImportRightOnly() throws Exception {
+    public void importDicomSEGAndSRDoesNotAssignUserIdWithCanImportRightOnly() throws Exception {
         wireSourceDatasetAndSegReferences();
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
@@ -246,11 +250,11 @@ public class DicomSEGAndSRImporterServiceTest {
         assertTrue(result);
         verify(datasetService).create(datasetCaptor.capture());
         // A CAN_IMPORT-only import does not record an annotator
-        assertNull(datasetCaptor.getValue().getUsername());
+        assertNull(datasetCaptor.getValue().getUserId());
     }
 
     @Test
-    public void importDicomSEGAndSRDoesNotAssignUsernameWithCanAdministrateRightOnly() throws Exception {
+    public void importDicomSEGAndSRDoesNotAssignUserIdWithCanAdministrateRightOnly() throws Exception {
         wireSourceDatasetAndSegReferences();
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE.name())).thenReturn(false);
         when(datasetSecurityService.hasRightOnStudy(STUDY_ID, StudyUserRight.CAN_ANNOTATE_REVIEW.name())).thenReturn(false);
@@ -262,7 +266,7 @@ public class DicomSEGAndSRImporterServiceTest {
         assertTrue(result);
         verify(datasetService).create(datasetCaptor.capture());
         // A study-administrator import behaves like CAN_IMPORT: no annotator is recorded
-        assertNull(datasetCaptor.getValue().getUsername());
+        assertNull(datasetCaptor.getValue().getUserId());
     }
 
     /**
