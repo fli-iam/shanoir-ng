@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -46,8 +47,11 @@ import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Subject;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.check.DicomInstanceConsistencyChecker;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
@@ -452,48 +456,34 @@ public abstract class AbstractImportTest extends AbstractTest {
         return uids;
     }
 
-    // -------------------------------------------------------------------
-    // Quality-card helpers
-    //
-    // Shared by both ImportWithStudyCardTests#testQualityCard and
-    // ImportWithoutStudyCardTests#testQualityCard: a quality card is a
-    // per-study construct independent of the study-card policy, so the
-    // exact same creation/apply/dry-run-test helpers work for a study with
-    // or without study cards - only the target Study instance differs.
-    //
-    // NOTE: this builds a minimal QualityCard (name + studyId only). The
-    // QualityCard model itself (rules/conditions it evaluates) was not part
-    // of the provided sources, so if QualityCard requires further mandatory
-    // fields to be persisted/evaluated meaningfully, extend
-    // buildMinimalQualityCard() accordingly.
-    // -------------------------------------------------------------------
+    /**
+     * Builds a rule with no conditions, i.e. one that unconditionally tags
+     * every examination/subject it is evaluated against with {@code tag}
+     * (the "Always" mode in the GUI).
+     */
+    protected QualityExaminationRule buildAlwaysFiringRule(QualityTag tag) {
+        QualityExaminationRule rule = new QualityExaminationRule();
+        rule.setQualityTag(tag);
+        rule.setOrConditions(false);
+        return rule;
+    }
 
-    protected QualityCard buildMinimalQualityCard(Study study, String namePrefix) {
+    protected QualityCard createQualityCardForStudy(Study study, String namePrefix, QualityTag tag,
+            boolean toCheckAtImport) {
         QualityCard qualityCard = new QualityCard();
         qualityCard.setName(namePrefix + UUID.randomUUID());
         qualityCard.setStudyId(study.getId());
-        return qualityCard;
-    }
+        qualityCard.setToCheckAtImport(toCheckAtImport);
+        qualityCard.setRules(new ArrayList<>(List.of(buildAlwaysFiringRule(tag))));
 
-    /**
-     * Creates the quality card on the server and asserts it was persisted.
-     */
-    protected QualityCard createQualityCardForStudy(Study study, String namePrefix) {
-        QualityCard qualityCard = buildMinimalQualityCard(study, namePrefix);
         QualityCard created = expertClient.createQualityCard(qualityCard);
         Assertions.assertNotNull(created, "Quality card could not be created.");
         Assertions.assertNotNull(created.getId(), "Created quality card has no id.");
-        logger.info("Quality card {} ({}) created for study {}.", created.getName(), created.getId(),
-                study.getId());
+        logger.info("Quality card {} ({}, toCheckAtImport={}) created for study {}.", created.getName(),
+                created.getId(), toCheckAtImport, study.getId());
         return created;
     }
 
-    /**
-     * "Run in ShUp on the client side": a dry-run evaluation of the quality
-     * card, as a user would trigger manually from the ShUp GUI to preview the
-     * outcome before actually applying it. Does not mutate anything
-     * server-side (mirrors {@code QualityCardApiController#testQualityCardOnStudy}).
-     */
     protected QualityCardResult testQualityCardOnStudyDryRun(Long qualityCardId) throws Exception {
         QualityCardResult result = expertClient.testQualityCardOnStudy(qualityCardId);
         Assertions.assertNotNull(result, "Client-side (dry-run) quality card test returned no result.");
@@ -501,16 +491,42 @@ public abstract class AbstractImportTest extends AbstractTest {
         return result;
     }
 
-    /**
-     * "Run at the end of the import in ms-datasets": the real application of
-     * the quality card against the study's (already imported) datasets
-     * (mirrors {@code QualityCardApiController#applyQualityCardOnStudy}).
-     */
     protected QualityCardResult applyQualityCardOnStudyForReal(Long qualityCardId) throws Exception {
         QualityCardResult result = expertClient.applyQualityCardOnStudy(qualityCardId);
         Assertions.assertNotNull(result, "Server-side quality card application returned no result.");
         logger.info("Server-side quality card application completed for quality card {}.", qualityCardId);
         return result;
+    }
+
+    protected QualityCardResultEntry findEntryForSubject(QualityCardResult result, String subjectName) {
+        Assertions.assertNotNull(subjectName, "subjectName to search for must not be null.");
+        for (QualityCardResultEntry entry : result) {
+            if (subjectName.equals(entry.getSubjectName())) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Asserts that {@code result} contains an entry for {@code subjectName}
+     * and that it was tagged as expected, i.e. that the quality card was
+     * actually evaluated against that specific subject/examination and not
+     * just returned an unrelated/empty result.
+     */
+    protected QualityCardResultEntry assertQualityCardWasAppliedToSubject(QualityCardResult result,
+            String subjectName, QualityTag expectedTag, String label) {
+        Assertions.assertNotNull(result, "[" + label + "] quality card result was null.");
+        Assertions.assertFalse(result.isEmpty(), "[" + label + "] quality card result has no entries at all.");
+        QualityCardResultEntry entry = findEntryForSubject(result, subjectName);
+        Assertions.assertNotNull(entry, "[" + label + "] quality card result did not include subject "
+                + subjectName + ".");
+        Assertions.assertEquals(expectedTag, entry.getTagSet(),
+                "[" + label + "] quality card result for subject " + subjectName
+                        + " did not carry the expected tag.");
+        logger.info("[{}] quality card result for subject {} carried tag {} as expected.", label, subjectName,
+                entry.getTagSet());
+        return entry;
     }
 
 }
