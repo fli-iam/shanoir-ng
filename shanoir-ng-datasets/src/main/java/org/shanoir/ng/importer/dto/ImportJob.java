@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.dto;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.quality.QualityTag;
@@ -38,8 +39,6 @@ public class ImportJob implements Serializable {
 
     private String workFolder;
 
-    private List<Patient> patients;
-
     private Long examinationId;
 
     private Long studyCardId;
@@ -49,8 +48,6 @@ public class ImportJob implements Serializable {
     private String studyCardName;
 
     private Long acquisitionEquipmentId;
-
-    private String anonymisationProfileToUse;
 
     private Long converterId;
 
@@ -69,6 +66,10 @@ public class ImportJob implements Serializable {
     private QualityTag qualityTag;
 
     private String studyInstanceUID;
+
+    private Study study;
+
+    private List<Serie> series;
 
     public long getTimestamp() {
         return timestamp;
@@ -127,14 +128,6 @@ public class ImportJob implements Serializable {
 
     }
 
-    public List<Patient> getPatients() {
-        return patients;
-    }
-
-    public void setPatients(final List<Patient> patients) {
-        this.patients = patients;
-    }
-
     public Long getExaminationId() {
         return examinationId;
     }
@@ -191,14 +184,6 @@ public class ImportJob implements Serializable {
         this.converterId = converterId;
     }
 
-    public String getAnonymisationProfileToUse() {
-        return anonymisationProfileToUse;
-    }
-
-    public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
-        this.anonymisationProfileToUse = anonymisationProfileToUse;
-    }
-
     public String getStudyInstanceUID() {
         return studyInstanceUID;
     }
@@ -240,25 +225,31 @@ public class ImportJob implements Serializable {
     }
 
     public Serie getFirstSerie() {
-        if (getPatients() == null || getPatients().size() == 0
-                || getPatients().get(0) == null
-                || getPatients().get(0).getStudies() == null || getPatients().get(0).getStudies().size() == 0
-                || getPatients().get(0).getStudies().get(0) == null
-                || getPatients().get(0).getStudies().get(0).getSeries() == null || getPatients().get(0).getStudies().get(0).getSeries().size() == 0) {
+        if (getSeries() == null || getSeries().size() == 0) {
             return null;
         } else {
-            return getPatients().get(0).getStudies().get(0).getSeries().get(0);
+            return getSeries().get(0);
         }
     }
 
-    public Study getFirstStudy() {
-        if (getPatients() == null
-                || getPatients().get(0) == null
-                || getPatients().get(0).getStudies() == null) {
-            return null;
-        } else {
-            return getPatients().get(0).getStudies().get(0);
-        }
+    public Study getStudy() {
+        return study;
+    }
+
+    public void setStudy(Study study) {
+        this.study = study;
+    }
+
+    public List<Serie> getSeries() {
+        return series;
+    }
+
+    public List<Serie> getSelectedSeries() {
+        return series.stream().filter(s -> s.getSelected() != null && s.getSelected()).collect(Collectors.toList());
+    }
+
+    public void setSeries(List<Serie> series) {
+        this.series = series;
     }
 
 }

@@ -26,6 +26,9 @@ import org.hibernate.Hibernate;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -96,22 +99,39 @@ public class SubjectServiceImpl implements SubjectService {
     @Autowired
     private StudyExaminationRepository studyExaminationRepository;
 
+    @Autowired
+    private ShanoirEventService eventService;
+
     private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
     @Override
     @Transactional
     public void deleteById(final Long id) throws EntityNotFoundException {
-        Optional<Subject> subject = subjectRepository.findById(id);
-        if (subject.isEmpty()) {
+        Optional<Subject> subjectOpt = subjectRepository.findById(id);
+        if (subjectOpt.isEmpty()) {
             throw new EntityNotFoundException(Subject.class, id);
         }
+
+        Subject subject = subjectOpt.get();
+        ShanoirEvent event = publishSubjectEvent(subject, ShanoirEventType.DELETE_SUBJECT_EVENT);
+
         // Delete all associated study_examination
         studyExaminationRepository.deleteBySubjectId(id);
-        subject.get().getTags().clear();
+        subject.getTags().clear();
         subjectRepository.deleteById(id);
-        if (subject.get().isPreclinical())
+        if (subject.isPreclinical())
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, id.toString());
-        rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, id.toString());
+
+        // The event is sent instead of the sole subject id, so that ms datasets knows which user
+        // asked for the deletion and can historize the deletions it cascades in the study.
+        try {
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_SUBJECT_QUEUE,
+                    objectMapper.writeValueAsString(event));
+        } catch (JsonProcessingException e) {
+            LOG.error("Could not request the deletion of the data of subject {}", id, e);
+            throw new IllegalStateException(
+                    "Error while communicating with MS Datasets to delete subject " + id, e);
+        }
     }
 
     @Override
@@ -190,6 +210,7 @@ public class SubjectServiceImpl implements SubjectService {
         } catch (DataIntegrityViolationException e) {
             throw new ShanoirException("Subject with the same name already exists in the study.", HttpStatus.CONFLICT.value());
         }
+
         LOG.info("New subject created with ID: {} and Name: {}", subjectDb.getId(), subjectDb.getName());
         if (withAMQP) {
             try {
@@ -198,6 +219,8 @@ public class SubjectServiceImpl implements SubjectService {
                 LOG.error("Unable to propagate subject creation to microservices: ", e);
             }
         }
+
+        publishSubjectEvent(subjectDb, ShanoirEventType.CREATE_SUBJECT_EVENT);
         return subjectDb;
     }
 
@@ -225,6 +248,8 @@ public class SubjectServiceImpl implements SubjectService {
                 LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
             }
         }
+
+        publishSubjectEvent(subjectDb, ShanoirEventType.CREATE_SUBJECT_EVENT);
         return subjectDb;
     }
 
@@ -273,6 +298,7 @@ public class SubjectServiceImpl implements SubjectService {
         subjectOld = updateSubjectValues(subjectOld, subjectNew);
         subjectOld = subjectRepository.save(subjectOld);
         updateSubjectInMicroservices(subjectMapper.subjectToSubjectDTO(subjectOld));
+        publishSubjectEvent(subjectOld, ShanoirEventType.UPDATE_SUBJECT_EVENT);
         return subjectOld;
     }
 
@@ -403,4 +429,53 @@ public class SubjectServiceImpl implements SubjectService {
         return this.subjectRepository.existsByStudyIdAndName(studyId, subjectName);
     }
 
+    /**
+     * Use this method to publish historic event related to subjects in a study.
+     *
+     * The deletion event is published as a running task: the examinations, acquisitions and
+     * datasets of the subject are deleted asynchronously by ms datasets, that completes it.
+     *
+     * @param subject the involved subject
+     * @param eventType the type of event
+     * @return the published event
+     */
+    private ShanoirEvent publishSubjectEvent(Subject subject, String eventType) {
+        Study study = subject.getStudy();
+        String eventMsg;
+
+        switch (eventType) {
+            case ShanoirEventType.CREATE_SUBJECT_EVENT:
+                eventMsg = "Subject " + subject.getName() + " (id: " + subject.getId() + ") created";
+                break;
+            case ShanoirEventType.DELETE_SUBJECT_EVENT:
+                eventMsg = "Deleting subject " + subject.getName() + " (id: " + subject.getId() + ")...";
+                break;
+            case ShanoirEventType.UPDATE_SUBJECT_EVENT:
+                eventMsg = "Subject " + subject.getName() + " (id: " + subject.getId() + ") updated";
+                break;
+            default:
+                eventMsg = "Unknown subject event type: "  + eventType;
+        }
+        ShanoirEvent event;
+        if (ShanoirEventType.DELETE_SUBJECT_EVENT.equals(eventType)) {
+            event = new ShanoirEvent(
+                    eventType,
+                    subject.getId().toString(),
+                    KeycloakUtil.getTokenUserId(),
+                    eventMsg,
+                    ShanoirEvent.IN_PROGRESS,
+                    0f,
+                    study.getId());
+        } else {
+            event = new ShanoirEvent(
+                    eventType,
+                    subject.getId().toString(),
+                    KeycloakUtil.getTokenUserId(),
+                    eventMsg,
+                    ShanoirEvent.SUCCESS,
+                    study.getId());
+        }
+        eventService.publishEvent(event);
+        return event;
+    }
 }

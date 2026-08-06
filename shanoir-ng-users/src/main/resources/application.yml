@@ -19,8 +19,8 @@ server:
     whitelabel:
       enabled: false
   display-name: Shanoir
-  notification.name: ${SHANOIR_NOTIFICATION_NAME}
-  notification.email: ${SHANOIR_NOTIFICATION_EMAIL}
+  notification.name: ${SHANOIR_NOTIFICATION_NAME:"Unknown"}
+  notification.email: ${SHANOIR_NOTIFICATION_EMAIL:"Unknown mail"}
 ##### Database #####
 spring:
   datasource:
@@ -96,7 +96,11 @@ front:
   server:
     address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
     url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
-##### Keycloak admin client, that ms users can directly communicate with keycloak #####
+##### Name of this instance, empty unless the owner chose one: the emails are then prefixed with [Shanoir] #####
+shanoir:
+  instance:
+    name: ${SHANOIR_INSTANCE_NAME:}
+##### Keycloak admin client that ms users can directly communicate with keycloak #####
 kc.admin.client:
   server.url: ${SHANOIR_KEYCLOAK_INTERNAL_URL}
   realm: master

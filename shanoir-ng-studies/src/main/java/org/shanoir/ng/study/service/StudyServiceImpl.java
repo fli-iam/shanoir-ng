@@ -37,9 +37,7 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dto.StudyExaminationsDTO.StudyExaminationDTO;
 import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -342,46 +340,19 @@ public class StudyServiceImpl implements StudyService {
             }
         }
 
+        // Update subjects
         if (study.getSubjects() != null) {
-            Set<Long> updatedIds = new HashSet<>();
-            for (Subject subject : study.getSubjects()) {
-                updatedIds.add(subject.getId());
-            }
+            Study oldStudy = studyRepository.findById(study.getId())
+                    .orElseThrow(() -> new EntityNotFoundException(Study.class, study.getId()));
 
-            // A subject belongs to exactly one study: subjects removed from the
-            // study are deleted entirely, as the user was warned in the edit view.
-            List<Subject> removed = new ArrayList<>();
-            for (Subject subjectDb : studyDb.getSubjects()) {
-                if (!updatedIds.contains(subjectDb.getId())) {
-                    removed.add(subjectDb);
-                }
-            }
-            for (Subject subject : removed) {
-                // Detach from the managed collection first, otherwise the
-                // cascade on studyDb would re-save the deleted entity on flush
-                studyDb.getSubjects().remove(subject);
-                subjectService.deleteById(subject.getId());
-
-                eventService.publishEvent(
-                        new ShanoirEvent(
-                                ShanoirEventType.REMOVE_SUBJECT_FROM_STUDY_EVENT,
-                                subject.getId().toString(),
-                                KeycloakUtil.getTokenUserId(),
-                                "Subject " + subject.getName() + " (id: " + subject.getId() + ") removed from study "
-                                        + study.getName() + " (id: " + study.getId() + ")",
-                                ShanoirEvent.SUCCESS,
-                                study.getId()));
-            }
-
-            // Update the remaining subjects (only a few fields can be changed)
             Map<Long, Subject> oldSubjectsMap = new HashMap<>();
-            for (Subject s : studyDb.getSubjects()) {
+            for (Subject s : oldStudy.getSubjects()) {
                 oldSubjectsMap.put(s.getId(), s);
             }
             for (Subject newSubject : study.getSubjects()) {
                 Subject oldSubject = oldSubjectsMap.get(newSubject.getId());
                 if (oldSubject != null && hasSubjectChanged(oldSubject, newSubject)) {
-                    newSubject.setStudy(studyDb);
+                    newSubject.setStudy(study);
                     subjectService.update(newSubject);
                 }
             }

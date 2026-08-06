@@ -171,9 +171,21 @@ public final class ModelsUtil {
     }
 
     public static Subject createSubject() {
+        return createSubject(null);
+    }
+
+    public static Subject createSubject(Long id) {
         final Subject subject = new Subject();
         subject.setName(SUBJECT_NAME);
+        subject.setId(id);
         return subject;
     }
 
+    public static Subject createSubjectWithStudy(Long id) {
+        final Subject subject = new Subject();
+        subject.setName(SUBJECT_NAME);
+        subject.setId(id);
+        subject.setStudy(createStudy(id));
+        return subject;
+    }
 }

@@ -27,7 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.ng.utils.Utils;
@@ -65,7 +65,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 
     private String filePathDicomDir;
 
-    private Map<String, ImportJob> importJobs;
+    private Map<String, ImportJobBase> importJobs;
 
     private JFrame frame;
 
@@ -73,7 +73,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 
     public DownloadOrCopyRunnable(boolean isFromPACS, boolean isTableImport, JFrame frame, JProgressBar downloadProgressBar,
             final IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer,
-            final String filePathDicomDir, Map<String, ImportJob> importJobs) {
+            final String filePathDicomDir, Map<String, ImportJobBase> importJobs) {
         this.isFromPACS = isFromPACS;
         this.isTableImport = isTableImport;
         this.frame = frame;
@@ -92,15 +92,15 @@ public class DownloadOrCopyRunnable implements Runnable {
         StringBuilder downloadOrCopyReportSummary = new StringBuilder();
         for (String studyInstanceUID : importJobs.keySet()) {
             StringBuilder downloadOrCopyReportPerStudy = new StringBuilder();
-            ImportJob importJob = importJobs.get(studyInstanceUID);
+            ImportJobBase importJob = importJobs.get(studyInstanceUID);
             downloadOrCopyReportPerStudy.append("DICOM study: ["
                     + importJob.getStudy().getStudyDate() + "], "
                     + importJob.getStudy().getStudyDescription() + "\n");
             File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(),
                     importJob.getSubject().getIdentifier());
             importJob.setWorkFolder(uploadFolder.getAbsolutePath());
-            List<Serie> selectedSeries = importJob.getSelectedSeries();
-            downloadOrCopyReportPerStudy.append(selectedSeries.size() + " series selected for download or copy.\n\n");
+            List<Serie> series = importJob.getSeries();
+            downloadOrCopyReportPerStudy.append(series.size() + " series selected for download or copy.\n\n");
             List<String> allFileNames = null;
             downloadProgressBar.setValue(0);
             try {
@@ -108,18 +108,18 @@ public class DownloadOrCopyRunnable implements Runnable {
                  * 1. Download from PACS or copy from CD/DVD/local file system
                  */
                 allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(
-                        this.isFromPACS, downloadProgressBar, downloadOrCopyReportPerStudy, studyInstanceUID, selectedSeries,
+                        this.isFromPACS, downloadProgressBar, downloadOrCopyReportPerStudy, studyInstanceUID, series,
                         uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
                 /**
                  * 2. Fill MRI information into all series from first DICOM file of each serie
                  */
-                for (Serie serie : selectedSeries) {
-                    dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), null,
+                for (Serie serie : series) {
+                    dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), importJob.getPatient(),
                             importJob.getStudy(), serie, isFromPACS);
                 }
             } catch (FileNotFoundException e) {
                 LOG.error(e.getMessage(), e);
-                // as exception occured, we set allFileNames to null, to force ERROR state of import
+                // as exception occurred, we set allFileNames to null, to force ERROR state of import
                 allFileNames = null;
             }
 
@@ -175,4 +175,5 @@ public class DownloadOrCopyRunnable implements Runnable {
                     JOptionPane.INFORMATION_MESSAGE);
         }
     }
+
 }

@@ -30,6 +30,7 @@ import org.dcm4che3.emf.MultiframeExtractor;
 import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.importer.model.Image;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
@@ -79,51 +80,45 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
     @Autowired
     private ShanoirEventService eventService;
 
-    public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event, boolean isFromShUpQualityControl)
+    public void createImagesAndAnalyzeDicomFiles(
+            ImportJobBase importJob, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event, boolean isFromShUpQualityControl)
             throws FileNotFoundException {
-        // patient level
-        for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
-            Patient patient = patientsIt.next();
-            // study level
-            List<Study> studies = patient.getStudies();
-            for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-                Study study = studiesIt.next();
-                // serie level
-                List<Serie> series = study.getSeries();
-                int nbSeries = series.size();
-                int cpt = 1;
-                for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
-                    Serie serie = seriesIt.next();
-                    if (!serie.isIgnored()) {
-                        if (event != null) {
-                            event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
-                            eventService.publishEvent(event);
-                        }
-                        try {
-                            filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS, isFromShUpQualityControl);
-                        } catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
-                            handleError(event, nbSeries, cpt, serie, e);
-                        }
-                        if (!serie.isIgnored()) {
-                            // use a second try here, in case error is on serie, to get at least the serie name for error tracing
-                            try {
-                                getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, patient, study, serie, isImportFromPACS);
-                            } catch (Exception e) {
-                                handleError(event, nbSeries, cpt, serie, e);
-                            }
-                        }
-                    }
-                    cpt++;
+        int cpt = 1;
+        int nbSeries = importJob.getSeries().size();
+        for (Iterator<Serie> seriesIt = importJob.getSeries().iterator(); seriesIt.hasNext();) {
+            Serie serie = seriesIt.next();
+            if (!serie.isIgnored()) {
+                if (event != null) {
+                    event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
+                    eventService.publishEvent(event);
                 }
-                /*
-                 * We apply an additional sort here on the series list to base everything on seriesNumbers finally.
-                 * It might happen, while using ShanoirUploader, that some PACS will not share the seriesNumber, so
-                 * we can not correctly sort in ShanoirUploader without going into the files itself, what we do not
-                 * do, therefore we have the ImagesCreatorAndDicomFileAnalyzerService, that is called on the server.
-                 */
-                series.sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
+                try {
+                    filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS, isFromShUpQualityControl);
+                } catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
+                    handleError(event, nbSeries, cpt, serie, e);
+                }
+                if (!serie.isIgnored()) {
+                    // use a second try here, in case error is on serie, to get at least the serie name for error tracing
+                    try {
+                        getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, importJob.getPatient(), importJob.getStudy(), serie, isImportFromPACS);
+                    } catch (Exception e) {
+                        handleError(event, nbSeries, cpt, serie, e);
+                    }
+                }
+                // We clean instances here, as now transformed to images
+                serie.setInstances(null);
             }
+            cpt++;
         }
+        /**
+         * We apply an additional sort here on the series list to base everything on
+         * seriesNumbers finally. It might happen, while using ShanoirUploader, that
+         * some PACS will not share the seriesNumber, so we can not correctly sort in
+         * ShanoirUploader without going into the files itself, what we do not do,
+         * therefore we have the ImagesCreatorAndDicomFileAnalyzerService, that is
+         * called on the server.
+         */
+        importJob.getSeries().sort(new SeriesNumberOrAcquisitionTimeOrDescriptionSorter());
     }
 
     private void handleError(ShanoirEvent event, int nbSeries, int cpt, Serie serie, Exception e) {

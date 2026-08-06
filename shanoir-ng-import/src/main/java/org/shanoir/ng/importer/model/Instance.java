@@ -37,14 +37,6 @@ public class Instance implements Cloneable {
     @JsonProperty("instanceNumber")
     private String instanceNumber;
 
-    // Used in DICOMDIR to hold SOPInstanceUID
-    @JsonProperty("referencedSOPInstanceUIDInFile")
-    private String referencedSOPInstanceUIDInFile;
-
-    // Used in DICOMDIR to hold SOPClassUID
-    @JsonProperty("referencedSOPClassUIDInFile")
-    private String referencedSOPClassUIDInFile;
-
     // Used in DICOMDIR to reference DICOM file
     @JsonProperty("referencedFileID")
     private String[] referencedFileID;
@@ -52,21 +44,28 @@ public class Instance implements Cloneable {
     public Instance() { }
 
     public Instance(Attributes attributes) {
+        sopClassUID = attributes.getString(Tag.SOPClassUID);
+        if (sopClassUID == null) {
+            // Applies to reading a DICOMDIR, not Q/R
+            // Used in DICOMDIR to hold SOPClassUID
+            String referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
+            if (referencedSOPClassUIDInFile != null) {
+                sopClassUID = referencedSOPClassUIDInFile;
+            }
+        }
         sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
-        // try to remove confusing spaces, in case DICOM server sends them wrongly
+        if (sopInstanceUID == null) {
+            // Applies to reading a DICOMDIR, not Q/R
+            // Used in DICOMDIR to hold SOPInstanceUID
+            String referencedSOPInstanceUIDInFile = attributes.getString(Tag.ReferencedSOPInstanceUIDInFile);
+            if (referencedSOPInstanceUIDInFile != null) {
+                sopInstanceUID = referencedSOPInstanceUIDInFile;
+            }
+        }
+        // Remove confusing spaces, in case DICOM server sends them wrongly
         if (sopInstanceUID != null)
             sopInstanceUID = sopInstanceUID.trim();
-        sopClassUID = attributes.getString(Tag.SOPClassUID);
         instanceNumber = attributes.getString(Tag.InstanceNumber);
-        // below code applies to reading a DICOMDIR, not Q/R
-        referencedSOPInstanceUIDInFile = attributes.getString(Tag.ReferencedSOPInstanceUIDInFile);
-        if (referencedSOPInstanceUIDInFile != null && sopInstanceUID == null) {
-            sopInstanceUID = referencedSOPInstanceUIDInFile;
-        }
-        referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
-        if (referencedSOPClassUIDInFile != null && sopClassUID == null) {
-            sopClassUID = referencedSOPClassUIDInFile;
-        }
         referencedFileID = attributes.getStrings(Tag.ReferencedFileID);
     }
 
@@ -79,20 +78,12 @@ public class Instance implements Cloneable {
         return instanceNumber;
     }
 
-    public String getReferencedSOPClassUIDInFile() {
-        return referencedSOPClassUIDInFile;
-    }
-
     public String[] getReferencedFileID() {
         return referencedFileID;
     }
 
     public void setInstanceNumber(String instanceNumber) {
         this.instanceNumber = instanceNumber;
-    }
-
-    public void setReferencedSOPClassUIDInFile(String referencedSOPClassUIDInFile) {
-        this.referencedSOPClassUIDInFile = referencedSOPClassUIDInFile;
     }
 
     public void setReferencedFileID(String[] referencedFileID) {
@@ -111,16 +102,10 @@ public class Instance implements Cloneable {
         return sopClassUID;
     }
 
-    public String getReferencedSOPInstanceUIDInFile() {
-        return referencedSOPInstanceUIDInFile;
-    }
-
     @Override
     public String toString() {
         return "Instance [sopInstanceUID=" + sopInstanceUID + ", sopClassUID=" + sopClassUID + ", instanceNumber="
-                + instanceNumber + ", referencedSOPInstanceUIDInFile=" + referencedSOPInstanceUIDInFile
-                + ", referencedSOPClassUIDInFile=" + referencedSOPClassUIDInFile + ", referencedFileID="
-                + Arrays.toString(referencedFileID) + "]";
+                + instanceNumber + ", referencedFileID=" + Arrays.toString(referencedFileID) + "]";
     }
 
 }
