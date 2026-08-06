@@ -69,6 +69,13 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             public acqEqPipe: AcquisitionEquipmentPipe,
             private downloadService: MassDownloadService) {
         super(route);
+        // the deletion of the last dataset of this acquisition removes it : this page is then gone
+        this.subscriptions.push(
+            this.datasetService.onAcquisitionsRemoved.subscribe(ids => {
+                if (this.datasetAcquisition?.examination?.id && ids.includes(this.datasetAcquisition.id)) {
+                    this.router.navigate(['/examination/details/' + this.datasetAcquisition.examination.id]);
+                }
+            }));
     }
 
     protected getRoutingName(): string {

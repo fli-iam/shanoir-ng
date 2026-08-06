@@ -68,7 +68,9 @@ public interface DatasetApi {
     @DeleteMapping(value = "/{datasetId}", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<Void> deleteDataset(
-            @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
+            @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
+            @Parameter(description = "remove the dataset acquisition too when this deletion leaves it empty")
+            @RequestParam(value = "deleteEmptyAcquisitions", defaultValue = "false") boolean deleteEmptyAcquisitions)
             throws RestServiceException, EntityNotFoundException;
 
     @Operation(summary = "", description = "Deletes several datasets")
@@ -82,7 +84,9 @@ public interface DatasetApi {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
     ResponseEntity<Void> deleteDatasets(
             @Parameter(description = "ids of the datasets", required = true) @Valid
-            @RequestBody(required = true) List<Long> datasetIds)
+            @RequestBody(required = true) List<Long> datasetIds,
+            @Parameter(description = "remove the dataset acquisitions too when this deletion leaves them empty")
+            @RequestParam(value = "deleteEmptyAcquisitions", defaultValue = "false") boolean deleteEmptyAcquisitions)
             throws RestServiceException;
 
     @Operation(summary = "", description = "Deletes nifti files from a study")

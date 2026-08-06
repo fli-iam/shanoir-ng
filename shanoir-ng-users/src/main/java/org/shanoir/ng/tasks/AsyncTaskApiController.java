@@ -61,6 +61,7 @@ public class AsyncTaskApiController implements AsyncTaskApi {
                 ShanoirEventType.DOWNLOAD_STATISTICS_EVENT,
                 ShanoirEventType.MASSIVE_OUTPUTS_DOWNLOAD,
                 ShanoirEventType.DELETE_EXAMINATION_EVENT,
+                ShanoirEventType.DELETE_SUBJECT_EVENT,
                 ShanoirEventType.DELETE_NIFTI_EVENT,
                 ShanoirEventType.DELETE_DATASET_EVENT,
                 ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,

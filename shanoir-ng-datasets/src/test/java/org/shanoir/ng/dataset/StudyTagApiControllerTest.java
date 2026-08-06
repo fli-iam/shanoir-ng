@@ -44,8 +44,10 @@ import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -180,6 +182,12 @@ public class StudyTagApiControllerTest {
 
     @MockBean
     private StorageService storageService;
+
+    @MockBean
+    private DatasetAcquisitionService datasetAcquisitionService;
+
+    @MockBean
+    private ExaminationDatasetAcquisitionMapper examinationDatasetAcquisitionMapper;
 
     @Autowired
     private ObjectMapper mapper;
