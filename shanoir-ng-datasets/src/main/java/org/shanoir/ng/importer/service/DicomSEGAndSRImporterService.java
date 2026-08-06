@@ -118,8 +118,7 @@ public class DicomSEGAndSRImporterService {
             LOG.error("Error: importDicomSEGAndSR: examination not found for StudyInstanceUID: {}", studyInstanceUID);
             return false;
         }
-        boolean canAnnotate = datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ANNOTATE.name())
-                || datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ANNOTATE_REVIEW.name());
+        boolean canAnnotate = datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ANNOTATE.name());
         boolean canImport = datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_IMPORT.name());
         boolean canAdministrate = datasetSecurityService.hasRightOnStudy(examination.getStudyId(), StudyUserRight.CAN_ADMINISTRATE.name());
         if (!canAnnotate && !canImport && !canAdministrate) {
@@ -347,7 +346,7 @@ public class DicomSEGAndSRImporterService {
      * @param examination
      * @param dataset
      * @param datasetAttributes
-     * @param canAnnotate whether the importing user holds the CAN_ANNOTATE or CAN_ANNOTATE_REVIEW right
+     * @param canAnnotate whether the importing user holds the CAN_ANNOTATE right
      * @throws MalformedURLException
      * @throws ShanoirException
      */
