@@ -177,10 +177,10 @@ public class Patient {
             sb.append("patientID=").append(Utils.sha256(patientID)).append(", ");
         }
         if (patientName != null) {
-            sb.append("patientname = ").append(Utils.sha256(patientName)).append(", ");
+            sb.append("patientName=").append(Utils.sha256(patientName)).append(", ");
         }
         if (patientBirthName != null) {
-            sb.append("patientBirthname = ").append(Utils.sha256(patientBirthName)).append(", ");
+            sb.append("patientBirthName=").append(Utils.sha256(patientBirthName)).append(", ");
         }
         if (patientBirthDate != null) {
             sb.append("patientBirthDate=").append(Utils.sha256(patientBirthDate.toString())).append(", ");
