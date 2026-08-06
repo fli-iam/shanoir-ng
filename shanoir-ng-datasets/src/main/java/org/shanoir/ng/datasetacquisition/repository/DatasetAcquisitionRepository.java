@@ -75,6 +75,13 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
             + "WHERE da.id = :id")
     Optional<DatasetAcquisition> findByIdWithDatasets(Long id);
 
+    @Query("SELECT da FROM DatasetAcquisition da WHERE da.datasets IS EMPTY")
+    List<DatasetAcquisition> findEmpty();
+
+    @Query("SELECT da FROM DatasetAcquisition da "
+            + "WHERE da.datasets IS EMPTY AND da.examination.study.id = :studyId")
+    List<DatasetAcquisition> findEmptyByStudyId(@Param("studyId") Long studyId);
+
     /**
      * Get the acquisitions having id greather than param
      *

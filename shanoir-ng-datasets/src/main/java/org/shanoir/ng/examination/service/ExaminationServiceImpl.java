@@ -112,6 +112,7 @@ public class ExaminationServiceImpl implements ExaminationService {
     private StorageService storageService;
 
     @Override
+    @Transactional
     public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         Optional<Examination> examinationOpt = examinationRepository.findById(id);
         if (!examinationOpt.isPresent()) {

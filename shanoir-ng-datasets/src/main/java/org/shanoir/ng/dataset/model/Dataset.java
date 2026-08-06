@@ -106,6 +106,9 @@ public abstract class Dataset extends AbstractEntity {
     @LocalDateAnnotations
     private LocalDate creationDate;
 
+    /** Name of the user who imported the dataset. */
+    private String username;
+
     /**
      * Dataset Acquisition.
      */
@@ -212,6 +215,7 @@ public abstract class Dataset extends AbstractEntity {
 
     public Dataset(Dataset d) {
         this.creationDate = d.getCreationDate();
+        this.username = d.getUsername();
         this.datasetAcquisition = d.getDatasetAcquisition();
         this.datasetExpressions = new ArrayList<>(d.getDatasetExpressions().size());
         for (DatasetExpression ds : d.getDatasetExpressions()) {
@@ -254,6 +258,20 @@ public abstract class Dataset extends AbstractEntity {
      */
     public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
+    }
+
+    /**
+     * @return the username of the user who imported the dataset
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * @param username the username to set
+     */
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     /**
