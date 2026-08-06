@@ -135,10 +135,10 @@ public class MassEmailServiceTest {
     public void sendMassEmailDelegatesToEmailServiceTest() {
         final List<User> recipients = List.of(enabledUser);
 
-        massEmailService.sendMassEmail(recipients, "[Shanoir] Maintenance", "Service unavailable.", disabledUser,
+        massEmailService.sendMassEmail(recipients, "Maintenance", "Service unavailable.", disabledUser,
                 "My Study");
 
-        Mockito.verify(emailService).sendMassEmail(recipients, "[Shanoir] Maintenance", "Service unavailable.",
+        Mockito.verify(emailService).sendMassEmail(recipients, "Maintenance", "Service unavailable.",
                 disabledUser, "My Study");
     }
 
