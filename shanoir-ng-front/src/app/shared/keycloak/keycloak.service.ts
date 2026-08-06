@@ -117,14 +117,12 @@ export class KeycloakService {
     }
 
     getRefreshToken(): Promise<string> {
-        this.tokenPromise = new Promise<string>((resolve, reject) => {
-            if (KeycloakService.auth.authz.token) {
-                resolve(KeycloakService.auth.authz.refreshToken as string);
-            } else {
-                reject();
-            }
-        });
-        return this.tokenPromise;
+        // Force a token refresh (updateToken(-1)) so the returned refresh token is freshly
+        // rotated and the Keycloak session is validated. If the session is no longer active,
+        // updateToken rejects, which lets callers block instead of handing out a stale token.
+        return KeycloakService.auth.authz.updateToken(-1).then(
+            () => KeycloakService.auth.authz.refreshToken as string
+        );
     }
 
     /**

@@ -197,6 +197,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         @case ('deleteExamination.event') {
                             <i class="fa-solid fa-trash"></i>
                         }
+                        @case ('deleteSubject.event') {
+                            <i class="fa-solid fa-trash"></i>
+                        }
                         @case ('deleteDataset.event') {
                             <i class="fa-solid fa-trash"></i>
                         }
@@ -368,9 +371,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <i class="fas fa-users"></i>
                 Manage users
             </li>
+            <li routerLink="/send-email" routerLinkActive="active">
+                <i class="fas fa-envelope"></i>
+                Send email
+            </li>
             <li (click)="indexToSolr()">
                 <i class="fas fa-list-ol"></i>
                 Index to Solr
+            </li>
+            <li (click)="cleanUpEmptyAcquisitions()">
+                <i class="fas fa-broom"></i>
+                Clean up empty acquisitions
             </li>
             <li routerLink="/preclinical-reference" routerLinkActive="active">
                 <i class="fas fa-book"></i>

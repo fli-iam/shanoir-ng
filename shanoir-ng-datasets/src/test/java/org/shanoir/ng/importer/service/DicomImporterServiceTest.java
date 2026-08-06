@@ -52,7 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Tests for the CAN_IMPORT rights check on study level in DicomImporterService.
  *
- * @author afragkia
+ * @author Adam Fragkiadakis
  */
 @ExtendWith(MockitoExtension.class)
 public class DicomImporterServiceTest {
