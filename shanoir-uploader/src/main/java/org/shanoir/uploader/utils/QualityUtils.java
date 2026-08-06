@@ -76,7 +76,7 @@ public class QualityUtils {
         }
 
         // Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
-        imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), isImportFromPACS, null, true);
+        imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), null, true);
 
         // Construct Dicom datasets from images
         List<Serie> series = importJob.getSeries();

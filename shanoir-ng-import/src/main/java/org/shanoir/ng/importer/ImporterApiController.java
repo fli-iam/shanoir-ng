@@ -215,7 +215,7 @@ public class ImporterApiController implements ImporterApi {
 
         handleLegacySubjectAndSeries(importJob);
         imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(
-                importJob, importJobDir.getAbsolutePath(), false, null, false);
+                importJob, importJobDir.getAbsolutePath(), null, false);
         return importJob;
     }
 

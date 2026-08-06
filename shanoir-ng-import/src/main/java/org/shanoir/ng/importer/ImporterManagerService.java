@@ -147,12 +147,12 @@ public class ImporterManagerService {
                         importJob.getStudyInstanceUID(), importJob.getSeries(), event);
                 // Convert instances to images, as already done after zip file upload
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
-                        importJobDir.getAbsolutePath(), true, event, false);
+                        importJobDir.getAbsolutePath(), event, false);
             } else if (importJob.isFromShanoirUploader()) {
                 importJobDir = new File(importJob.getWorkFolder());
                 // Convert instances to images, as already done after zip file upload
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
-                        importJobDir.getAbsolutePath(), false, event, false);
+                        importJobDir.getAbsolutePath(), event, false);
             } else if (importJob.isFromDicomZip()) {
                 // Images creation and analyze of dicom files has been done after upload already
                 importJobDir = new File(importJob.getWorkFolder());

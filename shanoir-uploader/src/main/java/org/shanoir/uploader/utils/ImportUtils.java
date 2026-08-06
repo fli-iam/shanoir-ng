@@ -250,7 +250,7 @@ public class ImportUtils {
                 continue;
             }
             for (Instance instance : serie.getInstances()) {
-                File sourceFile = dicomFileAnalyzer.getFileFromInstance(instance, serie, filePathDicomDir, false);
+                File sourceFile = dicomFileAnalyzer.getFileFromInstance(instance, serie, filePathDicomDir);
                 String dicomFileName = null;
                 if (sourceFile.getAbsolutePath().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
                     dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_");

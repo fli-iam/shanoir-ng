@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -83,7 +84,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
     private ShanoirEventService eventService;
 
     public void createImagesAndAnalyzeDicomFiles(
-            ImportJobBase importJob, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event, boolean isFromShUpQualityControl)
+            ImportJobBase importJob, String folderFileAbsolutePath, ShanoirEvent event, boolean isFromShUpQualityControl)
             throws FileNotFoundException {
         int cpt = 1;
         int nbSeries = importJob.getSeries().size();
@@ -95,14 +96,14 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                     eventService.publishEvent(event);
                 }
                 try {
-                    filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS, isFromShUpQualityControl);
+                    filterAndCreateImages(folderFileAbsolutePath, serie, isFromShUpQualityControl);
                 } catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
                     handleError(event, nbSeries, cpt, serie, e);
                 }
                 if (!serie.isIgnored()) {
                     // use a second try here, in case error is on serie, to get at least the serie name for error tracing
                     try {
-                        getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, importJob.getPatient(), importJob.getStudy(), serie, isImportFromPACS);
+                        getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, importJob.getPatient(), importJob.getStudy(), serie);
                     } catch (Exception e) {
                         handleError(event, nbSeries, cpt, serie, e);
                     }
@@ -139,12 +140,12 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param serie
      * @throws FileNotFoundException
      */
-    public void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Patient patient, Study study, Serie serie, boolean isImportFromPACS)
+    public void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Patient patient, Study study, Serie serie)
             throws FileNotFoundException {
         List<Instance> instances = serie.getInstances();
         if (instances != null && !instances.isEmpty()) {
             Instance firstInstance = instances.get(0);
-            File firstInstanceFile = getFileFromInstance(firstInstance, serie, folderFileAbsolutePath, isImportFromPACS);
+            File firstInstanceFile = getFileFromInstance(firstInstance, serie, folderFileAbsolutePath);
             processDicomFileForFirstInstance(firstInstanceFile, patient, study, serie);
         }
     }
@@ -157,13 +158,13 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param serie
      * @throws FileNotFoundException
      */
-    private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS, boolean isFromShUpQualityControl) throws Exception {
+    private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isFromShUpQualityControl) throws Exception {
         List<Image> images = new ArrayList<Image>();
         List<Instance> instances = serie.getInstances();
         if (instances != null) {
             for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
                 Instance instance = instancesIt.next();
-                File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
+                File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath);
                 processDicomFilePerInstanceAndCreateImage(instanceFile, images, folderFileAbsolutePath, isFromShUpQualityControl);
             }
             /**
@@ -190,10 +191,10 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param images
      * @throws FileNotFoundException
      */
-    public File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath, boolean isImportFromPACS)
+    public File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath)
             throws FileNotFoundException {
         String instanceFilePath;
-        if (isImportFromPACS) {
+        if (ArrayUtils.isEmpty(instance.getReferencedFileID())) {
             StringBuilder instanceFilePathBuilder = new StringBuilder();
             instanceFilePathBuilder.append(folderFileAbsolutePath)
                 .append(File.separator)
