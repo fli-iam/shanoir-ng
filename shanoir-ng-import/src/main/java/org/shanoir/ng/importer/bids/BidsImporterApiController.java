@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.shanoir.ng.importer.ImportJobStatusService;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -90,7 +90,7 @@ public class BidsImporterApiController implements BidsImporterApi {
      * This method import a BIDS subject folder.
      */
     @Override
-    public ResponseEntity<ImportJob> importAsBids(
+    public ResponseEntity<ImportJobBase> importAsBids(
             @Parameter(name = "file detail") @RequestPart("file") final MultipartFile bidsFile,
             @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(name = "name of the study", required = true) @PathVariable("studyName") String studyName,
@@ -103,7 +103,7 @@ public class BidsImporterApiController implements BidsImporterApi {
         if (!ImportUtils.isZipFile(bidsFile)) {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
         }
-        ImportJob importJob = new ImportJob();
+        ImportJobBase importJob = new ImportJobBase();
         importJob.setStudyId(studyId);
         importJob.setStudyName(studyName);
         importJob.setUserId(KeycloakUtil.getTokenUserId());
@@ -130,15 +130,13 @@ public class BidsImporterApiController implements BidsImporterApi {
             } })) {
             String fileName = subjectFile.getName();
             String subjectName = null;
+            // We found a subject
             if (fileName.startsWith("sub-")) {
-                // We found a subject
-                subjectName = subjectFile.getName().split("sub-")[1];
+                subjectName = subjectFile.getName();
                 Subject subject = new Subject();
                 subject.setName(subjectName);
                 subject.setStudy(new IdName(studyId, studyName));
-                importJob.setSubjectName(subjectName);
-
-                // Create subject
+                // Create subject in ms-studies
                 subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, objectMapper.writeValueAsString(subject));
                 if (subjectId == null) {
                     throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
@@ -243,7 +241,7 @@ public class BidsImporterApiController implements BidsImporterApi {
      * @param dataTypeFile
      * @param importJob
      */
-    private void importSession(File dataTypeFile, ImportJob importJob) throws AmqpException, JsonProcessingException {
+    private void importSession(File dataTypeFile, ImportJobBase importJob) throws AmqpException, JsonProcessingException {
         if (dataTypeFile.isDirectory()) {
             importJob.setWorkFolder(dataTypeFile.getAbsolutePath());
             LOG.debug("We found a data folder " + dataTypeFile.getName());
