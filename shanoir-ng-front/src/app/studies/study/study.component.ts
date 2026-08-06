@@ -30,6 +30,9 @@ import { CenterService } from '../../centers/shared/center.service';
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -42,7 +45,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
 import { UserService } from '../../users/shared/user.service';
-import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
+import { capitalsAndUnderscoresToDisplayable, isDarkColor } from '../../utils/app.utils';
 import { SuperPromise } from "../../utils/super-promise";
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
@@ -54,7 +57,6 @@ import { CheckboxComponent } from "../../shared/checkbox/checkbox.component";
 import { TooltipComponent } from "../../shared/components/tooltip/tooltip.component";
 import { LoadingBarComponent } from "../../shared/components/loading-bar/loading-bar.component";
 import { TagCreatorComponent } from "../../tags/tag.creator.component";
-import { SubjectStudyListComponent } from "../../shared/components/subject-study-list/subject-study-list.component";
 import { StudyUserListComponent } from "../studyuser/studyuser-list.component";
 import { StudyEmailMembersComponent } from "../email-members/study-email-members.component";
 import { QualityControlComponent } from "../../quality-control/quality-control.component";
@@ -70,12 +72,13 @@ import { CopyFromCsvComponent } from "./copy-csv.component";
     selector: 'study-detail',
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
-    imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent,
+    imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, TableComponent, StudyUserListComponent, QualityControlComponent,
         BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent]
 })
 
 export class StudyComponent extends EntityComponent<Study> {
     @ViewChild('memberTable', { static: false }) table: TableComponent;
+    @ViewChild('subjectTable', { static: false }) private subjectTable: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
     protected pdfDownloadState: TaskState = new TaskState();
@@ -97,6 +100,7 @@ export class StudyComponent extends EntityComponent<Study> {
     accessRequests: AccessRequest[];
     isStudyAdmin: boolean;
     subjectTagsInUse: Tag[] = [];
+    subjectColumnDefs: ColumnDefinition[];
 
     public openPrefix: boolean = false;
 
@@ -158,6 +162,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public set entity(study: Study) {
         super.entity = study;
         this.updateSubjectTagsInUse();
+        this.updateSubjectColumnDefs();
     }
 
     public get entity(): Study {
@@ -671,6 +676,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.study.tags = [].concat(this.study.tags);
         this.study.subjects = [].concat(this.study.subjects);
         this.updateSubjectTagsInUse();
+        this.updateSubjectColumnDefs();
     }
 
     onStudyTagListChange() {
@@ -686,8 +692,69 @@ export class StudyComponent extends EntityComponent<Study> {
         setTimeout(() => {
             this.studyService.get(this.id).then(study => {
                 this.study.subjects = study.subjects;
+                this.updateSubjectColumnDefs();
+                this.subjectTable?.refresh();
             });
         }, 1000);
+    }
+
+    /**
+     * Table of the subjects of this study, on the "subjects" tab. The tag and quality
+     * columns only show up when there is something to display in them.
+     */
+    private updateSubjectColumnDefs() {
+        const subjects: Subject[] = this.study?.subjects;
+        const hasTags: boolean = !!subjects?.find(subject => subject.study?.tags?.length > 0)
+                || this.study?.tags?.length > 0;
+        const hasQualityTags: boolean = !!subjects?.find(subject => !!subject.qualityTag);
+        const columnDefs: ColumnDefinition[] = [{ headerName: 'Subject', field: 'name', defaultSortCol: true }];
+        if (hasTags) {
+            columnDefs.push(
+                { headerName: 'Tags', field: 'tags', editable: true, multi: true,
+                    possibleValues: () => {
+                        return this.study?.tags?.map(tag => {
+                            const opt = new Option(tag, tag.name);
+                            if (tag.color) {
+                                opt.backgroundColor = tag.color;
+                                opt.color = isDarkColor(tag.color) ? 'white' : 'black';
+                            }
+                            return opt;
+                        });
+                    }
+                }
+            );
+        }
+        if (hasQualityTags) {
+            columnDefs.push(
+                { headerName: 'Quality', field: 'qualityTag', editable: false, width: '90px', cellGraphics: (item) => {
+                    if (item.qualityTag == 'VALID') return {color: 'green', tag: true, awesome: 'fas fa-check-circle'};
+                    else if (item.qualityTag == 'WARNING') return {color: 'chocolate', tag: true, awesome: 'fas fa-exclamation-triangle'};
+                    else if (item.qualityTag == 'ERROR') return {color: 'red', tag: true, awesome: 'fas fa-times-circle'};
+                }}
+            );
+        }
+        columnDefs.push(
+            { headerName: 'Subject id for this study', field: 'studyIdentifier', editable: true },
+            { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', disableSorting: true },
+            { headerName: 'Subject Type', field: 'subjectType', editable: true, possibleValues: [new Option(null, ''), new Option('HEALTHY_VOLUNTEER', 'Healthy Volunteer'), new Option('PATIENT', 'Patient'), new Option('PHANTOM', 'Phantom')] }
+        );
+        this.subjectColumnDefs = columnDefs;
+    }
+
+    getSubjectsPage(pageable: FilterablePageable): Promise<Page<Subject>> {
+        return Promise.resolve(new BrowserPaging<Subject>(this.study.subjects, this.subjectColumnDefs).getPage(pageable));
+    }
+
+    getSubjectRoute(subject: Subject): string {
+        return '/subject/details/' + subject.id;
+    }
+
+    onSubjectEdit() {
+        const subjectsControl: AbstractControl = this.form?.get('subjects');
+        subjectsControl?.setValue(this.study.subjects);
+        subjectsControl?.markAsDirty();
+        subjectsControl?.markAsTouched();
+        subjectsControl?.updateValueAndValidity();
     }
 
     studyCardPolicyStr() {

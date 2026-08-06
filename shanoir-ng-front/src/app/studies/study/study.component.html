@@ -679,12 +679,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [tagsInUse]="subjectTagsInUse"
                         (userChange)="onTagListChange()"
                         formControlName="tags"></tag-creator>
-                    <subject-study-list
-                        [allowRemove]="false"
-                        [study]="study"
-                        [selectableList]="subjects"
-                        formControlName="subjects"
-                        [mode]="mode"></subject-study-list>
+                    <legend>
+                        Subject
+                        <tool-tip>You can choose one or more subjects from the list</tool-tip>
+                    </legend>
+                    <ol>
+                        @if (study.subjects?.length > 0 && subjectColumnDefs) {
+                            <li>
+                                <shanoir-table
+                                    #subjectTable
+                                    [getPage]="getSubjectsPage.bind(this)"
+                                    [editMode]="mode != 'view'"
+                                    [columnDefs]="subjectColumnDefs"
+                                    [browserSearch]="false"
+                                    [rowRoute]="getSubjectRoute.bind(this)"
+                                    (rowEdit)="onSubjectEdit()"></shanoir-table>
+                            </li>
+                        }
+                    </ol>
                 </fieldset>
                 <fieldset [class.hidden-tab]="activeTab != 'centers'" tab="centers">
                     <legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
