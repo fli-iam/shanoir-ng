@@ -110,7 +110,7 @@ public class QualityUtils {
                 // if quality card result contains an ERROR tag, we remove the serie from the selection
                 if (!serieQualityCardResult.isEmpty() && serieQualityCardResult.hasError()) {
                     serie.setSelected(false);
-                    importJob.getSeries().remove(serie);
+                    seriesIt.remove();
                     LOG.info("Quality Control At Import - Serie with description " + serie.getSeriesDescription() + " did not pass quality control and will not be imported.");
                 // Handle the case where the serie passes quality control : we set the quality tag to the serie
                 // Even if a rule with a VALID tag is fulfilled, if a failed valid is found we don't set the VALID tag

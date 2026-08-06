@@ -177,7 +177,7 @@ public class CardsProcessingService {
             throw new RestClientException("Quality card used with empty rules.");
         }
 
-        // Load lazy data before go parallel
+        // Load lazy data
         loadRulesLazyCollections(qualityCard.getRules(), event);
 
         List<Examination> examinations = study.getExaminations();
