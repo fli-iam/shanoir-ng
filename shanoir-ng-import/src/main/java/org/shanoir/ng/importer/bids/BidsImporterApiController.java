@@ -104,17 +104,12 @@ public class BidsImporterApiController implements BidsImporterApi {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
         }
         ImportJobBase importJob = new ImportJobBase();
+        File importJobFile = ImportUtils.initImportJob(importJob, importDir, bidsFile);
+        File importJobDir = ImportUtils.saveImportJobFileCreateFolderAndUnzip(importJobFile);
+        importJobStatusService.setInProgress(importJob, "Import job received, queued for processing.");
+
         importJob.setStudyId(studyId);
         importJob.setStudyName(studyName);
-        importJob.setUserId(KeycloakUtil.getTokenUserId());
-        importJob.setUsername(KeycloakUtil.getTokenUserName());
-
-        // Create tmp folder and unzip archive
-        final File userImportDir = ImportUtils.getUserImportDir(importDir);
-        File tempFile = ImportUtils.saveTempFile(userImportDir, bidsFile);
-        File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, bidsFile, false);
-        String tempDirId = importJobDir.getName();
-        importJobStatusService.setInProgress(tempDirId, "Import job received, queued for processing.");
 
         // Get equipment from file if existing, otherwise, set the "UNKNOWN EQUIPMENT"
         importJob.setAcquisitionEquipmentId(0L);
@@ -224,8 +219,8 @@ public class BidsImporterApiController implements BidsImporterApi {
                 }
             }
         }
-        importJobStatusService.setFinished(tempDirId, importJob);
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        importJobStatusService.setFinished(importJob);
+        return new ResponseEntity<ImportJobBase>(importJob, HttpStatus.OK);
     }
 
     private void publishExaminationCreatedEvent(Long examId, ExaminationDTO examination, Long centerId,

@@ -109,13 +109,6 @@ public class ImportWithoutStudyCardTests extends AbstractImportTest {
         }
     }
 
-    // NOTE: a dedicated "local ShanoirUploader upload" test was removed here,
-    // for the same reason as in ImportWithStudyCardTests: testImportShUpFromPACS()
-    // below exercises the exact same downstream pipeline (anonymize -> upload
-    // via ShUp -> startImportJob -> consistency check -> massiveDownload
-    // compare) plus the PACS C-FIND/C-MOVE retrieval on top, so it is a
-    // strict superset and the only "ShUp upload" test kept in this class.
-
     @Test
     @Order(2)
     public void testImportShUpFromPACS() throws Exception {
@@ -296,10 +289,12 @@ public class ImportWithoutStudyCardTests extends AbstractImportTest {
 
         Long centerId = study.getStudyCenterList().get(0).getCenter().getId();
 
-        // See ImportWithStudyCardTests#testImportBIDS: this endpoint only
-        // confirms server-side acceptance, not completion.
-        userClient.uploadBIDSDataset(file, study.getId(), study.getName(), centerId);
-        logger.info("BIDS dataset upload accepted by server for study: {}", study.getId());
+        ImportJobBase importJob = userClient.importBIDSDataset(file, study.getId(), study.getName(), centerId);
+        Assertions.assertNotNull(importJob, "testImportBIDS  (no study card) returned no import job.");
+        Assertions.assertNotNull(importJob.getExaminationId(),
+                "testImportBIDS (no study card) did not create/return an examination id.");
+        logger.info("testImportBIDS (no study card) created examination: {}",
+                importJob.getExaminationId());
     }
 
     /**

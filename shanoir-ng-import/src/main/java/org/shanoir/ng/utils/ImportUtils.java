@@ -33,6 +33,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import org.shanoir.ng.importer.dto.ExaminationDTO;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -255,7 +256,6 @@ public final class ImportUtils {
      * @throws IOException
      */
     private static void extractFile(ZipEntry zipIn, ZipFile zipFile, String filePath) throws IOException {
-
         try (InputStream in = zipFile.getInputStream(zipIn);
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
             byte[] bytesIn = new byte[BUFFER_SIZE];
@@ -271,44 +271,52 @@ public final class ImportUtils {
      * folder with the same name and unzips the content into this folder, and gives
      * back the folder with the content.
      *
-     * @param tempFile
+     * @param importJobFile
      * @param dicomZipFile
      * @return
      * @throws IOException
      * @throws RestServiceException
      */
-    public static File saveTempFileCreateFolderAndUnzip(final File tempFile, final MultipartFile dicomZipFile,
-            final boolean fromDicom) throws IOException, RestServiceException {
-        String fileName = tempFile.getName();
+    public static File saveImportJobFileCreateFolderAndUnzip(final File importJobFile) throws IOException, RestServiceException {
+        String fileName = importJobFile.getName();
         int pos = fileName.lastIndexOf(FILE_POINT);
         if (pos > 0) {
             fileName = fileName.substring(0, pos);
         }
-        File unzipFolderFile = new File(tempFile.getParentFile().getAbsolutePath() + File.separator + fileName);
+        File unzipFolderFile = new File(importJobFile.getParentFile().getAbsolutePath() + File.separator + fileName);
         if (!unzipFolderFile.exists()) {
             unzipFolderFile.mkdirs();
         } else {
             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                     "Error while unzipping file: folder already exists.", null));
         }
-        ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
-        tempFile.delete();
+        ImportUtils.unzip(importJobFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
+        importJobFile.delete();
         return unzipFolderFile;
     }
 
-    /**
-     * This method takes a multipart file and stores it in a configured upload
-     * directory in relation with the userId with a random name and the suffix
-     * .upload
-     *
-     * @param file
-     * @throws IOException
-     */
-    public static File saveTempFile(final File userImportDir, final MultipartFile file) throws IOException {
+    public static File initImportJob(final ImportJobBase importJob, final String importDir, final MultipartFile file) throws IOException {
+        importJob.setUserId(KeycloakUtil.getTokenUserId());
+        importJob.setUsername(KeycloakUtil.getTokenUserName());
         long n = createRandomLong();
-        File uploadFile = new File(userImportDir.getAbsolutePath(), Long.toString(n) + UPLOAD_FILE_SUFFIX);
-        file.transferTo(uploadFile);
-        return uploadFile;
+        importJob.setId(Long.toString(n));
+        File userImportDir = getUserImportDir(importDir);
+        File uploadedFile = new File(userImportDir.getAbsolutePath(), importJob.getId() + UPLOAD_FILE_SUFFIX);
+        file.transferTo(uploadedFile);
+        return uploadedFile;
+    }
+
+    public static File initImportJob(final ImportJobBase importJob, final String importDir) throws IOException {
+        importJob.setUserId(KeycloakUtil.getTokenUserId());
+        importJob.setUsername(KeycloakUtil.getTokenUserName());
+        long n = createRandomLong();
+        importJob.setId(Long.toString(n));
+        File userImportDir = getUserImportDir(importDir);
+        File importJobDir = new File(userImportDir.getAbsolutePath(), importJob.getId());
+        if (!importJobDir.exists()) {
+            importJobDir.mkdirs();
+        }
+        return importJobDir;
     }
 
     /**
@@ -316,7 +324,7 @@ public final class ImportUtils {
      *
      * @return long: random number
      */
-    public static long createRandomLong() {
+    private static long createRandomLong() {
         long n = RANDOM.nextLong();
         if (n == Long.MIN_VALUE) {
             n = 0; // corner case

@@ -53,7 +53,7 @@ public interface ImporterApi {
         @ApiResponse(responseCode = "500", description = "unexpected error")})
     @GetMapping(value = {"", "/"}, produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<String> createTempDir() throws RestServiceException;
+    ResponseEntity<String> createTempDir() throws RestServiceException, IOException;
 
     // used by ShanoirUploader!!! 2. step: called for each DICOM file
     @Operation(summary = "Upload a file into a specific temp dir", description = "Upload a file into a specific temp dir")
@@ -176,10 +176,10 @@ public interface ImporterApi {
             @ApiResponse(responseCode = "404", description = "no status found for this id"),
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden")})
-    @GetMapping(value = "/status/{tempDirId}", produces = {"application/json"})
+    @GetMapping(value = "/status/{id}", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<ImportJobStatus> getImportJobStatus(
-            @Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId);
+            @Parameter(name = "id", required = true) @PathVariable("id") String id);
 
     @Operation(summary = "Start analysis of EEG job", description = "Start analysis eeg job")
     @ApiResponses(value = {

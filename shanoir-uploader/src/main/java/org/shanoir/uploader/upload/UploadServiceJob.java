@@ -368,6 +368,7 @@ public class UploadServiceJob {
     private void setTempDirIdAndStartImport(String tempDirId, ImportJobBase importJob)
             throws IOException, JsonParseException, JsonMappingException, JsonProcessingException, Exception {
         importJob.setWorkFolder(tempDirId);
+        importJob.setId(tempDirId);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         shanoirUploaderServiceClient.startImportJob(tempDirId, importJobJson);
     }

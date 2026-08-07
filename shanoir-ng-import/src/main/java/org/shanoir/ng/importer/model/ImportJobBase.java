@@ -26,6 +26,9 @@ import org.shanoir.ng.shared.quality.QualityTag;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
+ * Each ImportJobBase has one specific ID, that it identifies and
+ * allows to trace it.
+ *
  * One ImportJobBase is related to the import of ONE DICOM STUDY,
  * which equals ONE EXAMINATION in Shanoir. We are doing this, as one
  * DICOM study can have a size of up to 10Gb nowadays. This means
@@ -56,6 +59,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class ImportJobBase implements Serializable {
 
     private static final long serialVersionUID = 8804929608059674037L;
+
+    private String id;
 
     private long timestamp;
 
@@ -126,6 +131,14 @@ public class ImportJobBase implements Serializable {
     private String uploadPercentage;
 
     private String studyInstanceUID;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public long getTimestamp() {
         return timestamp;

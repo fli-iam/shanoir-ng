@@ -104,14 +104,6 @@ public class ImportWithStudyCardTests extends AbstractImportTest {
         }
     }
 
-    // NOTE: a dedicated "local ShanoirUploader upload" test was removed here.
-    // testImportShUpFromPACS() below exercises the exact same downstream pipeline
-    // (anonymize -> upload via ShUp -> startImportJob -> consistency check ->
-    // massiveDownload compare) plus the PACS C-FIND/C-MOVE retrieval on top,
-    // so it is a strict superset and the only "ShUp upload" test kept in this
-    // class. ImportWithoutStudyCardTests still has its own local-only variant,
-    // since there is no no-study-card PACS test to supersede it.
-
     @Test
     @Order(2)
     public void testImportMultipleDicomZip() throws Exception {
@@ -194,13 +186,12 @@ public class ImportWithStudyCardTests extends AbstractImportTest {
 
         Long centerId = study.getStudyCards().get(0).getCenterId();
 
-        // Unlike the DICOM/EEG import paths, the BIDS import endpoint (datasets
-        // microservice) responds with an empty 200 OK and processes the subject/
-        // examination/dataset creation asynchronously over RabbitMQ. There is no
-        // workFolder/tempDirId returned, so we cannot poll ImporterStatus here as
-        // the other tests do - this only verifies the server accepted the upload.
-        userClient.uploadBIDSDataset(file, study.getId(), study.getName(), centerId);
-        logger.info("BIDS dataset upload accepted by server for study: {}", study.getId());
+        ImportJobBase importJob = userClient.importBIDSDataset(file, study.getId(), study.getName(), centerId);
+        Assertions.assertNotNull(importJob, "testImportBIDS (with study card) returned no import job.");
+        Assertions.assertNotNull(importJob.getExaminationId(),
+                "testImportBIDS (with study card) did not create/return an examination id.");
+        logger.info("testImportBIDS (with study card) created examination: {}",
+                importJob.getExaminationId());
     }
 
     @Test

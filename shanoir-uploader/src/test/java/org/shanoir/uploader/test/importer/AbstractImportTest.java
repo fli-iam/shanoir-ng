@@ -51,7 +51,7 @@ import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
+import org.shanoir.ng.studycard.model.rule.QualityCardRule;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.check.DicomInstanceConsistencyChecker;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
@@ -266,6 +266,7 @@ public abstract class AbstractImportTest extends AbstractTest {
             logger.debug("Uploaded file {}/{}: {}", i, dicomFiles.size(), file.getName());
         }
         logger.info("Upload: " + dicomFiles.size() + " uploaded files to tempDirId: " + tempDirId);
+        importJob.setId(tempDirId);
         importJob.setWorkFolder(tempDirId);
         logger.info("TempDirId: {}", importJob.getWorkFolder());
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
@@ -461,8 +462,8 @@ public abstract class AbstractImportTest extends AbstractTest {
      * every examination/subject it is evaluated against with {@code tag}
      * (the "Always" mode in the GUI).
      */
-    protected QualityExaminationRule buildAlwaysFiringRule(QualityTag tag) {
-        QualityExaminationRule rule = new QualityExaminationRule();
+    protected QualityCardRule buildAlwaysFiringRule(QualityTag tag) {
+        QualityCardRule rule = new QualityCardRule();
         rule.setQualityTag(tag);
         rule.setOrConditions(false);
         return rule;
