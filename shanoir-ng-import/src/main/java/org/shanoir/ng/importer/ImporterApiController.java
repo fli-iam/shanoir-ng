@@ -457,7 +457,7 @@ public class ImporterApiController implements ImporterApi {
         try {
             // Save files to import job directory
             ImportJob importJob = new ImportJob();
-            File importJobDir = ImportUtils.initImportJob(importJob, importDir);
+            File importJobDir = ImportUtils.initImportJob(importJob, importDir, true);
             File destinationImageFile = new File(importJobDir.getAbsolutePath(), imageFileName);
             imageFile.transferTo(destinationImageFile);
             if (headerFile != null) {
@@ -640,7 +640,7 @@ public class ImporterApiController implements ImporterApi {
     @Override
     public ResponseEntity<String> createTempDir() throws RestServiceException, IOException {
         ImportJob importJob = new ImportJob();
-        File importJobDir = ImportUtils.initImportJob(importJob, importDir);
+        File importJobDir = ImportUtils.initImportJob(importJob, importDir, true);
         return new ResponseEntity<String>(importJobDir.getName(), HttpStatus.OK);
     }
 
@@ -698,7 +698,6 @@ public class ImporterApiController implements ImporterApi {
             @Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
             @Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException {
         LOG.info("Multiple examination import for study {} ({})", studyName, studyId);
-        // STEP 1: Unzip file
         if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
@@ -736,17 +735,19 @@ public class ImporterApiController implements ImporterApi {
                             "The main subject folder should only contain sub-folders and not single/data files.", null));
                 }
                 ImportJob importJobChild = new ImportJob();
-                File importJobFileChild = ImportUtils.initImportJob(importJobChild, importDir);
-                if (importJobFileChild.exists()) {
+                File importJobDirChild = ImportUtils.initImportJob(importJobChild, importDir, false);
+                if (importJobDirChild.exists()) {
+                    LOG.error("Error while creating exam work dir: random number generated twice?");
                     throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
                             "Error while creating exam work dir: random number generated twice?", null));
                 }
-                if (!examFolder.renameTo(importJobFileChild)) {
+                if (!examFolder.renameTo(importJobDirChild)) {
+                    LOG.error("Could not move exam folder [" + examFolder.getName() + "] into its own work directory.");
                     throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                             "Could not move exam folder [" + examFolder.getName() + "] into its own work directory.", null));
                 }
-                boolean createDicomDir = !new File(importJobFileChild, DICOMDIR).exists();
-                completeImportJobFromDirectory(importJobChild, importJobFileChild, createDicomDir);
+                boolean createDicomDir = !new File(importJobDirChild, DICOMDIR).exists();
+                completeImportJobFromDirectory(importJobChild, importJobDirChild, createDicomDir);
                 Patient patient = importJobChild.getPatient();
 
                 // Create subject only once.
@@ -805,6 +806,7 @@ public class ImporterApiController implements ImporterApi {
                 String anonymizationProfile = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, studyId);
 
                 importJobChild.setSubjectName(subjectName);
+                importJobChild.setSubject(subject);
                 importJobChild.setExaminationId(examId);
                 importJobChild.setFromDicomZip(true);
                 importJobChild.setFromPacs(false);
@@ -813,7 +815,6 @@ public class ImporterApiController implements ImporterApi {
                 importJobChild.setStudyName(studyName);
                 importJobChild.setAcquisitionEquipmentId(equipmentId);
                 importJobChild.setAnonymisationProfileToUse(anonymizationProfile);
-                importJobChild.setSubject(subject);
                 importJobChild.setStudyInstanceUID(studyInstanceUID);
 
                 // Select all series
@@ -824,8 +825,10 @@ public class ImporterApiController implements ImporterApi {
                 // Send to ms-dataset for logical import
                 cleanUpImportJob(importJobChild);
                 this.startImportJobBase(importJobChild);
+                // Delete temporary file
+                FileUtils.deleteQuietly(importJobDirChild);
             }
-            // STEP 5 delete temporary file
+            // Delete temporary file
             FileUtils.deleteQuietly(importJobDirParent);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

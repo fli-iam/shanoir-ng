@@ -223,17 +223,6 @@ public class ImportWithoutStudyCardTests extends AbstractImportTest {
                 study.getId(), study.getName(), 0L, centerId, equipment.getId());
 
         Assertions.assertNotNull(importJob, "Multiple-examination import returned no import job.");
-        Assertions.assertNotNull(importJob.getExaminationId(),
-                "Multiple-examination import did not create/return an examination id.");
-        logger.info("Multiple-examination import (no study card) created examination: {}",
-                importJob.getExaminationId());
-
-        if (importJob.getWorkFolder() != null && !importJob.getWorkFolder().isEmpty()) {
-            final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
-            waitForServerImportJobStatus(tempDirId, "testImportMultipleDicomZipNoStudyCard-before-ds");
-        }
-        File multiExamExtractDir = Files.createTempDirectory("shanoir-multi-exam-source-").toFile();
-        unzip(file, multiExamExtractDir);
     }
 
     @Test

@@ -306,14 +306,14 @@ public final class ImportUtils {
         return uploadedFile;
     }
 
-    public static File initImportJob(final ImportJobBase importJob, final String importDir) throws IOException {
+    public static File initImportJob(final ImportJobBase importJob, final String importDir, final boolean mkdirs) throws IOException {
         importJob.setUserId(KeycloakUtil.getTokenUserId());
         importJob.setUsername(KeycloakUtil.getTokenUserName());
         long n = createRandomLong();
         importJob.setId(Long.toString(n));
         File userImportDir = getUserImportDir(importDir);
         File importJobDir = new File(userImportDir.getAbsolutePath(), importJob.getId());
-        if (!importJobDir.exists()) {
+        if (!importJobDir.exists() && mkdirs) {
             importJobDir.mkdirs();
         }
         return importJobDir;
