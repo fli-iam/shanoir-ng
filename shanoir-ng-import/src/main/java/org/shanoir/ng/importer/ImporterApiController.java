@@ -175,11 +175,6 @@ public class ImporterApiController implements ImporterApi {
         }
     }
 
-    /**
-     * Builds an ImportJob directly from a directory already present on disk —
-     * shared by the zip-upload path and by uploadMultipleDicom, which previously
-     * re-zipped and re-unzipped exam folders that never left the local filesystem.
-     */
     private void completeImportJobFromDirectory(ImportJob importJob, File importJobDir, boolean createDicomDir) throws Exception {
         if (createDicomDir) {
             LOG.info("DICOMDIR missing, generating one.");
@@ -208,7 +203,7 @@ public class ImporterApiController implements ImporterApi {
     }
 
     /**
-     * 1. STEP: read DICOMDIR and create Shanoir model from it (== Dicom model):
+     * Read DICOMDIR and create Shanoir model from it (== Dicom model):
      * Patient - Study - Serie - Instance 2. STEP: split instances into non-images
      * and images and get additional meta-data from first DICOM file of each serie,
      * meta-data missing in dicomdir.
@@ -833,6 +828,7 @@ public class ImporterApiController implements ImporterApi {
             // STEP 5 delete temporary file
             FileUtils.deleteQuietly(importJobDirParent);
         } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
             throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                     "The file could not be correctly unziped on the server. Please check consistency.", e));
         }
