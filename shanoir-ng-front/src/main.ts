@@ -82,7 +82,6 @@ import { QualityCardDTOService } from './app/study-cards/shared/quality-card.dto
 import { QualityCardService } from './app/study-cards/shared/quality-card.service';
 import { StudyCardDTOService } from './app/study-cards/shared/study-card.dto';
 import { StudyCardService } from './app/study-cards/shared/study-card.service';
-import { SubjectStudyPipe } from './app/subjects/shared/subject-study.pipe';
 import { SubjectDTOService } from './app/subjects/shared/subject.dto';
 import { SubjectService } from './app/subjects/shared/subject.service';
 import { AccessRequestService } from './app/users/access-request/access-request.service';
@@ -181,7 +180,6 @@ const options = {
         NotificationsService,
         CenterDTOService,
         LoaderService,
-        SubjectStudyPipe,
         KeycloakSessionService,
         ConsoleService,
         ExtraDataService,
