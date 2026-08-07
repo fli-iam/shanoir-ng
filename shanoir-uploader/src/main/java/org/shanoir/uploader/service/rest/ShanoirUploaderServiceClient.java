@@ -1025,12 +1025,12 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
-    public void startImportJob(String tempDirId, String importJobJsonStr) throws Exception {
+    public void startImportJob(String id, String importJobJsonStr) throws Exception {
         try (CloseableHttpResponse response = httpService.post(this.serviceURLImporterStartImportJob, importJobJsonStr,
                 false)) {
             int code = response.getCode();
             if (code == HttpStatus.SC_OK) {
-                LOG.info("Import job started on server: {}", tempDirId);
+                LOG.info("Import job started on server: {}", id);
             } else {
                 LOG.error("Error in startImportJob: with json " + importJobJsonStr + " (status code: " + code
                         + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
@@ -1039,15 +1039,15 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
-    public ImportJobStatus getImportJobStatus(String tempDirId) throws Exception {
-        try (CloseableHttpResponse response = httpService.get(this.serviceURLImporterStatus + tempDirId)) {
+    public ImportJobStatus getImportJobStatus(String id) throws Exception {
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLImporterStatus + id)) {
             int code = response.getCode();
             if (code == HttpStatus.SC_OK) {
                 return Util.getMappedObject(response, ImportJobStatus.class);
             } else if (code == HttpStatus.SC_NOT_FOUND) {
                 return null;
             } else {
-                LOG.error("Could not get import job status for tempDirId " + tempDirId
+                LOG.error("Could not get import job status for id " + id
                         + " (status code: " + code + ", message: "
                         + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
                 throw new Exception("Error in getImportJobStatus");
@@ -1530,27 +1530,23 @@ public class ShanoirUploaderServiceClient {
     }
 
     /**
-     * Uploads a BIDS-formatted subject folder (zipped) for import. This hits
-     * the datasets microservice directly (org.shanoir.ng.importer.bids.BidsImporterApi),
-     * not the importer microservice used by the other upload* methods.
+     * Imports a BIDS-formatted subject folder (zipped). This hits
+     * the import microservice (org.shanoir.ng.importer.bids.BidsImporterApi).
      *
-     * Note: the server-side controller always returns a null body with 200 OK
-     * and processes the import asynchronously via RabbitMQ, without exposing a
-     * workFolder/tempDirId we could poll via ImporterStatus. So this method (and
-     * any test using it) can only confirm the upload was accepted, not that the
-     * subject/examination/datasets were actually created server-side.
      */
-    public void uploadBIDSDataset(File file, Long studyId, String studyName, Long centerId) throws Exception {
+    public ImportJobBase importBIDSDataset(File file, Long studyId, String studyName, Long centerId) throws Exception {
         StringBuilder url = new StringBuilder(this.serviceURLImporterBids);
         url.append(studyId)
                 .append("/").append(URLEncoder.encode(studyName, "UTF-8"))
                 .append("/").append(centerId);
         try (CloseableHttpResponse response = httpService.postFile(url.toString(), file)) {
             int code = response.getCode();
-            if (code != HttpStatus.SC_OK) {
-                LOG.error("Error in uploadBIDSDataset: studyId={} (status code: {}, message: {})",
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, ImportJobBase.class);
+            } else {
+                LOG.error("Error in importBIDSDataset: studyId={} (status code: {}, message: {})",
                         studyId, code, apiResponseMessages.getOrDefault(code, "unknown status code"));
-                throw new Exception("Error in uploadBIDSDataset");
+                throw new Exception("Error in importBIDSDataset");
             }
         }
     }
