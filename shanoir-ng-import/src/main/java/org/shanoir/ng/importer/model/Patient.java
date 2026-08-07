@@ -173,13 +173,13 @@ public class Patient {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Patient [");
-        if (patientID != null) {
+        if (patientID != null && !patientID.isBlank()) {
             sb.append("patientID=").append(Utils.sha256(patientID)).append(", ");
         }
-        if (patientName != null) {
+        if (patientName != null && !patientName.isBlank()) {
             sb.append("patientName=").append(Utils.sha256(patientName)).append(", ");
         }
-        if (patientBirthName != null) {
+        if (patientBirthName != null && !patientBirthName.isBlank()) {
             sb.append("patientBirthName=").append(Utils.sha256(patientBirthName)).append(", ");
         }
         if (patientBirthDate != null) {
