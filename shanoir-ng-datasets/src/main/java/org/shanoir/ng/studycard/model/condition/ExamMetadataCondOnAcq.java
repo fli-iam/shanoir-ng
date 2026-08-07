@@ -67,15 +67,9 @@ public class ExamMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcq
             } catch (CheckedIllegalClassException e) {
                 valueFromDb = null;
             }
-            if (valueFromDb != null) {
-                // get all possible values, that can fulfill the condition
-                for (String value : this.getValues()) {
-                    if (textualCompare(this.getOperation(), valueFromDb, value)) {
-                        LOG.info("condition fulfilled: ds.name = " + valueFromDb + ", value=" + value);
-                        nbOk++;
-                        break;
-                    }
-                }
+            if (valueFromDb != null && textualCompare(this.getOperation(), valueFromDb)) {
+                LOG.info("condition fulfilled: ds.name = " + valueFromDb);
+                nbOk++;
             }
         }
         boolean complies = cardinalityComplies(nbOk, total);

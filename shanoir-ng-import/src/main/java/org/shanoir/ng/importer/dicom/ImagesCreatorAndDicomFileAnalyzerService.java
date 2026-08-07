@@ -108,8 +108,15 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                         handleError(event, nbSeries, cpt, serie, e);
                     }
                 }
-                // We clean instances here, as now transformed to images
-                serie.setInstances(null);
+                // We clean instances here, as now transformed to images. Skip this for the
+                // local ShanoirUploader quality-control : the same importJob/Serie set
+                // is analyzed again server-side once the real import starts, and that second
+                // pass needs the original instances to rebuild the image list with
+                // server-side paths (the local pass keeps client-local absolute paths, which
+                // are meaningless once the files are uploaded to the server).
+                if (!isFromShUpQualityControl) {
+                    serie.setInstances(null);
+                }
             }
             cpt++;
         }
