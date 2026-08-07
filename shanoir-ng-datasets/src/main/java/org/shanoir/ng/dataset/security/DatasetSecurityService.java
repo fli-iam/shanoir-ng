@@ -158,12 +158,12 @@ public class DatasetSecurityService {
         if (dataset == null) {
             return false;
         }
-        String owner = dataset.getUsername();
+        Long owner = dataset.getUserId();
         if (owner == null) {
             return true;
         }
         Long studyId = dataset.getStudyId();
-        if (owner.equals(KeycloakUtil.getTokenUserName())
+        if (owner.equals(KeycloakUtil.getTokenUserId())
                 && hasRightOnStudy(studyId, StudyUserRight.CAN_ANNOTATE.name())) {
             return true;
         }
@@ -859,16 +859,16 @@ public class DatasetSecurityService {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }
-        String userName = KeycloakUtil.getTokenUserName();
+        Long userId = KeycloakUtil.getTokenUserId();
         UserRights userRights = studyRightsService.getUserRights();
         Set<Dataset> toRemove = new HashSet<>();
         list.forEach((Dataset ds) -> {
-            String owner = ds.getUsername();
+            Long owner = ds.getUserId();
             if (owner != null) {
                 Long studyId = ds.getStudyId();
                 boolean canSeeAllAnnotations = userRights.hasStudyRights(studyId, StudyUserRight.CAN_ANNOTATE_REVIEW.name())
                         || userRights.hasStudyRights(studyId, StudyUserRight.CAN_ADMINISTRATE.name());
-                boolean ownAnnotator = owner.equals(userName)
+                boolean ownAnnotator = owner.equals(userId)
                         && userRights.hasStudyRights(studyId, StudyUserRight.CAN_ANNOTATE.name());
                 if (!canSeeAllAnnotations && !ownAnnotator) {
                     toRemove.add(ds);
