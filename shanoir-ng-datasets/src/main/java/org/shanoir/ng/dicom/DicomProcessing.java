@@ -129,7 +129,7 @@ public class DicomProcessing {
                 try {
                     attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()));
                 } catch (IOException e) {
-                    throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
+                    throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSeriesInstanceUID(), e);
                 }
             }
         }
