@@ -582,7 +582,10 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     /**
-     * Use this method to publish historic event related to subjects in a study
+     * Use this method to publish historic event related to subjects in a study.
+     *
+     * The deletion event is published as a running task: the examinations, acquisitions and
+     * datasets of the subject are deleted asynchronously by ms datasets, that completes it.
      *
      * @param subject the involved subject
      * @param eventType the type of event
@@ -597,7 +600,7 @@ public class SubjectServiceImpl implements SubjectService {
                 eventMsg = "Subject " + subject.getName() + " (id: " + subject.getId() + ") created";
                 break;
             case ShanoirEventType.DELETE_SUBJECT_EVENT:
-                eventMsg = "Subject " + subject.getName() + " (id: " + subject.getId() + ") removed";
+                eventMsg = "Deleting subject " + subject.getName() + " (id: " + subject.getId() + ")...";
                 break;
             case ShanoirEventType.UPDATE_SUBJECT_EVENT:
                 eventMsg = "Subject " + subject.getName() + " (id: " + subject.getId() + ") updated";
@@ -605,13 +608,25 @@ public class SubjectServiceImpl implements SubjectService {
             default:
                 eventMsg = "Unknown subject event type: "  + eventType;
         }
-        ShanoirEvent event = new ShanoirEvent(
-                eventType,
-                subject.getId().toString(),
-                KeycloakUtil.getTokenUserId(),
-                eventMsg,
-                ShanoirEvent.SUCCESS,
-                study.getId());
+        ShanoirEvent event;
+        if (ShanoirEventType.DELETE_SUBJECT_EVENT.equals(eventType)) {
+            event = new ShanoirEvent(
+                    eventType,
+                    subject.getId().toString(),
+                    KeycloakUtil.getTokenUserId(),
+                    eventMsg,
+                    ShanoirEvent.IN_PROGRESS,
+                    0f,
+                    study.getId());
+        } else {
+            event = new ShanoirEvent(
+                    eventType,
+                    subject.getId().toString(),
+                    KeycloakUtil.getTokenUserId(),
+                    eventMsg,
+                    ShanoirEvent.SUCCESS,
+                    study.getId());
+        }
         eventService.publishEvent(event);
         return event;
     }
