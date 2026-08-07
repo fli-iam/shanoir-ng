@@ -409,15 +409,16 @@ public class ImporterService {
      * @throws Exception
      */
     private void persistSeriesInPacs(List<Serie> series, ShanoirEvent event) throws Exception {
+        long selectedSeriesCount = series.stream().filter(serie -> serie.getSelected() != null && serie.getSelected()).count();
         float progress = 0.75f;
         for (Serie serie : series) {
             if (serie.getSelected() != null && serie.getSelected()) {
                 persistSerieInPacs(serie);
+                progress += 0.25f / selectedSeriesCount;
+                event.setMessage("Saving serie " + serie.getSeriesDescription() + " into PACS.");
+                event.setProgress(progress);
+                eventService.publishEvent(event);
             }
-            progress += 0.25f / series.size();
-            event.setMessage("Saving serie " + serie.getSeriesDescription() + " into PACS.");
-            event.setProgress(progress);
-            eventService.publishEvent(event);
         }
     }
 

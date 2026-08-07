@@ -109,7 +109,6 @@ public class QualityUtils {
                 QualityTag worstTagSet = serieQualityCardResult.getUpdatedDatasetAcquisitions().get(0).getQualityTag();
                 // if quality card result contains an ERROR tag, we remove the serie from the selection
                 if (!serieQualityCardResult.isEmpty() && serieQualityCardResult.hasError()) {
-                    serie.setSelected(false);
                     seriesIt.remove();
                     LOG.info("Quality Control At Import - Serie with description " + serie.getSeriesDescription() + " did not pass quality control and will not be imported.");
                 // Handle the case where the serie passes quality control : we set the quality tag to the serie
