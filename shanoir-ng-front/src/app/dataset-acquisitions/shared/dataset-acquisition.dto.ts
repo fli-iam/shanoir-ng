@@ -13,6 +13,8 @@
  */
 import { Injectable } from '@angular/core';
 
+import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
 import { DatasetDTO, DatasetDTOService } from '../../datasets/shared/dataset.dto';
@@ -109,6 +111,7 @@ export class DatasetAcquisitionDTOService {
         entity.copies = dto.copies;
         entity.importDate = dto.importDate;
         entity.username = dto.username;
+        entity.qualityTag = dto.qualityTag;
         entity.extraDataFilePathList = dto.extraDataFilePathList;
         if (dto.acquisitionEquipmentId) {
             entity.acquisitionEquipment = new AcquisitionEquipment();
@@ -164,6 +167,7 @@ export class DatasetAcquisitionDTO {
         this.username = dsAcq.username;
         this.source = dsAcq.source;
         this.copies = dsAcq.copies;
+        this.qualityTag = dsAcq.qualityTag;
         this.extraDataFilePathList = dsAcq.extraDataFilePathList;
     }
 
@@ -180,6 +184,7 @@ export class DatasetAcquisitionDTO {
     username: string;
     copies: number[];
     source: number;
+    qualityTag: QualityTag;
     extraDataFilePathList: string[] = [];
 }
 
@@ -208,6 +213,7 @@ export class ExaminationDatasetAcquisitionDTO {
     name: string;
     type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS';
     datasets: any;
+    qualityTag: QualityTag;
     extraDataFilePathList: string[];
 }
 
