@@ -138,8 +138,8 @@ RUN --mount=type=cache,target=/opt/miniconda3/pkgs \
     && rm   miniconda.sh
 
 # Install dicomifier
-RUN --mount=type=cache,target=/opt/miniconda3/pkgs \
-    /opt/miniconda3/bin/conda install -c conda-forge dicomifier -y
+# RUN --mount=type=cache,target=/opt/miniconda3/pkgs \
+#     /opt/miniconda3/bin/conda install -c conda-forge dicomifier -y
 
 
 FROM base-debian AS nifti-conversion-builder
