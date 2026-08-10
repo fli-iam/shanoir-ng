@@ -81,7 +81,7 @@ public class EegImporterService {
      * @param importJob the import job from importer MS.
      */
     @Transactional
-    public void createEegDataset(final EegImportJob importJob) throws IOException {
+    public void createEegDataset(final EegImportJob importJob) {
         Long userId = KeycloakUtil.getTokenUserId();
         ShanoirEvent event;
         if (Objects.isNull(importJob.getShanoirEvent())) {

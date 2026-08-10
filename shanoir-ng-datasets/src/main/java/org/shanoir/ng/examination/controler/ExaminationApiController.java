@@ -69,8 +69,6 @@ public class ExaminationApiController implements ExaminationApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExaminationApiController.class);
 
-    private static final UIDGeneration UID_GENERATOR = new UIDGeneration();
-
     @Autowired
     private ExaminationMapper examinationMapper;
 
@@ -124,9 +122,9 @@ public class ExaminationApiController implements ExaminationApi {
     }
 
     @Override
-    public ResponseEntity<ExaminationDTO> findExaminationById( final Long examinationId) throws EntityNotFoundException {
+    public ResponseEntity<ExaminationDTO> findExaminationById(final Long examinationId) throws EntityNotFoundException {
         Examination examination = repository.findByIdWithAllRelations(examinationId)
-                .orElseThrow(() -> new EntityNotFoundException(Examination.class, examinationId));;
+                .orElseThrow(() -> new EntityNotFoundException(Examination.class, examinationId));
         if (examination == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

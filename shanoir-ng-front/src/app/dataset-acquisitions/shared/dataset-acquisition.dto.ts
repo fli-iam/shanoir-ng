@@ -215,7 +215,6 @@ export class ExaminationDatasetAcquisitionDTO {
     datasets: any;
     qualityTag: QualityTag;
     extraDataFilePathList: string[];
-    qualityTag: QualityTag;
 }
 
 export class DatasetAcquisitionDatasetsDTO extends DatasetAcquisitionDTO {

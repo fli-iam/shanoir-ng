@@ -100,6 +100,7 @@ class DatasetAcquisitionServiceImplTest {
         when(repository.findById(ACQ_ID)).thenReturn(Optional.of(acquisition));
         when(datasetRepository.countByDatasetAcquisitionId(ACQ_ID)).thenReturn(0);
         when(repository.findBySourceId(ACQ_ID)).thenReturn(Collections.emptyList());
+        when(repository.findByIdWithDatasets(ACQ_ID)).thenReturn(Optional.of(acquisition));
     }
 
     @Test

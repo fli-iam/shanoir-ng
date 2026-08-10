@@ -110,7 +110,7 @@ public class DicomSEGAndSRImporterService {
     private DicomImporterService dicomImporterService;
 
     @Transactional
-    public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality, boolean nonOhifRequest) {
+    public boolean importDicomSEGAndSR(Attributes metaInformationAttributes, Attributes datasetAttributes, String modality, boolean nonOhifRequest) throws RestServiceException {
         // Retrieve examination; adjust datasetAttributes if received from OHIF
         String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
         Examination examination = nonOhifRequest

@@ -17,12 +17,10 @@ package org.shanoir.ng.dataset.controler;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,10 +44,6 @@ import org.shanoir.ng.dataset.service.DatasetService;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
-import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
-import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.importer.service.ProcessedDatasetImporterService;
@@ -95,8 +89,6 @@ import jakarta.validation.Valid;
 
 @Controller
 public class DatasetApiController implements DatasetApi {
-
-    private static final String DCM = "dcm";
 
     private static final String ZIP = ".zip";
 
