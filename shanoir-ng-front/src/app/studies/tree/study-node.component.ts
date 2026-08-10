@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, Input, OnChanges, QueryList, SimpleChanges, ViewChildren } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, QueryList, SimpleChanges, ViewChildren, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -50,6 +50,7 @@ export type Sort = {field: 'name' | 'id', way : 'asc' | 'desc'}
     selector: 'study-node',
     templateUrl: 'study-node.component.html',
     styleUrls: ['study-node.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, FormsModule, SubjectNodeComponent, CenterNodeComponent, StudyCardNodeComponent, MemberNodeComponent]
 })
 

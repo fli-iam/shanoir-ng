@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
-import { Component, ElementRef, Input, OnDestroy, OnInit} from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { NgTemplateOutlet } from '@angular/common';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
@@ -35,6 +35,7 @@ import { BidsElement } from '../model/bidsElement.model';
     selector: 'bids-tree',
     templateUrl: 'bids-tree.component.html',
     styleUrls: ['bids-tree.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TreeNodeComponent, NgTemplateOutlet, NgxJsonViewerModule, LoadingBarComponent]
 })
 

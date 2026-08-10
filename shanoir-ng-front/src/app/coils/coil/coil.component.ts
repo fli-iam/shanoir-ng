@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
@@ -34,6 +34,7 @@ import { SelectBoxComponent } from '../../shared/select/select.component';
     selector: 'coil',
     templateUrl: 'coil.component.html',
     styleUrls: ['coil.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, RouterLink, ManufacturerModelPipe]
 })
 export class CoilComponent extends EntityComponent<Coil> {

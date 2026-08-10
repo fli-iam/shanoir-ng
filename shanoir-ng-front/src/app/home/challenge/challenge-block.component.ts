@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -25,6 +25,7 @@ import { LoadingBarComponent } from '../../shared/components/loading-bar/loading
     selector: 'challenge-block',
     templateUrl: 'challenge-block.component.html',
     styleUrls: ['challenge-block.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [LoadingBarComponent, RouterLink]
 })
 

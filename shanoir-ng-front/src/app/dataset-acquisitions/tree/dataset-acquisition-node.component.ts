@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -36,6 +36,7 @@ import { DatasetNodeComponent } from '../../datasets/tree/dataset-node.component
 @Component({
     selector: 'dataset-acquisition-node',
     templateUrl: 'dataset-acquisition-node.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [LoadingBarComponent, TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, DatasetNodeComponent]
 })
 

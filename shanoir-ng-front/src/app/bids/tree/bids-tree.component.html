@@ -104,7 +104,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 @if (task && task.progress < 1) {
     <div class="json-report">
         <p class="info-frame">
-            <progress-bar [progress]="task?.progress" [width]="200" [warning]="task.status == 5 || task.status == 3"></progress-bar>
+            <progress-bar [progress]="$safeNavigationMigration(task?.progress)" [width]="200" [warning]="task.status == 5 || task.status == 3"></progress-bar>
             <br />
             <i class="fas fa-info-circle"></i>
             BIDS export is in progress and can take some time depending of the size of your study. Once the export is finished, you will be able to use the

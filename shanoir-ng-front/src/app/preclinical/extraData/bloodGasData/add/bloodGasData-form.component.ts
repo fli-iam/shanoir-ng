@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -30,6 +30,7 @@ import { FormFooterComponent } from '../../../../shared/components/form-footer/f
 @Component({
     selector: 'bloodgas-data-upload-form',
     templateUrl: 'bloodGasData-form.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, UploaderComponent]
 })
 export class BloodGasDataFormComponent extends EntityComponent<BloodGasDataFile> {

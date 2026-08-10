@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
@@ -30,6 +30,7 @@ import { SimpleDatasetNodeComponent } from './simple-dataset-node.component';
 @Component({
     selector: 'processing-node',
     templateUrl: 'processing-node.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TreeNodeComponent, DropdownMenuComponent, MenuItemComponent, SimpleDatasetNodeComponent]
 })
 

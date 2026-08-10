@@ -60,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         }
         @if (condition.scope?.includes('DICOMCondition')) {
             <span class="var" title="{{ condition.dicomTag | dicomTagLabel }}">
-                {{ condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag?.code | dicomTagLabel) }}
+                {{ condition.dicomTag?.label ? condition.dicomTag.label : ($safeNavigationMigration(condition.dicomTag?.code) | dicomTagLabel) }}
             </span>
         }
         @if (!condition.scope?.includes('DICOMCondition')) {

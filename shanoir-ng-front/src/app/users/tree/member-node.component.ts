@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
 
@@ -29,6 +29,7 @@ import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-it
 @Component({
     selector: 'member-node',
     templateUrl: 'member-node.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent]
 })
 

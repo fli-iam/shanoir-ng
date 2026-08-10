@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <select-box
                         [(ngModel)]="study"
                         (userChange)="onSelectStudy()"
-                        [viewRoute]="'/study/details/' + study?.id"
+                        [viewRoute]="'/study/details/' + $safeNavigationMigration(study?.id)"
                         [viewDisabled]="!study"
                         [options]="studyOptions"
                         [disabled]="loading"></select-box>
@@ -62,7 +62,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <select-box
                             [(ngModel)]="studycard"
                             (userChange)="onSelectStudyCard()"
-                            [viewRoute]="'/study-card/details/' + studycard?.id"
+                            [viewRoute]="'/study-card/details/' + $safeNavigationMigration(studycard?.id)"
                             (userClear)="onClearStudyCard()"
                             [viewDisabled]="!studycard"
                             [options]="studycardOptions"
@@ -120,7 +120,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
                             [(ngModel)]="center"
                             (userChange)="onSelectCenter()"
-                            [viewRoute]="'/center/details/' + center?.id"
+                            [viewRoute]="'/center/details/' + $safeNavigationMigration(center?.id)"
                             [viewDisabled]="!center"
                             (newClick)="openCreateCenter()"
                             [newHidden]="hasCompatibleCenters"
@@ -157,7 +157,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
                             [(ngModel)]="acquisitionEquipment"
                             (userChange)="onContextChange()"
-                            [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id"
+                            [viewRoute]="'/acquisition-equipment/details/' + $safeNavigationMigration(acquisitionEquipment?.id)"
                             [viewDisabled]="!acquisitionEquipment"
                             (newClick)="openCreateAcqEqt()"
                             [newHidden]="hasCompatibleEquipments"
@@ -195,7 +195,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [disabled]="loading || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
                         (userChange)="onSelectSubject()"
-                        [viewRoute]="'/subject/details/' + this.subject?.id"
+                        [viewRoute]="'/subject/details/' + $safeNavigationMigration(this.subject?.id)"
                         [viewDisabled]="!subject"
                         [optionArr]="subjects"></select-box>
                     <button class="new-subject" (click)="openCreateSubject()" [disabled]="!study || !acquisitionEquipment">
@@ -222,7 +222,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [disabled]="!study || !subject || loading"
                         [(ngModel)]="examination"
                         (userChange)="onSelectExam()"
-                        [viewRoute]="'/examination/details/' + this.examination?.id"
+                        [viewRoute]="'/examination/details/' + $safeNavigationMigration(this.examination?.id)"
                         [viewDisabled]="!examination"
                         [optionArr]="examinations"
                         [pipe]="subjectExaminationLabelPipe"></select-box>

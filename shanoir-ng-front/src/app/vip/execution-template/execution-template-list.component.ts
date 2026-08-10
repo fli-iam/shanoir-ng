@@ -1,4 +1,4 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, Input, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
@@ -15,6 +15,7 @@ import { ExecutionTemplateService } from "./execution-template.service";
 @Component({
     selector: 'execution-template-list',
     templateUrl: './execution-template-list.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, TableComponent]
     
 })

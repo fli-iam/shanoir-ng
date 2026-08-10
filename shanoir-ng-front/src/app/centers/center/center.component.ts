@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
@@ -32,6 +32,7 @@ import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/ac
     selector: 'center-detail',
     templateUrl: 'center.component.html',
     styleUrls: ['center.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, HelpMessageComponent, AcquisitionEquipmentPipe]
 })
 

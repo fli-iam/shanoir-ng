@@ -103,7 +103,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        <a [routerLink]="['/study/details/', qualityCard.study?.id]" (click)="breadcrumbsService.markMilestone()">
+                                        <a [routerLink]="['/study/details/', $safeNavigationMigration(qualityCard.study?.id)]" (click)="breadcrumbsService.markMilestone()">
                                             {{ qualityCard.study.name }}
                                         </a>
                                     }
@@ -162,7 +162,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [(ngModel)]="qualityCard.rules"
                         [mode]="selectMode ? 'select' : mode"
                         [allCoils]="allCoils"
-                        [studyId]="qualityCard.study?.id"
+                        [studyId]="$safeNavigationMigration(qualityCard.study?.id)"
                         [showErrors]="showRulesErrors"
                         (selectedRulesChange)="selectedRules = $event"
                         [addSubForm]="addConditionForm.bind(this)"></study-card-rules>

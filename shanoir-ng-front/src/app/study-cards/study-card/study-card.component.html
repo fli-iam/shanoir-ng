@@ -87,7 +87,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        <a [routerLink]="['/study/details/', studyCard.study?.id]">
+                                        <a [routerLink]="['/study/details/', $safeNavigationMigration(studyCard.study?.id)]">
                                             {{ studyCard.study.name }}
                                         </a>
                                     }
@@ -121,7 +121,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        <a [routerLink]="['/acquisition-equipment/details/', studyCard.acquisitionEquipment?.id]">
+                                        <a [routerLink]="['/acquisition-equipment/details/', $safeNavigationMigration(studyCard.acquisitionEquipment?.id)]">
                                             {{ studyCard.acquisitionEquipment | acqEqptLabel }}
                                         </a>
                                     }
@@ -161,7 +161,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         cardType="studycard"
                         formControlName="rules"
                         [mode]="selectMode ? 'select' : mode"
-                        [manufModelId]="studyCard.acquisitionEquipment?.manufacturerModel?.id"
+                        [manufModelId]="$safeNavigationMigration(studyCard.acquisitionEquipment?.manufacturerModel?.id)"
                         [allCoils]="allCoils"
                         [showErrors]="showRulesErrors"
                         (selectedRulesChange)="selectedRules = $event"

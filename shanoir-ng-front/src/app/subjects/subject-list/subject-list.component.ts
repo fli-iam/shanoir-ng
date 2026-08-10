@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
@@ -29,6 +29,7 @@ import { IdName } from "../../shared/models/id-name.model";
     selector: 'subject-list',
     templateUrl: 'subject-list.component.html',
     styleUrls: ['subject-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 

@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, HostListener, OnDestroy, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -35,6 +35,7 @@ import { TreeService } from './tree.service';
     selector: 'study-tree',
     templateUrl: 'study-tree.component.html',
     styleUrls: ['study-tree.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [DoubleAwesomeComponent, StudyNodeComponent]
 })
 

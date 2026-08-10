@@ -87,7 +87,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </tr>
                 <tr class="item">
                     <td class="label">Birth date</td>
-                    <td class="value">{{ $any(detailedPatient)?.patientBirthDate | localDateFormatPipe }}</td>
+                    <td class="value">{{ $safeNavigationMigration($any(detailedPatient)?.patientBirthDate) | localDateFormatPipe }}</td>
                 </tr>
                 <tr class="item">
                     <td class="label">Identity removed</td>
@@ -111,7 +111,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </tr>
                 <tr class="item">
                     <td class="label">Date</td>
-                    <td class="value">{{ $any(detailedStudy)?.studyDate | localDateFormatPipe }}</td>
+                    <td class="value">{{ $safeNavigationMigration($any(detailedStudy)?.studyDate) | localDateFormatPipe }}</td>
                 </tr>
                 <tr class="item">
                     <td class="label">Description</td>
@@ -148,7 +148,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </tr>
                 <tr class="item">
                     <td class="label">Series date</td>
-                    <td class="value">{{ $any(detailedSerie)?.seriesDate | localDateFormatPipe }}</td>
+                    <td class="value">{{ $safeNavigationMigration($any(detailedSerie)?.seriesDate) | localDateFormatPipe }}</td>
                 </tr>
                 <tr class="item">
                     <td class="label">Series number</td>

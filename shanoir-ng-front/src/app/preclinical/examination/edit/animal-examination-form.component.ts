@@ -13,7 +13,7 @@
  */
 
 import { NgClass } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
@@ -48,6 +48,7 @@ import { AnimalExaminationService } from '../shared/animal-examination.service';
     selector: 'examination-preclinical-form',
     templateUrl: 'animal-examination-form.component.html',
     styleUrls: ['animal-examination.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, ExaminationAnestheticFormComponent, PhysiologicalDataFormComponent, BloodGasDataFormComponent, LocalDateFormatPipe]
 })
 export class AnimalExaminationFormComponent extends ExaminationComponent {

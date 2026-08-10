@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AngularDeviceInformationService } from 'angular-device-information';
 import { Subscription } from 'rxjs';
@@ -34,6 +34,7 @@ import { SizePipe } from '../../utils/size.pipe';
     selector: 'download-setup',
     templateUrl: 'download-setup.component.html',
     styleUrls: ['download-setup.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent, TooltipComponent, CheckboxComponent, TreeNodeComponent, NgTemplateOutlet, SizePipe]
 })
 

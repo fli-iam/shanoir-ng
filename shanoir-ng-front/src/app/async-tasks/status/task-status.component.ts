@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HttpClient } from "@angular/common/http";
 import { FormsModule } from '@angular/forms';
@@ -36,6 +36,7 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
     selector: 'task-status',
     templateUrl: 'task-status.component.html',
     styleUrls: ['task-status.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, LoadingBarComponent, RouterLink, TableComponent, LocalDateFormatPipe]
 })
 export class TaskStatusComponent implements OnDestroy, OnChanges {

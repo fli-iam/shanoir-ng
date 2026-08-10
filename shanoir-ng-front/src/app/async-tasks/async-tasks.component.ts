@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { TableComponent } from '../shared/components/table/table.component';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
@@ -31,6 +31,7 @@ import { TaskStatusComponent } from './status/task-status.component';
     selector: 'async-tasks',
     templateUrl: 'async-tasks.component.html',
     styleUrls: ['async-tasks.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent, TaskStatusComponent]
 })
 

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
 import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
@@ -30,6 +30,7 @@ import { ExecutionMonitoringService } from './execution-monitoring.service';
     selector: 'app-execution-monitorings',
     templateUrl: './execution-monitorings.component.html',
     styleUrls: ['./execution-monitorings.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class ExecutionMonitoringsComponent extends EntityListComponent<ExecutionMonitoring> implements AfterViewInit {

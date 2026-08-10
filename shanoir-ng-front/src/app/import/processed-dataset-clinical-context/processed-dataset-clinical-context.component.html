@@ -28,7 +28,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                     [(ngModel)]="study"
                     (userChange)="onSelectStudy(); onContextChange()"
-                    [viewRoute]="'/study/details/' + study?.id"
+                    [viewRoute]="'/study/details/' + $safeNavigationMigration(study?.id)"
                     [viewDisabled]="!study"
                     [options]="studyOptions"
                     [disabled]="loading"></select-box>
@@ -48,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [disabled]="loading || !study"
                     [(ngModel)]="subject"
                     (userChange)="onContextChange()"
-                    [viewRoute]="'/subject/details/' + subject?.id"
+                    [viewRoute]="'/subject/details/' + $safeNavigationMigration(subject?.id)"
                     [viewDisabled]="!subject"
                     [optionArr]="subjects"></select-box>
             </span>

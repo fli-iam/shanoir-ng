@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { Pipeline } from 'src/app/vip/models/pipeline';
 import { ImagesUrlUtil } from 'src/app/shared/utils/images-url.util';
@@ -22,6 +22,7 @@ import { ImagesUrlUtil } from 'src/app/shared/utils/images-url.util';
     selector: 'app-pipeline',
     templateUrl: './pipeline.component.html',
     styleUrls: ['./pipeline.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: []
 })
 export class PipelineComponent implements OnInit {

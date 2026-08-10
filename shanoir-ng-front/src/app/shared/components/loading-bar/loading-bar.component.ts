@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, HostBinding, Input } from '@angular/core';
+import { Component, HostBinding, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { getSizeStr } from 'src/app/utils/app.utils';
 
@@ -22,6 +22,7 @@ import { getSizeStr } from 'src/app/utils/app.utils';
     selector: 'progress-bar',
     templateUrl: 'loading-bar.component.html',
     styleUrls: ['loading-bar.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: []
 })
 

@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ComponentRef, EventEmitter, ViewChild } from '@angular/core';
+import { Component, ComponentRef, EventEmitter, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormArray, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom, Observable, race } from 'rxjs';
@@ -53,6 +53,7 @@ import { LoadingBarComponent } from '../../shared/components/loading-bar/loading
     selector: 'quality-card',
     templateUrl: 'quality-card.component.html',
     styleUrls: ['quality-card.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, CheckboxComponent, StudyCardRulesComponent, LoadingBarComponent, TableComponent]
 })
 export class QualityCardComponent extends EntityComponent<QualityCard> {

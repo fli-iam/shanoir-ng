@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, forwardRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Router } from '@angular/router';
 import { combineLatest, Subject as RxjsSubject, Subscription } from 'rxjs';
@@ -41,6 +41,7 @@ import { TooltipComponent } from '../tooltip/tooltip.component';
             multi: true
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TooltipComponent, FormsModule, TableComponent]
 })
 

@@ -1,4 +1,4 @@
-import {Component} from '@angular/core'
+import {Component, ChangeDetectionStrategy} from '@angular/core'
 import {ActivatedRoute} from "@angular/router"
 import {FormGroup, ReactiveFormsModule, UntypedFormGroup, Validators} from "@angular/forms"
 import { CommonModule } from '@angular/common'
@@ -17,6 +17,7 @@ import {ExecutionTemplateFilterService} from "./execution-template-filter.servic
     selector: 'execution-template-filter',
     templateUrl: './execution-template-filter.component.html',
     styleUrls: ['./execution-template-filter.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         CommonModule,
         ReactiveFormsModule,

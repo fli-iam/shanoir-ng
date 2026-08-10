@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, KeyValueDiffer, KeyValueDiffers } from '@angular/core';
+import { Component, Input, KeyValueDiffer, KeyValueDiffers, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -54,6 +54,7 @@ import { SubjectTherapyListComponent } from '../../therapies/subjectTherapy/list
     selector: 'animal-subject-form',
     templateUrl: 'animal-subject-form.component.html',
     styleUrls: ['../../../subjects/subject/subject.component.css', 'animal-subject-form.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, SelectBoxComponent, TagInputComponent, CheckboxComponent, SubjectPathologiesListComponent, SubjectTherapyListComponent]
 })
 

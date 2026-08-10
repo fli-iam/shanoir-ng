@@ -13,7 +13,7 @@
  */
 
 import { formatDate } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import {
     FormsModule,
     ReactiveFormsModule,
@@ -48,6 +48,7 @@ import { PipelineParameter } from "../models/pipelineParameter";
     selector: 'app-execution',
     templateUrl: './execution.component.html',
     styleUrls: ['./execution.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent, TooltipComponent]
 })
 export class ExecutionComponent implements OnInit {

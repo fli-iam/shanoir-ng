@@ -13,7 +13,7 @@
  */
 
 import { HttpEventType, HttpResponse } from '@angular/common/http';
-import {Component, HostListener, OnDestroy } from '@angular/core';
+import {Component, HostListener, OnDestroy, ChangeDetectionStrategy} from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -43,6 +43,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'dicom-upload',
     templateUrl: 'dicom-upload.component.html',
     styleUrls: ['dicom-upload.component.css', '../shared/import.step.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [CheckboxComponent, FormsModule, SelectBoxComponent, UploaderComponent, LoadingBarComponent]
 })
 export class DicomUploadComponent implements OnDestroy {

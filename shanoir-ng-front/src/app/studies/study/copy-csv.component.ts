@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, HostBinding, HostListener, inject, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostBinding, HostListener, inject, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
 
@@ -22,6 +22,7 @@ import { TreeService } from './tree.service';
 
 @Component({
     selector: 'copy-from-csv',
+    changeDetection: ChangeDetectionStrategy.Eager,
     template: `
         <button class="right-icon" type="button">
             Copy from mapping file

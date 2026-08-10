@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -26,6 +26,7 @@ import { CoilService } from '../shared/coil.service';
     selector: 'coil-list',
     templateUrl: 'coil-list.component.html',
     styleUrls: ['coil-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {

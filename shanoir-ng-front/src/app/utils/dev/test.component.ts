@@ -13,7 +13,7 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { DatasetAcquisitionService } from 'src/app/dataset-acquisitions/shared/dataset-acquisition.service';
@@ -25,6 +25,7 @@ import { StudyService } from 'src/app/studies/shared/study.service';
     selector: 'dev-test',
     templateUrl: 'test.component.html',
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule]
 })
 

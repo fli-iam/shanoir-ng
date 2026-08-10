@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormArray, FormGroup, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
@@ -45,6 +45,7 @@ import { TooltipComponent } from '../../shared/components/tooltip/tooltip.compon
     selector: 'study-card',
     templateUrl: 'study-card.component.html',
     styleUrls: ['study-card.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, TooltipComponent, StudyCardRulesComponent, AcquisitionEquipmentPipe]
 })
 export class StudyCardComponent extends EntityComponent<StudyCard> implements OnDestroy {
