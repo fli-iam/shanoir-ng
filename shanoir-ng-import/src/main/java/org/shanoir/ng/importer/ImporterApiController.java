@@ -208,7 +208,7 @@ public class ImporterApiController implements ImporterApi {
         }
         importJob.setPatients(patients);
         // Required here as imagesCreator is already based on new structure:
-        handleLegacyPatientStudySeries(importJob);
+        handleLegacyPatientSubjectStudySeries(importJob);
         /**
          * STEP: split instances into non-images and images and get additional meta-data
          * from first DICOM file of each serie, meta-data missing in DICOMDIR.
@@ -246,9 +246,9 @@ public class ImporterApiController implements ImporterApi {
         File userImportDir = ImportUtils.getUserImportDir(importDir);
         final Long userId = KeycloakUtil.getTokenUserId();
         importJob.setUserId(userId);
-        String tempDirId = importJob.getWorkFolder();
-        importJob.setId(tempDirId);
-        final File importJobDir = new File(userImportDir, tempDirId);
+        String id = ImportJobStatusService.keyOf(importJob.getWorkFolder());
+        importJob.setId(id);
+        final File importJobDir = new File(userImportDir, id);
         if (importJobDir.exists()) {
             importJob.setWorkFolder(importJobDir.getAbsolutePath());
             importJobStatusService.setInProgress(importJob, "Import job received, queued for processing.");
@@ -256,7 +256,7 @@ public class ImporterApiController implements ImporterApi {
             LOG.info("Import job (old) for user {} ({})", KeycloakUtil.getTokenUserName(), userId);
             LOG.info("Import type: {}", importJob.getImportType());
             LOG.info("WorkFolder: {}", importJob.getWorkFolder());
-            handleLegacyPatientStudySeries(importJob);
+            handleLegacyPatientSubjectStudySeries(importJob);
             importerManagerService.manageImportJob(importJob);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
@@ -266,11 +266,12 @@ public class ImporterApiController implements ImporterApi {
         }
     }
 
-    public void handleLegacyPatientStudySeries(final ImportJob importJob) {
+    public void handleLegacyPatientSubjectStudySeries(final ImportJob importJob) {
         // Get subject, study and series from legacy location and put in new locations
         if (!importJob.getPatients().isEmpty()) {
             Patient patient = importJob.getPatients().getFirst();
             importJob.setPatient(patient);
+            importJob.setSubject(patient.getSubject());
             if (!patient.getStudies().isEmpty()) {
                 Study study = patient.getStudies().getFirst();
                 importJob.setStudy(study);
