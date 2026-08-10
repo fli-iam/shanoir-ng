@@ -247,6 +247,7 @@ public class ImporterApiController implements ImporterApi {
         final Long userId = KeycloakUtil.getTokenUserId();
         importJob.setUserId(userId);
         String tempDirId = importJob.getWorkFolder();
+        importJob.setId(tempDirId);
         final File importJobDir = new File(userImportDir, tempDirId);
         if (importJobDir.exists()) {
             importJob.setWorkFolder(importJobDir.getAbsolutePath());
