@@ -47,7 +47,7 @@
     "@types/jasminewd2": "~2.0.13",
     "@typescript-eslint/eslint-plugin": "^8.4.0",
     "@typescript-eslint/parser": "^8.4.0",
-    "angular-eslint": "20.3.0",
+    "angular-eslint": "22.1.0",
     "browserslist": "^4.28.1",
     "caniuse-lite": "^1.0.30001769",
     "eslint": "^9.39.1",
