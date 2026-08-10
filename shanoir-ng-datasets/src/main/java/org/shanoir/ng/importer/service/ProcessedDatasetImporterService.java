@@ -124,7 +124,7 @@ public class ProcessedDatasetImporterService {
 
             event.setStatus(ShanoirEvent.SUCCESS);
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")] "
-                    + "Successfully created processed dataset [" + dataset.getId() + "] "
+                    + " Created processed dataset [" + dataset.getId() + "] "
                     + "for subject [" + importJob.getSubjectName() + "]");
             event.setProgress(1f);
             eventService.publishEvent(event);
