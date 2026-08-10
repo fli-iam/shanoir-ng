@@ -69,8 +69,12 @@ public class ExecutionTemplateServiceImpl implements ExecutionTemplateService {
     }
 
     public ExecutionTemplate update(ExecutionTemplate executionTemplate) {
-        ExecutionTemplate oldEntity = repository.findById(executionTemplate.getId()).get();
+        ExecutionTemplate oldEntity = repository.findByIdWithStudy(executionTemplate.getId()).get();
         executionTemplate.setFilters(oldEntity.getFilters());
+        executionTemplate.setStudy(oldEntity.getStudy());
+        if (executionTemplate.getParameters() != null) {
+            executionTemplate.getParameters().forEach(parameter -> parameter.setExecutionTemplate(executionTemplate));
+        }
         return executionTemplate;
     }
 

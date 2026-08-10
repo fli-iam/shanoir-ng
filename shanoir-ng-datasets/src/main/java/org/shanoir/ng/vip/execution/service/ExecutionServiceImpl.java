@@ -283,12 +283,12 @@ public class ExecutionServiceImpl implements ExecutionService {
     /**
      * Get location of exec results as URI
      */
-    private List<String> getResultsLocationUri(String resultLocation, ExecutionCandidateDTO candidate) {
-        return List.of(shanoirURIScheme + resultLocation
+    private String getResultsLocationUri(String resultLocation, ExecutionCandidateDTO candidate) {
+        return shanoirURIScheme + resultLocation
                 + "?token=" + KeycloakUtil.getToken()
                 + "&refreshToken=" + candidate.getRefreshToken()
                 + "&clientId=" + candidate.getClient()
-                + "&md5=none&type=File");
+                + "&md5=none&type=File";
     }
 
     /**
