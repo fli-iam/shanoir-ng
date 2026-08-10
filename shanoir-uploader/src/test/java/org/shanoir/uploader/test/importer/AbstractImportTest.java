@@ -235,9 +235,9 @@ public abstract class AbstractImportTest extends AbstractTest {
         importJob.setPatient(null);
         importJob.setStudy(null);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-        dumpImportJobJson(importJobJson, importJob.getWorkFolder(), label);
-        userClient.startImportJob(importJob.getWorkFolder(), importJobJson);
-        waitForServerImportJobStatus(importJob.getWorkFolder(), label + "-before-ds");
+        dumpImportJobJson(importJobJson, importJob.getId(), label);
+        userClient.startImportJob(importJob.getId(), importJobJson);
+        waitForServerImportJobStatus(importJob.getId(), label + "-before-ds");
     }
 
     /**
@@ -256,22 +256,22 @@ public abstract class AbstractImportTest extends AbstractTest {
         );
         Assertions.assertNotNull(dicomFiles);
         Assertions.assertTrue(dicomFiles.size() > 0, "No anonymized DICOM files found in upload folder.");
-        String tempDirId = userClient.createTempDir();
-        Assertions.assertNotNull(tempDirId);
-        logger.info("Upload: tempDirId for import: " + tempDirId);
+        String id = userClient.createTempDir();
+        Assertions.assertNotNull(id);
+        logger.info("Upload: id for import: " + id);
         int i = 0;
         for (File file : dicomFiles) {
             i++;
-            userClient.uploadFile(tempDirId, file);
+            userClient.uploadFile(id, file);
             logger.debug("Uploaded file {}/{}: {}", i, dicomFiles.size(), file.getName());
         }
-        logger.info("Upload: " + dicomFiles.size() + " uploaded files to tempDirId: " + tempDirId);
-        importJob.setId(tempDirId);
-        importJob.setWorkFolder(tempDirId);
-        logger.info("TempDirId: {}", importJob.getWorkFolder());
+        logger.info("Upload: " + dicomFiles.size() + " uploaded files to id: " + id);
+        importJob.setId(id);
+        importJob.setWorkFolder(id);
+        logger.info("id: {}", importJob.getWorkFolder());
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-        dumpImportJobJson(importJobJson, tempDirId, label);
-        userClient.startImportJob(tempDirId, importJobJson);
+        dumpImportJobJson(importJobJson, id, label);
+        userClient.startImportJob(id, importJobJson);
     }
 
     protected void dumpImportJobJson(String importJobJson, String workFolder, String label) {
@@ -324,25 +324,25 @@ public abstract class AbstractImportTest extends AbstractTest {
                 + examinationId + (lastError != null ? ": " + lastError.getMessage() : ""));
     }
 
-    protected org.shanoir.ng.importer.model.ImportJobStatus waitForServerImportJobStatus(String tempDirId, String label)
+    protected org.shanoir.ng.importer.model.ImportJobStatus waitForServerImportJobStatus(String id, String label)
             throws Exception {
         long deadline = System.currentTimeMillis() + CONSISTENCY_CHECK_TIMEOUT_MILLIS;
         while (System.currentTimeMillis() < deadline) {
-            org.shanoir.ng.importer.model.ImportJobStatus status = userClient.getImportJobStatus(tempDirId);
+            org.shanoir.ng.importer.model.ImportJobStatus status = userClient.getImportJobStatus(id);
             if (status != null) {
                 if (status.getState() == org.shanoir.ng.importer.model.ImportJobStatus.State.FINISHED) {
-                    logger.info("Server reported FINISHED for tempDirId {}.", tempDirId);
+                    logger.info("Server reported FINISHED for id {}.", id);
                     ImportJobBase importJob = status.getImportJob();
                     String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-                    dumpImportJobJson(importJobJson, tempDirId, label);
+                    dumpImportJobJson(importJobJson, id, label);
                     return status;
                 } else if (status.getState() == org.shanoir.ng.importer.model.ImportJobStatus.State.ERROR) {
-                    Assertions.fail("Import failed on server for tempDirId " + tempDirId + ": " + status.getMessage());
+                    Assertions.fail("Import failed on server for id " + id + ": " + status.getMessage());
                 }
             }
             Thread.sleep(CONSISTENCY_CHECK_POLL_INTERVAL_MILLIS);
         }
-        Assertions.fail("Import did not reach FINISHED on server within timeout for tempDirId " + tempDirId);
+        Assertions.fail("Import did not reach FINISHED on server within timeout for id " + id);
         return null;
     }
 

@@ -215,7 +215,7 @@ public interface ImporterApi {
             produces = {"application/json"},
             consumes = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT') and @importSecurityService.canImportFromPACS())")
-    ResponseEntity<ImportJob> queryPACS(@Parameter(name = "DicomQuery", required = true) @RequestBody DicomQuery dicomQuery) throws RestServiceException;
+    ResponseEntity<ImportJob> queryPACS(@Parameter(name = "DicomQuery", required = true) @RequestBody DicomQuery dicomQuery) throws RestServiceException, IOException;
 
     @Operation(summary = "Get dicom image", description = "Get dicom image")
     @ApiResponses(value = {

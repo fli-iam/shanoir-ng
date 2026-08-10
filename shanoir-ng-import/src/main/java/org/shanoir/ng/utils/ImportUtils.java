@@ -20,7 +20,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
@@ -37,11 +40,8 @@ import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -266,57 +266,28 @@ public final class ImportUtils {
         }
     }
 
-    /**
-     * This method stores an uploaded zip file in a temporary file, creates a new
-     * folder with the same name and unzips the content into this folder, and gives
-     * back the folder with the content.
-     *
-     * @param importJobFile
-     * @param dicomZipFile
-     * @return
-     * @throws IOException
-     * @throws RestServiceException
-     */
-    public static File saveImportJobFileCreateFolderAndUnzip(final File importJobFile) throws IOException, RestServiceException {
-        String fileName = importJobFile.getName();
-        int pos = fileName.lastIndexOf(FILE_POINT);
-        if (pos > 0) {
-            fileName = fileName.substring(0, pos);
-        }
-        File unzipFolderFile = new File(importJobFile.getParentFile().getAbsolutePath() + File.separator + fileName);
-        if (!unzipFolderFile.exists()) {
-            unzipFolderFile.mkdirs();
-        } else {
-            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                    "Error while unzipping file: folder already exists.", null));
-        }
-        ImportUtils.unzip(importJobFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
-        importJobFile.delete();
-        return unzipFolderFile;
-    }
-
-    public static File initImportJob(final ImportJobBase importJob, final String importDir, final MultipartFile file) throws IOException {
-        importJob.setUserId(KeycloakUtil.getTokenUserId());
-        importJob.setUsername(KeycloakUtil.getTokenUserName());
-        long n = createRandomLong();
-        importJob.setId(Long.toString(n));
-        File userImportDir = getUserImportDir(importDir);
-        File uploadedFile = new File(userImportDir.getAbsolutePath(), importJob.getId() + UPLOAD_FILE_SUFFIX);
-        file.transferTo(uploadedFile);
-        return uploadedFile;
-    }
-
-    public static File initImportJob(final ImportJobBase importJob, final String importDir, final boolean mkdirs) throws IOException {
+    public static File initImportJob(final ImportJobBase importJob, final String importDir) throws IOException {
         importJob.setUserId(KeycloakUtil.getTokenUserId());
         importJob.setUsername(KeycloakUtil.getTokenUserName());
         long n = createRandomLong();
         importJob.setId(Long.toString(n));
         File userImportDir = getUserImportDir(importDir);
         File importJobDir = new File(userImportDir.getAbsolutePath(), importJob.getId());
-        if (!importJobDir.exists() && mkdirs) {
+        if (!importJobDir.exists()) {
             importJobDir.mkdirs();
+        } else {
+            LOG.error("Error in initImportJob: importJobDir/workFolder exists.");
+            throw new IOException("Error in initImportJob: importJobDir/workFolder exists.");
         }
+        importJob.setWorkFolder(importJobDir.getAbsolutePath());
         return importJobDir;
+    }
+
+    public static File initImportJob(final ImportJobBase importJob, final String importDir, final MultipartFile file) throws IOException {
+        File importJobDir = initImportJob(importJob, importDir);
+        File uploadedFile = new File(importJobDir.getAbsolutePath() + UPLOAD_FILE_SUFFIX);
+        file.transferTo(uploadedFile);
+        return uploadedFile;
     }
 
     /**
@@ -332,6 +303,22 @@ public final class ImportUtils {
             n = Math.abs(n);
         }
         return n;
+    }
+
+    public static void moveDirectoryContents(File sourceDir, File targetDir) throws IOException {
+        File[] children = sourceDir.listFiles();
+        if (children == null) {
+            throw new IOException("Not a directory or IO error: " + sourceDir);
+        }
+        for (File child : children) {
+            Path dest = targetDir.toPath().resolve(child.getName());
+            try {
+                Files.move(child.toPath(), dest, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(child.toPath(), dest); // fallback: cross-filesystem
+            }
+        }
+        Files.delete(sourceDir.toPath());
     }
 
     public static String readableFileSize(long size) {

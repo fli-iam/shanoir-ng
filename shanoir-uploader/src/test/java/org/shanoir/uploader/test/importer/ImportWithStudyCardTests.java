@@ -27,7 +27,6 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.shanoir.ng.importer.ImportJobStatusService;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Patient;
@@ -85,7 +84,7 @@ public class ImportWithStudyCardTests extends AbstractImportTest {
         logger.info("......................................................");
         try {
             ImportJobBase importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
-            logger.info("TempDirId: {}", importJob.getWorkFolder());
+            logger.info("ID: {}", importJob.getId());
             study = createStudyAndCenterAndStudyCardAndAddMembers();
             if (!importJob.getSeries().isEmpty()) {
                 selectAllSeriesForImport(importJob);
@@ -159,8 +158,7 @@ public class ImportWithStudyCardTests extends AbstractImportTest {
         // MS Import is only relaying the job to MS Datasets
         userClient.startImportEEGJob(analyzedJob);
         if (analyzedJob.getWorkFolder() != null && !analyzedJob.getWorkFolder().isEmpty()) {
-            final String tempDirId = ImportJobStatusService.keyOf(analyzedJob.getWorkFolder());
-            waitForServerImportJobStatus(tempDirId, "testImportEEG-before-ds");
+            waitForServerImportJobStatus(analyzedJob.getId(), "testImportEEG-before-ds");
         }
     }
 
@@ -273,7 +271,7 @@ public class ImportWithStudyCardTests extends AbstractImportTest {
             Util.mapper.writeValue(importJobJsonFile, importJob);
 
             startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportShUpFromPACS");
-            waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportShUpFromPACS-before-ds");
+            waitForServerImportJobStatus(importJob.getId(), "testImportShUpFromPACS-before-ds");
             waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
             downloadAndCompareDatasetsZip(examination.getId(), uploadFolder, "testImportShUpFromPACS");
         } finally {

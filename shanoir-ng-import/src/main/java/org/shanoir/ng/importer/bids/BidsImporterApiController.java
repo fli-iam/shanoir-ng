@@ -105,7 +105,9 @@ public class BidsImporterApiController implements BidsImporterApi {
         }
         ImportJobBase importJob = new ImportJobBase();
         File importJobFile = ImportUtils.initImportJob(importJob, importDir, bidsFile);
-        File importJobDir = ImportUtils.saveImportJobFileCreateFolderAndUnzip(importJobFile);
+        File importJobDir = new File(importJob.getWorkFolder());
+        ImportUtils.unzip(importJobFile.getAbsolutePath(), importJobDir.getAbsolutePath());
+        importJobFile.delete();
         importJobStatusService.setInProgress(importJob, "Import job received, queued for processing.");
 
         importJob.setStudyId(studyId);

@@ -16,7 +16,6 @@ package org.shanoir.ng.importer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -48,7 +47,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -67,8 +65,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ImporterManagerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImporterManagerService.class);
-
-    private static final SecureRandom RANDOM = new SecureRandom();
 
     /**
      * For the moment Spring is not used here to autowire, as we try to keep the
@@ -105,9 +101,6 @@ public class ImporterManagerService {
     @Autowired
     private StudyUserRightsRepository studyUserRightRepo;
 
-    @Value("${shanoir.import.directory}")
-    private String importDir;
-
     @Async
     public void manageImportJob(final ImportJobBase importJob) {
         importJobStatusService.setInProgress(importJob, "Starting import");
@@ -118,16 +111,7 @@ public class ImporterManagerService {
         event.setTimestamp(importJob.getTimestamp());
         eventService.publishEvent(event);
         importJob.setShanoirEvent(event);
-        importJob.setUsername(KeycloakUtil.getTokenUserName());
         try {
-            // Always create a userId specific folder in the import work folder
-            // (the root of everything): split imports to clearly separate them
-            // into separate folders for each user
-            final String userImportDirFilePath = importDir + File.separator + Long.toString(importJob.getUserId());
-            final File userImportDir = new File(userImportDirFilePath);
-            if (!userImportDir.exists()) {
-                userImportDir.mkdirs(); // create if not yet existing, e.g. in case of PACS import
-            }
             // 1. call to cleanSeries: remove ignored series, that have been detected to be
             // ignored by the uploadDicomZipFile (DicomDirToModelService) or the QueryPACSService
             // (either from ShUp or the web-gui-pacs import), see usage of
@@ -136,9 +120,8 @@ public class ImporterManagerService {
             // In PACS import the DICOM files are still in the PACS, we have to download
             // them first and then analyze them:
             // what gives us a list of images for each serie.
-            final File importJobDir;
+            final File importJobDir = new File(importJob.getWorkFolder());
             if (importJob.isFromPacs()) {
-                importJobDir = createImportJobDir(userImportDir.getAbsolutePath());
                 // At first all DICOM files arrive normally in /tmp/shanoir-dcmrcv
                 // (see config DicomStoreSCPServer)
                 downloadAndMoveDicomFilesToImportJobDir(importJobDir,
@@ -147,14 +130,12 @@ public class ImporterManagerService {
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
                         importJobDir.getAbsolutePath(), event, false);
             } else if (importJob.isFromShanoirUploader()) {
-                importJobDir = new File(importJob.getWorkFolder());
                 // Convert instances to images, as already done after zip file upload
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
                         importJobDir.getAbsolutePath(), event, false);
-            } else if (importJob.isFromDicomZip()) {
-                // Images creation and analyze of dicom files has been done after upload already
-                importJobDir = new File(importJob.getWorkFolder());
-            } else {
+            // isFromDicomZip: do nothing, as images creation and analyze of DICOM files
+            // have been done after upload of ZIP file(s) already
+            } else if (!importJob.isFromDicomZip()) {
                 throw new ShanoirException("Unsupported type of import.");
             }
             // 2. call to cleanSeries: at this point we are sure for all imports, that the
@@ -272,38 +253,6 @@ public class ImporterManagerService {
         } catch (AmqpException | JsonProcessingException e) {
             LOG.error("Could not send email for this import. ", e);
         }
-    }
-
-    /**
-     * This method creates a random number named work folder to work within during the import.
-     *
-     * @return file: work folder
-     * @throws ShanoirException
-     */
-    private File createImportJobDir(final String parent) throws ShanoirException {
-        long n = createRandomLong();
-        File importJobDir = new File(parent, Long.toString(n));
-        if (!importJobDir.exists()) {
-            importJobDir.mkdirs();
-        } else {
-            throw new ShanoirException("Error while creating importJobDir: folder already exists.");
-        }
-        return importJobDir;
-    }
-
-    /**
-     * This method creates a random long number.
-     *
-     * @return long: random number
-     */
-    private long createRandomLong() {
-        long n = RANDOM.nextLong();
-        if (n == Long.MIN_VALUE) {
-            n = 0; // corner case
-        } else {
-            n = Math.abs(n);
-        }
-        return n;
     }
 
     /**
