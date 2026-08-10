@@ -71,6 +71,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
 
         importJob.patients.push(this.patient);
         importJob.workFolder = contextImportJob.workFolder;
+        importJob.id = contextImportJob.id;
         importJob.fromDicomZip = true;
         importJob.subjectName = context.subject.name;
         importJob.studyName = context.study.name;
