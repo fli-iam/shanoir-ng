@@ -110,7 +110,7 @@ public class BidsImporterApiController implements BidsImporterApi {
         importJobFile.delete();
         importJobStatusService.setInProgress(importJob, "Import job received, queued for processing.");
         LOG.info("============== NEW IMPORT BIDS ===========================");
-        LOG.info("BIDS mport job (base) for user {} ({})", KeycloakUtil.getTokenUserName(), KeycloakUtil.getTokenUserId());
+        LOG.info("BIDS import job (base) for user {} ({})", KeycloakUtil.getTokenUserName(), KeycloakUtil.getTokenUserId());
         LOG.info("Import type: {}", importJob.getImportType());
         LOG.info("Import ID: {}", importJob.getId());
         LOG.info("WorkFolder: {}", importJob.getWorkFolder());
