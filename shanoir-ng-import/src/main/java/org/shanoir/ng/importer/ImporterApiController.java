@@ -396,7 +396,7 @@ public class ImporterApiController implements ImporterApi {
             File dataFileDir = new File(importJob.getWorkFolder() + File.separator
                     + importJob.getArchive().replace(".zip", ""));
 
-            LOG.error(dataFileDir.getAbsolutePath());
+            LOG.info(dataFileDir.getAbsolutePath());
 
             // Get .VHDR file
             File[] bvMatchingFiles = dataFileDir.listFiles(new FilenameFilter() {
