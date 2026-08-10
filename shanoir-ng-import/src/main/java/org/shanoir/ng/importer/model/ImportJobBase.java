@@ -60,7 +60,7 @@ public class ImportJobBase implements Serializable {
 
     private static final long serialVersionUID = 8804929608059674037L;
 
-    private String id;
+    private String id = "";
 
     private long timestamp;
 
@@ -408,7 +408,7 @@ public class ImportJobBase implements Serializable {
                 }
             }
         }
-        return "userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + getImportType()
+        return "id=" + id + ",userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + getImportType()
                 + ",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality
                 + ",enhanced=" + enhanced
                 + ",subjectName=" + subjectName + ",examinationId=" + examinationId + ",StudyInstanceUID="

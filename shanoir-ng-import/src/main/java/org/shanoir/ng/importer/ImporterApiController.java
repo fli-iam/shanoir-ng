@@ -295,6 +295,7 @@ public class ImporterApiController implements ImporterApi {
             LOG.info("============== NEW IMPORT ===========================");
             LOG.info("Import job (base) for user {} ({})", KeycloakUtil.getTokenUserName(), userId);
             LOG.info("Import type: {}", importJob.getImportType());
+            LOG.info("Import ID: {}", importJob.getId());
             LOG.info("WorkFolder: {}", importJob.getWorkFolder());
             importerManagerService.manageImportJob(importJob);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -629,6 +630,10 @@ public class ImporterApiController implements ImporterApi {
             @Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob)
             throws RestServiceException {
         importJobStatusService.setInProgress(importJob, "Import job received, queued for processing.");
+        LOG.info("============== NEW IMPORT EEG =======================");
+        LOG.info("EEG import job for user {} ({})", KeycloakUtil.getTokenUserName(), KeycloakUtil.getTokenUserId());
+        LOG.info("Import type: {}", importJob.getImportType());
+        LOG.info("WorkFolder: {}", importJob.getWorkFolder());
         // Comment: Anonymisation is not necessary for pure brainvision EEGs data
         try {
             importJob.setUserId(KeycloakUtil.getTokenUserId());
