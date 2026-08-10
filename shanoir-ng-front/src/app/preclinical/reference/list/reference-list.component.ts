@@ -14,7 +14,7 @@
 
 import {Component, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { Reference } from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';

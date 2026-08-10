@@ -16,10 +16,10 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { Selection } from '@app/studies/study/tree.service';
 
 import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';

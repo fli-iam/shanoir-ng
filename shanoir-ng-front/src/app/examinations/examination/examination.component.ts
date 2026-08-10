@@ -16,10 +16,10 @@ import { AbstractControl, FormGroup, UntypedFormGroup, Validators, FormsModule, 
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { Selection } from '@app/studies/study/tree.service';
 
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';

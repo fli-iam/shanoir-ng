@@ -15,7 +15,7 @@
 import {Component, ViewChild, ChangeDetectionStrategy} from '@angular/core'
 
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { Pathology } from '../shared/pathology.model';
 import { PathologyService } from '../shared/pathology.service';

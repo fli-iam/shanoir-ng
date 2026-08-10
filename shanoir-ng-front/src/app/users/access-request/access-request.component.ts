@@ -16,8 +16,8 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { IdName } from 'src/app/shared/models/id-name.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { IdName } from '@app/shared/models/id-name.model';
 
 import { UserService } from '../shared/user.service'
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';

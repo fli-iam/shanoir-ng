@@ -15,8 +15,8 @@ import { Component, ElementRef, Input, OnChanges, SimpleChanges, ChangeDetection
 import { Router, RouterLink } from '@angular/router';
 
 
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from '@app/studies/study/tree.service';
 
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { MemberNode } from '../../tree/tree.model';

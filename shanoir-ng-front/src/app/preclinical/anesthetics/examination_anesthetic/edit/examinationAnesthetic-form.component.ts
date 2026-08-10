@@ -16,11 +16,11 @@ import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from 
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { InjectionInterval } from 'src/app/preclinical/shared/enum/injectionInterval';
-import { InjectionSite } from 'src/app/preclinical/shared/enum/injectionSite';
-import { InjectionType } from 'src/app/preclinical/shared/enum/injectionType';
-import { SelectBoxComponent } from 'src/app/shared/select/select.component';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { InjectionInterval } from '@app/preclinical/shared/enum/injectionInterval';
+import { InjectionSite } from '@app/preclinical/shared/enum/injectionSite';
+import { InjectionType } from '@app/preclinical/shared/enum/injectionType';
+import { SelectBoxComponent } from '@app/shared/select/select.component';
 
 import { ExaminationAnesthetic }    from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';

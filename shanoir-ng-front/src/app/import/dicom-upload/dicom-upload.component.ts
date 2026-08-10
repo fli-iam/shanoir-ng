@@ -18,7 +18,7 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
+import { TaskState } from '@app/async-tasks/task.model';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { ImportDataService } from '../shared/import.data-service';

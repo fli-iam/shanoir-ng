@@ -16,7 +16,7 @@ import { Component, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angul
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
+import { Selection, TreeService } from '@app/studies/study/tree.service';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { BrowserPaging } from "../../../shared/components/table/browser-paging.model";

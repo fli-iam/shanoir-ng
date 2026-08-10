@@ -17,11 +17,11 @@ import { HttpClient } from "@angular/common/http";
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
-import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
-import { FilterablePageable, Page } from 'src/app/shared/components/table/pageable.model';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { QualityCardComponent } from 'src/app/study-cards/quality-card/quality-card.component';
+import { BrowserPaging } from '@app/shared/components/table/browser-paging.model';
+import { ColumnDefinition } from '@app/shared/components/table/column.definition.type';
+import { FilterablePageable, Page } from '@app/shared/components/table/pageable.model';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { QualityCardComponent } from '@app/study-cards/quality-card/quality-card.component';
 
 import { NotificationsService } from '../../shared/notifications/notifications.service';
 import {Task} from '../task.model';

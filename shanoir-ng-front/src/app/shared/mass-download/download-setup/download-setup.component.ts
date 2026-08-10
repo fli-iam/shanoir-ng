@@ -18,7 +18,7 @@ import { AngularDeviceInformationService } from 'angular-device-information';
 import { Subscription } from 'rxjs';
 import { NgTemplateOutlet } from '@angular/common';
 
-import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { DatasetLight, DatasetService, Format } from '@app/datasets/shared/dataset.service';
 
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";

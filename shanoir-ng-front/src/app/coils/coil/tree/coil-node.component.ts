@@ -13,9 +13,9 @@
  */
 import { Component, ElementRef, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { TreeService } from 'src/app/studies/study/tree.service';
-import { CoilNode } from 'src/app/tree/tree.model';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from '@app/studies/study/tree.service';
+import { CoilNode } from '@app/tree/tree.model';
 
 import { TreeNodeComponent } from '../../../shared/components/tree/tree-node.component';
 

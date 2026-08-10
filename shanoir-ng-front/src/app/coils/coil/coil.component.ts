@@ -16,8 +16,8 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { Selection } from '@app/studies/study/tree.service';
 
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { ManufacturerModelPipe } from '../../acquisition-equipments/shared/manufacturer-model.pipe';

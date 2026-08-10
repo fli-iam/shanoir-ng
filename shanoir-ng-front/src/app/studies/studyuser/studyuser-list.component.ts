@@ -14,9 +14,9 @@
 import { Component, forwardRef, inject, Input, OnChanges, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import { IdName } from 'src/app/shared/models/id-name.model';
-import { ConsoleService } from 'src/app/shared/console/console.service';
+import { AccessRequestService } from '@app/users/access-request/access-request.service';
+import { IdName } from '@app/shared/models/id-name.model';
+import { ConsoleService } from '@app/shared/console/console.service';
 
 import { Center } from '../../centers/shared/center.model';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';

@@ -15,10 +15,10 @@ import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleCh
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { StudyUserRight } from '@app/studies/shared/study-user-right.enum';
+import { TreeService } from '@app/studies/study/tree.service';
 
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { ConsoleService } from "../../shared/console/console.service";

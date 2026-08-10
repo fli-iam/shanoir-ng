@@ -1,12 +1,14 @@
 {
     "compileOnSave": false,
     "compilerOptions": {
-        "baseUrl": "./",
+        "noImplicitAny": false,
+        "strict": false,
         "outDir": "./dist/out-tsc",
         "paths": {
-            "@env/*": ["src/environments/*"],
-            "file-saver-es": ["@types/file-saver"],
-            "wicg-file-system-access": ["@types/wicg-file-system-access"]
+            "@env/*": ["./src/environments/*"],
+            "@app/*": ["./src/app/*"],
+            "file-saver-es": ["./node_modules/@types/file-saver"],
+            "wicg-file-system-access": ["./node_modules/@types/wicg-file-system-access"]
         },
         "esModuleInterop": true,
         "sourceMap": true,
@@ -16,6 +18,10 @@
         "moduleResolution": "bundler",
         "importHelpers": true,
         "target": "ES2022",
+        "lib": [
+            "ES2024",
+            "DOM"
+        ],
         "typeRoots": [
           "node_modules/@types"
         ],

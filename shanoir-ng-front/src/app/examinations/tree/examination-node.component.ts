@@ -15,9 +15,9 @@ import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleCh
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { TreeService } from '@app/studies/study/tree.service';
 
 import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { environment } from '../../../environments/environment';

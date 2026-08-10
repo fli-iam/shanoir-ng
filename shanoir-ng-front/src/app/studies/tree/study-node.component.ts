@@ -15,11 +15,11 @@ import { Component, ElementRef, Input, OnChanges, QueryList, SimpleChanges, View
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
-import { Entity } from 'src/app/shared/components/entity/entity.abstract';
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { QualityCardService } from 'src/app/study-cards/shared/quality-card.service';
-import { isDarkColor } from 'src/app/utils/app.utils';
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { Entity } from '@app/shared/components/entity/entity.abstract';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { QualityCardService } from '@app/study-cards/shared/quality-card.service';
+import { isDarkColor } from '@app/utils/app.utils';
+import { SuperPromise } from '@app/utils/super-promise';
 
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";

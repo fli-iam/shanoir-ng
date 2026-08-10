@@ -26,7 +26,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
+import { QualityTag } from '@app/study-cards/shared/quality-card.model';
 
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { Tag } from '../../../tags/tag.model';

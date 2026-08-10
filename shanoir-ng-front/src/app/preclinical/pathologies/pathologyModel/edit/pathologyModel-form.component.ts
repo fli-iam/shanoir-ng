@@ -16,9 +16,9 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Validators, UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { StudyRightsService } from '@app/studies/shared/study-rights.service';
 
 import { PathologyModel }    from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';

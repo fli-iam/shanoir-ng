@@ -17,11 +17,11 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { NgTemplateOutlet } from '@angular/common';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
-import { DatasetService } from 'src/app/datasets/shared/dataset.service';
-import { StudyService } from 'src/app/studies/shared/study.service';
-import { Task, TaskStatus } from 'src/app/async-tasks/task.model';
-import { NotificationsService } from 'src/app/shared/notifications/notifications.service';
-import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { DatasetService } from '@app/datasets/shared/dataset.service';
+import { StudyService } from '@app/studies/shared/study.service';
+import { Task, TaskStatus } from '@app/async-tasks/task.model';
+import { NotificationsService } from '@app/shared/notifications/notifications.service';
+import { LoadingBarComponent } from '@app/shared/components/loading-bar/loading-bar.component';
 
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';

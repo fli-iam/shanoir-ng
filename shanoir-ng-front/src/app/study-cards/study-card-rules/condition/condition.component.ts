@@ -15,7 +15,7 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy
 import { FormArray, FormControl, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-import { Coil } from 'src/app/coils/shared/coil.model';
+import { Coil } from '@app/coils/shared/coil.model';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option, SelectBoxComponent } from '../../../shared/select/select.component';

@@ -15,7 +15,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { Pathology } from '../shared/pathology.model';

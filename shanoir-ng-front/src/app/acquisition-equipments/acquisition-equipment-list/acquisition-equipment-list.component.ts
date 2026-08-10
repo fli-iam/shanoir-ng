@@ -14,7 +14,7 @@
 
 import { Component, ViewChild, ViewContainerRef, ChangeDetectionStrategy } from '@angular/core';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';

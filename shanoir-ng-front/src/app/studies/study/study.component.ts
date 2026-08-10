@@ -16,14 +16,14 @@ import { Component, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angu
 import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Tag } from 'src/app/tags/tag.model';
-import { AccessRequest } from 'src/app/users/access-request/access-request.model';
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import { ExecutionTemplateListComponent } from "src/app/vip/execution-template/execution-template-list.component";
+import { TaskState } from '@app/async-tasks/task.model';
+import { DUAAssistantComponent } from '@app/dua/dua-assistant.component';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { Tag } from '@app/tags/tag.model';
+import { AccessRequest } from '@app/users/access-request/access-request.model';
+import { AccessRequestService } from '@app/users/access-request/access-request.service';
+import { ExecutionTemplateListComponent } from "@app/vip/execution-template/execution-template-list.component";
 
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';

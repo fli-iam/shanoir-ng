@@ -18,10 +18,10 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { StudyUser } from 'src/app/studies/shared/study-user.model';
-import { StudyService } from 'src/app/studies/shared/study.service';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { StudyUser } from '@app/studies/shared/study-user.model';
+import { StudyService } from '@app/studies/shared/study.service';
+import { Selection } from '@app/studies/study/tree.service';
 
 import { Role } from '../../roles/role.model';
 import { RoleService } from '../../roles/role.service';

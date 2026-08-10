@@ -13,7 +13,7 @@
  */
 import {Component, ViewChild, ChangeDetectionStrategy} from '@angular/core'
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationAnestheticService } from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';

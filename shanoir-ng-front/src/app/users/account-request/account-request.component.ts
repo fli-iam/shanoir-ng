@@ -17,7 +17,7 @@ import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/cor
 import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { ConsoleService } from 'src/app/shared/console/console.service';
+import { ConsoleService } from '@app/shared/console/console.service';
 
 import * as AppUtils from '../../utils/app.utils';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';

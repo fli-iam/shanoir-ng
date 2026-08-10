@@ -17,9 +17,9 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { ExaminationComponent } from 'src/app/examinations/examination/examination.component';
-import { DatepickerComponent } from 'src/app/shared/date-picker/date-picker.component';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { ExaminationComponent } from '@app/examinations/examination/examination.component';
+import { DatepickerComponent } from '@app/shared/date-picker/date-picker.component';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../../centers/shared/center.service';

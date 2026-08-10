@@ -17,8 +17,8 @@ import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/for
 import {  ActivatedRoute } from '@angular/router';
 
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { UploaderComponent } from 'src/app/shared/components/uploader/uploader.component';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { UploaderComponent } from '@app/shared/components/uploader/uploader.component';
 
 import { PhysiologicalDataFile }    from '../shared/physiologicalDataFile.model';
 import { ExtraDataService } from '../../extraData/shared/extradata.service';

@@ -17,11 +17,11 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom, Observable, race } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { ExaminationService } from 'src/app/examinations/shared/examination.service';
-import { ServiceLocator } from 'src/app/utils/locator.service';
-import { SuperPromise } from 'src/app/utils/super-promise';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { ExaminationService } from '@app/examinations/shared/examination.service';
+import { ServiceLocator } from '@app/utils/locator.service';
+import { SuperPromise } from '@app/utils/super-promise';
+import { Selection } from '@app/studies/study/tree.service';
 
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';

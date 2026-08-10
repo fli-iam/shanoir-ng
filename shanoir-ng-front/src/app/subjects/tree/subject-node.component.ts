@@ -14,11 +14,11 @@
 import { Component, ElementRef, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { ConsoleService } from 'src/app/shared/console/console.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { ConsoleService } from '@app/shared/console/console.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { StudyUserRight } from '@app/studies/shared/study-user-right.enum';
+import { TreeService } from '@app/studies/study/tree.service';
 
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { ExaminationService } from '../../examinations/shared/examination.service';

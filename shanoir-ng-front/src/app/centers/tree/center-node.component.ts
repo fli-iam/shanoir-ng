@@ -14,10 +14,10 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
-import { CoilService } from 'src/app/coils/shared/coil.service';
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { AcquisitionEquipmentService } from '@app/acquisition-equipments/shared/acquisition-equipment.service';
+import { CoilService } from '@app/coils/shared/coil.service';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from '@app/studies/study/tree.service';
 
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";

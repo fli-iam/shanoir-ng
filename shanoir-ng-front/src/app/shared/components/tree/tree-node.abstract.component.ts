@@ -14,9 +14,9 @@
 import { AfterContentInit, Directive, ElementRef, EventEmitter, Input, Output, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { ShanoirNode, UNLOADED } from 'src/app/tree/tree.model';
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { TaskState } from '@app/async-tasks/task.model';
+import { ShanoirNode, UNLOADED } from '@app/tree/tree.model';
+import { SuperPromise } from '@app/utils/super-promise';
 
 @Directive()
 export class TreeNodeAbstractComponent<T extends ShanoirNode> implements AfterContentInit, OnDestroy {

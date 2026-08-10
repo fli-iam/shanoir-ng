@@ -15,9 +15,9 @@ import { Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular
 import { Router, RouterLink } from '@angular/router';
 
 
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { SuperPromise } from '@app/utils/super-promise';
 
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { TaskState } from "../../async-tasks/task.model";

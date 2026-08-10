@@ -14,7 +14,7 @@
 
 import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';

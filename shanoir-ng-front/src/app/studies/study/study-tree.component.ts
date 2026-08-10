@@ -15,7 +15,7 @@ import { Component, ElementRef, HostListener, OnDestroy, ViewChild, ChangeDetect
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { DatasetCopyDialogService } from 'src/app/shared/components/dataset-copy-dialog/dataset-copy-dialog.service';
+import { DatasetCopyDialogService } from '@app/shared/components/dataset-copy-dialog/dataset-copy-dialog.service';
 
 import { TaskState } from '../../async-tasks/task.model';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';

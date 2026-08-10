@@ -13,9 +13,9 @@
  */
 import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
-import { Pageable, Page } from 'src/app/shared/components/table/pageable.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { EntityListComponent } from '@app/shared/components/entity/entity-list.component.abstract';
+import { Pageable, Page } from '@app/shared/components/table/pageable.model';
 
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';

@@ -13,7 +13,7 @@
  */
 import { Component, ElementRef, HostBinding, HostListener, inject, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
-import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
+import { ConfirmDialogService } from '@app/shared/components/confirm-dialog/confirm-dialog.service';
 
 import { CopyData, CopyDataService } from '../shared/copy-data.service';
 

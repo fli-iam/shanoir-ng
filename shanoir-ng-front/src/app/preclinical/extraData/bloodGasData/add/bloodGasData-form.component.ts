@@ -16,8 +16,8 @@ import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from 
 import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { UploaderComponent } from 'src/app/shared/components/uploader/uploader.component';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { UploaderComponent } from '@app/shared/components/uploader/uploader.component';
 
 import { ExtraDataService } from '../../extraData/shared/extradata.service';
 import { BloodGasDataFile } from '../shared/bloodGasDataFile.model';

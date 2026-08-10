@@ -14,7 +14,7 @@
 
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { SuperPromise } from '@app/utils/super-promise';
 
 
 @Component({

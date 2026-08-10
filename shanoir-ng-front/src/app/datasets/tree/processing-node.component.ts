@@ -14,8 +14,8 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
-import { TreeService } from 'src/app/studies/study/tree.service';
+import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from '@app/studies/study/tree.service';
 
 import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetProcessing } from '../shared/dataset-processing.model';

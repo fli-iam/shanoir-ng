@@ -14,7 +14,7 @@
 
 import { Component, HostBinding, Input, ChangeDetectionStrategy } from '@angular/core';
 
-import { getSizeStr } from 'src/app/utils/app.utils';
+import { getSizeStr } from '@app/utils/app.utils';
 
 
 

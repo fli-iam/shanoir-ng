@@ -17,7 +17,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
+import { ConfirmDialogService } from '@app/shared/components/confirm-dialog/confirm-dialog.service';
 
 import { StudyService } from '../../studies/shared/study.service';
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';

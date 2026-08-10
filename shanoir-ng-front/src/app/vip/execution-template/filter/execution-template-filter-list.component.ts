@@ -14,8 +14,8 @@
 import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { ColumnDefinition } from '@app/shared/components/table/column.definition.type';
 
 import { TableComponent } from "../../../shared/components/table/table.component";
 import { BrowserPaginEntityListComponent } from "../../../shared/components/entity/entity-list.browser.component.abstract";

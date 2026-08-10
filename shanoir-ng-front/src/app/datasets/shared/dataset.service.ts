@@ -15,8 +15,8 @@ import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/comm
 import { ErrorHandler, inject, Injectable } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { DownloadUtilsService } from 'src/app/shared/mass-download/download.utils.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { DownloadUtilsService } from '@app/shared/mass-download/download.utils.service';
 
 import { BidsElement } from "../../bids/model/bidsElement.model";
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';

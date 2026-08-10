@@ -15,9 +15,9 @@ import { Component, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angul
 import { FormArray, FormGroup, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { Selection } from '@app/studies/study/tree.service';
+import { DUAAssistantComponent } from '@app/dua/dua-assistant.component';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';

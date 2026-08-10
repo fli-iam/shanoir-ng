@@ -13,7 +13,7 @@
  */
 import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';

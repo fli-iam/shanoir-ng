@@ -16,7 +16,7 @@ import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, 
 import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { DatasetLight, DatasetService, Format } from '@app/datasets/shared/dataset.service';
 
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";

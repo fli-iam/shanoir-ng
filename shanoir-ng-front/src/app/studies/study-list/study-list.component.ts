@@ -13,7 +13,7 @@
  */
 import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";

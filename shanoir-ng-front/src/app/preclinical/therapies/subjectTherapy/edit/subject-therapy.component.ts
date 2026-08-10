@@ -17,9 +17,9 @@ import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '
 import { ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
 
-import { Reference } from 'src/app/preclinical/reference/shared/reference.model';
-import { ReferenceService } from 'src/app/preclinical/reference/shared/reference.service';
-import { Frequency } from 'src/app/preclinical/shared/enum/frequency';
+import { Reference } from '@app/preclinical/reference/shared/reference.model';
+import { ReferenceService } from '@app/preclinical/reference/shared/reference.service';
+import { Frequency } from '@app/preclinical/shared/enum/frequency';
 
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';

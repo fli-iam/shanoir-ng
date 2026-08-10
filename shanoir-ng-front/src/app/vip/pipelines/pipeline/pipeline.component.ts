@@ -14,8 +14,8 @@
 
 import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
-import { Pipeline } from 'src/app/vip/models/pipeline';
-import { ImagesUrlUtil } from 'src/app/shared/utils/images-url.util';
+import { Pipeline } from '@app/vip/models/pipeline';
+import { ImagesUrlUtil } from '@app/shared/utils/images-url.util';
 
 
 @Component({

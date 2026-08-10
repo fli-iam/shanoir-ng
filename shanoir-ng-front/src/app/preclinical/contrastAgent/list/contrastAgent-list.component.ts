@@ -14,7 +14,7 @@
 
 import {Component, Input, ViewChild, ChangeDetectionStrategy} from '@angular/core'
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { ContrastAgent } from '../shared/contrastAgent.model';
 import { ContrastAgentService } from '../shared/contrastAgent.service';

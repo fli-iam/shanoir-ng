@@ -18,10 +18,10 @@ import { FormsModule, ReactiveFormsModule, UntypedFormGroup, Validators } from '
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { distinctUntilChanged, firstValueFrom, takeUntil } from 'rxjs';
 
-import { Selection } from 'src/app/studies/study/tree.service';
-import { ExecutionMonitoringService } from 'src/app/vip/execution-monitorings/execution-monitoring.service';
-import { ExecutionMonitoring } from 'src/app/vip/models/execution-monitoring.model';
-import { Study } from "src/app/studies/shared/study.model";
+import { Selection } from '@app/studies/study/tree.service';
+import { ExecutionMonitoringService } from '@app/vip/execution-monitorings/execution-monitoring.service';
+import { ExecutionMonitoring } from '@app/vip/models/execution-monitoring.model';
+import { Study } from "@app/studies/shared/study.model";
 
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';

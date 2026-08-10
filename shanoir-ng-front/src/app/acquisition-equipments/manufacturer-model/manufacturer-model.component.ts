@@ -16,7 +16,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";

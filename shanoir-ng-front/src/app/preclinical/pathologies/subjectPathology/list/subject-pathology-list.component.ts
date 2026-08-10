@@ -16,11 +16,11 @@ import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleCh
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Router } from '@angular/router';
 
-import { Mode } from 'src/app/shared/components/entity/entity.component.abstract';
-import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
-import { FilterablePageable, Page } from 'src/app/shared/components/table/pageable.model';
-import { KeycloakService } from 'src/app/shared/keycloak/keycloak.service';
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { Mode } from '@app/shared/components/entity/entity.component.abstract';
+import { BrowserPaging } from '@app/shared/components/table/browser-paging.model';
+import { FilterablePageable, Page } from '@app/shared/components/table/pageable.model';
+import { KeycloakService } from '@app/shared/keycloak/keycloak.service';
+import { SuperPromise } from '@app/utils/super-promise';
 
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { SubjectPathology } from '../shared/subjectPathology.model';

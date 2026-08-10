@@ -3,8 +3,8 @@ import {ActivatedRoute} from "@angular/router"
 import {FormGroup, ReactiveFormsModule, UntypedFormGroup, Validators} from "@angular/forms"
 import { CommonModule } from '@angular/common'
 
-import { FormFooterComponent } from 'src/app/shared/components/form-footer/form-footer.component'
-import { TooltipComponent } from 'src/app/shared/components/tooltip/tooltip.component'
+import { FormFooterComponent } from '@app/shared/components/form-footer/form-footer.component'
+import { TooltipComponent } from '@app/shared/components/tooltip/tooltip.component'
 
 import {EntityComponent} from "../../../shared/components/entity/entity.component.abstract"
 import {EntityService} from "../../../shared/components/entity/entity.abstract.service"
