@@ -89,7 +89,7 @@ public class ImportWithoutStudyCardTests extends AbstractImportTest {
         logger.info("......................................................");
         try {
             ImportJobBase importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
-            logger.info("TempDirId: {}", importJob.getWorkFolder());
+            logger.info("ID: {}", importJob.getWorkFolder());
             study = createStudyAndCenterWithoutStudyCard();
             equipment = createEquipment(study.getStudyCenterList().get(0).getCenter());
             Assertions.assertNotNull(equipment);
@@ -198,7 +198,7 @@ public class ImportWithoutStudyCardTests extends AbstractImportTest {
             Util.mapper.writeValue(importJobJsonFile, importJob);
 
             startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportShUpFromPACSNoStudyCard");
-            waitForServerImportJobStatus(importJob.getWorkFolder(), "testImportShUpFromPACSNoStudyCard-before-ds");
+            waitForServerImportJobStatus(importJob.getId(), "testImportShUpFromPACSNoStudyCard-before-ds");
             waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
             downloadAndCompareDatasetsZip(examination.getId(), uploadFolder, "testImportShUpFromPACSNoStudyCard");
         } finally {
@@ -261,8 +261,7 @@ public class ImportWithoutStudyCardTests extends AbstractImportTest {
         // MS Import is only relaying the job to MS Datasets
         userClient.startImportEEGJob(analyzedJob);
         if (analyzedJob.getWorkFolder() != null && !analyzedJob.getWorkFolder().isEmpty()) {
-            final String tempDirId = ImportJobStatusService.keyOf(analyzedJob.getWorkFolder());
-            waitForServerImportJobStatus(tempDirId, "testImportEEGNoStudyCard-before-ds");
+            waitForServerImportJobStatus(analyzedJob.getId(), "testImportEEGNoStudyCard-before-ds");
         }
     }
 
