@@ -628,10 +628,10 @@ public class ImporterApiController implements ImporterApi {
     public ResponseEntity<Void> startImportEEGJob(
             @Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob)
             throws RestServiceException {
-        final String tempDirId = ImportJobStatusService.keyOf(importJob.getWorkFolder());
         importJobStatusService.setInProgress(importJob, "Import job received, queued for processing.");
         // Comment: Anonymisation is not necessary for pure brainvision EEGs data
         try {
+            importJob.setUserId(KeycloakUtil.getTokenUserId());
             importJob.setUsername(KeycloakUtil.getTokenUserName());
             ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
             importJob.setShanoirEvent(event);
@@ -832,8 +832,6 @@ public class ImporterApiController implements ImporterApi {
                 // Send to ms-dataset for logical import
                 cleanUpImportJob(importJobChild);
                 this.startImportJobBase(importJobChild);
-                // Delete temporary file
-                FileUtils.deleteQuietly(importJobDirChild);
             }
             // Delete temporary file
             FileUtils.deleteQuietly(importJobDirParent);
