@@ -17,6 +17,7 @@ package org.shanoir.ng.processing.repository;
 import java.util.List;
 import java.util.Optional;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -42,6 +43,32 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      * @return
      */
     List<DatasetProcessing> findAllByInputDatasets_Id(Long datasetId);
+
+    /**
+     * Find all processings that are linked to the given datasets through INPUT_OF_DATASET_PROCESSING
+     * table, in one single query, with the output datasets fetched along
+     *
+     * @param datasetIds
+     * @return
+     */
+    @EntityGraph(attributePaths = "outputDatasets")
+    List<DatasetProcessing> findAllByInputDatasets_IdIn(List<Long> datasetIds);
+
+
+    /**
+     * Find all dataset processing by comment and type.
+     *
+     * @param comment Comment.
+     * @param type Dataset processing type.
+     * @return List of dataset processing.
+     */
+    @Query(value = "SELECT DISTINCT processing.id FROM dataset_processing as processing "
+            + "INNER JOIN execution_monitoring AS monitoring ON monitoring.id = processing.id "
+            + "WHERE processing.dataset_processing_type = :type "
+            + "AND processing.comment LIKE :comment "
+            + "AND monitoring.name LIKE '%post_processing' "
+            + "AND monitoring.status = 1", nativeQuery = true)
+    List<Long> findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(String comment, int type);
 
     /**
      * Find all processings that are linked to given monitoring through parent_id column
