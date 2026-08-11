@@ -28,10 +28,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.check.DicomInstanceConsistencyChecker;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.model.rest.DatasetsImportStatus;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
@@ -163,7 +165,7 @@ public class UploadServiceJob {
 
             setTempDirIdAndStartImport(tempDirId, importJob);
 
-            // Server (ms-import) still has to pseudonymize/create datasets and hand
+            // Server (ms-import) still has to create datasets and hand
             // off to ms-datasets, which itself still has to create the datasets.
             // Don't mark FINISHED yet — switch state and let the next scheduled
             // tick(s) poll both servers instead of blocking here.
@@ -322,8 +324,12 @@ public class UploadServiceJob {
                 case FINISHED:
                     LOG.info("Import finished on server (ms-datasets) for examinationId {} (folder {}).",
                             examinationId, folder.getName());
-                    markFinished(folder, allFiles, importJob, nominativeDataImportJobManager,
-                            currentNominativeDataController);
+                    if (checkInstancesMetadata(folder, importJob)) {
+                        markFinished(folder, allFiles, importJob, nominativeDataImportJobManager,
+                                currentNominativeDataController);
+                    } else {
+                        markError(folder, importJob, nominativeDataImportJobManager, currentNominativeDataController);
+                    }
                     break;
                 case ERROR:
                     LOG.error("Import failed on server (ms-datasets) for examinationId {} (folder {}): {}",
@@ -371,6 +377,33 @@ public class UploadServiceJob {
         importJob.setId(tempDirId);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         shanoirUploaderServiceClient.startImportJob(tempDirId, importJobJson);
+    }
+
+    /**
+     * Rapid, metadata-only sanity check, run by default for every import
+     * (unlike the heavy, opt-in check.on.server pixel-by-pixel comparison
+     * done later by ExaminationConsistencyServiceJob): pings the server's
+     * DICOMWeb metadata endpoint for every instance of the folder, in
+     * parallel, to catch a partially or badly imported examination right
+     * away — before it's marked FINISHED and its local DICOM files are
+     * possibly deleted.
+     */
+    private boolean checkInstancesMetadata(final File folder, final ImportJobBase importJob) {
+        long startTime = System.currentTimeMillis();
+        try {
+            DicomInstanceConsistencyChecker checker = new DicomInstanceConsistencyChecker(shanoirUploaderServiceClient);
+            String examinationUID = StudyInstanceUIDAndSubjectNameHandler.PREFIX + importJob.getExaminationId();
+            int numberOfInstancesChecked = checker.checkImportJobMetadata(importJob, examinationUID);
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            LOG.info("Metadata ping of {} DICOM instance(s) for folder {} finished in {} ms.",
+                    numberOfInstancesChecked, folder.getName(), elapsedTime);
+            return true;
+        } catch (Exception e) {
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            LOG.error("Metadata ping FAILED for folder {} after {} ms: {}",
+                    folder.getName(), elapsedTime, e.getMessage(), e);
+            return false;
+        }
     }
 
     private void deleteAllDicomFiles(File importJobFolder, Collection<File> files) {
