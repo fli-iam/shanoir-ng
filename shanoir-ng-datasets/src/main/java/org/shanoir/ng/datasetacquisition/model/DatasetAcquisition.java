@@ -29,6 +29,7 @@ import org.shanoir.ng.datasetacquisition.validation.DatasetsModalityTypeCheck;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.model.StudyCard;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -133,6 +134,8 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
     private LocalDateTime acquisitionStartTime;
 
+    private Integer qualityTag;
+
     /**
      * The DICOM SeriesInstanceUID present in the backup PACS of Shanoir,
      * dcm4chee arc light, and generated during pseudonymization.
@@ -160,6 +163,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
         this.copies = other.copies;
         this.source = other.source;
         this.acquisitionStartTime = other.acquisitionStartTime;
+        this.qualityTag = other.qualityTag;
     }
 
     /**
@@ -351,6 +355,14 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 
     public void setSeriesInstanceUID(String seriesInstanceUID) {
         this.seriesInstanceUID = seriesInstanceUID;
+    }
+
+    public QualityTag getQualityTag() {
+        return QualityTag.get(qualityTag);
+    }
+
+    public void setQualityTag(QualityTag tag) {
+        this.qualityTag = tag != null ? tag.getId() : null;
     }
 
 }

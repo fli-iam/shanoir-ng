@@ -15,6 +15,7 @@
 package org.shanoir.ng.preclinical.extra_data.bloodgas_data;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.shanoir.ng.preclinical.extra_data.ExtraDataService;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -92,7 +93,7 @@ public class BloodGasDataServiceImpl implements ExtraDataService<BloodGasData> {
     private BloodGasData updateBloodGasDataValues(final BloodGasData bloodGasDataDb, final BloodGasData bloodGasData) {
         bloodGasDataDb.setExaminationId(bloodGasData.getExaminationId());
         bloodGasDataDb.setExtraDataType(bloodGasData.getExtraDataType());
-        if (!bloodGasDataDb.getFilename().equals(bloodGasData.getFilename())) {
+        if (!Objects.equals(bloodGasDataDb.getFilename(), bloodGasData.getFilename())) {
             bloodGasDataDb.setFilename(bloodGasData.getFilename());
             bloodGasDataDb.setFilepath(bloodGasData.getFilepath());
         }

@@ -20,6 +20,7 @@ import { AccessRequestService } from 'src/app/users/access-request/access-reques
 
 import { environment } from '../../../environments/environment';
 import { VERSION } from '../../../environments/version';
+import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { SolrService } from '../../solr/solr.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { ConfirmDialogService } from "../components/confirm-dialog/confirm-dialog.service";
@@ -52,6 +53,7 @@ export class SideMenuComponent {
     constructor(
             public keycloakService: KeycloakService,
             private solrService: SolrService,
+            private datasetAcquisitionService: DatasetAcquisitionService,
             private consoleService: ConsoleService,
             public notificationsService: NotificationsService,
             private studyService: StudyService,
@@ -106,6 +108,31 @@ export class SideMenuComponent {
                     });
                 }
             });
+    }
+
+    /**
+     * Cleans up the acquisitions emptied before their removal was proposed on dataset deletion.
+     * The list is fetched first so that the administrator sees what would be deleted.
+     */
+    cleanUpEmptyAcquisitions() {
+        this.datasetAcquisitionService.getEmpty().then(empty => {
+            if (empty.length == 0) {
+                this.consoleService.log('info', 'No empty dataset acquisition to clean up.');
+                return;
+            }
+            this.confirmDialogService.confirm('Clean up empty acquisitions',
+                'The following ' + empty.length + ' dataset acquisition(s) hold no dataset anymore and would be deleted : '
+                + empty.map(acquisition => '"' + acquisition.name + '" (id n° ' + acquisition.id + ')').join(', ')
+                + '.<br/><br/>Are you sure ?')
+                .then(userChoice => {
+                    if (userChoice) {
+                        this.datasetAcquisitionService.deleteEmpty().then(deleted => {
+                            this.consoleService.log('info', deleted.length + ' empty dataset acquisition(s) deleted',
+                                ['ids : ' + deleted.join(', ')]);
+                        });
+                    }
+                });
+        });
     }
 
     duasToSign(): number {

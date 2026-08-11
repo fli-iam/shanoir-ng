@@ -19,11 +19,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -84,6 +84,10 @@ public class DICOMWebApiController implements DICOMWebApi {
 
     private static final Pattern BULK_DATA_QUERY_PATTERN = Pattern.compile("(?:offset|length)=\\d+(?:&(?:offset|length)=\\d+)*");
 
+    private static final Pattern ACCEPT_HEADER_PATTERN = Pattern.compile("[\\w!#$%&'*+.^`|~/=;,\" -]+");
+
+    private static final int MAX_ACCEPT_HEADER_LENGTH = 512;
+
     @Value("${viewer.ohif.url.base}")
     private String viewerBaseUrl;
 
@@ -98,6 +102,9 @@ public class DICOMWebApiController implements DICOMWebApi {
 
     @Autowired
     private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
+    @Autowired
+    private DatasetSecurityService datasetSecurityService;
 
     @Autowired
     private ObjectMapper mapper;
@@ -220,7 +227,7 @@ public class DICOMWebApiController implements DICOMWebApi {
             String response = dicomWebService.findSeriesOfStudy(studyInstanceUID, includefield, seriesInstanceUID);
             if (response != null) {
                 JsonNode root = mapper.readTree(response);
-                root = filterAndSortSeries(root, seriesToVirtualUIDs.keySet());
+                root = filterAndSortSeries(root, seriesToVirtualUIDs);
                 studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUIDAndPatientInfo(root, examinationUID, false, subjectName);
                 seriesInstanceUIDHandler.replaceSeriesInstanceUIDs(root, seriesToVirtualUIDs);
                 return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
@@ -232,7 +239,7 @@ public class DICOMWebApiController implements DICOMWebApi {
         }
     }
 
-    private JsonNode filterAndSortSeries(JsonNode root, Set<String> allowedSeriesInstanceUIDs) {
+    private JsonNode filterAndSortSeries(JsonNode root, Map<String, String> seriesToVirtualUIDs) {
         if (root.isArray()) {
             ArrayNode arrayNode = (ArrayNode) root;
             List<JsonNode> jsonNodes = new ArrayList<>();
@@ -240,7 +247,12 @@ public class DICOMWebApiController implements DICOMWebApi {
             List<JsonNode> filteredAndSorted = jsonNodes.stream()
                     .filter(node -> {
                         String seriesInstanceUID = node.path(SERIES_INSTANCE_UID_TAG).path(VALUE).path(0).asText();
-                        return allowedSeriesInstanceUIDs.contains(seriesInstanceUID);
+                        String virtualUID = seriesToVirtualUIDs.get(seriesInstanceUID);
+                        // keep only series of this exam (in the map) the user is
+                        // allowed to visualize: an owned annotation, e.g. a SEG/SR,
+                        // is hidden from the list for everyone but its annotator or
+                        // a reviewer
+                        return virtualUID != null && datasetSecurityService.hasRightToVisualizeSeries(virtualUID);
                     })
                     .sorted(Comparator.comparingInt(
                             node -> node.path(SERIES_NUMBER).path(VALUE).path(0).asInt(Integer.MAX_VALUE)))
@@ -271,6 +283,10 @@ public class DICOMWebApiController implements DICOMWebApi {
             for (Map.Entry<String, String> seriesToVirtualUID : seriesToVirtualUIDs.entrySet()) {
                 seriesInstanceUIDHandler.replaceSeriesInstanceUID(root, seriesToVirtualUID.getKey(), seriesToVirtualUID.getValue());
             }
+            // the study is referenced from within sequences as well, e.g. by an
+            // RT Structure Set in the RTReferencedStudySequence, and the viewer
+            // only knows the examinationUID
+            studyInstanceUIDAndSubjectNameHandler.replaceStudyInstanceUID(root, studyInstanceUID, examinationUID);
             rewriteBulkDataURIs(root, studyInstanceUID, examinationUID, serieInstanceUID, serieId);
             return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
         } else {
@@ -328,15 +344,36 @@ public class DICOMWebApiController implements DICOMWebApi {
 
     @Override
     public ResponseEntity findFrameOfStudyOfSerieOfInstance(String examinationUID, String serieInstanceUID,
-                                                            String sopInstanceUID, String frame) throws RestServiceException {
+                                                            String sopInstanceUID, String frame, String accept) throws RestServiceException {
         String studyInstanceUID = studyInstanceUIDAndSubjectNameHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
         serieInstanceUID = seriesInstanceUIDHandler.resolveSeriesInstanceUID(serieInstanceUID);
         if (!StringUtils.isEmpty(studyInstanceUID) && !StringUtils.isEmpty(serieInstanceUID)
                 && !StringUtils.isEmpty(sopInstanceUID) && !StringUtils.isEmpty(frame)) {
-            return dicomWebService.findFrameOfStudyOfSerieOfInstance(studyInstanceUID, serieInstanceUID, sopInstanceUID, frame);
+            return dicomWebService.findFrameOfStudyOfSerieOfInstance(studyInstanceUID, serieInstanceUID, sopInstanceUID,
+                    frame, sanitizeAcceptHeader(accept));
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    /**
+     * The Accept header of the viewer is forwarded to the PACS, so that the
+     * viewer can negotiate a transfer syntax it is able to decode. As the value
+     * ends up in an outgoing request, only sane media type characters are kept:
+     * anything else is dropped and the PACS applies its own default.
+     *
+     * @param accept the Accept header received from the viewer, may be null
+     * @return the header to forward or null, if there is nothing to forward
+     */
+    private String sanitizeAcceptHeader(String accept) {
+        if (StringUtils.isEmpty(accept) || accept.length() > MAX_ACCEPT_HEADER_LENGTH) {
+            return null;
+        }
+        if (!ACCEPT_HEADER_PATTERN.matcher(accept).matches()) {
+            LOG.warn("DICOMWeb: ignoring unexpected Accept header for frame request.");
+            return null;
+        }
+        return accept;
     }
 
     @Override

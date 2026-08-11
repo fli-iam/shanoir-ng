@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { inject, Injectable, OnDestroy } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 
@@ -60,11 +60,11 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
         return res;
     }
 
-    delete(id: number): Promise<void> {
-        return firstValueFrom(this.http.delete<void>(this.API_URL + '/' + id));
+    delete(id: number, params?: HttpParams): Promise<void> {
+        return firstValueFrom(this.http.delete<void>(this.API_URL + '/' + id, params ? { params: params } : {}));
     }
 
-    deleteWithConfirmDialog(name: string, entity: Entity, customMsg?: string): Promise<boolean> {
+    deleteWithConfirmDialog(name: string, entity: Entity, customMsg?: string, deleteParams?: HttpParams): Promise<boolean> {
         const dialogTitle : string = 'Delete ' + name;
         const defaultMsg : string = 'Are you sure you want to finally delete the ' + name
             + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?';
@@ -75,7 +75,7 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
                 customMsg || defaultMsg,
             ).then(res => {
                 if (res) {
-                    return this.delete(entity.id).then(() => {
+                    return this.delete(entity.id, deleteParams).then(() => {
                         if (name == 'examination') {
                             this.consoleService.log('info', 'The ' + name + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
                         } else {

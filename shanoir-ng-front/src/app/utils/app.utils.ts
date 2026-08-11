@@ -15,7 +15,7 @@
 import { HttpResponse } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
 
-import { environment } from '../../environments/environment';
+import { environment } from '@env/environment';
 
 // Emails
 export const SHANOIR_DPO_EMAIL = environment.dpoMail;
@@ -45,6 +45,7 @@ export const BACKEND_API_USER_ACCESS_REQUEST_BY_ADMIN: string = BACKEND_API_USER
 export const BACKEND_API_ACCESS_REQUEST_RESOLVE: string = BACKEND_API_USERS_MS_URL + '/accessrequest/resolve/';
 export const BACKEND_API_ACCESS_REQUEST_EXTENSION: string = BACKEND_API_USERS_MS_URL + '/accessrequest/extension';
 export const BACKEND_API_USER_PUBLIC_COUNT: string = BACKEND_API_USER_URL + BACKEND_API_COUNT_ENDPOINT;
+export const BACKEND_API_MASS_EMAIL_URL: string = BACKEND_API_USERS_MS_URL + '/massemail';
 
 // ShanoirEvents http api
 export const BACKEND_API_EVENTS_COUNT_DAYS_PARAM: string = '30';
@@ -338,7 +339,7 @@ function deepEquals(x, y) {
         }
         return true;
     }
-};
+}
 
 export function objectsEqual(value1, value2) {
     if (value1 === value2) return true;
@@ -361,7 +362,7 @@ export function isDarkColor(colorInp: string): boolean {
 }
 
 export function getSizeStr(size: number): string {
-    if (size == null || size == undefined){
+    if (size == null) {
         return "";
     }
     const base: number = 1024;
