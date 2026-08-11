@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.shared.email;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,6 +34,8 @@ public class EmailDatasetsImported extends EmailBase {
     private String examDate;
 
     private String studyCard;
+
+    private List<String> qualityCards;
 
     /**
      * @return the datasets
@@ -104,4 +107,17 @@ public class EmailDatasetsImported extends EmailBase {
         this.studyCard = studyCard;
     }
 
+    /**
+     * @return the qualityCards
+     */
+    public List<String> getQualityCards() {
+        return qualityCards;
+    }
+
+    /**
+     * @param qualityCards the qualityCards to set
+     */
+    public void setQualityCards(List<String> qualityCards) {
+        this.qualityCards = qualityCards;
+    }
 }

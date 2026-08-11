@@ -152,7 +152,7 @@ public class StudyCard extends HalEntity implements Card {
     * @param dicomAttributes
     * @return true if the application had any effect on acquisitions
     */
-    public boolean apply(DatasetAcquisition acquisition, AcquisitionAttributes<?> dicomAttributes) {
+    public boolean apply(DatasetAcquisition acquisition, AcquisitionAttributes<?> dicomAttributes) throws IllegalStateException {
         boolean changeInAtLeastOneAcquisition = false;
         if (this.getRules() != null) {
             for (StudyCardRule<?> rule : this.getRules()) {

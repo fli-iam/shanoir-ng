@@ -118,6 +118,32 @@ public abstract class CardCondition extends AbstractEntity {
         }
     }
 
+    private static final List<Operation> NEGATIVE_TEXTUAL_OPERATIONS = List.of(
+            Operation.DOES_NOT_CONTAIN, Operation.DOES_NOT_START_WITH,
+            Operation.DOES_NOT_END_WITH, Operation.NOT_EQUALS);
+
+    /**
+     * This method compares original against every candidate value of this condition,
+     * combined with the meaning of the operator: positive operators (CONTAINS, EQUALS, STARTS_WITH,
+     * ENDS_WITH) succeed if original matches ANY (= at least one) candidate (OR), while negative operators
+     * (DOES_NOT_CONTAIN, DOES_NOT_START_WITH, DOES_NOT_END_WITH, NOT_EQUALS) succeed only if
+     * original matches NONE of the candidates.
+     */
+    protected boolean textualCompare(Operation operation, String original) {
+        boolean negative = NEGATIVE_TEXTUAL_OPERATIONS.contains(operation);
+        for (String candidate : getValues()) {
+            boolean singleMatch = textualCompare(operation, original, candidate);
+            if (negative) {
+                if (!singleMatch) {
+                    return false;
+                }
+            } else if (singleMatch) {
+                return true; // OR: any positive match is enough
+            }
+        }
+        return negative;
+    }
+
     protected boolean textualCompare(Operation operation, String original, String studycardStr) {
         if (original != null) {
             if (Operation.EQUALS.equals(operation)) {
@@ -199,6 +225,20 @@ public abstract class CardCondition extends AbstractEntity {
                 intArr[i] = Integer.parseInt(split[i]);
             }
             return intArr;
+        }
+    }
+
+    protected void writeConditionsReport(StringBuffer report, boolean complies, int nbOk, int nbUnknown, int total) {
+        if (report != null) {
+            if (!complies) {
+                switch (getCardinality()) {
+                    case -1 -> report.append("\nThis condition failed because only " + nbOk + " out of all (" + total + ") dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                    case 0 -> report.append("\nThis condition failed because " + nbOk + " dataset(s) complied where 0 was required" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                    default -> report.append("\nThis condition failed because only " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+                }
+            } else {
+                report.append("\nThe condition [" + toString() + "] succeeds because " + nbOk + " out of " + total + " dataset(s) complied" + (nbUnknown > 0 ? " (" + nbUnknown + " unknown)" : ""));
+            }
         }
     }
 

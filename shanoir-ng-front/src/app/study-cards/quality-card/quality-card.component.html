@@ -27,7 +27,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </button>
                     }
                     @if (mode == 'view' && isStudyAdmin) {
-                        <button type="button" class="right-icon apply test" (click)="test()" [disabled]="true || applying || testing" title="Coming soon">
+                        <button type="button" class="right-icon apply test" (click)="test()" [disabled]="false || applying || testing" title="Test Quality Card rules on a subset of imported acquisitions of the selected study">
                             Test
                             @if (!testing) {
                                 <i class="fa-solid fa-play"></i>
@@ -38,7 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </button>
                     }
                     @if (mode == 'view' && isStudyAdmin) {
-                        <button type="button" class="alt right-icon apply" (click)="apply()" [disabled]="true || applying || testing" title="Coming soon">
+                        <button type="button" class="alt right-icon apply" (click)="apply()" [disabled]="false || applying || testing" title="Apply Quality Card rules to all the imported acquisitions of the selected study">
                             Apply now
                             @if (!applying) {
                                 <i class="fa-solid fa-play"></i>
@@ -140,7 +140,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                     <i class="fa-solid fa-times-circle"></i>
                                                     Error
                                                 </span>
-                                                tag will block any import
+                                                tag will block any DICOM serie/dataset acquisition import
                                                 <b>that would match</b>
                                                 this rule.
                                             </div>
@@ -152,8 +152,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </ol>
                 </fieldset>
                 <fieldset class="rules">
-                    <legend>Rules</legend>
-                    <div class="info left-icon">This rule set will be applied to each given examination</div>
+                    <legend>
+                      Rules
+                      <tool-tip [large]="true">
+						            <span class="bold">This rule set will be applied to each DICOM serie/dataset acquisition of a given examination, and will set a VALID/WARNING/ERROR quality tag for each acquisition.</span>
+						            <ul>
+							          <li>
+								        The "Auto check at import" checkbox can set this quality card to automatically check the quality of acquisitions at import if needed.<br>
+							          </li>
+							          <li>
+								        This quality card can also be applied to generate a quality report and set quality tags on already imported acquisitions of the selected study.
+							          </li>
+						            </ul>
+					            </tool-tip>
+                    </legend>
                     <study-card-rules
                         class="rules"
                         [formGroup]="form"

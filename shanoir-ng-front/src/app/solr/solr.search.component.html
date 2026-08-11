@@ -72,6 +72,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [ngModelOptions]="{ standalone: true }"
             (userChange)="updateSelections(); refreshTable('tags')"></solr-paging-criterion>
 
+        <solr-paging-criterion
+            label="Quality Tag"
+            awesome="fa-solid fa-gears"
+            facetName="qualityTag"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.qualityTag"
+            [ngModelOptions]="{ standalone: true }"
+            (userChange)="updateSelections(); refreshTable('qualityTag')"></solr-paging-criterion>
+
         <div class="dates">
             <div class="title" (click)="dateOpen = !dateOpen">
                 <span class="left-icon">

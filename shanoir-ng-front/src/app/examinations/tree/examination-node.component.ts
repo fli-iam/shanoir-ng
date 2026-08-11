@@ -165,4 +165,15 @@ export class ExaminationNodeComponent extends TreeNodeAbstractComponent<Examinat
     onAcquisitionDelete(index: number) {
         (this.node.datasetAcquisitions as DatasetAcquisitionNode[]).splice(index, 1) ;
     }
+
+    isDatasetAcquisitionNode(node: string | DatasetAcquisitionNode): node is DatasetAcquisitionNode {
+        return typeof node !== 'string';
+    }
+
+    getQualityTagColor(node: string | DatasetAcquisitionNode): string {
+        if (typeof node === 'string') return '';
+        if (node.qualityTag === 'ERROR') return 'red';
+        if (node.qualityTag === 'WARNING') return 'orange';
+        return '';
+    }
 }

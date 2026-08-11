@@ -47,13 +47,14 @@ import { FormFooterComponent } from '../../shared/components/form-footer/form-fo
 import { SelectBoxComponent } from '../../shared/select/select.component';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 
 @Component({
     selector: 'quality-card',
     templateUrl: 'quality-card.component.html',
     styleUrls: ['quality-card.component.css'],
-    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, CheckboxComponent, StudyCardRulesComponent, LoadingBarComponent, TableComponent]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, CheckboxComponent, StudyCardRulesComponent, LoadingBarComponent, TableComponent, TooltipComponent]
 })
 export class QualityCardComponent extends EntityComponent<QualityCard> {
 
@@ -208,7 +209,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     apply() {
         this.confirmService.confirm(
             'Apply Quality Card', 
-            `Do you want to apply the quality card named "${this.qualityCard.name}" all over the study "${this.qualityCard.study.name}" ? This would permanentely overwrite previous quality tags for the study's subjects.`
+            `Do you want to apply the quality card named "${this.qualityCard.name}" all over the study "${this.qualityCard.study.name}" ? This would permanently overwrite previous quality tags set on dataset acquisitions.`
         ).then(accept => {
             if (accept) {
                 this.applying = true;

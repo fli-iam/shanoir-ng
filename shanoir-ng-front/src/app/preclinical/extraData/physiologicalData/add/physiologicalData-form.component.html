@@ -154,10 +154,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 }
                                 @case ('create') {
                                     <upload-file name="physioDataFile" [noFilename]="true" (fileChange)="fileChangeEvent($event.target.files)"></upload-file>
+                                    {{ physioData.filename }}
+                                    @if (physioData?.filename) {
+                                        <button (click)="deleteFile()" class="delete"><i class="fa-regular fa-trash-can"></i></button>
+                                    }
                                 }
                                 @case ('edit') {
-                                    {{ physioData.filename }}
                                     <upload-file name="physioDataFile" [noFilename]="true" (fileChange)="fileChangeEvent($event.target.files)"></upload-file>
+                                    {{ physioData.filename }}
+                                    @if (physioData?.filename) {
+                                        <button (click)="deleteFile()" class="delete"><i class="fa-regular fa-trash-can"></i></button>
+                                    }
                                 }
                             }
                         </span>
