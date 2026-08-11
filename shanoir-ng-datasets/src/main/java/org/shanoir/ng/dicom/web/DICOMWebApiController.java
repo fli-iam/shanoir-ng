@@ -294,6 +294,24 @@ public class DICOMWebApiController implements DICOMWebApi {
         }
     }
 
+    @Override
+    public ResponseEntity<String> findInstanceMetadataOfStudyOfSerie(String examinationUID, String serieInstanceUID,
+            String sopInstanceUID) throws RestServiceException {
+        String studyInstanceUID = studyInstanceUIDAndSubjectNameHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
+        serieInstanceUID = seriesInstanceUIDHandler.resolveSeriesInstanceUID(serieInstanceUID);
+        if (!StringUtils.isEmpty(studyInstanceUID) && !StringUtils.isEmpty(serieInstanceUID)
+                && !StringUtils.isEmpty(sopInstanceUID)) {
+            String response = dicomWebService.findInstanceMetadataOfStudyOfSerie(studyInstanceUID, serieInstanceUID, sopInstanceUID);
+            if (response != null) {
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
     /**
      * The PACS does not inline large binary attributes, e.g. overlay data
      * (60xx3000), in the serie metadata, but references them with an absolute
