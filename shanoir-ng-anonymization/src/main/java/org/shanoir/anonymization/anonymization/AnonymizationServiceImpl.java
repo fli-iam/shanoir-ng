@@ -69,7 +69,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
     private static Map<String, List<String>> tagsToDeleteForManufacturer;
 
     @Override
-    public void anonymize(ArrayList<File> dicomFiles, String profile) throws Exception {
+    public AnonymizationResult anonymize(ArrayList<File> dicomFiles, String profile) throws Exception {
         long startTime = System.currentTimeMillis();
         final int totalAmount = dicomFiles.size();
         LOG.info("Start pseudonymization: profile {} on {} DICOM files.", profile, totalAmount);
@@ -82,33 +82,34 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         Map<String, String> frameOfReferenceUIDs = new HashMap<>();
         Map<String, String> studyInstanceUIDs = new HashMap<>();
         Map<String, String> studyIds = new HashMap<>();
+        Map<String, String> sopInstanceUIDsByFilePath = new HashMap<>();
 
         AnonymizationStats stats = new AnonymizationStats();
         LOG.debug("anonymize : totalAmount={}", totalAmount);
         int current = 0;
         for (int i = 0; i < dicomFiles.size(); ++i) {
             final File file = dicomFiles.get(i);
-            // Perform the anonymization
             performAnonymization(file, anonymizationMap, false, "", "", null, seriesInstanceUIDs, frameOfReferenceUIDs,
-                    studyInstanceUIDs, studyIds, stats);
+                    studyInstanceUIDs, studyIds, sopInstanceUIDsByFilePath, stats);
             current++;
             final int currentPercent = current * 100 / totalAmount;
             LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
         }
         logInfos("End pseudonymization", startTime);
         stats.logSummary();
+        return new AnonymizationResult(seriesInstanceUIDs, studyInstanceUIDs, frameOfReferenceUIDs, sopInstanceUIDsByFilePath);
     }
 
     @Override
-    public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName,
+    public AnonymizationResult anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName,
             String patientFirstName, String patientID, String studyInstanceUID) throws Exception {
         String patientName = patientLastName + "^" + patientFirstName + "^^^";
-        anonymizeForShanoir(dicomFiles, profile, patientName, patientID, studyInstanceUID);
+        return anonymizeForShanoir(dicomFiles, profile, patientName, patientID, studyInstanceUID);
     }
 
     @Override
-    public void anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName, String patientID,
-            String studyInstanceUID) throws Exception {
+    public AnonymizationResult anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName,
+            String patientID, String studyInstanceUID) throws Exception {
         long startTime = System.currentTimeMillis();
         final int totalAmount = dicomFiles.size();
         LOG.info("Start pseudonymization: profile {} on {} DICOM files.", profile, totalAmount);
@@ -122,21 +123,23 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         Map<String, String> frameOfReferenceUIDs = new HashMap<>();
         Map<String, String> studyInstanceUIDs = new HashMap<>();
         Map<String, String> studyIds = new HashMap<>();
+        Map<String, String> sopInstanceUIDsByFilePath = new HashMap<>();
 
         AnonymizationStats stats = new AnonymizationStats();
         LOG.debug("anonymize : totalAmount={}", totalAmount);
         int current = 0;
         for (int i = 0; i < dicomFiles.size(); ++i) {
             final File file = dicomFiles.get(i);
-            // Perform the anonymization
             performAnonymization(file, anonymizationMap, true, patientName, patientID, studyInstanceUID,
-                    seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds, stats);
+                    seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds,
+                    sopInstanceUIDsByFilePath, stats);
             current++;
             final int currentPercent = current * 100 / totalAmount;
             LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
         }
         logInfos("End pseudonymization", startTime);
         stats.logSummary();
+        return new AnonymizationResult(seriesInstanceUIDs, studyInstanceUIDs, frameOfReferenceUIDs, sopInstanceUIDsByFilePath);
     }
 
     private void logInfos(final String methodName, long startTime) {
@@ -197,10 +200,11 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             boolean isShanoirAnonymization,
             String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs,
             Map<String, String> frameOfReferenceUIDs,
-            Map<String, String> studyInstanceUIDs, Map<String, String> studyIds) throws Exception {
+            Map<String, String> studyInstanceUIDs, Map<String, String> studyIds,
+            Map<String, String> sopInstanceUIDsByFilePath) throws Exception {
         performAnonymization(dicomFile, anonymizationMap, isShanoirAnonymization, patientName, patientID,
                 studyInstanceUID, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds,
-                new AnonymizationStats());
+                sopInstanceUIDsByFilePath, new AnonymizationStats());
     }
 
     /**
@@ -213,7 +217,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             boolean isShanoirAnonymization,
             String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs,
             Map<String, String> frameOfReferenceUIDs,
-            Map<String, String> studyInstanceUIDs, Map<String, String> studyIds, AnonymizationStats stats)
+            Map<String, String> studyInstanceUIDs, Map<String, String> studyIds,
+            Map<String, String> sopInstanceUIDsByFilePath, AnonymizationStats stats)
             throws Exception {
         DicomInputStream din = null;
         DicomOutputStream dos = null;
@@ -321,10 +326,20 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                     }
                 }
             }
+
             // Special anonymization of patient data if isShanoirAnonymization
             if (isShanoirAnonymization) {
                 anonymizePatientMetaData(datasetAttributes, patientName, patientID, patientBirthDateAttr, stats);
             }
+
+            // Record the file's FINAL SOPInstanceUID (whatever action applied, or
+            // none at all) keyed by its path, so callers can correlate this file
+            // back to the Instance it came from and patch that Instance's UID.
+            String finalSopInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
+            if (finalSopInstanceUID != null) {
+                sopInstanceUIDsByFilePath.put(dicomFile.getAbsolutePath(), finalSopInstanceUID);
+            }
+
             LOG.debug("finish anonymization: begin storage");
             dos = new DicomOutputStream(dicomFile);
             dos.writeDataset(metaInformationAttributes, datasetAttributes);
