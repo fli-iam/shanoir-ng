@@ -211,6 +211,35 @@ public class DICOMWebService {
     }
 
     /**
+     * Only get metadata (application/dicom+json) for one instance stored
+     * in the backup PACS dcm4chee-arc. Fast and avoids loading PixelData.
+     * To be faster: ignore private tags too. Similar to an instance-"ping".
+     * @param studyInstanceUID
+     * @param serieInstanceUID
+     * @param sopInstanceUID
+     * @return
+     */
+    public String findInstanceMetadataOfStudyOfSerie(String studyInstanceUID, String serieInstanceUID, String sopInstanceUID) {
+        try {
+            String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID
+                    + "/instances/" + sopInstanceUID + "/metadata?excludeprivate=false";
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.setHeader("Accept-Charset", "UTF-8");
+            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    return EntityUtils.toString(entity, "UTF-8");
+                } else {
+                    LOG.error("DICOMWeb: findInstanceMetadataOfStudyOfSerie: empty response entity.");
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    /**
      * This method is used by the viewer OHIF to display the actual images.
      * The raw pixel data are searched in dcm4chee arc light behind Shanoir
      * and send as byte array to OHIF.
