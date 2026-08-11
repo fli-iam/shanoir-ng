@@ -28,6 +28,7 @@ public class ImportFinishRunnable implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(ImportFinishRunnable.class);
 
     private final File uploadFolder;
+
     private final ImportJobBase importJob;
 
     private final Anonymizer anonymizer = new Anonymizer();
