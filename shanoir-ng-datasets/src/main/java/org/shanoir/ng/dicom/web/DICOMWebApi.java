@@ -103,7 +103,7 @@ public interface DICOMWebApi {
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
             @Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
         ) throws RestServiceException, JsonMappingException, JsonProcessingException;
-    
+
     @Operation(summary = "", description = "Returns the metadata of a DICOM instance")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found instance metadata"),
@@ -114,7 +114,7 @@ public interface DICOMWebApi {
     @GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}/metadata", produces = { "application/dicom+json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL') and @datasetSecurityService.hasRightToVisualizeSeries(#serieInstanceUID))")
     ResponseEntity<String> findInstanceMetadataOfStudyOfSerie(String examinationUID, String serieInstanceUID, String sopInstanceUID) throws RestServiceException;
-    
+
     @Operation(summary = "", description = "Returns all DICOM instances of a study and serie")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found instances/datasets"),
