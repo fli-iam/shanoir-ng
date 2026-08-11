@@ -133,12 +133,15 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
 
-    @Override
-    public boolean canProcess(ExecutionMonitoring processing) throws ResultHandlerException {
-        if (processing.getPipelineIdentifier() == null || processing.getPipelineIdentifier().isEmpty()) {
-            throw new ResultHandlerException("Pipeline identifier is not set for processing [" + processing.getName() + "]", null);
+    public boolean canProcess(ExecutionMonitoring processing, boolean postProcessing) throws ResultHandlerException {
+        return canProcess(processing.getPipelineIdentifier(), postProcessing);
+    }
+
+    public boolean canProcess(String pipelineIdentifier, boolean postProcessing) throws ResultHandlerException {
+        if (Objects.isNull(pipelineIdentifier)) {
+            throw new ResultHandlerException("Pipeline identifier can not be null", null);
         }
-        return processing.getPipelineIdentifier().startsWith("ofsep_sequences_identification")  || processing.getPipelineIdentifier().startsWith("SIMS");
+        return (pipelineIdentifier.startsWith("SIMS") || pipelineIdentifier.startsWith("ofsep_sequences_identification")) && postProcessing == pipelineIdentifier.endsWith("post_processing");
     }
 
     @Override

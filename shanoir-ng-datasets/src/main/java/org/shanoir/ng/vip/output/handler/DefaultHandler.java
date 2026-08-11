@@ -78,9 +78,12 @@ public class DefaultHandler extends OutputHandler {
     @Autowired
     private ProcessedDatasetImporterService processedDatasetImporterService;
 
-    @Override
-    public boolean canProcess(ExecutionMonitoring processing) {
-        return true;
+    public boolean canProcess(ExecutionMonitoring processing, boolean postProcessing) {
+        return !postProcessing;
+    }
+
+    public boolean canProcess(String pipelineIdentifier, boolean postProcessing) {
+        return !postProcessing;
     }
 
     @Override

@@ -54,6 +54,22 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
     @EntityGraph(attributePaths = "outputDatasets")
     List<DatasetProcessing> findAllByInputDatasets_IdIn(List<Long> datasetIds);
 
+
+    /**
+     * Find all dataset processing by comment and type.
+     *
+     * @param comment Comment.
+     * @param type Dataset processing type.
+     * @return List of dataset processing.
+     */
+    @Query(value = "SELECT DISTINCT processing.id FROM dataset_processing as processing "
+            + "INNER JOIN execution_monitoring AS monitoring ON monitoring.id = processing.id "
+            + "WHERE processing.dataset_processing_type = :type "
+            + "AND processing.comment LIKE :comment "
+            + "AND monitoring.name LIKE '%post_processing' "
+            + "AND monitoring.status = 1", nativeQuery = true)
+    List<Long> findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(String comment, int type);
+
     /**
      * Find all processings that are linked to given monitoring through parent_id column
      *
