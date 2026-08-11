@@ -1,5 +1,5 @@
 shanoir-table { width: 490px; margin-right: 20px; display: inline-block; }
-.pannel { margin-top: 48px; border: 1px solid var(--grey); padding: 8px 9px; width: 470px; position: relative; background-color: var(--lighter-grey); border-radius: 2px; }
+.panel { margin-top: 48px; border: 1px solid var(--grey); padding: 8px 9px; width: 470px; position: relative; background-color: var(--lighter-grey); border-radius: 2px; }
 .right-col label { display: inline-block; }
 label { margin-left: 0px; min-width: 250px; }
 fieldset { margin: 0; }

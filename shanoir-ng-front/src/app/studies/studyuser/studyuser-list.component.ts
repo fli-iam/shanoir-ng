@@ -207,17 +207,17 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     onUserClick(studyUser: StudyUser) {
         if (this.panelStudyUser && (this.panelStudyUser.id == studyUser.id)) {
-            this.closePannel();
+            this.closePanel();
         } else {
-            this.openPannel(studyUser);
+            this.openPanel(studyUser);
         }
     }
 
-    openPannel(studyUser: StudyUser) {
+    openPanel(studyUser: StudyUser) {
         this.panelStudyUser = studyUser;
     }
 
-    closePannel() {
+    closePanel() {
         this.panelStudyUser = null;
     }
 
@@ -232,7 +232,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         this.onChangeCallback(this.studyUserList);
         this.onTouchedCallback();
         StudyUser.completeMember(item, this.users);
-        this.closePannel();
+        this.closePanel();
     }
 
     onStudyUserEdit() {

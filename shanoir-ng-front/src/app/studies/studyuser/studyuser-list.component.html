@@ -48,8 +48,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [selectedId]="panelStudyUser?.id"></shanoir-table>
         @if (panelStudyUser) {
             <span class="right-col">
-                <div class="pannel">
-                    <div class="close" (click)="closePannel()"><i class="fas fa-times"></i></div>
+                <div class="panel">
+                    <div class="close" (click)="closePanel()"><i class="fas fa-times"></i></div>
                     @if (isAdmin) {
                         <fieldset>
                             <legend>General</legend>
@@ -192,8 +192,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <span class="right-col">
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
-                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ANNOTATE)"
-                                        (userChange)="onEditRight(StudyUserRight.CAN_ANNOTATE, pannelStudyUser, $event)"
+                                        [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ANNOTATE)"
+                                        (userChange)="onEditRight(StudyUserRight.CAN_ANNOTATE, panelStudyUser, $event)"
                                         [disabled]="study.isDraft"></checkbox>
                                 </span>
                             </li>
@@ -202,8 +202,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <span class="right-col">
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
-                                        [ngModel]="pannelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ANNOTATE_REVIEW)"
-                                        (userChange)="onEditRight(StudyUserRight.CAN_ANNOTATE_REVIEW, pannelStudyUser, $event)"
+                                        [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ANNOTATE_REVIEW)"
+                                        (userChange)="onEditRight(StudyUserRight.CAN_ANNOTATE_REVIEW, panelStudyUser, $event)"
                                         [disabled]="study.isDraft"></checkbox>
                                 </span>
                             </li>
