@@ -20,7 +20,9 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.assertj.core.util.Lists;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.output.handler.DefaultHandler;
@@ -31,11 +33,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -61,12 +68,13 @@ public class OutputServiceImpl implements OutputService {
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
 
-    public void process(ExecutionMonitoring monitoring, OutputHandler outputHandler) throws ResultHandlerException, EntityNotFoundException {
-        process(monitoring, Lists.list(outputHandler), true);
-    }
+    @Autowired
+    @Lazy
+    private DatasetProcessingRepository processingRepository;
 
+    @Transactional(readOnly = true)
     public void process(ExecutionMonitoring monitoring) throws ResultHandlerException, EntityNotFoundException {
-        process(monitoring, outputHandlers, false);
+        process(monitoring, outputHandlers);
     }
 
     /**
@@ -77,20 +85,20 @@ public class OutputServiceImpl implements OutputService {
      * @param selectedOutputHandlers
      * @throws ResultHandlerException
      */
-    private void process(ExecutionMonitoring monitoring, List<OutputHandler> selectedOutputHandlers, boolean postProcessing) throws ResultHandlerException, EntityNotFoundException {
+    protected void process(ExecutionMonitoring monitoring, List<OutputHandler> selectedOutputHandlers) throws ResultHandlerException {
+        List<File> outputFiles;
 
         File userImportDir = new File(this.importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator + monitoring.getResultsLocation());
-
         if (userImportDir.exists()) {
             for (File archive : getArchivesToProcess(userImportDir)) {
                 LOG.info("Processing archive : " + archive.getAbsolutePath());
                 File cacheFolder = new File(userImportDir.getAbsolutePath() + File.separator + FilenameUtils.getBaseName(archive.getName()));
                 try {
                     String resourceId = archive.getName().split("\\+")[1];
-                    List<File> outputFiles = extractTarIntoCache(archive, cacheFolder);
+                    outputFiles = extractTarIntoCache(archive, cacheFolder);
 
                     for (OutputHandler outputHandler : selectedOutputHandlers) {
-                        if (outputHandler.canProcess(monitoring, postProcessing)) {
+                        if (outputHandler.canProcess(monitoring.getName())) {
                             LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputHandler.getClass().getSimpleName());
                             outputHandler.manageTarGzResult(outputFiles, userImportDir, monitoring, resourceId);
                         }
@@ -101,19 +109,23 @@ public class OutputServiceImpl implements OutputService {
                 }
             }
         }
-
         if (selectedOutputHandlers.stream().anyMatch(handler -> handler instanceof DefaultHandler) && monitoring.getPipelineIdentifier().endsWith("post_processing")) {
             LOG.info("Output processing for monitoring " +  monitoring.getId() + " finished. Output kept for post-processing.");
-            // Remove processed datasets from current execution monitoring
         } else {
             deleteDirectory(userImportDir);
             processingResourceRepository.deleteByProcessingId(monitoring.getId());
-            LOG.info("Working files for output processing removed.");
         }
+    }
 
-        LOG.info("Output processing for monitoring " +  monitoring.getId() + " finished.");
-        // Remove processed datasets from current execution monitoring
-
+    @Transactional
+    public void postProcess(Long processingId, OutputHandler outputHandler) throws EntityNotFoundException {
+        DatasetProcessing processing = processingRepository.findById(processingId)
+                .orElseThrow(() -> new EntityNotFoundException(DatasetProcessing.class, processingId));
+        List<File> outputFiles = processing.getOutputDatasets().stream().map(this::toOutputFile).toList();
+        if (!outputFiles.isEmpty()) {
+            LOG.info("Processing result file [{}] with [{}] output processing", outputFiles.getFirst().getAbsolutePath(), outputHandler.getClass().getSimpleName());
+            outputHandler.manageDelayedOutput(outputFiles, processing);
+        }
     }
 
     /**
@@ -176,6 +188,17 @@ public class OutputServiceImpl implements OutputService {
         } catch (IOException e) {
             LOG.error("I/O error while deleting cache dir [{}]", directory.getAbsolutePath());
             LOG.error(e.getCause().getMessage(), e);
+        }
+    }
+
+    private File toOutputFile(Dataset ds) {
+        String path = ds.getDatasetExpressions().getFirst()
+                .getDatasetFiles().getFirst()
+                .getPath();
+        try {
+            return new File(new URI(path));
+        } catch (URISyntaxException e) {
+            throw new UncheckedIOException("Invalid URI for dataset path: " + path, new IOException(e));
         }
     }
 }

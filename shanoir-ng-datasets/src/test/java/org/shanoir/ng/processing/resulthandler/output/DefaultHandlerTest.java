@@ -37,12 +37,11 @@ public class DefaultHandlerTest {
     @Test
     public void canProcessTest() {
         ExecutionMonitoring processing = new ExecutionMonitoring();
-        processing.setPipelineIdentifier("ofsep_sequences_identification/0.1");
-        Assertions.assertTrue(outputProcessing.canProcess(processing, false));
-        processing.setPipelineIdentifier("ofsep_sequences_identification/1.0");
-        Assertions.assertTrue(outputProcessing.canProcess(processing, false));
-        processing.setPipelineIdentifier("ct-tiqua/2.2");
-        Assertions.assertTrue(outputProcessing.canProcess(processing, false));
+        processing.setName("ofsep_sequences_identification/0.1");
+        Assertions.assertTrue(outputProcessing.canProcess(processing.getName()));
+        processing.setName("ofsep_sequences_identification/1.0");
+        Assertions.assertTrue(outputProcessing.canProcess(processing.getComment()));
+        processing.setName("ct-tiqua/2.2");
+        Assertions.assertTrue(outputProcessing.canProcess(processing.getComment()));
     }
-
 }

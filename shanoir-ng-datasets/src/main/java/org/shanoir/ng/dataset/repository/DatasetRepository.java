@@ -96,10 +96,9 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
     boolean existsByTagsContains(StudyTag tag);
 
-    @Query(value = "SELECT ds.id FROM dataset as ds "
-            + "INNER JOIN input_of_dataset_processing as input ON ds.id=input.dataset_id "
-            + "WHERE input.processing_id in :processingIds or ds.dataset_processing_id in :processingIds", nativeQuery = true)
-    List<Dataset> findDatasetsByProcessingIdIn(List<Long> processingIds);
+    @Query("SELECT DISTINCT ds FROM Dataset ds LEFT JOIN ds.processings p "
+            + "WHERE p.id IN :processingIds")
+    List<Dataset> findDatasetsByProcessingIdIn(@Param("processingIds") List<Long> processingIds);
 
     @Query("""
             SELECT DISTINCT
