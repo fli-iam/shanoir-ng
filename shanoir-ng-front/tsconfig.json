@@ -2,7 +2,6 @@
     "compileOnSave": false,
     "compilerOptions": {
         "noImplicitAny": false,
-        "strict": false,
         "outDir": "./dist/out-tsc",
         "paths": {
             "@env/*": ["./src/environments/*"],
