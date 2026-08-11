@@ -27,6 +27,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.shanoir.anonymization.anonymization.AnonymizationResult;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Patient;
@@ -262,9 +263,9 @@ public class ImportWithStudyCardTests extends AbstractImportTest {
 
             Anonymizer anonymizer = new Anonymizer();
             String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
-            boolean anonymizationSuccess = anonymizer.pseudonymize(
+            AnonymizationResult anonymizationResult = anonymizer.pseudonymize(
                     uploadFolder, anonymizationProfile, subject.getName(), examination.getStudyInstanceUID());
-            Assertions.assertTrue(anonymizationSuccess, "Local anonymization of PACS-retrieved DICOM files failed.");
+            Assertions.assertNotNull(anonymizationResult, "Local anonymization of PACS-retrieved DICOM files failed.");
             
             File importJobJsonFile = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
             importJobJsonFile.createNewFile();
