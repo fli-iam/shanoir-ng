@@ -15,7 +15,6 @@
 package org.shanoir.ng.vip.output.service;
 
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
-
 import java.util.List;
 
 public interface PostProcessingService {
@@ -26,4 +25,9 @@ public interface PostProcessingService {
      * @param comment
      */
     void launchPostProcessing(List<Long> processingIds, String comment) throws ResultHandlerException;
+
+    /**
+     * Launch post processing for given processing ids partition with the static output handler
+     */
+    void launchPostProcessingPartition(List<Long> partition);
 }

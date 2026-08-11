@@ -20,6 +20,7 @@ import org.dcm4che3.data.VR;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -47,12 +48,12 @@ public class OFSEPSeqIdProcessingTest {
     @Test
     public void canProcessTest() throws ResultHandlerException {
         ExecutionMonitoring processing = new ExecutionMonitoring();
-        processing.setPipelineIdentifier("ofsep_sequences_identification/0.1");
-        assertTrue(outputProcessing.canProcess(processing, false));
-        processing.setPipelineIdentifier("SIMS/1.0");
-        assertTrue(outputProcessing.canProcess(processing, false));
-        processing.setPipelineIdentifier("ct-tiqua/2.2");
-        assertFalse(outputProcessing.canProcess(processing, false));
+        processing.setName("ofsep_sequences_identification/0.1");
+        Assertions.assertTrue(outputProcessing.canProcess(processing.getName()));
+        processing.setName("SIMS/1.0");
+        Assertions.assertTrue(outputProcessing.canProcess(processing.getName()));
+        processing.setName("ct-tiqua/2.2");
+        Assertions.assertFalse(outputProcessing.canProcess(processing.getName()));
     }
 
     @Test

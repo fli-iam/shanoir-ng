@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/vip/postProcessing")
 public interface PostProcessingApi {
 
-    @Operation(summary = "Launch every post processingq according to processing name and comment", description = "Launch every post processings according to processing name and comment.", tags = {  })
+    @Operation(summary = "Launch every post processing according to processing name and comment", description = "Launch every post processings according to processing name and comment.", tags = {  })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Post processing command successfully initiated"),
             @ApiResponse(responseCode = "403", description = "forbidden"),

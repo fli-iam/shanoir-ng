@@ -27,6 +27,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.property.model.DatasetProperty;
@@ -133,15 +134,11 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     @Autowired
     private ProcessingResourceRepository processingResourceRepository;
 
-    public boolean canProcess(ExecutionMonitoring processing, boolean postProcessing) throws ResultHandlerException {
-        return canProcess(processing.getPipelineIdentifier(), postProcessing);
-    }
-
-    public boolean canProcess(String pipelineIdentifier, boolean postProcessing) throws ResultHandlerException {
+    public boolean canProcess(String pipelineIdentifier) throws ResultHandlerException {
         if (Objects.isNull(pipelineIdentifier)) {
             throw new ResultHandlerException("Pipeline identifier can not be null", null);
         }
-        return (pipelineIdentifier.startsWith("SIMS") || pipelineIdentifier.startsWith("ofsep_sequences_identification")) && postProcessing == pipelineIdentifier.endsWith("post_processing");
+        return (pipelineIdentifier.startsWith("SIMS") || pipelineIdentifier.startsWith("ofsep_sequences_identification")) && !pipelineIdentifier.endsWith("post_processing");
     }
 
     @Override
@@ -172,6 +169,36 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             return;
         }
         LOG.error("Expected result file [" + parentFolder.getAbsolutePath() + "/" + PIPELINE_OUTPUT + "] is not present.");
+    }
+
+    @Override
+    public void manageDelayedOutput(List<File> resultFiles, DatasetProcessing processing) {
+
+        for (File file : resultFiles) {
+            if (!file.getName().equals(PIPELINE_OUTPUT)) {
+                continue;
+            }
+
+            if (file.length() == 0) {
+                LOG.error("File" + file.getName() + " is empty, this processing result won't be created.");
+                continue;
+            }
+
+            try (InputStream is = new FileInputStream(file)) {
+                JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
+                JSONArray series = json.getJSONArray(SERIES);
+
+                if (series.length() < 1) {
+                    LOG.warn("Series list is empty in result file [{}].", file.getAbsolutePath());
+                    return;
+                }
+                processSeries(series, processing);
+            } catch (Exception e) {
+                LOG.error("An error occured while extracting result from result archive.", e);
+            }
+            return;
+        }
+        LOG.error("Expected result file " + PIPELINE_OUTPUT + " is not present.");
     }
 
     /**
@@ -266,6 +293,9 @@ public class OFSEPSeqIdHandler extends OutputHandler {
      */
     private boolean checkIfSameDatasetVolume(Dataset dataset, JSONObject volume) {
         try {
+            if (!volume.has("shanoirId")) {
+                return false;
+            }
             String shanoirId = volume.getString("shanoirId");
 
             if (shanoirId.contains(",")) {
@@ -289,11 +319,10 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             JSONObject serie = series.getJSONObject(i);
             Long serieId = serie.getLong(ID);
 
-
             List<Dataset> datasets = processingResourceRepository.findDatasetsByResourceId(resourceId)
-                    .stream().filter(ds -> ds.getDatasetAcquisition() != null
-                            && ds.getDatasetAcquisition().getId().equals(serieId))
-                    .collect(Collectors.toList());
+                        .stream().filter(ds -> ds.getDatasetAcquisition() != null
+                                && ds.getDatasetAcquisition().getId().equals(serieId))
+                        .collect(Collectors.toList());
 
             if (datasets.isEmpty()) {
                 LOG.error("No dataset found for serie/acquisition [" + serieId + "]");
@@ -326,6 +355,57 @@ public class OFSEPSeqIdHandler extends OutputHandler {
                     List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, monitoring);
                     addDatasetTags(ds, properties);
                     properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, monitoring));
+                    datasetPropertyService.createAll(properties);
+                } else {
+                    LOG.info("Dataset {} ignored, no update", ds.getId());
+                }
+            }
+        }
+        LOG.info("Output.json processed for examination {}", examinationId);
+    }
+
+    /**
+     * Process all series / acquisitions found in output JSON
+     */
+    private void processSeries(JSONArray series, DatasetProcessing processing) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
+        Long examinationId = null;
+
+        for (int i = 0; i < series.length(); i++) {
+            JSONObject serie = series.getJSONObject(i);
+            Long serieId = serie.getLong(ID);
+
+            List<Dataset> datasets = datasetRepository.findDatasetsByProcessingIdIn(List.of(processing.getId()));
+
+            if (datasets.isEmpty()) {
+                LOG.error("No dataset found for serie/acquisition [" + serieId + "]");
+                continue;
+            }
+
+            if (Objects.isNull(examinationId)) {
+                examinationId = datasets.get(0).getFirstRealInput().getDatasetAcquisition().getExamination().getId();
+            }
+
+            for (Dataset ds : datasets) {
+                Attributes attributes = wadoDownloaderService.getDicomAttributesForDataset(ds);
+                JSONObject vol = getMatchingVolume(ds, serie, attributes);
+
+                if (vol == null) {
+                    continue;
+                }
+                JSONObject volume = vol.getJSONObject("volume");
+                if (!volume.has("status") || !Objects.equals("IGNORED", volume.getString("status"))) {
+                    try {
+                        updateDataset(serie, ds, vol);
+                    } catch (CheckedIllegalClassException | EntityNotFoundException | SolrServerException | IOException e) {
+                        LOG.error("Error while updating dataset [{}]", ds.getId(), e);
+                        throw e;
+                    }
+
+                    LOG.info("Dataset {} updated", ds.getId());
+
+                    List<DatasetProperty> properties = getDatasetPropertiesFromVolume(ds, vol, (ExecutionMonitoring) processing.getParent());
+                    addDatasetTags(ds, properties);
+                    properties.addAll(getDatasetPropertiesFromDicom(attributes, ds, (ExecutionMonitoring) processing.getParent()));
                     datasetPropertyService.createAll(properties);
                 } else {
                     LOG.info("Dataset {} ignored, no update", ds.getId());

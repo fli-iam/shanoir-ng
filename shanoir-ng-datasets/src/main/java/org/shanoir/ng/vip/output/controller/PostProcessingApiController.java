@@ -42,7 +42,7 @@ public class PostProcessingApiController implements PostProcessingApi {
 
     @Override
     public ResponseEntity<IdName> launchPostProcessing(String name, String comment) {
-        LOG.info("Initiating post processing session for type: " + name + " and comment: " + comment);
+        LOG.info("Initiating post processing session for monitoring type: " + name + " and comment: " + comment);
 
         Integer processingTypeId = DatasetProcessingType.getIdFromString(name);
         if (Objects.nonNull(processingTypeId)) {
@@ -56,7 +56,7 @@ public class PostProcessingApiController implements PostProcessingApi {
                 LOG.error(e.getMessage(), e);
             }
         }
-        LOG.error("No processing type found for name {}", name);
+        LOG.error("No monitoring type found for name {}", name);
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

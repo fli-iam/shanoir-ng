@@ -23,7 +23,7 @@ public interface OutputService {
 
     /**
      *
-     * Process the result of the given execution
+     * Process the results of the given execution
      *
      * @param monitoring
      * @throws ResultHandlerException
@@ -32,11 +32,15 @@ public interface OutputService {
 
     /**
      *
-     * Process the result of the given execution in post_processing context, so with a specific output handler
+     * Process the result of the given processing in post_processing context, so with a specific output handler.
+     * Takes the processing id and reloads the entity, so it can run in its own transaction/session regardless
+     * of which thread it is called from (it is invoked from worker threads spawned outside the caller's
+     * transaction, which don't share its Hibernate session).
      *
-     * @param monitoring
+     * @param processingId
      * @param outputHandler
      * @throws ResultHandlerException
      */
-    void process(ExecutionMonitoring monitoring, OutputHandler outputHandler) throws ResultHandlerException, EntityNotFoundException;
+    void postProcess(Long processingId, OutputHandler outputHandler) throws ResultHandlerException, EntityNotFoundException;
+
 }

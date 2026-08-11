@@ -78,12 +78,9 @@ public class DefaultHandler extends OutputHandler {
     @Autowired
     private ProcessedDatasetImporterService processedDatasetImporterService;
 
-    public boolean canProcess(ExecutionMonitoring processing, boolean postProcessing) {
-        return !postProcessing;
-    }
 
-    public boolean canProcess(String pipelineIdentifier, boolean postProcessing) {
-        return !postProcessing;
+    public boolean canProcess(String pipelineIdentifier) {
+        return true;
     }
 
     @Override
@@ -130,6 +127,10 @@ public class DefaultHandler extends OutputHandler {
             throw new ResultHandlerException("An error occured while extracting result from result archive.", e);
         }
     }
+
+    @Override
+    public void manageDelayedOutput(List<File> resultFiles, DatasetProcessing processing) { }
+
 
     /**
      * Creates a list of processed dataset and a dataset processing associated to the list of files given in entry.
