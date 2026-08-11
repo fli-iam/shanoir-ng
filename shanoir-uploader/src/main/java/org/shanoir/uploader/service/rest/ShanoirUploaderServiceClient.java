@@ -1603,7 +1603,38 @@ public class ShanoirUploaderServiceClient {
             }
         }
     }
-    
+
+    /**
+     * Lightweight "ping" of one DICOM instance on the server: fetches only its
+     * DICOMWeb metadata (application/dicom+json, no PixelData), to check fast
+     * that the instance actually made it through the import pipeline. Much
+     * cheaper than {@link #getDicomInstance}, used by
+     * DicomInstanceConsistencyChecker for the full pixel-by-pixel comparison.
+     */
+    public boolean checkDicomInstanceMetadata(String examinationUID, String seriesInstanceUID, String sopInstanceUID)
+            throws Exception {
+        URIBuilder b = new URIBuilder(this.serviceURLDatasetsDicomWebStudies
+                + "/" + examinationUID
+                + "/series/" + seriesInstanceUID
+                + "/instances/" + sopInstanceUID
+                + "/metadata");
+        URL url = b.build().toURL();
+        try (CloseableHttpResponse response = httpService.get(url.toString())) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return true;
+            } else if (code == HttpStatus.SC_NOT_FOUND) {
+                return false;
+            } else {
+                LOG.error("Error in checkDicomInstanceMetadata: examinationUID={}, seriesInstanceUID={}, "
+                        + "sopInstanceUID={} (status code: {}, message: {})",
+                        examinationUID, seriesInstanceUID, sopInstanceUID, code,
+                        apiResponseMessages.getOrDefault(code, "unknown status code"));
+                return false;
+            }
+        }
+    }
+
     public Long getUserId() {
         return userId;
     }
