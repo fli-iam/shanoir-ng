@@ -97,11 +97,12 @@ public interface DICOMWebApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/metadata", produces = { "application/dicom+json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL') and @datasetSecurityService.hasRightToVisualizeSeries(#serieInstanceUID))")
+    @GetMapping(value = "/studies/{examinationUID}/series/{seriesInstanceUID}/metadata", produces = { "application/dicom+json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL')"
+            + " and @datasetSecurityService.hasRightToVisualizeSeries(#seriesInstanceUID))")
     ResponseEntity<String> findSerieMetadataOfStudy(
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-            @Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
+            @Parameter(description = "seriesInstanceUID", required = true) @PathVariable("seriesInstanceUID") String seriesInstanceUID
         ) throws RestServiceException, JsonMappingException, JsonProcessingException;
 
     @Operation(summary = "", description = "Returns the metadata of a DICOM instance")
@@ -111,9 +112,13 @@ public interface DICOMWebApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}/metadata", produces = { "application/dicom+json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL') and @datasetSecurityService.hasRightToVisualizeSeries(#serieInstanceUID))")
-    ResponseEntity<String> findInstanceMetadataOfStudyOfSerie(String examinationUID, String serieInstanceUID, String sopInstanceUID) throws RestServiceException;
+    @GetMapping(value = "/studies/{examinationUID}/series/{seriesInstanceUID}/instances/{sopInstanceUID}/metadata", produces = { "application/dicom+json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL')"
+            + " and @datasetSecurityService.hasRightToVisualizeSeries(#seriesInstanceUID))")
+    ResponseEntity<String> findInstanceMetadataOfStudyOfSerie(
+            @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
+            @Parameter(description = "seriesInstanceUID", required = true) @PathVariable("seriesInstanceUID") String seriesInstanceUID,
+            @Parameter(description = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID) throws RestServiceException;
 
     @Operation(summary = "", description = "Returns all DICOM instances of a study and serie")
     @ApiResponses(value = {
@@ -122,11 +127,11 @@ public interface DICOMWebApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances", produces = { "application/dicom+json" })
+    @GetMapping(value = "/studies/{examinationUID}/series/{seriesInstanceUID}/instances", produces = { "application/dicom+json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
     ResponseEntity<String> findInstancesOfStudyOfSerie(
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-            @Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
+            @Parameter(description = "seriesInstanceUID", required = true) @PathVariable("seriesInstanceUID") String seriesInstanceUID
         ) throws RestServiceException;
 
     @Operation(summary = "", description = "Returns a DICOM instance")
@@ -136,11 +141,12 @@ public interface DICOMWebApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_DOWNLOAD') and @datasetSecurityService.hasRightToVisualizeSeries(#serieInstanceUID))")
+    @GetMapping(value = "/studies/{examinationUID}/series/{seriesInstanceUID}/instances/{sopInstanceUID}")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_DOWNLOAD')"
+            + " and @datasetSecurityService.hasRightToVisualizeSeries(#seriesInstanceUID))")
     ResponseEntity findInstance(
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-            @Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
+            @Parameter(description = "seriesInstanceUID", required = true) @PathVariable("seriesInstanceUID") String seriesInstanceUID,
             @Parameter(description = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID
         ) throws RestServiceException;
 
@@ -151,11 +157,11 @@ public interface DICOMWebApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}/frames/{frame}")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_DOWNLOAD') and @datasetSecurityService.hasRightToVisualizeSeries(#serieInstanceUID))")
+    @GetMapping(value = "/studies/{examinationUID}/series/{seriesInstanceUID}/instances/{sopInstanceUID}/frames/{frame}")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_DOWNLOAD') and @datasetSecurityService.hasRightToVisualizeSeries(#seriesInstanceUID))")
     ResponseEntity findFrameOfStudyOfSerieOfInstance(
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-            @Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
+            @Parameter(description = "seriesInstanceUID", required = true) @PathVariable("seriesInstanceUID") String seriesInstanceUID,
             @Parameter(description = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID,
             @Parameter(description = "frame", required = true) @PathVariable("frame") String frame,
             @Parameter(description = "media types accepted by the viewer") @RequestHeader(value = HttpHeaders.ACCEPT, required = false) String accept
@@ -168,11 +174,11 @@ public interface DICOMWebApi {
             @ApiResponse(responseCode = "401", description = "unauthorized"),
             @ApiResponse(responseCode = "403", description = "forbidden"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}/bulkdata/**")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_DOWNLOAD') and @datasetSecurityService.hasRightToVisualizeSeries(#serieInstanceUID))")
+    @GetMapping(value = "/studies/{examinationUID}/series/{seriesInstanceUID}/instances/{sopInstanceUID}/bulkdata/**")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_DOWNLOAD') and @datasetSecurityService.hasRightToVisualizeSeries(#seriesInstanceUID))")
     ResponseEntity findBulkDataOfStudyOfSerieOfInstance(
             @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-            @Parameter(description = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
+            @Parameter(description = "seriesInstanceUID", required = true) @PathVariable("seriesInstanceUID") String seriesInstanceUID,
             @Parameter(description = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID,
             HttpServletRequest request
         ) throws RestServiceException;
