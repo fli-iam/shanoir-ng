@@ -1,9 +1,8 @@
 :host {
     color: var(--very-dark-grey);
-    /* test palette */
-    --test-blue: #67aeca;
-    --test-orange: #FFA500;
-    --test-pink: #e52a6f;
+    --blue: #67aeca;
+    --orange: #FFA500;
+    --pink: #e52a6f;
 }
 
 .logo {text-align: center; opacity: 0.8; }
@@ -30,7 +29,7 @@
 .block .pannel table { width: 100%; }
 .block .pannel td { height: auto; }
 
-.access-requests { --block-color: var(--test-blue); }
+.access-requests { --block-color: var(--blue); }
 .access-requests .pannel table { margin-top: 8px; }
 .access-requests-list:hover { color: var(--block-color); }
 .access-requests-list td {  overflow: hidden; }
@@ -44,9 +43,9 @@
 .solr .pannel i { margin-right: 7px; }
 .solr input { margin-bottom: 10px; text-align: center; }
 
-.jobs { --block-color: var(--test-orange); }
+.jobs { --block-color: var(--orange); }
 
-.notifications { --block-color: var(--test-pink); }
+.notifications { --block-color: var(--pink); }
 .notification-list:hover { color: var(--block-color); }
 .notification-list td { max-width: 102px; overflow: hidden; }
 .notifications .pannel tr + tr { border-top: 1px solid var(--grey); }
@@ -63,10 +62,10 @@
 .import-link .title { font-size: 15px; font-weight: bold; display: contents; color: white; }
 
 .dicom { background-color: var(--color-a); }
-.bruker { background-color: var(--test-orange); }
-.eeg { background-color: var(--test-pink); }
+.bruker { background-color: var(--orange); }
+.eeg { background-color: var(--pink); }
 .bids { background-color: var(--color-b); }
-.pacs { background-color: var(--test-blue); }
+.pacs { background-color: var(--blue); }
 
 h2 { margin-bottom: 30px; }
 
