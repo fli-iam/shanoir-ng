@@ -112,6 +112,14 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasDataFile>
         }
     }
 
+    deleteFile() {
+        this.bloodGasData.filename = null;
+        this.bloodGasData.bloodGasDataFile = null;
+        if (this.embedded) {
+            this.bloodGasDataReady.emit(this.bloodGasData);
+        }
+    }
+
     public async hasDeleteRight(): Promise<boolean> {
         return false;
     }

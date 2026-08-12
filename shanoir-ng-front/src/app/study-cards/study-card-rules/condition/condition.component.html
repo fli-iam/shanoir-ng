@@ -16,9 +16,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 @if (mode == 'view') {
     <span class="view">
         @if (['DatasetDICOMConditionOnDataset', 'DatasetMetadataCondOnDataset'].includes(condition.scope)) {
-            <span>for a dataset</span>
+            <span>for a dataset,&nbsp;</span>
         } @else if ('AcqMetadataCondOnAcq' == condition.scope) {
-            <span>for an acquisition</span>
+            <span>for an acquisition,&nbsp;</span>
         } @else {
             @if (condition.cardinality == -1) {
                 <span class="cardinality-type">for every</span>

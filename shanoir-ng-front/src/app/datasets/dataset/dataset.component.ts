@@ -25,6 +25,7 @@ import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
@@ -54,6 +55,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     public downloadState: TaskState = new TaskState();
     isMRS: boolean = false; // MR Spectroscopy
     papayaLoadCallback: () => Promise<any[]>;
+    private removedAcquisitionIds: number[] = [];
 
     constructor(
             private datasetService: DatasetService,
@@ -62,6 +64,31 @@ export class DatasetComponent extends EntityComponent<Dataset> {
             private studyRightsService: StudyRightsService,
             private downloadService: MassDownloadService) {
         super(route);
+        this.subscriptions.push(
+            this.datasetService.onAcquisitionsRemoved.subscribe(ids => this.removedAcquisitionIds = ids));
+    }
+
+    override goToParent(): void {
+        if (!this.goToExaminationOfRemovedAcquisition()) super.goToParent();
+    }
+
+    override goBack(): void {
+        if (!this.goToExaminationOfRemovedAcquisition()) super.goBack();
+    }
+
+    /**
+     * Deleting the last dataset of an acquisition removes that acquisition too, so its page does
+     * not exist anymore : the examination is then where to go once the dataset is deleted.
+     *
+     * @return true when the acquisition was removed and the examination reached
+     */
+    private goToExaminationOfRemovedAcquisition(): boolean {
+        const acquisition: DatasetAcquisition = this.dataset?.datasetAcquisition;
+        if (acquisition?.examination?.id && this.removedAcquisitionIds.includes(acquisition.id)) {
+            this.router.navigate(['/examination/details/' + acquisition.examination.id]);
+            return true;
+        }
+        return false;
     }
 
     protected getRoutingName(): string {

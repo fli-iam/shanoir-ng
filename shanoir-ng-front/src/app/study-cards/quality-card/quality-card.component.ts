@@ -11,50 +11,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ComponentRef, EventEmitter, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { FormArray, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, ComponentRef, EventEmitter, ViewChild } from '@angular/core';
+import { FormArray, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { firstValueFrom, Observable, race } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '@app/examinations/shared/examination.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { Selection } from '@app/studies/study/tree.service';
 import { ServiceLocator } from '@app/utils/locator.service';
 import { SuperPromise } from '@app/utils/super-promise';
-import { Selection } from '@app/studies/study/tree.service';
 
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
+import { SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
+import * as AppUtils from '../../utils/app.utils';
 import { QualityCard, QualityCardRule } from '../shared/quality-card.model';
 import { Interval, QualityCardService } from '../shared/quality-card.service';
 import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
-import * as AppUtils from '../../utils/app.utils';
 import { TestQualityCardOptionsComponent } from '../test-quality-card-options/test-quality-card-options.component';
-import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
-import { SelectBoxComponent } from '../../shared/select/select.component';
-import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 
 
 @Component({
     selector: 'quality-card',
     templateUrl: 'quality-card.component.html',
     styleUrls: ['quality-card.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, CheckboxComponent, StudyCardRulesComponent, LoadingBarComponent, TableComponent]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, CheckboxComponent, StudyCardRulesComponent, LoadingBarComponent, TableComponent, TooltipComponent]
 })
 export class QualityCardComponent extends EntityComponent<QualityCard> {
 
@@ -209,7 +209,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     apply() {
         this.confirmService.confirm(
             'Apply Quality Card', 
-            `Do you want to apply the quality card named "${this.qualityCard.name}" all over the study "${this.qualityCard.study.name}" ? This would permanentely overwrite previous quality tags for the study's subjects.`
+            `Do you want to apply the quality card named "${this.qualityCard.name}" all over the study "${this.qualityCard.study.name}" ? This would permanently overwrite previous quality tags set on dataset acquisitions.`
         ).then(accept => {
             if (accept) {
                 this.applying = true;

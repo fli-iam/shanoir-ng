@@ -61,6 +61,13 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
             protected treeService: TreeService,
             elementRef: ElementRef) {
         super(elementRef);
+        // the deletion of the last dataset of this acquisition removes the acquisition itself
+        this.subscriptions.push(
+            this.datasetService.onAcquisitionsRemoved.subscribe(ids => {
+                if (this.node && ids.includes(this.node.id)) {
+                    this.acquisitionDelete.emit();
+                }
+            }));
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -77,6 +84,7 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
                     this.input.datasetAcquisition.id,
                     label,
                     UNLOADED,
+                    null,
                     this.input.datasetAcquisition.extraDataFilePathList,
                     this.input.studyRights.includes(StudyUserRight.CAN_ADMINISTRATE),
                     this.input.studyRights.includes(StudyUserRight.CAN_DOWNLOAD)

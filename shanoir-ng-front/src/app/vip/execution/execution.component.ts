@@ -59,7 +59,6 @@ export class ExecutionComponent implements OnInit {
     private selectedDatasets: Set<DatasetLight>;
 
     datasetsOptions: Option<DatasetLight>[];
-    token: string;
     refreshToken: string;
     parametersApplied: boolean = false;
     execution: Execution;
@@ -112,16 +111,6 @@ export class ExecutionComponent implements OnInit {
                 this.isLoading = false;
             });
 
-        this.keycloakService.getToken().then(
-            (token: string) => {
-                this.token = token;
-            }
-        )
-        this.keycloakService.getRefreshToken().then(
-            (refreshToken: string) => {
-                this.refreshToken = refreshToken;
-            }
-        )
         this.execDefaultName = this.getDefaultExecutionName();
     }
 
@@ -220,12 +209,24 @@ export class ExecutionComponent implements OnInit {
 
         this.isSubmitted = true;
 
+        // Refresh the token right before building the VIP inputs, so the refresh token embedded
+        // in the shanoir:/ URIs is freshly rotated and the session is confirmed active. If the
+        // session has expired, block the launch instead of submitting a job VIP can't authenticate.
+        try {
+            this.refreshToken = await this.keycloakService.getRefreshToken();
+        } catch {
+            this.isSubmitted = false;
+            this.msgService.log('error', 'Session expired — please log in again.');
+            return;
+        }
+
         const exec = this.initExecutionCandidate();
         this.executionService.createExecution(exec).then(
             () => {
                 this.router.navigate([`/solr-search`]);
             },
             (error) => {
+                this.isSubmitted = false;
                 this.msgService.log('error', 'Sorry, an error occurred while submitting execution.');
                 console.error(error);
             }

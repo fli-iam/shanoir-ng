@@ -121,6 +121,9 @@ public class DatasetAcquisitionApiSecurityTest {
         assertAccessDenied(api::createNewDatasetAcquisition, new ImportJob());
         assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
         assertAccessDenied(api::deleteDatasetAcquisition, 1L);
+        assertAccessDenied(api::findEmptyDatasetAcquisitions, 1L);
+        assertAccessDenied(api::deleteEmptyDatasetAcquisitions, 1L);
+        assertAccessDenied(api::findDatasetAcquisitionsLeftEmptyBy, Utils.toList(1L));
     }
 
     @Test
@@ -152,6 +155,9 @@ public class DatasetAcquisitionApiSecurityTest {
         assertAccessAuthorized(api::createNewDatasetAcquisition, new ImportJob());
         assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
         assertAccessAuthorized(api::deleteDatasetAcquisition, 4L);
+        assertAccessAuthorized(api::findEmptyDatasetAcquisitions, 1L);
+        assertAccessAuthorized(api::deleteEmptyDatasetAcquisitions, 1L);
+        assertAccessAuthorized(api::findDatasetAcquisitionsLeftEmptyBy, Utils.toList(1L));
     }
 
     private void testAll(String role) throws ShanoirException, RestServiceException {
@@ -233,6 +239,15 @@ public class DatasetAcquisitionApiSecurityTest {
         given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(false);
         given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(false);
         given(rightsService.hasRightOnStudy(4L, "CAN_ADMINISTRATE")).willReturn(false);
+
+        // findEmptyDatasetAcquisitions(Long) and deleteEmptyDatasetAcquisitions(Long), admin only
+        assertAccessDenied(api::findEmptyDatasetAcquisitions, 1L);
+        assertAccessDenied(api::deleteEmptyDatasetAcquisitions, 1L);
+
+        // findDatasetAcquisitionsLeftEmptyBy(List<Long>), needs the rights on the datasets themselves
+        if ("ROLE_USER".equals(role)) {
+            assertAccessDenied(api::findDatasetAcquisitionsLeftEmptyBy, Utils.toList(1L));
+        }
 
         // findDatasetAcquisitionById(Long)
         assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);
