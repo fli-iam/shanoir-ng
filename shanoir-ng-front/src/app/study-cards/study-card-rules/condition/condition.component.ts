@@ -60,6 +60,11 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         new Option('PRESENT', 'present'),
         new Option('ABSENT', 'absent'),
     ];
+    cardinalityTypeOptions: Option<'NONE' | 'ALL' | 'AT_LEAST'>[] = [
+        new Option('NONE', 'for no'),
+        new Option('ALL', 'for every'),
+        new Option('AT_LEAST', 'for at least'),
+    ];
     @Output() delete: EventEmitter<void> = new EventEmitter();
     init: boolean = false;
     conditionTypeOptions: Option<ConditionScope>[];

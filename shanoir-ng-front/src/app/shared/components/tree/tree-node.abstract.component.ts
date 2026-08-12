@@ -21,6 +21,7 @@ import { SuperPromise } from '@app/utils/super-promise';
 @Directive()
 export class TreeNodeAbstractComponent<T extends ShanoirNode> implements AfterContentInit, OnDestroy {
 
+    protected readonly UNLOADED = UNLOADED;
     @Output() nodeInit: EventEmitter<T> = new EventEmitter();
     @Output() selectedChange: EventEmitter<T> = new EventEmitter();
     @Output() nodeSelect: EventEmitter<number> = new EventEmitter();

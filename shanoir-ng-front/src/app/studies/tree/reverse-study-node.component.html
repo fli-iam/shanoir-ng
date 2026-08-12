@@ -32,7 +32,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <menu-item [disabled]="loading" label="Download" awesome="fas fa-download" (click)="loading ? null : download()"></menu-item>
             </dropdown-menu>
         }
-        @if (node.open && node.examinations && node.examinations != $any('UNLOADED')) {
+        @if (node.open && node.examinations && node.examinations != UNLOADED) {
             @for (examinationNode of node.examinations; track examinationNode) {
                 <examination-node node [input]="examinationNode" (selectedChange)="selectedChange.emit()" [hasBox]="hasBox"></examination-node>
             }

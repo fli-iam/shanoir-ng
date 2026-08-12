@@ -11,19 +11,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
 
 import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node.abstract.component';
 import { TreeService } from '@app/studies/study/tree.service';
 
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { MemberNode } from '../../tree/tree.model';
 import { User } from '../shared/user.model';
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
-import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
 
 
 @Component({

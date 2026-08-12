@@ -192,7 +192,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         return !!su.centers?.find(c => c.id == center.id);
     }
 
-    onUserClick(studyUser: StudyUser) {
+    onUserClick(studyUser: any) {
+        studyUser = studyUser as StudyUser;
         if (this.pannelStudyUser && (this.pannelStudyUser.id == studyUser.id)) {
             this.closePannel();
         } else {

@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -19,17 +19,17 @@ import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node
 import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
 import { TreeService } from '@app/studies/study/tree.service';
 
-import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { environment } from '../../../environments/environment';
+import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetAcquisitionNodeComponent } from '../../dataset-acquisitions/tree/dataset-acquisition-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { DatasetAcquisitionNode, ExaminationNode, ShanoirNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
-import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
-import { DatasetAcquisitionNodeComponent } from '../../dataset-acquisitions/tree/dataset-acquisition-node.component';
 
 
 @Component({

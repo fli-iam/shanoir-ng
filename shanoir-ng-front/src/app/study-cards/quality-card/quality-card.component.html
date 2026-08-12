@@ -109,7 +109,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     }
                                     @default {
                                         <select-box
-                                            [readOnly]="forceStudyId"
+                                            [readOnly]="forceStudyId != null && forceStudyId != undefined"
                                             formControlName="study"
                                             (userChange)="onStudyChange()"
                                             [optionArr]="studies"
@@ -164,7 +164,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [allCoils]="allCoils"
                         [studyId]="$safeNavigationMigration(qualityCard.study?.id)"
                         [showErrors]="showRulesErrors"
-                        (selectedRulesChange)="selectedRules = $event"
+                        (selectedRulesChange)="onSelectedRulesChange($event)"
                         [addSubForm]="addConditionForm.bind(this)"></study-card-rules>
                 </fieldset>
                 @if (progress > 0 && progress < 1) {

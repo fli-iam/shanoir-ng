@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -21,16 +21,16 @@ import { StudyUserRight } from '@app/studies/shared/study-user-right.enum';
 import { TreeService } from '@app/studies/study/tree.service';
 
 import { DatasetService } from '../../datasets/shared/dataset.service';
+import { DatasetNodeComponent } from '../../datasets/tree/dataset-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { ConsoleService } from "../../shared/console/console.service";
 import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
 import { DatasetAcquisitionNode, DatasetNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
-import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
-import { DatasetNodeComponent } from '../../datasets/tree/dataset-node.component';
 
 
 @Component({

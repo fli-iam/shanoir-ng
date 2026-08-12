@@ -57,7 +57,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [(ngModel)]="assignment.value"
             [options]="assigmentOptions"
             (userChange)="onChangeValue()"
-            [placeholder]="assignment.value"
+            [placeholder]="assignment.label"
             (focusout)="valueTouched = true"
             [clear]="false"></select-box>
     }

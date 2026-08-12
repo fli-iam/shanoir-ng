@@ -13,7 +13,7 @@
  */
 
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators, FormsModule, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
@@ -23,9 +23,13 @@ import { ImportService } from '../shared/import.service';
 import { ConsoleService } from '../../shared/console/console.service';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
-export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFormGroup ): ValidationErrors | null => {
-    const hasAtLeastOneNotBlank = group && group.controls && Object.keys(group.controls)
-      .some(key => !validator(group.controls[key]) && group.controls[key].value.trim().length != 0);
+export const atLeastOneNotBlank = (validator: ValidatorFn): ValidatorFn => (group: AbstractControl): ValidationErrors | null => {
+    const formGroup = group as UntypedFormGroup;
+    const hasAtLeastOneNotBlank = Object.keys(formGroup.controls)
+        .some(key =>
+            !validator(formGroup.controls[key])
+            && formGroup.controls[key].value.trim().length !== 0
+        );
     return hasAtLeastOneNotBlank ? null : { atLeastOneNotBlank: true };
 };
 

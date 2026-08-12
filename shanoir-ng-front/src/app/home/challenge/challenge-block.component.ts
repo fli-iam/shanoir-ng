@@ -12,14 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { TaskState } from '@app/async-tasks/task.model';
+import { StudyLight } from '@app/studies/shared/study.dto';
 
-import { Study } from '../../studies/shared/study.model';
-import { StudyService } from '../../studies/shared/study.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { StudyService } from '../../studies/shared/study.service';
 
 @Component({
     selector: 'challenge-block',
@@ -31,7 +31,7 @@ import { LoadingBarComponent } from '../../shared/components/loading-bar/loading
 
 export class ChallengeBlockComponent {
 
-    @Input() challengeStudy: Study;
+    @Input() challengeStudy: StudyLight;
     protected downloadState: TaskState = new TaskState();
 
     constructor(

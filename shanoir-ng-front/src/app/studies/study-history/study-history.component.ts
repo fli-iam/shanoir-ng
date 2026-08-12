@@ -77,7 +77,7 @@ export class StudyHistoryComponent implements OnInit {
         this.eventHistory.then( () => this.getPage);
     }
 
-    getPage(pageable: Pageable): Promise<Page<ShanoirEvent> | void> {
+    getPage(pageable: Pageable): Promise<Page<ShanoirEvent>> {
         return this.shanoirEventService.getPage(pageable, this.study.id, this.table.filter.searchStr? this.table.filter.searchStr : "", this.table.filter.searchField ? this.table.filter.searchField : "").then(page => {
             page.content.forEach(item => {
                 if (this.users.get(item.userId) == undefined) {
@@ -94,6 +94,8 @@ export class StudyHistoryComponent implements OnInit {
         }).catch(reason => {
             if(reason?.error?.code != 403) {
                 throw Error(reason);
+            } else {
+                return new Page<ShanoirEvent>();
             }
         });
     }

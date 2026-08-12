@@ -75,7 +75,8 @@ export class StudyCardForRulesListComponent extends StudyCardListComponent imple
         };
     }
 
-    onRowClick(sc: StudyCard) {
+    onRowClick(selectedRow: object) {
+        const sc: StudyCard = selectedRow as StudyCard;
         const currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/study-card/select-rule/select/' + sc.id]).then(() => {
             this.breadcrumbsService.currentStep.label = 'Import rule';

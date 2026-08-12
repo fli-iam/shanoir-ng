@@ -102,7 +102,8 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
         }
     }
 
-    select(lightTask: Task) {
+    select(selectedObject: object) {
+        const lightTask: Task = selectedObject as Task;
         this.notificationsService.nbNew = 0;
         this.notificationsService.nbNewError = 0;
         this.selected = null;

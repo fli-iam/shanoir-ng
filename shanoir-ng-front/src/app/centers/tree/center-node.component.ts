@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { AcquisitionEquipmentService } from '@app/acquisition-equipments/shared/acquisition-equipment.service';
@@ -20,15 +20,15 @@ import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node
 import { TreeService } from '@app/studies/study/tree.service';
 
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
+import { EquipmentNodeComponent } from '../../acquisition-equipments/tree/equipment-node.component';
+import { CoilNodeComponent } from '../../coils/coil/tree/coil-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { AcquisitionEquipmentNode, CenterNode, CoilNode, UNLOADED } from '../../tree/tree.model';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
-import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
-import { EquipmentNodeComponent } from '../../acquisition-equipments/tree/equipment-node.component';
-import { CoilNodeComponent } from '../../coils/coil/tree/coil-node.component';
 
 
 @Component({

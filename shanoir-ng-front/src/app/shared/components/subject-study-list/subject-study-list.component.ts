@@ -16,6 +16,8 @@ import { FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Router } from '@angular/router';
 import { combineLatest, Subject as RxjsSubject, Subscription } from 'rxjs';
 
+import { IdName } from '@app/shared/models/id-name.model';
+
 import { Study } from '../../../studies/shared/study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { isDarkColor } from '../../../utils/app.utils';
@@ -49,7 +51,7 @@ export class SubjectStudyListComponent extends AbstractInput<Subject[]> implemen
 
     @Input() mode: Mode;
     @Input() study: Study;
-    @Input() selectableList: Subject[];
+    @Input() selectableList: IdName[];
     public selected: Subject;
     @Input() displaySubjectType: boolean = true;
     @Input() allowRemove: boolean;

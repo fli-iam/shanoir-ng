@@ -37,7 +37,7 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
-import { QualityCard } from '../shared/quality-card.model';
+import { QualityCard, QualityCardRule } from '../shared/quality-card.model';
 import { Interval, QualityCardService } from '../shared/quality-card.service';
 import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
@@ -296,5 +296,9 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
 
     protected downloadReport() {
         QualityCardComponent.downloadReport(this.report, this.qualityCard?.name);
+    }
+
+    protected onSelectedRulesChange(selectedRules: (StudyCardRule | QualityCardRule)[]) {
+        this.selectedRules = selectedRules as StudyCardRule[];
     }
 }

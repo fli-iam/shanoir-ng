@@ -40,6 +40,7 @@ import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.comp
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+import { QualityCardRule } from '../shared/quality-card.model';
 
 @Component({
     selector: 'study-card',
@@ -285,6 +286,10 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
             }
         }
         this.navigateToAttributeCreateStep('/acquisition-equipment/create', 'acquisitionEquipment', options);
+    }
+
+    onSelectedRulesChange(rules: (StudyCardRule | QualityCardRule)[]) {
+        this.selectedRules = rules as StudyCardRule[];
     }
 
 }

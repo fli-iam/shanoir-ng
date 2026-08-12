@@ -33,7 +33,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (labelClick)="getContent(item, id + i)"
             [buttonPicto]="hasDownloadRights() ? 'fas fa-save' : undefined"
             (buttonClick)="download(item)"
-            (openClick)="getDetail($event)"
             [hasChildren]="item.elements && item.elements.length > 0"
             [class.selected]="selectedIndex == id + i">
             <ng-container *ngTemplateOutlet="recursiveList; context: { $implicit: item.elements, id: id + i }"></ng-container>
@@ -67,7 +66,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <table>
             @for (line of tsv; track line) {
                 <tr>
-                    @for (col of line; track col; let i = $index) {
+                    @for (col of line; track $index; let i = $index) {
                         <td [class.first]="i == 0" [class.last]="i == line.length - 1">
                             {{ col }}
                         </td>

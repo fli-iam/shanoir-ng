@@ -164,7 +164,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [manufModelId]="$safeNavigationMigration(studyCard.acquisitionEquipment?.manufacturerModel?.id)"
                         [allCoils]="allCoils"
                         [showErrors]="showRulesErrors"
-                        (selectedRulesChange)="selectedRules = $event"
+                        (selectedRulesChange)="onSelectedRulesChange($event)"
                         (importRules)="importRules()"
                         [addSubForm]="addConditionForm.bind(this)"></study-card-rules>
                 </fieldset>

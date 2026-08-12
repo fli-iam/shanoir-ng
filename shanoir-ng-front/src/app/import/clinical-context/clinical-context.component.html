@@ -38,7 +38,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [viewRoute]="'/study/details/' + $safeNavigationMigration(study?.id)"
                         [viewDisabled]="!study"
                         [options]="studyOptions"
-                        [disabled]="loading"></select-box>
+                        [disabled]="loading != 0"></select-box>
                 </span>
             </li>
             @if (study && useStudyCard && studycardOptions && studycardOptions.length == 0 && modality == 'MR') {
@@ -66,7 +66,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             (userClear)="onClearStudyCard()"
                             [viewDisabled]="!studycard"
                             [options]="studycardOptions"
-                            [disabled]="loading"></select-box>
+                            [disabled]="loading != 0"></select-box>
                     </span>
                 </li>
             }
@@ -116,7 +116,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span class="right-col">
                     @if ((modality == 'MR' && !useStudyCard) || modality != 'MR' || center) {
                         <select-box
-                            [disabled]="(!useStudyCard && (!study || !centerOptions)) || loading"
+                            [disabled]="(!useStudyCard && (!study || !centerOptions)) || loading != 0"
                             [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
                             [(ngModel)]="center"
                             (userChange)="onSelectCenter()"
@@ -153,7 +153,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span class="right-col">
                     @if ((modality == 'MR' && !useStudyCard) || modality != 'MR' || acquisitionEquipment) {
                         <select-box
-                            [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions)) || loading"
+                            [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions)) || loading != 0"
                             [readOnly]="useStudyCard && (modality == 'MR' || modality == 'bruker')"
                             [(ngModel)]="acquisitionEquipment"
                             (userChange)="onContextChange()"
@@ -192,7 +192,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span class="right-col">
                     <select-box
                         class="subject-select"
-                        [disabled]="loading || !study || !acquisitionEquipment"
+                        [disabled]="loading != 0 || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
                         (userChange)="onSelectSubject()"
                         [viewRoute]="'/subject/details/' + $safeNavigationMigration(this.subject?.id)"
@@ -219,7 +219,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span class="right-col">
                     <select-box
                         class="examination-select"
-                        [disabled]="!study || !subject || loading"
+                        [disabled]="!study || !subject || loading != 0"
                         [(ngModel)]="examination"
                         (userChange)="onSelectExam()"
                         [viewRoute]="'/examination/details/' + $safeNavigationMigration(this.examination?.id)"

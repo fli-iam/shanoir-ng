@@ -146,6 +146,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     }
 
     getDetail(component: TreeNodeComponent) {
+        console.log("getDetail", component);
         component.dataLoading = true;
         component.hasChildren = true;
         component.open();

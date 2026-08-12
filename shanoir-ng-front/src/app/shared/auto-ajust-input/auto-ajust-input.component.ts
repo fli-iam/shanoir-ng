@@ -60,4 +60,9 @@ export class AutoAdjustInputComponent implements ControlValueAccessor {
     onFocusOut() {
         this.onTouch();
     }
+
+    manualChange(event: Event) {
+        const target = event.target as HTMLInputElement;
+        this.userChange.emit(target.value);
+    }
 }

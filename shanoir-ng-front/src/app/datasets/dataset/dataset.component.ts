@@ -34,6 +34,7 @@ import { MrDataset } from './mr/dataset.mr.model';
 import { CommonDatasetComponent } from './common/dataset.common.component';
 import { MrDatasetComponent } from './mr/dataset.mr.component';
 import { EegDatasetComponent } from './eeg/dataset.eeg.component';
+import { EegDataset } from './eeg/dataset.eeg.model';
 
 
 
@@ -173,4 +174,11 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         this.router.navigate(['/solr-search']);
     }
 
+    get mrDataset(): MrDataset | null {
+        return this.dataset.type === 'Mr' ? this.dataset as MrDataset : null;
+    }
+
+    get eegDataset(): EegDataset | null {
+        return this.dataset.type === 'Eeg' ? this.dataset as EegDataset : null;
+    }
 }

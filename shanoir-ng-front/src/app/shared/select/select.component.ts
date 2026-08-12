@@ -657,8 +657,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
 export class Option<T> {
 
-    compatible: boolean = undefined;
-    backgroundColor: string;
+    compatible?: boolean = undefined;
+    backgroundColor?: string;
       
     constructor(
         public value: T,

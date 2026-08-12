@@ -48,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
             </dropdown-menu>
         }
-        @if (node.open && node.datasetAcquisitions && node.datasetAcquisitions != $any('UNLOADED')) {
+        @if (node.open && node.datasetAcquisitions && node.datasetAcquisitions != UNLOADED) {
             @for (datasetAcqNode of node.datasetAcquisitions; track datasetAcqNode; let i = $index) {
                 <dataset-acquisition-node
                     node
@@ -59,11 +59,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [withMenu]="withMenu"></dataset-acquisition-node>
             }
         }
-        @if (!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0) {
+        @if (!!node.extraDataFilePathList && node.extraDataFilePathList != UNLOADED && node.extraDataFilePathList.length > 0) {
             <node
                 label="Extra data files"
                 awesome="fa-regular fa-folder-open"
-                [hasChildren]="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
+                [hasChildren]="true"
                 [(opened)]="node.extraDataOpen">
                 @for (file of node.extraDataFilePathList; track file) {
                     <node

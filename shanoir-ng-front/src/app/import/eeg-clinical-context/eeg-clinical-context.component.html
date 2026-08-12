@@ -38,14 +38,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [viewRoute]="'/study/details/' + $safeNavigationMigration(study?.id)"
                         [viewDisabled]="!study"
                         [options]="studyOptions"
-                        [disabled]="loading"></select-box>
+                        [disabled]="loading != 0"></select-box>
                 </span>
             </li>
             <li>
                 <label [class.required-label]="!useStudyCard">Select a center</label>
                 <span class="right-col">
                     <select-box
-                        [disabled]="!study || loading"
+                        [disabled]="!study || loading != 0"
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
                         [viewRoute]="'/center/details/' + $safeNavigationMigration(center?.id)"
@@ -75,7 +75,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label [class.required-label]="!useStudyCard">Select a center equipment</label>
                 <span class="right-col">
                     <select-box
-                        [disabled]="!center || loading"
+                        [disabled]="!center || loading != 0"
                         [(ngModel)]="acquisitionEquipment"
                         (userChange)="onContextChange()"
                         [viewRoute]="'/acquisition-equipment/details/' + $safeNavigationMigration(acquisitionEquipment?.id)"
@@ -111,7 +111,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label class="required-label">Select a subject</label>
                 <span class="right-col">
                     <select-box
-                        [disabled]="loading || !study || !acquisitionEquipment"
+                        [disabled]="loading != 0 || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
                         (userChange)="onSelectSubject()"
                         [viewRoute]="'/subject/details/' + $safeNavigationMigration(subject?.id)"
@@ -137,7 +137,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label class="required-label">Select an examination</label>
                 <span class="right-col">
                     <select-box
-                        [disabled]="!study || !subject || loading"
+                        [disabled]="!study || !subject || loading != 0"
                         [(ngModel)]="examination"
                         (userChange)="onSelectExam()"
                         [viewRoute]="'/examination/details/' + $safeNavigationMigration(examination?.id)"

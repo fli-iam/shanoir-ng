@@ -174,7 +174,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     @if (col.type == 'progress') {
                         <progress-bar
                             [progress]="vars.render?.progress != undefined ? $safeNavigationMigration(vars.render?.progress) : vars.render"
-                            width="100"
+                            [width]="100"
                             [warning]="vars.render?.status == 5 || vars.render?.status == 3"></progress-bar>
                     }
                     @if (colIndex < columnDefs.length - 1) {

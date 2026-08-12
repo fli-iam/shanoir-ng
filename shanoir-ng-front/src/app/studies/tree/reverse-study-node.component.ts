@@ -19,19 +19,19 @@ import { TreeNodeAbstractComponent } from '@app/shared/components/tree/tree-node
 import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
 import { SuperPromise } from '@app/utils/super-promise';
 
-import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { TaskState } from "../../async-tasks/task.model";
+import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
+import { ExaminationNodeComponent } from '../../examinations/tree/examination-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { ExaminationNode, ReverseStudyNode, ShanoirNode, UNLOADED } from '../../tree/tree.model';
 import { StudyRightsService } from "../shared/study-rights.service";
 import { StudyUserRight } from "../shared/study-user-right.enum";
 import { Study } from '../shared/study.model';
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
-import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
-import { ExaminationNodeComponent } from '../../examinations/tree/examination-node.component';
 
 @Component({
     selector: 'reverse-study-node',

@@ -659,7 +659,7 @@ export class MassDownloadService {
         try {
             return JSON.parse(task?.report);
         } catch (e) {
-            this.consoleService.log('error', 'Can\'t parse the status from the recorded message', [e, task?.report]);
+            this.consoleService.log('error', 'Can\'t parse the status from the recorded message', [e as string, task?.report]);
             return null;
         }
     }

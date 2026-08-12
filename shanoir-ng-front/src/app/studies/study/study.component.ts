@@ -13,7 +13,7 @@
  */
 import { KeyValue, NgClass, KeyValuePipe } from "@angular/common";
 import { Component, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl } from '@angular/forms';
+import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { TaskState } from '@app/async-tasks/task.model';
@@ -316,9 +316,9 @@ export class StudyComponent extends EntityComponent<Study> {
         return formGroup;
     }
 
-    private inclusionRatePairValidator(group: UntypedFormGroup) {
-        const rate = group.get('inclusionRate')?.value;
-        const unit = group.get('inclusionRateUnit')?.value;
+    private inclusionRatePairValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+        const rate = control.get('inclusionRate')?.value;
+        const unit = control.get('inclusionRateUnit')?.value;
 
         if ((rate && !unit) || (!rate && unit)) return { inclusionRatePair: true };
 
@@ -440,7 +440,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.subjectService
             .getAllSubjectsNames()
             .then(subjects => {
-                this.subjects = subjects?.sort(function(a:Subject, b:Subject){
+                this.subjects = subjects?.sort((a:IdName, b:IdName) => {
                     return a.name.localeCompare(b.name);
                 });
             });

@@ -1,7 +1,6 @@
 {
     "compileOnSave": false,
     "compilerOptions": {
-        "noImplicitAny": false,
         "outDir": "./dist/out-tsc",
         "paths": {
             "@env/*": ["./src/environments/*"],
@@ -24,7 +23,11 @@
         "typeRoots": [
           "node_modules/@types"
         ],
-        "useDefineForClassFields": false
+        "useDefineForClassFields": false,
+        "noImplicitAny": false,
+        "strictPropertyInitialization": false,
+        "strictNullChecks": false,
+        "useUnknownInCatchVariables": false
     },
     "angularCompilerOptions": {
         "fullTemplateTypeCheck": true,
