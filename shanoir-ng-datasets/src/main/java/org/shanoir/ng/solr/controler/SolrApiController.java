@@ -19,10 +19,14 @@
  */
 package org.shanoir.ng.solr.controler;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.Valid;
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.TooManyResultsException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.service.SolrService;
@@ -35,8 +39,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.io.IOException;
-import java.util.List;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 /**
  * @author yyao
@@ -48,23 +52,43 @@ public class SolrApiController implements SolrApi {
     @Autowired
     private SolrService solrService;
 
+    @Override
     public ResponseEntity<Void> indexAll() throws SolrServerException, IOException {
         solrService.indexAll();
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Override
     public ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(
             @Parameter(description = "facets", required = true) @Valid @RequestBody ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
         SolrResultPage<ShanoirSolrDocument> documents = solrService.facetSearch(facet, pageable);
         return new ResponseEntity<>(documents, HttpStatus.OK);
     }
 
+    @Override
     public ResponseEntity<Page<ShanoirSolrDocument>> findByIdIn(@Parameter(description = "dataset ids", required = true) @Valid @RequestBody List<Long> datasetIds, Pageable pageable) throws RestServiceException {
         Page<ShanoirSolrDocument> documents = solrService.getByIdIn(datasetIds, pageable);
         if (documents.getContent().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<Page<ShanoirSolrDocument>>(documents, HttpStatus.OK);
+        return new ResponseEntity<>(documents, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Set<Long>> findAllDatasetIdsForQuery(
+            @Parameter(description = "facets", required = true) @Valid @RequestBody ShanoirSolrQuery query) throws RestServiceException {
+
+        try {
+            Set<Long> datasetIds = solrService.findAllDatasetIdsForQuery(query);
+            if (datasetIds.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<>(datasetIds, HttpStatus.OK);
+            }
+        } catch (TooManyResultsException ex) {
+            ErrorModel error = new ErrorModel(HttpStatus.PAYLOAD_TOO_LARGE.value(), "Too many results, max is 10 million", ex.getMessage());
+            throw new RestServiceException(error);
+        }
     }
 
 }
