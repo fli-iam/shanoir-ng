@@ -5,8 +5,12 @@ import java.awt.event.MouseAdapter;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.ResourceBundle;
 
 import javax.swing.Box;
@@ -41,8 +45,12 @@ public class UpdateCheckerService {
     public static void checkForUpdates(JFrame parent, ResourceBundle resourceBundle) {
         try {
             URL url = new URL(RELEASES_URL);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection(buildProxy());
             conn.setRequestProperty("Accept", "application/vnd.github.v3+json");
+            String proxyAuthorization = buildProxyAuthorizationHeader();
+            if (proxyAuthorization != null) {
+                conn.setRequestProperty("Proxy-Authorization", proxyAuthorization);
+            }
 
             if (conn.getResponseCode() == 200) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -117,6 +125,30 @@ public class UpdateCheckerService {
         } catch (Exception e) {
             logger.error("Error while checking for updates: ", e);
         }
+    }
+
+    /**
+     * Builds the proxy to use for the GitHub connection from the user's configured
+     * proxy settings (same settings used by HttpService/KeycloakAuthCodeLoginService
+     * for calls to the Shanoir server), so the update check also works on networks
+     * that require a proxy for outbound internet access.
+     */
+    private static Proxy buildProxy() {
+        ServiceConfiguration sc = ServiceConfiguration.getInstance();
+        if (sc.isProxyEnabled() && sc.getProxyHost() != null) {
+            int port = sc.getProxyPort() != null ? Integer.parseInt(sc.getProxyPort()) : 80;
+            return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(sc.getProxyHost(), port));
+        }
+        return Proxy.NO_PROXY;
+    }
+
+    private static String buildProxyAuthorizationHeader() {
+        ServiceConfiguration sc = ServiceConfiguration.getInstance();
+        if (sc.isProxyEnabled() && sc.getProxyUser() != null && sc.getProxyPassword() != null) {
+            String credentials = sc.getProxyUser() + ":" + sc.getProxyPassword();
+            return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+        }
+        return null;
     }
 
     private static boolean isNewerVersion(String latest, String current) {
