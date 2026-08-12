@@ -12,24 +12,29 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.shared.exception;
+package org.shanoir.ng.shared.quality;
 
-/**
- * PacsException exception.
- *
- * @author jlouis
- *
- */
-public class PacsException extends ShanoirException {
 
-    private static final long serialVersionUID = -1545868693201382850L;
+public class DatasetAcquisitionQualityTagDTO {
 
-    public PacsException(String message) {
-        super(message);
+    private Long datasetAcquisitionId;
+
+    private QualityTag tag;
+
+    public Long getDatasetAcquisitionId() {
+        return datasetAcquisitionId;
     }
 
-    public PacsException(String message, Throwable cause) {
-        super(message, cause);
+    public void setDatasetAcquisitionId(Long datasetAcquisitionId) {
+        this.datasetAcquisitionId = datasetAcquisitionId;
+    }
+
+    public QualityTag getTag() {
+        return tag;
+    }
+
+    public void setTag(QualityTag tag) {
+        this.tag = tag;
     }
 
 }
