@@ -1036,7 +1036,7 @@ public class ShanoirUploaderServiceClient {
                 false)) {
             int code = response.getCode();
             if (code == HttpStatus.SC_OK) {
-                LOG.info("Import job started on server: {}", id);
+                LOG.info("ImportJob {} started on server.", id);
             } else {
                 LOG.error("Error in startImportJob: with json " + importJobJsonStr + " (status code: " + code
                         + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");

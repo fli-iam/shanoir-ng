@@ -76,12 +76,12 @@ public class UploadServiceJob {
     public void execute() throws Exception {
         if (LOCK.tryLock()) {
             try {
-                LOG.debug("UploadServiceJob started...");
+                LOG.debug("Job tick started.");
                 File workFolder = new File(ShUpConfig.shanoirUploaderFolder.getAbsolutePath() + File.separator + ShUpConfig.WORK_FOLDER);
                 processWorkFolder(workFolder, currentNominativeDataController);
             } finally {
                 LOCK.unlock();
-                LOG.debug("UploadServiceJob ended...");
+                LOG.debug("Job tick ended.");
             }
         }
     }
@@ -94,7 +94,7 @@ public class UploadServiceJob {
      */
     private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) throws IOException {
         final List<File> folders = Util.listFolders(workFolder);
-        LOG.debug("Found " + folders.size() + " folders in work folder.");
+        LOG.debug("{} folder(s) found in work folder.", folders.size());
         for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
             final File folder = (File) foldersIt.next();
             final File importJobFile = new File(folder.getAbsolutePath() + File.separator + ShUpConfig.IMPORT_JOB_JSON);
@@ -108,7 +108,7 @@ public class UploadServiceJob {
                     processFolderForServer(folder, importJobManager, importJob, currentNominativeDataController);
                 }
             } else {
-                LOG.warn("Folder found in workFolder without import-job.json.");
+                LOG.warn("[{}] Missing import-job.json.", folder.getName());
             }
         }
     }
@@ -126,18 +126,14 @@ public class UploadServiceJob {
                 true
         );
         if (importJobManager == null) {
-            LOG.error("importJobManager is null.");
+            LOG.error("[{}] importJobManager is null.", folder.getName());
             return;
         }
         final UploadState uploadState = importJob.getUploadState();
         if (uploadState.equals(UploadState.START_IMPORT_JOB)) {
-            long startTime = System.currentTimeMillis();
             processStartForServer(folder, filesToTransfer, importJob, importJobManager,
                     currentNominativeDataController);
             currentNominativeDataController.setNominativeDataSubjectName(folder, importJob.getSubjectName());
-            long elapsedTime = System.currentTimeMillis() - startTime;
-            LOG.info("Upload of files in folder: " + folder.getAbsolutePath() + " finished in duration (ms): "
-                    + elapsedTime);
         } else if (uploadState.equals(UploadState.SERVER_PROCESSING)) {
             processServerProcessingForServer(folder, filesToTransfer, importJob, importJobManager,
                     currentNominativeDataController);
@@ -154,21 +150,17 @@ public class UploadServiceJob {
     private void processStartForServer(final File folder, final Collection<File> allFiles,
             final ImportJobBase importJob, NominativeDataImportJobManager nominativeDataImportJobManager,
             CurrentNominativeDataController currentNominativeDataController) {
+        String id = null;
         try {
-            String tempDirId = shanoirUploaderServiceClient.createTempDir();
-            LOG.info("Upload: tempDirId for import: " + tempDirId);
-
-            uploadFilesInParallel(folder, allFiles, tempDirId, importJob, nominativeDataImportJobManager,
+            id = shanoirUploaderServiceClient.createTempDir();
+            LOG.info("[{}] Uploading {} file(s) from {}", id, allFiles.size(), folder.getAbsolutePath());
+            long startTime = System.currentTimeMillis();
+            uploadFilesInParallel(folder, allFiles, id, importJob, nominativeDataImportJobManager,
                     currentNominativeDataController);
-
-            LOG.info("Upload: " + allFiles.size() + " uploaded files to tempDirId: " + tempDirId);
-
-            setTempDirIdAndStartImport(tempDirId, importJob);
-
-            // Server (ms-import) still has to create datasets and hand
-            // off to ms-datasets, which itself still has to create the datasets.
-            // Don't mark FINISHED yet — switch state and let the next scheduled
-            // tick(s) poll both servers instead of blocking here.
+            currentNominativeDataController.setNominativeDataSubjectName(folder, importJob.getSubjectName());
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            LOG.info("[{}] Upload finished in {} ms.", id, elapsedTime);
+            setImportJobIdAndStartImport(id, importJob);
             currentNominativeDataController.updateNominativeDataPercentage(folder,
                     UploadState.SERVER_PROCESSING.toString());
             importJob.setUploadState(UploadState.SERVER_PROCESSING);
@@ -179,7 +171,7 @@ public class UploadServiceJob {
             importJob.setUploadState(UploadState.ERROR);
             importJob.setTimestamp(System.currentTimeMillis());
             nominativeDataImportJobManager.writeImportJob(importJob);
-            LOG.error(e.getMessage(), e);
+            LOG.error("[{}] Upload failed: {}", id != null ? id : folder.getName(), e.getMessage(), e);
         }
     }
 
@@ -269,32 +261,29 @@ public class UploadServiceJob {
         try {
             ImportJobStatus msImportStatus = shanoirUploaderServiceClient.getImportJobStatus(tempDirId);
             if (msImportStatus == null) {
-                LOG.debug("No status yet on server (ms-import) for tempDirId {}, will retry in 5s.", tempDirId);
+                LOG.debug("[{}] No ms-import status yet, retrying in 5s.", tempDirId);
                 return;
             }
             switch (msImportStatus.getState()) {
                 case FINISHED:
                     // ms-import is done and has handed off to ms-datasets: the import
                     // is NOT finished yet, ms-datasets still has to create the datasets.
-                    LOG.debug("ms-import finished for tempDirId {} (folder {}), checking ms-datasets.",
-                            tempDirId, folder.getName());
+                    LOG.debug("[{}] ms-import finished, checking ms-datasets.", tempDirId);
                     processMsDatasetsStatus(folder, allFiles, importJob, nominativeDataImportJobManager,
                             currentNominativeDataController);
                     break;
                 case ERROR:
-                    LOG.error("Import failed on server (ms-import) for tempDirId {} (folder {}): {}",
-                            tempDirId, folder.getName(), msImportStatus.getMessage());
+                    LOG.error("[{}] ms-import failed: {}", tempDirId, msImportStatus.getMessage());
                     markError(folder, importJob, nominativeDataImportJobManager, currentNominativeDataController);
                     break;
                 case IN_PROGRESS:
                 default:
-                    LOG.debug("Import still in progress on server (ms-import) for tempDirId {}: {}", tempDirId,
-                            msImportStatus.getMessage());
+                    LOG.debug("[{}] ms-import in progress: {}", tempDirId, msImportStatus.getMessage());
                     break;
             }
         } catch (Exception e) {
             // transient (network/server) error: stay SERVER_PROCESSING, retry next tick
-            LOG.warn("Could not poll import status (ms-import) for tempDirId {}: {}", tempDirId, e.getMessage());
+            LOG.warn("[{}] Could not poll ms-import status: {}", tempDirId, e.getMessage());
         }
     }
 
@@ -306,24 +295,22 @@ public class UploadServiceJob {
     private void processMsDatasetsStatus(final File folder, final Collection<File> allFiles,
             final ImportJobBase importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
             final CurrentNominativeDataController currentNominativeDataController) {
+        String id = importJob.getId();
         Long examinationId = importJob.getExaminationId();
         if (examinationId == null) {
-            LOG.warn("ms-import reports FINISHED but importJob has no examinationId (folder {}); "
-                    + "cannot verify ms-datasets completion yet, will retry.", folder.getName());
+            LOG.warn("[{}] ms-import finished but no examinationId yet, retrying.", id);
             return;
         }
         try {
             DatasetsImportStatus datasetsStatus =
                     shanoirUploaderServiceClient.findImportStatusByExaminationId(examinationId);
             if (datasetsStatus == null) {
-                LOG.debug("No status yet on server (ms-datasets) for examinationId {}, will retry in 5s.",
-                        examinationId);
+                LOG.debug("[{}] No ms-datasets status yet, retrying in 5s.", id);
                 return;
             }
             switch (datasetsStatus.getState()) {
                 case FINISHED:
-                    LOG.info("Import finished on server (ms-datasets) for examinationId {} (folder {}).",
-                            examinationId, folder.getName());
+                    LOG.info("[{}] ms-datasets finished.", id);
                     if (checkInstancesMetadata(folder, importJob)) {
                         markFinished(folder, allFiles, importJob, nominativeDataImportJobManager,
                                 currentNominativeDataController);
@@ -332,20 +319,17 @@ public class UploadServiceJob {
                     }
                     break;
                 case ERROR:
-                    LOG.error("Import failed on server (ms-datasets) for examinationId {} (folder {}): {}",
-                            examinationId, folder.getName(), datasetsStatus.getMessage());
+                    LOG.error("[{}] ms-datasets failed: {}", id, datasetsStatus.getMessage());
                     markError(folder, importJob, nominativeDataImportJobManager, currentNominativeDataController);
                     break;
                 case IN_PROGRESS:
                 default:
-                    LOG.debug("Import still in progress on server (ms-datasets) for examinationId {}: {}",
-                            examinationId, datasetsStatus.getMessage());
+                    LOG.debug("[{}] ms-datasets in progress: {}", id, datasetsStatus.getMessage());
                     break;
             }
         } catch (Exception e) {
             // transient (network/server) error: stay SERVER_PROCESSING, retry next tick
-            LOG.warn("Could not poll import status (ms-datasets) for examinationId {}: {}",
-                    examinationId, e.getMessage());
+            LOG.warn("[{}] Could not poll ms-datasets status: {}", id, e.getMessage());
         }
     }
 
@@ -358,7 +342,7 @@ public class UploadServiceJob {
         nominativeDataImportJobManager.writeImportJob(importJob);
         String value = ShUpConfig.basicProperties.getProperty(ShUpConfig.CHECK_ON_SERVER);
         if (!Boolean.parseBoolean(value)) {
-            deleteAllDicomFiles(folder, allFiles);
+            deleteAllDicomFiles(importJob.getId(), folder, allFiles);
         }
     }
 
@@ -371,12 +355,12 @@ public class UploadServiceJob {
         nominativeDataImportJobManager.writeImportJob(importJob);
     }
 
-    private void setTempDirIdAndStartImport(String tempDirId, ImportJobBase importJob)
+    private void setImportJobIdAndStartImport(String id, ImportJobBase importJob)
             throws IOException, JsonParseException, JsonMappingException, JsonProcessingException, Exception {
-        importJob.setWorkFolder(tempDirId);
-        importJob.setId(tempDirId);
+        importJob.setWorkFolder(id);
+        importJob.setId(id);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-        shanoirUploaderServiceClient.startImportJob(tempDirId, importJobJson);
+        shanoirUploaderServiceClient.startImportJob(id, importJobJson);
     }
 
     /**
@@ -389,24 +373,23 @@ public class UploadServiceJob {
      * possibly deleted.
      */
     private boolean checkInstancesMetadata(final File folder, final ImportJobBase importJob) {
+        String id = importJob.getId();
         long startTime = System.currentTimeMillis();
         try {
             DicomInstanceConsistencyChecker checker = new DicomInstanceConsistencyChecker(shanoirUploaderServiceClient);
             String examinationUID = StudyInstanceUIDAndSubjectNameHandler.PREFIX + importJob.getExaminationId();
             int numberOfInstancesChecked = checker.checkImportJobMetadata(importJob, examinationUID);
             long elapsedTime = System.currentTimeMillis() - startTime;
-            LOG.info("Metadata ping of {} DICOM instance(s) for folder {} finished in {} ms.",
-                    numberOfInstancesChecked, folder.getName(), elapsedTime);
+            LOG.info("[{}] Checked {} instance(s) in {} ms.", id, numberOfInstancesChecked, elapsedTime);
             return true;
         } catch (Exception e) {
             long elapsedTime = System.currentTimeMillis() - startTime;
-            LOG.error("Metadata ping FAILED for folder {} after {} ms: {}",
-                    folder.getName(), elapsedTime, e.getMessage(), e);
+            LOG.error("[{}] Metadata check failed after {} ms: {}", id, elapsedTime, e.getMessage(), e);
             return false;
         }
     }
 
-    private void deleteAllDicomFiles(File importJobFolder, Collection<File> files) {
+    private void deleteAllDicomFiles(String id, File importJobFolder, Collection<File> files) {
         for (Iterator<File> iterator = files.iterator(); iterator.hasNext();) {
             File file = (File) iterator.next();
             // from-disk: delete files directly
@@ -417,7 +400,7 @@ public class UploadServiceJob {
                 FileUtils.deleteQuietly(file.getParentFile());
             }
         }
-        LOG.info("All DICOM files deleted after upload to server.");
+        LOG.info("[{}] Deleted {} local DICOM file(s).", id, files.size());
     }
 
 }
