@@ -368,6 +368,25 @@ export class StudyLight {
 }
 
 
+export class StudyStatisticsDTO {
+  studyId: number;
+  centerId: number;
+  centerName: string;
+  centerPrefix: string;
+  subjectId: number;
+  commonName: string;
+  examinationId: number;
+  examinationComment: string;
+  examinationDate: string;
+  datasetAcquisitionId: number;
+  importDate: string;
+  datasetId: number;
+  datasetName: string;
+  modality: string;
+  quality: string;
+}
+
+
 export class StudyStorageVolumeDTO {
     total: number;
     volumeByFormat: VolumeByFormatDTO[];

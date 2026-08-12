@@ -36,6 +36,7 @@ import {
     StudyDTO,
     StudyDTOService,
     StudyLight,
+    StudyStatisticsDTO,
     StudyStorageVolumeDTO
 } from './study.dto';
 import { Study } from './study.model';
@@ -72,6 +73,10 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         .then((typeResult: StudyLight[]) => {
           return typeResult;
         });
+    }
+
+    getStudyStatistics(studyId: number): Promise<StudyStatisticsDTO[]> {
+      return firstValueFrom(this.http.get<StudyStatisticsDTO[]>(AppUtils.BACKEND_API_STUDY_URL + '/statistics/' + studyId));
     }
 
     findStudiesByUserId(): Promise<Study[]> {
