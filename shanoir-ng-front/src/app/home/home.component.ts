@@ -30,12 +30,13 @@ import { DUASigningComponent } from '../dua/dua-signing/dua-signing.component';
 import { EventTypePipe } from '../async-tasks/event.pipe';
 
 import { ChallengeBlockComponent } from './challenge/challenge-block.component';
+import { StatisticsBlockComponent } from './statistics/statistics-block.component';
 
 @Component({
     selector: 'home',
     templateUrl: 'home.component.html',
     styleUrls: ['home.component.css'],
-    imports: [DUASigningComponent, ChallengeBlockComponent, RouterLink, DecimalPipe, DatePipe, EventTypePipe]
+    imports: [DUASigningComponent, ChallengeBlockComponent, StatisticsBlockComponent, RouterLink, DecimalPipe, DatePipe, EventTypePipe]
 })
 
 export class HomeComponent {
