@@ -59,6 +59,8 @@ export class AnimalExaminationFormComponent extends ExaminationComponent {
     examAnesthetic: ExaminationAnesthetic = new ExaminationAnesthetic();
     animalSubjectId: number;
     examinationExtradatas: ExtraData[] = [];
+    private physioUploadFile: File;
+    private bloodGasUploadFile: File;
 
     constructor(
             route: ActivatedRoute,
@@ -192,12 +194,9 @@ export class AnimalExaminationFormComponent extends ExaminationComponent {
 
     onUploadPhysiologicalData(event) {
         const firstInit: boolean = !this.physioDataFile;
-        const fileChanged: boolean = this.physioDataFile?.physiologicalDataFile?.name != event?.physiologicalDataFile?.name;
         this.physioDataFile = event;
         this.physioDataFile.extraDataType = "Physiological data";
-        if (fileChanged) {
-            this.files.push(this.physioDataFile.physiologicalDataFile);
-        }
+        this.physioUploadFile = this.syncUploadFile(this.physioUploadFile, this.physioDataFile.physiologicalDataFile);
         if (!firstInit) {
             this.form.markAsDirty();
             this.form.updateValueAndValidity();
@@ -207,9 +206,23 @@ export class AnimalExaminationFormComponent extends ExaminationComponent {
     onUploadBloodGasData(event) {
         this.bloodGasDataFile = event;
         this.bloodGasDataFile.extraDataType = "Blood gas data";
-        this.files.push(this.bloodGasDataFile.bloodGasDataFile);
+        this.bloodGasUploadFile = this.syncUploadFile(this.bloodGasUploadFile, this.bloodGasDataFile.bloodGasDataFile);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
+    }
+
+    // Keeps this.files in sync when the chosen extra-data file changes or is cleared,
+    // so a removed file is not uploaded on save. Returns the newly tracked file.
+    private syncUploadFile(previous: File, next: File): File {
+        if (previous === next) return previous;
+        if (previous) {
+            const idx = this.files.indexOf(previous);
+            if (idx >= 0) this.files.splice(idx, 1);
+        }
+        if (next) {
+            this.files.push(next);
+        }
+        return next;
     }
 
     onExamAnestheticChange(event) {

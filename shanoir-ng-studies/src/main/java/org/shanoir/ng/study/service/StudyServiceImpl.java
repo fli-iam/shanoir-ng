@@ -37,9 +37,7 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dto.StudyExaminationsDTO.StudyExaminationDTO;
 import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -381,41 +379,6 @@ public class StudyServiceImpl implements StudyService {
             ListDependencyUpdate.updateWithNoRemove(studyDb.getStudyTags(), study.getStudyTags());
             for (StudyTag tag : studyDb.getStudyTags()) {
                 tag.setStudy(studyDb);
-            }
-        }
-
-        List<Subject> toBeDeleted = new ArrayList<Subject>();
-
-        if (study.getSubjectStudyList() != null) {
-            // Find all ids from new study
-            Set<Long> updatedIds = new HashSet<>();
-            for (SubjectStudy entity : study.getSubjectStudyList()) {
-                updatedIds.add(entity.getId());
-            }
-
-            // Find deleted subject study so we can eventualy delete subjects
-            List<Subject> removed = new ArrayList<Subject>();
-
-            for (SubjectStudy subjectStudyDb : studyDb.getSubjectStudyList()) {
-                if (!updatedIds.contains(subjectStudyDb.getId())) {
-                    Subject sub = subjectStudyDb.getSubject();
-                    removed.add(sub);
-
-                    eventService.publishEvent(
-                            new ShanoirEvent(
-                                    ShanoirEventType.REMOVE_SUBJECT_FROM_STUDY_EVENT,
-                                    sub.getId().toString(),
-                                    KeycloakUtil.getTokenUserId(),
-                                    "Subject " + sub.getName() + " (id: " + sub.getId() + ") removed from study "
-                                            + study.getName() + " (id: " + study.getId() + ")",
-                                    ShanoirEvent.SUCCESS,
-                                    study.getId()));
-                }
-            }
-            for (Subject subject : removed) {
-                if (this.subjectStudyRepository.countBySubject(subject) == 1L) {
-                    toBeDeleted.add(subject);
-                }
             }
         }
 
