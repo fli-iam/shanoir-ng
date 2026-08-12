@@ -76,7 +76,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <checkbox
                                             [mode]="mode == 'view' ? mode : 'edit'"
                                             [(ngModel)]="panelStudyUser.receiveNewImportReport"
-                                            (userChange)="onStudyUserEdit()"></checkbox>
+                                            (userChange)="onStudyUserEdit()"
+                                            [falseTimes]="true"></checkbox>
                                     </span>
                                 </li>
                                 <li>
@@ -85,7 +86,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <checkbox
                                             [mode]="mode == 'view' ? mode : 'edit'"
                                             [(ngModel)]="panelStudyUser.receiveStudyUserReport"
-                                            (userChange)="onStudyUserEdit()"></checkbox>
+                                            (userChange)="onStudyUserEdit()"
+                                            [falseTimes]="true"></checkbox>
                                     </span>
                                 </li>
                             </ul>
@@ -154,7 +156,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             (panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL) &&
                                                 panelStudyUser.userId == getLoggedUserId()) ||
                                             study.isDraft
-                                        "></checkbox>
+                                        "
+                                        [falseTimes]="true"></checkbox>
                                 </span>
                             </li>
                             <li>
@@ -164,7 +167,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)"
                                         (userChange)="onEditRight(StudyUserRight.CAN_DOWNLOAD, panelStudyUser, $event)"
-                                        [disabled]="study.isDraft"></checkbox>
+                                        [disabled]="study.isDraft"
+                                        [falseTimes]="true"></checkbox>
                                 </span>
                             </li>
                             <li>
@@ -174,7 +178,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_IMPORT)"
                                         (userChange)="onEditRight(StudyUserRight.CAN_IMPORT, panelStudyUser, $event)"
-                                        [disabled]="study.isDraft"></checkbox>
+                                        [disabled]="study.isDraft"
+                                        [falseTimes]="true"></checkbox>
                                 </span>
                             </li>
                             <li>
@@ -184,7 +189,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_EXECUTE)"
                                         (userChange)="onEditRight(StudyUserRight.CAN_EXECUTE, panelStudyUser, $event)"
-                                        [disabled]="study.isDraft"></checkbox>
+                                        [disabled]="study.isDraft"
+                                        [falseTimes]="true"></checkbox>
                                 </span>
                             </li>
                             <li>
@@ -194,7 +200,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ANNOTATE)"
                                         (userChange)="onEditRight(StudyUserRight.CAN_ANNOTATE, panelStudyUser, $event)"
-                                        [disabled]="study.isDraft"></checkbox>
+                                        [disabled]="study.isDraft"
+                                        [falseTimes]="true"></checkbox>
                                 </span>
                             </li>
                             <li>
@@ -204,7 +211,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ANNOTATE_REVIEW)"
                                         (userChange)="onEditRight(StudyUserRight.CAN_ANNOTATE_REVIEW, panelStudyUser, $event)"
-                                        [disabled]="study.isDraft"></checkbox>
+                                        [disabled]="study.isDraft"
+                                        [falseTimes]="true"></checkbox>
                                 </span>
                             </li>
                             <li>
@@ -214,7 +222,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)"
                                         (userChange)="onEditRight(StudyUserRight.CAN_ADMINISTRATE, panelStudyUser, $event)"
-                                        [disabled]="study.isDraft"></checkbox>
+                                        [disabled]="study.isDraft"
+                                        [falseTimes]="true"></checkbox>
                                 </span>
                             </li>
                         </ul>
@@ -229,7 +238,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="!(panelStudyUser.centers?.length > 0)"
                                         (userChange)="onToggleAllCenters($event)"
-                                        [disabled]="study.isDraft"></checkbox>
+                                        [disabled]="study.isDraft"
+                                        [falseTimes]="true"></checkbox>
                                 </li>
                             }
                         </ul>
@@ -243,7 +253,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 [mode]="mode == 'view' ? mode : 'edit'"
                                                 [ngModel]="hasCenter(center, panelStudyUser)"
                                                 (userChange)="onEditCenter(center, panelStudyUser, $event)"
-                                                [disabled]="study.isDraft"></checkbox>
+                                                [disabled]="study.isDraft"
+                                                [falseTimes]="true"></checkbox>
                                         </span>
                                     </li>
                                 }

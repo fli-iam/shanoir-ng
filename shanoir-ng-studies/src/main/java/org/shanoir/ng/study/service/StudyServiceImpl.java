@@ -705,6 +705,7 @@ public class StudyServiceImpl implements StudyService {
             existingSu.setConfirmed(replacingSu.isConfirmed());
             existingSu.setCenters(replacingSu.getCenters());
             if (replacingSu.getStudyUserRights() != null && replacingSu.getStudyUserRights().contains(StudyUserRight.CAN_ADMINISTRATE)) {
+                // No expiration for admin users
                 existingSu.setExpiration(null);
             } else if (replacingSu.getExpiration() == null) {
                 existingSu.setExpiration(LocalDate.now().plusDays(userDefaultExpirationDays));
