@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.shanoir.anonymization.anonymization.AnonymizationResult;
 import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.query.DicomStoreSCPServer;
@@ -208,7 +209,8 @@ public class ImporterManagerService {
             event.setMessage("Pseudonymizing DICOM files for subject [" + subjectName + "]...");
             eventService.publishEvent(event);
             try {
-                ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName, importJob.getStudyInstanceUID());
+                AnonymizationResult anonymizationResult = ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName, importJob.getStudyInstanceUID());
+                ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, importJobDir, anonymizationResult);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
                 throw new ShanoirException("Error during pseudonymization.");
