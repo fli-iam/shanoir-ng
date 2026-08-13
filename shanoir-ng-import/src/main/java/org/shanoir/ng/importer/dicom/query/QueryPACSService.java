@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -496,11 +497,23 @@ public class QueryPACSService {
             List<Study> studies = patient.getStudies();
             studiesAttr.parallelStream().forEach(studyAttr -> {
                 Study study = new Study(studyAttr);
+                boolean added;
                 synchronized (studies) {
-                    LOG.info("Study found in DICOM server: " + study.toString());
-                    studies.add(study);
+                    boolean alreadyPresent = studies.stream().anyMatch(existing ->
+                            existing.getStudyInstanceUID().equals(study.getStudyInstanceUID())
+                            && Objects.equals(existing.getStudyDate(), study.getStudyDate()));
+                    if (alreadyPresent) {
+                        LOG.debug("Study ignored, already found with same StudyInstanceUID and StudyDate: " + study.toString());
+                        added = false;
+                    } else {
+                        LOG.info("Study found in DICOM server: " + study.toString());
+                        studies.add(study);
+                        added = true;
+                    }
                 }
-                querySeries(association, study, modality);
+                if (added) {
+                    querySeries(association, study, modality);
+                }
             });
             synchronized (studies) {
                 studies.sort(new StudyDateSorter());
