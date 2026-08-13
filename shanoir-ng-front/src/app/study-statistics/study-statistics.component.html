@@ -14,11 +14,31 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 @if (error) {
     <div class="statistics-error">Could not load statistics for this study.</div>
 } @else {
+    @if (!loading && globalStats) {
+        <div class="stat-tiles">
+            <div class="stat-tile">
+                <i class="fa-regular fa-hospital"></i>
+                <div class="stat-tile-value">{{ globalStats.centers | number }}</div>
+                <div class="stat-tile-label">Centers</div>
+            </div>
+            <div class="stat-tile">
+                <i class="fas fa-user-injured"></i>
+                <div class="stat-tile-value">{{ globalStats.subjects | number }}</div>
+                <div class="stat-tile-label">Subjects</div>
+            </div>
+            <div class="stat-tile">
+                <i class="fas fa-stethoscope"></i>
+                <div class="stat-tile-value">{{ globalStats.examinations | number }}</div>
+                <div class="stat-tile-label">Examinations</div>
+            </div>
+        </div>
+    }
     <div class="statistics-chart">
         <shanoir-line-chart
             [loading]="loading"
             [labels]="labels"
             [datasets]="datasets"
+            [zoomEnabled]="true"
             emptyMessage="No dated examinations or subjects to display yet"
             yAxisLabel="Cumulative count">
         </shanoir-line-chart>

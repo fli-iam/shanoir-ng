@@ -20,6 +20,34 @@ export interface InclusionsEvolution {
     subjects: number[];
 }
 
+export interface GlobalStatistics {
+    centers: number;
+    subjects: number;
+    examinations: number;
+}
+
+function countDistinct(rows: StudyStatisticsDTO[], idField: 'centerId' | 'subjectId' | 'examinationId'): number {
+    const ids = new Set<number>();
+    for (const row of rows) {
+        const id = row[idField];
+        if (id != null) ids.add(id);
+    }
+    return ids.size;
+}
+
+/**
+ * Ports Neurovasc-Dashboard's analytics.py::get_global_statistics (centers/subjects/exams
+ * counts) to TypeScript: the number of distinct centers, subjects and examinations that
+ * have at least one dataset in this study.
+ */
+export function computeGlobalStatistics(rows: StudyStatisticsDTO[]): GlobalStatistics {
+    return {
+        centers: countDistinct(rows, 'centerId'),
+        subjects: countDistinct(rows, 'subjectId'),
+        examinations: countDistinct(rows, 'examinationId'),
+    };
+}
+
 /**
  * importDate is missing for data imported before the field was introduced (january 2022),
  * in which case examinationDate is used as a fallback (same convention as the reference

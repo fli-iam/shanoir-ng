@@ -16,5 +16,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 } @else if (!labels?.length) {
     <div class="chart-message">{{ emptyMessage }}</div>
 } @else {
+    @if (zoomEnabled) {
+        <button type="button" class="chart-reset-zoom" title="Reset zoom" (click)="resetZoom()">
+            <i class="fas fa-magnifying-glass-minus"></i> Reset zoom
+        </button>
+    }
     <canvas baseChart type="line" [data]="chartData" [options]="chartOptions"></canvas>
 }

@@ -12,18 +12,19 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { DecimalPipe } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 import { LineChartComponent, LineChartDataset } from '../shared/components/line-chart/line-chart.component';
 import { StudyService } from '../studies/shared/study.service';
 
-import { computeInclusionsEvolution } from './study-statistics.utils';
+import { computeGlobalStatistics, computeInclusionsEvolution, GlobalStatistics } from './study-statistics.utils';
 
 @Component({
     selector: 'study-statistics',
     templateUrl: 'study-statistics.component.html',
     styleUrls: ['study-statistics.component.css'],
-    imports: [LineChartComponent]
+    imports: [LineChartComponent, DecimalPipe]
 })
 export class StudyStatisticsComponent implements OnChanges {
 
@@ -33,6 +34,7 @@ export class StudyStatisticsComponent implements OnChanges {
     error: boolean = false;
     labels: string[] = [];
     datasets: LineChartDataset[] = [];
+    globalStats?: GlobalStatistics;
 
     constructor(private studyService: StudyService) {
     }
@@ -48,11 +50,13 @@ export class StudyStatisticsComponent implements OnChanges {
         this.error = false;
         try {
             const rows = await this.studyService.getStudyStatistics(this.studyId);
+            this.globalStats = computeGlobalStatistics(rows);
             const evolution = computeInclusionsEvolution(rows);
             this.labels = evolution.labels;
             this.datasets = [
-                { label: 'Examinations', data: evolution.examinations, color: 'blue' },
-                { label: 'Subjects', data: evolution.subjects, color: 'darkorange' },
+                // colors match the palette from the home page
+                { label: 'Examinations', data: evolution.examinations, color: '#5f0f4e' },
+                { label: 'Subjects', data: evolution.subjects, color: '#67aeca' },
             ];
         } catch {
             this.error = true;

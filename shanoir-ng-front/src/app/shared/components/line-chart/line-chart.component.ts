@@ -12,9 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, ViewChild } from '@angular/core';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+import 'chartjs-plugin-zoom';
 
 export interface LineChartDataset {
     label: string;
@@ -35,6 +36,10 @@ export class LineChartComponent implements OnChanges {
     @Input() loading: boolean = false;
     @Input() emptyMessage: string = 'No data available';
     @Input() yAxisLabel: string;
+    /** Enables mouse-drag range selection (zoom) and panning along the x axis. */
+    @Input() zoomEnabled: boolean = false;
+
+    @ViewChild(BaseChartDirective) chartDirective: BaseChartDirective;
 
     chartData: ChartConfiguration<'line'>['data'];
     chartOptions: ChartOptions<'line'>;
@@ -63,7 +68,18 @@ export class LineChartComponent implements OnChanges {
             },
             plugins: {
                 legend: { display: true },
+                zoom: this.zoomEnabled ? {
+                    pan: { enabled: true, mode: 'x' },
+                    zoom: {
+                        drag: { enabled: true },
+                        mode: 'x',
+                    },
+                } : undefined,
             },
         };
+    }
+
+    resetZoom(): void {
+        this.chartDirective?.chart?.resetZoom();
     }
 }
