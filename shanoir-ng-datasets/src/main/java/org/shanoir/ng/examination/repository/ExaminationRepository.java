@@ -180,15 +180,6 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
             + "ORDER BY COALESCE(da.sortingIndex, da.rank, 0)")
     Optional<Examination> findByIdWithAcquisitionsAndSource(Long id);
 
-    /**
-     * Hibernate cannot LEFT JOIN FETCH more than one bag-typed collection (unordered List) of the
-     * same entity in a single query: it raises a MultipleBagFetchException. This applies to ANY
-     * pair of bag collections on Examination (datasetAcquisitions, copies,
-     * instrumentBasedAssessmentList are all Lists) - not just a specific pair of fields. So only
-     * one bag (datasetAcquisitions) is join-fetched here; the others are initialized in a second
-     * step, within the same transaction/persistence context, so they attach to the same managed
-     * Examination instance without triggering the exception or an N+1 per collection.
-     */
     @Transactional(readOnly = true)
     default Optional<Examination> findByIdWithAcquisitionsAndCopiesAndSource(Long id) {
         Optional<Examination> examination = findByIdWithAcquisitionsAndSource(id);

@@ -236,17 +236,17 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     List<Dataset> findByIdsWithProcessingAncestors(List<Long> ids);
 
     @Query("SELECT dataset FROM Dataset dataset "
-            + "JOIN FETCH dataset.relatedStudies "
-            + "JOIN FETCH dataset.datasetProcessing "
-            + "JOIN FETCH dataset.datasetAcquisition AS acq "
-            + "JOIN FETCH acq.examination "
+            + "LEFT JOIN FETCH dataset.relatedStudies "
+            + "LEFT JOIN FETCH dataset.datasetProcessing "
+            + "LEFT JOIN FETCH dataset.datasetAcquisition AS acq "
+            + "LEFT JOIN FETCH acq.examination "
             + "WHERE dataset.id = :id")
     Dataset findByIdWithExaminationRelationsAndRelatedStudies(Long id);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "LEFT JOIN FETCH dataset.datasetProcessing "
-            + "WHERE dataset.subjectId = :subjectId")
-    Dataset findByIdWithDatasetProcessing(Long id);
+            + "WHERE dataset.id = :id")
+    Optional<Dataset> findByIdWithDatasetProcessing(Long id);
 
     @Query("SELECT dataset FROM Dataset dataset "
             + "LEFT JOIN FETCH dataset.tags "

@@ -138,7 +138,7 @@ public interface DatasetProcessingApi {
             "application/json"})
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and !@datasetSecurityService.isDraftStudy(#datasetProcessing.getStudyId())")
     ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(@Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
-                                                                  BindingResult result) throws RestServiceException;
+                                                                  BindingResult result) throws RestServiceException, EntityNotFoundException;
 
     @Operation(summary = "", description = "Updates a dataset processing")
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "dataset processing updated"),
@@ -152,7 +152,7 @@ public interface DatasetProcessingApi {
     ResponseEntity<Void> updateDatasetProcessing(
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
             @Parameter(description = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing, BindingResult result)
-            throws RestServiceException;
+            throws RestServiceException, EntityNotFoundException;
 
     @Operation(summary = "massiveDownloadByProcessingIds", description = "If exists, returns a zip file of the inputs/outputs per processing corresponding to the given processing IDs.  Datas are in the http response body, it must be written in a zip file. Datas are sorted with folders according to their respective examination and processing.")
     @ApiResponses(value = {

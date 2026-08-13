@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.hibernate.Hibernate;
 import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -224,14 +225,21 @@ public class ExaminationServiceImpl implements ExaminationService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Page<Examination> findPage(final Pageable pageable, boolean preclinical, String searchStr, String searchField) {
         List<Pair<Long, Long>> studyCenters = new ArrayList<>();
         Set<Long> unrestrictedStudies = new HashSet<Long>();
         securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
         if (searchStr != null && searchStr.length() >= 1) {
-            return examinationRepository.findPageByStudyCenterOrStudyIdInAndSearch(studyCenters, unrestrictedStudies, pageable, preclinical, searchStr, searchField);
+            Page<Examination> page = examinationRepository.findPageByStudyCenterOrStudyIdInAndSearch(studyCenters, unrestrictedStudies, pageable, preclinical, searchStr, searchField);
+            page.forEach(examination -> Hibernate.initialize(examination.getCopies()));
+            page.forEach(examination -> Hibernate.initialize(examination.getInstrumentBasedAssessmentList()));
+            return page;
         } else {
-            return examinationRepository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable, preclinical);
+            Page<Examination> page =  examinationRepository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable, preclinical);
+            page.forEach(examination -> Hibernate.initialize(examination.getCopies()));
+            page.forEach(examination -> Hibernate.initialize(examination.getInstrumentBasedAssessmentList()));
+            return page;
         }
     }
 

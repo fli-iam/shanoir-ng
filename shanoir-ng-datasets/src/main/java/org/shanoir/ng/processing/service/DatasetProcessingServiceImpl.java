@@ -154,7 +154,7 @@ public class DatasetProcessingServiceImpl implements DatasetProcessingService {
     }
 
     @Override
-    public void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException {
+    public void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException, EntityNotFoundException {
         if (processing.getStudyId() == null) {
             ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Processing must be linked to a study.", null);
             throw new RestServiceException(error);

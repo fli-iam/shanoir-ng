@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.mapstruct.*;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -157,14 +158,15 @@ public interface DatasetAcquisitionMapper {
 
     @AfterMapping
     default void setType(DatasetAcquisition acquisition, @MappingTarget DatasetAcquisitionDTO dto) {
-        if (acquisition.getType().equals("Mr")) {
-            dto.setProtocol(((MrDatasetAcquisition) acquisition).getMrProtocol());
-        } else if (acquisition.getType().equals("Pet")) {
-            dto.setProtocol(((PetDatasetAcquisition) acquisition).getPetProtocol());
-        } else if (acquisition.getType().equals("Ct")) {
-            dto.setProtocol(((CtDatasetAcquisition) acquisition).getCtProtocol());
-        } else if (acquisition.getType().equals("Xa")) {
-            dto.setProtocol(((XaDatasetAcquisition) acquisition).getXaProtocol());
+        DatasetAcquisition unproxiedAcq = (DatasetAcquisition) Hibernate.unproxy(acquisition); // Can not cast a proxy
+        if (unproxiedAcq.getType().equals("Mr")) {
+            dto.setProtocol(((MrDatasetAcquisition) unproxiedAcq).getMrProtocol());
+        } else if (unproxiedAcq.getType().equals("Pet")) {
+            dto.setProtocol(((PetDatasetAcquisition) unproxiedAcq).getPetProtocol());
+        } else if (unproxiedAcq.getType().equals("Ct")) {
+            dto.setProtocol(((CtDatasetAcquisition) unproxiedAcq).getCtProtocol());
+        } else if (unproxiedAcq.getType().equals("Xa")) {
+            dto.setProtocol(((XaDatasetAcquisition) unproxiedAcq).getXaProtocol());
         }
     }
 }

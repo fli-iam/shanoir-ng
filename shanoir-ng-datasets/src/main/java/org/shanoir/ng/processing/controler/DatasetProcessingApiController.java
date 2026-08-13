@@ -156,7 +156,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     @Override
     public ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(
             @Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
-            final BindingResult result) throws RestServiceException {
+            final BindingResult result) throws RestServiceException, EntityNotFoundException {
         /* set authenticated username */
         datasetProcessing.setUsername(KeycloakUtil.getTokenUserName());
 
@@ -173,7 +173,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     public ResponseEntity<Void> updateDatasetProcessing(
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
             @Parameter(description = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
-            final BindingResult result) throws RestServiceException {
+            final BindingResult result) throws RestServiceException, EntityNotFoundException {
 
         validate(result);
         datasetProcessingService.validateDatasetProcessing(datasetProcessing);

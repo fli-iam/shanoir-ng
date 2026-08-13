@@ -202,7 +202,7 @@ public interface DatasetService {
     boolean existsById(Long id);
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.id, 'CAN_SEE_ALL'))")
-    Long getStudyId(Dataset dataset);
+    Long getStudyId(Dataset dataset) throws EntityNotFoundException;
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.id, 'CAN_SEE_ALL'))")
     Examination getExamination(Dataset dataset);

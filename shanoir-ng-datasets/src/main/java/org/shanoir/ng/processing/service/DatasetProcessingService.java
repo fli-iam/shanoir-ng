@@ -81,5 +81,5 @@ public interface DatasetProcessingService {
      */
     void deleteByParentId(Long id) throws RestServiceException, ShanoirException, SolrServerException, IOException;
 
-    void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException;
+    void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException, EntityNotFoundException;
 }
