@@ -148,7 +148,7 @@ public class FileUtil {
                     fileNamesForSerie.add(dicomFileName);
                     File sourceFileFromPacs = serieFiles[i];
                     try (DicomInputStream dIS = new DicomInputStream(sourceFileFromPacs)) { // keep try to finally close input stream
-                        Attributes attributes = dIS.readDataset();
+                        Attributes attributes = dIS.readDatasetUntilPixelData();
                         if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
                             Instance instance = new Instance(attributes);
                             instances.add(instance);
