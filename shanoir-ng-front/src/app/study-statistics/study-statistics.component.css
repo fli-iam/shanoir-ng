@@ -2,6 +2,22 @@
 .statistics-error { text-align: center; padding-top: 40px; color: var(--color-error); }
 .chart-title { padding: 0 10px 0 0; color: var(--color-c); font-size: 14px; font-weight: normal; margin: 10px 0; width: 100%; }
 
+.statistics-parameters {
+    width: 100%;
+    margin-bottom: 24px;
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.parameter-control { display: flex; flex-direction: column; }
+.parameters-label { display: block; font-size: 12px; color: var(--greyer); margin-bottom: 4px; }
+.parameter-control select { width: fit-content; min-width: 200px; }
+
 .stat-tiles { display: flex; gap: 16px; margin-bottom: 24px; }
 .stat-tile {
     flex: 1;

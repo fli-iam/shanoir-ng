@@ -14,7 +14,36 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 @if (error) {
     <div class="statistics-error">Could not load statistics for this study.</div>
 } @else {
+    @if (!loading && (availableCenters.length > 0 || (dateRangeMin && dateRangeMax))) {
+        <h3 class="chart-title">Parameters</h3>
+        <div class="statistics-parameters">
+            @if (availableCenters.length > 0) {
+                <div class="parameter-control">
+                    <label class="parameters-label" for="center-select">Center</label>
+                    <select id="center-select" [ngModel]="selectedCenter" (ngModelChange)="onCenterChange($event)">
+                        <option [ngValue]="null">All centers</option>
+                        @for (center of availableCenters; track center) {
+                            <option [ngValue]="center">{{ center }}</option>
+                        }
+                    </select>
+                </div>
+            }
+            @if (dateRangeMin && dateRangeMax) {
+                <div class="parameter-control">
+                    <label class="parameters-label">Date range (import date, or examination date when missing)</label>
+                    <date-range-slider
+                        [minDate]="dateRangeMin"
+                        [maxDate]="dateRangeMax"
+                        [startDate]="filterStartDate"
+                        [endDate]="filterEndDate"
+                        (rangeChange)="onRangeChange($event)">
+                    </date-range-slider>
+                </div>
+            }
+        </div>
+    }
     @if (!loading && globalStats) {
+        <h3 class="chart-title">Global statistics</h3>
         <div class="stat-tiles">
             <div class="stat-tile">
                 <i class="fa-regular fa-hospital"></i>

@@ -91,12 +91,29 @@ export function computeSubjectsByCenter(rows: StudyStatisticsDTO[]): CenterBarDa
     return computeDistinctCountByCenter(rows, 'subjectId');
 }
 
-// Fixed modality -> color mapping, in the declaration order of the "getStudyStatistics"
-// stored procedure's dataset_modality_type CASE (docker-compose/database-migrations/
-// db-init-procedures/2_add_studyStatistics_procedure.sql). Uses the app's own palette
-// (same colors as the rest of the Statistics tab), one hue per modality, in fixed order
-// (never cycled); any rarer modality not in this map (Egg, Generic, Ieeg, Micr, Beh,
-// Nirs, Xa, ...) falls back to a shared neutral "Other" grey, so a color is never
+// Distinct center names in the study, sorted alphabetically, for the "Select center" dropdown.
+export function computeCenterNames(rows: StudyStatisticsDTO[]): string[] {
+    const names = new Set<string>();
+    for (const row of rows) {
+        if (row.centerName) names.add(row.centerName);
+    }
+    return Array.from(names).sort((a, b) => a.localeCompare(b));
+}
+
+const CENTER_GREY_COLOR = '#c9c9c9';
+
+/**
+ * Center highlights behavior: when a center is selected, every
+ * other center's bar is greyed out instead of being filtered out of the chart.
+ */
+export function centerHighlightColors(centers: string[], selectedCenter: string | null | undefined, activeColor: string): string[] {
+    if (!selectedCenter) return centers.map(() => activeColor);
+    return centers.map(center => center === selectedCenter ? activeColor : CENTER_GREY_COLOR);
+}
+
+// Uses the app's home page palette
+// one hue per modality, in fixed order, any rarer modality not in this map
+// falls back to a shared neutral "Other" grey, so a color is never
 // reassigned depending on which modalities happen to be present.
 const MODALITY_COLORS: Record<string, string> = {
     Mr: '#5F0F4E',
@@ -118,8 +135,7 @@ export interface ModalityBarData {
 }
 
 /**
- * Ports Neurovasc-Dashboard's analytics.py::get_modality_pie to TypeScript - as a bar
- * chart rather than a pie/donut, which is hard to read past a few slices: the number of
+ * Compute datasets DICOM modality ratio: the number of
  * datasets per DICOM modality, sorted with the most common modality first.
  */
 export function computeDatasetsByModality(rows: StudyStatisticsDTO[]): ModalityBarData {
@@ -152,8 +168,7 @@ export interface ModalityByCenterData {
 }
 
 /**
- * Ports Neurovasc-Dashboard's analytics.py::get_modality_hist to TypeScript: the number
- * of datasets per DICOM modality, broken down by center (for a stacked bar chart).
+ * Compute the number of datasets by DICOM modalities and centers.
  */
 export function computeModalityByCenter(rows: StudyStatisticsDTO[]): ModalityByCenterData {
     const centerTotals = new Map<number, { name: string, total: number }>();
@@ -312,14 +327,43 @@ export function computeQualityByCenter(rows: StudyStatisticsDTO[]): QualityByCen
 
 /**
  * importDate is missing for data imported before the field was introduced (january 2022),
- * in which case examinationDate is used as a fallback (same convention as the reference
- * Neurovasc-Dashboard analytics).
+ * in which case examinationDate is used as a fallback.
  */
-function parseEffectiveDate(row: StudyStatisticsDTO): Date | null {
+export function parseEffectiveDate(row: StudyStatisticsDTO): Date | null {
     const raw = row.importDate ?? row.examinationDate;
     if (!raw) return null;
     const date = new Date(raw);
     return isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * The [min, max] span of effective dates (importDate, falling back to examinationDate)
+ * across all rows, used to bound the Parameters date-range slider. Rows with neither
+ * date are ignored, as they cannot be placed on the timeline.
+ */
+export function computeEffectiveDateRange(rows: StudyStatisticsDTO[]): { min: Date, max: Date } | null {
+    let min: Date | null = null;
+    let max: Date | null = null;
+    for (const row of rows) {
+        const date = parseEffectiveDate(row);
+        if (!date) continue;
+        if (!min || date < min) min = date;
+        if (!max || date > max) max = date;
+    }
+    return min && max ? { min, max } : null;
+}
+
+/**
+ * Restricts rows to those whose effective date (importDate, falling back to
+ * examinationDate) falls within [start, end]. Rows with no parseable date are
+ * excluded, since their membership in the range cannot be determined.
+ */
+export function filterRowsByDateRange(rows: StudyStatisticsDTO[], start: Date, end: Date): StudyStatisticsDTO[] {
+    return rows.filter(row => {
+        const date = parseEffectiveDate(row);
+        if (!date) return false;
+        return date >= start && date <= end;
+    });
 }
 
 function minDatesById(rows: StudyStatisticsDTO[], idField: 'examinationId' | 'subjectId'): Date[] {
@@ -368,8 +412,7 @@ function formatMonthLabel(date: Date): string {
 }
 
 /**
- * Ports Neurovasc-Dashboard's analytics.py::get_inclusions_evolution to TypeScript:
- * cumulative count of distinct examinations and distinct subjects, by month, based on
+ * Compute cumulative count of distinct examinations and distinct subjects, by month, based on
  * each examination's/subject's earliest inclusion date across all its dataset rows.
  */
 export function computeInclusionsEvolution(rows: StudyStatisticsDTO[]): InclusionsEvolution {

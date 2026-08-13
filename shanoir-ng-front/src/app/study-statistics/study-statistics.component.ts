@@ -18,12 +18,17 @@ import { FormsModule } from '@angular/forms';
 
 import { LocalDateFormatPipe } from '../shared/localLanguage/localDateFormat.pipe';
 import { BarChartComponent, BarChartDataset } from '../shared/components/bar-chart/bar-chart.component';
+import { DateRange, DateRangeSliderComponent } from '../shared/components/date-range-slider/date-range-slider.component';
 import { DonutChartComponent } from '../shared/components/donut-chart/donut-chart.component';
 import { LineChartComponent, LineChartDataset } from '../shared/components/line-chart/line-chart.component';
+import { StudyStatisticsDTO } from '../studies/shared/study.dto';
 import { StudyService } from '../studies/shared/study.service';
 
 import {
+    centerHighlightColors,
+    computeCenterNames,
     computeDatasetsByModality,
+    computeEffectiveDateRange,
     computeExamsByCenter,
     computeGlobalStatistics,
     computeInclusionsEvolution,
@@ -32,6 +37,7 @@ import {
     computeQualityByCenter,
     computeQualityDistribution,
     computeSubjectsByCenter,
+    filterRowsByDateRange,
     GlobalStatistics,
     LatestImportRow
 } from './study-statistics.utils';
@@ -40,7 +46,7 @@ import {
     selector: 'study-statistics',
     templateUrl: 'study-statistics.component.html',
     styleUrls: ['study-statistics.component.css'],
-    imports: [LineChartComponent, BarChartComponent, DonutChartComponent, DecimalPipe, LocalDateFormatPipe, FormsModule]
+    imports: [LineChartComponent, BarChartComponent, DonutChartComponent, DateRangeSliderComponent, DecimalPipe, LocalDateFormatPipe, FormsModule]
 })
 export class StudyStatisticsComponent implements OnChanges {
 
@@ -48,6 +54,14 @@ export class StudyStatisticsComponent implements OnChanges {
 
     loading: boolean = false;
     error: boolean = false;
+    allRows: StudyStatisticsDTO[] = [];
+    dateRangeMin?: Date;
+    dateRangeMax?: Date;
+    filterStartDate?: Date;
+    filterEndDate?: Date;
+    availableCenters: string[] = [];
+    selectedCenter: string | null = null;
+    private dateFilteredRows: StudyStatisticsDTO[] = [];
     labels: string[] = [];
     datasets: LineChartDataset[] = [];
     examsByCenterLabels: string[] = [];
@@ -81,61 +95,92 @@ export class StudyStatisticsComponent implements OnChanges {
         this.loading = true;
         this.error = false;
         try {
-            const rows = await this.studyService.getStudyStatistics(this.studyId);
-            this.globalStats = computeGlobalStatistics(rows);
-
-            const evolution = computeInclusionsEvolution(rows);
-            this.labels = evolution.labels;
-            this.datasets = [
-                // colors match the palette from the home page
-                { label: 'Examinations', data: evolution.examinations, color: '#5f0f4e' },
-                { label: 'Subjects', data: evolution.subjects, color: '#67aeca' },
-            ];
-
-            const examsByCenter = computeExamsByCenter(rows);
-            this.examsByCenterLabels = examsByCenter.centers;
-            this.examsByCenterDatasets = [
-                { label: 'Examinations', data: examsByCenter.counts, color: '#5f0f4e' },
-            ];
-
-            const subjectsByCenter = computeSubjectsByCenter(rows);
-            this.subjectsByCenterLabels = subjectsByCenter.centers;
-            this.subjectsByCenterDatasets = [
-                { label: 'Subjects', data: subjectsByCenter.counts, color: '#67aeca' },
-            ];
-
-            const datasetsByModality = computeDatasetsByModality(rows);
-            this.modalityLabels = datasetsByModality.modalities;
-            this.modalityData = datasetsByModality.counts;
-            this.modalityColors = datasetsByModality.colors;
-
-            const modalityByCenter = computeModalityByCenter(rows);
-            this.modalityByCenterLabels = modalityByCenter.centers;
-            this.modalityByCenterDatasets = modalityByCenter.series.map(series => ({
-                label: series.modality,
-                data: series.counts,
-                color: series.color,
-            }));
-
-            const qualityDistribution = computeQualityDistribution(rows);
-            this.qualityLabels = qualityDistribution.qualities;
-            this.qualityData = qualityDistribution.counts;
-            this.qualityColors = qualityDistribution.colors;
-
-            const qualityByCenter = computeQualityByCenter(rows);
-            this.qualityByCenterLabels = qualityByCenter.centers;
-            this.qualityByCenterDatasets = qualityByCenter.series.map(series => ({
-                label: series.quality,
-                data: series.counts,
-                color: series.color,
-            }));
-
-            this.latestImports = computeLatestImports(rows);
+            this.allRows = await this.studyService.getStudyStatistics(this.studyId);
+            this.availableCenters = computeCenterNames(this.allRows);
+            this.selectedCenter = null;
+            const dateRange = computeEffectiveDateRange(this.allRows);
+            this.dateRangeMin = dateRange?.min;
+            this.dateRangeMax = dateRange?.max;
+            this.filterStartDate = dateRange?.min;
+            this.filterEndDate = dateRange?.max;
+            this.dateFilteredRows = this.allRows;
+            this.recompute();
         } catch {
             this.error = true;
         } finally {
             this.loading = false;
         }
+    }
+
+    onRangeChange(range: DateRange): void {
+        this.filterStartDate = range.start;
+        this.filterEndDate = range.end;
+        const isFullRange = range.start.getTime() === this.dateRangeMin?.getTime() && range.end.getTime() === this.dateRangeMax?.getTime();
+        this.dateFilteredRows = isFullRange ? this.allRows : filterRowsByDateRange(this.allRows, range.start, range.end);
+        this.recompute();
+    }
+
+    onCenterChange(center: string | null): void {
+        this.selectedCenter = center;
+        this.recompute();
+    }
+
+    private recompute() {
+        const rows = this.dateFilteredRows;
+        // Every chart except "by center" ones is scoped to the selected center only, like
+        // Neurovasc-Dashboard's center filter - the "by center" ones instead keep every
+        // center's bar and grey out the ones that aren't selected (see below).
+        const centerRows = this.selectedCenter ? rows.filter(row => row.centerName === this.selectedCenter) : rows;
+
+        this.globalStats = computeGlobalStatistics(centerRows);
+
+        const evolution = computeInclusionsEvolution(centerRows);
+        this.labels = evolution.labels;
+        this.datasets = [
+            // colors match the palette from the home page
+            { label: 'Examinations', data: evolution.examinations, color: '#5f0f4e' },
+            { label: 'Subjects', data: evolution.subjects, color: '#67aeca' },
+        ];
+
+        const examsByCenter = computeExamsByCenter(rows);
+        this.examsByCenterLabels = examsByCenter.centers;
+        this.examsByCenterDatasets = [
+            { label: 'Examinations', data: examsByCenter.counts, color: centerHighlightColors(examsByCenter.centers, this.selectedCenter, '#5f0f4e') },
+        ];
+
+        const subjectsByCenter = computeSubjectsByCenter(rows);
+        this.subjectsByCenterLabels = subjectsByCenter.centers;
+        this.subjectsByCenterDatasets = [
+            { label: 'Subjects', data: subjectsByCenter.counts, color: centerHighlightColors(subjectsByCenter.centers, this.selectedCenter, '#67aeca') },
+        ];
+
+        const datasetsByModality = computeDatasetsByModality(centerRows);
+        this.modalityLabels = datasetsByModality.modalities;
+        this.modalityData = datasetsByModality.counts;
+        this.modalityColors = datasetsByModality.colors;
+
+        const modalityByCenter = computeModalityByCenter(centerRows);
+        this.modalityByCenterLabels = modalityByCenter.centers;
+        this.modalityByCenterDatasets = modalityByCenter.series.map(series => ({
+            label: series.modality,
+            data: series.counts,
+            color: series.color,
+        }));
+
+        const qualityDistribution = computeQualityDistribution(centerRows);
+        this.qualityLabels = qualityDistribution.qualities;
+        this.qualityData = qualityDistribution.counts;
+        this.qualityColors = qualityDistribution.colors;
+
+        const qualityByCenter = computeQualityByCenter(centerRows);
+        this.qualityByCenterLabels = qualityByCenter.centers;
+        this.qualityByCenterDatasets = qualityByCenter.series.map(series => ({
+            label: series.quality,
+            data: series.counts,
+            color: series.color,
+        }));
+
+        this.latestImports = computeLatestImports(centerRows);
     }
 
     get displayedLatestImports(): LatestImportRow[] {

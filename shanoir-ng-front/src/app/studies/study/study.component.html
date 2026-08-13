@@ -868,7 +868,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
                 @if (mode == 'view' && keycloakService.isUserAdminOrExpert()) {
                     <fieldset [class.hidden-tab]="activeTab != 'statistics'" tab="statistics">
-                        <legend>Global statistics</legend>
                         <study-statistics [studyId]="id"></study-statistics>
                     </fieldset>
                 }
