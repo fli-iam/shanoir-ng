@@ -393,3 +393,38 @@ export function computeInclusionsEvolution(rows: StudyStatisticsDTO[]): Inclusio
         subjects: cumulativeCounts(subjectDates, points),
     };
 }
+
+export interface LatestImportRow {
+    commonName: string;
+    centerName: string;
+    examinationComment: string;
+    examinationDate: Date | null;
+    importDate: Date | null;
+}
+
+/**
+ * Compute lastly imported examinations, keeping their most recent import date, 
+ * sorted with the most recently imported examination first.
+ */
+export function computeLatestImports(rows: StudyStatisticsDTO[]): LatestImportRow[] {
+    const latestByExam = new Map<number, { row: StudyStatisticsDTO, date: Date }>();
+    for (const row of rows) {
+        if (row.examinationId == null) continue;
+        const date = parseEffectiveDate(row);
+        if (!date) continue;
+        const existing = latestByExam.get(row.examinationId);
+        if (!existing || date > existing.date) {
+            latestByExam.set(row.examinationId, { row, date });
+        }
+    }
+
+    return Array.from(latestByExam.values())
+        .sort((a, b) => b.date.getTime() - a.date.getTime())
+        .map(({ row }) => ({
+            commonName: row.commonName,
+            centerName: row.centerName,
+            examinationComment: row.examinationComment,
+            examinationDate: row.examinationDate ? new Date(row.examinationDate) : null,
+            importDate: row.importDate ? new Date(row.importDate) : null,
+        }));
+}

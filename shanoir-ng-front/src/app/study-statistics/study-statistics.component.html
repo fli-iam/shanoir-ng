@@ -123,4 +123,44 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </shanoir-bar-chart>
         </div>
     }
+
+    <h3 class="chart-title">Latest imported examinations</h3>
+    <div class="latest-imports">
+        @if (loading) {
+            <div class="statistics-message"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+        } @else if (!latestImports.length) {
+            <div class="statistics-message">No imported examinations to display yet</div>
+        } @else {
+            <div class="latest-imports-controls">
+                <label for="latest-imports-size">Show</label>
+                <select id="latest-imports-size" [(ngModel)]="latestImportsPageSize">
+                    <option [ngValue]="10">10 results</option>
+                    <option [ngValue]="25">25 results</option>
+                    <option [ngValue]="50">50 results</option>
+                </select>
+            </div>
+            <table class="latest-imports-table">
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>Center</th>
+                        <th>Comment</th>
+                        <th>Examination date</th>
+                        <th>Import date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (item of displayedLatestImports; track item) {
+                        <tr>
+                            <td>{{ item.commonName }}</td>
+                            <td>{{ item.centerName }}</td>
+                            <td>{{ item.examinationComment }}</td>
+                            <td>{{ item.examinationDate | localDateFormatPipe }}</td>
+                            <td>{{ item.importDate | localDateFormatPipe }}</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
 }

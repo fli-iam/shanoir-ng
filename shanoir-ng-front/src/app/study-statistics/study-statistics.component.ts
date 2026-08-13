@@ -14,7 +14,9 @@
 
 import { DecimalPipe } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
+import { LocalDateFormatPipe } from '../shared/localLanguage/localDateFormat.pipe';
 import { BarChartComponent, BarChartDataset } from '../shared/components/bar-chart/bar-chart.component';
 import { DonutChartComponent } from '../shared/components/donut-chart/donut-chart.component';
 import { LineChartComponent, LineChartDataset } from '../shared/components/line-chart/line-chart.component';
@@ -25,18 +27,20 @@ import {
     computeExamsByCenter,
     computeGlobalStatistics,
     computeInclusionsEvolution,
+    computeLatestImports,
     computeModalityByCenter,
     computeQualityByCenter,
     computeQualityDistribution,
     computeSubjectsByCenter,
-    GlobalStatistics
+    GlobalStatistics,
+    LatestImportRow
 } from './study-statistics.utils';
 
 @Component({
     selector: 'study-statistics',
     templateUrl: 'study-statistics.component.html',
     styleUrls: ['study-statistics.component.css'],
-    imports: [LineChartComponent, BarChartComponent, DonutChartComponent, DecimalPipe]
+    imports: [LineChartComponent, BarChartComponent, DonutChartComponent, DecimalPipe, LocalDateFormatPipe, FormsModule]
 })
 export class StudyStatisticsComponent implements OnChanges {
 
@@ -60,6 +64,8 @@ export class StudyStatisticsComponent implements OnChanges {
     qualityColors: string[] = [];
     qualityByCenterLabels: string[] = [];
     qualityByCenterDatasets: BarChartDataset[] = [];
+    latestImports: LatestImportRow[] = [];
+    latestImportsPageSize: number = 10;
     globalStats?: GlobalStatistics;
 
     constructor(private studyService: StudyService) {
@@ -123,10 +129,16 @@ export class StudyStatisticsComponent implements OnChanges {
                 data: series.counts,
                 color: series.color,
             }));
+
+            this.latestImports = computeLatestImports(rows);
         } catch {
             this.error = true;
         } finally {
             this.loading = false;
         }
+    }
+
+    get displayedLatestImports(): LatestImportRow[] {
+        return this.latestImports.slice(0, this.latestImportsPageSize);
     }
 }

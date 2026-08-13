@@ -17,3 +17,26 @@
 .stat-tile i { font-size: 22px; color: #5f0f4e; margin-bottom: 8px; }
 .stat-tile-value { font-size: 28px; font-weight: 600; color: var(--very-dark-grey); font-variant-numeric: normal; }
 .stat-tile-label { font-size: 12px; color: var(--greyer); margin-top: 2px; }
+
+.latest-imports {
+    width: 100%;
+    margin-bottom: 48px;
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 16px;
+    box-sizing: border-box;
+}
+.statistics-message { text-align: center; padding: 30px 0; color: var(--greyer); }
+.statistics-message i { margin-right: 6px; }
+.latest-imports-controls { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 12px; }
+.latest-imports-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.latest-imports-table th {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 2px solid var(--grey);
+    color: var(--greyer);
+    font-weight: 600;
+}
+.latest-imports-table td { padding: 8px 10px; border-bottom: 1px solid var(--light-grey); }
+.latest-imports-table tr:hover td { background-color: var(--lighter-grey); }

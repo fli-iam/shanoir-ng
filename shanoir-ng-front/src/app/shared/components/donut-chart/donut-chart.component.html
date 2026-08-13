@@ -21,5 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <i class="fas fa-download"></i>
         </button>
     </div>
-    <canvas baseChart type="doughnut" [data]="chartData" [options]="chartOptions"></canvas>
+    <div class="chart-canvas-wrapper">
+        <canvas baseChart type="doughnut" [data]="chartData" [options]="chartOptions"></canvas>
+    </div>
 }
