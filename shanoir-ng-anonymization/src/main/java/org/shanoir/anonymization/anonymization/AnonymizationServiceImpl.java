@@ -185,6 +185,14 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * Further does each part of an UID has to start with a non-zero value, see
      * UIDGeneration code.
      *
+     * Once anonymization of the DICOM attributes is complete and the file has
+     * been written back to disk, the file itself is renamed on disk to
+     * "<SOPInstanceUID>.dcm" (in its original parent directory, skipping the
+     * rename if a file with that name already exists there), so that every
+     * anonymized DICOM file's name matches its final SOPInstanceUID.
+     * sopInstanceUIDsByFilePath is keyed by the file's ORIGINAL path so callers
+     * can still resolve it from an untouched, pre-rename referencedFileID.
+     *
      * Overload kept for backward compatibility with existing external callers: it
      * simply runs the anonymization with a fresh, single-file stats tracker that
      * is discarded afterwards. Prefer the overload below in batch contexts, so
@@ -332,18 +340,43 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                 anonymizePatientMetaData(datasetAttributes, patientName, patientID, patientBirthDateAttr, stats);
             }
 
-            // Record the file's FINAL SOPInstanceUID (whatever action applied, or
-            // none at all) keyed by its path, so callers can correlate this file
-            // back to the Instance it came from and patch that Instance's UID.
+            // Determine the file's FINAL SOPInstanceUID (whatever action applied, or
+            // none at all). Used both to correlate this file back to the Instance
+            // it came from, and to rename the file on disk once it has been
+            // written out below.
             String finalSopInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
-            if (finalSopInstanceUID != null) {
-                sopInstanceUIDsByFilePath.put(dicomFile.getAbsolutePath(), finalSopInstanceUID);
-            }
 
             LOG.debug("finish anonymization: begin storage");
             dos = new DicomOutputStream(dicomFile);
             dos.writeDataset(metaInformationAttributes, datasetAttributes);
+            dos.close();
+            // Already closed explicitly above: null it out so the finally block
+            // below does not attempt to close it a second time.
+            dos = null;
             LOG.debug("finish anonymization: end storage");
+
+            // Rename the file to "<SOPInstanceUID>.dcm" in its original parent
+            // directory, now that the anonymized content has been fully written
+            // and flushed to disk. The map is keyed by the file's FINAL path, so
+            // callers can still correlate it back to the Instance it came from.
+            if (finalSopInstanceUID != null) {
+                // Keyed by the file's ORIGINAL absolute path (not the renamed one):
+                // callers such as updateImportJobWithPseudonymizedUIDs() resolve this
+                // same path from the untouched, pre-rename referencedFileID, so the
+                // lookup key has to match that, regardless of what the file is now
+                // called on disk after the rename below.
+                sopInstanceUIDsByFilePath.put(dicomFile.getAbsolutePath(), finalSopInstanceUID);
+
+                File renamedFile = new File(dicomFile.getParentFile(), finalSopInstanceUID + ".dcm");
+                if (renamedFile.exists()) {
+                    LOG.warn(
+                            "performAnonymization : skipping rename, target file {} already exists (SOPInstanceUID collision for {})",
+                            renamedFile.getAbsolutePath(), dicomFile.getAbsolutePath());
+                } else if (!dicomFile.renameTo(renamedFile)) {
+                    LOG.error("performAnonymization : could not rename file {} to {}",
+                            dicomFile.getAbsolutePath(), renamedFile.getAbsolutePath());
+                }
+            }
         } catch (final IOException exc) {
             LOG.error("performAnonymization : error while anonymizing file " + dicomFile.toString() + " : ", exc);
         } finally {

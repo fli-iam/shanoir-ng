@@ -129,6 +129,10 @@ public class ImportFinishRunnable implements Runnable {
                 String newSopInstanceUID = anonymizationResult.getSopInstanceUIDsByFilePath().get(filePath);
                 if (newSopInstanceUID != null) {
                     instance.setSopInstanceUID(newSopInstanceUID);
+                    // The underlying file was renamed on disk to "<SOPInstanceUID>.dcm"
+                    // (see AnonymizationServiceImpl#performAnonymization).
+                    instance.setReferencedFileID(
+                            renamedReferencedFileID(instance.getReferencedFileID(), newSopInstanceUID));
                     updatedInstances++;
                 } else {
                     missingInstances++;
@@ -141,6 +145,21 @@ public class ImportFinishRunnable implements Runnable {
         logger.info("{}: importJob UIDs updated to their pseudonymized values for {} instance(s){}.",
                 uploadFolder.getName(), updatedInstances,
                 missingInstances > 0 ? (", " + missingInstances + " instance(s) could not be matched") : "");
+    }
+
+    /**
+     * Builds the new referencedFileID matching the renamed file
+     * "<newSopInstanceUID>.dcm" on disk, preserving whatever directory prefix
+     * (if any) the original referencedFileID had.
+     */
+    private String[] renamedReferencedFileID(String[] originalReferencedFileID, String newSopInstanceUID) {
+        String newFileName = newSopInstanceUID + ".dcm";
+        if (originalReferencedFileID == null || originalReferencedFileID.length == 0) {
+            return new String[] { newFileName };
+        }
+        String[] newReferencedFileID = originalReferencedFileID.clone();
+        newReferencedFileID[newReferencedFileID.length - 1] = newFileName;
+        return newReferencedFileID;
     }
 
 }
