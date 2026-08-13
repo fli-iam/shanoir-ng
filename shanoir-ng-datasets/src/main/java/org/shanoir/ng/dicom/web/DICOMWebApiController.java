@@ -312,6 +312,49 @@ public class DICOMWebApiController implements DICOMWebApi {
         }
     }
 
+    @Override
+    public ResponseEntity<String> checkSeriesInstanceCounts(String examinationUID,
+            Map<String, Integer> localInstanceCountsBySeriesInstanceUID) throws RestServiceException, JsonProcessingException {
+        long startTime = System.currentTimeMillis();
+        String studyInstanceUID = studyInstanceUIDAndSubjectNameHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
+        if (studyInstanceUID == null) {
+            LOG.warn("DICOMWeb: checkSeriesInstanceCounts: no study found for examinationUID {}.", examinationUID);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Map<String, Integer> serverInstanceCountsBySeriesInstanceUID = dicomWebService.findSeriesInstanceCounts(studyInstanceUID);
+        if (serverInstanceCountsBySeriesInstanceUID == null) {
+            LOG.error("DICOMWeb: checkSeriesInstanceCounts: could not retrieve series instance counts "
+                    + "for examinationUID {}.", examinationUID);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        boolean consistent = true;
+        ArrayNode mismatches = mapper.createArrayNode();
+        for (Map.Entry<String, Integer> localEntry : localInstanceCountsBySeriesInstanceUID.entrySet()) {
+            String seriesInstanceUID = localEntry.getKey();
+            int localCount = localEntry.getValue();
+            Integer serverCount = serverInstanceCountsBySeriesInstanceUID.get(seriesInstanceUID);
+            if (serverCount == null || !serverCount.equals(localCount)) {
+                consistent = false;
+                ObjectNode mismatch = mapper.createObjectNode();
+                mismatch.put(SERIES_INSTANCE_UID_TAG, seriesInstanceUID);
+                mismatch.put("localCount", localCount);
+                mismatch.put("serverCount", serverCount != null ? serverCount : -1);
+                mismatches.add(mismatch);
+            }
+        }
+
+        ObjectNode result = mapper.createObjectNode();
+        result.put("consistent", consistent);
+        result.set("mismatches", mismatches);
+
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        LOG.info("DICOMWeb: checkSeriesInstanceCounts for examinationUID {}: {} serie(s) checked, consistent={}, "
+                + "duration={} ms.", examinationUID, localInstanceCountsBySeriesInstanceUID.size(), consistent, elapsedTime);
+
+        return new ResponseEntity<String>(mapper.writeValueAsString(result), HttpStatus.OK);
+    }
+
     /**
      * The PACS does not inline large binary attributes, e.g. overlay data
      * (60xx3000), in the serie metadata, but references them with an absolute

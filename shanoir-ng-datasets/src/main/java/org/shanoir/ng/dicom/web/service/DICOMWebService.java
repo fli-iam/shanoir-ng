@@ -19,6 +19,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -89,6 +91,12 @@ public class DICOMWebService {
     private static final String CONTENT_TYPE = "&contentType";
 
     private static final String REJECT_SUFFIX = "/reject/113001%5EDCM";
+
+    private static final String SERIES_INSTANCE_UID_TAG = "0020000E";
+
+    private static final String NUMBER_OF_SERIES_RELATED_INSTANCES_TAG = "00201209";
+
+    private static final String VALUE = "Value";
 
     private CloseableHttpClient httpClient;
 
@@ -237,6 +245,59 @@ public class DICOMWebService {
             LOG.error(e.getMessage(), e);
         }
         return null;
+    }
+
+    /**
+     * Lightweight consistency check for a whole DICOM study: a single QIDO-RS
+     * series-level search, with includefield=NumberOfSeriesRelatedInstances
+     * (0020,1209), returns EVERY series of the study together with its
+     * instance count in one HTTP round-trip -- no PixelData, no per-instance
+     * metadata fetch.
+     *
+     * @return real SeriesInstanceUID -> NumberOfSeriesRelatedInstances, or
+     *         null on error / empty response.
+     */
+    public Map<String, Integer> findSeriesInstanceCounts(String studyInstanceUID) {
+        long startTime = System.currentTimeMillis();
+        try {
+            String url = this.serverURL + "/" + studyInstanceUID + "/series?includefield="
+                    + NUMBER_OF_SERIES_RELATED_INSTANCES_TAG;
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.setHeader("Accept-Charset", "UTF-8");
+            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    String json = EntityUtils.toString(entity, "UTF-8");
+                    return parseSeriesInstanceCounts(json);
+                } else {
+                    LOG.error("DICOMWeb: findSeriesInstanceCounts: empty response entity for studyInstanceUID: "
+                            + studyInstanceUID);
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        } finally {
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            LOG.info("DICOMWeb: findSeriesInstanceCounts (QIDO-RS series query, field {}) for studyInstanceUID {} "
+                    + "finished in {} ms.", NUMBER_OF_SERIES_RELATED_INSTANCES_TAG, studyInstanceUID, elapsedTime);
+        }
+        return null;
+    }
+
+    private Map<String, Integer> parseSeriesInstanceCounts(String json) throws IOException {
+        Map<String, Integer> counts = new HashMap<>();
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(json);
+        if (root.isArray()) {
+            for (JsonNode serie : root) {
+                String seriesInstanceUID = serie.path(SERIES_INSTANCE_UID_TAG).path(VALUE).path(0).asText(null);
+                JsonNode countNode = serie.path(NUMBER_OF_SERIES_RELATED_INSTANCES_TAG).path(VALUE).path(0);
+                if (seriesInstanceUID != null && !countNode.isMissingNode()) {
+                    counts.put(seriesInstanceUID, countNode.asInt());
+                }
+            }
+        }
+        return counts;
     }
 
     /**

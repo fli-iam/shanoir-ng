@@ -120,6 +120,21 @@ public interface DICOMWebApi {
             @Parameter(description = "seriesInstanceUID", required = true) @PathVariable("seriesInstanceUID") String seriesInstanceUID,
             @Parameter(description = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID) throws RestServiceException;
 
+    @Operation(summary = "", description = "Compares with numberOfSeriesRelatedInstances (0020,1209) by examination")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "comparison performed, see body for per-serie result"),
+            @ApiResponse(responseCode = "404", description = "study not found on server"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "/studies/{examinationUID}/series/instanceCount/check",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
+    ResponseEntity<String> checkSeriesInstanceCounts(
+            @Parameter(description = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
+            @RequestBody Map<String, Integer> localInstanceCountsBySeriesInstanceUID
+        ) throws RestServiceException, JsonProcessingException;
+
     @Operation(summary = "", description = "Returns all DICOM instances of a study and serie")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "found instances/datasets"),
