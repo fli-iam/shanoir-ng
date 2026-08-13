@@ -36,9 +36,8 @@ function countDistinct(rows: StudyStatisticsDTO[], idField: 'centerId' | 'subjec
 }
 
 /**
- * Ports Neurovasc-Dashboard's analytics.py::get_global_statistics (centers/subjects/exams
- * counts) to TypeScript: the number of distinct centers, subjects and examinations that
- * have at least one dataset in this study.
+ * Global statistics: the number of distinct centers, subjects and examinations
+ * that have at least one dataset in this study.
  */
 export function computeGlobalStatistics(rows: StudyStatisticsDTO[]): GlobalStatistics {
     return {
@@ -50,7 +49,30 @@ export function computeGlobalStatistics(rows: StudyStatisticsDTO[]): GlobalStati
 
 export interface CenterBarData {
     centers: string[];
-    examinations: number[];
+    counts: number[];
+}
+
+function computeDistinctCountByCenter(rows: StudyStatisticsDTO[], idField: 'examinationId' | 'subjectId'): CenterBarData {
+    const idsByCenter = new Map<number, { name: string, ids: Set<number> }>();
+    for (const row of rows) {
+        if (row.centerId == null) continue;
+        let entry = idsByCenter.get(row.centerId);
+        if (!entry) {
+            entry = { name: row.centerName, ids: new Set<number>() };
+            idsByCenter.set(row.centerId, entry);
+        }
+        const id = row[idField];
+        if (id != null) entry.ids.add(id);
+    }
+
+    const sorted = Array.from(idsByCenter.values())
+        .map(entry => ({ name: entry.name, count: entry.ids.size }))
+        .sort((a, b) => b.count - a.count);
+
+    return {
+        centers: sorted.map(entry => entry.name),
+        counts: sorted.map(entry => entry.count),
+    };
 }
 
 /**
@@ -58,25 +80,120 @@ export interface CenterBarData {
  * number of distinct examinations per center, sorted with the largest contributor first.
  */
 export function computeExamsByCenter(rows: StudyStatisticsDTO[]): CenterBarData {
-    const examIdsByCenter = new Map<number, { name: string, examIds: Set<number> }>();
+    return computeDistinctCountByCenter(rows, 'examinationId');
+}
+
+/**
+ * Ports Neurovasc-Dashboard's analytics.py::get_subjects_by_centers to TypeScript: the
+ * number of distinct subjects per center, sorted with the largest contributor first.
+ */
+export function computeSubjectsByCenter(rows: StudyStatisticsDTO[]): CenterBarData {
+    return computeDistinctCountByCenter(rows, 'subjectId');
+}
+
+// Fixed modality -> color mapping, in the declaration order of the "getStudyStatistics"
+// stored procedure's dataset_modality_type CASE (docker-compose/database-migrations/
+// db-init-procedures/2_add_studyStatistics_procedure.sql). Uses the app's own palette
+// (same colors as the rest of the Statistics tab), one hue per modality, in fixed order
+// (never cycled); any rarer modality not in this map (Egg, Generic, Ieeg, Micr, Beh,
+// Nirs, Xa, ...) falls back to a shared neutral "Other" grey, so a color is never
+// reassigned depending on which modalities happen to be present.
+const MODALITY_COLORS: Record<string, string> = {
+    Mr: '#5F0F4E',
+    Meg: '#67AECA',
+    Ct: '#675682',
+    Spect: '#E52A6F',
+    Pet: '#FFAA00',
+};
+const OTHER_MODALITY_COLOR = '#8a8a8a';
+
+function modalityColor(modality: string): string {
+    return MODALITY_COLORS[modality] ?? OTHER_MODALITY_COLOR;
+}
+
+export interface ModalityBarData {
+    modalities: string[];
+    counts: number[];
+    colors: string[];
+}
+
+/**
+ * Ports Neurovasc-Dashboard's analytics.py::get_modality_pie to TypeScript - as a bar
+ * chart rather than a pie/donut, which is hard to read past a few slices: the number of
+ * datasets per DICOM modality, sorted with the most common modality first.
+ */
+export function computeDatasetsByModality(rows: StudyStatisticsDTO[]): ModalityBarData {
+    const countsByModality = new Map<string, number>();
     for (const row of rows) {
-        if (row.centerId == null) continue;
-        let entry = examIdsByCenter.get(row.centerId);
-        if (!entry) {
-            entry = { name: row.centerName, examIds: new Set<number>() };
-            examIdsByCenter.set(row.centerId, entry);
-        }
-        if (row.examinationId != null) entry.examIds.add(row.examinationId);
+        const modality = row.modality ?? 'Unknown';
+        countsByModality.set(modality, (countsByModality.get(modality) ?? 0) + 1);
     }
 
-    const sorted = Array.from(examIdsByCenter.values())
-        .map(entry => ({ name: entry.name, count: entry.examIds.size }))
+    const sorted = Array.from(countsByModality.entries())
+        .map(([modality, count]) => ({ modality, count }))
         .sort((a, b) => b.count - a.count);
 
     return {
-        centers: sorted.map(entry => entry.name),
-        examinations: sorted.map(entry => entry.count),
+        modalities: sorted.map(entry => entry.modality),
+        counts: sorted.map(entry => entry.count),
+        colors: sorted.map(entry => modalityColor(entry.modality)),
     };
+}
+
+export interface ModalitySeries {
+    modality: string;
+    color: string;
+    counts: number[];
+}
+
+export interface ModalityByCenterData {
+    centers: string[];
+    series: ModalitySeries[];
+}
+
+/**
+ * Ports Neurovasc-Dashboard's analytics.py::get_modality_hist to TypeScript: the number
+ * of datasets per DICOM modality, broken down by center (for a stacked bar chart).
+ */
+export function computeModalityByCenter(rows: StudyStatisticsDTO[]): ModalityByCenterData {
+    const centerTotals = new Map<number, { name: string, total: number }>();
+    const cellCounts = new Map<string, number>();
+    const modalities = new Set<string>();
+
+    for (const row of rows) {
+        if (row.centerId == null) continue;
+        const modality = row.modality ?? 'Unknown';
+        modalities.add(modality);
+
+        const key = row.centerId + '|' + modality;
+        cellCounts.set(key, (cellCounts.get(key) ?? 0) + 1);
+
+        let centerEntry = centerTotals.get(row.centerId);
+        if (!centerEntry) {
+            centerEntry = { name: row.centerName, total: 0 };
+            centerTotals.set(row.centerId, centerEntry);
+        }
+        centerEntry.total++;
+    }
+
+    const sortedCenters = Array.from(centerTotals.entries()).sort((a, b) => b[1].total - a[1].total);
+    const centers = sortedCenters.map(([, entry]) => entry.name);
+    const centerIds = sortedCenters.map(([id]) => id);
+
+    // fixed order: known modalities first (per MODALITY_COLORS declaration order), then any other
+    const knownOrder = Object.keys(MODALITY_COLORS);
+    const orderedModalities = [
+        ...knownOrder.filter(m => modalities.has(m)),
+        ...Array.from(modalities).filter(m => !knownOrder.includes(m)).sort(),
+    ];
+
+    const series: ModalitySeries[] = orderedModalities.map(modality => ({
+        modality,
+        color: modalityColor(modality),
+        counts: centerIds.map(centerId => cellCounts.get(centerId + '|' + modality) ?? 0),
+    }));
+
+    return { centers, series };
 }
 
 /**

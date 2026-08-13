@@ -19,7 +19,8 @@ import { BaseChartDirective } from 'ng2-charts';
 export interface BarChartDataset {
     label: string;
     data: number[];
-    color?: string;
+    // A single color for the whole series, or one color per bar
+    color?: string | string[];
 }
 
 @Component({
@@ -34,8 +35,10 @@ export class BarChartComponent implements OnChanges {
     @Input() datasets: BarChartDataset[] = [];
     @Input() loading: boolean = false;
     @Input() emptyMessage: string = 'No data available';
-    /** Draws the bars horizontally (categories on the y axis) - the default, most legible layout for many/long category labels. */
+    // Draws the bars horizontally (categories on the y axis) for many/long category labels.
     @Input() horizontal: boolean = true;
+    // Stacks multiple datasets into a single bar per category instead of grouping them side by side.
+    @Input() stacked: boolean = false;
 
     chartData: ChartConfiguration<'bar'>['data'];
     chartOptions: ChartOptions<'bar'>;
@@ -47,14 +50,21 @@ export class BarChartComponent implements OnChanges {
                 label: ds.label,
                 data: ds.data,
                 backgroundColor: ds.color,
+                // caps bar thickness so a chart with very few categories
+                // doesn't render a couple of oversized bars filling the whole chart
+                maxBarThickness: 40,
             })),
         };
+        const valueAxis = this.horizontal ? 'x' : 'y';
+        const categoryAxis = this.horizontal ? 'y' : 'x';
         this.chartOptions = {
             indexAxis: this.horizontal ? 'y' : 'x',
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                x: { beginAtZero: true },
+                // counts are always whole numbers - not decimal values
+                [valueAxis]: { beginAtZero: true, ticks: { precision: 0 }, stacked: this.stacked },
+                [categoryAxis]: { stacked: this.stacked },
             },
             plugins: {
                 legend: { display: this.datasets.length > 1 },

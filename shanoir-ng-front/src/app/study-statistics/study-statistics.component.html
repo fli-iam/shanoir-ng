@@ -49,9 +49,43 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div class="statistics-chart">
         <shanoir-bar-chart
             [loading]="loading"
-            [labels]="centerLabels"
-            [datasets]="centerDatasets"
+            [labels]="examsByCenterLabels"
+            [datasets]="examsByCenterDatasets"
             emptyMessage="No examinations to display yet">
         </shanoir-bar-chart>
     </div>
+
+    <h3 class="chart-title">Number of subjects by center</h3>
+    <div class="statistics-chart">
+        <shanoir-bar-chart
+            [loading]="loading"
+            [labels]="subjectsByCenterLabels"
+            [datasets]="subjectsByCenterDatasets"
+            emptyMessage="No subjects to display yet">
+        </shanoir-bar-chart>
+    </div>
+
+    <h3 class="chart-title">Distribution of DICOM modalities</h3>
+    <div class="statistics-chart">
+        <shanoir-donut-chart
+            [loading]="loading"
+            [labels]="modalityLabels"
+            [data]="modalityData"
+            [colors]="modalityColors"
+            emptyMessage="No datasets to display yet">
+        </shanoir-donut-chart>
+    </div>
+
+    @if (!loading && globalStats && globalStats.centers > 1) {
+        <h3 class="chart-title">Modality distribution by center</h3>
+        <div class="statistics-chart">
+            <shanoir-bar-chart
+                [loading]="loading"
+                [labels]="modalityByCenterLabels"
+                [datasets]="modalityByCenterDatasets"
+                [stacked]="true"
+                emptyMessage="No datasets to display yet">
+            </shanoir-bar-chart>
+        </div>
+    }
 }

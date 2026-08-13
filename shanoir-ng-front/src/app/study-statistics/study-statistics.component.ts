@@ -16,16 +16,25 @@ import { DecimalPipe } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 import { BarChartComponent, BarChartDataset } from '../shared/components/bar-chart/bar-chart.component';
+import { DonutChartComponent } from '../shared/components/donut-chart/donut-chart.component';
 import { LineChartComponent, LineChartDataset } from '../shared/components/line-chart/line-chart.component';
 import { StudyService } from '../studies/shared/study.service';
 
-import { computeExamsByCenter, computeGlobalStatistics, computeInclusionsEvolution, GlobalStatistics } from './study-statistics.utils';
+import {
+    computeDatasetsByModality,
+    computeExamsByCenter,
+    computeGlobalStatistics,
+    computeInclusionsEvolution,
+    computeModalityByCenter,
+    computeSubjectsByCenter,
+    GlobalStatistics
+} from './study-statistics.utils';
 
 @Component({
     selector: 'study-statistics',
     templateUrl: 'study-statistics.component.html',
     styleUrls: ['study-statistics.component.css'],
-    imports: [LineChartComponent, BarChartComponent, DecimalPipe]
+    imports: [LineChartComponent, BarChartComponent, DonutChartComponent, DecimalPipe]
 })
 export class StudyStatisticsComponent implements OnChanges {
 
@@ -35,8 +44,15 @@ export class StudyStatisticsComponent implements OnChanges {
     error: boolean = false;
     labels: string[] = [];
     datasets: LineChartDataset[] = [];
-    centerLabels: string[] = [];
-    centerDatasets: BarChartDataset[] = [];
+    examsByCenterLabels: string[] = [];
+    examsByCenterDatasets: BarChartDataset[] = [];
+    subjectsByCenterLabels: string[] = [];
+    subjectsByCenterDatasets: BarChartDataset[] = [];
+    modalityLabels: string[] = [];
+    modalityData: number[] = [];
+    modalityColors: string[] = [];
+    modalityByCenterLabels: string[] = [];
+    modalityByCenterDatasets: BarChartDataset[] = [];
     globalStats?: GlobalStatistics;
 
     constructor(private studyService: StudyService) {
@@ -64,10 +80,29 @@ export class StudyStatisticsComponent implements OnChanges {
             ];
 
             const examsByCenter = computeExamsByCenter(rows);
-            this.centerLabels = examsByCenter.centers;
-            this.centerDatasets = [
-                { label: 'Examinations', data: examsByCenter.examinations, color: '#5f0f4e' },
+            this.examsByCenterLabels = examsByCenter.centers;
+            this.examsByCenterDatasets = [
+                { label: 'Examinations', data: examsByCenter.counts, color: '#5f0f4e' },
             ];
+
+            const subjectsByCenter = computeSubjectsByCenter(rows);
+            this.subjectsByCenterLabels = subjectsByCenter.centers;
+            this.subjectsByCenterDatasets = [
+                { label: 'Subjects', data: subjectsByCenter.counts, color: '#67aeca' },
+            ];
+
+            const datasetsByModality = computeDatasetsByModality(rows);
+            this.modalityLabels = datasetsByModality.modalities;
+            this.modalityData = datasetsByModality.counts;
+            this.modalityColors = datasetsByModality.colors;
+
+            const modalityByCenter = computeModalityByCenter(rows);
+            this.modalityByCenterLabels = modalityByCenter.centers;
+            this.modalityByCenterDatasets = modalityByCenter.series.map(series => ({
+                label: series.modality,
+                data: series.counts,
+                color: series.color,
+            }));
         } catch {
             this.error = true;
         } finally {
