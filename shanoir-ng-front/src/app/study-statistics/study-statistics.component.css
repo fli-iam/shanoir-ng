@@ -1,5 +1,6 @@
-.statistics-chart { width: 100%; height: 400px; }
+.statistics-chart { width: 100%; height: 400px; margin-bottom: 32px; }
 .statistics-error { text-align: center; padding-top: 40px; color: var(--color-error); }
+.chart-title { padding: 0 10px 0 0; color: var(--color-c); font-size: 14px; font-weight: normal; margin: 10px 0; width: 100%; }
 
 .stat-tiles { display: flex; gap: 16px; margin-bottom: 24px; }
 .stat-tile {

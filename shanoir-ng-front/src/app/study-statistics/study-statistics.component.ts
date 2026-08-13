@@ -15,16 +15,17 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 
+import { BarChartComponent, BarChartDataset } from '../shared/components/bar-chart/bar-chart.component';
 import { LineChartComponent, LineChartDataset } from '../shared/components/line-chart/line-chart.component';
 import { StudyService } from '../studies/shared/study.service';
 
-import { computeGlobalStatistics, computeInclusionsEvolution, GlobalStatistics } from './study-statistics.utils';
+import { computeExamsByCenter, computeGlobalStatistics, computeInclusionsEvolution, GlobalStatistics } from './study-statistics.utils';
 
 @Component({
     selector: 'study-statistics',
     templateUrl: 'study-statistics.component.html',
     styleUrls: ['study-statistics.component.css'],
-    imports: [LineChartComponent, DecimalPipe]
+    imports: [LineChartComponent, BarChartComponent, DecimalPipe]
 })
 export class StudyStatisticsComponent implements OnChanges {
 
@@ -34,6 +35,8 @@ export class StudyStatisticsComponent implements OnChanges {
     error: boolean = false;
     labels: string[] = [];
     datasets: LineChartDataset[] = [];
+    centerLabels: string[] = [];
+    centerDatasets: BarChartDataset[] = [];
     globalStats?: GlobalStatistics;
 
     constructor(private studyService: StudyService) {
@@ -51,12 +54,19 @@ export class StudyStatisticsComponent implements OnChanges {
         try {
             const rows = await this.studyService.getStudyStatistics(this.studyId);
             this.globalStats = computeGlobalStatistics(rows);
+
             const evolution = computeInclusionsEvolution(rows);
             this.labels = evolution.labels;
             this.datasets = [
                 // colors match the palette from the home page
                 { label: 'Examinations', data: evolution.examinations, color: '#5f0f4e' },
                 { label: 'Subjects', data: evolution.subjects, color: '#67aeca' },
+            ];
+
+            const examsByCenter = computeExamsByCenter(rows);
+            this.centerLabels = examsByCenter.centers;
+            this.centerDatasets = [
+                { label: 'Examinations', data: examsByCenter.examinations, color: '#5f0f4e' },
             ];
         } catch {
             this.error = true;

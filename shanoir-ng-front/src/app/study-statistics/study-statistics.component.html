@@ -33,6 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </div>
         </div>
     }
+    <h3 class="chart-title">Inclusions over time</h3>
     <div class="statistics-chart">
         <shanoir-line-chart
             [loading]="loading"
@@ -42,5 +43,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             emptyMessage="No dated examinations or subjects to display yet"
             yAxisLabel="Cumulative count">
         </shanoir-line-chart>
+    </div>
+
+    <h3 class="chart-title">Number of examinations by center</h3>
+    <div class="statistics-chart">
+        <shanoir-bar-chart
+            [loading]="loading"
+            [labels]="centerLabels"
+            [datasets]="centerDatasets"
+            emptyMessage="No examinations to display yet">
+        </shanoir-bar-chart>
     </div>
 }

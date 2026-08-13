@@ -48,6 +48,37 @@ export function computeGlobalStatistics(rows: StudyStatisticsDTO[]): GlobalStati
     };
 }
 
+export interface CenterBarData {
+    centers: string[];
+    examinations: number[];
+}
+
+/**
+ * Ports Neurovasc-Dashboard's analytics.py::get_exams_by_centers to TypeScript: the
+ * number of distinct examinations per center, sorted with the largest contributor first.
+ */
+export function computeExamsByCenter(rows: StudyStatisticsDTO[]): CenterBarData {
+    const examIdsByCenter = new Map<number, { name: string, examIds: Set<number> }>();
+    for (const row of rows) {
+        if (row.centerId == null) continue;
+        let entry = examIdsByCenter.get(row.centerId);
+        if (!entry) {
+            entry = { name: row.centerName, examIds: new Set<number>() };
+            examIdsByCenter.set(row.centerId, entry);
+        }
+        if (row.examinationId != null) entry.examIds.add(row.examinationId);
+    }
+
+    const sorted = Array.from(examIdsByCenter.values())
+        .map(entry => ({ name: entry.name, count: entry.examIds.size }))
+        .sort((a, b) => b.count - a.count);
+
+    return {
+        centers: sorted.map(entry => entry.name),
+        examinations: sorted.map(entry => entry.count),
+    };
+}
+
 /**
  * importDate is missing for data imported before the field was introduced (january 2022),
  * in which case examinationDate is used as a fallback (same convention as the reference
