@@ -26,6 +26,7 @@
     "angular-device-information": "^4.0.0",
     "buffer": "^6.0.3",
     "chart.js": "^4.5.1",
+    "chartjs-plugin-zoom": "^2.2.0",
     "fs-extra": "^11.2.0",
     "git-describe": "4.0.4",
     "html2canvas": "^1.4.1",

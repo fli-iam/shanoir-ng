@@ -10,6 +10,7 @@ import { bootstrapApplication, BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import zoomPlugin from 'chartjs-plugin-zoom';
 
 import { AcquisitionEquipmentPipe } from './app/acquisition-equipments/shared/acquisition-equipment.pipe';
 import { AcquisitionEquipmentService } from './app/acquisition-equipments/shared/acquisition-equipment.service';
@@ -203,7 +204,7 @@ const options = {
         ExecutionTemplateFilterService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
         provideHttpClient(withInterceptorsFromDi()),
-        provideCharts(withDefaultRegisterables()),
+        provideCharts(withDefaultRegisterables(zoomPlugin)),
     ]
 }
 
