@@ -1,11 +1,15 @@
 :host { display: block; position: relative; width: 100%; height: 100%; }
 .chart-message { text-align: center; padding-top: 40px; color: var(--greyer); }
 .chart-message i { margin-right: 6px; }
-.chart-reset-zoom {
+.chart-toolbar {
     position: absolute;
     top: 0;
-    right: 0;
+    right: 10px;
     z-index: 1;
+    display: flex;
+    gap: 6px;
+}
+.chart-action-btn {
     font-size: 11px;
     padding: 3px 8px;
     color: var(--very-dark-grey);
@@ -14,5 +18,6 @@
     border-radius: 4px;
     cursor: pointer;
 }
-.chart-reset-zoom:hover { background-color: var(--light-grey); }
-.chart-reset-zoom i { margin-right: 4px; }
+.chart-action-btn:hover { background-color: var(--light-grey); }
+.chart-action-btn i { margin-right: 4px; }
+.chart-action-btn i:only-child { margin-right: 0; }

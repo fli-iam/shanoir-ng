@@ -17,6 +17,8 @@ import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import 'chartjs-plugin-zoom';
 
+import { downloadChartAsPng } from '../../utils/chart-download.util';
+
 export interface LineChartDataset {
     label: string;
     data: number[];
@@ -38,6 +40,8 @@ export class LineChartComponent implements OnChanges {
     @Input() yAxisLabel: string;
     /** Enables mouse-drag range selection (zoom) and panning along the x axis. */
     @Input() zoomEnabled: boolean = false;
+    /** File name used (without extension) when the chart is downloaded as a PNG. */
+    @Input() fileName: string = 'chart';
 
     @ViewChild(BaseChartDirective) chartDirective: BaseChartDirective;
 
@@ -81,5 +85,9 @@ export class LineChartComponent implements OnChanges {
 
     resetZoom(): void {
         this.chartDirective?.chart?.resetZoom();
+    }
+
+    downloadPng(): void {
+        downloadChartAsPng(this.chartDirective?.chart, this.fileName);
     }
 }

@@ -196,6 +196,120 @@ export function computeModalityByCenter(rows: StudyStatisticsDTO[]): ModalityByC
     return { centers, series };
 }
 
+// Quality uses good/warning/critical colors rather than the app's categorical palette.
+const QUALITY_COLORS: Record<string, string> = {
+    Valid: '#0ca30c',
+    Warning: '#fab219',
+    Error: '#d03b3b',
+};
+const MISSING_QUALITY = 'missing';
+const MISSING_QUALITY_COLOR = '#8a8a8a';
+
+function qualityColor(quality: string): string {
+    return QUALITY_COLORS[quality] ?? MISSING_QUALITY_COLOR;
+}
+
+/**
+ * Quality tags live on datasetAcquisition, not on the
+ * subject, so this groups by datasetAcquisitionId.
+ */
+function qualityByAcquisition(rows: StudyStatisticsDTO[]): Map<number, { centerId: number, centerName: string, quality: string }> {
+    const result = new Map<number, { centerId: number, centerName: string, quality: string }>();
+    for (const row of rows) {
+        if (row.datasetAcquisitionId == null) continue;
+        if (!result.has(row.datasetAcquisitionId)) {
+            result.set(row.datasetAcquisitionId, {
+                centerId: row.centerId,
+                centerName: row.centerName,
+                quality: row.quality ?? MISSING_QUALITY,
+            });
+        }
+    }
+    return result;
+}
+
+export interface QualityDistributionData {
+    qualities: string[];
+    counts: number[];
+    colors: string[];
+}
+
+/**
+ * Compute Quality tags distribution among dataset acquisitions as a donut
+ * chart: the number of dataset acquisitions (DICOM series) per quality tag.
+ */
+export function computeQualityDistribution(rows: StudyStatisticsDTO[]): QualityDistributionData {
+    const countsByQuality = new Map<string, number>();
+    for (const { quality } of qualityByAcquisition(rows).values()) {
+        countsByQuality.set(quality, (countsByQuality.get(quality) ?? 0) + 1);
+    }
+
+    const knownOrder = [...Object.keys(QUALITY_COLORS), MISSING_QUALITY];
+    const orderedQualities = [
+        ...knownOrder.filter(q => countsByQuality.has(q)),
+        ...Array.from(countsByQuality.keys()).filter(q => !knownOrder.includes(q)).sort(),
+    ];
+
+    return {
+        qualities: orderedQualities,
+        counts: orderedQualities.map(q => countsByQuality.get(q) ?? 0),
+        colors: orderedQualities.map(qualityColor),
+    };
+}
+
+export interface QualitySeries {
+    quality: string;
+    color: string;
+    counts: number[];
+}
+
+export interface QualityByCenterData {
+    centers: string[];
+    series: QualitySeries[];
+}
+
+/**
+ * Compute the number of dataset acquisitions per quality tag, broken down by center.
+ */
+export function computeQualityByCenter(rows: StudyStatisticsDTO[]): QualityByCenterData {
+    const centerTotals = new Map<number, { name: string, total: number }>();
+    const cellCounts = new Map<string, number>();
+    const qualities = new Set<string>();
+
+    for (const acquisition of qualityByAcquisition(rows).values()) {
+        if (acquisition.centerId == null) continue;
+        qualities.add(acquisition.quality);
+
+        const key = acquisition.centerId + '|' + acquisition.quality;
+        cellCounts.set(key, (cellCounts.get(key) ?? 0) + 1);
+
+        let centerEntry = centerTotals.get(acquisition.centerId);
+        if (!centerEntry) {
+            centerEntry = { name: acquisition.centerName, total: 0 };
+            centerTotals.set(acquisition.centerId, centerEntry);
+        }
+        centerEntry.total++;
+    }
+
+    const sortedCenters = Array.from(centerTotals.entries()).sort((a, b) => b[1].total - a[1].total);
+    const centers = sortedCenters.map(([, entry]) => entry.name);
+    const centerIds = sortedCenters.map(([id]) => id);
+
+    const knownOrder = [...Object.keys(QUALITY_COLORS), MISSING_QUALITY];
+    const orderedQualities = [
+        ...knownOrder.filter(q => qualities.has(q)),
+        ...Array.from(qualities).filter(q => !knownOrder.includes(q)).sort(),
+    ];
+
+    const series: QualitySeries[] = orderedQualities.map(quality => ({
+        quality,
+        color: qualityColor(quality),
+        counts: centerIds.map(centerId => cellCounts.get(centerId + '|' + quality) ?? 0),
+    }));
+
+    return { centers, series };
+}
+
 /**
  * importDate is missing for data imported before the field was introduced (january 2022),
  * in which case examinationDate is used as a fallback (same convention as the reference

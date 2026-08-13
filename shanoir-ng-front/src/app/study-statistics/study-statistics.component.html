@@ -40,6 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [labels]="labels"
             [datasets]="datasets"
             [zoomEnabled]="true"
+            fileName="inclusions-over-time"
             emptyMessage="No dated examinations or subjects to display yet"
             yAxisLabel="Cumulative count">
         </shanoir-line-chart>
@@ -51,6 +52,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [loading]="loading"
             [labels]="examsByCenterLabels"
             [datasets]="examsByCenterDatasets"
+            valueAxisLabel="Number of examinations"
+            fileName="examinations-by-center"
             emptyMessage="No examinations to display yet">
         </shanoir-bar-chart>
     </div>
@@ -61,6 +64,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [loading]="loading"
             [labels]="subjectsByCenterLabels"
             [datasets]="subjectsByCenterDatasets"
+            valueAxisLabel="Number of subjects"
+            fileName="subjects-by-center"
             emptyMessage="No subjects to display yet">
         </shanoir-bar-chart>
     </div>
@@ -72,6 +77,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [labels]="modalityLabels"
             [data]="modalityData"
             [colors]="modalityColors"
+            fileName="dicom-modalities-distribution"
             emptyMessage="No datasets to display yet">
         </shanoir-donut-chart>
     </div>
@@ -84,7 +90,36 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [labels]="modalityByCenterLabels"
                 [datasets]="modalityByCenterDatasets"
                 [stacked]="true"
+                valueAxisLabel="Number of datasets"
+                fileName="modality-distribution-by-center"
                 emptyMessage="No datasets to display yet">
+            </shanoir-bar-chart>
+        </div>
+    }
+
+    <h3 class="chart-title">Distribution of data quality</h3>
+    <div class="statistics-chart">
+        <shanoir-donut-chart
+            [loading]="loading"
+            [labels]="qualityLabels"
+            [data]="qualityData"
+            [colors]="qualityColors"
+            fileName="data-quality-distribution"
+            emptyMessage="No quality-tagged dataset acquisitions to display yet">
+        </shanoir-donut-chart>
+    </div>
+
+    @if (!loading && globalStats && globalStats.centers > 1) {
+        <h3 class="chart-title">Quality of imported data by center</h3>
+        <div class="statistics-chart">
+            <shanoir-bar-chart
+                [loading]="loading"
+                [labels]="qualityByCenterLabels"
+                [datasets]="qualityByCenterDatasets"
+                [stacked]="true"
+                valueAxisLabel="Number of DICOM series/dataset acquisition"
+                fileName="quality-by-center"
+                emptyMessage="No quality-tagged dataset acquisitions to display yet">
             </shanoir-bar-chart>
         </div>
     }

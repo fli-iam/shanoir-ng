@@ -26,6 +26,8 @@ import {
     computeGlobalStatistics,
     computeInclusionsEvolution,
     computeModalityByCenter,
+    computeQualityByCenter,
+    computeQualityDistribution,
     computeSubjectsByCenter,
     GlobalStatistics
 } from './study-statistics.utils';
@@ -53,6 +55,11 @@ export class StudyStatisticsComponent implements OnChanges {
     modalityColors: string[] = [];
     modalityByCenterLabels: string[] = [];
     modalityByCenterDatasets: BarChartDataset[] = [];
+    qualityLabels: string[] = [];
+    qualityData: number[] = [];
+    qualityColors: string[] = [];
+    qualityByCenterLabels: string[] = [];
+    qualityByCenterDatasets: BarChartDataset[] = [];
     globalStats?: GlobalStatistics;
 
     constructor(private studyService: StudyService) {
@@ -100,6 +107,19 @@ export class StudyStatisticsComponent implements OnChanges {
             this.modalityByCenterLabels = modalityByCenter.centers;
             this.modalityByCenterDatasets = modalityByCenter.series.map(series => ({
                 label: series.modality,
+                data: series.counts,
+                color: series.color,
+            }));
+
+            const qualityDistribution = computeQualityDistribution(rows);
+            this.qualityLabels = qualityDistribution.qualities;
+            this.qualityData = qualityDistribution.counts;
+            this.qualityColors = qualityDistribution.colors;
+
+            const qualityByCenter = computeQualityByCenter(rows);
+            this.qualityByCenterLabels = qualityByCenter.centers;
+            this.qualityByCenterDatasets = qualityByCenter.series.map(series => ({
+                label: series.quality,
                 data: series.counts,
                 color: series.color,
             }));

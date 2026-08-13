@@ -12,9 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, ViewChild } from '@angular/core';
 import { ChartConfiguration, ChartOptions, TooltipItem } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+
+import { downloadChartAsPng } from '../../utils/chart-download.util';
 
 @Component({
     selector: 'shanoir-donut-chart',
@@ -29,6 +31,10 @@ export class DonutChartComponent implements OnChanges {
     @Input() colors: string[] = [];
     @Input() loading: boolean = false;
     @Input() emptyMessage: string = 'No data available';
+    // File name used (without extension) when the chart is downloaded as a PNG.
+    @Input() fileName: string = 'chart';
+
+    @ViewChild(BaseChartDirective) chartDirective!: BaseChartDirective;
 
     chartData: ChartConfiguration<'doughnut'>['data'];
     chartOptions: ChartOptions<'doughnut'>;
@@ -60,5 +66,9 @@ export class DonutChartComponent implements OnChanges {
                 },
             },
         };
+    }
+
+    downloadPng(): void {
+        downloadChartAsPng(this.chartDirective?.chart, this.fileName);
     }
 }

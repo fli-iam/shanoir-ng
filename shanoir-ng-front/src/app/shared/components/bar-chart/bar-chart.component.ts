@@ -12,9 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, ViewChild } from '@angular/core';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+
+import { downloadChartAsPng } from '../../utils/chart-download.util';
 
 export interface BarChartDataset {
     label: string;
@@ -39,6 +41,12 @@ export class BarChartComponent implements OnChanges {
     @Input() horizontal: boolean = true;
     // Stacks multiple datasets into a single bar per category instead of grouping them side by side.
     @Input() stacked: boolean = false;
+    // Label for the numeric (value) axis - the count axis.
+    @Input() valueAxisLabel?: string;
+    // File name used (without extension) when the chart is downloaded as a PNG.
+    @Input() fileName: string = 'chart';
+
+    @ViewChild(BaseChartDirective) chartDirective!: BaseChartDirective;
 
     chartData: ChartConfiguration<'bar'>['data'];
     chartOptions: ChartOptions<'bar'>;
@@ -63,12 +71,21 @@ export class BarChartComponent implements OnChanges {
             maintainAspectRatio: false,
             scales: {
                 // counts are always whole numbers - not decimal values
-                [valueAxis]: { beginAtZero: true, ticks: { precision: 0 }, stacked: this.stacked },
+                [valueAxis]: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
+                    stacked: this.stacked,
+                    title: { display: !!this.valueAxisLabel, text: this.valueAxisLabel },
+                },
                 [categoryAxis]: { stacked: this.stacked },
             },
             plugins: {
                 legend: { display: this.datasets.length > 1 },
             },
         };
+    }
+
+    downloadPng(): void {
+        downloadChartAsPng(this.chartDirective?.chart, this.fileName);
     }
 }
