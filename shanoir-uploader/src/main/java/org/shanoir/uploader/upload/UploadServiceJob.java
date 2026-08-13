@@ -378,10 +378,10 @@ public class UploadServiceJob {
         try {
             DicomInstanceConsistencyChecker checker = new DicomInstanceConsistencyChecker(shanoirUploaderServiceClient);
             String examinationUID = StudyInstanceUIDAndSubjectNameHandler.PREFIX + importJob.getExaminationId();
-            int numberOfInstancesChecked = checker.checkImportJobMetadata(importJob, examinationUID);
+            boolean checked = checker.checkImportJobMetadataOnSeries(importJob, examinationUID);
             long elapsedTime = System.currentTimeMillis() - startTime;
-            LOG.info("[{}] Checked {} instance(s) in {} ms.", id, numberOfInstancesChecked, elapsedTime);
-            return true;
+            LOG.info("[{}] Checked {} serie(s) in {} ms.", id, checked, elapsedTime);
+            return checked;
         } catch (Exception e) {
             long elapsedTime = System.currentTimeMillis() - startTime;
             LOG.error("[{}] Metadata check failed after {} ms: {}", id, elapsedTime, e.getMessage(), e);

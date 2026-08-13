@@ -1635,6 +1635,21 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
+    public boolean checkSeriesInstanceCounts(String examinationUID, Map<String, Integer> localCountsBySeriesInstanceUID)
+            throws Exception {
+        String json = Util.objectWriter.writeValueAsString(localCountsBySeriesInstanceUID);
+        try (CloseableHttpResponse response = httpService.post(
+                this.serviceURLDatasetsDicomWebStudies + "/" + examinationUID + "/series/instanceCount/check", json, false)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                String body = EntityUtils.toString(response.getEntity());
+                return new org.json.JSONObject(body).getBoolean("consistent");
+            }
+            LOG.error("Error in checkSeriesInstanceCounts: examinationUID={} (status code: {})", examinationUID, code);
+            throw new Exception("Error in checkSeriesInstanceCounts");
+        }
+    }
+
     public Long getUserId() {
         return userId;
     }

@@ -18,8 +18,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -173,6 +175,19 @@ public class DicomInstanceConsistencyChecker {
         }
     }
 
+    public boolean checkImportJobMetadataOnSeries(ImportJobBase importJob, String examinationUID) throws Exception {
+        Map<String, Integer> localCountsBySeriesInstanceUID = new HashMap<String, Integer>();
+        for (Serie serie : importJob.getSeries()) {
+            List<Instance> instances = serie.getInstances();
+            if (instances == null) {
+                continue;
+            }
+            localCountsBySeriesInstanceUID.put(serie.getSeriesInstanceUID(), instances.size());
+        }
+        return client.checkSeriesInstanceCounts(examinationUID, localCountsBySeriesInstanceUID);
+    }
+
+    
     /**
      * Lightweight, metadata-only counterpart to
      * {@link #checkImportJob(List, File, String, boolean, boolean)}: pings each
@@ -185,7 +200,7 @@ public class DicomInstanceConsistencyChecker {
      * Checks run concurrently (bounded pool) since this sits on the upload
      * state machine's critical path and must stay fast.
      */
-    public int checkImportJobMetadata(ImportJobBase importJob, String examinationUID) throws Exception {
+    public int checkImportJobMetadataOnInstances(ImportJobBase importJob, String examinationUID) throws Exception {
         List<Callable<Boolean>> checks = new ArrayList<>();
         List<String> descriptions = new ArrayList<>(); // parallel-indexed, for error messages
         for (Serie serie : importJob.getSeries()) {
