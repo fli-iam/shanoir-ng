@@ -16,6 +16,7 @@ import { DecimalPipe } from '@angular/common';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+import * as AppUtils from '../utils/app.utils';
 import { LocalDateFormatPipe } from '../shared/localLanguage/localDateFormat.pipe';
 import { BarChartComponent, BarChartDataset } from '../shared/components/bar-chart/bar-chart.component';
 import { DateRange, DateRangeSliderComponent } from '../shared/components/date-range-slider/date-range-slider.component';
@@ -25,6 +26,7 @@ import { StudyStatisticsDTO } from '../studies/shared/study.dto';
 import { StudyService } from '../studies/shared/study.service';
 
 import {
+    buildStatisticsCsv,
     centerHighlightColors,
     computeCenterNames,
     computeDatasetsByModality,
@@ -62,6 +64,7 @@ export class StudyStatisticsComponent implements OnChanges {
     availableCenters: string[] = [];
     selectedCenter: string | null = null;
     private dateFilteredRows: StudyStatisticsDTO[] = [];
+    private filteredRows: StudyStatisticsDTO[] = [];
     labels: string[] = [];
     datasets: LineChartDataset[] = [];
     examsByCenterLabels: string[] = [];
@@ -131,6 +134,7 @@ export class StudyStatisticsComponent implements OnChanges {
         // Neurovasc-Dashboard's center filter - the "by center" ones instead keep every
         // center's bar and grey out the ones that aren't selected (see below).
         const centerRows = this.selectedCenter ? rows.filter(row => row.centerName === this.selectedCenter) : rows;
+        this.filteredRows = centerRows;
 
         this.globalStats = computeGlobalStatistics(centerRows);
 
@@ -185,5 +189,11 @@ export class StudyStatisticsComponent implements OnChanges {
 
     get displayedLatestImports(): LatestImportRow[] {
         return this.latestImports.slice(0, this.latestImportsPageSize);
+    }
+
+    downloadCsv(): void {
+        const csv = buildStatisticsCsv(this.filteredRows);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        AppUtils.browserDownloadFile(blob, 'shanoir_statistics.csv');
     }
 }

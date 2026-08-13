@@ -471,3 +471,29 @@ export function computeLatestImports(rows: StudyStatisticsDTO[]): LatestImportRo
             importDate: row.importDate ? new Date(row.importDate) : null,
         }));
 }
+
+// One column per StudyStatisticsDTO field, in the order the field is declared in the DTO.
+const CSV_COLUMNS: (keyof StudyStatisticsDTO)[] = [
+    'studyId', 'centerId', 'centerName', 'centerPrefix', 'subjectId', 'commonName',
+    'examinationId', 'examinationComment', 'examinationDate', 'datasetAcquisitionId',
+    'importDate', 'datasetId', 'datasetName', 'modality', 'quality',
+];
+
+function csvEscape(value: unknown): string {
+    if (value == null) return '';
+    const str = String(value);
+    return /[",\n]/.test(str) ? '"' + str.replace(/"/g, '""') + '"' : str;
+}
+
+/**
+ * "Export as CSV" button: a raw dump of the (already
+ * center/date-range-filtered) statistics rows, one line per dataset, same columns as
+ * getStudyStatistics().
+ */
+export function buildStatisticsCsv(rows: StudyStatisticsDTO[]): string {
+    const lines = [
+        CSV_COLUMNS.join(','),
+        ...rows.map(row => CSV_COLUMNS.map(col => csvEscape(row[col])).join(',')),
+    ];
+    return lines.join('\n');
+}

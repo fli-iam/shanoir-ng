@@ -17,6 +17,7 @@
 .parameter-control { display: flex; flex-direction: column; }
 .parameters-label { display: block; font-size: 12px; color: var(--greyer); margin-bottom: 4px; }
 .parameter-control select { width: fit-content; min-width: 200px; }
+.parameter-actions { align-items: flex-start; }
 
 .stat-tiles { display: flex; gap: 16px; margin-bottom: 24px; }
 .stat-tile {
