@@ -174,6 +174,8 @@ public interface DatasetService {
     @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
     List<Dataset> findByStudyId(Long studyId);
 
+    List<Dataset> findBySubjectId(Long studyId);
+
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
     int countByStudyId(Long studyId);
 

@@ -446,6 +446,13 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
+    public List<Dataset> findBySubjectId(Long subjectId) {
+        List<Dataset> datasets = Utils.toList(repository.findBySubjectId(subjectId));
+        populateInPacs(datasets);
+        return datasets;
+    }
+
+    @Override
     public List<VolumeByFormatDTO> getVolumeByFormat(Long studyId) {
         List<Object[]> results = repository.findExpressionSizesByStudyIdGroupByFormat(studyId);
         List<VolumeByFormatDTO> sizesByFormat = new ArrayList<>();
@@ -570,7 +577,7 @@ public class DatasetServiceImpl implements DatasetService {
         if (dataset.getStudyId() != null) {
             return dataset.getStudyId();
         }
-        if (dataset.getDatasetProcessing().getId() != null) {
+        if (dataset.getDatasetProcessing() != null) {
             return repository.findByIdWithDatasetProcessing(dataset.getId()).orElseThrow(() -> new EntityNotFoundException(Dataset.class, dataset.getId())).getDatasetProcessing().getStudyId();
         }
         if (dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null) {

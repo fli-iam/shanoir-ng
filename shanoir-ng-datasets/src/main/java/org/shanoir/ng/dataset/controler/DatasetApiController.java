@@ -333,7 +333,7 @@ public class DatasetApiController implements DatasetApi {
 
     public ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectId(
             Long subjectId) {
-        List<Dataset> datasets = datasetRepository.findBySubjectId(subjectId);
+        List<Dataset> datasets = datasetService.findBySubjectId(subjectId);
         return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetListToDatasetDTOListWithMetadata(datasets), HttpStatus.OK);
     }
 
@@ -357,7 +357,7 @@ public class DatasetApiController implements DatasetApi {
         return ResponseEntity.ok(dicomJson);
     }
 
-    public ResponseEntity<Void> createProcessedDataset(@Parameter(description = "ProcessedDataset to create", required = true)  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException, Exception {
+    public ResponseEntity<Void> createProcessedDataset(@Parameter(description = "ProcessedDataset to create", required = true)  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws Exception {
         processedDatasetImporterService.createProcessedDataset(importJob);
         File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
         importerService.cleanTempFiles(originalNiftiName.getParent());
