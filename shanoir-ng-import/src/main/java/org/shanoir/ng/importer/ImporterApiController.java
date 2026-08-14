@@ -157,6 +157,7 @@ public class ImporterApiController implements ImporterApi {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
         }
+        LOG.info("============== NEW ZIP UPLOAD ===========================");
         File importJobFile = null;
         try {
             ImportJob importJob = new ImportJob();
