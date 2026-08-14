@@ -248,18 +248,11 @@ public class ImportUtils {
                 continue;
             }
             for (Instance instance : serie.getInstances()) {
-                File sourceFile = null;
-                if (!ArrayUtils.isEmpty(instance.getReferencedFileID())) {
-                    String instanceFilePath = DicomUtils.referencedFileIDToPath(filePathDicomDir, instance.getReferencedFileID());
-                    sourceFile = new File(instanceFilePath);
-                    if (!sourceFile.exists()) {
-                        throw new FileNotFoundException(
-                                "instanceFilePath: missing file: " + instanceFilePath);
-                    }
-                } else {
-                    logger.error("Error copying file: instance.referencedFileID is empty.");
-                    continue;
-                }
+                File sourceFile = dicomFileAnalyzer.getFileFromInstance(instance, serie, filePathDicomDir);
+                // Attention: very important here: we copy locally and now had access to the file, now we
+                // set the DICOMDIR referencedFileID to null, that the later code in ImagesCreatorAnd-
+                // DicomFileAnalyzerService does not search it as before
+                instance.setReferencedFileID(null);
                 // SOPInstanceUID is a dotted numeric string: no path separators or colons,
                 // so it's a safe, portable filename on every OS without any sanitizing
                 String dicomFileName = instance.getSopInstanceUID() + DcmRcvManager.DICOM_FILE_SUFFIX;

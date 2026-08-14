@@ -127,18 +127,14 @@ public class ImporterManagerService {
                 // (see config DicomStoreSCPServer)
                 downloadAndMoveDicomFilesToImportJobDir(importJobDir,
                         importJob.getStudyInstanceUID(), importJob.getSeries(), event);
-                // Convert instances to images, as already done after zip file upload
-                imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
-                        importJobDir.getAbsolutePath(), event, false);
-            } else if (importJob.isFromShanoirUploader()) {
-                // Convert instances to images, as already done after zip file upload
-                imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
-                        importJobDir.getAbsolutePath(), event, false);
-            // isFromDicomZip: do nothing, as images creation and analyze of DICOM files
-            // have been done after upload of ZIP file(s) already
-            } else if (!importJob.isFromDicomZip()) {
+                pseudonymize(importJob, event, importJobDir);
+            } else if (importJob.isFromDicomZip()) {
+                pseudonymize(importJob, event, importJobDir);
+            } else if (!importJob.isFromShanoirUploader()) {
                 throw new ShanoirException("Unsupported type of import.");
             }
+            imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
+                    importJobDir.getAbsolutePath(), event, false);
             // 2. call to cleanSeries: at this point we are sure for all imports, that the
             // ImagesCreatorAndDicomFileAnalyzer has been run and correctly classified
             // everything. So no need to check afterwards for erroneous series.
@@ -149,13 +145,8 @@ public class ImporterManagerService {
 
             event.setProgress(0.25F);
             eventService.publishEvent(event);
-            importJobStatusService.setInProgress(importJob, "Pseudonymizing and creating datasets");
-
-            if (!importJob.isFromShanoirUploader()) {
-                pseudonymize(importJob, event, importJobDir);
-            }
+            importJobStatusService.setInProgress(importJob, "Creating datasets");
             datasetsCreatorService.createDatasets(importJob, importJobDir);
-
             importJobStatusService.setFinished(importJob);
 
             this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET,
@@ -210,7 +201,7 @@ public class ImporterManagerService {
             eventService.publishEvent(event);
             try {
                 AnonymizationResult anonymizationResult = ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName, importJob.getStudyInstanceUID());
-                ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, importJobDir, anonymizationResult);
+                ImportUtils.updateImportJobInstancesWithPseudonymizedUIDs(importJob, importJobDir, anonymizationResult);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
                 throw new ShanoirException("Error during pseudonymization.");
@@ -308,7 +299,7 @@ public class ImporterManagerService {
      * @throws FileNotFoundException
      */
     private ArrayList<File> getDicomFilesForImportJob(final ImportJobBase importJob, final String workFolderPath) throws FileNotFoundException {
-        Set<File> pathsSet = new HashSet<>(50000);
+        Set<File> pathsSet = new HashSet<>(100000);
         List<Serie> series = importJob.getSeries();
         for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
             Serie serie = seriesIt.next();

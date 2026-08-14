@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -36,6 +37,7 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
+import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
@@ -105,15 +107,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                     } catch (Exception e) {
                         handleError(event, nbSeries, cpt, serie, e);
                     }
-                }
-                // We clean instances here, as now transformed to images. Skip this for the
-                // local ShanoirUploader quality-control : the same importJob/Serie set
-                // is analyzed again server-side once the real import starts, and that second
-                // pass needs the original instances to rebuild the image list with
-                // server-side paths (the local pass keeps client-local absolute paths, which
-                // are meaningless once the files are uploaded to the server).
-                if (!isFromShUpQualityControl) {
-                    serie.setInstances(null);
                 }
             }
             cpt++;
@@ -198,19 +191,25 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      */
     public File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath)
             throws FileNotFoundException {
-        StringBuilder instanceFilePathBuilder = new StringBuilder();
-        instanceFilePathBuilder.append(folderFileAbsolutePath)
+        String instanceFilePath;
+        if (ArrayUtils.isEmpty(instance.getReferencedFileID())) {
+            StringBuilder instanceFilePathBuilder = new StringBuilder();
+            instanceFilePathBuilder.append(folderFileAbsolutePath)
                 .append(File.separator)
                 .append(serie.getSeriesInstanceUID())
                 .append(File.separator)
                 .append(instance.getSopInstanceUID())
-                .append(SUFFIX_DCM);
-        File instanceFile = new File(instanceFilePathBuilder.toString());
+                    .append(SUFFIX_DCM);
+            instanceFilePath = instanceFilePathBuilder.toString();
+        } else {
+            instanceFilePath = DicomUtils.referencedFileIDToPath(folderFileAbsolutePath, instance.getReferencedFileID());
+        }
+        File instanceFile = new File(instanceFilePath);
         if (instanceFile.exists()) {
             return instanceFile;
         } else {
             throw new FileNotFoundException(
-                    "instanceFilePath: missing file: " + instanceFilePathBuilder.toString());
+                    "instanceFilePath: missing file: " + instanceFilePath);
         }
     }
 

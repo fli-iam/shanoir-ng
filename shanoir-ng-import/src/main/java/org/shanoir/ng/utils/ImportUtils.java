@@ -36,6 +36,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.shanoir.anonymization.anonymization.AnonymizationResult;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
@@ -404,7 +405,7 @@ public final class ImportUtils {
      * their OLD value in the shared old->new maps produced by anonymization.
      * @throws FileNotFoundException
      */
-    public static void updateImportJobWithPseudonymizedUIDs(final ImportJobBase importJob, final File importJobFolder,
+    public static void updateImportJobInstancesWithPseudonymizedUIDs(final ImportJobBase importJob, final File importJobFolder,
             final AnonymizationResult anonymizationResult) throws FileNotFoundException {
         if (importJob.getPatient() == null) {
             return;
@@ -431,7 +432,13 @@ public final class ImportUtils {
                 String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(instance.getSopInstanceUID());
                 if (newSopInstanceUID != null) {
                     instance.setSopInstanceUID(newSopInstanceUID);
-                    instance.setReferencedFileID(new String[] {newSopInstanceUID + ImagesCreatorAndDicomFileAnalyzerService.SUFFIX_DCM});
+                    // This case is important with DICOM zip import via web GUI,
+                    // as the unzipped folder has a n-sub-folder structure
+                    if (!ArrayUtils.isEmpty(instance.getReferencedFileID())) {
+                        instance.setReferencedFileID(renamedReferencedFileID(instance.getReferencedFileID(), newSopInstanceUID));
+                    } else {
+                        instance.setReferencedFileID(new String[] {newSopInstanceUID + ImagesCreatorAndDicomFileAnalyzerService.SUFFIX_DCM});
+                    }
                     updatedInstances++;
                 } else {
                     missingInstances++;
@@ -444,6 +451,13 @@ public final class ImportUtils {
         LOG.info("{}: importJobUIDs updated for {} instance(s){}.",
                 importJobFolder.getName(), updatedInstances,
                 missingInstances > 0 ? (", " + missingInstances + " instance(s) could not be matched") : "");
+    }
+
+    private static String[] renamedReferencedFileID(String[] originalReferencedFileID, String newSopInstanceUID) {
+        String newFileName = newSopInstanceUID + ImagesCreatorAndDicomFileAnalyzerService.SUFFIX_DCM;
+        String[] newReferencedFileID = originalReferencedFileID.clone();
+        newReferencedFileID[newReferencedFileID.length - 1] = newFileName;
+        return newReferencedFileID;
     }
 
 }

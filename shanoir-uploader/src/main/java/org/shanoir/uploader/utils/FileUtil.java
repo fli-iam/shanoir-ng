@@ -150,6 +150,7 @@ public class FileUtil {
                     try (DicomInputStream dIS = new DicomInputStream(sourceFileFromPacs)) { // keep try to finally close input stream
                         Attributes attributes = dIS.readDatasetUntilPixelData();
                         if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
+                            // Here the referencedFileID is always null
                             Instance instance = new Instance(attributes);
                             instances.add(instance);
                             File destSerieFolder = new File(importJobFolder.getAbsolutePath() + File.separator + seriesInstanceUID);
