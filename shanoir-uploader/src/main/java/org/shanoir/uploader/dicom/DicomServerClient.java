@@ -149,7 +149,7 @@ public class DicomServerClient implements IDicomServerClient {
             try {
                 FileUtil.cleanTempFolders(workFolder, studyInstanceUID);
                 downloadFromDicomServer(studyInstanceUID, selectedSeries, progressBar, downloadOrCopyReport);
-                FileUtil.readAndCopyDicomFilesToUploadFolder(workFolder, studyInstanceUID, selectedSeries, uploadFolder, retrievedDicomFiles, downloadOrCopyReport);
+                FileUtil.readAndCopyDicomFilesToImportJobFolder(workFolder, studyInstanceUID, selectedSeries, uploadFolder, retrievedDicomFiles, downloadOrCopyReport);
                 FileUtil.deleteFolderDownloadFromDicomServer(workFolder, studyInstanceUID, selectedSeries);
             } catch (Exception e) {
                 LOG.error(":\n\n Download of "

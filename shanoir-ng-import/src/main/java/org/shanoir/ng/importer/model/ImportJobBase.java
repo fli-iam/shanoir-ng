@@ -27,7 +27,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Each ImportJobBase has one specific ID, that it identifies and
- * allows to trace it.
+ * allows to trace it. We do not use the newly generated StudyInstanceUID
+ * of the exam here, as Shanoir allows to import datasets into existing
+ * examinations, where we want to separate each ImportJob.
  *
  * One ImportJobBase is related to the import of ONE DICOM STUDY,
  * which equals ONE EXAMINATION in Shanoir. We are doing this, as one

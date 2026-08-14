@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -37,7 +36,6 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
-import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
@@ -72,7 +70,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
     private static final String SLASH = "/";
 
-    private static final String SUFFIX_DCM = ".dcm";
+    public static final String SUFFIX_DCM = ".dcm";
 
     private static final String YES = "YES";
 
@@ -200,25 +198,19 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      */
     public File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath)
             throws FileNotFoundException {
-        String instanceFilePath;
-        if (ArrayUtils.isEmpty(instance.getReferencedFileID())) {
-            StringBuilder instanceFilePathBuilder = new StringBuilder();
-            instanceFilePathBuilder.append(folderFileAbsolutePath)
+        StringBuilder instanceFilePathBuilder = new StringBuilder();
+        instanceFilePathBuilder.append(folderFileAbsolutePath)
                 .append(File.separator)
                 .append(serie.getSeriesInstanceUID())
                 .append(File.separator)
                 .append(instance.getSopInstanceUID())
-                    .append(SUFFIX_DCM);
-            instanceFilePath = instanceFilePathBuilder.toString();
-        } else {
-            instanceFilePath = DicomUtils.referencedFileIDToPath(folderFileAbsolutePath, instance.getReferencedFileID());
-        }
-        File instanceFile = new File(instanceFilePath);
+                .append(SUFFIX_DCM);
+        File instanceFile = new File(instanceFilePathBuilder.toString());
         if (instanceFile.exists()) {
             return instanceFile;
         } else {
             throw new FileNotFoundException(
-                    "instanceFilePath: missing file: " + instanceFilePath);
+                    "instanceFilePath: missing file: " + instanceFilePathBuilder.toString());
         }
     }
 

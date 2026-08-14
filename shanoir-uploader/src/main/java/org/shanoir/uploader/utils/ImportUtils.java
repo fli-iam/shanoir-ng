@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -15,7 +17,7 @@ import java.util.List;
 import javax.swing.JProgressBar;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
@@ -26,6 +28,7 @@ import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
@@ -173,19 +176,6 @@ public class ImportUtils {
                 logger.warn("Serie [" + serie.getSeriesDescription() + "] found with instances == null or empty. Serie de-selected.");
                 continue;
             }
-            /**
-             * Warning: the below switch is important, as all import jobs from ShUp
-             * are considered as "from-disk" on the server, nevertheless if within ShUp
-             * they come from a pacs or a local disk, so the below setReferencedFileID
-             * is necessary, that import-from-pacs with ShUp run on the server.
-             */
-            for(Instance instance : instances) {
-                // do not change referencedFileID in case of import from disk
-                if (instance.getReferencedFileID() == null || instance.getReferencedFileID().length == 0) {
-                    String[] myStringArray = {instance.getSopInstanceUID() + DcmRcvManager.DICOM_FILE_SUFFIX};
-                    instance.setReferencedFileID(myStringArray);
-                }
-            }
             serie.setSelected(true);
         }
         // We sort again here, even if the QueryPACSService or the DicomDirToModelService sort already
@@ -215,7 +205,7 @@ public class ImportUtils {
      * @return
      * @throws FileNotFoundException
      */
-    public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, List<Serie> selectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
+    public static List<String> downloadOrCopyFilesIntoImportJobFolder(boolean isFromPACS, JProgressBar progressBar, StringBuilder downloadOrCopyReport, String studyInstanceUID, List<Serie> selectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
         List<String> allFileNames = null;
         if (isFromPACS) {
             allFileNames = dicomServerClient.retrieveDicomFiles(progressBar, downloadOrCopyReport, studyInstanceUID, selectedSeries, uploadFolder);
@@ -226,7 +216,7 @@ public class ImportUtils {
                 return null;
             }
         } else {
-            allFileNames = copyFilesToUploadFolder(progressBar, downloadOrCopyReport, dicomFileAnalyzer, selectedSeries, uploadFolder, filePathDicomDir);
+            allFileNames = copyFilesToImportJobFolder(progressBar, downloadOrCopyReport, dicomFileAnalyzer, selectedSeries, uploadFolder, filePathDicomDir);
             if(allFileNames != null) {
                 logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD/local file system.");
             } else {
@@ -237,41 +227,56 @@ public class ImportUtils {
         return allFileNames;
     }
 
-    public static List<String> copyFilesToUploadFolder(JProgressBar progressBar, StringBuilder downloadOrCopyReport, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, List<Serie> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
+    public static List<String> copyFilesToImportJobFolder(JProgressBar progressBar, StringBuilder downloadOrCopyReport,
+            ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, List<Serie> selectedSeries,
+            final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
         List<String> allFileNames = new ArrayList<String>();
-        int totalPercent = 0;
         int serieNumber = 0;
         int numberOfSeries = selectedSeries.size();
         for (Serie serie : selectedSeries) {
             serieNumber++;
-            List<String> newFileNamesOfSerie = new ArrayList<String>();
             if (serie.getInstances() == null) {
-                downloadOrCopyReport.append("Copy: serie (" + serie.getSeriesNumber() + ") " + serie.getSeriesDescription() + " has no images (ignored).\n");
+                downloadOrCopyReport.append("Copy: serie (" + serie.getSeriesNumber() + ") "
+                        + serie.getSeriesDescription() + " has no images (ignored).\n");
+                continue;
+            }
+            List<String> newFileNamesOfSerie = new ArrayList<String>();
+            // one folder per serie, created once, not checked/created on every single file
+            File serieFolder = new File(uploadFolder, serie.getSeriesInstanceUID());
+            if (!serieFolder.exists() && !serieFolder.mkdirs()) {
+                logger.error("Error creating serie folder: " + serieFolder.getAbsolutePath());
                 continue;
             }
             for (Instance instance : serie.getInstances()) {
-                File sourceFile = dicomFileAnalyzer.getFileFromInstance(instance, serie, filePathDicomDir);
-                String dicomFileName = null;
-                if (sourceFile.getAbsolutePath().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
-                    dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_");
+                File sourceFile = null;
+                if (!ArrayUtils.isEmpty(instance.getReferencedFileID())) {
+                    String instanceFilePath = DicomUtils.referencedFileIDToPath(filePathDicomDir, instance.getReferencedFileID());
+                    sourceFile = new File(instanceFilePath);
+                    if (!sourceFile.exists()) {
+                        throw new FileNotFoundException(
+                                "instanceFilePath: missing file: " + instanceFilePath);
+                    }
                 } else {
-                    dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_") + DcmRcvManager.DICOM_FILE_SUFFIX;
+                    logger.error("Error copying file: instance.referencedFileID is empty.");
+                    continue;
                 }
-                // clean Windows file system root here to avoid destFile-path
-                // with two colons in the path, what is forbidden under Windows
-                // and leads therefore to copy failures, that block exports
-                if (SystemUtils.IS_OS_WINDOWS) {
-                    dicomFileName = dicomFileName.replace(":", "");
+                // SOPInstanceUID is a dotted numeric string: no path separators or colons,
+                // so it's a safe, portable filename on every OS without any sanitizing
+                String dicomFileName = instance.getSopInstanceUID() + DcmRcvManager.DICOM_FILE_SUFFIX;
+                File destFile = new File(serieFolder, dicomFileName);
+                try {
+                    Files.copy(sourceFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    logger.error("Error copying file " + sourceFile.getAbsolutePath() + " to "
+                            + destFile.getAbsolutePath(), e);
+                    continue;
                 }
-                File destFile = new File(uploadFolder.getAbsolutePath() + File.separator + dicomFileName);
-                FileUtil.copyFile(sourceFile, destFile);
                 newFileNamesOfSerie.add(dicomFileName);
-                instance.setReferencedFileID(new String[]{dicomFileName});
             }
-            downloadOrCopyReport.append("Copy: serie (" + serie.getSeriesNumber() + ") " + serie.getSeriesDescription() + " copied with " + newFileNamesOfSerie.size() + " images.\n");
+            downloadOrCopyReport.append("Copy: serie (" + serie.getSeriesNumber() + ") "
+                    + serie.getSeriesDescription() + " copied with " + newFileNamesOfSerie.size() + " images.\n");
             allFileNames.addAll(newFileNamesOfSerie);
-            totalPercent = Math.round(((float) serieNumber / numberOfSeries) * 100);
-            progressBar.setValue(totalPercent);
+            progressBar.setValue(Math.round(((float) serieNumber / numberOfSeries) * 100));
         }
         return allFileNames;
     }

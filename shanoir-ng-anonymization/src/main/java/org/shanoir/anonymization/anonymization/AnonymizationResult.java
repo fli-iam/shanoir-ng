@@ -17,11 +17,8 @@ package org.shanoir.anonymization.anonymization;
 import java.util.Map;
 
 /**
- * SeriesInstanceUID/StudyInstanceUID/FrameOfReferenceUID are looked up by their
- * OLD (pre-anonymization) value, since the same shared map is reused across
- * files for consistency. SOPInstanceUID is different: it is regenerated
- * independently per file (never looked up in a shared map), so it can only be
- * correlated back to an Instance via the file it came from.
+ * SeriesInstanceUID/StudyInstanceUID/FrameOfReferenceUID/SOPInstanceUID are looked up by their
+ * OLD (pre-anonymization) value, since the same shared map is reused across files for consistency.
  */
 public final class AnonymizationResult {
 
@@ -31,15 +28,14 @@ public final class AnonymizationResult {
 
     private final Map<String, String> frameOfReferenceUIDs;
 
-    // File.getAbsolutePath() -> new SOPInstanceUID
-    private final Map<String, String> sopInstanceUIDsByFilePath;
+    private final Map<String, String> sopInstanceUIDs;
 
     AnonymizationResult(Map<String, String> seriesInstanceUIDs, Map<String, String> studyInstanceUIDs,
-            Map<String, String> frameOfReferenceUIDs, Map<String, String> sopInstanceUIDsByFilePath) {
+            Map<String, String> frameOfReferenceUIDs, Map<String, String> sopInstanceUIDs) {
         this.seriesInstanceUIDs = seriesInstanceUIDs;
         this.studyInstanceUIDs = studyInstanceUIDs;
         this.frameOfReferenceUIDs = frameOfReferenceUIDs;
-        this.sopInstanceUIDsByFilePath = sopInstanceUIDsByFilePath;
+        this.sopInstanceUIDs = sopInstanceUIDs;
     }
 
     public Map<String, String> getSeriesInstanceUIDs() {
@@ -54,8 +50,8 @@ public final class AnonymizationResult {
         return frameOfReferenceUIDs;
     }
 
-    public Map<String, String> getSopInstanceUIDsByFilePath() {
-        return sopInstanceUIDsByFilePath;
+    public Map<String, String> getSopInstanceUIDs() {
+        return sopInstanceUIDs;
     }
 
 }

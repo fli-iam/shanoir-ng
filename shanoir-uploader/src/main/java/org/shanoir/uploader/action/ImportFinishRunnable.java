@@ -23,7 +23,7 @@ public class ImportFinishRunnable implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ImportFinishRunnable.class);
 
-    private final File uploadFolder;
+    private final File importJobFolder;
 
     private final ImportJobBase importJob;
 
@@ -34,13 +34,13 @@ public class ImportFinishRunnable implements Runnable {
      *  release its per-folder in-progress guard and restore UI state. */
     private final Runnable onDone;
 
-    public ImportFinishRunnable(final File uploadFolder, final ImportJobBase importJob) {
-        this(uploadFolder, importJob, null);
+    public ImportFinishRunnable(final File importJobFolder, final ImportJobBase importJob) {
+        this(importJobFolder, importJob, null);
     }
 
-    public ImportFinishRunnable(final File uploadFolder, final ImportJobBase importJob,
+    public ImportFinishRunnable(final File importJobFolder, final ImportJobBase importJob,
             final Runnable onDone) {
-        this.uploadFolder = uploadFolder;
+        this.importJobFolder = importJobFolder;
         this.importJob = importJob;
         this.onDone = onDone;
     }
@@ -50,24 +50,24 @@ public class ImportFinishRunnable implements Runnable {
             AnonymizationResult anonymizationResult = null;
             try {
                 String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
-                anonymizationResult = anonymizer.pseudonymize(uploadFolder, anonymizationProfile,
+                anonymizationResult = anonymizer.pseudonymize(importJobFolder, anonymizationProfile,
                         importJob.getSubjectName(), importJob.getStudyInstanceUID());
             } catch (IOException e) {
-                logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+                logger.error(importJobFolder.getName() + ": " + e.getMessage(), e);
             }
             if (anonymizationResult != null) {
                 try {
-                    ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, uploadFolder, anonymizationResult);
+                    ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, importJobFolder, anonymizationResult);
                     importJob.setUploadState(UploadState.START_IMPORT_JOB);
                     NominativeDataImportJobManager importJobManager =
-                            new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
+                            new NominativeDataImportJobManager(importJobFolder.getAbsolutePath());
                     importJobManager.writeImportJob(importJob);
                 } catch (Exception e) {
-                    logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+                    logger.error(importJobFolder.getName() + ": " + e.getMessage(), e);
                 }
-                logger.info(uploadFolder.getName() + " scheduled for upload.");
+                logger.info(importJobFolder.getName() + " scheduled for upload.");
             } else {
-                logger.error(uploadFolder.getName() + ": Error during anonymization.");
+                logger.error(importJobFolder.getName() + ": Error during anonymization.");
             }
         } finally {
             if (onDone != null) {

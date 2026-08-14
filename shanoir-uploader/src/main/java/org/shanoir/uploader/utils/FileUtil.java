@@ -132,7 +132,7 @@ public class FileUtil {
         }
     }
 
-    public static void readAndCopyDicomFilesToUploadFolder(File workFolder, String studyInstanceUID, List<Serie> selectedSeries, final File uploadFolder,
+    public static void readAndCopyDicomFilesToImportJobFolder(File workFolder, String studyInstanceUID, List<Serie> selectedSeries, final File importJobFolder,
             final List<String> retrievedDicomFiles, StringBuilder downloadOrCopyReport) throws IOException {
         for (Serie serie : selectedSeries) {
             List<String> fileNamesForSerie = new ArrayList<String>();
@@ -152,7 +152,7 @@ public class FileUtil {
                         if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
                             Instance instance = new Instance(attributes);
                             instances.add(instance);
-                            File destSerieFolder = new File(uploadFolder.getAbsolutePath() + File.separator + seriesInstanceUID);
+                            File destSerieFolder = new File(importJobFolder.getAbsolutePath() + File.separator + seriesInstanceUID);
                             if (!destSerieFolder.exists())
                                 destSerieFolder.mkdirs();
                             File destDicomFile = new File(destSerieFolder, dicomFileName);
@@ -164,7 +164,7 @@ public class FileUtil {
                 serie.setInstances(instances);
                 if (!instances.isEmpty()) {
                     instances.sort(new InstanceNumberSorter());
-                    LOG.info(instances.size() + " instances found for serie " + serie.getSeriesDescription());
+                    LOG.info(instances.size() + " instances " + serie.getSeriesDescription() + " (" + serie.getSeriesInstanceUID() + ")");
                 } else {
                     LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
                     serie.setIgnored(true);
@@ -192,14 +192,14 @@ public class FileUtil {
                     );
                 }
                 retrievedDicomFiles.addAll(fileNamesForSerie);
-                LOG.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+                LOG.debug(importJobFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
                         + " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
                         + " was successful.\n\n");
             } else {
                 downloadOrCopyReport.append("Error: Download: serie "
                         + (serie.getSeriesNumber() != null ? "(No. " + serie.getSeriesNumber() + ") " : "")
                         + serie.getSeriesDescription() + " downloaded without an existing serie folder.\n");
-                LOG.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+                LOG.error(importJobFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
                         + " DICOM files for serie " + seriesInstanceUID + ": " + serie.getSeriesDescription()
                         + " has failed.\n\n");
             }

@@ -123,7 +123,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         Map<String, String> frameOfReferenceUIDs = new HashMap<>();
         Map<String, String> studyInstanceUIDs = new HashMap<>();
         Map<String, String> studyIds = new HashMap<>();
-        Map<String, String> sopInstanceUIDsByFilePath = new HashMap<>();
+        Map<String, String> sopInstanceUIDs = new HashMap<>();
 
         AnonymizationStats stats = new AnonymizationStats();
         LOG.debug("anonymize : totalAmount={}", totalAmount);
@@ -132,14 +132,14 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             final File file = dicomFiles.get(i);
             performAnonymization(file, anonymizationMap, true, patientName, patientID, studyInstanceUID,
                     seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds,
-                    sopInstanceUIDsByFilePath, stats);
+                    sopInstanceUIDs, stats);
             current++;
             final int currentPercent = current * 100 / totalAmount;
             LOG.debug("anonymize : anonymization current percent= {} %", currentPercent);
         }
         logInfos("End pseudonymization", startTime);
         stats.logSummary();
-        return new AnonymizationResult(seriesInstanceUIDs, studyInstanceUIDs, frameOfReferenceUIDs, sopInstanceUIDsByFilePath);
+        return new AnonymizationResult(seriesInstanceUIDs, studyInstanceUIDs, frameOfReferenceUIDs, sopInstanceUIDs);
     }
 
     private void logInfos(final String methodName, long startTime) {
@@ -209,10 +209,10 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs,
             Map<String, String> frameOfReferenceUIDs,
             Map<String, String> studyInstanceUIDs, Map<String, String> studyIds,
-            Map<String, String> sopInstanceUIDsByFilePath) throws Exception {
+            Map<String, String> sopInstanceUIDs) throws Exception {
         performAnonymization(dicomFile, anonymizationMap, isShanoirAnonymization, patientName, patientID,
                 studyInstanceUID, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds,
-                sopInstanceUIDsByFilePath, new AnonymizationStats());
+                sopInstanceUIDs, new AnonymizationStats());
     }
 
     /**
@@ -226,7 +226,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs,
             Map<String, String> frameOfReferenceUIDs,
             Map<String, String> studyInstanceUIDs, Map<String, String> studyIds,
-            Map<String, String> sopInstanceUIDsByFilePath, AnonymizationStats stats)
+            Map<String, String> sopInstanceUIDs, AnonymizationStats stats)
             throws Exception {
         DicomInputStream din = null;
         DicomOutputStream dos = null;
@@ -256,7 +256,8 @@ public class AnonymizationServiceImpl implements AnonymizationService {
              * (I made the mistake already twice...).
              */
             Attributes datasetAttributes = din.readDataset();
-
+            String sopInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
+            
             // Make sure the PatientName and PatientID exist in the dataset attributes.
             if (!datasetAttributes.contains(Tag.PatientID))
                 datasetAttributes.setNull(Tag.PatientID, VR.LO);
@@ -357,16 +358,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
             // Rename the file to "<SOPInstanceUID>.dcm" in its original parent
             // directory, now that the anonymized content has been fully written
-            // and flushed to disk. The map is keyed by the file's FINAL path, so
-            // callers can still correlate it back to the Instance it came from.
+            // and flushed to disk.
             if (finalSopInstanceUID != null) {
-                // Keyed by the file's ORIGINAL absolute path (not the renamed one):
-                // callers such as updateImportJobWithPseudonymizedUIDs() resolve this
-                // same path from the untouched, pre-rename referencedFileID, so the
-                // lookup key has to match that, regardless of what the file is now
-                // called on disk after the rename below.
-                sopInstanceUIDsByFilePath.put(dicomFile.getAbsolutePath(), finalSopInstanceUID);
-
+                sopInstanceUIDs.put(sopInstanceUID, finalSopInstanceUID);
                 File renamedFile = new File(dicomFile.getParentFile(), finalSopInstanceUID + ".dcm");
                 if (renamedFile.exists()) {
                     LOG.warn(

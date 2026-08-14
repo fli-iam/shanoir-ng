@@ -37,6 +37,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import org.shanoir.anonymization.anonymization.AnonymizationResult;
+import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Instance;
@@ -45,7 +46,6 @@ import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
@@ -400,14 +400,11 @@ public final class ImportUtils {
      * import-job.json stays consistent with what's really on disk from this
      * point on.
      *
-     * SeriesInstanceUID/StudyInstanceUID are looked up by their OLD value in
-     * the shared old->new maps produced by anonymization. SOPInstanceUID has
-     * no such shared map (it's generated independently per file), so
-     * instances are instead correlated to their file via
-     * {@link Instance#getReferencedFileID()}.
+     * SeriesInstanceUID/StudyInstanceUID/SOPInstanceUID are looked up by
+     * their OLD value in the shared old->new maps produced by anonymization.
      * @throws FileNotFoundException
      */
-    public static void updateImportJobWithPseudonymizedUIDs(final ImportJobBase importJob, final File uploadFolder,
+    public static void updateImportJobWithPseudonymizedUIDs(final ImportJobBase importJob, final File importJobFolder,
             final AnonymizationResult anonymizationResult) throws FileNotFoundException {
         if (importJob.getPatient() == null) {
             return;
@@ -431,42 +428,22 @@ public final class ImportUtils {
                 continue;
             }
             for (Instance instance : serie.getInstances()) {
-                String filePath = DicomUtils.referencedFileIDToPath(
-                        uploadFolder.getAbsolutePath(), instance.getReferencedFileID());
-                String newSopInstanceUID = anonymizationResult.getSopInstanceUIDsByFilePath().get(filePath);
+                String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(instance.getSopInstanceUID());
                 if (newSopInstanceUID != null) {
                     instance.setSopInstanceUID(newSopInstanceUID);
-                    // The underlying file was renamed on disk to "<SOPInstanceUID>.dcm"
-                    // (see AnonymizationServiceImpl#performAnonymization).
-                    instance.setReferencedFileID(
-                            renamedReferencedFileID(instance.getReferencedFileID(), newSopInstanceUID));
+                    instance.setReferencedFileID(new String[] {newSopInstanceUID + ImagesCreatorAndDicomFileAnalyzerService.SUFFIX_DCM});
                     updatedInstances++;
                 } else {
                     missingInstances++;
                     LOG.warn("{}: no pseudonymized SOPInstanceUID found for instance file {}; "
                             + "importJob keeps its pre-pseudonymization UID for this instance.",
-                            uploadFolder.getName(), filePath);
+                            importJobFolder.getName(), instance.getSopInstanceUID());
                 }
             }
         }
-        LOG.info("{}: importJob UIDs updated to their pseudonymized values for {} instance(s){}.",
-                uploadFolder.getName(), updatedInstances,
+        LOG.info("{}: importJobUIDs updated for {} instance(s){}.",
+                importJobFolder.getName(), updatedInstances,
                 missingInstances > 0 ? (", " + missingInstances + " instance(s) could not be matched") : "");
-    }
-
-    /**
-     * Builds the new referencedFileID matching the renamed file
-     * "<newSopInstanceUID>.dcm" on disk, preserving whatever directory prefix
-     * (if any) the original referencedFileID had.
-     */
-    private static String[] renamedReferencedFileID(String[] originalReferencedFileID, String newSopInstanceUID) {
-        String newFileName = newSopInstanceUID + ".dcm";
-        if (originalReferencedFileID == null || originalReferencedFileID.length == 0) {
-            return new String[] {newFileName};
-        }
-        String[] newReferencedFileID = originalReferencedFileID.clone();
-        newReferencedFileID[newReferencedFileID.length - 1] = newFileName;
-        return newReferencedFileID;
     }
 
 }
