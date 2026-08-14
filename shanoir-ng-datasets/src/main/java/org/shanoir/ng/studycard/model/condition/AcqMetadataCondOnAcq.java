@@ -14,15 +14,17 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 /**
  * Condition valid for the given DatasetAcquisition if the acquisition metadata fulfill the condition
@@ -44,6 +46,11 @@ public class AcqMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcqu
         shanoirField = field.getId();
     }
 
+    /**
+     * Check if the condition is fulfilled for the given acquisition
+     * @param acquisition the acquisition to check
+     * @return true if the condition is fulfilled, false otherwise
+     */
     public boolean fulfilled(DatasetAcquisition acquisition) {
         DatasetAcquisitionMetadataField field = this.getShanoirField();
         if (field != null) {
@@ -56,12 +63,34 @@ public class AcqMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcqu
             if (valueFromDb != null) {
                 // get all possible values, that can fulfill the condition
                 for (String value : this.getValues()) {
-                    LOG.info("condition fulfilled: acq.name = " + valueFromDb + ", value=" + value);
+                    LOG.info("Condition fulfilled: acquisition metadata field value = " + valueFromDb + ", value =" + value);
                     return true; // as condition values are combined by OR: return if one is true
                 }
             }
         }
         return false;
+    }
+
+    /**
+     * Check if the condition is fulfilled for the given acquisition and append a message if not
+     * Used in QualityCardRule to check the condition and set the msg in quality report
+     * @param acquisition the acquisition to check
+     * @param msg the message to append if the condition is not fulfilled
+     * @return true if the condition is fulfilled, false otherwise
+     * @throws CheckedIllegalClassException
+     */
+    public boolean fulfilled(DatasetAcquisition acquisition, StringBuffer report) {
+        boolean fulfilled = fulfilled(acquisition);
+        if (!fulfilled) {
+            try {
+                report.append("Condition not fulfilled for acquisition ").append(acquisition.getId()).append(" : ");
+                report.append("field ").append(this.getShanoirField().get(acquisition)).append(" value is not in ").append(this.getValues());
+            } catch (CheckedIllegalClassException e) {
+                report.append("Error occurred while checking condition for acquisition ").append(acquisition.getId());
+                LOG.error("Error occurred while checking condition for acquisition {}", acquisition.getId(), e);
+            }
+        }
+        return fulfilled;
     }
 
 }

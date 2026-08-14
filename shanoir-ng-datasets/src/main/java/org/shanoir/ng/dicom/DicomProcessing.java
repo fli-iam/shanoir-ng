@@ -33,7 +33,6 @@ import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
-import org.shanoir.ng.importer.strategies.datasetacquisition.GenericDatasetAcquisitionStrategy;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
@@ -45,7 +44,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class DicomProcessing {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GenericDatasetAcquisitionStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomProcessing.class);
 
     private static UIDGeneration uidGenerator = new UIDGeneration();
 
@@ -120,7 +119,7 @@ public class DicomProcessing {
         if (!CollectionUtils.isEmpty(serie.getImages())) {
             sopUID = serie.getImages().get(0).getSOPInstanceUID();
         } else {
-            LOG.warn("Attention: a new SOPInstanceUID has been generated for serie: {}/{}", serie.getSequenceName(), serie.getProtocolName());
+            LOG.info("In-memory SOPInstanceUID generated for serie: {}/{}", serie.getSequenceName(), serie.getProtocolName());
             sopUID = uidGenerator.getNewUID();
         }
         // In case of Quality Check during Import from ShUp, Serie does not have any Dataset and conditions are applied on DICOM metadata only.
@@ -130,7 +129,7 @@ public class DicomProcessing {
                 try {
                     attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()));
                 } catch (IOException e) {
-                    throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
+                    throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSeriesInstanceUID(), e);
                 }
             }
         }
