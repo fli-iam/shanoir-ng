@@ -402,7 +402,6 @@ services:
     environment:
       POSTGRES_HOST: "${SHANOIR_PREFIX}dcm4chee-database"
       WILDFLY_CHOWN: /storage
-      STORAGE_DIR: s3://mysupertest
       WILDFLY_WAIT_FOR: "${SHANOIR_PREFIX}ldap:389 ${SHANOIR_PREFIX}dcm4chee-database:5432"
     depends_on:
       - "ldap"
