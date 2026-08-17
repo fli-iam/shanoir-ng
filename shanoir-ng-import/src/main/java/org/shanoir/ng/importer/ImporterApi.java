@@ -62,17 +62,34 @@ public interface ImporterApi {
         @ApiResponse(responseCode = "401", description = "unauthorized"),
         @ApiResponse(responseCode = "403", description = "forbidden"),
         @ApiResponse(responseCode = "500", description = "unexpected error")})
-    @PostMapping(value = "/{tempDirId}", consumes = {"multipart/form-data"})
+    @PostMapping(value = "/{tempDirId}", consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<Void> uploadFile(
             @Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId,
-            @Parameter(name = "file") @RequestParam("file") MultipartFile file) throws RestServiceException, IOException;
+            @Parameter(name = "file") @RequestParam("file") MultipartFile file)
+            throws RestServiceException, IOException;
+
+    // used by ShanoirUploader!!! 2. step (new): called for each DICOM file, uploads
+    // it directly into a series sub-folder (named after the DICOM seriesInstanceUID)
+    // of the tempDirId, so the server does not have to separate files into series folders
+    // afterwards anymore.
+    @Operation(summary = "Upload a file into a series sub-folder of a specific temp dir", description = "Upload a file into a temp dir, sorted directly into a seriesInstanceUID sub-folder")
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "file uploaded"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "/{tempDirId}/series/{seriesInstanceUID}", consumes = { "multipart/form-data" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
+    ResponseEntity<Void> uploadFileToSeries(
+            @Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId,
+            @Parameter(name = "seriesInstanceUID", required = true) @PathVariable("seriesInstanceUID") String seriesInstanceUID,
+            @Parameter(name = "file") @RequestParam("file") MultipartFile file)
+            throws RestServiceException, IOException;
 
     @Operation(summary = "Upload one DICOM .zip file", description = "Upload DICOM .zip file")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "success returns file path"),
-        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
-        @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "success returns file path"),
+            @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+            @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
         @ApiResponse(responseCode = "200", description = "Unexpected Error")})
     @PostMapping(value = "/upload_dicom/",
             produces = {"application/json"},
