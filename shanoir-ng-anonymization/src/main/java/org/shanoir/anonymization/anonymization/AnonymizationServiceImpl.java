@@ -342,35 +342,19 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             }
 
             // Determine the file's FINAL SOPInstanceUID (whatever action applied, or
-            // none at all). Used both to correlate this file back to the Instance
-            // it came from, and to rename the file on disk once it has been
-            // written out below.
+            // none at all). Used to correlate this file back to the Instance
+            // it came from.
             String finalSopInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
+            if (finalSopInstanceUID != null) {
+                sopInstanceUIDs.put(sopInstanceUID, finalSopInstanceUID);
+            } else {
+                LOG.error("performAnonymization : error while anonymizing file " + dicomFile.toString() + ", SOPInstanceUID null.");
+            }
 
             LOG.debug("finish anonymization: begin storage");
             dos = new DicomOutputStream(dicomFile);
             dos.writeDataset(metaInformationAttributes, datasetAttributes);
-            dos.close();
-            // Already closed explicitly above: null it out so the finally block
-            // below does not attempt to close it a second time.
-            dos = null;
             LOG.debug("finish anonymization: end storage");
-
-            // Rename the file to "<SOPInstanceUID>.dcm" in its original parent
-            // directory, now that the anonymized content has been fully written
-            // and flushed to disk.
-            if (finalSopInstanceUID != null) {
-                sopInstanceUIDs.put(sopInstanceUID, finalSopInstanceUID);
-                File renamedFile = new File(dicomFile.getParentFile(), finalSopInstanceUID + ".dcm");
-                if (renamedFile.exists()) {
-                    LOG.warn(
-                            "performAnonymization : skipping rename, target file {} already exists (SOPInstanceUID collision for {})",
-                            renamedFile.getAbsolutePath(), dicomFile.getAbsolutePath());
-                } else if (!dicomFile.renameTo(renamedFile)) {
-                    LOG.error("performAnonymization : could not rename file {} to {}",
-                            dicomFile.getAbsolutePath(), renamedFile.getAbsolutePath());
-                }
-            }
         } catch (final IOException exc) {
             LOG.error("performAnonymization : error while anonymizing file " + dicomFile.toString() + " : ", exc);
         } finally {

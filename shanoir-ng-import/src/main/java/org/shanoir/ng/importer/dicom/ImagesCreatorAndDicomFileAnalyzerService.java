@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -37,12 +36,12 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
-import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,10 +69,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ImagesCreatorAndDicomFileAnalyzerService.class);
 
-    private static final String SLASH = "/";
-
-    public static final String SUFFIX_DCM = ".dcm";
-
     private static final String YES = "YES";
 
     private static final String SERIES_NUMBER_0 = "0";
@@ -84,7 +79,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
     private ShanoirEventService eventService;
 
     public void createImagesAndAnalyzeDicomFiles(
-            ImportJobBase importJob, String folderFileAbsolutePath, ShanoirEvent event, boolean isFromShUpQualityControl)
+            ImportJobBase importJob, String folderFileAbsolutePath, ShanoirEvent event, boolean isFromPACS)
             throws FileNotFoundException {
         int cpt = 1;
         int nbSeries = importJob.getSeries().size();
@@ -96,14 +91,14 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                     eventService.publishEvent(event);
                 }
                 try {
-                    filterAndCreateImages(folderFileAbsolutePath, serie, isFromShUpQualityControl);
+                    filterAndCreateImages(folderFileAbsolutePath, serie, isFromPACS);
                 } catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
                     handleError(event, nbSeries, cpt, serie, e);
                 }
                 if (!serie.isIgnored()) {
                     // use a second try here, in case error is on serie, to get at least the serie name for error tracing
                     try {
-                        getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, importJob.getPatient(), importJob.getStudy(), serie);
+                        getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, importJob.getPatient(), importJob.getStudy(), serie, isFromPACS);
                     } catch (Exception e) {
                         handleError(event, nbSeries, cpt, serie, e);
                     }
@@ -138,12 +133,17 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param serie
      * @throws FileNotFoundException
      */
-    public void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Patient patient, Study study, Serie serie)
+    public void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Patient patient, Study study, Serie serie, boolean isFromPACS)
             throws FileNotFoundException {
         List<Instance> instances = serie.getInstances();
         if (instances != null && !instances.isEmpty()) {
-            Instance firstInstance = instances.get(0);
-            File firstInstanceFile = getFileFromInstance(firstInstance, serie, folderFileAbsolutePath);
+            Instance firstInstance = instances.getFirst();
+            File firstInstanceFile = null;
+            if (isFromPACS) {
+                firstInstanceFile = ImportUtils.getInstanceFileByUIDs(firstInstance, serie, folderFileAbsolutePath);
+            } else {
+                firstInstanceFile = ImportUtils.getInstanceFileByReferencedFileID(firstInstance, folderFileAbsolutePath);
+            }
             processDicomFileForFirstInstance(firstInstanceFile, patient, study, serie);
         }
     }
@@ -156,14 +156,20 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param serie
      * @throws FileNotFoundException
      */
-    private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isFromShUpQualityControl) throws Exception {
+    private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isFromPACS) throws Exception {
         List<Image> images = new ArrayList<Image>();
         List<Instance> instances = serie.getInstances();
         if (instances != null) {
             for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
                 Instance instance = instancesIt.next();
-                File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath);
-                processDicomFilePerInstanceAndCreateImage(instanceFile, images, folderFileAbsolutePath, isFromShUpQualityControl);
+                File instanceFile = null;
+                if (isFromPACS) {
+                    instanceFile = ImportUtils.getInstanceFileByUIDs(instance, serie, folderFileAbsolutePath);
+                } else {
+                    instanceFile = ImportUtils.getInstanceFileByReferencedFileID(instance, folderFileAbsolutePath);
+                }
+                LOG.info("filterAndCreateImages: processing file {}", instanceFile.getAbsolutePath());
+                processDicomFilePerInstanceAndCreateImage(instanceFile, images, folderFileAbsolutePath);
             }
             /**
              * Old versions of ShUp v7.0.1, still installed and running, send "ignored" series.
@@ -180,38 +186,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
         }
     }
 
-    /**
-     * This method accesses to the dicom file of each instance and handles it.
-     *
-     * @param instance
-     * @param folderFileAbsolutePath
-     * @param nonImages
-     * @param images
-     * @throws FileNotFoundException
-     */
-    public File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath)
-            throws FileNotFoundException {
-        String instanceFilePath;
-        if (ArrayUtils.isEmpty(instance.getReferencedFileID())) {
-            StringBuilder instanceFilePathBuilder = new StringBuilder();
-            instanceFilePathBuilder.append(folderFileAbsolutePath)
-                .append(File.separator)
-                .append(serie.getSeriesInstanceUID())
-                .append(File.separator)
-                .append(instance.getSopInstanceUID())
-                    .append(SUFFIX_DCM);
-            instanceFilePath = instanceFilePathBuilder.toString();
-        } else {
-            instanceFilePath = DicomUtils.referencedFileIDToPath(folderFileAbsolutePath, instance.getReferencedFileID());
-        }
-        File instanceFile = new File(instanceFilePath);
-        if (instanceFile.exists()) {
-            return instanceFile;
-        } else {
-            throw new FileNotFoundException(
-                    "instanceFilePath: missing file: " + instanceFilePath);
-        }
-    }
 
     /**
      * This method opens the connection to each dcm file and reads its attributes
@@ -226,22 +200,20 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
      * @param images
      */
     private void processDicomFilePerInstanceAndCreateImage(File dicomFile, List<Image> images,
-            String folderFileAbsolutePath, boolean isFromShUpQualityControl) throws Exception {
+            String folderFileAbsolutePath) throws Exception {
         try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
             Attributes attributes = dIS.readDatasetUntilPixelData();
             // Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
             if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
-                // else do nothing here as instances list will be emptied after split between images and non-images
                 Image image = new Image();
-                /**
-                 * Attention: the path of each image is always relative: either to the temporary folder created
-                 * with dicom zip import during the upload or with the DicomStoreSCPServer folder for PACS import.
-                 * If the import is from ShanoirUploader, the path stays absolute to allow the execution of quality control.
-                 */
-                String relativeFilePath = !isFromShUpQualityControl
-                        ? dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "")
-                        : dicomFile.getAbsolutePath();
-                image.setPath(relativeFilePath);
+                String sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
+                if (sopInstanceUID == null || sopInstanceUID.isEmpty()) {
+                    UIDGeneration generator = new UIDGeneration();
+                    sopInstanceUID = generator.getNewUID();
+                    LOG.warn("DICOM file without SOPInstanceUID: " + dicomFile.getAbsolutePath());
+                }
+                image.setSOPInstanceUID(sopInstanceUID);
+                image.setPath(dicomFile.getAbsolutePath());
                 addImageSeparateDatasetsInfo(image, attributes, dicomFile);
                 images.add(image);
             }
@@ -293,12 +265,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
             }
             attributes = emf.extract(attributes, 0);
         }
-        String sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
-        if (sopInstanceUID == null || sopInstanceUID.isEmpty()) {
-            UIDGeneration generator = new UIDGeneration();
-            sopInstanceUID = generator.getNewUID();
-        }
-        image.setSOPInstanceUID(sopInstanceUID);
         // acquisition number
         image.setAcquisitionNumber(attributes.getInt(Tag.AcquisitionNumber, 0));
         // image orientation patient

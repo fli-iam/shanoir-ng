@@ -127,14 +127,17 @@ public class ImporterManagerService {
                 // (see config DicomStoreSCPServer)
                 downloadAndMoveDicomFilesToImportJobDir(importJobDir,
                         importJob.getStudyInstanceUID(), importJob.getSeries(), event);
-                pseudonymize(importJob, event, importJobDir);
-            } else if (importJob.isFromDicomZip()) {
-                pseudonymize(importJob, event, importJobDir);
-            } else if (!importJob.isFromShanoirUploader()) {
+                imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
+                        importJobDir.getAbsolutePath(), event, true);
+            } else if (importJob.isFromShanoirUploader()) {
+                imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
+                        importJobDir.getAbsolutePath(), event, false);
+            // isFromDicomZip: do nothing, as images creation and analyze of DICOM files
+            // have been done after upload of ZIP file(s) already
+            } else if (!importJob.isFromDicomZip()) {
                 throw new ShanoirException("Unsupported type of import.");
             }
-            imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
-                    importJobDir.getAbsolutePath(), event, false);
+
             // 2. call to cleanSeries: at this point we are sure for all imports, that the
             // ImagesCreatorAndDicomFileAnalyzer has been run and correctly classified
             // everything. So no need to check afterwards for erroneous series.
@@ -145,7 +148,10 @@ public class ImporterManagerService {
 
             event.setProgress(0.25F);
             eventService.publishEvent(event);
-            importJobStatusService.setInProgress(importJob, "Creating datasets");
+            importJobStatusService.setInProgress(importJob, "Pseudonymizing and creating datasets");
+            if (!importJob.isFromShanoirUploader()) {
+                pseudonymize(importJob, event, importJobDir);
+            }
             datasetsCreatorService.createDatasets(importJob, importJobDir);
             importJobStatusService.setFinished(importJob);
 

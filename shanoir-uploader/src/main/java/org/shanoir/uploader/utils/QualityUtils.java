@@ -89,7 +89,6 @@ public class QualityUtils {
             LOG.info("Quality Control At Import - " + qualityCards.size() + " quality card(s) found for study id " + importJob.getStudyId() + ", " + cardsToCheck.size() + " to be checked at import.");
         }
 
-        // Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
         imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), null, true);
 
         // Construct Dicom datasets from images

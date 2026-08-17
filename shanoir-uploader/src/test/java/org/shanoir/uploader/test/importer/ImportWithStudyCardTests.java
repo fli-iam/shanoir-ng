@@ -245,7 +245,7 @@ public class ImportWithStudyCardTests extends AbstractImportTest {
                     new org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService();
             for (Serie serie : selectedSeries) {
                 dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), importJob.getPatient(),
-                        importJob.getStudy(), serie);
+                        importJob.getStudy(), serie, true);
             }
 
             StudyCard studyCard = study.getStudyCards().get(0);

@@ -17,7 +17,6 @@ import java.util.List;
 import javax.swing.JProgressBar;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
@@ -28,7 +27,6 @@ import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.PseudonymusHashValues;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
@@ -248,11 +246,7 @@ public class ImportUtils {
                 continue;
             }
             for (Instance instance : serie.getInstances()) {
-                File sourceFile = dicomFileAnalyzer.getFileFromInstance(instance, serie, filePathDicomDir);
-                // Attention: very important here: we copy locally and now had access to the file, now we
-                // set the DICOMDIR referencedFileID to null, that the later code in ImagesCreatorAnd-
-                // DicomFileAnalyzerService does not search it as before
-                instance.setReferencedFileID(null);
+                File sourceFile = org.shanoir.ng.utils.ImportUtils.getInstanceFileByReferencedFileID(instance, filePathDicomDir);
                 // SOPInstanceUID is a dotted numeric string: no path separators or colons,
                 // so it's a safe, portable filename on every OS without any sanitizing
                 String dicomFileName = instance.getSopInstanceUID() + DcmRcvManager.DICOM_FILE_SUFFIX;

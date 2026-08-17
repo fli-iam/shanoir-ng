@@ -36,9 +36,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.shanoir.anonymization.anonymization.AnonymizationResult;
-import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Instance;
@@ -47,6 +45,7 @@ import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,6 +67,8 @@ public final class ImportUtils {
     private static final String APPLICATION_ZIP = "application/zip";
 
     private static final String ZIP_FILE_SUFFIX = ".zip";
+
+    public static final String SUFFIX_DCM = ".dcm";
 
     private static final String UPLOAD_FILE_SUFFIX = ".upload";
 
@@ -432,13 +433,6 @@ public final class ImportUtils {
                 String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(instance.getSopInstanceUID());
                 if (newSopInstanceUID != null) {
                     instance.setSopInstanceUID(newSopInstanceUID);
-                    // This case is important with DICOM zip import via web GUI,
-                    // as the unzipped folder has a n-sub-folder structure
-                    if (!ArrayUtils.isEmpty(instance.getReferencedFileID())) {
-                        instance.setReferencedFileID(renamedReferencedFileID(instance.getReferencedFileID(), newSopInstanceUID));
-                    } else {
-                        instance.setReferencedFileID(new String[] {newSopInstanceUID + ImagesCreatorAndDicomFileAnalyzerService.SUFFIX_DCM});
-                    }
                     updatedInstances++;
                 } else {
                     missingInstances++;
@@ -453,11 +447,31 @@ public final class ImportUtils {
                 missingInstances > 0 ? (", " + missingInstances + " instance(s) could not be matched") : "");
     }
 
-    private static String[] renamedReferencedFileID(String[] originalReferencedFileID, String newSopInstanceUID) {
-        String newFileName = newSopInstanceUID + ImagesCreatorAndDicomFileAnalyzerService.SUFFIX_DCM;
-        String[] newReferencedFileID = originalReferencedFileID.clone();
-        newReferencedFileID[newReferencedFileID.length - 1] = newFileName;
-        return newReferencedFileID;
+    public static File getInstanceFileByReferencedFileID(Instance instance, String folderFileAbsolutePath)
+            throws FileNotFoundException {
+        String instanceFilePath = DicomUtils.referencedFileIDToPath(folderFileAbsolutePath, instance.getReferencedFileID());
+        return getFileFromPath(instanceFilePath);
+    }
+
+    public static File getInstanceFileByUIDs(Instance instance, Serie serie, String folderFileAbsolutePath) throws FileNotFoundException {
+        StringBuilder instanceFilePathBuilder = new StringBuilder();
+        instanceFilePathBuilder.append(folderFileAbsolutePath)
+                .append(File.separator)
+                .append(serie.getSeriesInstanceUID())
+                .append(File.separator)
+                .append(instance.getSopInstanceUID())
+                .append(SUFFIX_DCM);
+        return getFileFromPath(instanceFilePathBuilder.toString());
+    }
+
+    private static File getFileFromPath(String instanceFilePath) throws FileNotFoundException {
+        File instanceFile = new File(instanceFilePath);
+        if (instanceFile.exists()) {
+            return instanceFile;
+        } else {
+            throw new FileNotFoundException(
+                    "instanceFilePath: missing file: " + instanceFilePath);
+        }
     }
 
 }

@@ -115,7 +115,7 @@ public class DownloadOrCopyRunnable implements Runnable {
                  */
                 for (Serie serie : series) {
                     dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(importJobFolder.getAbsolutePath(), importJob.getPatient(),
-                            importJob.getStudy(), serie);
+                            importJob.getStudy(), serie, true);
                 }
             } catch (FileNotFoundException e) {
                 LOG.error(e.getMessage(), e);

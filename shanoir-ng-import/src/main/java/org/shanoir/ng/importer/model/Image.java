@@ -21,6 +21,9 @@ import org.shanoir.ng.shared.dicom.EchoTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * The path of an image is always absolute.
+ */
 public class Image {
 
     @JsonProperty("path")
@@ -44,6 +47,7 @@ public class Image {
     @JsonProperty("imageOrientationPatient")
     private List<Double> imageOrientationPatient;
 
+    @JsonProperty("sopInstanceUID")
     private String sopInstanceUID;
 
     public String getPath() {
@@ -109,4 +113,5 @@ public class Image {
     public void setSOPInstanceUID(String sopInstanceUID) {
         this.sopInstanceUID = sopInstanceUID;
     }
+
 }
