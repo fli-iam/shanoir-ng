@@ -131,7 +131,7 @@ public class ImporterManagerService {
                         importJobDir.getAbsolutePath(), event, true);
             } else if (importJob.isFromShanoirUploader()) {
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
-                        importJobDir.getAbsolutePath(), event, false);
+                        importJobDir.getAbsolutePath(), event, true);
             // isFromDicomZip: do nothing, as images creation and analyze of DICOM files
             // have been done after upload of ZIP file(s) already
             } else if (!importJob.isFromDicomZip()) {

@@ -19,7 +19,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -687,33 +691,54 @@ public class ImporterApiController implements ImporterApi {
      * directly into a seriesInstanceUID-named sub-folder of the temp dir.
      */
     @Override
-    public ResponseEntity<Void> uploadFileToSeries(@PathVariable("tempDirId") String tempDirId,
+    public ResponseEntity<Void> uploadFileToSeries(
+            @PathVariable("tempDirId") String tempDirId,
             @PathVariable("seriesInstanceUID") String seriesInstanceUID,
-            @RequestParam("file") MultipartFile file) throws RestServiceException, IOException {
+            @RequestParam("file") MultipartFile file)
+            throws RestServiceException, IOException {
         final File userImportDir = ImportUtils.getUserImportDir(importDir);
         final File importJobDir = new File(userImportDir, tempDirId);
-        // only continue in case of existing temp dir id
-        if (!importJobDir.exists()) {
-            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                    "Upload file called with not existing tempDirId.", null));
+        if (!importJobDir.isDirectory()) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "Upload file called with not existing tempDirId.",
+                            null));
         }
         final File seriesDir = new File(importJobDir, seriesInstanceUID);
-        if (!seriesDir.exists() && !seriesDir.mkdirs()) {
-            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                    "Could not create series sub-folder for tempDirId.", null));
-        }
+        Files.createDirectories(seriesDir.toPath());
         writeUploadedFile(seriesDir, file);
-        return new ResponseEntity<Void>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
-    private void writeUploadedFile(File targetDir, MultipartFile file) throws RestServiceException, IOException {
-        File fileToWrite = new File(targetDir, file.getOriginalFilename());
-        if (fileToWrite.exists()) {
-            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                    "Duplicate file name in tempDir, could not create file as file exists already.", null));
-        } else {
-            byte[] bytes = file.getBytes();
-            Files.write(fileToWrite.toPath(), bytes);
+    private void writeUploadedFile(File targetDir, MultipartFile file)
+            throws RestServiceException, IOException {
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isBlank()) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "Uploaded file has no filename.",
+                            null));
+        }
+
+        String filename = Paths.get(originalFilename)
+                .getFileName()
+                .toString();
+        Path fileToWrite = targetDir.toPath().resolve(filename);
+        try {
+            Files.write(
+                    fileToWrite,
+                    file.getBytes(),
+                    StandardOpenOption.CREATE_NEW,
+                    StandardOpenOption.WRITE
+            );
+        } catch (FileAlreadyExistsException e) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "Duplicate file name in tempDir, could not create file as file exists already.",
+                            null));
         }
     }
 
