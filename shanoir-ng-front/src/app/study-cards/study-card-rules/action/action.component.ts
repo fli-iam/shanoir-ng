@@ -165,10 +165,11 @@ export class ShanoirMetadataField {
     public options?: Observable<Option<any>[]>;
 
     constructor(
-            public label: string, 
+            public label: string,
             public field: string,
-            public scope: MetadataFieldScope, 
-            options?: Observable<Option<any>[]> | Option<any>[]) {
+            public scope: MetadataFieldScope,
+            options?: Observable<Option<any>[]> | Option<any>[],
+            public numeric: boolean = false) {
 
         if (options instanceof Observable) {
             this.options = options;

@@ -104,6 +104,8 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             validators.push(Validators.pattern(this.buildArrayPattern(vm, 'float')));
         } else if ( type == 'IntArray') {
             validators.push(Validators.pattern(this.buildArrayPattern(vm, 'int'))); // comma separated integers
+        } else if (!type && this.fields?.find(f => f.field == this.condition?.shanoirField)?.numeric) {
+            validators.push(Validators.pattern('[+-]?([0-9]*[.])?[0-9]+')); // reals : only numbers, with dot as decimal separator
         }
         return new FormControl(value, validators);
     }
@@ -370,7 +372,17 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                 this.operations.forEach(op => op.disabled = false);
             }
         } else { // Shanoir fields
-            if (this.shanoirFieldOptions?.length > 0) { // with option list such as coils
+            const shanoirField: ShanoirMetadataField = this.fields?.find(f => f.field == this.condition.shanoirField);
+            if (shanoirField?.numeric) {
+                this.operations.forEach(op => {
+                    if (['EQUALS', 'NOT_EQUALS', 'SMALLER_THAN', 'BIGGER_THAN'].includes(op.value)) {
+                        op.disabled = false;
+                    } else {
+                        op.disabled = true;
+                    }
+                   ;
+                });
+            } else if (this.shanoirFieldOptions?.length > 0) { // with option list such as coils
                 this.operations.forEach(op => {
                     if (['EQUALS', 'NOT_EQUALS'].includes(op.value)) {
                         op.disabled = false;
