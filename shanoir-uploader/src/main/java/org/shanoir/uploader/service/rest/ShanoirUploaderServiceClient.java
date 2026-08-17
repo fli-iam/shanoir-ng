@@ -936,7 +936,7 @@ public class ShanoirUploaderServiceClient {
      * seriesInstanceUID sub-folder on the server.
      */
     public void uploadFile(String tempDirId, String seriesInstanceUID, File file) throws Exception {
-        String url = this.serviceURLImporterCreateTempDir + tempDirId + "/series/" + seriesInstanceUID + "/";
+        String url = this.serviceURLImporterCreateTempDir + "/" + tempDirId + "/series/" + seriesInstanceUID;
         try (CloseableHttpResponse response = httpService.postFile(url, file)) {
             int code = response.getCode();
             if (code != HttpStatus.SC_OK) {

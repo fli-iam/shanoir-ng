@@ -38,6 +38,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.shanoir.anonymization.anonymization.AnonymizationResult;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
+import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Serie;
@@ -407,8 +408,8 @@ public final class ImportUtils {
      * their OLD value in the shared old->new maps produced by anonymization.
      * @throws FileNotFoundException
      */
-    public static void updateImportJobInstancesWithPseudonymizedUIDs(final ImportJobBase importJob, final File importJobFolder,
-            final AnonymizationResult anonymizationResult, boolean referencedFileIDFlat) throws FileNotFoundException {
+    public static void updateImportJobWithPseudonymizedUIDs(final ImportJobBase importJob, final File importJobFolder,
+            final AnonymizationResult anonymizationResult) throws FileNotFoundException {
         if (importJob.getPatient() == null) {
             return;
         }
@@ -435,18 +436,27 @@ public final class ImportUtils {
                 if (newSopInstanceUID != null) {
                     instance.setSopInstanceUID(newSopInstanceUID);
                     String newFileName = newSopInstanceUID + SUFFIX_DCM;
-                    if (referencedFileIDFlat) {
-                        instance.setReferencedFileID(new String[] {newFileName});
-                    } else {
-                        instance.setReferencedFileID(
-                                renamedReferencedFileID(instance.getReferencedFileID(), newFileName));
-                    }
+                    instance.setReferencedFileID(
+                            renamedReferencedFileID(instance.getReferencedFileID(), newFileName));
                     updatedInstances++;
                 } else {
                     missingInstances++;
                     LOG.warn("{}: no pseudonymized SOPInstanceUID found for instance file {}; "
                             + "importJob keeps its pre-pseudonymization UID for this instance.",
                             importJobFolder.getName(), instance.getSopInstanceUID());
+                }
+            }
+            if (serie.getImages() == null) {
+                continue;
+            }
+            for (Image image : serie.getImages()) {
+                String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(image.getSOPInstanceUID());
+                if (newSopInstanceUID != null) {
+                    image.setSOPInstanceUID(newSopInstanceUID);
+                    String newFileName = newSopInstanceUID + SUFFIX_DCM;
+                    String path = image.getPath();
+                    String[] pathArray = path.split(File.separator);
+                    image.setPath(renamedReferencedFileID(pathArray, newFileName).toString());
                 }
             }
         }
@@ -461,6 +471,9 @@ public final class ImportUtils {
      * (if any) the original referencedFileID had.
      */
     private static String[] renamedReferencedFileID(String[] originalReferencedFileID, String newFileName) {
+        if (originalReferencedFileID == null || originalReferencedFileID.length == 0) {
+            return new String[] {newFileName};
+        }
         String[] newReferencedFileID = originalReferencedFileID.clone();
         newReferencedFileID[newReferencedFileID.length - 1] = newFileName;
         return newReferencedFileID;

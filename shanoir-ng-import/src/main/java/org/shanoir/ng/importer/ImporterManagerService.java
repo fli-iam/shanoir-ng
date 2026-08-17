@@ -208,7 +208,7 @@ public class ImporterManagerService {
             eventService.publishEvent(event);
             try {
                 AnonymizationResult anonymizationResult = ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName, importJob.getStudyInstanceUID());
-                ImportUtils.updateImportJobInstancesWithPseudonymizedUIDs(importJob, importJobDir, anonymizationResult, false);
+                ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, importJobDir, anonymizationResult);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
                 throw new ShanoirException("Error during pseudonymization.");

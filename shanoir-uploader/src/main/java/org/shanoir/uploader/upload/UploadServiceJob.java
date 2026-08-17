@@ -16,9 +16,14 @@ package org.shanoir.uploader.upload;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -31,6 +36,8 @@ import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.ImportJobStatus;
+import org.shanoir.ng.importer.model.Instance;
+import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.check.DicomInstanceConsistencyChecker;
@@ -192,12 +199,20 @@ public class UploadServiceJob {
         // the same ImportJob instance / import-job.json file.
         final Object progressLock = new Object();
 
+        // allFiles is only consulted to physically locate each instance's bytes (by matching
+        // SOPInstanceUID against file names) - it does not drive the series grouping.
+        final List<UploadTask> uploadTasks = buildUploadTasks(allFiles, importJob);
+
         ExecutorService uploadExecutor = Executors.newFixedThreadPool(
                 Math.min(UPLOAD_PARALLELISM, Math.max(1, total)));
         try {
-            List<Future<Void>> futures = allFiles.stream()
-                    .map(file -> (Callable<Void>) () -> {
-                        shanoirUploaderServiceClient.uploadFile(tempDirId, file);
+            List<Future<Void>> futures = uploadTasks.stream()
+                    .map(task -> (Callable<Void>) () -> {
+                        if (task.seriesInstanceUID() != null) {
+                            shanoirUploaderServiceClient.uploadFile(tempDirId, task.seriesInstanceUID(), task.file());
+                        } else {
+                            throw new IOException("Instance with missing seriesInstanceUID.");
+                        }
                         int done = completedCount.incrementAndGet();
                         synchronized (progressLock) {
                             String percentage = (done * 100 / total) + " %";
@@ -235,6 +250,66 @@ public class UploadServiceJob {
         } finally {
             uploadExecutor.shutdown();
         }
+    }
+
+    /**
+     * A single planned upload: a local file and the (possibly null) seriesInstanceUID of the
+     * serie it belongs to, according to the ImportJob. Null seriesInstanceUID means the file
+     * could not be matched to any instance in the ImportJob and must go through the legacy
+     * flat upload instead.
+     */
+    private record UploadTask(File file, String seriesInstanceUID) { }
+
+    /**
+     * Builds one upload task per file on disk, using the ImportJob's series/instances as the
+     * source of truth for the target seriesInstanceUID: for every Instance of every Serie, the
+     * corresponding local file is looked up by SOPInstanceUID (files are named
+     * "{sopInstanceUID}{DICOM_FILE_SUFFIX}") and paired with that Serie's - already
+     * pseudonymized - seriesInstanceUID. Any file on disk that cannot be matched to an instance
+     * (should not normally happen at this stage) still gets an upload task, just without a
+     * seriesInstanceUID.
+     */
+    private List<UploadTask> buildUploadTasks(final Collection<File> allFiles, final ImportJobBase importJob) {
+        final Map<String, File> sopInstanceUIDToFile = new HashMap<>();
+        for (File file : allFiles) {
+            sopInstanceUIDToFile.put(stripDicomSuffix(file.getName()), file);
+        }
+
+        final List<UploadTask> tasks = new ArrayList<>(allFiles.size());
+        final Set<File> matchedFiles = new HashSet<>();
+        if (importJob.getSeries() != null) {
+            for (Serie serie : importJob.getSeries()) {
+                if (serie.getInstances() == null) {
+                    continue;
+                }
+                for (Instance instance : serie.getInstances()) {
+                    File file = sopInstanceUIDToFile.get(instance.getSopInstanceUID());
+                    if (file != null) {
+                        tasks.add(new UploadTask(file, serie.getSeriesInstanceUID()));
+                        matchedFiles.add(file);
+                    } else {
+                        LOG.warn("No local file found for instance {} of serie {}, skipping.",
+                                instance.getSopInstanceUID(), serie.getSeriesInstanceUID());
+                    }
+                }
+            }
+        }
+        // Any file on disk not referenced by an instance in the ImportJob: still upload it
+        // (never silently lose data), but we don't know its series, so use the flat endpoint.
+        for (File file : allFiles) {
+            if (!matchedFiles.contains(file)) {
+                LOG.warn("File {} is not referenced by any instance in the ImportJob, falling back to flat upload.",
+                        file.getAbsolutePath());
+                tasks.add(new UploadTask(file, null));
+            }
+        }
+        return tasks;
+    }
+
+    private String stripDicomSuffix(String fileName) {
+        return fileName.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)
+                ? fileName.substring(0, fileName.length() - DcmRcvManager.DICOM_FILE_SUFFIX.length())
+                : fileName;
     }
 
     /**
