@@ -34,7 +34,7 @@ public class VipExecutionDTO {
     private Integer errorCode;
     private Long startDate;
     private Long endDate;
-    private String resultsLocation;
+    private List<String> resultsLocation;
     private String sorting;
     private LinkedHashMap<String, LinkedHashMap<String, Object>> jobs;
 
@@ -133,11 +133,11 @@ public class VipExecutionDTO {
         this.endDate = endDate;
     }
 
-    public String getResultsLocation() {
+    public List<String> getResultsLocation() {
         return resultsLocation;
     }
 
-    public void setResultsLocation(String resultsLocation) {
+    public void setResultsLocation(List<String> resultsLocation) {
         this.resultsLocation = resultsLocation;
     }
 
