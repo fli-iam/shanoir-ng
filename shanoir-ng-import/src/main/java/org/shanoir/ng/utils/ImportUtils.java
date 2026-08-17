@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
@@ -454,9 +455,9 @@ public final class ImportUtils {
                 if (newSopInstanceUID != null) {
                     image.setSOPInstanceUID(newSopInstanceUID);
                     String newFileName = newSopInstanceUID + SUFFIX_DCM;
-                    String path = image.getPath();
-                    String[] pathArray = path.split(File.separator);
-                    image.setPath(renamedReferencedFileID(pathArray, newFileName).toString());
+                    Path path = Paths.get(image.getPath());
+                    Path renamedPath = path.resolveSibling(newFileName);
+                    image.setPath(renamedPath.toString());
                 }
             }
         }
