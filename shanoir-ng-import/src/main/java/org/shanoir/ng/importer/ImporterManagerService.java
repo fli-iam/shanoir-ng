@@ -129,6 +129,8 @@ public class ImporterManagerService {
                         importJob.getStudyInstanceUID(), importJob.getSeries(), event);
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
                         importJobDir.getAbsolutePath(), event, true);
+            // Pseudonymization already done and UIDs updated in importJob
+            // createImages already based on correct instances post-pseudo
             } else if (importJob.isFromShanoirUploader()) {
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
                         importJobDir.getAbsolutePath(), event, true);
@@ -152,7 +154,6 @@ public class ImporterManagerService {
             if (!importJob.isFromShanoirUploader()) {
                 pseudonymize(importJob, event, importJobDir);
             }
-            // fix here
             datasetsCreatorService.createDatasets(importJob, importJobDir);
             importJobStatusService.setFinished(importJob);
 
