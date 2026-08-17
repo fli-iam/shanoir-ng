@@ -345,15 +345,27 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             // none at all). Used to correlate this file back to the Instance
             // it came from.
             String finalSopInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
-            if (finalSopInstanceUID != null) {
-                sopInstanceUIDs.put(sopInstanceUID, finalSopInstanceUID);
-            } else {
-                LOG.error("performAnonymization : error while anonymizing file " + dicomFile.toString() + ", SOPInstanceUID null.");
-            }
 
             LOG.debug("finish anonymization: begin storage");
             dos = new DicomOutputStream(dicomFile);
             dos.writeDataset(metaInformationAttributes, datasetAttributes);
+            dos.close();
+            dos = null;
+            // Rename the file to "<SOPInstanceUID>.dcm" in its original parent
+            // directory, now that the anonymized content has been fully written
+            // and flushed to disk.
+            if (finalSopInstanceUID != null) {
+                sopInstanceUIDs.put(sopInstanceUID, finalSopInstanceUID);
+                File renamedFile = new File(dicomFile.getParentFile(), finalSopInstanceUID + ".dcm");
+                if (renamedFile.exists()) {
+                    LOG.warn(
+                            "performAnonymization : skipping rename, target file {} already exists (SOPInstanceUID collision for {})",
+                            renamedFile.getAbsolutePath(), dicomFile.getAbsolutePath());
+                } else if (!dicomFile.renameTo(renamedFile)) {
+                    LOG.error("performAnonymization : could not rename file {} to {}",
+                            dicomFile.getAbsolutePath(), renamedFile.getAbsolutePath());
+                }
+            }
             LOG.debug("finish anonymization: end storage");
         } catch (final IOException exc) {
             LOG.error("performAnonymization : error while anonymizing file " + dicomFile.toString() + " : ", exc);

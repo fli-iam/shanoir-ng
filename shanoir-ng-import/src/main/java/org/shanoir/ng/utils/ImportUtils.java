@@ -394,6 +394,7 @@ public final class ImportUtils {
      * SOPInstanceUID directly inside the DICOM files on disk, in place -- but
      * importJob's own Patient/Study/Serie/Instance tree was built from those
      * files BEFORE that rewrite, from the original, vendor-assigned UIDs.
+     *
      * Left untouched, the importJob written to import-job.json (sent as-is
      * to ms-import, and later relied on e.g. by UploadServiceJob's
      * post-import metadata check) would reference UIDs that no longer exist
@@ -407,7 +408,7 @@ public final class ImportUtils {
      * @throws FileNotFoundException
      */
     public static void updateImportJobInstancesWithPseudonymizedUIDs(final ImportJobBase importJob, final File importJobFolder,
-            final AnonymizationResult anonymizationResult) throws FileNotFoundException {
+            final AnonymizationResult anonymizationResult, boolean referencedFileIDFlat) throws FileNotFoundException {
         if (importJob.getPatient() == null) {
             return;
         }
@@ -433,6 +434,13 @@ public final class ImportUtils {
                 String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(instance.getSopInstanceUID());
                 if (newSopInstanceUID != null) {
                     instance.setSopInstanceUID(newSopInstanceUID);
+                    String newFileName = newSopInstanceUID + SUFFIX_DCM;
+                    if (referencedFileIDFlat) {
+                        instance.setReferencedFileID(new String[] {newFileName});
+                    } else {
+                        instance.setReferencedFileID(
+                                renamedReferencedFileID(instance.getReferencedFileID(), newFileName));
+                    }
                     updatedInstances++;
                 } else {
                     missingInstances++;
@@ -445,6 +453,17 @@ public final class ImportUtils {
         LOG.info("{}: importJobUIDs updated for {} instance(s){}.",
                 importJobFolder.getName(), updatedInstances,
                 missingInstances > 0 ? (", " + missingInstances + " instance(s) could not be matched") : "");
+    }
+
+    /**
+     * Builds the new referencedFileID matching the renamed file
+     * "<newSopInstanceUID>.dcm" on disk, preserving whatever directory prefix
+     * (if any) the original referencedFileID had.
+     */
+    private static String[] renamedReferencedFileID(String[] originalReferencedFileID, String newFileName) {
+        String[] newReferencedFileID = originalReferencedFileID.clone();
+        newReferencedFileID[newReferencedFileID.length - 1] = newFileName;
+        return newReferencedFileID;
     }
 
     public static File getInstanceFileByReferencedFileID(Instance instance, String folderFileAbsolutePath)

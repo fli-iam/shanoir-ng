@@ -152,6 +152,7 @@ public class ImporterManagerService {
             if (!importJob.isFromShanoirUploader()) {
                 pseudonymize(importJob, event, importJobDir);
             }
+            // fix here
             datasetsCreatorService.createDatasets(importJob, importJobDir);
             importJobStatusService.setFinished(importJob);
 
@@ -207,7 +208,7 @@ public class ImporterManagerService {
             eventService.publishEvent(event);
             try {
                 AnonymizationResult anonymizationResult = ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName, importJob.getStudyInstanceUID());
-                ImportUtils.updateImportJobInstancesWithPseudonymizedUIDs(importJob, importJobDir, anonymizationResult);
+                ImportUtils.updateImportJobInstancesWithPseudonymizedUIDs(importJob, importJobDir, anonymizationResult, false);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);
                 throw new ShanoirException("Error during pseudonymization.");
@@ -329,7 +330,7 @@ public class ImporterManagerService {
         for (Iterator<Image> imagesIt = images.iterator(); imagesIt.hasNext();) {
             Image image = imagesIt.next();
             String path = image.getPath();
-            File file = new File(workFolderPath + File.separator + path);
+            File file = new File(path);
             if (file.exists()) {
                 pathsSet.add(file);
             } else {

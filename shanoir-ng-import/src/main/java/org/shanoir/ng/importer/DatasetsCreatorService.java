@@ -33,6 +33,7 @@ import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -249,18 +250,18 @@ public class DatasetsCreatorService {
             Image image = iterator.next();
             // the path has been set in processDicomFile in DicomFileAnalyzer before
             String filePath = image.getPath();
-            File oldFile = new File(importJobDir.getAbsolutePath() + File.separator + filePath);
+            File oldFile = new File(filePath);
             if (oldFile.exists()) {
-                File newFile = new File(serieIDFolder.getAbsolutePath() + File.separator + filePath);
+                File newFile = new File(serieIDFolder.getAbsolutePath() + File.separator + image.getSOPInstanceUID() + ImportUtils.SUFFIX_DCM);
                 newFile.getParentFile().mkdirs();
                 boolean success = oldFile.renameTo(newFile);
                 if (!success) {
-                    throw new ShanoirException("Error while creating serie id folder: file to copy already exists.");
+                    throw new ShanoirException("Error creating serie id folder: file to copy exists.");
                 }
                 LOG.debug("Moving file: {} to {}", oldFile.getAbsolutePath(), newFile.getAbsolutePath());
                 image.setPath(newFile.getAbsolutePath());
             } else {
-                throw new ShanoirException("Error while creating serie id folder: file to copy does not exist.");
+                throw new ShanoirException("Error creating serie id folder: file to copy does not exist: " + oldFile.getAbsolutePath());
             }
         }
     }
