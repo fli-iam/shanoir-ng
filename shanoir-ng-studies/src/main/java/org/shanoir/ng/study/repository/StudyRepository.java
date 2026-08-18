@@ -42,7 +42,7 @@ public interface StudyRepository extends JpaRepository<Study, Long>, StudyReposi
     List<Study> findByVisibleByDefaultTrueAndIsDraftFalse();
 
     @EntityGraph(attributePaths = { "studyTags", "profile" })
-    List<Study> findDistinctByStudyUserListUserIdAndStudyUserListExpirationBefore(Long userId, LocalDate date);
+    List<Study> findDistinctByStudyUserListUserIdAndStudyUserListExpirationDateBefore(Long userId, LocalDate date);
 
     List<Study> findByIsDraftTrue();
 

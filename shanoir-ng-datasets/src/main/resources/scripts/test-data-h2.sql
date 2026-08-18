@@ -164,7 +164,7 @@ VALUES
 	(3);
 
 INSERT INTO study_user
-	(id, confirmed, receive_study_user_report, receive_new_import_report, study_id, user_id, user_name, expiration, received_expiration_notification)
+	(id, confirmed, receive_study_user_report, receive_new_import_report, study_id, user_id, user_name, expiration_date, received_expiration_notification)
 VALUES
 	(1, 1, 0, 1, 1, 1, 'admin', null, 0),
 	(2, 1, 0, 1, 3, 1, 'admin', null, 0),

@@ -109,7 +109,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
             'motivation': [this.accessRequest.motivation, []],
             'studyId': [this.accessRequest.studyId, []],
             'studyName': [this.accessRequest.studyName, []],
-            'expiration': [this.accessRequest.expiration]
+            'expirationDate': [this.accessRequest.expirationDate]
         });
     }
 
@@ -124,7 +124,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     acceptRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, true, this.accessRequest.expiration)
+        this.accessRequestService.resolveRequest(this.accessRequest.id, true, this.accessRequest.expirationDate)
             .then(() => {
                 this.accessRequestService.decreaseAccessRequests();
                 this.router.navigate(['/study/details/' + this.accessRequest.studyId])
@@ -135,7 +135,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     refuseRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, false, this.accessRequest.expiration).then(() => {
+        this.accessRequestService.resolveRequest(this.accessRequest.id, false, this.accessRequest.expirationDate).then(() => {
             this.accessRequestService.decreaseAccessRequests();
             this.goBack();
         });

@@ -249,9 +249,9 @@ public class RabbitMQStudiesService {
                 if (su.getUserId().equals(userId)) { // user already exists on study
                     // check if it's an extension request
                     if (userAccessData != null && event.getEventType().equals(ShanoirEventType.USER_EXTEND_TO_STUDY_EVENT)
-                            && userAccessData.getExpiration().isAfter(su.getExpiration())) {
+                            && userAccessData.getExpirationDate().isAfter(su.getExpirationDate())) {
                         // If it's an extension request, just update the expiration date
-                        su.setExpiration(userAccessData.getExpiration());
+                        su.setExpirationDate(userAccessData.getExpirationDate());
                         su.setReceivedExpirationNotification(false);
                         studyService.updateStudyUserToStudy(su, studyToUpdate);
                         eventService.publishEvent(event);
@@ -268,8 +268,8 @@ public class RabbitMQStudiesService {
             subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
             if (userAccessData != null) {
                 subscription.setUserName(userAccessData.getUserName());
-                subscription.setExpiration(userAccessData.getExpiration() != null
-                        ? userAccessData.getExpiration()
+                subscription.setExpirationDate(userAccessData.getExpirationDate() != null
+                        ? userAccessData.getExpirationDate()
                         : LocalDate.now().plusDays(userDefaultExpirationDays));
             }
             if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {

@@ -122,7 +122,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     }
                                 </span>
                             </li>
-                            @if (panelStudyUser.expiration || mode != 'view') {
+                            @if (panelStudyUser.expirationDate || mode != 'view') {
                                 <li>
                                     <label>Expiration</label>
                                     <span class="right-col fix-icon left-icon">
@@ -131,15 +131,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         } @else {
                                             <span class="bool-true"><i class="fas fa-check"></i></span>
                                         }
-                                        @if (mode == 'view' && panelStudyUser.expiration) {
-                                            {{panelStudyUser.expiration | localDateFormatPipe}}
+                                        @if (mode == 'view' && panelStudyUser.expirationDate) {
+                                            {{panelStudyUser.expirationDate | localDateFormatPipe}}
                                             @if (panelStudyUser.userId == getLoggedUserId()) {
-                                                <button class="right-button" (click)="accessRequestService.openAccessExtensionModal(panelStudyUser.expiration, study)">
+                                                <button class="right-button" (click)="accessRequestService.openAccessExtensionModal(panelStudyUser.expirationDate, study)">
                                                     Ask extension
                                                 </button>
                                             }
                                         } @else {
-                                            <datepicker [ngModel]="panelStudyUser.expiration" (ngModelChange)="onExpirationChange(panelStudyUser, $event)" [min]="minExpirationDate"></datepicker>
+                                            <datepicker [ngModel]="panelStudyUser.expirationDate" (ngModelChange)="onExpirationChange(panelStudyUser, $event)" [min]="minExpirationDate"></datepicker>
                                         }
                                     </span>
                                 </li>

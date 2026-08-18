@@ -108,7 +108,7 @@ public class AccessRequestApiController implements AccessRequestApi {
         User user = userService.findById(KeycloakUtil.getTokenUserId());
         request.setUser(user);
         request.setStatus(AccessRequest.ON_DEMAND);
-        request.setExpiration(null); // IMPORTANT : this prevents a user from setting an expiration date for his access request,
+        request.setExpirationDate(null); // IMPORTANT : this prevents a user from setting an expiration date for his access request,
         // which would be a security issue. Also the expiration date should be set at the time of validation, not at the time of request.
 
         // Sanity check: user already has a pending access request
@@ -183,10 +183,15 @@ public class AccessRequestApiController implements AccessRequestApi {
         List<AccessRequest> accessRequests = this.accessRequestService.findByStudyIdAndStatus(studiesId, AccessRequest.ON_DEMAND);
         accessRequests.addAll(this.accessRequestService.findByStudyIdAndStatus(studiesId, AccessRequest.ON_EXTENSION_DEMAND));
         for (AccessRequest accessRequest : accessRequests) {
-            // pre-fetch expiration date so the 6 months or so starts at validation time, not at request time
-            if (accessRequest.getExpiration() == null) {
-                LocalDate expiration = LocalDate.now().plusDays(accessRequestExpirationDays);
-                accessRequest.setExpiration(expiration);
+            if (accessRequest.getExpirationDate() == null) {
+                // If it's an account request, set the expiration date to the asked expiration date
+                if (accessRequest.getUser().isAccountRequestDemand() && accessRequest.getUser().getAccountRequestInfo() != null) {
+                    accessRequest.setExpirationDate(accessRequest.getUser().getAccountRequestInfo().getStudyExpirationDate());
+                } else {
+                    // pre-fetch expiration date so the 6 months or so starts at validation time, not at request time
+                    LocalDate expiration = LocalDate.now().plusDays(accessRequestExpirationDays);
+                    accessRequest.setExpirationDate(expiration);
+                }
             }
         }
 
@@ -209,12 +214,12 @@ public class AccessRequestApiController implements AccessRequestApi {
         }
         if (validation.isAccept()) {
             if (validation.getExpiration() != null) {
-                resolvedRequest.setExpiration(validation.getExpiration());
-            } else if (resolvedRequest.getExpiration() == null) {
+                resolvedRequest.setExpirationDate(validation.getExpiration());
+            } else if (resolvedRequest.getExpirationDate() == null) {
                 LocalDate expiration = LocalDate.now().plusDays(accessRequestExpirationDays);
-                resolvedRequest.setExpiration(expiration);
+                resolvedRequest.setExpirationDate(expiration);
             }
-            UserAccessData userAccessData = new UserAccessData(resolvedRequest.getUser().getUsername(), resolvedRequest.getExpiration());
+            UserAccessData userAccessData = new UserAccessData(resolvedRequest.getUser().getUsername(), resolvedRequest.getExpirationDate());
             String serializedUserAccessData = mapper.writeValueAsString(userAccessData);
             ShanoirEvent subscription;
             if (status == AccessRequest.ON_DEMAND) {
@@ -222,6 +227,8 @@ public class AccessRequestApiController implements AccessRequestApi {
                 accessRequestService.update(resolvedRequest);
                 // if there is an account request, accept it.
                 if (resolvedRequest.getUser().isAccountRequestDemand() != null && resolvedRequest.getUser().isAccountRequestDemand()) {
+                    // set the date accordingly to the access request expiration date
+                    resolvedRequest.getUser().setExpirationDate(resolvedRequest.getExpirationDate());
                     this.userService.confirmAccountRequest(resolvedRequest.getUser());
                 }
                 // Update study to add a new user
@@ -280,7 +287,7 @@ public class AccessRequestApiController implements AccessRequestApi {
             studyName = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_QUEUE, resolvedRequest.getStudyId());
         }
         IdName study = new IdName(resolvedRequest.getStudyId(), studyName);
-        LocalDate extensionDate = resolvedRequest.getExpiration();
+        LocalDate extensionDate = resolvedRequest.getExpirationDate();
         emailService.notifyAdminsAccessRequestExtensionGranted(user, study, extensionDate);
         emailService.notifyUserAccessRequestExtensionGranted(user, study, extensionDate);
     }
@@ -294,7 +301,7 @@ public class AccessRequestApiController implements AccessRequestApi {
             throw new RestServiceException(new ErrorModel(HttpStatus.FORBIDDEN.value(), "You are not allowed to request an extension for this study."));
         } else if (extensionDate == null || extensionDate.isBefore(LocalDate.now())) {
             throw new RestServiceException(new ErrorModel(HttpStatus.BAD_REQUEST.value(), "The extension date must be in the future."));
-        } else if (studyUser.getExpiration() != null && extensionDate.isBefore(studyUser.getExpiration())) {
+        } else if (studyUser.getExpirationDate() != null && extensionDate.isBefore(studyUser.getExpirationDate())) {
             throw new RestServiceException(new ErrorModel(HttpStatus.BAD_REQUEST.value(), "The extension date must be after the current expiration date."));
         } else {
             accessRequestService.requestExtension(studyId, KeycloakUtil.getTokenUserId(), extensionDate);
@@ -307,9 +314,9 @@ public class AccessRequestApiController implements AccessRequestApi {
     public ResponseEntity<AccessRequest> getById(@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException {
         AccessRequest acceReq = this.accessRequestService.findById(accessRequestId).get();
         // pre-fetch expiration date so the 6 months or so starts at validation time, not at request time
-        if (acceReq.getExpiration() == null) {
+        if (acceReq.getExpirationDate() == null) {
             LocalDate expiration = LocalDate.now().plusDays(accessRequestExpirationDays);
-            acceReq.setExpiration(expiration);
+            acceReq.setExpirationDate(expiration);
         }
         return new ResponseEntity<AccessRequest>(acceReq, HttpStatus.OK);
     }

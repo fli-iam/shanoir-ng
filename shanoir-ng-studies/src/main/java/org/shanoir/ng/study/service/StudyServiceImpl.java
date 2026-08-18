@@ -210,7 +210,7 @@ public class StudyServiceImpl implements StudyService {
         if (study.getStudyUserList() != null) {
             for (final StudyUser studyUser : study.getStudyUserList()) {
                 if (studyUser.getStudyUserRights() == null || !studyUser.getStudyUserRights().contains(StudyUserRight.CAN_ADMINISTRATE)) {
-                    studyUser.setExpiration(LocalDate.now().plusDays(userDefaultExpirationDays));
+                    studyUser.setExpirationDate(LocalDate.now().plusDays(userDefaultExpirationDays));
                 }
                 // if dua file exists, set StudyUser to confirmed false
                 if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
@@ -223,7 +223,7 @@ public class StudyServiceImpl implements StudyService {
                 // he doesn't have to sign it)
                 if (KeycloakUtil.getTokenUserId().equals(studyUser.getUserId())) {
                     studyUser.setConfirmed(true);
-                    studyUser.setExpiration(null);
+                    studyUser.setExpirationDate(null);
                 }
             }
         }
@@ -706,11 +706,11 @@ public class StudyServiceImpl implements StudyService {
             existingSu.setCenters(replacingSu.getCenters());
             if (replacingSu.getStudyUserRights() != null && replacingSu.getStudyUserRights().contains(StudyUserRight.CAN_ADMINISTRATE)) {
                 // No expiration for admin users
-                existingSu.setExpiration(null);
-            } else if (replacingSu.getExpiration() == null) {
-                existingSu.setExpiration(LocalDate.now().plusDays(userDefaultExpirationDays));
+                existingSu.setExpirationDate(null);
+            } else if (replacingSu.getExpirationDate() == null) {
+                existingSu.setExpirationDate(LocalDate.now().plusDays(userDefaultExpirationDays));
             } else {
-                existingSu.setExpiration(replacingSu.getExpiration());
+                existingSu.setExpirationDate(replacingSu.getExpirationDate());
             }
             toBeUpdated.add(existingSu);
         }
@@ -721,9 +721,9 @@ public class StudyServiceImpl implements StudyService {
             for (StudyUser su : toBeCreated) {
                 su.setStudy(studyDb);
                 if (su.getStudyUserRights() != null && su.getStudyUserRights().contains(StudyUserRight.CAN_ADMINISTRATE)) {
-                    su.setExpiration(null);
-                } else if (su.getExpiration() == null) {
-                    su.setExpiration(LocalDate.now().plusDays(userDefaultExpirationDays));
+                    su.setExpirationDate(null);
+                } else if (su.getExpirationDate() == null) {
+                    su.setExpirationDate(LocalDate.now().plusDays(userDefaultExpirationDays));
                 }
             }
             // save them first to get their id
@@ -995,7 +995,7 @@ public class StudyServiceImpl implements StudyService {
     @Override
     public List<Study> findExpiredStudies() {
         Long userId = KeycloakUtil.getTokenUserId();
-        List<Study> studies = this.studyRepository.findDistinctByStudyUserListUserIdAndStudyUserListExpirationBefore(userId, LocalDate.now());
+        List<Study> studies = this.studyRepository.findDistinctByStudyUserListUserIdAndStudyUserListExpirationDateBefore(userId, LocalDate.now());
         setNumberOfSubjectsAndExaminations(studies);
         return studies;
     }

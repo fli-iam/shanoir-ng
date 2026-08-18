@@ -80,8 +80,8 @@ public interface StudyUserInterface {
 
     public List<Long> getCenterIds();
 
-    public void setExpiration(LocalDate expiration);
+    public void setExpirationDate(LocalDate expirationDate);
 
-    public LocalDate getExpiration();
+    public LocalDate getExpirationDate();
 
 }

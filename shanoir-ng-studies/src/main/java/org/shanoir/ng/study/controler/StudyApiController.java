@@ -273,8 +273,8 @@ public class StudyApiController implements StudyApi {
     private void setDefaultStudyUserExpirationDates(final Study study) {
         if (study.getStudyUserList() != null && !study.getStudyUserList().isEmpty()) {
             for (StudyUser studyUser : study.getStudyUserList()) {
-                if (studyUser.getExpiration() == null) {
-                    studyUser.setExpiration(LocalDate.now().plusDays(userDefaultExpirationDays));
+                if (studyUser.getExpirationDate() == null) {
+                    studyUser.setExpirationDate(LocalDate.now().plusDays(userDefaultExpirationDays));
                 }
             }
         }

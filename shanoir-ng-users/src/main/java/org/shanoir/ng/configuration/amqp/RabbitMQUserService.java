@@ -99,10 +99,10 @@ public class RabbitMQUserService {
             if ((CommandType.CREATE.equals(command.getType()) || CommandType.UPDATE.equals(command.getType()))
                     && command.getStudyUser() != null) {
                 StudyUserInterface studyUser = command.getStudyUser();
-                if (studyUser.getExpiration() != null) {
+                if (studyUser.getExpirationDate() != null) {
                     User user = userService.findById(studyUser.getUserId());
-                    if (user != null && studyUser.getExpiration().isAfter(user.getExpirationDate())) {
-                        user.setExpirationDate(studyUser.getExpiration());
+                    if (user != null && studyUser.getExpirationDate().isAfter(user.getExpirationDate())) {
+                        user.setExpirationDate(studyUser.getExpirationDate());
                         try {
                             userService.update(user);
                         } catch (EntityNotFoundException e) {

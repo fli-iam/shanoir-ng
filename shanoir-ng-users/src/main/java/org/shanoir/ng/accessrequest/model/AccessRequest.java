@@ -45,7 +45,7 @@ public class AccessRequest extends AbstractEntity {
 
     private Long studyId;
 
-    private LocalDate expiration;
+    private LocalDate expirationDate;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -106,11 +106,11 @@ public class AccessRequest extends AbstractEntity {
         this.studyName = studyName;
     }
 
-    public LocalDate getExpiration() {
-        return expiration;
+    public LocalDate getExpirationDate() {
+        return expirationDate;
     }
 
-    public void setExpiration(LocalDate expiration) {
-        this.expiration = expiration;
+    public void setExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
     }
 }

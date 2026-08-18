@@ -369,7 +369,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     private computeExpirationDate(study: Study) {
-        this.userExpiration = study?.studyUserList?.find(su => su.userId == KeycloakService.auth.userId)?.expiration;
+        this.userExpiration = study?.studyUserList?.find(su => su.userId == KeycloakService.auth.userId)?.expirationDate;
         if (this.userExpiration && this.userExpiration > new Date()) {
             if (this.userExpiration && this.userExpiration < new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)) {
                 this.userExpirationColor = 'darkorange';

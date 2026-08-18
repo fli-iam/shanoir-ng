@@ -112,7 +112,7 @@ public class ScheduledTasks {
         LocalDate today = LocalDate.now();
         LocalDate limit = today.plusWeeks(1);
 
-        List<StudyUser> studyUsers = studyUserRightsRepository.findByExpirationBetween(today, limit);
+        List<StudyUser> studyUsers = studyUserRightsRepository.findByExpirationDateBetween(today, limit);
         for (StudyUser studyUser : studyUsers) {
             try {
                 String studyName = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_QUEUE, studyUser.getStudyId());
@@ -121,7 +121,7 @@ public class ScheduledTasks {
                 if (user == null) {
                     throw new EntityNotFoundException("User with id " + studyUser.getUserId() + " not found");
                 }
-                emailService.notifyStudyUserWillExpire(study, user, studyUser.getExpiration());
+                emailService.notifyStudyUserWillExpire(study, user, studyUser.getExpirationDate());
                 studyUser.setReceivedExpirationNotification(true);
                 studyUserRightsRepository.save(studyUser);
             } catch (MailException e) {

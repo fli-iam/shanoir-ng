@@ -141,7 +141,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             { headerName: 'Confirmed', field: 'confirmed', type: 'boolean', editable: false, width: '54px', disableSorting: true},
             // { headerName: 'Centers', type: 'boolean', editable: false, width: '54px', disableSorting: true,
             //     cellRenderer: (params: any) => !params.data.centers || params.data.centers.length == 0},
-            { headerName: 'Expiration', type: 'date', field: 'expiration', width: '120px' },
+            { headerName: 'Expiration', type: 'date', field: 'expirationDate', width: '120px' },
             { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', disableSorting: true,
                 //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
@@ -198,7 +198,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     }
 
     onExpirationChange(su: StudyUser, expiration: Date) {
-        su.expiration = expiration;
+        su.expirationDate = expiration;
         this.onStudyUserEdit();
     }
 

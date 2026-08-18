@@ -125,7 +125,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
                 return su
                     .map(s => Object.assign(new StudyUser(), s))
                     .map(s => {
-                        s.expiration = s.expiration ? new Date(s.expiration) : null;
+                        s.expirationDate = s.expirationDate ? new Date(s.expirationDate) : null;
                         return s;
                     });
             });

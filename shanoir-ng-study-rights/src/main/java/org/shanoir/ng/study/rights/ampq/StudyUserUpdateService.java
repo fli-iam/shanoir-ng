@@ -66,7 +66,7 @@ public class StudyUserUpdateService {
             existingSu.setReceiveNewImportReport(replacingSu.isReceiveNewImportReport());
             existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
             existingSu.setConfirmed(replacingSu.isConfirmed());
-            existingSu.setExpiration(replacingSu.getExpiration());
+            existingSu.setExpirationDate(replacingSu.getExpirationDate());
             existingSu.setCenterIds(replacingSu.getCenterIds());
         }
 

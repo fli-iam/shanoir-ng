@@ -20,12 +20,12 @@ public class UserAccessData {
 
     private String userName;
 
-    private LocalDate expiration;
+    private LocalDate expirationDate;
 
 
-    public UserAccessData(String userName, LocalDate expiration) {
+    public UserAccessData(String userName, LocalDate expirationDate) {
         this.userName = userName;
-        this.expiration = expiration;
+        this.expirationDate = expirationDate;
     }
 
     public String getUserName() {
@@ -36,11 +36,11 @@ public class UserAccessData {
         this.userName = userName;
     }
 
-    public LocalDate getExpiration() {
-        return expiration;
+    public LocalDate getExpirationDate() {
+        return expirationDate;
     }
 
-    public void setExpiration(LocalDate expiration) {
-        this.expiration = expiration;
+    public void setExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
     }
 }

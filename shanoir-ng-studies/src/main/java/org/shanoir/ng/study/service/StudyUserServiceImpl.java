@@ -109,8 +109,8 @@ public class StudyUserServiceImpl implements StudyUserService {
         List<StudyUser> studyUsers = studyUserRepository.findByUserId(userId);
         List<IdDate> expirationDates = new ArrayList<>();
         for (StudyUser studyUser : studyUsers) {
-            if (studyUser.getExpiration() != null) {
-                expirationDates.add(new IdDate(studyUser.getStudyId(), studyUser.getExpiration()));
+            if (studyUser.getExpirationDate() != null) {
+                expirationDates.add(new IdDate(studyUser.getStudyId(), studyUser.getExpirationDate()));
             }
         }
         return expirationDates;

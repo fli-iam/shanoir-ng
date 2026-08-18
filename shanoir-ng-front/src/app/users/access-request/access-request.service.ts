@@ -22,13 +22,18 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import * as AppUtils from '../../utils/app.utils';
 
 import { AccessRequest } from './access-request.model';
+import { User } from '../shared/user.model';
+import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 
 @Injectable()
 export class AccessRequestService extends EntityService<AccessRequest> implements OnDestroy {
 
 
     getEntityInstance(): AccessRequest {
-        return new AccessRequest();
+        const accessRequest: AccessRequest = new AccessRequest();
+        accessRequest.user = new User();
+        accessRequest.user.accountRequestInfo = new AccountRequestInfo();
+        return accessRequest;
     }
 
     API_URL = AppUtils.BACKEND_API_USER_ACCESS_REQUEST;
@@ -50,9 +55,6 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
         this._accessRequests --;
         this.accessRequets.next(this._accessRequests);
     }
-
-
-
 
     public inviteUser(mail: string, func: string, study: IdName): Promise<AccessRequest> {
         const formData: FormData = new FormData();
@@ -113,7 +115,9 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
                 this._accessRequests = typeResult?.length;
                 this.accessRequets.next(typeResult?.length);
                 return typeResult;
-            }).then((typeResult: AccessRequest[]) => this.mapEntityList(typeResult));
+            }).then((typeResult: AccessRequest[]) => {
+                return this.mapEntityList(typeResult);
+            });
     }
 
     public findByStudy(studyId: number): Promise<AccessRequest[]> {
@@ -136,7 +140,7 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
 
     protected toRealObject(entity: any): AccessRequest {
         const trueObject: AccessRequest = super.toRealObject(entity);
-        trueObject.expiration = entity.expiration ? new Date(entity.expiration) : null;
+        trueObject.expirationDate = entity.expirationDate ? new Date(entity.expirationDate) : null;
         return trueObject;
     }
 

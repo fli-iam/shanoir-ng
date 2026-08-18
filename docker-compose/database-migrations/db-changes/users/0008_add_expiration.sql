@@ -10,8 +10,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-alter table study_user add COLUMN expiration DATE NOT NULL;
+alter table study_user add COLUMN expiration_date DATE NOT NULL;
 alter table study_user add COLUMN received_expiration_notification BIT(1) NOT NULL DEFAULT FALSE;
 update study_user su
 join users.users u on u.id = su.user_id
-set su.expiration = u.expiration_date;
+set su.expiration_date = u.expiration_date;
+
+alter table account_request_info add COLUMN study_expiration DATE;

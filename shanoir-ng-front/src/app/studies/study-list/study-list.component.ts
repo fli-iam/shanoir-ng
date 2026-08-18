@@ -72,7 +72,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
                 if (study) {
                     const userId: number = this.keycloakService.getUserId();
                     const studyUser: StudyUser = study.studyUserList?.find(su => su.userId == userId);
-                    const currentExpirationDate: Date = studyUser?.expiration;
+                    const currentExpirationDate: Date = studyUser?.expirationDate;
                     this.accessRequestService.openAccessExtensionModal(currentExpirationDate, study);
                 }
             });
@@ -308,7 +308,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> i
                         if (response == true) this.router.navigate(['/dua']);
                     });
                 } else if (studyUser.expired) {
-                    const currentExpirationDate: Date = studyUser?.expiration;
+                    const currentExpirationDate: Date = studyUser?.expirationDate;
                     this.accessRequestService.openAccessExtensionModal(currentExpirationDate, study);
                 } else {
                     super.goToViewFromEntity(study);

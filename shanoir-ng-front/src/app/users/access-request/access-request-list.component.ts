@@ -66,10 +66,11 @@ export class AccessRequestListComponent {
     }
 
     decide(request: AccessRequest, accept: boolean) {
-        this.accessRequestService.resolveRequest(request.id, accept, request.expiration);
-        const index = this.accessRequests.indexOf(request);
-        this.accessRequests.splice(index, 1);
-        this.accessRequestService.decreaseAccessRequests();
+        this.accessRequestService.resolveRequest(request.id, accept, request.expirationDate).then(() => {
+            const index = this.accessRequests.indexOf(request);
+            this.accessRequests.splice(index, 1);
+            this.accessRequestService.decreaseAccessRequests();
+        });
     }
 
     public isAdmin(): boolean {

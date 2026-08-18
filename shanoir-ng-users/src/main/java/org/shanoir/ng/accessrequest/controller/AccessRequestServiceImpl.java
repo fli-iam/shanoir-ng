@@ -79,7 +79,7 @@ public class AccessRequestServiceImpl implements AccessRequestService {
         List<AccessRequest> accessRequests = this.accessRequestRepository.findByUserIdAndStudyId(userId, studyId);
         if (!accessRequests.isEmpty()) {
             AccessRequest accessRequest = accessRequests.get(0);
-            accessRequest.setExpiration(extensionDate);
+            accessRequest.setExpirationDate(extensionDate);
             accessRequest.setStatus(AccessRequest.ON_EXTENSION_DEMAND);
             this.accessRequestRepository.save(accessRequest);
         } else {
@@ -88,7 +88,7 @@ public class AccessRequestServiceImpl implements AccessRequestService {
             User user = new User();
             user.setId(userId);
             accessRequest.setUser(user);
-            accessRequest.setExpiration(extensionDate);
+            accessRequest.setExpirationDate(extensionDate);
             accessRequest.setStatus(AccessRequest.ON_EXTENSION_DEMAND);
             accessRequest.setMotivation("This is an extension request, please check the asked expiration date.");
             this.accessRequestRepository.save(accessRequest);

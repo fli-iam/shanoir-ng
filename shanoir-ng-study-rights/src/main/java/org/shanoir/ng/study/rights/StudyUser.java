@@ -51,7 +51,7 @@ public class StudyUser implements StudyUserInterface {
      */
     private boolean confirmed = true;
 
-    private LocalDate expiration;
+    private LocalDate expirationDate;
 
     private boolean receivedExpirationNotification = false;
 
@@ -117,15 +117,15 @@ public class StudyUser implements StudyUserInterface {
     }
 
     public boolean canAccessStudy() {
-        return isConfirmed() && (getExpiration() == null || getExpiration().isAfter(LocalDate.now()));
+        return isConfirmed() && (getExpirationDate() == null || getExpirationDate().isAfter(LocalDate.now()));
     }
 
-    public LocalDate getExpiration() {
-        return expiration;
+    public LocalDate getExpirationDate() {
+        return expirationDate;
     }
 
-    public void setExpiration(LocalDate expiration) {
-        this.expiration = expiration;
+    public void setExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     /**
