@@ -19,6 +19,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -758,7 +760,15 @@ public class ImporterApiController implements ImporterApi {
             @Parameter(name = "path", required = true) @RequestParam(value = "path", required = true) String path)
             throws RestServiceException, IOException {
         final File userImportDir = ImportUtils.getUserImportDir(importDir);
-        final File dicomFile = new File(userImportDir, path);
+        final String userImportDirCanonicalPath = userImportDir.getCanonicalPath();
+        final String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
+        final File dicomFile = new File(decodedPath);
+        final String dicomFileCanonicalPath = dicomFile.getCanonicalPath();
+        if (!dicomFileCanonicalPath.startsWith(userImportDirCanonicalPath + File.separator)
+                && !dicomFileCanonicalPath.equals(userImportDirCanonicalPath)) {
+            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                    "Path is not within the allowed user import directory: " + path, null));
+        }
         byte[] byteArray = Files.readAllBytes(dicomFile.toPath());
         ByteArrayResource resource = new ByteArrayResource(byteArray);
         return ResponseEntity.ok()

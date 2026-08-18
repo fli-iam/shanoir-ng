@@ -123,7 +123,7 @@ export class SelectSeriesComponent {
 
     private initPapaya(serie: SerieDicom): Promise<any[]> {
         const listOfPromises = serie.images.map((image) => {
-            return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, this.workFolder + '/' + image.path);
+            return this.importService.downloadImage(AppUtils.BACKEND_API_GET_DICOM_URL, image.path);
         });
         const promiseOfList = Promise.all(listOfPromises);
         return promiseOfList.then((values) => {
