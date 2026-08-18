@@ -230,10 +230,10 @@ public class ImportWithStudyCardTests extends AbstractImportTest {
             }
             Assertions.assertFalse(selectedSeries.isEmpty(), "No series returned by PACS C-FIND.");
 
-            File uploadFolder = ImportUtils.createUploadFolder(workFolder, "pacs-test-subject");
+            File importJobFolder = ImportUtils.createUploadFolder(workFolder, "pacs-test-subject");
             List<String> retrievedFiles = dicomServerClient.retrieveDicomFiles(
                     new javax.swing.JProgressBar(), new StringBuilder(), dicomStudy.getStudyInstanceUID(),
-                    selectedSeries, uploadFolder);
+                    selectedSeries, importJobFolder);
             Assertions.assertNotNull(retrievedFiles);
             Assertions.assertFalse(retrievedFiles.isEmpty(), "No DICOM files retrieved via C-MOVE.");
             
@@ -244,7 +244,7 @@ public class ImportWithStudyCardTests extends AbstractImportTest {
             org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer =
                     new org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService();
             for (Serie serie : selectedSeries) {
-                dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), importJob.getPatient(),
+                dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(importJobFolder.getAbsolutePath(), importJob.getPatient(),
                         importJob.getStudy(), serie, true);
             }
 
@@ -264,17 +264,18 @@ public class ImportWithStudyCardTests extends AbstractImportTest {
             Anonymizer anonymizer = new Anonymizer();
             String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
             AnonymizationResult anonymizationResult = anonymizer.pseudonymize(
-                    uploadFolder, anonymizationProfile, subject.getName(), examination.getStudyInstanceUID());
+                    importJobFolder, anonymizationProfile, subject.getName(), examination.getStudyInstanceUID());
             Assertions.assertNotNull(anonymizationResult, "Local anonymization of PACS-retrieved DICOM files failed.");
+            org.shanoir.ng.utils.ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, importJobFolder, anonymizationResult, true);
             
-            File importJobJsonFile = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
+            File importJobJsonFile = new File(importJobFolder, ShUpConfig.IMPORT_JOB_JSON);
             importJobJsonFile.createNewFile();
             Util.mapper.writeValue(importJobJsonFile, importJob);
 
-            startImportJobFromShanoirUploader(importJob, uploadFolder, "testImportShUpFromPACS");
+            startImportJobFromShanoirUploader(importJob, importJobFolder, "testImportShUpFromPACS");
             waitForServerImportJobStatus(importJob.getId(), "testImportShUpFromPACS-before-ds");
-            waitAndCheckServerConsistency(uploadFolder, examination.getId(), true);
-            downloadAndCompareDatasetsZip(examination.getId(), uploadFolder, "testImportShUpFromPACS");
+            waitAndCheckServerConsistency(importJobFolder, examination.getId(), true);
+            downloadAndCompareDatasetsZip(examination.getId(), importJobFolder, "testImportShUpFromPACS");
         } finally {
             pacs.stop();
         }

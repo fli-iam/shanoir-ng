@@ -410,7 +410,7 @@ public final class ImportUtils {
      * @throws FileNotFoundException
      */
     public static void updateImportJobWithPseudonymizedUIDs(final ImportJobBase importJob, final File importJobFolder,
-            final AnonymizationResult anonymizationResult) throws FileNotFoundException {
+            final AnonymizationResult anonymizationResult, boolean setReferencedFileID) throws FileNotFoundException {
         if (importJob.getPatient() == null) {
             return;
         }
@@ -436,9 +436,11 @@ public final class ImportUtils {
                 String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(instance.getSopInstanceUID());
                 if (newSopInstanceUID != null) {
                     instance.setSopInstanceUID(newSopInstanceUID);
-                    String newFileName = newSopInstanceUID + SUFFIX_DCM;
-                    instance.setReferencedFileID(
-                            renamedReferencedFileID(instance.getReferencedFileID(), newFileName));
+                    if (setReferencedFileID) {
+                        String newFileName = newSopInstanceUID + SUFFIX_DCM;
+                        instance.setReferencedFileID(
+                                renamedReferencedFileID(instance.getReferencedFileID(), newFileName));
+                    }
                     updatedInstances++;
                 } else {
                     missingInstances++;

@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -164,7 +165,14 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                 Instance instance = instancesIt.next();
                 File instanceFile = null;
                 if (isFromPACS) {
-                    instanceFile = ImportUtils.getInstanceFileByUIDs(instance, serie, folderFileAbsolutePath);
+                    // Old versions of ShUp always set the ReferencedFileID
+                    // and upload all files into the same import job folder
+                    // TODO to remove after migration phase with old ShUps
+                    if (!ArrayUtils.isEmpty(instance.getReferencedFileID())) {
+                        instanceFile = ImportUtils.getInstanceFileByReferencedFileID(instance, folderFileAbsolutePath);
+                    } else {
+                        instanceFile = ImportUtils.getInstanceFileByUIDs(instance, serie, folderFileAbsolutePath);
+                    }
                 } else {
                     instanceFile = ImportUtils.getInstanceFileByReferencedFileID(instance, folderFileAbsolutePath);
                 }
