@@ -784,6 +784,7 @@ public class ImporterApiController implements ImporterApi {
             @Parameter(name = "studyCardId") @PathVariable("studyCardId") Long studyCardId,
             @Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
             @Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException {
+        LOG.info("============== NEW MULTIPLE-DICOM-STUDY ZIP IMPORT ==============");
         LOG.info("Multiple examination import for study {} ({})", studyName, studyId);
         if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
             throw new RestServiceException(
