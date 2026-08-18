@@ -66,6 +66,7 @@ import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.test.AbstractTest;
+import org.shanoir.uploader.upload.UploadServiceJob;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
@@ -259,19 +260,11 @@ public abstract class AbstractImportTest extends AbstractTest {
         String id = userClient.createTempDir();
         Assertions.assertNotNull(id);
         logger.info("Upload: id for import: " + id);
-        int i = 0;
-        for (File file : dicomFiles) {
-            i++;
-            userClient.uploadFile(id, file);
-            logger.debug("Uploaded file {}/{}: {}", i, dicomFiles.size(), file.getName());
-        }
+        UploadServiceJob.uploadFilesInParallel(userClient, dicomFiles, id, importJob,
+                percentage -> logger.debug("[{}] Upload progress: {}", id, percentage));
         logger.info("Upload: " + dicomFiles.size() + " uploaded files to id: " + id);
-        importJob.setId(id);
-        importJob.setWorkFolder(id);
-        logger.info("id: {}", importJob.getWorkFolder());
-        String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-        dumpImportJobJson(importJobJson, id, label);
-        userClient.startImportJob(id, importJobJson);
+        UploadServiceJob.setImportJobIdAndStartImport(userClient, id, importJob);
+        dumpImportJobJson(Util.objectWriter.writeValueAsString(importJob), id, label);
     }
 
     protected void dumpImportJobJson(String importJobJson, String workFolder, String label) {

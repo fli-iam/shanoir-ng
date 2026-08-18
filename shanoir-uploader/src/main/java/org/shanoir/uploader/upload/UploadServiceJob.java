@@ -162,12 +162,17 @@ public class UploadServiceJob {
             id = shanoirUploaderServiceClient.createTempDir();
             LOG.info("[{}] Uploading {} file(s) from {}", id, allFiles.size(), folder.getAbsolutePath());
             long startTime = System.currentTimeMillis();
-            uploadFilesInParallel(folder, allFiles, id, importJob, nominativeDataImportJobManager,
-                    currentNominativeDataController);
+            final String tempDirId = id;
+            uploadFilesInParallel(shanoirUploaderServiceClient, allFiles, tempDirId, importJob,
+                    percentage -> {
+                        importJob.setUploadPercentage(percentage);
+                        currentNominativeDataController.updateNominativeDataPercentage(folder, percentage);
+                        nominativeDataImportJobManager.writeImportJob(importJob);
+                    });
             currentNominativeDataController.setNominativeDataSubjectName(folder, importJob.getSubjectName());
             long elapsedTime = System.currentTimeMillis() - startTime;
             LOG.info("[{}] Upload finished in {} ms.", id, elapsedTime);
-            setImportJobIdAndStartImport(id, importJob);
+            setImportJobIdAndStartImport(shanoirUploaderServiceClient, tempDirId, importJob);
             currentNominativeDataController.updateNominativeDataPercentage(folder,
                     UploadState.SERVER_PROCESSING.toString());
             importJob.setUploadState(UploadState.SERVER_PROCESSING);
@@ -183,51 +188,47 @@ public class UploadServiceJob {
     }
 
     /**
-     * Uploads all files of one folder to the server concurrently, using a
-     * small bounded pool. Fails fast: if any single file upload throws, the
-     * remaining not-yet-started uploads are cancelled and the exception is
-     * propagated to the caller, matching the previous sequential behavior.
+     * Progress callback invoked (under lock) after each successfully uploaded file, with the
+     * running "N %" completion string for the whole batch.
      */
-    private void uploadFilesInParallel(final File folder, final Collection<File> allFiles, final String tempDirId,
-            final ImportJobBase importJob, final NominativeDataImportJobManager nominativeDataImportJobManager,
-            final CurrentNominativeDataController currentNominativeDataController) throws Exception {
+    @FunctionalInterface
+    public interface UploadProgressListener {
+        void onProgress(String percentage);
+    }
 
+    /**
+     * Uploads all files of one folder to the server concurrently, using a small bounded pool,
+     * matching each file to its serie via the ImportJob's series/instances.
+     *
+     * Fails fast: if any single file upload throws, the remaining not-yet-started uploads are
+     * cancelled and the exception is propagated to the caller.
+     */
+    public static void uploadFilesInParallel(final ShanoirUploaderServiceClient client,
+            final Collection<File> allFiles, final String tempDirId, final ImportJobBase importJob,
+            final UploadProgressListener progressListener) throws Exception {
         final int total = allFiles.size();
         final AtomicInteger completedCount = new AtomicInteger(0);
-        // Guards importJob mutation + the write-to-disk of the progress file,
-        // since multiple upload threads finish concurrently and both touch
-        // the same ImportJob instance / import-job.json file.
         final Object progressLock = new Object();
-
-        // allFiles is only consulted to physically locate each instance's bytes (by matching
-        // SOPInstanceUID against file names) - it does not drive the series grouping.
         final List<UploadTask> uploadTasks = buildUploadTasks(allFiles, importJob);
-
         ExecutorService uploadExecutor = Executors.newFixedThreadPool(
                 Math.min(UPLOAD_PARALLELISM, Math.max(1, total)));
         try {
             List<Future<Void>> futures = uploadTasks.stream()
                     .map(task -> (Callable<Void>) () -> {
                         if (task.seriesInstanceUID() != null) {
-                            shanoirUploaderServiceClient.uploadFile(tempDirId, task.seriesInstanceUID(), task.file());
+                            client.uploadFile(tempDirId, task.seriesInstanceUID(), task.file());
                         } else {
                             throw new IOException("Instance with missing seriesInstanceUID.");
                         }
                         int done = completedCount.incrementAndGet();
                         synchronized (progressLock) {
-                            String percentage = (done * 100 / total) + " %";
-                            importJob.setUploadPercentage(percentage);
-                            currentNominativeDataController.updateNominativeDataPercentage(folder, percentage);
-                            nominativeDataImportJobManager.writeImportJob(importJob);
+                            progressListener.onProgress((done * 100 / total) + " %");
                         }
                         return null;
                     })
                     .map(uploadExecutor::submit)
                     .toList();
 
-            // Wait for all uploads; on the first failure, cancel the rest
-            // and re-throw so processStartForServer's catch block marks
-            // the folder ERROR, exactly as the sequential version did.
             Exception firstFailure = null;
             for (Future<Void> future : futures) {
                 try {
@@ -235,8 +236,6 @@ public class UploadServiceJob {
                 } catch (ExecutionException e) {
                     if (firstFailure == null) {
                         firstFailure = (e.getCause() instanceof Exception cause) ? cause : e;
-                        // Cancel remaining/queued uploads; already-running
-                        // ones will finish but their results are ignored.
                         futures.forEach(f -> f.cancel(true));
                     }
                 } catch (InterruptedException e) {
@@ -252,13 +251,21 @@ public class UploadServiceJob {
         }
     }
 
-    /**
-     * A single planned upload: a local file and the (possibly null) seriesInstanceUID of the
-     * serie it belongs to, according to the ImportJob. Null seriesInstanceUID means the file
-     * could not be matched to any instance in the ImportJob and must go through the legacy
-     * flat upload instead.
-     */
     private record UploadTask(File file, String seriesInstanceUID) { }
+
+    /**
+     * Finalizes an ImportJob after upload (assigns the server-side work-folder id) and starts the
+     * import on the server. Extracted {@code static} + client-parameterized for the same
+     * testability reason as {@link #uploadFilesInParallel}.
+     */
+    public static void setImportJobIdAndStartImport(final ShanoirUploaderServiceClient client, String id,
+            ImportJobBase importJob) throws IOException, JsonParseException, JsonMappingException,
+            JsonProcessingException, Exception {
+        importJob.setWorkFolder(id);
+        importJob.setId(id);
+        String importJobJson = Util.objectWriter.writeValueAsString(importJob);
+        client.startImportJob(id, importJobJson);
+    }
 
     /**
      * Builds one upload task per file on disk, using the ImportJob's series/instances as the
@@ -269,12 +276,11 @@ public class UploadServiceJob {
      * (should not normally happen at this stage) still gets an upload task, just without a
      * seriesInstanceUID.
      */
-    private List<UploadTask> buildUploadTasks(final Collection<File> allFiles, final ImportJobBase importJob) {
+    private static List<UploadTask> buildUploadTasks(final Collection<File> allFiles, final ImportJobBase importJob) {
         final Map<String, File> sopInstanceUIDToFile = new HashMap<>();
         for (File file : allFiles) {
             sopInstanceUIDToFile.put(stripDicomSuffix(file.getName()), file);
         }
-
         final List<UploadTask> tasks = new ArrayList<>(allFiles.size());
         final Set<File> matchedFiles = new HashSet<>();
         if (importJob.getSeries() != null) {
@@ -306,7 +312,7 @@ public class UploadServiceJob {
         return tasks;
     }
 
-    private String stripDicomSuffix(String fileName) {
+    private static String stripDicomSuffix(String fileName) {
         return fileName.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)
                 ? fileName.substring(0, fileName.length() - DcmRcvManager.DICOM_FILE_SUFFIX.length())
                 : fileName;
