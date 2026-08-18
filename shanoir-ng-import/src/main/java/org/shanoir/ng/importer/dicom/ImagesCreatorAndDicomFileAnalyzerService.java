@@ -168,7 +168,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                 } else {
                     instanceFile = ImportUtils.getInstanceFileByReferencedFileID(instance, folderFileAbsolutePath);
                 }
-                LOG.info("filterAndCreateImages: processing file {}", instanceFile.getAbsolutePath());
+                LOG.debug("filterAndCreateImages: processing file {}", instanceFile.getAbsolutePath());
                 processDicomFilePerInstanceAndCreateImage(instanceFile, images, folderFileAbsolutePath);
             }
             /**

@@ -128,11 +128,14 @@ public class DicomServerClient implements IDicomServerClient {
         query.setStudyDescription(studyDescription);
         query.setStudyDate(studyDate);
         query.setModality(modality);
-        return queryPACSService.queryCFIND(query).getPatients();
+        return queryPACSService.queryCFIND(query);
     }
 
+    /**
+     * Used by ImportFromTableRunner.java
+     */
     public List<Patient> queryDicomServer(DicomQuery query) throws Exception {
-        return queryPACSService.queryCFIND(query).getPatients();
+        return queryPACSService.queryCFIND(query);
     }
 
     /*

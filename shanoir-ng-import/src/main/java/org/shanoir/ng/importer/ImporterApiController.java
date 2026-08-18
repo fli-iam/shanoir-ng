@@ -332,7 +332,8 @@ public class ImporterApiController implements ImporterApi {
         importJob.setFromPacs(true);
         ImportUtils.initImportJob(importJob, importDir);
         try {
-            importJob = queryPACSService.queryCFIND(dicomQuery);
+            List<Patient> patients = queryPACSService.queryCFIND(dicomQuery);
+            importJob.setPatients(patients);
         } catch (Exception e) {
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), null));
