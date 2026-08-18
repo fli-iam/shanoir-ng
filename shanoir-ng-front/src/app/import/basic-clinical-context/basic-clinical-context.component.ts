@@ -69,7 +69,8 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
 
         importJob.patients.push(filteredPatient);
         importJob.workFolder = this.importDataService.patientList.workFolder;
-        importJob.fromDicomZip = true;
+        importJob.fromDicomZip = this.importDataService.patientList.fromDicomZip;
+        importJob.fromPacs = this.importDataService.patientList.fromPacs;
         importJob.examinationId = context.examination.id;
         importJob.studyInstanceUID = context.examination.studyInstanceUID;
         importJob.studyId = context.study.id;
