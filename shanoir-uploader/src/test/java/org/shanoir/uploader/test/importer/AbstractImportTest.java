@@ -248,10 +248,10 @@ public abstract class AbstractImportTest extends AbstractTest {
      * already been fully prepared (via {@link ImportUtils#prepareImportJob})
      * by the caller.
      */
-    protected void startImportJobFromShanoirUploader(ImportJobBase importJob, File uploadFolder, String label)
+    protected void startImportJobFromShanoirUploader(ImportJobBase importJob, File importJobFolder, String label)
             throws Exception {
         java.util.Collection<File> dicomFiles = Util.listFiles(
-                uploadFolder,
+                importJobFolder,
                 (dir, name) -> name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX),
                 true
         );

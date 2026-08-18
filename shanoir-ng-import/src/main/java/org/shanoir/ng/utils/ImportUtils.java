@@ -401,12 +401,12 @@ public final class ImportUtils {
      * to ms-import, and later relied on e.g. by UploadServiceJob's
      * post-import metadata check) would reference UIDs that no longer exist
      * in the actual DICOM data. Patch the tree here, right after
-     * anonymization and before the state switch to START_IMPORT_JOB, so
+     * pseudonymization and before the state switch to START_IMPORT_JOB, so
      * import-job.json stays consistent with what's really on disk from this
      * point on.
      *
      * SeriesInstanceUID/StudyInstanceUID/SOPInstanceUID are looked up by
-     * their OLD value in the shared old->new maps produced by anonymization.
+     * their OLD value in the shared old->new maps produced by pseudonymization.
      * @throws FileNotFoundException
      */
     public static void updateImportJobWithPseudonymizedUIDs(final ImportJobBase importJob, final File importJobFolder,
