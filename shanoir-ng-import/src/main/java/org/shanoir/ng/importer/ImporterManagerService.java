@@ -126,7 +126,7 @@ public class ImporterManagerService {
                 // At first all DICOM files arrive normally in /tmp/shanoir-dcmrcv
                 // (see config DicomStoreSCPServer)
                 downloadAndMoveDicomFilesToImportJobDir(importJobDir,
-                        importJob.getStudyInstanceUID(), importJob.getSeries(), event);
+                        importJob.getStudy().getStudyInstanceUID(), importJob.getSeries(), event);
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
                         importJobDir.getAbsolutePath(), event, true);
             // Pseudonymization already done and UIDs updated in importJob
