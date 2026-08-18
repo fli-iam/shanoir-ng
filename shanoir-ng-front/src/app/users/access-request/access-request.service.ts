@@ -20,10 +20,10 @@ import { KeycloakService } from 'src/app/shared/keycloak/keycloak.service';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
-
-import { AccessRequest } from './access-request.model';
 import { User } from '../shared/user.model';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
+
+import { AccessRequest } from './access-request.model';
 
 @Injectable()
 export class AccessRequestService extends EntityService<AccessRequest> implements OnDestroy {

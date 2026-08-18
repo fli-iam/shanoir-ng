@@ -19,12 +19,9 @@ import { ConsoleService } from "../../console/console.service";
 import { ShanoirError } from "../../models/error.model";
 import { ConfirmDialogService } from "../confirm-dialog/confirm-dialog.service";
 import { Page } from '../table/pageable.model';
+import { getDeclaredFields } from '../../reflect/field.decorator';
 
 import { Entity } from './entity.abstract';
-import { getDeclaredFields } from '../../reflect/field.decorator';
-import { AccountRequestInfo } from 'src/app/users/account-request-info/account-request-info.model';
-import { AccessRequest } from 'src/app/users/access-request/access-request.model';
-import { User } from 'src/app/users/shared/user.model';
 
 @Injectable()
 export abstract class EntityService<T extends Entity> implements OnDestroy {
