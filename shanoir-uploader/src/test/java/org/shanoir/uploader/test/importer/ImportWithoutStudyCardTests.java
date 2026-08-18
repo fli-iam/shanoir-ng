@@ -88,11 +88,11 @@ public class ImportWithoutStudyCardTests extends AbstractImportTest {
         logger.info("START testImportFromDicomZip (no study card)...........");
         logger.info("......................................................");
         try {
-            ImportJobBase importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
-            logger.info("ID: {}", importJob.getWorkFolder());
             study = createStudyAndCenterWithoutStudyCard();
             equipment = createEquipment(study.getStudyCenterList().get(0).getCenter());
             Assertions.assertNotNull(equipment);
+            ImportJobBase importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
+            logger.info("ID: {}", importJob.getWorkFolder());
             if (!importJob.getSeries().isEmpty()) {
                 selectAllSeriesForImport(importJob);
                 org.shanoir.uploader.model.rest.Subject subject = createSubject(importJob, study, equipment);

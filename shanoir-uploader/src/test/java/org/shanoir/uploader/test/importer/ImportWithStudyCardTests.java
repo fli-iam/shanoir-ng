@@ -84,9 +84,9 @@ public class ImportWithStudyCardTests extends AbstractImportTest {
         logger.info("START testImportFromDicomZip (with study card)........");
         logger.info("......................................................");
         try {
+            study = createStudyAndCenterAndStudyCardAndAddMembers();
             ImportJobBase importJob = uploadDicomZip(ACR_PHANTOM_T1_ZIP);
             logger.info("ID: {}", importJob.getId());
-            study = createStudyAndCenterAndStudyCardAndAddMembers();
             if (!importJob.getSeries().isEmpty()) {
                 selectAllSeriesForImport(importJob);
                 org.shanoir.uploader.model.rest.Subject subject =
