@@ -83,6 +83,8 @@ public class ImportJobBase implements Serializable {
     private PatientVerification patientVerification;
 
     // DICOM study for this import job
+    // Important to keep: carries the old StudyInstanceUID,
+    // required to do the mapping after pseudonymization
     private Study study;
 
     // series to import with this import job
