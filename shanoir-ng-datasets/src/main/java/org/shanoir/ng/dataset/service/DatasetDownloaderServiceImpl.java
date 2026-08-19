@@ -130,7 +130,6 @@ public class DatasetDownloaderServiceImpl {
         self.massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, null);
     }
 
-    @Transactional(readOnly = true)
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting) throws RestServiceException {
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<>();
@@ -139,12 +138,15 @@ public class DatasetDownloaderServiceImpl {
         // Prepare the HTTP response for a zip download
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "attachment;filename=\"" + getFileName(datasets) + "\"");
+        // Flush headers immediately so the client sees the response start before
+        // the (potentially slow) per-dataset DB/PACS work below produces any bytes,
+        // otherwise a client-side read timeout can fire while nothing has been sent yet.
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
             Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
             datasetDownloadPath = new HashMap<>();
             if (Objects.nonNull(sorting)) {
-                datasetDownloadPath = getDatasetDownloadPath(datasets, sorting);
+                datasetDownloadPath = self.getDatasetDownloadPath(datasets, sorting);
             }
 
             for (Dataset dataset : datasets) {
@@ -219,6 +221,7 @@ public class DatasetDownloaderServiceImpl {
         }
     }
 
+    @Transactional(readOnly = true)
     protected Map<Long, String> getDatasetDownloadPath(List<Dataset> datasets, String sorting) {
         HashMap<Long, String> datasetDownloadPath = new HashMap<>();
 
