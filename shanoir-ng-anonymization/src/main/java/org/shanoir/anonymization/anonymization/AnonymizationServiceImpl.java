@@ -257,7 +257,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
              */
             Attributes datasetAttributes = din.readDataset();
             String sopInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
-            
+
             // Make sure the PatientName and PatientID exist in the dataset attributes.
             if (!datasetAttributes.contains(Tag.PatientID))
                 datasetAttributes.setNull(Tag.PatientID, VR.LO);
