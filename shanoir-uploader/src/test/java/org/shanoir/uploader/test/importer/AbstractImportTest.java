@@ -234,7 +234,6 @@ public abstract class AbstractImportTest extends AbstractTest {
             importJob.setAnonymisationProfileToUse("Profile OFSEP");
         }
         importJob.setPatient(null);
-        importJob.setStudy(null);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         dumpImportJobJson(importJobJson, importJob.getId(), label);
         userClient.startImportJob(importJob.getId(), importJobJson);

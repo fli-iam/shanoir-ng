@@ -413,10 +413,12 @@ public final class ImportUtils {
             final AnonymizationResult anonymizationResult, boolean setReferencedFileID) throws FileNotFoundException {
         int updatedInstances = 0;
         int missingInstances = 0;
+        int updatedImages = 0;
+        int missingImages = 0;
         Study study = importJob.getStudy();
-        String newStudyUID = anonymizationResult.getStudyInstanceUIDs().get(study.getStudyInstanceUID());
-        if (newStudyUID != null) {
-            study.setStudyInstanceUID(newStudyUID);
+        String newStudyInstanceUID = anonymizationResult.getStudyInstanceUIDs().get(study.getStudyInstanceUID());
+        if (newStudyInstanceUID != null) {
+            study.setStudyInstanceUID(newStudyInstanceUID);
         }
         if (importJob.getSeries() == null) {
             return;
@@ -454,13 +456,22 @@ public final class ImportUtils {
                         Path path = Paths.get(image.getPath());
                         Path renamedPath = path.resolveSibling(newFileName);
                         image.setPath(renamedPath.toString());
+                        updatedImages++;
+                    } else {
+                        missingImages++;
+                        LOG.warn("{}: no pseudonymized SOPInstanceUID found for image file {}; "
+                                + "importJob keeps its pre-pseudonymization UID for this image.",
+                                importJobFolder.getName(), image.getSOPInstanceUID());
                     }
                 }
             }
         }
-        LOG.info("{}: importJobUIDs updated for {} instance(s){}.",
-                importJobFolder.getName(), updatedInstances,
-                missingInstances > 0 ? (", " + missingInstances + " instance(s) could not be matched") : "");
+        LOG.info("{}: importJobUIDs updated for {} instance(s){} and {} image(s){}.",
+                importJobFolder.getName(),
+                updatedInstances,
+                missingInstances > 0 ? (", " + missingInstances + " instance(s) could not be matched") : "",
+                updatedImages,
+                missingImages > 0 ? (", " + missingImages + " image(s) could not be matched") : "");
     }
 
     /**
