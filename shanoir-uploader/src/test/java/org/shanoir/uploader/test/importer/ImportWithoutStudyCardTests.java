@@ -111,6 +111,85 @@ public class ImportWithoutStudyCardTests extends AbstractImportTest {
 
     @Test
     @Order(2)
+    public void testImportMultipleDicomZip() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportMultipleDicomZip (no study card).......");
+        logger.info("......................................................");
+        URL resource = getClass().getClassLoader().getResource(TEST_MULTIPLE_EXAM_ZIP);
+        Assertions.assertNotNull(resource, "Test resource " + TEST_MULTIPLE_EXAM_ZIP + " not found.");
+        File file = new File(resource.toURI());
+
+        Long centerId = study.getStudyCenterList().get(0).getCenter().getId();
+        // studyCardId 0L: mirrors the SC_DISABLED / "no study card" policy of this
+        // study.
+        ImportJobBase importJob = userClient.uploadMultipleDicom(file,
+                study.getId(), study.getName(), 0L, centerId, equipment.getId());
+
+        Assertions.assertNotNull(importJob, "Multiple-examination import returned no import job.");
+    }
+
+    @Test
+    @Order(3)
+    public void testImportEEG() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportEEG (no study card).....................");
+        logger.info("......................................................");
+        URL resource = getClass().getClassLoader().getResource(TEST_EEG_ZIP);
+        Assertions.assertNotNull(resource, "Test resource " + TEST_EEG_ZIP + " not found.");
+        File file = new File(resource.toURI());
+
+        EegImportJob uploadedJob = userClient.uploadEEGZip(file);
+        Assertions.assertNotNull(uploadedJob, "EEG upload did not return an import job.");
+        Assertions.assertNotNull(uploadedJob.getWorkFolder(), "EEG upload did not return a work folder.");
+        logger.info("EEG file uploaded, workFolder: {}", uploadedJob.getWorkFolder());
+
+        EegImportJob analyzedJob = userClient.analyzeEegZipFile(uploadedJob);
+        Assertions.assertNotNull(analyzedJob, "EEG analysis did not return an import job.");
+        Assertions.assertNotNull(analyzedJob.getDatasets(), "EEG analysis did not return any datasets.");
+        Assertions.assertFalse(analyzedJob.getDatasets().isEmpty(), "EEG analysis returned an empty dataset list.");
+        logger.info("EEG file analyzed, {} dataset(s) found.", analyzedJob.getDatasets().size());
+
+        org.shanoir.uploader.model.rest.Subject subject = createSubject(study);
+        Assertions.assertNotNull(subject, "Subject could not be created for EEG import.");
+        Long centerId = study.getStudyCenterList().get(0).getCenter().getId();
+        Examination examination = createExamination(study.getId(), subject.getId(), centerId);
+        Assertions.assertNotNull(examination, "Examination could not be created for EEG import.");
+
+        analyzedJob.setStudyId(study.getId());
+        analyzedJob.setStudyName(study.getName());
+        analyzedJob.setSubjectName(subject.getName());
+        analyzedJob.setExaminationId(examination.getId());
+        analyzedJob.setAcquisitionEquipmentId(equipment.getId());
+
+        // MS Import is only relaying the job to MS Datasets
+        userClient.startImportEEGJob(analyzedJob);
+        if (analyzedJob.getWorkFolder() != null && !analyzedJob.getWorkFolder().isEmpty()) {
+            waitForServerImportJobStatus(analyzedJob.getId(), "testImportEEGNoStudyCard-before-ds");
+        }
+    }
+
+    @Test
+    @Order(4)
+    public void testImportBIDS() throws Exception {
+        logger.info("......................................................");
+        logger.info("START testImportBIDS (no study card)....................");
+        logger.info("......................................................");
+        URL resource = getClass().getClassLoader().getResource(TEST_BIDS_ZIP);
+        Assertions.assertNotNull(resource, "Test resource " + TEST_BIDS_ZIP + " not found.");
+        File file = new File(resource.toURI());
+
+        Long centerId = study.getStudyCenterList().get(0).getCenter().getId();
+
+        ImportJobBase importJob = userClient.importBIDSDataset(file, study.getId(), study.getName(), centerId);
+        Assertions.assertNotNull(importJob, "testImportBIDS  (no study card) returned no import job.");
+        Assertions.assertNotNull(importJob.getExaminationId(),
+                "testImportBIDS (no study card) did not create/return an examination id.");
+        logger.info("testImportBIDS (no study card) created examination: {}",
+                importJob.getExaminationId());
+    }
+
+    @Test
+    @Order(5)
     public void testImportShUpFromPACS() throws Exception {
         logger.info("......................................................");
         logger.info("START testImportShUpFromPACS (no study card)...............");
@@ -205,85 +284,6 @@ public class ImportWithoutStudyCardTests extends AbstractImportTest {
         } finally {
             pacs.stop();
         }
-    }
-
-    @Test
-    @Order(3)
-    public void testImportMultipleDicomZip() throws Exception {
-        logger.info("......................................................");
-        logger.info("START testImportMultipleDicomZip (no study card).......");
-        logger.info("......................................................");
-        URL resource = getClass().getClassLoader().getResource(TEST_MULTIPLE_EXAM_ZIP);
-        Assertions.assertNotNull(resource, "Test resource " + TEST_MULTIPLE_EXAM_ZIP + " not found.");
-        File file = new File(resource.toURI());
-
-        Long centerId = study.getStudyCenterList().get(0).getCenter().getId();
-        // studyCardId 0L: mirrors the SC_DISABLED / "no study card" policy of this
-        // study.
-        ImportJobBase importJob = userClient.uploadMultipleDicom(file,
-                study.getId(), study.getName(), 0L, centerId, equipment.getId());
-
-        Assertions.assertNotNull(importJob, "Multiple-examination import returned no import job.");
-    }
-
-    @Test
-    @Order(4)
-    public void testImportEEG() throws Exception {
-        logger.info("......................................................");
-        logger.info("START testImportEEG (no study card).....................");
-        logger.info("......................................................");
-        URL resource = getClass().getClassLoader().getResource(TEST_EEG_ZIP);
-        Assertions.assertNotNull(resource, "Test resource " + TEST_EEG_ZIP + " not found.");
-        File file = new File(resource.toURI());
-
-        EegImportJob uploadedJob = userClient.uploadEEGZip(file);
-        Assertions.assertNotNull(uploadedJob, "EEG upload did not return an import job.");
-        Assertions.assertNotNull(uploadedJob.getWorkFolder(), "EEG upload did not return a work folder.");
-        logger.info("EEG file uploaded, workFolder: {}", uploadedJob.getWorkFolder());
-
-        EegImportJob analyzedJob = userClient.analyzeEegZipFile(uploadedJob);
-        Assertions.assertNotNull(analyzedJob, "EEG analysis did not return an import job.");
-        Assertions.assertNotNull(analyzedJob.getDatasets(), "EEG analysis did not return any datasets.");
-        Assertions.assertFalse(analyzedJob.getDatasets().isEmpty(), "EEG analysis returned an empty dataset list.");
-        logger.info("EEG file analyzed, {} dataset(s) found.", analyzedJob.getDatasets().size());
-
-        org.shanoir.uploader.model.rest.Subject subject = createSubject(study);
-        Assertions.assertNotNull(subject, "Subject could not be created for EEG import.");
-        Long centerId = study.getStudyCenterList().get(0).getCenter().getId();
-        Examination examination = createExamination(study.getId(), subject.getId(), centerId);
-        Assertions.assertNotNull(examination, "Examination could not be created for EEG import.");
-
-        analyzedJob.setStudyId(study.getId());
-        analyzedJob.setStudyName(study.getName());
-        analyzedJob.setSubjectName(subject.getName());
-        analyzedJob.setExaminationId(examination.getId());
-        analyzedJob.setAcquisitionEquipmentId(equipment.getId());
-
-        // MS Import is only relaying the job to MS Datasets
-        userClient.startImportEEGJob(analyzedJob);
-        if (analyzedJob.getWorkFolder() != null && !analyzedJob.getWorkFolder().isEmpty()) {
-            waitForServerImportJobStatus(analyzedJob.getId(), "testImportEEGNoStudyCard-before-ds");
-        }
-    }
-
-    @Test
-    @Order(5)
-    public void testImportBIDS() throws Exception {
-        logger.info("......................................................");
-        logger.info("START testImportBIDS (no study card)....................");
-        logger.info("......................................................");
-        URL resource = getClass().getClassLoader().getResource(TEST_BIDS_ZIP);
-        Assertions.assertNotNull(resource, "Test resource " + TEST_BIDS_ZIP + " not found.");
-        File file = new File(resource.toURI());
-
-        Long centerId = study.getStudyCenterList().get(0).getCenter().getId();
-
-        ImportJobBase importJob = userClient.importBIDSDataset(file, study.getId(), study.getName(), centerId);
-        Assertions.assertNotNull(importJob, "testImportBIDS  (no study card) returned no import job.");
-        Assertions.assertNotNull(importJob.getExaminationId(),
-                "testImportBIDS (no study card) did not create/return an examination id.");
-        logger.info("testImportBIDS (no study card) created examination: {}",
-                importJob.getExaminationId());
     }
 
     /**
