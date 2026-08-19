@@ -74,6 +74,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
     private static final String SERIES_NUMBER_0 = "0";
 
+    private static final String SLASH = "/";
+
     private MultiframeExtractor emf = new MultiframeExtractor();
 
     @Autowired
@@ -223,7 +225,13 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                     LOG.warn("DICOM file without SOPInstanceUID: " + dicomFile.getAbsolutePath());
                 }
                 image.setSOPInstanceUID(sopInstanceUID);
-                image.setPath(dicomFile.getAbsolutePath());
+                /**
+                 * Attention: the path of each image is always relative: either to the temporary folder created
+                 * with dicom zip import during the upload or with the DicomStoreSCPServer folder for PACS import.
+                 * If the import is from ShanoirUploader, the path stays absolute to allow the execution of quality control.
+                 */
+                String relativeFilePath = dicomFile.getAbsolutePath().replace(folderFileAbsolutePath + SLASH, "");
+                image.setPath(relativeFilePath);
                 addImageSeparateDatasetsInfo(image, attributes, dicomFile);
                 images.add(image);
             }

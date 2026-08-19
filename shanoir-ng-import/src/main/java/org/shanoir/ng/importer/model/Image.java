@@ -22,7 +22,9 @@ import org.shanoir.ng.shared.dicom.EchoTime;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * The path of an image is always absolute.
+ * The path of an image is always RELATIVE to the importJobDir.
+ * The DICOM ZIP import is relative to the server importJobDir by userId,
+ * but ShUp is relative to the Windows/Linux importJobDir of the local machine.
  */
 public class Image {
 

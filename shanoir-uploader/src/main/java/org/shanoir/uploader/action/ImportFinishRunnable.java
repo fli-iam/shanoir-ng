@@ -57,7 +57,7 @@ public class ImportFinishRunnable implements Runnable {
             }
             if (anonymizationResult != null) {
                 try {
-                    ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, importJobFolder, anonymizationResult, false);
+                    ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, importJobFolder, anonymizationResult);
                     importJob.setUploadState(UploadState.START_IMPORT_JOB);
                     NominativeDataImportJobManager importJobManager =
                             new NominativeDataImportJobManager(importJobFolder.getAbsolutePath());

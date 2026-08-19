@@ -270,7 +270,7 @@ public class ImportWithoutStudyCardTests extends AbstractImportTest {
             AnonymizationResult anonymizationResult = anonymizer.pseudonymize(
                     importJobFolder, anonymizationProfile, subject.getName(), examination.getStudyInstanceUID());
             Assertions.assertNotNull(anonymizationResult, "Local anonymization of PACS-retrieved DICOM files failed.");
-            org.shanoir.ng.utils.ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, importJobFolder, anonymizationResult, false);
+            org.shanoir.ng.utils.ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, importJobFolder, anonymizationResult);
 
             File importJobJsonFile = new File(importJobFolder, ShUpConfig.IMPORT_JOB_JSON);
             importJobJsonFile.createNewFile();
