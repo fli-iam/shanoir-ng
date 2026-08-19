@@ -411,9 +411,6 @@ public final class ImportUtils {
      */
     public static void updateImportJobWithPseudonymizedUIDs(final ImportJobBase importJob, final File importJobFolder,
             final AnonymizationResult anonymizationResult, boolean setReferencedFileID) throws FileNotFoundException {
-        if (importJob.getPatient() == null) {
-            return;
-        }
         int updatedInstances = 0;
         int missingInstances = 0;
         Study study = importJob.getStudy();
@@ -425,41 +422,39 @@ public final class ImportUtils {
             return;
         }
         for (Serie serie : importJob.getSeries()) {
-            String newSeriesUID = anonymizationResult.getSeriesInstanceUIDs().get(serie.getSeriesInstanceUID());
-            if (newSeriesUID != null) {
-                serie.setSeriesInstanceUID(newSeriesUID);
+            String newSeriesInstanceUID = anonymizationResult.getSeriesInstanceUIDs().get(serie.getSeriesInstanceUID());
+            if (newSeriesInstanceUID != null) {
+                serie.setSeriesInstanceUID(newSeriesInstanceUID);
             }
-            if (serie.getInstances() == null) {
-                continue;
-            }
-            for (Instance instance : serie.getInstances()) {
-                String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(instance.getSopInstanceUID());
-                if (newSopInstanceUID != null) {
-                    instance.setSopInstanceUID(newSopInstanceUID);
-                    if (setReferencedFileID) {
-                        String newFileName = newSopInstanceUID + SUFFIX_DCM;
-                        instance.setReferencedFileID(
-                                renamedReferencedFileID(instance.getReferencedFileID(), newFileName));
+            if (serie.getInstances() != null) {
+                for (Instance instance : serie.getInstances()) {
+                    String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(instance.getSopInstanceUID());
+                    if (newSopInstanceUID != null) {
+                        instance.setSopInstanceUID(newSopInstanceUID);
+                        if (setReferencedFileID) {
+                            String newFileName = newSopInstanceUID + SUFFIX_DCM;
+                            instance.setReferencedFileID(
+                                    renamedReferencedFileID(instance.getReferencedFileID(), newFileName));
+                        }
+                        updatedInstances++;
+                    } else {
+                        missingInstances++;
+                        LOG.warn("{}: no pseudonymized SOPInstanceUID found for instance file {}; "
+                                + "importJob keeps its pre-pseudonymization UID for this instance.",
+                                importJobFolder.getName(), instance.getSopInstanceUID());
                     }
-                    updatedInstances++;
-                } else {
-                    missingInstances++;
-                    LOG.warn("{}: no pseudonymized SOPInstanceUID found for instance file {}; "
-                            + "importJob keeps its pre-pseudonymization UID for this instance.",
-                            importJobFolder.getName(), instance.getSopInstanceUID());
                 }
             }
-            if (serie.getImages() == null) {
-                continue;
-            }
-            for (Image image : serie.getImages()) {
-                String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(image.getSOPInstanceUID());
-                if (newSopInstanceUID != null) {
-                    image.setSOPInstanceUID(newSopInstanceUID);
-                    String newFileName = newSopInstanceUID + SUFFIX_DCM;
-                    Path path = Paths.get(image.getPath());
-                    Path renamedPath = path.resolveSibling(newFileName);
-                    image.setPath(renamedPath.toString());
+            if (serie.getImages() != null) {
+                for (Image image : serie.getImages()) {
+                    String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(image.getSOPInstanceUID());
+                    if (newSopInstanceUID != null) {
+                        image.setSOPInstanceUID(newSopInstanceUID);
+                        String newFileName = newSopInstanceUID + SUFFIX_DCM;
+                        Path path = Paths.get(image.getPath());
+                        Path renamedPath = path.resolveSibling(newFileName);
+                        image.setPath(renamedPath.toString());
+                    }
                 }
             }
         }
