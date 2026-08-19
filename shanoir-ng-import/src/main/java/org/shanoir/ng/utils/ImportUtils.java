@@ -417,8 +417,6 @@ public final class ImportUtils {
      */
     public static void updateImportJobWithPseudonymizedUIDs(final ImportJobBase importJob, final File importJobFolder,
             final AnonymizationResult anonymizationResult, boolean setReferencedFileID) throws FileNotFoundException {
-        int updatedInstances = 0;
-        int missingInstances = 0;
         int updatedImages = 0;
         int missingImages = 0;
         Study study = importJob.getStudy();
@@ -430,6 +428,7 @@ public final class ImportUtils {
             return;
         }
         for (Serie serie : importJob.getSeries()) {
+            String oldSeriesInstanceUID = serie.getSeriesInstanceUID();
             String newSeriesInstanceUID = anonymizationResult.getSeriesInstanceUIDs().get(serie.getSeriesInstanceUID());
             if (newSeriesInstanceUID != null) {
                 serie.setSeriesInstanceUID(newSeriesInstanceUID);
@@ -439,8 +438,10 @@ public final class ImportUtils {
                     String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(image.getSOPInstanceUID());
                     if (newSopInstanceUID != null) {
                         image.setSOPInstanceUID(newSopInstanceUID);
+                        String pathStr = image.getPath();
+                        pathStr = pathStr.replace(oldSeriesInstanceUID, newSeriesInstanceUID);
+                        Path path = Paths.get(pathStr);
                         String newFileName = newSopInstanceUID + SUFFIX_DCM;
-                        Path path = Paths.get(image.getPath());
                         Path renamedPath = path.resolveSibling(newFileName);
                         image.setPath(renamedPath.toString());
                         updatedImages++;
@@ -455,8 +456,6 @@ public final class ImportUtils {
         }
         LOG.info("{}: importJobUIDs updated for {} instance(s){} and {} image(s){}.",
                 importJobFolder.getName(),
-                updatedInstances,
-                missingInstances > 0 ? (", " + missingInstances + " instance(s) could not be matched") : "",
                 updatedImages,
                 missingImages > 0 ? (", " + missingImages + " image(s) could not be matched") : "");
     }
