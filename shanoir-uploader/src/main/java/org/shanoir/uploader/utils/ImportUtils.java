@@ -22,6 +22,7 @@ import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.SeriesNumberOrAcquisitionTimeOrDescriptionSorter;
+import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -167,8 +168,8 @@ public class ImportUtils {
         importJob.setSubject(subject);
 
         for (Serie serie : importJob.getSeries()) {
-            List<Instance> instances = serie.getInstances();
-            if (instances == null || instances.isEmpty()) {
+            List<Image> images = serie.getImages();
+            if (images == null || images.isEmpty()) {
                 serie.setIgnored(true);
                 serie.setSelected(false);
                 logger.warn("Serie [" + serie.getSeriesDescription() + "] found with instances == null or empty. Serie de-selected.");

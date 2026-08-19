@@ -434,25 +434,6 @@ public final class ImportUtils {
             if (newSeriesInstanceUID != null) {
                 serie.setSeriesInstanceUID(newSeriesInstanceUID);
             }
-            if (serie.getInstances() != null) {
-                for (Instance instance : serie.getInstances()) {
-                    String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(instance.getSopInstanceUID());
-                    if (newSopInstanceUID != null) {
-                        instance.setSopInstanceUID(newSopInstanceUID);
-                        if (setReferencedFileID) {
-                            String newFileName = newSopInstanceUID + SUFFIX_DCM;
-                            instance.setReferencedFileID(
-                                    renamedReferencedFileID(instance.getReferencedFileID(), newFileName));
-                        }
-                        updatedInstances++;
-                    } else {
-                        missingInstances++;
-                        LOG.warn("{}: no pseudonymized SOPInstanceUID found for instance file {}; "
-                                + "importJob keeps its pre-pseudonymization UID for this instance.",
-                                importJobFolder.getName(), instance.getSopInstanceUID());
-                    }
-                }
-            }
             if (serie.getImages() != null) {
                 for (Image image : serie.getImages()) {
                     String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(image.getSOPInstanceUID());

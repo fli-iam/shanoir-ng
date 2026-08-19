@@ -15,7 +15,6 @@
 package org.shanoir.uploader.utils;
 
 import java.awt.Dimension;
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -33,7 +32,6 @@ import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.importer.DatasetsCreatorService;
-import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.service.QualityService;
@@ -59,8 +57,6 @@ public class QualityUtils {
 
     private static final QualityService qualityService = new QualityService();
 
-    private static final ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
-
     private static final DatasetsCreatorService datasetsCreatorService = new DatasetsCreatorService();
 
     public static QualityCardResult checkQualityAtImport(ImportJobBase importJob, boolean isImportFromPACS) throws Exception {
@@ -68,8 +64,6 @@ public class QualityUtils {
         QualityCardResult qualityCardResult = new QualityCardResult();
         List<QualityCard> qualityCards = new ArrayList<>();
         List<QualityCard> cardsToCheck = new ArrayList<>();
-        final File importJobDir = new File(importJob.getWorkFolder());
-
         // Call Shanoir server to get all quality cards for the selected study
         try {
             qualityCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findQualityCardsByStudyId(importJob.getStudyId());
@@ -88,8 +82,6 @@ public class QualityUtils {
             .toList();
             LOG.info("Quality Control At Import - " + qualityCards.size() + " quality card(s) found for study id " + importJob.getStudyId() + ", " + cardsToCheck.size() + " to be checked at import.");
         }
-
-        imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), null, true);
 
         // Construct Dicom datasets from images
         List<Serie> series = importJob.getSeries();

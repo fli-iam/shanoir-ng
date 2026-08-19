@@ -105,18 +105,16 @@ public class DownloadOrCopyRunnable implements Runnable {
             downloadProgressBar.setValue(0);
             try {
                 /**
-                 * 1. Download from PACS or copy from CD/DVD/local file system
+                 * Download from PACS or copy from CD/DVD/local file system
                  */
                 allFileNames = ImportUtils.downloadOrCopyFilesIntoImportJobFolder(
                         this.isFromPACS, downloadProgressBar, downloadOrCopyReportPerStudy, studyInstanceUID, series,
                         importJobFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
                 /**
-                 * 2. Fill MRI information into all series from first DICOM file of each serie
+                 * Create images from all instances and put instances to null
                  */
-                for (Serie serie : series) {
-                    dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(importJobFolder.getAbsolutePath(), importJob.getPatient(),
-                            importJob.getStudy(), serie, true);
-                }
+                dicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
+                        importJobFolder.getAbsolutePath(), null, true);
             } catch (FileNotFoundException e) {
                 LOG.error(e.getMessage(), e);
                 // as exception occurred, we set allFileNames to null, to force ERROR state of import

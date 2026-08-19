@@ -34,9 +34,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
+import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.ImportJobStatus;
-import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
@@ -285,17 +285,17 @@ public class UploadServiceJob {
         final Set<File> matchedFiles = new HashSet<>();
         if (importJob.getSeries() != null) {
             for (Serie serie : importJob.getSeries()) {
-                if (serie.getInstances() == null) {
+                if (serie.getImages() == null) {
                     continue;
                 }
-                for (Instance instance : serie.getInstances()) {
-                    File file = sopInstanceUIDToFile.get(instance.getSopInstanceUID());
+                for (Image image : serie.getImages()) {
+                    File file = sopInstanceUIDToFile.get(image.getSOPInstanceUID());
                     if (file != null) {
                         tasks.add(new UploadTask(file, serie.getSeriesInstanceUID()));
                         matchedFiles.add(file);
                     } else {
                         LOG.warn("No local file found for instance {} of serie {}, skipping.",
-                                instance.getSopInstanceUID(), serie.getSeriesInstanceUID());
+                                image.getSOPInstanceUID(), serie.getSeriesInstanceUID());
                     }
                 }
             }

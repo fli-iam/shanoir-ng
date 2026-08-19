@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.shanoir.anonymization.anonymization.AnonymizationResult;
+import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Patient;
@@ -246,12 +247,10 @@ public class ImportWithoutStudyCardTests extends AbstractImportTest {
 
             ImportJobBase importJob = ImportUtils.createNewImportJob(patient, dicomStudy);
             importJob.setSeries(selectedSeries);
-            org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer =
-                    new org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService();
-            for (Serie serie : selectedSeries) {
-                dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(importJobFolder.getAbsolutePath(), importJob.getPatient(),
-                        importJob.getStudy(), serie, true);
-            }
+            ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer =
+                    new ImagesCreatorAndDicomFileAnalyzerService();
+            dicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
+                    importJobFolder.getAbsolutePath(), null, true);
 
             org.shanoir.uploader.model.rest.Subject subject = createSubjectFromLocalPatient(patient, study, equipment);
             importJob.setSubject(patient.getSubject());

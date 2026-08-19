@@ -105,6 +105,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
                     }
                 }
             }
+            // Images created, no need for instances anymore
+            serie.setInstances(null);
             cpt++;
         }
         /**

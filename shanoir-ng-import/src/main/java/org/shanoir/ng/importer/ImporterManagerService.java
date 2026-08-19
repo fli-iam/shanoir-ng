@@ -129,14 +129,11 @@ public class ImporterManagerService {
                         importJob.getStudy().getStudyInstanceUID(), importJob.getSeries(), event);
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
                         importJobDir.getAbsolutePath(), event, true);
-            // Pseudonymization already done and UIDs updated in importJob
+            // isFromShUp: Pseudonymization already done and UIDs updated in importJob
             // createImages already based on correct instances post-pseudo
-            } else if (importJob.isFromShanoirUploader()) {
-                imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
-                        importJobDir.getAbsolutePath(), event, true);
             // isFromDicomZip: do nothing, as images creation and analyze of DICOM files
             // have been done after upload of ZIP file(s) already
-            } else if (!importJob.isFromDicomZip()) {
+            } else if (!importJob.isFromDicomZip() && !importJob.isFromShanoirUploader()) {
                 throw new ShanoirException("Unsupported type of import.");
             }
 
@@ -152,7 +149,7 @@ public class ImporterManagerService {
             eventService.publishEvent(event);
             importJobStatusService.setInProgress(importJob, "Pseudonymizing and creating datasets");
             if (!importJob.isFromShanoirUploader()) {
-                pseudonymize(importJob, event, importJobDir);
+                pseudonymizeAndUpdateImportJobUIDs(importJob, event, importJobDir);
             }
             datasetsCreatorService.createDatasets(importJob, importJobDir);
             importJobStatusService.setFinished(importJob);
@@ -196,7 +193,7 @@ public class ImporterManagerService {
         }
     }
 
-    private void pseudonymize(final ImportJobBase importJob, ShanoirEvent event, final File importJobDir)
+    private void pseudonymizeAndUpdateImportJobUIDs(final ImportJobBase importJob, ShanoirEvent event, final File importJobDir)
             throws FileNotFoundException, ShanoirException {
         if (importJob.getAnonymisationProfileToUse() != null && !importJob.getAnonymisationProfileToUse().isEmpty()) {
             ArrayList<File> dicomFiles = getDicomFilesForImportJob(importJob, importJobDir.getAbsolutePath());

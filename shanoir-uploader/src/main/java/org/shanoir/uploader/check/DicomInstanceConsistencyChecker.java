@@ -33,6 +33,7 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.util.TagUtils;
+import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
@@ -162,12 +163,12 @@ public class DicomInstanceConsistencyChecker {
         return true;
     }
 
-    private void deleteInstanceFileAndSerieFolder(File importJobFolder, File instanceFile) {
-        if (instanceFile.getParentFile().equals(importJobFolder)) {
-            FileUtils.deleteQuietly(instanceFile);
+    private void deleteInstanceFileAndSerieFolder(File importJobFolder, File file) {
+        if (file.getParentFile().equals(importJobFolder)) {
+            FileUtils.deleteQuietly(file);
         } else {
-            FileUtils.deleteQuietly(instanceFile);
-            File serieFolder = instanceFile.getParentFile();
+            FileUtils.deleteQuietly(file);
+            File serieFolder = file.getParentFile();
             File[] remainingFiles = serieFolder.listFiles();
             if (remainingFiles == null || remainingFiles.length == 0) {
                 FileUtils.deleteQuietly(serieFolder);
@@ -178,11 +179,11 @@ public class DicomInstanceConsistencyChecker {
     public boolean checkImportJobMetadataOnSeries(ImportJobBase importJob, String examinationUID) throws Exception {
         Map<String, Integer> localCountsBySeriesInstanceUID = new HashMap<String, Integer>();
         for (Serie serie : importJob.getSeries()) {
-            List<Instance> instances = serie.getInstances();
-            if (instances == null) {
+            List<Image> images = serie.getImages();
+            if (images == null) {
                 continue;
             }
-            localCountsBySeriesInstanceUID.put(serie.getSeriesInstanceUID(), instances.size());
+            localCountsBySeriesInstanceUID.put(serie.getSeriesInstanceUID(), images.size());
         }
         return client.checkSeriesInstanceCounts(examinationUID, localCountsBySeriesInstanceUID);
     }
@@ -200,18 +201,18 @@ public class DicomInstanceConsistencyChecker {
      * Checks run concurrently (bounded pool) since this sits on the upload
      * state machine's critical path and must stay fast.
      */
-    public int checkImportJobMetadataOnInstances(ImportJobBase importJob, String examinationUID) throws Exception {
+    public int checkImportJobMetadataOnImages(ImportJobBase importJob, String examinationUID) throws Exception {
         List<Callable<Boolean>> checks = new ArrayList<>();
         List<String> descriptions = new ArrayList<>(); // parallel-indexed, for error messages
         for (Serie serie : importJob.getSeries()) {
-            List<Instance> instances = serie.getInstances();
-            if (instances == null) {
+            List<Image> images = serie.getImages();
+            if (images == null) {
                 continue;
             }
-            for (Instance instance : instances) {
+            for (Image image : images) {
                 checks.add(() -> client.checkDicomInstanceMetadata(
-                        examinationUID, serie.getSeriesInstanceUID(), instance.getSopInstanceUID()));
-                descriptions.add(serie.getSeriesDescription() + " / " + instance.getSopInstanceUID());
+                        examinationUID, serie.getSeriesInstanceUID(), image.getSOPInstanceUID()));
+                descriptions.add(serie.getSeriesDescription() + " / " + image.getSOPInstanceUID());
             }
         }
         if (checks.isEmpty()) {
