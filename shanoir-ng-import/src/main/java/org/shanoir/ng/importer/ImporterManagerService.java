@@ -156,7 +156,8 @@ public class ImporterManagerService {
             }
             datasetsCreatorService.createDatasets(importJob, importJobDir);
             importJobStatusService.setFinished(importJob);
-
+            ImportUtils.cleanUpImportJob(importJob);
+            // Send to ms-dataset to finish import
             this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET,
                     objectMapper.writeValueAsString(importJob));
             long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());

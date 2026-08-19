@@ -298,6 +298,12 @@ public final class ImportUtils {
         return uploadedFile;
     }
 
+    public static void cleanUpImportJob(final ImportJobBase importJob) {
+        // Clean up to send smaller json
+        importJob.setPatient(null);
+        importJob.setStudy(null);
+    }
+
     /**
      * This method creates a random long number.
      *

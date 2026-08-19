@@ -650,7 +650,8 @@ public class ImporterApiController implements ImporterApi {
             importJob.setUsername(KeycloakUtil.getTokenUserName());
             ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f, importJob.getStudyId());
             importJob.setShanoirEvent(event);
-            cleanUpImportJob(importJob);
+            ImportUtils.cleanUpImportJob(importJob);
+            // Send to ms-dataset to finish import
             Integer integg = (Integer) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_EEG_QUEUE, objectMapper.writeValueAsString(importJob));
             importJobStatusService.setFinished(importJob);
             return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));
@@ -658,12 +659,6 @@ public class ImporterApiController implements ImporterApi {
             LOG.error("Error during EEG import", e);
             return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    private void cleanUpImportJob(final ImportJobBase importJob) {
-        // Clean up to send smaller json
-        importJob.setPatient(null);
-        importJob.setStudy(null);
     }
 
     @Override
@@ -902,9 +897,6 @@ public class ImporterApiController implements ImporterApi {
                 for (Serie serie : importJobChild.getSeries()) {
                     serie.setSelected(true);
                 }
-
-                // Send to ms-dataset for logical import
-                cleanUpImportJob(importJobChild);
                 this.startImportJobBase(importJobChild);
             }
             // Delete temporary file
