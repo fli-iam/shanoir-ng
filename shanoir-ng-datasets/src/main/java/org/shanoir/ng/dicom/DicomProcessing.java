@@ -160,7 +160,6 @@ public class DicomProcessing {
             LOG.info("In-memory SOPInstanceUID generated for serie: {}/{}", serie.getSequenceName(), serie.getProtocolName());
             sopUID = uidGenerator.getNewUID();
         }
-        // In case of Quality Check during Import from ShUp, Serie does not have any Dataset and conditions are applied on DICOM metadata only.
         if (!CollectionUtils.isEmpty(serie.getDatasets())) {
             for (Dataset dataset : serie.getDatasets()) {
                 dataset.setFirstImageSOPInstanceUID(sopUID);

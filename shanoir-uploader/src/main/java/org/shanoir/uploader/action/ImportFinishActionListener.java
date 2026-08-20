@@ -54,13 +54,13 @@ public class ImportFinishActionListener implements ActionListener {
 
     private MainWindow mainWindow;
 
-    private File uploadFolder;
+    private File importJobDir;
     
     private Subject subjectREST;
     
-    public ImportFinishActionListener(final MainWindow mainWindow, File uploadFolder, Subject subjectREST) {
+    public ImportFinishActionListener(final MainWindow mainWindow, File importJobDir, Subject subjectREST) {
         this.mainWindow = mainWindow;
-        this.uploadFolder = uploadFolder;
+        this.importJobDir = importJobDir;
         this.subjectREST = subjectREST;
     }
 
@@ -72,7 +72,7 @@ public class ImportFinishActionListener implements ActionListener {
         }
         startButton.setEnabled(false);
 
-        final String folderKey = uploadFolder.getAbsolutePath();
+        final String folderKey = importJobDir.getAbsolutePath();
         if (!FOLDERS_IN_PROGRESS.add(folderKey)) {
             logger.warn("Import for folder {} already in progress, ignoring duplicate trigger.", folderKey);
             startButton.setEnabled(true);
@@ -88,7 +88,7 @@ public class ImportFinishActionListener implements ActionListener {
 
         ImportJobBase importJob = null;
         try {
-            importJob = ImportUtils.readImportJob(uploadFolder);
+            importJob = ImportUtils.readImportJob(importJobDir);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
             showErrorAndReset(startButton, folderKey,
@@ -229,14 +229,14 @@ public class ImportFinishActionListener implements ActionListener {
         // Quality Check if the Study selected has Quality Cards to be checked at import
         boolean seriesToBeImported = true;
         try {
-            QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJob, mainWindow.isFromPACS);
+            QualityCardResult qualityControlResult = QualityUtils.checkQualityAtImport(importJobDir, importJob, mainWindow.isFromPACS);
             if (!qualityControlResult.isEmpty() && (qualityControlResult.hasError())) {
                 JOptionPane.showMessageDialog(mainWindow.frame,  QualityUtils.getQualityControlreportScrollPane(qualityControlResult),
                 ShUpConfig.resourceBundle.getString("shanoir.uploader.import.quality.check.window.title"), JOptionPane.ERROR_MESSAGE);
                 // set status ERROR if all series were unselected from importJob due to Quality Control errors
                 if (importJob.getSeries().isEmpty()) {
                     seriesToBeImported = false;
-                    ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(uploadFolder,
+                    ShUpOnloadConfig.getCurrentNominativeDataController().updateNominativeDataPercentage(importJobDir,
                         UploadState.ERROR.toString());
                         // if an exam was created for the import, we delete it
                         if (mainWindow.importDialog.mrExaminationNewExamCB.isSelected()) {
@@ -279,7 +279,7 @@ public class ImportFinishActionListener implements ActionListener {
             // Submit to the bounded pool. The completion callback (always run,
             // success or failure) is where we release the guard and restore
             // the UI -- NOT immediately after submission.
-            IMPORT_FINISH_EXECUTOR.submit(new ImportFinishRunnable(uploadFolder, importJob,
+            IMPORT_FINISH_EXECUTOR.submit(new ImportFinishRunnable(importJobDir, importJob,
                 () -> onImportFinishDone(folderKey)));
 
             JOptionPane.showMessageDialog(mainWindow.frame,

@@ -68,14 +68,14 @@ public class DatasetsCreatorService {
         List<Serie> series = importJob.getSeries();
         for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
             Serie serie = seriesIt.next();
-            File serieIDFolderFile = createSerieIDFolderAndMoveFiles(importJobDir, seriesFolderFile, serie);
+            File serieIDFolderFile = createSerieIDFolderAndMoveFilesAndSetAbsoluteImagePath(importJobDir, seriesFolderFile, serie);
             boolean serieIdentifiedForNotSeparating;
             try {
                 serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
                 // if the serie is not one of the series, that should not be separated, please separate the series,
                 // otherwise just do not separate the series and keep all images for one nii conversion
                 serie.setDatasets(new ArrayList<Dataset>());
-                constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
+                constructDatasets(serieIDFolderFile, serie, serieIdentifiedForNotSeparating, null);
             } catch (NoSuchFieldException | SecurityException e) {
                 LOG.error(e.getMessage());
             }
@@ -114,13 +114,15 @@ public class DatasetsCreatorService {
     /**
      * This method extract the dicom files in proper dataset(s) (in a serie).
      * It also constructs the associated ExpressionFormat and DatasetFiles
-     * within the Dataset object.
+     * within the Dataset object. The importJobDir is only used by ShUp, as
+     * no files are moved before and therefore the images paths remain relative.
      *
+     *@param importJobDir
      * @param serieIDFolderFile
      * @param serie
      * @param serieIdentifiedForNotSeparating
      */
-    public void constructDicom(final File serieIDFolderFile, final Serie serie, final boolean serieIdentifiedForNotSeparating) {
+    public void constructDatasets(final File serieIDFolderFile, final Serie serie, final boolean serieIdentifiedForNotSeparating, final File importJobDir) {
         if (!serieIdentifiedForNotSeparating) {
             final HashMap<SerieToDatasetsSeparator, Dataset> datasetMap = new HashMap<>();
             for (Image image : serie.getImages()) {
@@ -132,7 +134,7 @@ public class DatasetsCreatorService {
                 Dataset existing = datasetMap.get(seriesToDatasetsSeparator);
                 // existing dataset has been found, just add the image/datasetFile
                 if (existing != null) {
-                    DatasetFile datasetFile = createDatasetFile(image);
+                    DatasetFile datasetFile = createDatasetFile(image, importJobDir);
                     datasetMap.get(seriesToDatasetsSeparator).getExpressionFormats().get(0).getDatasetFiles().add(datasetFile);
                     datasetMap.get(seriesToDatasetsSeparator).getFlipAngles().add(Double.valueOf(image.getFlipAngle()));
                     datasetMap.get(seriesToDatasetsSeparator).getRepetitionTimes().add(image.getRepetitionTime());
@@ -144,7 +146,7 @@ public class DatasetsCreatorService {
                     ExpressionFormat expressionFormat = new ExpressionFormat();
                     expressionFormat.setType("dcm");
                     dataset.getExpressionFormats().add(expressionFormat);
-                    DatasetFile datasetFile = createDatasetFile(image);
+                    DatasetFile datasetFile = createDatasetFile(image, importJobDir);
                     dataset.getFlipAngles().add(Double.valueOf(image.getFlipAngle()));
                     dataset.setFirstImageSOPInstanceUID(image.getSOPInstanceUID());
                     dataset.getRepetitionTimes().add(image.getRepetitionTime());
@@ -157,16 +159,16 @@ public class DatasetsCreatorService {
             }
 
             boolean success = true;
-            // create a separate folder for each group of images
             int index = 0;
             for (final Entry<SerieToDatasetsSeparator, Dataset> datasets : datasetMap.entrySet()) {
-                // create a folder
+                // Create a Dataset specific folder
                 final File folder = new File(serieIDFolderFile.getAbsolutePath() + File.separator + DATASET_STR + index);
                 success = folder.mkdirs();
                 if (!success) {
-                    LOG.error("deleteFolder : the creation of {} failed", folder);
+                    LOG.error("Create dataset folder: the creation of {} failed", folder);
                 }
-                // move the files into the folder
+                // Move the DatasetFile(s) into a Dataset specific folder
+                // and sets an absolute path into DatasetFile.path
                 for (final DatasetFile datasetFile : datasets.getValue().getExpressionFormats().get(0).getDatasetFiles()) {
                     String path = datasetFile.getPath();
                     final File oldFile = new File(path);
@@ -176,14 +178,14 @@ public class DatasetsCreatorService {
                         datasetFile.setPath(newFile.getAbsolutePath());
                         datasets.getValue().setName(serie.getSeriesDescription() + index);
                         if (!success) {
-                            LOG.error("deleteFolder : moving of " + oldFile + " failed");
+                            LOG.error("Move DatasetFile(s): moving of " + oldFile + " failed");
                         }
                     }
                 }
                 index++;
             }
             if (!success) {
-                LOG.error("Error while constructing Dicom in constructDicom.");
+                LOG.error("Error while constructing Dicom in constructDatasets.");
             }
         } else {
             Dataset dataset = new Dataset();
@@ -196,7 +198,7 @@ public class DatasetsCreatorService {
                 dataset.getRepetitionTimes().add(image.getRepetitionTime());
                 dataset.getInversionTimes().add(image.getInversionTime());
                 dataset.setEchoTimes(image.getEchoTimes());
-                DatasetFile datasetFile = createDatasetFile(image);
+                DatasetFile datasetFile = createDatasetFile(image, importJobDir);
                 expressionFormat.getDatasetFiles().add(datasetFile);
             }
             serie.getDatasets().add(dataset);
@@ -204,12 +206,18 @@ public class DatasetsCreatorService {
     }
 
     /**
+     * QualityControl in ShUp sets the importJobDir to have an absolute path.
      * @param image
+     * @param importJobDir
      * @return
      */
-    private DatasetFile createDatasetFile(Image image) {
+    private DatasetFile createDatasetFile(Image image, File importJobDir) {
         DatasetFile datasetFile = new DatasetFile();
-        datasetFile.setPath(image.getPath());
+        if (importJobDir != null) {
+            datasetFile.setPath(importJobDir.getAbsolutePath() + File.separator + image.getPath());
+        } else {
+            datasetFile.setPath(image.getPath());
+        }
         datasetFile.setAcquisitionNumber(image.getAcquisitionNumber());
         datasetFile.setImageOrientationPatient(image.getImageOrientationPatient());
         return datasetFile;
@@ -223,7 +231,7 @@ public class DatasetsCreatorService {
      * @param serie
      * @throws ShanoirException
      */
-    private File createSerieIDFolderAndMoveFiles(File importJobDir, File seriesFolderFile, Serie serie) throws ShanoirException {
+    private File createSerieIDFolderAndMoveFilesAndSetAbsoluteImagePath(File importJobDir, File seriesFolderFile, Serie serie) throws ShanoirException {
         String serieID = serie.getSeriesInstanceUID();
         File serieIDFolderFile = new File(seriesFolderFile.getAbsolutePath() + File.separator + serieID);
         if (!serieIDFolderFile.exists()) {
@@ -235,7 +243,7 @@ public class DatasetsCreatorService {
                     + ": folder already exists.");
         }
         List<Image> images = serie.getImages();
-        moveFiles(importJobDir, serieIDFolderFile, images);
+        moveFilesAndSetAbsoluteImagePath(importJobDir, serieIDFolderFile, images);
         return serieIDFolderFile;
     }
 
@@ -245,7 +253,7 @@ public class DatasetsCreatorService {
      * @param images
      * @throws RestServiceException
      */
-    private void moveFiles(File importJobDir, File serieIDFolder, List<Image> images) throws ShanoirException {
+    private void moveFilesAndSetAbsoluteImagePath(File importJobDir, File serieIDFolder, List<Image> images) throws ShanoirException {
         for (Iterator<Image> iterator = images.iterator(); iterator.hasNext();) {
             Image image = iterator.next();
             File oldFile = new File(importJobDir.getAbsolutePath() + File.separator + image.getPath());

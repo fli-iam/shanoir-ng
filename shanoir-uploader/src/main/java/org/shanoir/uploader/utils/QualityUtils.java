@@ -15,6 +15,7 @@
 package org.shanoir.uploader.utils;
 
 import java.awt.Dimension;
+import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -59,7 +60,7 @@ public class QualityUtils {
 
     private static final DatasetsCreatorService datasetsCreatorService = new DatasetsCreatorService();
 
-    public static QualityCardResult checkQualityAtImport(ImportJobBase importJob, boolean isImportFromPACS) throws Exception {
+    public static QualityCardResult checkQualityAtImport(File importJobDir, ImportJobBase importJob, boolean isImportFromPACS) throws Exception {
 
         QualityCardResult qualityCardResult = new QualityCardResult();
         List<QualityCard> qualityCards = new ArrayList<>();
@@ -89,13 +90,17 @@ public class QualityUtils {
             Serie serie = seriesIt.next();
             try {
                 serie.setDatasets(new ArrayList<>());
-                datasetsCreatorService.constructDicom(null, serie, true);
+                /**
+                 * Not moving any files into a Dataset specific folder only create
+                 * in memory datasets for QC check. No Dataset separation/splitting.
+                 */
+                datasetsCreatorService.constructDatasets(null, serie, true, importJobDir);
                 org.shanoir.ng.importer.dto.Serie serieDto = SerieMapper.INSTANCE.toDto(serie);
+                
                 AcquisitionAttributes<String> dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serieDto);
-
                 DatasetAcquisition datasetAcquisition = generateDatasetAcquisitionForQualityCheck(importJob.getStudy(), serie);
-
                 QualityCardResult serieQualityCardResult = qualityService.checkQuality(datasetAcquisition, dicomAttributes, cardsToCheck);
+                
                 // We retrieve the worst quality tag associated with the datasetAcquisition
                 QualityTag worstTagSet = serieQualityCardResult.getUpdatedDatasetAcquisitions().get(0).getQualityTag();
                 // if quality card result contains an ERROR tag, we remove the serie from the selection
@@ -108,6 +113,7 @@ public class QualityUtils {
                     serie.setQualityTag(worstTagSet);
                 }
                 qualityCardResult.merge(serieQualityCardResult);
+                serie.setDatasets(null);
             } catch (SecurityException e) {
                 LOG.error(e.getMessage());
             }
