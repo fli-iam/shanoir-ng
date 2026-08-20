@@ -16,6 +16,7 @@ import { EegDatasetAcquisition } from '../modality/eeg/eeg-dataset-acquisition.m
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.model';
 import { XaDatasetAcquisition } from '../modality/xa/xa-dataset-acquisition.model';
+import { RtDatasetAcquisition } from '../modality/rt/rt-dataset-acquisition.model';
 import { GenericDatasetAcquisition } from '../modality/generic-dataset-acquisition.model';
 import { BidsDatasetAcquisition } from '../modality/bids/bids-dataset-acquisition.model';
 
@@ -30,6 +31,7 @@ export abstract class DatasetAcquisitionUtils {
             case 'Pet': return new PetDatasetAcquisition();
             case 'Ct': return new CtDatasetAcquisition();
             case 'Xa': return new XaDatasetAcquisition();
+            case 'Rt': return new RtDatasetAcquisition();
             case 'Generic': return new GenericDatasetAcquisition();
             case 'BIDS': return new BidsDatasetAcquisition();
             case 'Eeg': return new EegDatasetAcquisition();

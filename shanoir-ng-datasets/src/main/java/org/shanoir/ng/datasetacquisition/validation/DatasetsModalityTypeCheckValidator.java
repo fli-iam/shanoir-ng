@@ -22,6 +22,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 
 /**
  * Validates if all datasets of an acquisition have same modality type than the
@@ -56,6 +57,12 @@ public class DatasetsModalityTypeCheckValidator
             } else if (datasetAcquisition instanceof CtDatasetAcquisition) {
                 for (Dataset dataset : datasetAcquisition.getDatasets()) {
                     if (!(dataset.getType().equals(DatasetType.CT))) {
+                        return false;
+                    }
+                }
+            } else if (datasetAcquisition instanceof RtDatasetAcquisition) {
+                for (Dataset dataset : datasetAcquisition.getDatasets()) {
+                    if (!(dataset.getType().equals(DatasetType.RT))) {
                         return false;
                     }
                 }

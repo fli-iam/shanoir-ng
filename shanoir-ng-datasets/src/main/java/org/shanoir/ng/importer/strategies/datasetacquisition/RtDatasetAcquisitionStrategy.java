@@ -11,19 +11,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.shanoir.ng.dataset.modality.GenericDataset;
+import org.shanoir.ng.dataset.modality.RtDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
@@ -34,20 +34,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * RT Dataset Acquisition Strategy for RTSTRUCT, RTDOSE and RTPLAN series.
+ */
 @Component
-public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
+public class RtDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy {
 
-    /** Logger. */
-    private static final Logger LOG = LoggerFactory.getLogger(GenericDatasetAcquisitionStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RtDatasetAcquisitionStrategy.class);
 
     @Autowired
-    private DatasetStrategy<GenericDataset> genericDatasetStrategy;
+    private DatasetStrategy<RtDataset> rtDatasetStrategy;
 
     @Override
-    public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank, AcquisitionAttributes<String> dicomAttributes) throws Exception {
-        GenericDatasetAcquisition datasetAcquisition = (GenericDatasetAcquisition) generateFlatDatasetAcquisitionForSerie(
+    public DatasetAcquisition generateDeepDatasetAcquisitionForSerie(String userName, Long subjectId, Serie serie, int rank,
+            AcquisitionAttributes<String> dicomAttributes) throws Exception {
+        RtDatasetAcquisition datasetAcquisition = (RtDatasetAcquisition) generateFlatDatasetAcquisitionForSerie(
                 userName, serie, rank, dicomAttributes.getFirstDatasetAttributes());
-        DatasetsWrapper<GenericDataset> datasetsWrapper = genericDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
+        DatasetsWrapper<RtDataset> datasetsWrapper = rtDatasetStrategy.generateDatasetsForSerie(dicomAttributes, serie, subjectId);
         List<Dataset> genericizedList = new ArrayList<>();
         for (Dataset dataset : datasetsWrapper.getDatasets()) {
             dataset.setDatasetAcquisition(datasetAcquisition);
@@ -60,24 +63,24 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
     @Override
     public DatasetAcquisition generateFlatDatasetAcquisitionForSerie(String userName, Serie serie, int rank,
             Attributes attributes) throws Exception {
-        LOG.info("Generating GenericDatasetAcquisition for: {} - {} - {} - Rank: {}",
-                serie.getSeriesDescription(), serie.getProtocolName(),  serie.getSequenceName(), rank);
-        GenericDatasetAcquisition datasetAcquisition = new GenericDatasetAcquisition();
+        LOG.info("Generating RtDatasetAcquisition for: {} - {} - {} - Rank: {}",
+                serie.getSeriesDescription(), serie.getProtocolName(), serie.getSequenceName(), rank);
+        RtDatasetAcquisition datasetAcquisition = new RtDatasetAcquisition();
         datasetAcquisition.setUsername(userName);
         datasetAcquisition.setImportDate(LocalDate.now());
         datasetAcquisition.setSeriesInstanceUID(serie.getSeriesInstanceUID());
         datasetAcquisition.setRank(rank);
         datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
         datasetAcquisition.setSoftwareRelease(attributes.getString(Tag.SoftwareVersions));
-        LocalDateTime acquisitionStartTime = DicomProcessing.parseAcquisitionStartTime(
-                attributes.getString(Tag.AcquisitionDate), attributes.getString(Tag.AcquisitionTime));
-        datasetAcquisition.setAcquisitionStartTime(acquisitionStartTime);
+        datasetAcquisition.setAcquisitionStartTime(
+                DicomProcessing.parseRtAcquisitionStartTime(attributes, serie.getModality()));
         return datasetAcquisition;
     }
 
     @Override
-    public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex, Long subjectId, Attributes attributes) throws Exception {
-        return genericDatasetStrategy.generateSingleDataset(attributes, serie, dataset, datasetIndex, subjectId);
+    public Dataset generateFlatDataset(Serie serie, org.shanoir.ng.importer.dto.Dataset dataset, int datasetIndex,
+            Long subjectId, Attributes attributes) throws Exception {
+        return rtDatasetStrategy.generateSingleDataset(attributes, serie, dataset, datasetIndex, subjectId);
     }
 
 }

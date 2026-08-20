@@ -376,6 +376,40 @@ public interface ShanoirMetadataRepositoryCustom {
             + " LEFT JOIN center c ON c.id = e.center_id"
             + " , xa_dataset cd, dataset_metadata dm"
             + " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id";
+    String RT_QUERY = "SELECT d.id as datasetId, "
+            + "dm.name as datasetName, "
+            + "dm.dataset_modality_type as datasetType, "
+            + "null as datasetNature, "
+            + "d.creation_date as datasetCreationDate, "
+            + "e.id as examinationId, "
+            + "e.comment as examinationComment, "
+            + "e.data_reuse_agreement as dataReuseAgreement, "
+            + "e.examination_date as examinationDate, "
+            + "ae.name as acquisitionEquipmentName, "
+            + "su.name as subjectName, "
+            + "su.subject_type as subjectType, "
+            + "su.id as subjectId, "
+            + "st.name as studyName, "
+            + "e.study_id as studyId, "
+            + "c.name as centerName, "
+            + "c.id as centerId, "
+            + "null as sliceThickness, "
+            + "null as pixelBandwidth, "
+            + "null as magneticFieldStrength, "
+            + "da.import_date as importDate, "
+            + "da.username as username, "
+            + "da.sorting_index as sortingIndex, "
+            + "CASE WHEN d.dataset_processing_id IS NULL THEN 0 ELSE 1 END as processed, "
+            + "da.quality_tag as qualityTag"
+            + " FROM dataset d"
+            + " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
+            + " LEFT JOIN examination e ON e.id = da.examination_id"
+            + " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
+            + " LEFT JOIN study st ON st.id = e.study_id"
+            + " LEFT JOIN subject su ON su.id = e.subject_id AND su.study_id = e.study_id"
+            + " LEFT JOIN center c ON c.id = e.center_id"
+            + " , rt_dataset rd, dataset_metadata dm"
+            + " WHERE d.updated_metadata_id = dm.id AND rd.id = d.id";
     String RESULTSET_MAPPING = "SolrResult";
 
     String SUBJECT_TAG_QUERY = "SELECT d.id AS dataset_id, tag.name AS tag"
@@ -393,6 +427,7 @@ public interface ShanoirMetadataRepositoryCustom {
             PET_QUERY,
             CT_QUERY,
             XA_QUERY,
+            RT_QUERY,
             GENERIC_QUERY,
             EEG_QUERY,
             BIDS_QUERY,
@@ -405,6 +440,7 @@ public interface ShanoirMetadataRepositoryCustom {
             PET_QUERY,
             CT_QUERY,
             XA_QUERY,
+            RT_QUERY,
             GENERIC_QUERY,
             EEG_QUERY,
             BIDS_QUERY,
