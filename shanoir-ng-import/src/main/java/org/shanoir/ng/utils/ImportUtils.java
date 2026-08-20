@@ -458,20 +458,6 @@ public final class ImportUtils {
                 missingImages > 0 ? (", " + missingImages + " image(s) could not be matched") : "");
     }
 
-    /**
-     * Builds the new referencedFileID matching the renamed file
-     * "<newSopInstanceUID>.dcm" on disk, preserving whatever directory prefix
-     * (if any) the original referencedFileID had.
-     */
-    private static String[] renamedReferencedFileID(String[] originalReferencedFileID, String newFileName) {
-        if (originalReferencedFileID == null || originalReferencedFileID.length == 0) {
-            return new String[] {newFileName};
-        }
-        String[] newReferencedFileID = originalReferencedFileID.clone();
-        newReferencedFileID[newReferencedFileID.length - 1] = newFileName;
-        return newReferencedFileID;
-    }
-
     public static File getInstanceFileByReferencedFileID(Instance instance, String folderFileAbsolutePath)
             throws FileNotFoundException {
         String instanceFilePath = DicomUtils.referencedFileIDToPath(folderFileAbsolutePath, instance.getReferencedFileID());

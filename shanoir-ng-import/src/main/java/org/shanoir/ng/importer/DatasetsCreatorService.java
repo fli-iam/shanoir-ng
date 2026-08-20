@@ -58,7 +58,7 @@ public class DatasetsCreatorService {
     private String seriesProperties;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    public void createDatasets(ImportJobBase importJob, File importJobDir, boolean isFromShanoirUploader) throws ShanoirException {
+    public void createDatasets(ImportJobBase importJob, File importJobDir) throws ShanoirException {
         File seriesFolderFile = new File(importJobDir.getAbsolutePath() + File.separator + SERIES);
         if (!seriesFolderFile.exists()) {
             seriesFolderFile.mkdirs();
@@ -68,7 +68,7 @@ public class DatasetsCreatorService {
         List<Serie> series = importJob.getSeries();
         for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
             Serie serie = seriesIt.next();
-            File serieIDFolderFile = createSerieIDFolderAndMoveFiles(importJobDir, seriesFolderFile, serie, isFromShanoirUploader);
+            File serieIDFolderFile = createSerieIDFolderAndMoveFiles(importJobDir, seriesFolderFile, serie);
             boolean serieIdentifiedForNotSeparating;
             try {
                 serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
@@ -223,7 +223,7 @@ public class DatasetsCreatorService {
      * @param serie
      * @throws ShanoirException
      */
-    private File createSerieIDFolderAndMoveFiles(File importJobDir, File seriesFolderFile, Serie serie, boolean isFromShanoirUploader) throws ShanoirException {
+    private File createSerieIDFolderAndMoveFiles(File importJobDir, File seriesFolderFile, Serie serie) throws ShanoirException {
         String serieID = serie.getSeriesInstanceUID();
         File serieIDFolderFile = new File(seriesFolderFile.getAbsolutePath() + File.separator + serieID);
         if (!serieIDFolderFile.exists()) {
@@ -235,7 +235,7 @@ public class DatasetsCreatorService {
                     + ": folder already exists.");
         }
         List<Image> images = serie.getImages();
-        moveFiles(importJobDir, serieIDFolderFile, images, isFromShanoirUploader);
+        moveFiles(importJobDir, serieIDFolderFile, images);
         return serieIDFolderFile;
     }
 
@@ -245,15 +245,10 @@ public class DatasetsCreatorService {
      * @param images
      * @throws RestServiceException
      */
-    private void moveFiles(File importJobDir, File serieIDFolder, List<Image> images, boolean isFromShanoirUploader) throws ShanoirException {
+    private void moveFiles(File importJobDir, File serieIDFolder, List<Image> images) throws ShanoirException {
         for (Iterator<Image> iterator = images.iterator(); iterator.hasNext();) {
             Image image = iterator.next();
-            File oldFile = null;
-            if (isFromShanoirUploader) {
-                oldFile = new File(importJobDir.getAbsolutePath() + File.separator + serieIDFolder.getName() + File.separator + image.getSOPInstanceUID() + ImportUtils.SUFFIX_DCM);
-            } else {
-                oldFile = new File(importJobDir.getAbsolutePath() + File.separator + image.getPath());
-            }
+            File oldFile = new File(importJobDir.getAbsolutePath() + File.separator + image.getPath());
             if (oldFile.exists()) {
                 File newFile = new File(serieIDFolder.getAbsolutePath() + File.separator + image.getSOPInstanceUID() + ImportUtils.SUFFIX_DCM);
                 newFile.getParentFile().mkdirs();

@@ -151,7 +151,7 @@ public class ImporterManagerService {
             if (!importJob.isFromShanoirUploader()) {
                 pseudonymizeAndUpdateImportJobUIDs(importJob, event, importJobDir);
             }
-            datasetsCreatorService.createDatasets(importJob, importJobDir, importJob.isFromShanoirUploader());
+            datasetsCreatorService.createDatasets(importJob, importJobDir);
             importJobStatusService.setFinished(importJob);
             ImportUtils.cleanUpImportJob(importJob);
             // Send to ms-dataset to finish import
@@ -328,7 +328,7 @@ public class ImporterManagerService {
         List<Image> images = serie.getImages();
         for (Iterator<Image> imagesIt = images.iterator(); imagesIt.hasNext();) {
             Image image = imagesIt.next();
-            String path = image.getPath();
+            String path = workFolderPath + File.separator + image.getPath();
             File file = new File(path);
             if (file.exists()) {
                 pathsSet.add(file);
