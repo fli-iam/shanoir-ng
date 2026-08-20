@@ -24,6 +24,7 @@ import { Tag } from 'src/app/tags/tag.model';
 import { AccessRequest } from 'src/app/users/access-request/access-request.model';
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 import { ExecutionTemplateListComponent } from "src/app/vip/execution-template/execution-template-list.component";
+import { StudyStatisticsComponent } from "src/app/study-statistics/study-statistics.component";
 
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
@@ -71,7 +72,7 @@ import { CopyFromCsvComponent } from "./copy-csv.component";
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
     imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent,
-        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent]
+        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent, StudyStatisticsComponent]
 })
 
 export class StudyComponent extends EntityComponent<Study> {

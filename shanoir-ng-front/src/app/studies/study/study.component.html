@@ -85,10 +85,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <li [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>
                         }
                         <li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" replaceUrl="true">BIDS</li>
+                        @if (keycloakService.isUserAdminOrExpert()) {
+                            <li [class.active]="activeTab == 'statistics'" [routerLink]="'.'" [fragment]="'statistics'" replaceUrl="true">Statistics</li>
+                        }
                     }
                     @if (mode != 'view') {
                         <li [class.active]="activeTab == 'quality'" class="disabled" replaceUrl="true">Quality</li>
                         <li [class.active]="activeTab == 'bids'" class="disabled" replaceUrl="true">BIDS</li>
+                        @if (keycloakService.isUserAdminOrExpert()) {
+                            <li [class.active]="activeTab == 'statistics'" class="disabled" replaceUrl="true">Statistics</li>
+                        }
                     }
                     @if (isStudyAdmin) {
                         <li
@@ -858,6 +864,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <fieldset [class.hidden-tab]="activeTab != 'bids'" tab="bids">
                         <legend>BIDS tree</legend>
                         <bids-tree [studyId]="id" [studyName]="study.name"></bids-tree>
+                    </fieldset>
+                }
+                @if (mode == 'view' && keycloakService.isUserAdminOrExpert()) {
+                    <fieldset [class.hidden-tab]="activeTab != 'statistics'" tab="statistics">
+                        <legend>Statistics parameters</legend>
+                        <study-statistics [studyId]="id"></study-statistics>
                     </fieldset>
                 }
                 @if (mode == 'view') {
