@@ -20,7 +20,7 @@ import { Coil } from 'src/app/coils/shared/coil.model';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
 import { DicomService } from '../../shared/dicom.service';
-import { ConditionScope, DicomTag, Operation, StudyCardCondition, TagType, VM } from '../../shared/study-card.model';
+import { ConditionScope, DicomTag, FieldType, Operation, StudyCardCondition, VM } from '../../shared/study-card.model';
 import { ShanoirMetadataField } from '../action/action.component';
 import { AutoAdjustInputComponent } from '../../../shared/auto-ajust-input/auto-ajust-input.component';
 
@@ -90,12 +90,13 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
 
     private buildValueControl(value: string | Coil) {
         const validators: ValidatorFn[] = [Validators.required, Validators.minLength(1)]
-        const type: TagType = this.condition?.dicomTag?.type;
+        const type: FieldType = this.condition?.dicomTag?.type
+            ?? this.fields?.find(f => f.field == this.condition?.shanoirField)?.type;
         const vm: VM = this.condition?.dicomTag?.vm;
         if (['Double', 'Float'].includes(type)) {
             validators.push(Validators.pattern('[+-]?([0-9]*[.])?[0-9]+')); // reals : only numbers, with dot as decimal separator
         } else if (['Integer', 'Long'].includes(type)) {
-            validators.push(Validators.pattern('[+-]?[0-9]+')); // only numbers w/o decimals 
+            validators.push(Validators.pattern('[+-]?[0-9]+')); // only numbers w/o decimals
         } else if (type == 'String') {
             validators.push(Validators.pattern(/^[^"]*$/)); // exclude "
         } else if (type == 'Date') {
@@ -104,8 +105,6 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             validators.push(Validators.pattern(this.buildArrayPattern(vm, 'float')));
         } else if ( type == 'IntArray') {
             validators.push(Validators.pattern(this.buildArrayPattern(vm, 'int'))); // comma separated integers
-        } else if (!type && this.fields?.find(f => f.field == this.condition?.shanoirField)?.numeric) {
-            validators.push(Validators.pattern('[+-]?([0-9]*[.])?[0-9]+')); // reals : only numbers, with dot as decimal separator
         }
         return new FormControl(value, validators);
     }
@@ -331,7 +330,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     private filterOperations() {
         if (this.condition.scope?.includes('DICOMCondition')) { // DICOM fields
             if (this.condition?.dicomTag) {
-                const type: TagType = this.condition.dicomTag.type;
+                const type: FieldType = this.condition.dicomTag.type;
                 if (['Double', 'Float', 'Integer', 'Long', 'Date'].includes(type)) {
                     this.operations.forEach(op => {
                         if (['EQUALS', 'SMALLER_THAN', 'BIGGER_THAN', 'NOT_EQUALS','PRESENT', 'ABSENT'].includes(op.value)) {
@@ -373,7 +372,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             }
         } else { // Shanoir fields
             const shanoirField: ShanoirMetadataField = this.fields?.find(f => f.field == this.condition.shanoirField);
-            if (shanoirField?.numeric) {
+            if (['Long', 'Float', 'Double', 'Integer'].includes(shanoirField?.type)) {
                 this.operations.forEach(op => {
                     if (['EQUALS', 'NOT_EQUALS', 'SMALLER_THAN', 'BIGGER_THAN'].includes(op.value)) {
                         op.disabled = false;

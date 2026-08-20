@@ -118,8 +118,8 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         // condition-only fields: computed/DICOM-derived values that can be tested but not assigned by a study card
         this.conditionFields = [
             ...this.assignmentFields,
-            new ShanoirMetadataField('Number of slices', 'NUMBER_OF_SLICES', 'DatasetAcquisition', null, true),
-            new ShanoirMetadataField('Slice thickness', 'SLICE_THICKNESS', 'DatasetAcquisition', null, true),
+            new ShanoirMetadataField('Number of slices', 'NUMBER_OF_SLICES', 'DatasetAcquisition', null, 'Integer'),
+            new ShanoirMetadataField('Slice thickness', 'SLICE_THICKNESS', 'DatasetAcquisition', null, 'Double'),
         ];
     }
     
