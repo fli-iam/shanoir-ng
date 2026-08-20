@@ -28,6 +28,7 @@ import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
@@ -356,6 +357,7 @@ public class StudyInstanceUIDAndSubjectNameHandler {
                     || acquisition instanceof CtDatasetAcquisition
                     || acquisition instanceof PetDatasetAcquisition
                     || acquisition instanceof XaDatasetAcquisition
+                    || acquisition instanceof RtDatasetAcquisition
                     || acquisition instanceof GenericDatasetAcquisition) {
                 List<Dataset> datasets = acquisition.getDatasets();
                 if (!datasets.isEmpty()) {
