@@ -209,11 +209,8 @@ public class UploadServiceJob {
         try {
             List<Future<Void>> futures = allFiles.stream()
                     .map(file -> (Callable<Void>) () -> {
-                        String seriesInstanceUID = null;
-                        try (DicomInputStream dIS = new DicomInputStream(file)) {
-                            Attributes attributes = dIS.readDatasetUntilPixelData();
-                            seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
-                        }
+                        File parentDir = file.getParentFile();
+                        String seriesInstanceUID = parentDir.getName();
                         client.uploadFile(tempDirId, seriesInstanceUID, file);
                         int done = completedCount.incrementAndGet();
                         synchronized (progressLock) {
