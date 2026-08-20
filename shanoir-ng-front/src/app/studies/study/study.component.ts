@@ -99,6 +99,17 @@ export class StudyComponent extends EntityComponent<Study> {
     subjectTagsInUse: Tag[] = [];
 
     public openPrefix: boolean = false;
+    public useSubjectNamePattern: boolean = false;
+    public namePrefixOption: string = 'study_name';
+    public customNamePrefixes: string[] = [''];
+
+    addCustomNamePrefix() {
+        this.customNamePrefixes.push('');
+    }
+
+    removeCustomNamePrefix(index: number) {
+        this.customNamePrefixes.splice(index, 1);
+    }
 
     centerOptions: Option<IdName>[];
     profileOptions: Option<Profile>[];

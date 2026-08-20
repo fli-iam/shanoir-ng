@@ -681,55 +681,108 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         formControlName="tags"></tag-creator>
                     <fieldset class="pattern-fieldset">
                         <legend>Subject Name Pattern</legend>
-                        <div class="pattern-builder">
-                            <div class="pattern-field">
-                                Subject name prefix :
-                                <select id="namePrefix" name="namePrefix">
-                                    <option value="study_name">Study name</option>
-                                    <option value="random_name">Random name</option>
-                                </select>
-                            </div>
-
-                            <span class="pattern-separator-label">+</span>
-
-                            <div class="pattern-field">
-                                Separator :
-                                <select id="separator" name="separator">
-                                    <option value="-">-</option>
-                                    <option value="_">_</option>
-                                    <option value=".">.</option>
-                                </select>
-                            </div>
-
-                            <span class="pattern-separator-label">+</span>
-
-                            <div class="pattern-field">
-                                Subject name identifier length :
-                                <select id="idLength" name="idLength">
-                                    <option value="4">3 chars</option>
-                                    <option value="6">4 chars</option>
-                                    <option value="8">6 chars</option>
-                                    <option value="10">8 chars</option>
-                                </select>
-                            </div>
-
-                            <span class="pattern-separator-label">+</span>
-
-                            <div class="pattern-field">
-                                Subject name identifier type :
-                                <select id="idType" name="idType">
-                                    <option value="string">String value</option>
-                                    <option value="numeric">Numeric value</option>
-                                </select>
-                            </div>
+                        <div class="pattern-field">
+                            Use subject common name pattern :
+                            <span class="pattern-use-checkbox">
+                                @switch (mode) {
+                                    @case ('view') {
+                                        @if (useSubjectNamePattern) {
+                                            <span class="bool-true"><i class="fas fa-check"></i></span>
+                                        }
+                                        @if (!useSubjectNamePattern) {
+                                            <span class="bool-false"><i class="fas fa-times"></i></span>
+                                        }
+                                    }
+                                    @default {
+                                        <checkbox [(ngModel)]="useSubjectNamePattern" [ngModelOptions]="{standalone: true}"></checkbox>
+                                    }
+                                }
+                            </span>
                         </div>
+                        @if (useSubjectNamePattern) {
+                            <br>
+                            <div class="pattern-builder">
+                                <div class="pattern-field">
+                                    Subject name prefix :
+                                    <select
+                                        id="namePrefix"
+                                        name="namePrefix"
+                                        [disabled]="mode == 'view'"
+                                        [(ngModel)]="namePrefixOption"
+                                        [ngModelOptions]="{standalone: true}">
+                                        <option value="study_name">Study name</option>
+                                        <option value="custom_name">Custom name(s)</option>
+                                    </select>
+                                    <br>
+                                    @if (namePrefixOption == 'custom_name') {
+                                        <span class="multi-value">
+                                            @for (prefix of customNamePrefixes; track $index; let i = $index) {
+                                                <span class="one-value">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Enter prefix"
+                                                        [disabled]="mode == 'view'"
+                                                        [(ngModel)]="customNamePrefixes[i]"
+                                                        [ngModelOptions]="{standalone: true}" />
+                                                    @if (mode != 'view' && customNamePrefixes.length > 1) {
+                                                        <span class="delete-value" (click)="removeCustomNamePrefix(i)"><i class="far fa-times-circle"></i></span>
+                                                    }
+                                                </span>
+                                            }
+                                            @if (mode != 'view' && customNamePrefixes[customNamePrefixes.length - 1]?.length > 0) {
+                                                <span class="add-cond-value" (click)="addCustomNamePrefix()">
+                                                    <i class="fa-solid fa-circle-plus"></i>
+                                                    Add a possible prefix
+                                                </span>
+                                            }
+                                        </span>
+                                    }
+                                </div>
 
-                        <br>
+                                <span class="pattern-separator-label">+</span>
 
-                        <div class="pattern-preview">
-                            <span class="pattern-preview-label">Preview :</span>
-                            <code class="pattern-preview-value">StudyName-A8f2</code>
-                        </div>
+                                <div class="pattern-field">
+                                    Separator :
+                                    <select id="separator" name="separator" [disabled]="mode == 'view'">
+                                        <option value="-">-</option>
+                                        <option value="_">_</option>
+                                        <option value=".">.</option>
+                                    </select>
+                                </div>
+
+                                <span class="pattern-separator-label">+</span>
+
+                                <div class="pattern-field">
+                                    Subject name identifier length (number of characters) :
+                                    <select id="idLength" name="idLength" [disabled]="mode == 'view'">
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                        <option value="6">6</option>
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                    </select>
+                                </div>
+
+                                <span class="pattern-separator-label">+</span>
+
+                                <div class="pattern-field">
+                                    Subject name identifier type :
+                                    <select id="idType" name="idType" [disabled]="mode == 'view'">
+                                        <option value="string">String value</option>
+                                        <option value="numeric">Numeric value</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <br>
+
+                            <div class="pattern-preview">
+                                <span class="pattern-preview-label">Preview :</span>
+                                <code class="pattern-preview-value">StudyName-A8f2</code>
+                            </div>
+                        }
                     </fieldset>
                     <subject-study-list
                         [allowRemove]="false"
