@@ -130,10 +130,17 @@ public class ImporterManagerService {
                 imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
                         importJobDir.getAbsolutePath(), event, true);
             // isFromShUp: Pseudonymization already done and UIDs updated in importJob
-            // createImages already based on correct instances post-pseudo
+            // createImages already done now in new versions of ShUp too
+            } else if (importJob.isFromShanoirUploader()) {
+                boolean legacy = importJob.getSeries().getFirst().getInstances() != null;
+                // still manage imports of old versions
+                if (legacy) {
+                    imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
+                            importJobDir.getAbsolutePath(), event, false);
+                }
             // isFromDicomZip: do nothing, as images creation and analyze of DICOM files
             // have been done after upload of ZIP file(s) already
-            } else if (!importJob.isFromDicomZip() && !importJob.isFromShanoirUploader()) {
+            } else if (!importJob.isFromDicomZip()) {
                 throw new ShanoirException("Unsupported type of import.");
             }
 

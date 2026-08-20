@@ -114,7 +114,7 @@ public class DownloadOrCopyRunnable implements Runnable {
                  * Create images from all instances and put instances to null
                  */
                 dicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob,
-                        importJobFolder.getAbsolutePath(), null, this.isFromPACS);
+                        importJobFolder.getAbsolutePath(), null, true);
             } catch (FileNotFoundException e) {
                 LOG.error(e.getMessage(), e);
                 // as exception occurred, we set allFileNames to null, to force ERROR state of import
