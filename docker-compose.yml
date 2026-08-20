@@ -361,6 +361,8 @@ services:
   ldap:
     container_name: "${SHANOIR_PREFIX}ldap"
     image: dcm4che/slapd-dcm4chee:2.6.2-27.0
+    environment:
+      LDAP_INIT_CMDS: /etc/openldap/configure.sh /opt/shanoir/ldap-first-start.sh
     logging:
       driver: json-file
       options:
@@ -373,6 +375,7 @@ services:
     volumes:
       - "dcm4chee-ldap-data:/var/lib/openldap/openldap-data"
       - "dcm4chee-sldap-data:/etc/openldap/slapd.d"
+      - "./docker-compose/dcm4chee/ldap-first-start.sh:/opt/shanoir/ldap-first-start.sh:ro"
   dcm4chee-database:
     container_name: "${SHANOIR_PREFIX}dcm4chee-database"
     image: dcm4che/postgres-dcm4chee:14.4-27
