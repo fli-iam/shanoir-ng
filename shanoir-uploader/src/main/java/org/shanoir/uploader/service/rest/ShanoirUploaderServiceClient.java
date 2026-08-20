@@ -931,23 +931,6 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
-    /**
-     * New upload variant used by newer ShanoirUploader versions: uploads the file directly into a
-     * seriesInstanceUID sub-folder on the server.
-     */
-    public void uploadFile(String tempDirId, String seriesInstanceUID, File file) throws Exception {
-        String url = this.serviceURLImporterCreateTempDir + "/" + tempDirId + "/series/" + seriesInstanceUID;
-        try (CloseableHttpResponse response = httpService.postFile(url, file)) {
-            int code = response.getCode();
-            if (code != HttpStatus.SC_OK) {
-                LOG.error("Error in uploadFile (series): tempDirId={}, seriesInstanceUID={}, file (path: {}, size in bytes: {}), status code: {}, message: {}",
-                        tempDirId, seriesInstanceUID, file.getAbsolutePath(), Files.size(file.toPath()), code,
-                        apiResponseMessages.getOrDefault(code, "unknown status code"));
-                throw new Exception("Error in uploadFile (series).");
-            }
-        }
-    }
-
     public ImportJobBase uploadDicom(File file) throws Exception {
         try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterUploadDicom, file)) {
             try (response) {

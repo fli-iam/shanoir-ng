@@ -16,14 +16,9 @@ package org.shanoir.uploader.upload;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -34,10 +29,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
-import org.shanoir.ng.importer.model.Image;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.ImportJobStatus;
-import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.check.DicomInstanceConsistencyChecker;
@@ -209,17 +202,12 @@ public class UploadServiceJob {
         final int total = allFiles.size();
         final AtomicInteger completedCount = new AtomicInteger(0);
         final Object progressLock = new Object();
-        final List<UploadTask> uploadTasks = buildUploadTasks(allFiles, importJob);
         ExecutorService uploadExecutor = Executors.newFixedThreadPool(
                 Math.min(UPLOAD_PARALLELISM, Math.max(1, total)));
         try {
-            List<Future<Void>> futures = uploadTasks.stream()
-                    .map(task -> (Callable<Void>) () -> {
-                        if (task.seriesInstanceUID() != null) {
-                            client.uploadFile(tempDirId, task.seriesInstanceUID(), task.file());
-                        } else {
-                            throw new IOException("Instance with missing seriesInstanceUID.");
-                        }
+            List<Future<Void>> futures = allFiles.stream()
+                    .map(file -> (Callable<Void>) () -> {
+                        client.uploadFile(tempDirId, file);
                         int done = completedCount.incrementAndGet();
                         synchronized (progressLock) {
                             progressListener.onProgress((done * 100 / total) + " %");
@@ -251,8 +239,6 @@ public class UploadServiceJob {
         }
     }
 
-    private record UploadTask(File file, String seriesInstanceUID) { }
-
     /**
      * Finalizes an ImportJob after upload (assigns the server-side work-folder id) and starts the
      * import on the server. Extracted {@code static} + client-parameterized for the same
@@ -265,57 +251,6 @@ public class UploadServiceJob {
         importJob.setId(id);
         String importJobJson = Util.objectWriter.writeValueAsString(importJob);
         client.startImportJob(id, importJobJson);
-    }
-
-    /**
-     * Builds one upload task per file on disk, using the ImportJob's series/instances as the
-     * source of truth for the target seriesInstanceUID: for every Instance of every Serie, the
-     * corresponding local file is looked up by SOPInstanceUID (files are named
-     * "{sopInstanceUID}{DICOM_FILE_SUFFIX}") and paired with that Serie's - already
-     * pseudonymized - seriesInstanceUID. Any file on disk that cannot be matched to an instance
-     * (should not normally happen at this stage) still gets an upload task, just without a
-     * seriesInstanceUID.
-     */
-    private static List<UploadTask> buildUploadTasks(final Collection<File> allFiles, final ImportJobBase importJob) {
-        final Map<String, File> sopInstanceUIDToFile = new HashMap<>();
-        for (File file : allFiles) {
-            sopInstanceUIDToFile.put(stripDicomSuffix(file.getName()), file);
-        }
-        final List<UploadTask> tasks = new ArrayList<>(allFiles.size());
-        final Set<File> matchedFiles = new HashSet<>();
-        if (importJob.getSeries() != null) {
-            for (Serie serie : importJob.getSeries()) {
-                if (serie.getImages() == null) {
-                    continue;
-                }
-                for (Image image : serie.getImages()) {
-                    File file = sopInstanceUIDToFile.get(image.getSOPInstanceUID());
-                    if (file != null) {
-                        tasks.add(new UploadTask(file, serie.getSeriesInstanceUID()));
-                        matchedFiles.add(file);
-                    } else {
-                        LOG.warn("No local file found for instance {} of serie {}, skipping.",
-                                image.getSOPInstanceUID(), serie.getSeriesInstanceUID());
-                    }
-                }
-            }
-        }
-        // Any file on disk not referenced by an instance in the ImportJob: still upload it
-        // (never silently lose data), but we don't know its series, so use the flat endpoint.
-        for (File file : allFiles) {
-            if (!matchedFiles.contains(file)) {
-                LOG.warn("File {} is not referenced by any instance in the ImportJob, falling back to flat upload.",
-                        file.getAbsolutePath());
-                tasks.add(new UploadTask(file, null));
-            }
-        }
-        return tasks;
-    }
-
-    private static String stripDicomSuffix(String fileName) {
-        return fileName.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)
-                ? fileName.substring(0, fileName.length() - DcmRcvManager.DICOM_FILE_SUFFIX.length())
-                : fileName;
     }
 
     /**
@@ -434,14 +369,6 @@ public class UploadServiceJob {
         importJob.setUploadState(UploadState.ERROR);
         importJob.setTimestamp(System.currentTimeMillis());
         nominativeDataImportJobManager.writeImportJob(importJob);
-    }
-
-    private void setImportJobIdAndStartImport(String id, ImportJobBase importJob)
-            throws IOException, JsonParseException, JsonMappingException, JsonProcessingException, Exception {
-        importJob.setWorkFolder(id);
-        importJob.setId(id);
-        String importJobJson = Util.objectWriter.writeValueAsString(importJob);
-        shanoirUploaderServiceClient.startImportJob(id, importJobJson);
     }
 
     /**
