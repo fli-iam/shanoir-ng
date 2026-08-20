@@ -10,8 +10,10 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.htm
 
-CREATE INDEX FKa6tmrrsalv4mmwcoc0c9mlco9 ON examination (study_id);
+CREATE INDEX examination_study_id_idx ON examination (study_id);
 
-CREATE INDEX FKbyupgcuub9vxh5s5uu258uewy ON examination (subject_id);
+CREATE INDEX examination_subject_id_idx ON examination (subject_id);
 
-CREATE INDEX FKle0p9n78s9xv90qpp7gll7yl6 ON examination (source_id);
+CREATE INDEX examination_source_id_idx ON examination (source_id);
+
+CREATE INDEX examination_center_id_idx ON examination (center_id);
