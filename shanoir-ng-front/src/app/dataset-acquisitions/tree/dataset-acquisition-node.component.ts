@@ -60,6 +60,13 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
             protected treeService: TreeService,
             elementRef: ElementRef) {
         super(elementRef);
+        // the deletion of the last dataset of this acquisition removes the acquisition itself
+        this.subscriptions.push(
+            this.datasetService.onAcquisitionsRemoved.subscribe(ids => {
+                if (this.node && ids.includes(this.node.id)) {
+                    this.acquisitionDelete.emit();
+                }
+            }));
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -76,6 +83,8 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
                     this.input.datasetAcquisition.id,
                     label,
                     UNLOADED,
+                    null,
+                    this.input.datasetAcquisition.extraDataFilePathList,
                     this.input.studyRights.includes(StudyUserRight.CAN_ADMINISTRATE),
                     this.input.studyRights.includes(StudyUserRight.CAN_DOWNLOAD)
                 );
@@ -86,11 +95,16 @@ export class DatasetAcquisitionNodeComponent extends TreeNodeAbstractComponent<D
     }
 
     hasChildren(): boolean | 'unknown' {
-        if (!this.node.datasets) return false;
-        else if (this.node.datasets == 'UNLOADED') return 'unknown';
-        else return this.node.datasets.length > 0;
+        if (!this.node.datasets && !this.node.extraDataFilePathList) return false;
+        else if (this.node.datasets == 'UNLOADED' || this.node.extraDataFilePathList == 'UNLOADED') return 'unknown';
+        else return (this.node.datasets && this.node.datasets.length > 0)
+                || (this.node.extraDataFilePathList && this.node.extraDataFilePathList.length > 0);
     }
-    
+
+    downloadFile(file) {
+        this.datasetAcquisitionService.downloadFile(file, this.node.id, this.downloadState);
+    }
+
     loadDatasets() {
         if (this.node.datasets == UNLOADED) {
             this.loading = true;

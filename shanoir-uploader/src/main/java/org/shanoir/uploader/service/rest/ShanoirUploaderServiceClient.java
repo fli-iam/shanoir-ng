@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
@@ -38,21 +37,26 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.io.DicomInputStream;
 import org.json.JSONObject;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.EegImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.dto.StudyCardOnStudyResultDTO;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
+import org.shanoir.uploader.model.rest.DatasetLight;
+import org.shanoir.uploader.model.rest.DatasetsImportStatus;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.Manufacturer;
 import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.StudyUser;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.utils.Util;
 import org.slf4j.Logger;
@@ -67,7 +71,7 @@ import jakarta.mail.util.ByteArrayDataSource;
 
 /**
  *
- * Service layer for REST services of sh-ng.
+ * Service layer for REST services of Shanoir.
  *
  * @author mkain
  *
@@ -86,6 +90,10 @@ public class ShanoirUploaderServiceClient {
     private static final String SERVICE_STUDIES_NAMES_CENTERS = "service.studies.find.names.centers";
 
     private static final String SERVICE_STUDIES_PUBLIC_DATA = "service.studies.find.public.data";
+
+    private static final String SERVICE_STUDY_APPROVE = "service.studies.study.approve";
+
+    private static final String SERVICE_STUDY_USER = "service.studies.study.user";
 
     private static final String SERVICE_STUDYCARDS_CREATE = "service.studycards.create";
 
@@ -122,6 +130,10 @@ public class ShanoirUploaderServiceClient {
     private static final String SERVICE_DATASETS = "service.datasets";
 
     private static final String SERVICE_DATASETS_DICOM_WEB_STUDIES = "service.datasets.dicom.web.studies";
+    
+    private static final String SERVICE_DATASETS_IMPORT_STATUS = "service.datasets.import.status";
+    
+    private static final String SERVICE_DATASETS_FIND_BY_EXAMINATION = "service.datasets.find.by.examination";
 
     private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
 
@@ -129,11 +141,25 @@ public class ShanoirUploaderServiceClient {
 
     private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";
 
+    private static final String SERVICE_EXAMINATIONS_DELETE = "service.examinations.delete";
+
     private static final String SERVICE_IMPORTER_CREATE_TEMP_DIR = "service.importer.create.temp.dir";
 
     private static final String SERVICE_IMPORTER_START_IMPORT_JOB = "service.importer.start.import.job";
 
+    private static final String SERVICE_IMPORTER_STATUS = "service.importer.status";
+
     private static final String SERVICE_IMPORTER_UPLOAD_DICOM = "service.importer.upload.dicom";
+
+    private static final String SERVICE_IMPORTER_UPLOAD_MULTIPLE_DICOM = "service.importer.upload.multiple.dicom";
+
+    private static final String SERVICE_IMPORTER_UPLOAD_EEG = "service.importer.upload.eeg";
+
+    private static final String SERVICE_IMPORTER_ANALYZE_EEG = "service.importer.analyze.eeg";
+
+    private static final String SERVICE_IMPORTER_START_IMPORT_EEG_JOB = "service.importer.start.import.eeg.job";
+
+    private static final String SERVICE_IMPORTER_BIDS = "service.importer.bids";
 
     private static final String SERVICE_EXAMINATIONS_BY_SUBJECT_ID = "service.examinations.find.by.subject.id";
 
@@ -152,6 +178,10 @@ public class ShanoirUploaderServiceClient {
     private String serviceURLStudiesFindNamesAndCenters;
 
     private String serviceURLStudiesFindPublicData;
+
+    private String serviceURLStudyApprove;
+
+    private String serviceURLStudyUser;
 
     private String serviceURLStudyCardsCreate;
 
@@ -189,15 +219,33 @@ public class ShanoirUploaderServiceClient {
 
     private String serviceURLDatasets;
 
+    private String serviceURLDatasetsImportStatus;
+
+    private String serviceURLDatasetsFindByExamination;
+
+    private String serviceURLImporterBids;
+    
     private String serviceURLDatasetsDicomWebStudies;
 
     private String serviceURLExaminationsCreate;
+
+    private String serviceURLExaminationsDelete;
 
     private String serviceURLImporterCreateTempDir;
 
     private String serviceURLImporterStartImportJob;
 
+    private String serviceURLImporterStatus;
+
     private String serviceURLImporterUploadDicom;
+
+    private String serviceURLImporterUploadMultipleDicom;
+
+    private String serviceURLImporterUploadEeg;
+
+    private String serviceURLImporterAnalyzeEeg;
+
+    private String serviceURLImporterStartImportEegJob;
 
     private String serviceURLExaminationsBySubjectId;
 
@@ -208,6 +256,12 @@ public class ShanoirUploaderServiceClient {
     private String serviceURLSubjectsByStudyId;
 
     private Map<Integer, String> apiResponseMessages;
+
+    private Long userId;
+
+    private String userName;
+
+    private String accessToken;
 
     public void configure() {
         apiResponseMessages = new HashMap<Integer, String>();
@@ -226,6 +280,10 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
         this.serviceURLStudiesFindPublicData = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_PUBLIC_DATA);
+        this.serviceURLStudyApprove = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDY_APPROVE);
+        this.serviceURLStudyUser = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDY_USER);
         this.serviceURLStudyCardsCreate = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_CREATE);
         this.serviceURLStudyCardsFind = this.serverURL
@@ -257,6 +315,10 @@ public class ShanoirUploaderServiceClient {
         this.serviceURLDatasets = this.serverURL + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS);
         this.serviceURLDatasetsDicomWebStudies = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_DICOM_WEB_STUDIES);
+        this.serviceURLDatasetsImportStatus = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_IMPORT_STATUS);
+        this.serviceURLDatasetsFindByExamination = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_FIND_BY_EXAMINATION);
         this.serviceURLSubjectsCreate = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_CREATE);
         this.serviceURLSubjectsFind = this.serverURL
@@ -265,12 +327,26 @@ public class ShanoirUploaderServiceClient {
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_KEYS_FIND_VALUE);
         this.serviceURLExaminationsCreate = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
+        this.serviceURLExaminationsDelete = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_DELETE);
         this.serviceURLImporterCreateTempDir = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_CREATE_TEMP_DIR);
         this.serviceURLImporterStartImportJob = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_START_IMPORT_JOB);
+        this.serviceURLImporterStatus = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_STATUS);
         this.serviceURLImporterUploadDicom = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_UPLOAD_DICOM);
+        this.serviceURLImporterUploadMultipleDicom = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_UPLOAD_MULTIPLE_DICOM);
+        this.serviceURLImporterUploadEeg = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_UPLOAD_EEG);
+        this.serviceURLImporterAnalyzeEeg = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_ANALYZE_EEG);
+        this.serviceURLImporterStartImportEegJob = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_START_IMPORT_EEG_JOB);
+        this.serviceURLImporterBids = this.serverURL
+                + ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_BIDS);
         this.serviceURLExaminationsBySubjectId = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
         this.serviceURLExaminationsFind = this.serverURL
@@ -280,9 +356,9 @@ public class ShanoirUploaderServiceClient {
         this.serviceURLSubjectsByStudyId = this.serverURL
                 + ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_BY_STUDY_ID);
 
-        this.httpService = new HttpService(this.serverURL);
+        this.httpService = new HttpService(this);
 
-        LOG.info("ShanoirUploaderService successfully initialized.");
+        LOG.debug("ShanoirUploaderService successfully initialized.");
     }
 
     /**
@@ -330,18 +406,52 @@ public class ShanoirUploaderServiceClient {
                     final int statusCode = response.getCode();
                     if (HttpStatus.SC_OK == statusCode) {
                         JSONObject responseEntityJson = new JSONObject(responseEntityString);
+                        String accessToken = responseEntityJson.getString("access_token");
                         String refreshToken = responseEntityJson.getString("refresh_token");
+                        // Decode the access token payload (middle JWT segment) to read userId.
+                        // The token is not verified here – trust is established by HTTPS and
+                        // the prior Keycloak authentication exchange.
+                        try {
+                            String[] jwtParts = accessToken.split("\\.");
+                            if (jwtParts.length >= 2) {
+                                byte[] payloadBytes = java.util.Base64.getUrlDecoder()
+                                        .decode(padBase64(jwtParts[1]));
+                                JSONObject payload = new JSONObject(new String(payloadBytes,
+                                        java.nio.charset.StandardCharsets.UTF_8));
+                                if (payload.has(KeycloakUtil.USER_ID_TOKEN_ATT)) {
+                                    this.userId = payload.getLong(KeycloakUtil.USER_ID_TOKEN_ATT);
+                                } else {
+                                    LOG.warn("Keycloak token does not contain '{}' claim.",
+                                            KeycloakUtil.USER_ID_TOKEN_ATT);
+                                }
+                                if (payload.has(KeycloakUtil.PREFERRED_USERNAME)) {
+                                    this.userName = payload.getString(KeycloakUtil.PREFERRED_USERNAME);
+                                } else {
+                                    LOG.warn("Keycloak token does not contain '{}' claim.",
+                                            KeycloakUtil.PREFERRED_USERNAME);
+                                }
+                            }
+                        } catch (Exception e) {
+                            LOG.error("Could not extract userId from access token: {}", e.getMessage());
+                        }
                         refreshToken(keycloakURL, refreshToken);
-                        return responseEntityJson.getString("access_token");
+                        return accessToken;
                     }
                 }
             } catch (Exception e) {
-                LOG.error(e.getMessage(), e);
+                LOG.error(e.getMessage());
             }
         } catch (UnsupportedEncodingException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error(e.getMessage());
         }
         return null;
+    }
+
+    private static String padBase64(String base64Url) {
+        int remainder = base64Url.length() % 4;
+        if (remainder == 0)
+            return base64Url;
+        return base64Url + "=".repeat(4 - remainder);
     }
 
     /**
@@ -365,11 +475,11 @@ public class ShanoirUploaderServiceClient {
                         JSONObject responseEntityJson = new JSONObject(responseEntityString);
                         String newAccessToken = responseEntityJson.getString("access_token");
                         if (newAccessToken != null) {
-                            ShUpOnloadConfig.setTokenString(newAccessToken);
+                            this.setAccessToken(newAccessToken);
                         } else {
                             LOG.error("ERROR: with access token refresh.");
                         }
-                        LOG.debug("Access token has been refreshed.");
+                        LOG.debug("Access token has been refreshed for user: " + userId);
                     } else {
                         LOG.error("ERROR: Access token could NOT be refreshed: HttpStatus-" + statusCode);
                     }
@@ -428,11 +538,56 @@ public class ShanoirUploaderServiceClient {
                 List<Study> studies = Util.getMappedList(response, Study.class);
                 return studies;
             } else {
-                LOG.error("Could not get study public data (status code: " + code + ", message: "
-                        + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                if (code != HttpStatus.SC_NO_CONTENT) {
+                    LOG.error("Could not get study public data (status code: " + code + ", message: "
+                            + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                }
                 return null;
             }
         }
+    }
+
+    public StudyUser addStudyUser(
+            final Long studyId,
+            final StudyUser studyUser) {
+        try {
+            String json = Util.objectWriter.writeValueAsString(studyUser);
+            try (CloseableHttpResponse response = httpService.post(
+                    this.serviceURLStudyUser + studyId, json, false)) {
+                int code = response.getCode();
+                if (code == HttpStatus.SC_OK) {
+                    return Util.getMappedObject(response, StudyUser.class);
+                } else {
+                    LOG.error("Error in addStudyUser: studyId={}, userId={} (status code: {}, message: {})",
+                            studyId, studyUser.getUserId(), code,
+                            apiResponseMessages.getOrDefault(code, "unknown status code"));
+                }
+            }
+        } catch (JsonProcessingException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public boolean removeStudyUser(final Long studyId, final Long userId) {
+        try {
+            try (CloseableHttpResponse response = httpService.delete(
+                    this.serviceURLStudyUser + studyId + "/" + userId)) {
+                int code = response.getCode();
+                if (code == HttpStatus.SC_NO_CONTENT || code == HttpStatus.SC_OK) {
+                    return true;
+                } else {
+                    LOG.error("Error in removeStudyUser: studyId={}, userId={} (status code: {}, message: {})",
+                            studyId, userId, code,
+                            apiResponseMessages.getOrDefault(code, "unknown status code"));
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return false;
     }
 
     public List<Subject> findSubjects() throws Exception {
@@ -757,12 +912,12 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
-    public ImportJob uploadDicom(File file) throws Exception {
+    public ImportJobBase uploadDicom(File file) throws Exception {
         try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterUploadDicom, file)) {
             try (response) {
                 int code = response.getCode();
                 if (code == HttpStatus.SC_OK) {
-                    ImportJob importJob = Util.getMappedObject(response, ImportJob.class);
+                    ImportJobBase importJob = Util.getMappedObject(response, ImportJobBase.class);
                     return importJob;
                 } else {
                     LOG.error("Error in uploadDicom: "
@@ -774,16 +929,115 @@ public class ShanoirUploaderServiceClient {
         }
     }
 
-    public void startImportJob(String importJobJsonStr) throws Exception {
+    /**
+     * Calls the "upload multiple examinations" endpoint: a single subject
+     * folder containing several exam sub-folders, each zipped and imported
+     * (subject/examination creation and import job start) directly server-side.
+     * Response is parsed as {@link ImportJobBase} to stay consistent with the
+     * rest of the client, even though the endpoint's declared return type is
+     * the richer {@code ImportJob}.
+     */
+    public ImportJobBase uploadMultipleDicom(File file, Long studyId, String studyName, Long studyCardId,
+            Long centerId, Long equipmentId) throws Exception {
+        StringBuilder url = new StringBuilder(this.serviceURLImporterUploadMultipleDicom);
+        url.append(studyId)
+                .append("/studyName/").append(URLEncoder.encode(studyName, "UTF-8"))
+                .append("/studyCard/").append(studyCardId)
+                .append("/center/").append(centerId)
+                .append("/equipment/").append(equipmentId)
+                .append("/");
+        try (CloseableHttpResponse response = httpService.postFile(url.toString(), file)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, ImportJobBase.class);
+            } else {
+                LOG.error("Error in uploadMultipleDicom: studyId={} (status code: {}, message: {})",
+                        studyId, code, apiResponseMessages.getOrDefault(code, "unknown status code"));
+                throw new Exception("Error in uploadMultipleDicom");
+            }
+        }
+    }
+
+    /**
+     * 1st EEG import step: uploads and unzips the EEG archive server-side and
+     * gets back a first, mostly-empty {@link EegImportJob} (workFolder, archive
+     * name, user info).
+     */
+    public EegImportJob uploadEEGZip(File file) throws Exception {
+        try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterUploadEeg, file)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, EegImportJob.class);
+            } else {
+                LOG.error("Error in uploadEEGZip (status code: {}, message: {})",
+                        code, apiResponseMessages.getOrDefault(code, "unknown status code"));
+                throw new Exception("Error in uploadEEGZip");
+            }
+        }
+    }
+
+    /**
+     * 2nd EEG import step: analyzes the uploaded .vhdr/.edf file(s) to fill in
+     * channels, events and datasets on the {@link EegImportJob}.
+     */
+    public EegImportJob analyzeEegZipFile(EegImportJob importJob) throws Exception {
+        String json = Util.objectWriter.writeValueAsString(importJob);
+        try (CloseableHttpResponse response = httpService.post(this.serviceURLImporterAnalyzeEeg, json, false)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, EegImportJob.class);
+            } else {
+                LOG.error("Error in analyzeEegZipFile (status code: {}, message: {})",
+                        code, apiResponseMessages.getOrDefault(code, "unknown status code"));
+                throw new Exception("Error in analyzeEegZipFile");
+            }
+        }
+    }
+
+    /**
+     * 3rd EEG import step: sends the completed {@link EegImportJob} (with
+     * examination/study set) to trigger the actual dataset creation.
+     */
+    public void startImportEEGJob(EegImportJob importJob) throws Exception {
+        String json = Util.objectWriter.writeValueAsString(importJob);
+        try (CloseableHttpResponse response = httpService.post(this.serviceURLImporterStartImportEegJob, json, false)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                LOG.info("EEG import job started on server for examination: {}", importJob.getExaminationId());
+            } else {
+                LOG.error("Error in startImportEEGJob (status code: {}, message: {})",
+                        code, apiResponseMessages.getOrDefault(code, "unknown status code"));
+                throw new Exception("Error in startImportEEGJob");
+            }
+        }
+    }
+
+    public void startImportJob(String tempDirId, String importJobJsonStr) throws Exception {
         try (CloseableHttpResponse response = httpService.post(this.serviceURLImporterStartImportJob, importJobJsonStr,
                 false)) {
             int code = response.getCode();
             if (code == HttpStatus.SC_OK) {
-                LOG.info("Import job successfully started on server.");
+                LOG.info("Import job started on server: {}", tempDirId);
             } else {
                 LOG.error("Error in startImportJob: with json " + importJobJsonStr + " (status code: " + code
                         + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
                 throw new Exception("Error in startImportJob");
+            }
+        }
+    }
+
+    public ImportJobStatus getImportJobStatus(String tempDirId) throws Exception {
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLImporterStatus + tempDirId)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, ImportJobStatus.class);
+            } else if (code == HttpStatus.SC_NOT_FOUND) {
+                return null;
+            } else {
+                LOG.error("Could not get import job status for tempDirId " + tempDirId
+                        + " (status code: " + code + ", message: "
+                        + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                throw new Exception("Error in getImportJobStatus");
             }
         }
     }
@@ -808,17 +1062,19 @@ public class ShanoirUploaderServiceClient {
 
     public CloseableHttpResponse downloadDatasetsByIds(List<Long> datasetIds, String format) throws Exception {
         if (datasetIds != null) {
-            String datasetIdsString = datasetIds.stream().map(Object::toString).collect(Collectors.joining(","));
-            String url = this.serviceURLDatasets + "massiveDownload?datasetIds=" + datasetIdsString + "&format="
-                    + format;
-            try (CloseableHttpResponse response = httpService.get(url.toString())) {
-                int code = response.getCode();
-                if (code == HttpStatus.SC_OK) {
-                    return response;
-                } else {
-                    LOG.error("Could not get dataset ids " + datasetIds + " (status code: " + code + ", message: "
-                            + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
-                }
+            URIBuilder b = new URIBuilder(this.serviceURLDatasets + "massiveDownload");
+            for (Long datasetId : datasetIds) {
+                b.addParameter("datasetIds", String.valueOf(datasetId));
+            }
+            b.addParameter("format", format);
+            URL url = b.build().toURL();
+            CloseableHttpResponse response = httpService.post(url.toString(), "", false);
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return response;
+            } else {
+                LOG.error("Could not get dataset ids " + datasetIds + " (status code: " + code + ", message: "
+                        + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
             }
         }
         return null;
@@ -865,6 +1121,26 @@ public class ShanoirUploaderServiceClient {
         return null;
     }
 
+    public Study approveDraftStudy(final Long studyId) {
+        try {
+            String url = this.serviceURLStudyApprove + studyId;
+            try (CloseableHttpResponse response = httpService.put(url)) {
+                int code = response.getCode();
+                if (code == HttpStatus.SC_OK) {
+                    Study approvedStudy = Util.getMappedObject(response, Study.class);
+                    return approvedStudy;
+                } else {
+                    LOG.error("Error in approveDraftStudy: studyId={} (status code: {}, message: {})",
+                            studyId, code,
+                            apiResponseMessages.getOrDefault(code, "unknown status code"));
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Error in approveDraftStudy: studyId={}, error: {}", studyId, e.getMessage(), e);
+        }
+        return null;
+    }
+
     public StudyCard createStudyCard(final StudyCard studyCard) {
         try {
             String json = Util.objectWriter.writeValueAsString(studyCard);
@@ -874,7 +1150,7 @@ public class ShanoirUploaderServiceClient {
                     StudyCard studyCardCreated = Util.getMappedObject(response, StudyCard.class);
                     return studyCardCreated;
                 } else {
-                    LOG.error("Error in createStudyCard: with study " + studyCard.getName()
+                    LOG.error("Error in createStudyCard: " + studyCard.getName()
                             + " (status code: " + code + ", message: "
                             + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
                 }
@@ -1096,6 +1372,20 @@ public class ShanoirUploaderServiceClient {
         return null;
     }
 
+    public void deleteExamination(Long examinationUID) throws Exception {
+        try (CloseableHttpResponse response = httpService.delete(this.serviceURLExaminationsDelete + examinationUID)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_NO_CONTENT) {
+                LOG.info("Examination with UID " + examinationUID + " successfully deleted on server.");
+            } else {
+                LOG.error("Error in deleteExamination: with examinationUID " + examinationUID + " (status code: " + code
+                        + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+                throw new Exception("Error in deleteExamination");
+            }
+        }
+    }
+
+
     public List<StudyCardOnStudyResultDTO> applyStudyCardOnStudy(Long studyCardId) throws Exception {
         LOG.info("Apply studycard on study, started on server.");
         try (CloseableHttpResponse response = httpService.get(this.serviceURLStudyCardsApplyOnStudy + studyCardId)) {
@@ -1125,6 +1415,9 @@ public class ShanoirUploaderServiceClient {
                 if (code == HttpStatus.SC_OK) {
                     List<QualityCard> qualityCards = Util.getMappedList(response, QualityCard.class);
                     return qualityCards;
+                } 
+                else if (code == HttpStatus.SC_NOT_FOUND) {
+                    LOG.info("No quality cards found for studyId : " + studyIdentifier);
                 } else {
                     LOG.error("Could not get quality cards for studyId : " + studyIdentifier + " (status code: " + code
                             + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
@@ -1187,6 +1480,94 @@ public class ShanoirUploaderServiceClient {
                 throw new Exception("Error in postDicom");
             }
         }
+    }
+
+    /**
+     * Uploads a BIDS-formatted subject folder (zipped) for import. This hits
+     * the datasets microservice directly (org.shanoir.ng.importer.bids.BidsImporterApi),
+     * not the importer microservice used by the other upload* methods.
+     *
+     * Note: the server-side controller always returns a null body with 200 OK
+     * and processes the import asynchronously via RabbitMQ, without exposing a
+     * workFolder/tempDirId we could poll via ImporterStatus. So this method (and
+     * any test using it) can only confirm the upload was accepted, not that the
+     * subject/examination/datasets were actually created server-side.
+     */
+    public void uploadBIDSDataset(File file, Long studyId, String studyName, Long centerId) throws Exception {
+        StringBuilder url = new StringBuilder(this.serviceURLImporterBids);
+        url.append(studyId)
+                .append("/").append(URLEncoder.encode(studyName, "UTF-8"))
+                .append("/").append(centerId);
+        try (CloseableHttpResponse response = httpService.postFile(url.toString(), file)) {
+            int code = response.getCode();
+            if (code != HttpStatus.SC_OK) {
+                LOG.error("Error in uploadBIDSDataset: studyId={} (status code: {}, message: {})",
+                        studyId, code, apiResponseMessages.getOrDefault(code, "unknown status code"));
+                throw new Exception("Error in uploadBIDSDataset");
+            }
+        }
+    }
+    
+    public DatasetsImportStatus findImportStatusByExaminationId(Long examinationId) throws Exception {
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLDatasetsImportStatus + examinationId)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedObject(response, DatasetsImportStatus.class);
+            } else if (code == HttpStatus.SC_NOT_FOUND) {
+                return null; // not started/known yet on server side
+            } else {
+                LOG.error("Could not get dataset import status for examinationId " + examinationId
+                        + " (status code: " + code + ")");
+                throw new Exception("Error in findImportStatusByExaminationId");
+            }
+        }
+    }
+
+    public List<DatasetLight> findDatasetsByExaminationId(Long examinationId) throws Exception {
+        try (CloseableHttpResponse response = httpService.get(this.serviceURLDatasetsFindByExamination + examinationId)) {
+            int code = response.getCode();
+            if (code == HttpStatus.SC_OK) {
+                return Util.getMappedList(response, DatasetLight.class);
+            } else if (code == HttpStatus.SC_NO_CONTENT) {
+                return List.of();
+            } else {
+                LOG.error("Could not get datasets for examinationId " + examinationId
+                        + " (status code: " + code + ")");
+                throw new Exception("Error in findDatasetsByExaminationId");
+            }
+        }
+    }
+    
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getServerURL() {
+        return serverURL;
+    }
+
+    public void setServerURL(String serverURL) {
+        this.serverURL = serverURL;
     }
 
 }

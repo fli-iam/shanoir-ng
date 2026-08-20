@@ -30,12 +30,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
+      
         @if (menuOpened && withMenu && node.id != null) {
             <dropdown-menu [(openInput)]="menuOpened">
                 <a [routerLink]="detailsPath + node.id" class="open-new-tab">
                     <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
                 </a>
-                <menu-item label="View DICOM" awesome="fa-regular fa-eye" (click)="viewExaminationDicoms()"></menu-item>
+                @if (node.canDownload) {
+                    <menu-item label="View DICOM" awesome="fa-regular fa-eye" (click)="viewExaminationDicoms()"></menu-item>
+                }
                 <menu-item
                     [disabled]="(datasetIds && datasetIds.length == 0) || downloading"
                     label="Download"
@@ -55,6 +58,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [hasBox]="hasBox"
                     (acquisitionDelete)="onAcquisitionDelete(i)"
                     [withMenu]="withMenu"></dataset-acquisition-node>
+                @if ($any(datasetAcqNode).qualityTag) {
+                    <span class="tag label dark"
+                          [style.background]="getQualityTagColor(datasetAcqNode)">
+                    </span>
+                }
             }
         }
         @if (!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0) {

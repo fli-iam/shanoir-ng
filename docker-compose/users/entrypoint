@@ -12,25 +12,30 @@ require  SHANOIR_MIGRATION
 require  SHANOIR_URL_HOST
 require  SHANOIR_URL_SCHEME
 
-require	 SHANOIR_ADMIN_EMAIL
-require	 SHANOIR_SMTP_HOST
+export  SHANOIR_NOTIFICATION_EMAIL
+export	SHANOIR_NOTIFICATION_NAME
+export  DEV_USERS_DEFAULT_PASSWORD
+require	  SHANOIR_SMTP_HOST
 
-optional SHANOIR_CERTIFICATE
-require  SHANOIR_CERTIFICATE_PEM_CRT
-require  SHANOIR_CERTIFICATE_PEM_KEY
+optional  SHANOIR_CERTIFICATE
+require   SHANOIR_CERTIFICATE_PEM_CRT
+require   SHANOIR_CERTIFICATE_PEM_KEY
 
 handle_microservice_migration
 
 case "$SHANOIR_MIGRATION" in
 dev|init)
 	sync="--syncAllUsersToKeycloak=true" #FIXME: why can't we use an env var here?
+	# mitigate a race condition (the syncAllUsersToKeycloak task may
+	# terminate just after the server startup)
+	init_wait 10
 	;;
 *)
 	sync="--syncAllUsersToKeycloak=false"
 	;;
 esac
 
-# Rabbit MQ default environnement variable to set
+# Rabbit MQ default environment variable to set
 export SPRING_AMQP_DESERIALIZATION_TRUST_ALL=true
 
 # TLS server certificate management

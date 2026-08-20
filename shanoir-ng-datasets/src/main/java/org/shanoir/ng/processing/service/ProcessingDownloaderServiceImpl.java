@@ -71,7 +71,7 @@ public class ProcessingDownloaderServiceImpl extends DatasetDownloaderServiceImp
         manageResultOnly(processingList, resultOnly);
 
         response.setContentType("application/zip");
-        response.setHeader("Content-Disposition", "attachment;filename=Processings_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")));
+        response.setHeader("Content-Disposition", "attachment;filename=\"Processings_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + "\"");
         Map<Long, DatasetDownloadError> downloadResults = new HashMap<Long, DatasetDownloadError>();
         Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 

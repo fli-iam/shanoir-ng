@@ -73,6 +73,7 @@ public class ExecutionTemplateDecorator implements ExecutionTemplateMapper {
         entity.setPriority(dto.getPriority());
         entity.setStudy(studyRepository.findById(dto.getStudyId()).orElse(null));
         entity.setParameters(ExecutionTemplateParameterDTO.toEntities(dto.getParameters(), entity));
+        entity.setOfflineToken(dto.getOfflineToken());
         return entity;
     }
 }

@@ -125,14 +125,21 @@ jobs:
           # The image is exported in the OCI format ('image-manifest=true')
           # to avoid a "failed to solve: not found" error when pushing to the
           # github container registry.
+          is_main_branch = (main_branch_sha == env['IMAGE_TAG'] == env['SHA'])
           enable_cache_from = not env['PRODUCTION'] and not env['NO_CACHE']
-          enable_cache_to   = not env['PRODUCTION'] and (
-            main_branch_sha == env['IMAGE_TAG'] == env['SHA'])
+          enable_cache_to   = not env['PRODUCTION'] and is_main_branch
           print(f"{enable_cache_from = }\n{enable_cache_to = }\n")
 
           def cache_arg(enabled: bool, image: str, extra=""):
             return [f"type=registry,image-manifest=true,ref={env['DOCKER_REPOSITORY']}/{image}:cache{extra}"
                    ] if enabled else []
+
+          # - use $IMAGE_TAG for resulting docker image tag
+          # - add a second tag 'develop' when building the main branch
+          def tags(image: str):
+              return [f"{env['DOCKER_REPOSITORY']}/{image}:{t}" for t in (
+                        (env['IMAGE_TAG'], MAIN_BRANCH) if is_main_branch else
+                        (env['IMAGE_TAG'],))]
   
           # extract the list of images to be built from the docker-compose config
           images = json.loads(subprocess.check_output(
@@ -146,7 +153,7 @@ jobs:
               image: {
                 "cache-from": cache_arg(enable_cache_from, image),
                 "cache-to":   cache_arg(enable_cache_to,   image, ",mode=max"),
-                "tags": [f"{env['DOCKER_REPOSITORY']}/{image}:{env['IMAGE_TAG']}"],
+                "tags": tags(image),
                 "labels": {
                   "org.opencontainers.image.url":      env['GIT_REPO_URL'],
                   "org.opencontainers.image.source":   env['GIT_REPO_URL'],

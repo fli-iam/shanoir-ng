@@ -74,6 +74,8 @@ public class ExaminationApiController implements ExaminationApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExaminationApiController.class);
 
+    private static final UIDGeneration UID_GENERATOR = new UIDGeneration();
+
     @Autowired
     private ExaminationMapper examinationMapper;
 
@@ -313,7 +315,7 @@ public class ExaminationApiController implements ExaminationApi {
                 if (contentType == null) {
                     contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
                 }
-                response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+                response.setHeader("Content-Disposition", "attachment;filename=\"" + fileName + "\"");
                 response.setContentType(contentType);
                 if (fileToDownload.isReadable() && fileToDownload.contentLength() > 0) {
                     response.setContentLengthLong(fileToDownload.contentLength());
@@ -374,8 +376,7 @@ public class ExaminationApiController implements ExaminationApi {
      * @param examination
      */
     private void generateStudyInstanceUID(Examination examination) {
-        UIDGeneration generator = new UIDGeneration();
-        String newUID = generator.getNewUID();
+        String newUID = UID_GENERATOR.getNewUID();
         examination.setStudyInstanceUID(newUID);
     }
 
