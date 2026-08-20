@@ -28,6 +28,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.io.FileUtils;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.ImportJobStatus;
@@ -190,8 +193,7 @@ public class UploadServiceJob {
     }
 
     /**
-     * Uploads all files of one folder to the server concurrently, using a small bounded pool,
-     * matching each file to its serie via the ImportJob's series/instances.
+     * Uploads all files into one folder on the server concurrently, using a small bounded pool.
      *
      * Fails fast: if any single file upload throws, the remaining not-yet-started uploads are
      * cancelled and the exception is propagated to the caller.
@@ -207,7 +209,12 @@ public class UploadServiceJob {
         try {
             List<Future<Void>> futures = allFiles.stream()
                     .map(file -> (Callable<Void>) () -> {
-                        client.uploadFile(tempDirId, file);
+                        String seriesInstanceUID = null;
+                        try (DicomInputStream dIS = new DicomInputStream(file)) {
+                            Attributes attributes = dIS.readDatasetUntilPixelData();
+                            seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
+                        }
+                        client.uploadFile(tempDirId, seriesInstanceUID, file);
                         int done = completedCount.incrementAndGet();
                         synchronized (progressLock) {
                             progressListener.onProgress((done * 100 / total) + " %");
@@ -216,7 +223,6 @@ public class UploadServiceJob {
                     })
                     .map(uploadExecutor::submit)
                     .toList();
-
             Exception firstFailure = null;
             for (Future<Void> future : futures) {
                 try {

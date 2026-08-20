@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
@@ -437,11 +436,11 @@ public final class ImportUtils {
                     String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(image.getSOPInstanceUID());
                     if (newSopInstanceUID != null) {
                         image.setSOPInstanceUID(newSopInstanceUID);
-                        // Reflect what pseudonymization actually does: only change file name
-                        Path path = Paths.get(image.getPath());
-                        String newFileName = newSopInstanceUID + SUFFIX_DCM;
-                        Path renamedPath = path.resolveSibling(newFileName);
-                        image.setPath(renamedPath.toString());
+                        /**
+                         * Pseudonymization now streamlines everything to this structure.
+                         */
+                        String path = newSeriesInstanceUID + "/" + newSopInstanceUID + SUFFIX_DCM;
+                        image.setPath(path);
                         updatedImages++;
                     } else {
                         missingImages++;

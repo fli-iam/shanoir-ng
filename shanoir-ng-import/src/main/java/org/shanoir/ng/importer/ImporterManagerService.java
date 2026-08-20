@@ -206,7 +206,7 @@ public class ImporterManagerService {
             event.setMessage("Pseudonymizing DICOM files for subject [" + subjectName + "]...");
             eventService.publishEvent(event);
             try {
-                AnonymizationResult anonymizationResult = ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName, importJob.getStudyInstanceUID());
+                AnonymizationResult anonymizationResult = ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName, importJob.getStudyInstanceUID(), importJobDir);
                 ImportUtils.updateImportJobWithPseudonymizedUIDs(importJob, importJobDir, anonymizationResult);
             } catch (Exception e) {
                 LOG.error(e.getMessage(), e);

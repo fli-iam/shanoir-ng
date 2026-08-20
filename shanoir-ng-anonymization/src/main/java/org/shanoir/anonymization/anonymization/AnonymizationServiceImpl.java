@@ -68,8 +68,17 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
     private static Map<String, List<String>> tagsToDeleteForManufacturer;
 
+    /**
+     * Per-directory locks used when checking/deleting an original series folder
+     * once it has been emptied by moving all of its (now renamed) files into
+     * their new seriesInstanceUID folder. Needed because several files that
+     * originally lived in the same folder can be processed concurrently by
+     * different threads of a batch.
+     */
+    private static final Map<String, Object> DIR_LOCKS = new ConcurrentHashMap<>();
+
     @Override
-    public AnonymizationResult anonymize(ArrayList<File> dicomFiles, String profile) throws Exception {
+    public AnonymizationResult anonymize(ArrayList<File> dicomFiles, String profile, File importJobDir) throws Exception {
         long startTime = System.currentTimeMillis();
         final int totalAmount = dicomFiles.size();
         LOG.info("Start pseudonymization: profile {} on {} DICOM files.", profile, totalAmount);
@@ -89,7 +98,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         int current = 0;
         for (int i = 0; i < dicomFiles.size(); ++i) {
             final File file = dicomFiles.get(i);
-            performAnonymization(file, anonymizationMap, false, "", "", null, seriesInstanceUIDs, frameOfReferenceUIDs,
+            performAnonymization(file, importJobDir, anonymizationMap, false, "", "", null, seriesInstanceUIDs, frameOfReferenceUIDs,
                     studyInstanceUIDs, studyIds, sopInstanceUIDsByFilePath, stats);
             current++;
             final int currentPercent = current * 100 / totalAmount;
@@ -102,14 +111,14 @@ public class AnonymizationServiceImpl implements AnonymizationService {
 
     @Override
     public AnonymizationResult anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientLastName,
-            String patientFirstName, String patientID, String studyInstanceUID) throws Exception {
+            String patientFirstName, String patientID, String studyInstanceUID, File importJobDir) throws Exception {
         String patientName = patientLastName + "^" + patientFirstName + "^^^";
-        return anonymizeForShanoir(dicomFiles, profile, patientName, patientID, studyInstanceUID);
+        return anonymizeForShanoir(dicomFiles, profile, patientName, patientID, studyInstanceUID, importJobDir);
     }
 
     @Override
     public AnonymizationResult anonymizeForShanoir(ArrayList<File> dicomFiles, String profile, String patientName,
-            String patientID, String studyInstanceUID) throws Exception {
+            String patientID, String studyInstanceUID, File importJobDir) throws Exception {
         long startTime = System.currentTimeMillis();
         final int totalAmount = dicomFiles.size();
         LOG.info("Start pseudonymization: profile {} on {} DICOM files.", profile, totalAmount);
@@ -130,7 +139,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         int current = 0;
         for (int i = 0; i < dicomFiles.size(); ++i) {
             final File file = dicomFiles.get(i);
-            performAnonymization(file, anonymizationMap, true, patientName, patientID, studyInstanceUID,
+            performAnonymization(file, importJobDir, anonymizationMap, true, patientName, patientID, studyInstanceUID,
                     seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds,
                     sopInstanceUIDs, stats);
             current++;
@@ -186,12 +195,14 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * UIDGeneration code.
      *
      * Once anonymization of the DICOM attributes is complete and the file has
-     * been written back to disk, the file itself is renamed on disk to
-     * "<SOPInstanceUID>.dcm" (in its original parent directory, skipping the
-     * rename if a file with that name already exists there), so that every
-     * anonymized DICOM file's name matches its final SOPInstanceUID.
-     * sopInstanceUIDsByFilePath is keyed by the file's ORIGINAL path so callers
-     * can still resolve it from an untouched, pre-rename referencedFileID.
+     * been written back to disk, the file itself is renamed to
+     * "<SOPInstanceUID>.dcm" AND moved into a folder named after its (possibly
+     * newly generated) SeriesInstanceUID, created directly under importJobDir
+     * (skipping the move if a file with that name already exists in the target
+     * folder). Once a file has been moved out, if its original parent folder is
+     * left empty, that folder is deleted. sopInstanceUIDsByFilePath is keyed by
+     * the file's ORIGINAL SOPInstanceUID so callers can still resolve it from an
+     * untouched, pre-rename referencedFileID.
      *
      * Overload kept for backward compatibility with existing external callers: it
      * simply runs the anonymization with a fresh, single-file stats tracker that
@@ -200,17 +211,20 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      *
      * @param dicomFile
      *                  the image path
+     * @param importJobDir
+     *                  the root folder of the import job; new per-series folders
+     *                  are created directly under it
      * @param profile
      *                  anonymization profile
      * @throws Exception
      */
-    public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap,
+    public void performAnonymization(final File dicomFile, final File importJobDir, Map<String, String> anonymizationMap,
             boolean isShanoirAnonymization,
             String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs,
             Map<String, String> frameOfReferenceUIDs,
             Map<String, String> studyInstanceUIDs, Map<String, String> studyIds,
             Map<String, String> sopInstanceUIDs) throws Exception {
-        performAnonymization(dicomFile, anonymizationMap, isShanoirAnonymization, patientName, patientID,
+        performAnonymization(dicomFile, importJobDir, anonymizationMap, isShanoirAnonymization, patientName, patientID,
                 studyInstanceUID, seriesInstanceUIDs, frameOfReferenceUIDs, studyInstanceUIDs, studyIds,
                 sopInstanceUIDs, new AnonymizationStats());
     }
@@ -221,7 +235,7 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * files and reported once at the end (see {@link #anonymize} /
      * {@link #anonymizeForShanoir}).
      */
-    public void performAnonymization(final File dicomFile, Map<String, String> anonymizationMap,
+    public void performAnonymization(final File dicomFile, final File importJobDir, Map<String, String> anonymizationMap,
             boolean isShanoirAnonymization,
             String patientName, String patientID, String studyInstanceUID, Map<String, String> seriesInstanceUIDs,
             Map<String, String> frameOfReferenceUIDs,
@@ -345,25 +359,45 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             // none at all). Used to correlate this file back to the Instance
             // it came from.
             String finalSopInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
+            // Determine the file's FINAL SeriesInstanceUID (regenerated if the tag was
+            // anonymized above, unchanged otherwise). Used to pick/create the target
+            // per-series folder under importJobDir.
+            String finalSeriesInstanceUID = datasetAttributes.getString(Tag.SeriesInstanceUID);
 
             LOG.debug("finish anonymization: begin storage");
             dos = new DicomOutputStream(dicomFile);
             dos.writeDataset(metaInformationAttributes, datasetAttributes);
             dos.close();
             dos = null;
-            // Rename the file to "<SOPInstanceUID>.dcm" in its original parent
-            // directory, now that the anonymized content has been fully written
-            // and flushed to disk.
+            // Rename the file to "<SOPInstanceUID>.dcm" and move it into
+            // "<importJobDir>/<SeriesInstanceUID>/", now that the anonymized content
+            // has been fully written and flushed to disk.
             if (finalSopInstanceUID != null) {
                 sopInstanceUIDs.put(sopInstanceUID, finalSopInstanceUID);
-                File renamedFile = new File(dicomFile.getParentFile(), finalSopInstanceUID + ".dcm");
+                File originalParentDir = dicomFile.getParentFile();
+                File targetDir = originalParentDir;
+                if (finalSeriesInstanceUID != null && !finalSeriesInstanceUID.isEmpty() && importJobDir != null) {
+                    File seriesDir = new File(importJobDir, finalSeriesInstanceUID);
+                    if (!seriesDir.exists()) {
+                        seriesDir.mkdirs();
+                    }
+                    if (seriesDir.exists()) {
+                        targetDir = seriesDir;
+                    } else {
+                        LOG.error("performAnonymization : could not create series folder {}, keeping file in {}",
+                                seriesDir.getAbsolutePath(), originalParentDir.getAbsolutePath());
+                    }
+                }
+                File renamedFile = new File(targetDir, finalSopInstanceUID + ".dcm");
                 if (renamedFile.exists()) {
                     LOG.warn(
                             "performAnonymization : skipping rename, target file {} already exists (SOPInstanceUID collision for {})",
                             renamedFile.getAbsolutePath(), dicomFile.getAbsolutePath());
                 } else if (!dicomFile.renameTo(renamedFile)) {
-                    LOG.error("performAnonymization : could not rename file {} to {}",
+                    LOG.error("performAnonymization : could not rename/move file {} to {}",
                             dicomFile.getAbsolutePath(), renamedFile.getAbsolutePath());
+                } else if (!targetDir.equals(originalParentDir)) {
+                    deleteDirectoryIfEmpty(originalParentDir, importJobDir);
                 }
             }
             LOG.debug("finish anonymization: end storage");
@@ -379,6 +413,38 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                 }
             } catch (IOException e) {
                 LOG.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Deletes {@code dir} if it is now empty, once a file has been moved out of
+     * it into its new per-series folder. Synchronized per-directory (via
+     * {@link #DIR_LOCKS}) because several files originally living in the same
+     * folder can be processed concurrently by different threads of a batch, and
+     * we must avoid one thread deleting the folder while another is still about
+     * to move a sibling file out of it, or double-deleting it.
+     *
+     * @param dir
+     *            the file's original parent folder, now possibly empty
+     * @param importJobDir
+     *            the import job root; never deleted even if "empty"
+     */
+    private void deleteDirectoryIfEmpty(File dir, File importJobDir) {
+        if (dir == null || dir.equals(importJobDir)) {
+            return;
+        }
+        String key = dir.getAbsolutePath();
+        Object lock = DIR_LOCKS.computeIfAbsent(key, k -> new Object());
+        synchronized (lock) {
+            File[] remaining = dir.listFiles();
+            if (remaining != null && remaining.length == 0) {
+                if (dir.delete()) {
+                    LOG.debug("performAnonymization : deleted now-empty folder {}", dir.getAbsolutePath());
+                    DIR_LOCKS.remove(key);
+                } else {
+                    LOG.warn("performAnonymization : could not delete now-empty folder {}", dir.getAbsolutePath());
+                }
             }
         }
     }

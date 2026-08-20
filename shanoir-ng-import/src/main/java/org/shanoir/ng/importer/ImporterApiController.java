@@ -682,6 +682,33 @@ public class ImporterApiController implements ImporterApi {
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
+    /**
+     * New variant of {@link #uploadFile}, used by newer ShanoirUploader versions: instead of
+     * dropping every file flat into the temp dir (requiring a later, separate split-into-series
+     * step, see DatasetsCreatorService.createSerieIDFolderAndMoveFiles), the file is written
+     * directly into a seriesInstanceUID-named sub-folder of the temp dir.
+     */
+    @Override
+    public ResponseEntity<Void> uploadFileToSeries(
+            @PathVariable("tempDirId") String tempDirId,
+            @PathVariable("seriesInstanceUID") String seriesInstanceUID,
+            @RequestParam("file") MultipartFile file)
+            throws RestServiceException, IOException {
+        final File userImportDir = ImportUtils.getUserImportDir(importDir);
+        final File importJobDir = new File(userImportDir, tempDirId);
+        if (!importJobDir.isDirectory()) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "Upload file called with not existing tempDirId.",
+                            null));
+        }
+        final File seriesDir = new File(importJobDir, seriesInstanceUID);
+        Files.createDirectories(seriesDir.toPath());
+        writeUploadedFile(seriesDir, file);
+        return ResponseEntity.ok().build();
+    }
+
     private void writeUploadedFile(File targetDir, MultipartFile file)
             throws RestServiceException, IOException {
         String originalFilename = file.getOriginalFilename();
