@@ -50,12 +50,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <span class="right-col left-icon">
                         @if (['downloadStatistics.event', 'copyDataset.event'].includes(task._eventType)) {
                             <a (click)="downloadStats($event)" href="#">
-                                <i class="fa-solid fa-link"></i>
+                                <i class="fa-solid fa-download"></i>
                                 {{ task.route }}
                             </a>
                         } @else if (task._eventType == 'massiveOutputsDownload.event') {
                             <a (click)="downloadProcessingOutputs($event)" href="#">
-                                <i class="fa-solid fa-link"></i>
+                                <i class="fa-solid fa-download"></i>
                                 {{ task.route }}
                             </a>
                         } @else {

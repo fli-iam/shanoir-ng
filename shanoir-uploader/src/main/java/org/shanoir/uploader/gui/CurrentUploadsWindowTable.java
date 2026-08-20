@@ -31,7 +31,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
@@ -45,13 +45,14 @@ public class CurrentUploadsWindowTable implements Observer {
     public final JTable table;
     Object[] columnNames;
     Object[] paths;
-    public int importColumn = 7;
-    public int deleteColumn = 8;
+    public int subjectNameColumn = 6;
+    public int importColumn = 8;
+    public int deleteColumn = 9;
     public int patientNameColumn = 2;
-    public int uploadStateColumn = 6;
+    public int uploadStateColumn = 7;
     public String readyUploadState = UploadState.READY.toString();
-    public String startUploadState = UploadState.START.toString();
-    public String startAutoImportUploadState = UploadState.START_AUTOIMPORT.toString();
+    public String startImportJobUploadState = UploadState.START_IMPORT_JOB.toString();
+    public String serverProcessingUploadState = UploadState.SERVER_PROCESSING.toString();    
     public String finishedUploadState = UploadState.FINISHED.toString();
     public String errorUploadState = UploadState.ERROR.toString();
     public String checkOKUploadState = UploadState.CHECK_OK.toString();
@@ -71,6 +72,7 @@ public class CurrentUploadsWindowTable implements Observer {
             frame.resourceBundle.getString("shanoir.uploader.currentUploads.IPP"),
             frame.resourceBundle.getString("shanoir.uploader.currentUploads.studyDate"),
             frame.resourceBundle.getString("shanoir.uploader.currentUploads.mri"),
+            frame.resourceBundle.getString("shanoir.uploader.currentUploads.subjectName"),
             frame.resourceBundle.getString("shanoir.uploader.currentUploads.importState"),
             frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import"),
             frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete")
@@ -114,9 +116,10 @@ public class CurrentUploadsWindowTable implements Observer {
         table.getColumnModel().getColumn(1).setPreferredWidth(150);
         table.getColumnModel().getColumn(2).setPreferredWidth(150);
         table.getColumnModel().getColumn(5).setPreferredWidth(100);
-        table.getColumnModel().getColumn(6).setPreferredWidth(40);
+        table.getColumnModel().getColumn(6).setPreferredWidth(150);
         table.getColumnModel().getColumn(7).setPreferredWidth(40);
-        table.getColumnModel().getColumn(8).setPreferredWidth(50);
+        table.getColumnModel().getColumn(8).setPreferredWidth(40);
+        table.getColumnModel().getColumn(9).setPreferredWidth(50);
 
         // Resize and center the JTable header
         table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
@@ -135,19 +138,21 @@ public class CurrentUploadsWindowTable implements Observer {
         table.getColumnModel().getColumn(deleteColumn).setCellRenderer(new BackgroundRenderer());
     }
 
-    public void fillTable(Map<String, ImportJob> initialUploads) {
+    public void fillTable(Map<String, ImportJobBase> initialUploads) {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
-        for (Map.Entry<String, ImportJob> entry : initialUploads.entrySet()) {
+        for (Map.Entry<String, ImportJobBase> entry : initialUploads.entrySet()) {
             if (entry.getValue() != null) {
                 String key = entry.getKey();
-                ImportJob nominativeDataImportJob = (ImportJob) entry.getValue();
+                ImportJobBase nominativeDataImportJob = (ImportJobBase) entry.getValue();
                 addRow(model, key, nominativeDataImportJob);
             }
         }
     }
 
-    private void addRow(DefaultTableModel model, String key, ImportJob nominativeDataImportJob) {
-        Serie firstSelectedSerie = nominativeDataImportJob.getFirstSelectedSerie();
+    private void addRow(DefaultTableModel model, String key, ImportJobBase nominativeDataImportJob) {
+        Serie firstSerie = nominativeDataImportJob.getFirstSerieWithInstitutionAndEquipment();
+        String subjectName = nominativeDataImportJob.getSubjectName();
+        if (subjectName == null) subjectName = "";
         String actionImport = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import");
         String actionDelete = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete");
         Object[] row = switch (nominativeDataImportJob.getUploadState()) {
@@ -157,7 +162,8 @@ public class CurrentUploadsWindowTable implements Observer {
                 nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(), // Was firstname and lastname from nominativeDataUploadJob, check if firstname still present
                 nominativeDataImportJob.getPatient().getPatientID(),
                 nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
-                firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")", // was e.g Philips (serial number)
+                firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")", // was e.g Philips (serial number)
+                subjectName,
                 nominativeDataImportJob.getUploadState().toString(),
                 actionImport,
                 actionDelete
@@ -168,7 +174,8 @@ public class CurrentUploadsWindowTable implements Observer {
                 nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
                 nominativeDataImportJob.getPatient().getPatientID(),
                 nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
-                firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
+                firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")",
+                subjectName,
                 nominativeDataImportJob.getUploadPercentage().toString(),
                 "",
                 ""
@@ -179,7 +186,8 @@ public class CurrentUploadsWindowTable implements Observer {
                 nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
                 nominativeDataImportJob.getPatient().getPatientID(),
                 nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
-                firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
+                firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")",
+                subjectName,
                 nominativeDataImportJob.getUploadPercentage().toString(),
                 "",
                 actionDelete
@@ -190,7 +198,8 @@ public class CurrentUploadsWindowTable implements Observer {
                 nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
                 nominativeDataImportJob.getPatient().getPatientID(),
                 nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
-                firstSelectedSerie.getEquipment().getManufacturer() + " (" + firstSelectedSerie.getEquipment().getDeviceSerialNumber() + ")",
+                firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")",
+                subjectName,
                 nominativeDataImportJob.getUploadPercentage().toString(),
                 "",
                 ""
@@ -199,7 +208,7 @@ public class CurrentUploadsWindowTable implements Observer {
         model.addRow(row);
     }
 
-    public void addLineToTable(String absolutePath, ImportJob nominativeDataImportJob) {
+    public void addLineToTable(String absolutePath, ImportJobBase nominativeDataImportJob) {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         addRow(model, absolutePath, nominativeDataImportJob);
     }
@@ -210,6 +219,16 @@ public class CurrentUploadsWindowTable implements Observer {
         for (int i = 0; i < nbRow; i++) {
             if (model.getValueAt(i, 0).equals(path)) {
                 model.setValueAt(percentage, i, uploadStateColumn);
+            }
+        }
+    }
+    
+    public void updateSubjectName(String path, String subjectName) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        int nbRow = model.getRowCount();
+        for (int i = 0; i < nbRow; i++) {
+            if (model.getValueAt(i, 0).equals(path)) {
+                model.setValueAt(subjectName, i, subjectNameColumn);
             }
         }
     }
@@ -257,7 +276,7 @@ public class CurrentUploadsWindowTable implements Observer {
         int nbStartUpload = 0;
         int nbErrorUpload = 0;
         int totalUploadPercent = 0;
-        for (Map.Entry<String, ImportJob> entry : currentNominativeDataModel.getCurrentUploads()
+        for (Map.Entry<String, ImportJobBase> entry : currentNominativeDataModel.getCurrentUploads()
                 .entrySet()) {
             if (entry.getValue() != null) {
                 if (entry.getValue().getUploadPercentage() == null
@@ -267,7 +286,8 @@ public class CurrentUploadsWindowTable implements Observer {
                 } else {
                     if (entry.getValue().getUploadPercentage().equals(finishedUploadState)
                             || entry.getValue().getUploadPercentage().equals(checkOKUploadState)
-                            || entry.getValue().getUploadPercentage().equals(checkKOUploadState)) {
+                            || entry.getValue().getUploadPercentage().equals(checkKOUploadState)
+                            || entry.getValue().getUploadPercentage().equals(serverProcessingUploadState)) {
                         totalUploadPercent += 100;
                         nbFinishUpload++;
                     } else if (entry.getValue().getUploadPercentage().equals(errorUploadState)) {
@@ -311,11 +331,12 @@ public class CurrentUploadsWindowTable implements Observer {
             if (msg[0].equals("UpdatePercent")) {
                 updatePercent(msg[1], msg[2]);
             }
-
+            if (msg[0].equals("SubjectName")) {
+                updateSubjectName(msg[1], msg[2]);
+            }
             if (msg[0].equals("add")) {
                 addLineToTable(msg[1], currentNominativeDataModel.getCurrentUploads().get(msg[1]));
             }
-
         } else if (msg[0].equals("fill")) {
             DefaultTableModel model = (DefaultTableModel) table.getModel();
             int nbRow = model.getRowCount();

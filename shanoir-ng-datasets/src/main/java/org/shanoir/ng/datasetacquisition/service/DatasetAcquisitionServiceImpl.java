@@ -29,6 +29,7 @@ import java.util.stream.StreamSupport;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
@@ -46,6 +47,8 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -58,6 +61,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
@@ -91,6 +95,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Autowired
     private DatasetAcquisitionAsyncService datasetAcquisitionAsyncService;
+
+    @Autowired
+    private StorageService storageService;
+
+    @Autowired
+    private DatasetRepository datasetRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
 
@@ -135,6 +145,25 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         to.setSortingIndex(from.getSortingIndex());
         to.setStudyCard(from.getStudyCard());
         to.setAcquisitionStartTime(from.getAcquisitionStartTime()); // immutable
+        to.setQualityTag(from.getQualityTag());
+        // Update extra data paths => delete files not present in the new list anymore
+        if (to.getExtraDataFilePathList() != null) {
+            for (String filePath : to.getExtraDataFilePathList()) {
+                if (from.getExtraDataFilePathList() == null || !from.getExtraDataFilePathList().contains(filePath)) {
+                    try {
+                        storageService.deleteAcquisitionExtraData(to.getId(), filePath);
+                    } catch (StorageException e) {
+                        LOG.warn("Could not delete extra-data file {} for dataset acquisition {}", filePath, to.getId(), e);
+                    }
+                }
+            }
+        }
+        // Persist a de-duplicated list so the same file name is never stored twice, whatever the client sends
+        if (from.getExtraDataFilePathList() != null) {
+            to.setExtraDataFilePathList(from.getExtraDataFilePathList().stream().distinct().collect(Collectors.toList()));
+        } else {
+            to.setExtraDataFilePathList(null);
+        }
         return to;
     }
 
@@ -256,6 +285,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                             "This datasetAcquisition is linked to another datasetAcquisition that was copied."
                     ));
         } else {
+            // Delete the extra-data files attached to this acquisition
+            try {
+                storageService.deleteDirectoryAcquisitionExtraData(entity.getId());
+            } catch (StorageException e) {
+                LOG.warn("Could not delete extra-data directory for dataset acquisition {}", entity.getId(), e);
+            }
             List<Dataset> datasets = entity.getDatasets();
             if (datasets != null) {
                 List<Long> datasetIds = new ArrayList<>();
@@ -271,6 +306,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
                 }
                 if (!datasetIds.isEmpty()) solrService.deleteFromIndex(datasetIds);
             }
+            // the acquisition itself only goes once its datasets are gone, this method being
+            // called asynchronously by the acquisition deletion, its caller can not do it
+            repository.deleteById(entity.getId());
         }
     }
 
@@ -320,17 +358,141 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
-        event.setMessage("Delete examination - datasetAcquisition with id : " + id);
-        shanoirEventService.publishEvent(event);
+        if (event != null) {
+            event.setMessage("Delete examination - datasetAcquisition with id : " + id);
+            shanoirEventService.publishEvent(event);
+        }
         delete(entity, event);
 
+        shanoirEventService.publishEvent(new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                id.toString(),
+                KeycloakUtil.getTokenUserId(),
+                "Dataset acquisition " + id + " deleted.",
+                ShanoirEvent.SUCCESS,
+                1f,
+                entity.getExamination().getStudyId()));
+    }
+
+    @Override
+    public boolean isEmptyAndRemovable(Long id) throws EntityNotFoundException {
+        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        if (entity == null) {
+            throw new EntityNotFoundException("Cannot find entity with id = " + id);
+        }
+        return datasetRepository.countByDatasetAcquisitionId(id) == 0 && isRemovable(entity);
+    }
+
+    /**
+     * An emptied acquisition may only be removed automatically when it does not carry any data
+     * of its own: extra-data files are uploaded on the acquisition itself and would be lost,
+     * and a copy keeps a reference to the acquisition it was copied from.
+     *
+     * @param entity the acquisition
+     * @return true when nothing but datasets is attached to this acquisition
+     */
+    private boolean isRemovable(DatasetAcquisition entity) {
+        if (!CollectionUtils.isEmpty(entity.getExtraDataFilePathList())) {
+            return false;
+        }
+        return CollectionUtils.isEmpty(repository.findBySourceId(entity.getId()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DatasetAcquisition> findAcquisitionsLeftEmptyBy(List<Long> datasetIds) {
+        if (CollectionUtils.isEmpty(datasetIds)) {
+            return Collections.emptyList();
+        }
+        // number of datasets about to be deleted, per acquisition
+        Map<Long, Integer> deletedCountByAcquisitionId = new HashMap<>();
+        for (Dataset dataset : datasetRepository.findAllById(datasetIds)) {
+            if (dataset.getDatasetAcquisition() != null) {
+                deletedCountByAcquisitionId.merge(dataset.getDatasetAcquisition().getId(), 1, Integer::sum);
+            }
+        }
+        List<DatasetAcquisition> leftEmpty = new ArrayList<>();
+        for (Map.Entry<Long, Integer> deletedCount : deletedCountByAcquisitionId.entrySet()) {
+            Long acquisitionId = deletedCount.getKey();
+            // the acquisition is left empty when all the datasets it holds are being deleted
+            if (datasetRepository.countByDatasetAcquisitionId(acquisitionId) == deletedCount.getValue()) {
+                repository.findById(acquisitionId).filter(this::isRemovable).ifPresent(leftEmpty::add);
+            }
+        }
+        return leftEmpty;
+    }
+
+    @Override
+    public List<DatasetAcquisition> findEmptyAcquisitions(Long studyId) {
+        List<DatasetAcquisition> empty = studyId != null ? repository.findEmptyByStudyId(studyId) : repository.findEmpty();
+        return empty.stream().filter(this::isRemovable).toList();
+    }
+
+    /**
+     * Deletes an acquisition that does not hold any dataset anymore. Contrary to
+     * {@link #deleteById(Long, ShanoirEvent)} this does not reject the series from the pacs:
+     * every dataset of the acquisition has already been deleted one by one, and each of those
+     * deletions rejected its own files, so nothing is left in the pacs to reject here.
+     */
+    @Override
+    @Transactional
+    public void deleteEmptyAcquisition(Long id) throws EntityNotFoundException, RestServiceException {
+        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        if (entity == null) {
+            throw new EntityNotFoundException("Cannot find entity with id = " + id);
+        }
+        if (datasetRepository.countByDatasetAcquisitionId(id) != 0) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This datasetAcquisition still holds datasets, it can not be removed as an empty one."
+                    ));
+        }
+        if (!isRemovable(entity)) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This datasetAcquisition holds extra data or has been copied, it can not be removed automatically."
+                    ));
+        }
+        Long studyId = entity.getExamination() != null ? entity.getExamination().getStudyId() : null;
+        try {
+            storageService.deleteDirectoryAcquisitionExtraData(id);
+        } catch (StorageException e) {
+            LOG.warn("Could not delete extra-data directory for dataset acquisition {}", id, e);
+        }
         repository.deleteById(id);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
+        LOG.info("Empty dataset acquisition with id {} has been removed", id);
+        shanoirEventService.publishEvent(new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                id.toString(),
+                KeycloakUtil.getTokenUserId(),
+                "Dataset acquisition " + id + " deleted, it did not hold any dataset anymore.",
+                ShanoirEvent.SUCCESS,
+                1f,
+                studyId));
     }
 
     @Override
     public boolean existsByStudyCardId(Long studyCardId) {
         return repository.existsByStudyCard_Id(studyCardId);
+    }
+
+    @Override
+    public String addExtraData(final Long acquisitionId, final MultipartFile file) {
+        try {
+            LOG.info("Saving file {} for dataset acquisition: {}", file.getOriginalFilename(), acquisitionId);
+            return storageService.storeAcquisitionExtraData(
+                    acquisitionId,
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getContentType(),
+                    file.getSize());
+        } catch (Exception e) {
+            LOG.error("Error while uploading file {} for dataset acquisition: {}. File not uploaded. {}",
+                    file.getOriginalFilename(), acquisitionId, e);
+            return null;
+        }
     }
 
 }

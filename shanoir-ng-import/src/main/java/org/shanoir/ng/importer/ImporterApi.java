@@ -18,6 +18,8 @@ import java.io.IOException;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.ImportJobStatus;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
@@ -88,7 +90,7 @@ public interface ImporterApi {
             produces = {"application/json"},
             consumes = {"multipart/form-data"})
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<ImportJob> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
+    ResponseEntity<ImportJobBase> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
             @Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
             @Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
             @Parameter(name = "studyCardId") @PathVariable("studyCardId") Long studyCardId,
@@ -131,7 +133,7 @@ public interface ImporterApi {
     ResponseEntity<ImportJob> importDicomZipFile(@Parameter(name = "file path") @RequestBody String dicomZipFilename)
             throws RestServiceException;
 
-    // used by ShanoirUploader!!! 3. step
+    // used by ShanoirUploader!!!
     @Operation(summary = "Start import job", description = "Start import job")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "import job started"),
@@ -143,6 +145,41 @@ public interface ImporterApi {
               + "(hasAnyRole('EXPERT', 'USER') and "
               + "@importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT')))")
     ResponseEntity<Void> startImportJob(@Parameter(name = "ImportJob", required = true) @RequestBody ImportJob importJob) throws RestServiceException;
+
+    /**
+     * New endpoint to start the migration to a new ImportJob structure,
+     * that is only related to one DICOM study: ImportJobBase.
+     *
+     * @param importJob
+     * @return
+     * @throws RestServiceException
+     */
+    // used by ShanoirUploader!!!
+    @Operation(summary = "Start import job", description = "Start import job")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "import job started"),
+            @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "/start_import_job_base/", consumes = { "application/json" }, produces = { "application/json" })
+    @PreAuthorize("!@importSecurityService.isDraftStudy(#importJob.getStudyId()) and "
+            + "(hasRole('ADMIN') or "
+            + "(hasAnyRole('EXPERT', 'USER') and "
+            + "@importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT')))")
+    ResponseEntity<Void> startImportJobBase(
+            @Parameter(name = "ImportJob", required = true) @RequestBody ImportJobBase importJob)
+            throws RestServiceException;
+
+    // used by ShanoirUploader!!!
+    @Operation(summary = "Get import job status", description = "Poll the current state of an async import, and the final ImportJob once finished")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "status found"),
+            @ApiResponse(responseCode = "404", description = "no status found for this id"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden")})
+    @GetMapping(value = "/status/{tempDirId}", produces = {"application/json"})
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
+    ResponseEntity<ImportJobStatus> getImportJobStatus(
+            @Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId);
 
     @Operation(summary = "Start analysis of EEG job", description = "Start analysis eeg job")
     @ApiResponses(value = {

@@ -12,12 +12,27 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+// Shim Node-only globals that leak into a lazily loaded OHIF 3.12 browser
+// chunk (ReferenceError: __filename is not defined -> black screen on the first
+// load). Defining them on the global object lets the bare references resolved.
+// Safe to remove if the upstream ohif/app image stops referencing them.
+window.__filename = window.__filename || '';
+window.__dirname = window.__dirname || '/';
+
 window.config = {
 	routerBasename: null,
 	extensions: [],
 	modes: [],
 	experimentalStudyBrowserSort: true,
 	showStudyList: false,
+	customizationService: [
+		{
+			// Show only the examination the viewer was opened with:
+			'studyBrowser.studyMode': {
+				$set: 'primary',
+			},
+		},
+	],
 	maxNumRequests: {
 		interaction: SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS,
 		thumbnail: SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS,
@@ -52,7 +67,7 @@ window.config = {
   	  {
     	// ~ REQUIRED
     	// Authorization Server URL
-    	authority: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/auth/realms/shanoir-ng',
+    	authority: 'SHANOIR_KEYCLOAK_URL/realms/shanoir-ng',
     	client_id: 'ohif-viewer',
     	redirect_uri: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/callback', // `OHIFStandaloneViewer.js`
     	// "Authorization Code Flow"

@@ -24,7 +24,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <i class="fa-solid fa-circle-info"></i>
                 More info
             </button>
-            <a href="mailto:developers_shanoir@inria.fr">
+            <a [href]="contactMail">
                 <button class="left-icon" type="button">
                     <i class="fa-solid fa-paper-plane"></i>
                     Contact
@@ -53,7 +53,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             including
             <strong>{{ publicStudies.length }}&nbsp;</strong>
         } @else {
-            <strong>none</strong>
+            <strong>none </strong>
         }
         <strong>public</strong>
         ) containing
@@ -75,19 +75,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <strong>
             {{ usersCount || 'no' }} active user@if (usersCount > 1) {s}
         </strong>
-        and
-        @if (eventsCount === 0 || !eventsCount) {
-            <strong>no query</strong>
-            was run during the last month.
-        } @else {
+        @if (eventsCount) {
+            and
             <strong>{{ eventsCount }} {{ eventsCount === 1 ? 'query ' : 'queries ' }}</strong>
             @if (eventsCount === 1) {
                 was
             } @else {
                 were
             }
-            run during the last month.
-        }
+            run during the last month}.
     </div>
     <div class="study-tab-parent">
         @if (publicStudies?.length > 0) {

@@ -16,7 +16,9 @@ package org.shanoir.ng.dicom;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.HashSet;
 import java.util.Set;
@@ -33,7 +35,6 @@ import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
-import org.shanoir.ng.importer.strategies.datasetacquisition.GenericDatasetAcquisitionStrategy;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class DicomProcessing {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GenericDatasetAcquisitionStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DicomProcessing.class);
 
     private static UIDGeneration uidGenerator = new UIDGeneration();
 
@@ -69,7 +70,17 @@ public class DicomProcessing {
     public static LocalDateTime parseAcquisitionStartTime(String acqDate, String acqTime) {
         if (acqDate != null && acqTime != null) {
             try {
-                return LocalDateTime.of(DateTimeUtils.pacsStringToLocalDate(acqDate), DateTimeUtils.stringToLocalTime(acqTime));
+                /**
+                 * Both helpers return null for an empty value: a DICOM date/time tag can be
+                 * present but empty (type 2). Check before LocalDateTime.of, that throws a
+                 * NullPointerException on a null argument and would fail the entire import.
+                 */
+                LocalDate localDate = DateTimeUtils.pacsStringToLocalDate(acqDate);
+                LocalTime localTime = DateTimeUtils.stringToLocalTime(acqTime);
+                if (localDate == null || localTime == null) {
+                    return null;
+                }
+                return LocalDateTime.of(localDate, localTime);
             } catch (DateTimeParseException e) {
                 LOG.warn("could not parse the acquisition date : " + acqDate + " and time : " + acqTime);
                 return null;
@@ -77,6 +88,32 @@ public class DicomProcessing {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Parse acquisition start time for RT IODs (RTSTRUCT, RTDOSE, RTPLAN). Those often
+     * lack AcquisitionDate/AcquisitionTime; fall back to the closest equivalent timestamps.
+     *
+     * @param attributes DICOM attributes of the serie
+     * @param modality   serie modality (RTSTRUCT, RTDOSE or RTPLAN)
+     * @return the acquisition start time, or null if none could be determined
+     */
+    public static LocalDateTime parseRtAcquisitionStartTime(Attributes attributes, String modality) {
+        LocalDateTime acquisitionStartTime = parseAcquisitionStartTime(
+                attributes.getString(Tag.AcquisitionDate), attributes.getString(Tag.AcquisitionTime));
+        if (acquisitionStartTime == null && "RTSTRUCT".equals(modality)) {
+            acquisitionStartTime = parseAcquisitionStartTime(
+                    attributes.getString(Tag.StructureSetDate), attributes.getString(Tag.StructureSetTime));
+        }
+        if (acquisitionStartTime == null) {
+            acquisitionStartTime = parseAcquisitionStartTime(
+                    attributes.getString(Tag.ContentDate), attributes.getString(Tag.ContentTime));
+        }
+        if (acquisitionStartTime == null) {
+            acquisitionStartTime = parseAcquisitionStartTime(
+                    attributes.getString(Tag.SeriesDate), attributes.getString(Tag.SeriesTime));
+        }
+        return acquisitionStartTime;
     }
 
     public static Attributes getDicomObjectAttributes(DatasetFile image, Boolean isEnhancedMR) throws IOException {
@@ -120,7 +157,7 @@ public class DicomProcessing {
         if (!CollectionUtils.isEmpty(serie.getImages())) {
             sopUID = serie.getImages().get(0).getSOPInstanceUID();
         } else {
-            LOG.warn("Attention: a new SOPInstanceUID has been generated for serie: {}/{}", serie.getSequenceName(), serie.getProtocolName());
+            LOG.info("In-memory SOPInstanceUID generated for serie: {}/{}", serie.getSequenceName(), serie.getProtocolName());
             sopUID = uidGenerator.getNewUID();
         }
         // In case of Quality Check during Import from ShUp, Serie does not have any Dataset and conditions are applied on DICOM metadata only.
@@ -130,7 +167,7 @@ public class DicomProcessing {
                 try {
                     attributes.addDatasetAttributes(dataset.getFirstImageSOPInstanceUID(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced()));
                 } catch (IOException e) {
-                    throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
+                    throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSeriesInstanceUID(), e);
                 }
             }
         }
