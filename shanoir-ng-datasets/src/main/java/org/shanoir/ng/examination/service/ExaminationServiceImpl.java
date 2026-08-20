@@ -112,6 +112,7 @@ public class ExaminationServiceImpl implements ExaminationService {
     private StorageService storageService;
 
     @Override
+    @Transactional
     public void deleteById(final Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         Optional<Examination> examinationOpt = examinationRepository.findById(id);
         if (!examinationOpt.isPresent()) {
@@ -177,6 +178,21 @@ public class ExaminationServiceImpl implements ExaminationService {
             eventService.publishEvent(event);
             LOG.error("Error during deletion of examination with id : " + examinationId);
             LOG.error("Exception e : ", e);
+        }
+    }
+
+    @Async
+    @Override
+    public void deleteEmptyExamination(Long id) throws EntityNotFoundException {
+        Optional<Examination> examinationOpt = examinationRepository.findById(id);
+        if (!examinationOpt.isPresent()) {
+            throw new EntityNotFoundException(Examination.class, id);
+        }
+        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findByExamination(id);
+        if (CollectionUtils.isEmpty(acquisitions)) {
+            examinationRepository.deleteById(id);
+        } else {
+            LOG.warn("Trying to delete an examination with id {} that is not empty, deletion skipped.", id);
         }
     }
 

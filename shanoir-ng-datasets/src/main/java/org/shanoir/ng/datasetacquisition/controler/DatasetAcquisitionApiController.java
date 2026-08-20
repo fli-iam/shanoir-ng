@@ -16,6 +16,8 @@ package org.shanoir.ng.datasetacquisition.controler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -63,6 +65,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -132,12 +135,15 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    @Transactional
     public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         EegImportJob importJob = objectMapper.readValue(importJobAsString.getBody(), EegImportJob.class);
         eegImporterService.createEegDataset(importJob);
-        importerService.cleanTempFiles(importJob.getWorkFolder());
+        try {
+            importerService.cleanTempFiles(importJob.getWorkFolder());
+        } catch (Exception e) {
+            LOG.warn("Could not clean temp files for workFolder {}: {}", importJob.getWorkFolder(), e.getMessage());
+        }
         return HttpStatus.OK.value();
     }
 
@@ -251,6 +257,62 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
     }
 
     @Override
+    public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionsLeftEmptyBy(List<Long> datasetIds) {
+        List<DatasetAcquisition> leftEmpty = datasetAcquisitionService.findAcquisitionsLeftEmptyBy(datasetIds);
+        if (CollectionUtils.isEmpty(leftEmpty)) {
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(leftEmpty), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findEmptyDatasetAcquisitions(Long studyId) {
+        List<DatasetAcquisition> empty = datasetAcquisitionService.findEmptyAcquisitions(studyId);
+        if (CollectionUtils.isEmpty(empty)) {
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(empty), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<Long>> deleteEmptyDatasetAcquisitions(Long studyId) {
+        List<DatasetAcquisition> empty = datasetAcquisitionService.findEmptyAcquisitions(studyId);
+
+        ShanoirEvent event = new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                studyId != null ? String.valueOf(studyId) : null,
+                KeycloakUtil.getTokenUserId(),
+                "Starting the clean up of " + empty.size() + " empty dataset acquisition(s)",
+                ShanoirEvent.IN_PROGRESS,
+                0f,
+                studyId);
+        eventService.publishEvent(event);
+
+        List<Long> deleted = new ArrayList<>();
+        int handled = 0;
+        for (DatasetAcquisition acquisition : empty) {
+            try {
+                datasetAcquisitionService.deleteEmptyAcquisition(acquisition.getId());
+                deleted.add(acquisition.getId());
+            } catch (EntityNotFoundException | RestServiceException e) {
+                LOG.warn("Could not remove the empty dataset acquisition {}", acquisition.getId(), e);
+            }
+            // the ones that could not be removed still make the clean up progress
+            handled++;
+            event.setProgress((float) handled / empty.size());
+            eventService.publishEvent(event);
+        }
+
+        event.setMessage(deleted.size() + " empty dataset acquisition(s) deleted.");
+        event.setProgress(1f);
+        event.setStatus(ShanoirEvent.SUCCESS);
+        eventService.publishEvent(event);
+
+        LOG.info("Clean up of empty dataset acquisitions: {} removed", deleted.size());
+        return new ResponseEntity<>(deleted, HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
               Long datasetAcquisitionId) {
 
@@ -270,8 +332,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
     }
 
-
-
     @Override
     public ResponseEntity<Void> updateDatasetAcquisition(
               Long datasetAcquisitionId,
@@ -287,7 +347,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
 
     @Override
     public ResponseEntity<Void> addExtraData(
@@ -347,4 +406,5 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             throw new RestServiceException(error);
         }
     }
+
 }

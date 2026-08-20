@@ -443,7 +443,7 @@ public class UserServiceImpl implements UserService {
      * @return database user with new values.
      */
     private User updateUserValues(final User userDb, final User user) {
-        userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation() != null && user.isCanAccessToDicomAssociation());
+        userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation());
         userDb.setEmail(user.getEmail());
         // If expiration date was updated, reset expiration notifications.
         if (userDb.getExpirationDate() == null || user.getExpirationDate() == null || !userDb.getExpirationDate().isEqual(user.getExpirationDate())) {

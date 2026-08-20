@@ -12,26 +12,31 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.uploader.upload;
+package org.shanoir.ng.dataset.modality;
 
-import jakarta.xml.bind.annotation.XmlType;
+import jakarta.persistence.Entity;
+
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetType;
 
 /**
- * This class contains all states of the UploadService's
- * state engine, which is responsible to assure a secure
- * upload to the Shanoir server.
- * @author mkain
- *
+ * RT dataset (RTSTRUCT, RTDOSE, RTPLAN).
  */
-@XmlType
-public enum UploadState {
-    START, //
-    START_AUTOIMPORT,
-    START_AUTOIMPORT_FAIL,
-    MISSING, // Is it used ?
-    READY, // Is it used ?
-    UPLOADING_IMAGES, // Is it used ?
-    UPLOADING_JOB_FILE, // Is it used ?
-    FINISHED_UPLOAD, //
-    ERROR //
+@Entity
+public class RtDataset extends Dataset {
+
+    private static final long serialVersionUID = 3926301273461759121L;
+
+    public RtDataset() {
+    }
+
+    public RtDataset(Dataset other) {
+        super(other);
+    }
+
+    @Override
+    public DatasetType getType() {
+        return DatasetType.RT;
+    }
+
 }

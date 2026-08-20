@@ -23,6 +23,7 @@ import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -93,6 +94,9 @@ public class Serie {
 
     @JsonProperty("datasets")
     private List<Dataset> datasets = null;
+
+    @JsonProperty("qualityTag")
+    private QualityTag qualityTag = null;
 
     public Serie() { }
 
@@ -292,6 +296,14 @@ public class Serie {
 
     public void setIsSpectroscopy(Boolean isSpectroscopy) {
         this.isSpectroscopy = isSpectroscopy;
+    }
+
+    public QualityTag getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualityTag(QualityTag qualityTag) {
+        this.qualityTag = qualityTag;
     }
 
 }
