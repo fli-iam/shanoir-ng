@@ -1,4 +1,4 @@
-name: Renumber database migrations
+name: Renumber db changes scripts
 
 on:
   pull_request:
