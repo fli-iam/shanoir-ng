@@ -17,7 +17,7 @@ import { FormsModule } from '@angular/forms';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
-import { MetadataFieldScope, StudyCardAssignment } from '../../shared/study-card.model';
+import { FieldType, MetadataFieldScope, StudyCardAssignment } from '../../shared/study-card.model';
 import { AutoAdjustInputComponent } from '../../../shared/auto-ajust-input/auto-ajust-input.component';
 
 
@@ -165,10 +165,11 @@ export class ShanoirMetadataField {
     public options?: Observable<Option<any>[]>;
 
     constructor(
-            public label: string, 
+            public label: string,
             public field: string,
-            public scope: MetadataFieldScope, 
-            options?: Observable<Option<any>[]> | Option<any>[]) {
+            public scope: MetadataFieldScope,
+            options?: Observable<Option<any>[]> | Option<any>[],
+            public type: FieldType = 'String') {
 
         if (options instanceof Observable) {
             this.options = options;
