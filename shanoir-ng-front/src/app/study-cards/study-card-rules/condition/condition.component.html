@@ -179,6 +179,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [(ngModel)]="condition.shanoirField"
             (userChange)="onFieldChange()"
             [options]="fieldOptions"
+            [listLength]="fieldOptions?.length || 16"
             placeholder="select shanoir metadata field"
             (focusout)="shanoirFieldTouched = true"
             [clear]="false"></select-box>

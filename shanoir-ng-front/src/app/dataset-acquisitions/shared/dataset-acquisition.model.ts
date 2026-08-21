@@ -31,7 +31,7 @@ export abstract class DatasetAcquisition extends Entity {
     @Field() rank: number;
     @Field() softwareRelease: string;
     @Field() sortingIndex: number;
-    @Field() type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS'; // TODO : other types
+    @Field() type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Rt' | 'Generic' | 'Processed' | 'BIDS'; // TODO : other types
     @Field() protocol: any;
     @Field() name: string; // set in ExaminationDatasetAcquisitionDecorator.java
     @Field() importDate: Date;
