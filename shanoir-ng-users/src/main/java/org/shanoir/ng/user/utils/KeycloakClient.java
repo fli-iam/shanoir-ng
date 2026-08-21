@@ -15,7 +15,13 @@
 package org.shanoir.ng.user.utils;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.role.repository.RoleRepository;
@@ -150,19 +156,21 @@ public class KeycloakClient {
      */
     public void enableTotp(final String keycloakId) throws SecurityException {
         try {
-            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
-            final UserRepresentation userRepresentation = userResource.toRepresentation();
-            final List<String> requiredActions = userRepresentation.getRequiredActions() == null
-                    ? new ArrayList<>() : new ArrayList<>(userRepresentation.getRequiredActions());
+            final String token = getAdminToken();
+            final Map<String, Object> userRepresentation = getUserRepresentation(keycloakId, token);
+            final List<String> requiredActions = getRequiredActions(userRepresentation);
             if (!requiredActions.contains(CONFIGURE_TOTP_ACTION)) {
                 requiredActions.add(CONFIGURE_TOTP_ACTION);
-                userRepresentation.setRequiredActions(requiredActions);
-                userResource.update(userRepresentation);
+                userRepresentation.put("requiredActions", requiredActions);
+                updateUserRepresentation(keycloakId, userRepresentation, token);
             }
+        } catch (SecurityException e) {
+            throw e;
         } catch (Exception e) {
             throw new SecurityException("Could not enable two-factor authentication for user with keycloak id " + keycloakId, e);
         }
     }
+
 
     /**
      * Disable Keycloak two-factor (TOTP) authentication for a user. Removes the
@@ -175,20 +183,21 @@ public class KeycloakClient {
      */
     public void disableTotp(final String keycloakId) throws SecurityException {
         try {
-            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
-            final UserRepresentation userRepresentation = userResource.toRepresentation();
-            final List<String> requiredActions = userRepresentation.getRequiredActions();
-            if (requiredActions != null && requiredActions.contains(CONFIGURE_TOTP_ACTION)) {
-                final List<String> updatedActions = new ArrayList<>(requiredActions);
-                updatedActions.remove(CONFIGURE_TOTP_ACTION);
-                userRepresentation.setRequiredActions(updatedActions);
-                userResource.update(userRepresentation);
+            final String token = getAdminToken();
+            final Map<String, Object> userRepresentation = getUserRepresentation(keycloakId, token);
+            final List<String> requiredActions = getRequiredActions(userRepresentation);
+            if (requiredActions.contains(CONFIGURE_TOTP_ACTION)) {
+                requiredActions.remove(CONFIGURE_TOTP_ACTION);
+                userRepresentation.put("requiredActions", requiredActions);
+                updateUserRepresentation(keycloakId, userRepresentation, token);
             }
-            for (CredentialRepresentation credential : userResource.credentials()) {
-                if (OTP_CREDENTIAL_TYPE.equals(credential.getType())) {
-                    userResource.removeCredential(credential.getId());
+            for (Map<String, Object> credential : getCredentials(keycloakId, token)) {
+                if (OTP_CREDENTIAL_TYPE.equals(credential.get("type"))) {
+                    deleteCredential(keycloakId, (String) credential.get("id"), token);
                 }
             }
+        } catch (SecurityException e) {
+            throw e;
         } catch (Exception e) {
             throw new SecurityException("Could not disable two-factor authentication for user with keycloak id " + keycloakId, e);
         }
@@ -205,14 +214,16 @@ public class KeycloakClient {
      */
     public boolean isTotpEnabled(final String keycloakId) throws SecurityException {
         try {
-            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
-            for (CredentialRepresentation credential : userResource.credentials()) {
-                if (OTP_CREDENTIAL_TYPE.equals(credential.getType())) {
+            final String token = getAdminToken();
+            for (Map<String, Object> credential : getCredentials(keycloakId, token)) {
+                if (OTP_CREDENTIAL_TYPE.equals(credential.get("type"))) {
                     return true;
                 }
             }
-            final List<String> requiredActions = userResource.toRepresentation().getRequiredActions();
-            return requiredActions != null && requiredActions.contains(CONFIGURE_TOTP_ACTION);
+            final Map<String, Object> userRepresentation = getUserRepresentation(keycloakId, token);
+            return getRequiredActions(userRepresentation).contains(CONFIGURE_TOTP_ACTION);
+        } catch (SecurityException e) {
+            throw e;
         } catch (Exception e) {
             throw new SecurityException("Could not read two-factor authentication status for user with keycloak id " + keycloakId, e);
         }
@@ -229,14 +240,17 @@ public class KeycloakClient {
      */
     public void setUserEnabled(final String keycloakId, final boolean enabled) throws SecurityException {
         try {
-            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
-            final UserRepresentation userRepresentation = userResource.toRepresentation();
-            userRepresentation.setEnabled(enabled);
-            userResource.update(userRepresentation);
+            final String token = getAdminToken();
+            final Map<String, Object> userRepresentation = getUserRepresentation(keycloakId, token);
+            userRepresentation.put("enabled", enabled);
+            updateUserRepresentation(keycloakId, userRepresentation, token);
+        } catch (SecurityException e) {
+            throw e;
         } catch (Exception e) {
             throw new SecurityException("Could not update the enabled status for user with keycloak id " + keycloakId, e);
         }
     }
+
 
     /**
      * Read the enabled (activated) flag of every user of the realm in a single
@@ -247,14 +261,15 @@ public class KeycloakClient {
      */
     public Map<String, Boolean> getUsersEnabledStatus() throws SecurityException {
         try {
+            final String token = getAdminToken();
             final Map<String, Boolean> enabledByKeycloakId = new HashMap<>();
-            List<UserRepresentation> page;
+            List<Map<String, Object>> page;
             int first = 0;
             do {
-                page = getKeycloak().realm(keycloakRealm).users().list(first, USERS_PAGE_SIZE);
-                for (UserRepresentation userRepresentation : page) {
-                    enabledByKeycloakId.put(userRepresentation.getId(),
-                            Boolean.TRUE.equals(userRepresentation.isEnabled()));
+                page = listUsers(first, USERS_PAGE_SIZE, token);
+                for (Map<String, Object> userRepresentation : page) {
+                    enabledByKeycloakId.put((String) userRepresentation.get("id"),
+                            Boolean.TRUE.equals(userRepresentation.get("enabled")));
                 }
                 first += page.size();
             } while (page.size() == USERS_PAGE_SIZE);
@@ -274,13 +289,81 @@ public class KeycloakClient {
      */
     public boolean isUserEnabled(final String keycloakId) throws SecurityException {
         try {
-            final UserResource userResource = getKeycloak().realm(keycloakRealm).users().get(keycloakId);
-            return Boolean.TRUE.equals(userResource.toRepresentation().isEnabled());
+            final String token = getAdminToken();
+            final Map<String, Object> userRepresentation = getUserRepresentation(keycloakId, token);
+            return Boolean.TRUE.equals(userRepresentation.get("enabled"));
+        } catch (SecurityException e) {
+            throw e;
         } catch (Exception e) {
             throw new SecurityException("Could not read the enabled status for user with keycloak id " + keycloakId, e);
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getUserRepresentation(String keycloakId, String token) {
+        Map<?, ?> response = webClient.get()
+                .uri("/admin/realms/" + userRealm + "/users/" + keycloakId)
+                .headers(h -> h.setBearerAuth(token))
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block(Duration.ofSeconds(10));
+        if (response == null) {
+            throw new NoSuchElementException("User not found in Keycloak: " + keycloakId);
+        }
+        return (Map<String, Object>) response;
+    }
+
+    private void updateUserRepresentation(String keycloakId, Map<String, Object> userRepresentation, String token) {
+        webClient.put()
+                .uri("/admin/realms/" + userRealm + "/users/" + keycloakId)
+                .headers(h -> h.setBearerAuth(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(userRepresentation)
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(10));
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> getRequiredActions(Map<String, Object> userRepresentation) {
+        List<String> requiredActions = (List<String>) userRepresentation.get("requiredActions");
+        return requiredActions == null ? new ArrayList<>() : new ArrayList<>(requiredActions);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> getCredentials(String keycloakId, String token) {
+        List<?> response = webClient.get()
+                .uri("/admin/realms/" + userRealm + "/users/" + keycloakId + "/credentials")
+                .headers(h -> h.setBearerAuth(token))
+                .retrieve()
+                .bodyToMono(List.class)
+                .block(Duration.ofSeconds(10));
+        return response == null ? List.of() : (List<Map<String, Object>>) response;
+    }
+
+    private void deleteCredential(String keycloakId, String credentialId, String token) {
+        webClient.delete()
+                .uri("/admin/realms/" + userRealm + "/users/" + keycloakId + "/credentials/" + credentialId)
+                .headers(h -> h.setBearerAuth(token))
+                .retrieve()
+                .toBodilessEntity()
+                .block(Duration.ofSeconds(10));
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> listUsers(int first, int max, String token) {
+        List<?> response = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/admin/realms/" + userRealm + "/users")
+                        .queryParam("first", first)
+                        .queryParam("max", max)
+                        .build())
+                .headers(h -> h.setBearerAuth(token))
+                .retrieve()
+                .bodyToMono(List.class)
+                .block(Duration.ofSeconds(10));
+        return response == null ? List.of() : (List<Map<String, Object>>) response;
+    }
 
     /**
      * Delete a user.

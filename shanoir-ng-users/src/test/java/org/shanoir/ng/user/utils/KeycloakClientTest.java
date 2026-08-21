@@ -25,7 +25,6 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -33,6 +32,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.role.repository.RoleRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -47,8 +48,11 @@ public class KeycloakClientTest {
 
     private static final int PAGE_SIZE = 100;
 
+    @Value("${kc.admin.client.server.url}")
+    private String serverUrl;
+
     @Mock
-    private Keycloak keycloak;
+    private RoleRepository roleRepository;
 
     @Mock
     private RealmResource realmResource;
@@ -60,14 +64,8 @@ public class KeycloakClientTest {
 
     @BeforeEach
     public void setup() {
-        keycloakClient = new KeycloakClient() {
-            @Override
-            protected Keycloak getKeycloak() {
-                return keycloak;
-            }
-        };
+        keycloakClient = new KeycloakClient(roleRepository, serverUrl);
         ReflectionTestUtils.setField(keycloakClient, "keycloakRealm", REALM);
-        given(keycloak.realm(REALM)).willReturn(realmResource);
         given(realmResource.users()).willReturn(usersResource);
     }
 
@@ -108,7 +106,6 @@ public class KeycloakClientTest {
     @Test
     public void getUsersEnabledStatusKeycloakErrorTest() {
         given(usersResource.list(0, PAGE_SIZE)).willThrow(new RuntimeException("keycloak unreachable"));
-
         assertThrows(SecurityException.class, () -> keycloakClient.getUsersEnabledStatus());
     }
 

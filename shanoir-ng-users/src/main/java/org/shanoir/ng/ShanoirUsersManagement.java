@@ -112,8 +112,6 @@ public class ShanoirUsersManagement implements ApplicationRunner {
     @Value("${DEV_USERS_DEFAULT_PASSWORD:}")
     private String devUsersDefaultPassword;
 
-    private Keycloak keycloak = null;
-
     @Autowired
     private UserRepository userRepository;
 
@@ -202,21 +200,12 @@ public class ShanoirUsersManagement implements ApplicationRunner {
                 String keycloakId = createUser(user, token);
                 user.setKeycloakId(keycloakId);
                 userRepository.save(user);
-                // Reset user password, which is stored in Keycloak only
-                final CredentialRepresentation credential = new CredentialRepresentation();
-                credential.setType(CredentialRepresentation.PASSWORD);
 
                 final boolean devMode = isDevMode();
                 LOG.info("devMode={} (if true: use UsersDefaultPassword)", devMode);
                 final String newPassword = devMode ? devUsersDefaultPassword : PasswordUtils.generatePassword();
-                credential.setValue(newPassword);
-                credential.setTemporary(!devMode);
-
-                final UserResource userResource = keycloak.realm(keycloakRealm).users().get(keycloakId);
-                userResource.resetPassword(credential);
-                final RoleResource roleResource = keycloak.realm(keycloakRealm).roles().get(user.getRole().getName());
-                userResource.roles().realmLevel().add(Arrays.asList(roleResource.toRepresentation()));
-
+                resetPassword(keycloakId, newPassword, !devMode, token);
+                assignRealmRole(keycloakId, user.getRole().getName(), token);
                 if (!devMode) {
                     emailService.notifyUserResetPassword(user, newPassword);
                 }
@@ -258,11 +247,11 @@ public class ShanoirUsersManagement implements ApplicationRunner {
         return location.replaceAll(".*/([^/]+)$", "$1");
     }
 
-    private void resetPassword(String keycloakId, String newPassword, String token) {
+    private void resetPassword(String keycloakId, String newPassword, boolean temporary, String token) {
         Map<String, Object> credential = new HashMap<>();
         credential.put("type", "password");
         credential.put("value", newPassword);
-        credential.put("temporary", true);
+        credential.put("temporary", temporary);
         webClient.put()
                 .uri("/admin/realms/" + keycloakRealm + "/users/" + keycloakId + "/reset-password")
                 .headers(h -> h.setBearerAuth(token))

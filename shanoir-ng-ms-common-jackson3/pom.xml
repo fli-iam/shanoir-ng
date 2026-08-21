@@ -106,10 +106,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <artifactId>mariadb-java-client</artifactId>
             <version>3.5.2</version>
         </dependency>
-        <dependency>
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-ant</artifactId>
-        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
         <dependency>
