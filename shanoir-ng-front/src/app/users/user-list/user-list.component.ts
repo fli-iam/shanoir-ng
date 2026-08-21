@@ -13,12 +13,14 @@
  */
 
 import { Component, ViewChild } from '@angular/core';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { StudyService } from '../../studies/shared/study.service';
 import { StudyUser } from '../../studies/shared/study-user.model';
 
@@ -26,7 +28,8 @@ import { StudyUser } from '../../studies/shared/study-user.model';
 @Component({
     selector: 'user-list',
     templateUrl: 'user-list.component.html',
-    styleUrls: ['user-list.component.css']
+    styleUrls: ['user-list.component.css'],
+    imports: [TableComponent]
 })
 
 export class UserListComponent extends BrowserPaginEntityListComponent<User>{
@@ -49,14 +52,13 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
         };
     }
 
-    getEntities(): Promise<User[]> {
-        let userPromise = this.userService.getAll();
+    getEntities(eager: boolean = false): Promise<User[]> {
+        const userPromise: Promise<User[]> = this.userService.getAll();
         // get the study-users
-        Promise.all([userPromise, this.studyService.getAll()]).then(([users, studies]) => {
+        const allPromise: Promise<User[]> = Promise.all([userPromise, this.studyService.getAll()]).then(([users, studies]) => {
             users.forEach(user => {
                 user.studyUserList = [];
-                studies.forEach(study => Array.prototype.push.apply(
-                    user.studyUserList,
+                studies.forEach(study => user.studyUserList.push(...
                     study.studyUserList
                         .filter(studyUser => (studyUser.user ? studyUser.user.id : studyUser.userId) == user.id)
                         .map(studyUser => {
@@ -65,19 +67,18 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
                         })
                 ));
             })
+            return users;
         });
-        return userPromise;
+        if (eager) {
+            return allPromise;
+        } else {
+            return userPromise;
+        }
     }
 
     // Grid columns definition
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
-        let columnDefs: ColumnDefinition[] = [
+        const columnDefs: ColumnDefinition[] = [
             {headerName: "Username", field: "username" },
             {headerName: "First Name", field: "firstName" },
             {headerName: "Last Name", field: "lastName" },
@@ -94,18 +95,12 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
             }},
             {headerName: "Challenge", field: "accountRequestInfo.challenge", type: "boolean", defaultSortCol: true},
             {headerName: "Role", field: "role.displayName", width: "63px"},
-            {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.creationDate);
-            }},
-            {headerName: "Expiration", field: "expirationDate", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.expirationDate);
-            }},
-            {headerName: "Active", field: "valid", type: "boolean", cellRenderer: function (params: any) {
+            {headerName: "Creation", field: "creationDate", type: "date"},
+            {headerName: "Expiration", field: "expirationDate", type: "date"},
+            {headerName: "Expired", field: "valid", type: "boolean", cellRenderer: function (params: any) {
                 return !params.data.expirationDate || params.data.expirationDate >= new Date();
             }},
-            {headerName: "Last Login", field: "lastLogin", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.lastLogin);
-            }}
+            {headerName: "Last Login", field: "lastLogin", type: "date"}
         ];
 
         return columnDefs;

@@ -13,6 +13,8 @@
  */
 import { Injectable } from '@angular/core';
 
+import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
 import { DatasetDTO, DatasetDTOService } from '../../datasets/shared/dataset.dto';
@@ -30,6 +32,9 @@ import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.mode
 import { MrProtocol } from '../modality/mr/mr-protocol.model';
 import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.model';
 import { PetProtocol } from '../modality/pet/pet-protocol.model';
+import { XaDatasetAcquisition } from '../modality/xa/xa-dataset-acquisition.model';
+import { XaProtocol } from '../modality/xa/xa-protocol.model';
+
 import { DatasetAcquisition } from './dataset-acquisition.model';
 import { DatasetAcquisitionUtils } from './dataset-acquisition.utils';
 
@@ -49,14 +54,14 @@ export class DatasetAcquisitionDTOService {
     public toDatasetAcquisition(dto: DatasetAcquisitionDTO, result?: DatasetAcquisition): Promise<DatasetAcquisition> {
         if (!result) result = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
         DatasetAcquisitionDTOService.mapSyncFields(dto, result);
-        let promises = [];
+        const promises = [];
         if(dto.acquisitionEquipmentId > 0){
             promises.push(this.acqEqService.get(dto.acquisitionEquipmentId).then(acqEq => result.acquisitionEquipment = acqEq));
         }else{
             result.acquisitionEquipment = new AcquisitionEquipment();
         }
         promises.push( this.studyService.get(dto.examination.studyId).then(study => result.examination.study = study));
-        return Promise.all(promises).then(([]) => {
+        return Promise.all(promises).then(() => {
             return result;
         });
     }
@@ -67,12 +72,12 @@ export class DatasetAcquisitionDTOService {
      */
     public toDatasetAcquisitions(dtos: DatasetAcquisitionDTO[], result?: DatasetAcquisition[]): Promise<DatasetAcquisition[]>{
         if (!result) result = [];
-        for (let dto of dtos ? dtos : []) {
-            let entity = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
+        for (const dto of dtos ? dtos : []) {
+            const entity = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
             DatasetAcquisitionDTOService.mapSyncFields(dto, entity);
             if ((dto as DatasetAcquisitionDatasetsDTO).datasets) {
                 entity.datasets = (dto as DatasetAcquisitionDatasetsDTO).datasets.map(dsdto => {
-                    let simpleDataset: Dataset = DatasetUtils.getDatasetInstance(dsdto.type);
+                    const simpleDataset: Dataset = DatasetUtils.getDatasetInstance(dsdto.type);
                     DatasetDTOService.mapSyncFields(dsdto, simpleDataset);
                     return simpleDataset;
                 });
@@ -83,7 +88,7 @@ export class DatasetAcquisitionDTOService {
             this.acqEqService.getAll(),
             this.studyService.getStudiesNames()
         ]).then(([acqs, studies]) => {
-            for (let entity of result) {
+            for (const entity of result) {
                 if (entity.acquisitionEquipment) entity.acquisitionEquipment = acqs.find(acq => acq.id == entity.acquisitionEquipment.id);
                 if (entity.examination && entity.examination.study) entity.examination.study = studies.find(study => study.id == entity.examination.study.id);
             }
@@ -99,9 +104,15 @@ export class DatasetAcquisitionDTOService {
         }
         entity.rank = dto.rank;
         entity.softwareRelease = dto.softwareRelease;
+        if (dto.acquisitionStartTime) entity.acquisitionStartTime = new Date(dto.acquisitionStartTime);
         entity.sortingIndex = dto.sortingIndex;
         entity.type = dto.type;
-        entity.creationDate = dto.creationDate;
+        entity.source = dto.source;
+        entity.copies = dto.copies;
+        entity.importDate = dto.importDate;
+        entity.username = dto.username;
+        entity.qualityTag = dto.qualityTag;
+        entity.extraDataFilePathList = dto.extraDataFilePathList;
         if (dto.acquisitionEquipmentId) {
             entity.acquisitionEquipment = new AcquisitionEquipment();
             entity.acquisitionEquipment.id = dto.acquisitionEquipmentId;
@@ -123,6 +134,11 @@ export class DatasetAcquisitionDTOService {
                 (entity as CtDatasetAcquisition).protocol = Object.assign(new CtProtocol(), (dto as CtDatasetAcquisitionDTO).protocol);
                 break;
             }
+            case 'Xa': {
+                (entity as XaDatasetAcquisition).protocol = Object.assign(new XaProtocol(), (dto as XaDatasetAcquisitionDTO).protocol);
+                break;
+            }
+
         }
         return entity;
     }
@@ -147,7 +163,12 @@ export class DatasetAcquisitionDTO {
         this.softwareRelease = dsAcq.softwareRelease;
         this.sortingIndex = dsAcq.sortingIndex;
         this.type = dsAcq.type;
-        this.creationDate = dsAcq.creationDate;
+        this.importDate = dsAcq.importDate;
+        this.username = dsAcq.username;
+        this.source = dsAcq.source;
+        this.copies = dsAcq.copies;
+        this.qualityTag = dsAcq.qualityTag;
+        this.extraDataFilePathList = dsAcq.extraDataFilePathList;
     }
 
     id: number;
@@ -156,9 +177,15 @@ export class DatasetAcquisitionDTO {
     examination: ExaminationDTO;
     rank: number;
     softwareRelease: string;
+    acquisitionStartTime: Date;
     sortingIndex: number;
-    creationDate: Date;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed' | 'BIDS';
+    importDate: Date;
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Rt' | 'Generic' | 'Processed' | 'BIDS';
+    username: string;
+    copies: number[];
+    source: number;
+    qualityTag: QualityTag;
+    extraDataFilePathList: string[] = [];
 }
 
 export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
@@ -173,6 +200,10 @@ export class CtDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
     protocol: any;
 }
 
+export class XaDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
+    protocol: any;
+}
+
 export class ProcessedDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
    	parentAcquisitions: any[];
 }
@@ -180,8 +211,10 @@ export class ProcessedDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
 export class ExaminationDatasetAcquisitionDTO {
     id: number;
     name: string;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed' | 'BIDS';
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Rt' | 'Generic' | 'Processed' | 'BIDS';
     datasets: any;
+    qualityTag: QualityTag;
+    extraDataFilePathList: string[];
 }
 
 export class DatasetAcquisitionDatasetsDTO extends DatasetAcquisitionDTO {

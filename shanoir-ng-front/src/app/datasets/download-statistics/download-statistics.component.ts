@@ -2,24 +2,27 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { DatasetService } from '../shared/dataset.service';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 @Component({
     selector: 'download-statistics',
-    templateUrl: 'download-statistics.component.html'
+    templateUrl: 'download-statistics.component.html',
+    imports: [FormsModule, ReactiveFormsModule, TooltipComponent]
 })
 
 export class DownloadStatisticsComponent{
@@ -27,7 +30,7 @@ export class DownloadStatisticsComponent{
     public form: UntypedFormGroup;
 
     constructor(private datasetService: DatasetService,
-            private breadcrumbsService: BreadcrumbsService, 
+            private breadcrumbsService: BreadcrumbsService,
             private formBuilder: UntypedFormBuilder) {
 
         setTimeout(() => {
@@ -38,9 +41,9 @@ export class DownloadStatisticsComponent{
     }
 
     downloadStatistics(): void {
-        this.datasetService.downloadStatistics(this.form.get('studyNameInRegExp').value, 
-                                                this.form.get('studyNameOutRegExp').value, 
-                                                this.form.get('subjectNameInRegExp').value, 
+        this.datasetService.downloadStatistics(this.form.get('studyNameInRegExp').value,
+                                                this.form.get('studyNameOutRegExp').value,
+                                                this.form.get('subjectNameInRegExp').value,
                                                 this.form.get('subjectNameOutRegExp').value);
     }
 
@@ -62,9 +65,9 @@ export class DownloadStatisticsComponent{
     }
 
     hasError(fieldName: string, errors: string[]) {
-        let formError = this.formErrors(fieldName);
+        const formError = this.formErrors(fieldName);
         if (formError) {
-            for(let errorName of errors) {
+            for(const errorName of errors) {
                 if(formError[errorName]) return true;
             }
         }

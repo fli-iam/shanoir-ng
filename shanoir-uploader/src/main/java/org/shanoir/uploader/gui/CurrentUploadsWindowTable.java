@@ -1,9 +1,24 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.gui;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
@@ -13,248 +28,324 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.UploadState;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataModel;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
-import org.shanoir.uploader.upload.UploadState;
 
+@SuppressWarnings("deprecation")
 public class CurrentUploadsWindowTable implements Observer {
 
-	public MainWindow frame;
-	public static JTable table;
-	Object[] columnNames;
-	Object[] paths;
-	public int importColumn = 7;
-	public int deleteColumn = 8;
-	public int patientNameColumn = 2;
-	public int uploadStateColumn = 6;
-	public String readyUploadState = "READY";
-	public String startUploadState = "START";
-	public String startAutoImportUploadState = "START_AUTOIMPORT";
-	public String finishedUploadState = "FINISHED";
-	public String errorUploadState = "ERROR";
-	public int selectedRow;
-	public int rowsNb;
+    private static CurrentUploadsWindowTable instance;
+    public final MainWindow frame;
+    public final JTable table;
+    Object[] columnNames;
+    Object[] paths;
+    public int subjectNameColumn = 6;
+    public int importColumn = 8;
+    public int deleteColumn = 9;
+    public int patientNameColumn = 2;
+    public int uploadStateColumn = 7;
+    public String readyUploadState = UploadState.READY.toString();
+    public String startImportJobUploadState = UploadState.START_IMPORT_JOB.toString();
+    public String serverProcessingUploadState = UploadState.SERVER_PROCESSING.toString();    
+    public String finishedUploadState = UploadState.FINISHED.toString();
+    public String errorUploadState = UploadState.ERROR.toString();
+    public String checkOKUploadState = UploadState.CHECK_OK.toString();
+    public String checkKOUploadState = UploadState.CHECK_KO.toString();
+    public int selectedRow;
+    public int rowsNb;
 
-	public CurrentUploadsWindowTable(final MainWindow frame) {
-		this.frame = frame;
-		final Object[] columnNames = {
-			"id",
-			frame.resourceBundle.getString("shanoir.uploader.currentUploads.ID"),
-			frame.resourceBundle.getString("shanoir.uploader.currentUploads.patientName"),
-			frame.resourceBundle.getString("shanoir.uploader.currentUploads.IPP"),
-			frame.resourceBundle.getString("shanoir.uploader.currentUploads.studyDate"),
-			frame.resourceBundle.getString("shanoir.uploader.currentUploads.mri"),
-			frame.resourceBundle.getString("shanoir.uploader.currentUploads.importState"),
-			frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import"),
-			frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete")
-		};
-		this.columnNames = columnNames;
-		table = new JTable(new DefaultTableModel(columnNames, 0));
-		table.setPreferredScrollableViewportSize(new Dimension(800, 100));
-		table.setFillsViewportHeight(true);
+    // Formatter to display the dates in the table
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ShUpConfig.FORMATTER.toPattern());
 
-		table.getColumnModel().getColumn(0).setPreferredWidth(0);
-		table.getColumnModel().getColumn(0).setMinWidth(0);
-		table.getColumnModel().getColumn(0).setWidth(0);
-		table.getColumnModel().getColumn(0).setMaxWidth(0);
-		table.getColumnModel().getColumn(1).setPreferredWidth(150);
-		table.getColumnModel().getColumn(2).setPreferredWidth(150);
-		table.getColumnModel().getColumn(5).setPreferredWidth(100);
-		table.getColumnModel().getColumn(6).setPreferredWidth(40);
-		table.getColumnModel().getColumn(7).setPreferredWidth(40);
-		table.getColumnModel().getColumn(8).setPreferredWidth(50);
+    private CurrentUploadsWindowTable(MainWindow frame) {
+        this.frame = frame;
+        final Object[] columnNames = {
+            "id",
+            frame.resourceBundle.getString("shanoir.uploader.currentUploads.ID"),
+            frame.resourceBundle.getString("shanoir.uploader.currentUploads.patientName"),
+            frame.resourceBundle.getString("shanoir.uploader.currentUploads.IPP"),
+            frame.resourceBundle.getString("shanoir.uploader.currentUploads.studyDate"),
+            frame.resourceBundle.getString("shanoir.uploader.currentUploads.mri"),
+            frame.resourceBundle.getString("shanoir.uploader.currentUploads.subjectName"),
+            frame.resourceBundle.getString("shanoir.uploader.currentUploads.importState"),
+            frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import"),
+            frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete")
+        };
+        this.columnNames = columnNames;
+        // Create the non editable table to display the current uploads
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        this.table = new JTable(model);
 
-		// Resize and center the JTable header
-		table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
-		DefaultTableCellRenderer headerRenderer = (DefaultTableCellRenderer) table.getTableHeader()
-				.getDefaultRenderer();
-		headerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        // Activate sorting for comparable content
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(model);
+        sorter.setSortable(importColumn, false);
+        sorter.setSortable(deleteColumn, false);
+        table.setRowSorter(sorter);
 
-		// Center the JTable's cells
-		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-		for (int j = 0; j < table.getColumnCount(); j++) {
-			table.getColumnModel().getColumn(j).setCellRenderer(centerRenderer);
-		}
-		// Change Background color of action column
-		table.getColumnModel().getColumn(importColumn).setCellRenderer(new Background_Renderer());
-		table.getColumnModel().getColumn(deleteColumn).setCellRenderer(new Background_Renderer());
-		frame.scrollPaneUpload.getViewport().add(table);
-	}
+        initTable();
+        frame.scrollPaneUpload.getViewport().add(table);
+    }
 
-	public void fillTable(Map<String, NominativeDataUploadJob> initialUploads) {
-		DefaultTableModel model = (DefaultTableModel) table.getModel();
-		for (Map.Entry<String, NominativeDataUploadJob> entry : initialUploads.entrySet()) {
-			if (entry.getValue() != null) {
-				String key = entry.getKey();
-				NominativeDataUploadJob nominativeDataUploadJob = (NominativeDataUploadJob) entry.getValue();
-				addRow(model, key, nominativeDataUploadJob);
-			}
-		}
-		addLastRow(model);
-	}
+    // Method to create the singleton instance of the class
+    public static synchronized CurrentUploadsWindowTable getInstance(MainWindow frame) {
+        if (instance == null) {
+            instance = new CurrentUploadsWindowTable(frame);
+        }
+        return instance;
+    }
 
-	private void addLastRow(DefaultTableModel model) {
-		model.addRow(new Object[] { "", "", "", "", "", "", "", "",
-				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.deleteAll") });
-	}
+    private void initTable() {
+        table.setPreferredScrollableViewportSize(new Dimension(800, 100));
+        table.setFillsViewportHeight(true);
 
-	private void addRow(DefaultTableModel model, String key, NominativeDataUploadJob nominativeDataUploadJob) {
-		if (UploadState.READY.equals(nominativeDataUploadJob.getUploadState())) {
-			model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
-				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
-				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadState().toString(),
-				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import"),
-				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete")
-			});
-		} else if (UploadState.FINISHED_UPLOAD.equals(nominativeDataUploadJob.getUploadState())) {
-			model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
-				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
-				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadPercentage(), "",
-				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete") });
-		} else if (UploadState.ERROR.equals(nominativeDataUploadJob.getUploadState())) {
-			model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
-				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
-				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadState().toString(), "",
-				(String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete") });
-		} else {
-			model.addRow(new Object[] { key, nominativeDataUploadJob.getPatientPseudonymusHash(),
-				nominativeDataUploadJob.getPatientName(), nominativeDataUploadJob.getIPP(),
-				nominativeDataUploadJob.getStudyDate(), nominativeDataUploadJob.getMriSerialNumber(),
-				nominativeDataUploadJob.getUploadPercentage(), "", "" });
-		}
-	}
+        table.getColumnModel().getColumn(0).setPreferredWidth(0);
+        table.getColumnModel().getColumn(0).setMinWidth(0);
+        table.getColumnModel().getColumn(0).setWidth(0);
+        table.getColumnModel().getColumn(0).setMaxWidth(0);
+        table.getColumnModel().getColumn(1).setPreferredWidth(150);
+        table.getColumnModel().getColumn(2).setPreferredWidth(150);
+        table.getColumnModel().getColumn(5).setPreferredWidth(100);
+        table.getColumnModel().getColumn(6).setPreferredWidth(150);
+        table.getColumnModel().getColumn(7).setPreferredWidth(40);
+        table.getColumnModel().getColumn(8).setPreferredWidth(40);
+        table.getColumnModel().getColumn(9).setPreferredWidth(50);
 
-	public void addLineToTable(String absolutePath, NominativeDataUploadJob nominativeDataUploadJob) {
-		DefaultTableModel model = (DefaultTableModel) table.getModel();
-		int nbRow = model.getRowCount();
-		model.removeRow(nbRow - 1);
-		addRow(model, absolutePath, nominativeDataUploadJob);
-		addLastRow(model);
-	}
+        // Resize and center the JTable header
+        table.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
+        DefaultTableCellRenderer headerRenderer = (DefaultTableCellRenderer) table.getTableHeader()
+                .getDefaultRenderer();
+        headerRenderer.setHorizontalAlignment(JLabel.CENTER);
 
-	public void updatePercent(String path, String percentage) {
-		DefaultTableModel model = (DefaultTableModel) table.getModel();
-		int nbRow = model.getRowCount();
-		for (int i = 0; i < nbRow - 1; i++) {
-			if (model.getValueAt(i, 0).equals(path)) {
-				model.setValueAt(percentage, i, uploadStateColumn);
-			}
-		}
-	}
+        // Center the JTable's cells
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        for (int j = 0; j < table.getColumnCount(); j++) {
+            table.getColumnModel().getColumn(j).setCellRenderer(centerRenderer);
+        }
+        // Change Background color of action column
+        table.getColumnModel().getColumn(importColumn).setCellRenderer(new BackgroundRenderer());
+        table.getColumnModel().getColumn(deleteColumn).setCellRenderer(new BackgroundRenderer());
+    }
 
-	/**
-	 * Create the GUI and show it. For thread safety, this method should be invoked
-	 * from the event-dispatching thread.
-	 */
-	private void showGUI(MainWindow frame, final Object[][] currentUploadsTable) {
-		frame.scrollPaneUpload.getViewport().add(table);
-	}
+    public void fillTable(Map<String, ImportJobBase> initialUploads) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        for (Map.Entry<String, ImportJobBase> entry : initialUploads.entrySet()) {
+            if (entry.getValue() != null) {
+                String key = entry.getKey();
+                ImportJobBase nominativeDataImportJob = (ImportJobBase) entry.getValue();
+                addRow(model, key, nominativeDataImportJob);
+            }
+        }
+    }
 
-	public void showWindow(final MainWindow frame, final Object[][] currentUploadsTable, final Object[] paths) {
-		// Schedule a job for the event-dispatching thread:
-		// creating and showing this application's GUI.
-		this.paths = paths;
-		javax.swing.SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				showGUI(frame, currentUploadsTable);
-			}
-		});
-	}
+    private void addRow(DefaultTableModel model, String key, ImportJobBase nominativeDataImportJob) {
+        Serie firstSerie = nominativeDataImportJob.getFirstSerieWithInstitutionAndEquipment();
+        String subjectName = nominativeDataImportJob.getSubjectName();
+        if (subjectName == null) subjectName = "";
+        String actionImport = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.import");
+        String actionDelete = (String) frame.resourceBundle.getString("shanoir.uploader.currentUploads.Action.delete");
+        Object[] row = switch (nominativeDataImportJob.getUploadState()) {
+            case READY, ERROR -> new Object[] {
+                key,
+                nominativeDataImportJob.getSubject().getIdentifier(),
+                nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(), // Was firstname and lastname from nominativeDataUploadJob, check if firstname still present
+                nominativeDataImportJob.getPatient().getPatientID(),
+                nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
+                firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")", // was e.g Philips (serial number)
+                subjectName,
+                nominativeDataImportJob.getUploadState().toString(),
+                actionImport,
+                actionDelete
+            };
+            case FINISHED -> new Object[] {
+                key,
+                nominativeDataImportJob.getSubject().getIdentifier(),
+                nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
+                nominativeDataImportJob.getPatient().getPatientID(),
+                nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
+                firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")",
+                subjectName,
+                nominativeDataImportJob.getUploadPercentage().toString(),
+                "",
+                ""
+            };
+            case CHECK_OK, CHECK_KO -> new Object[] {
+                key,
+                nominativeDataImportJob.getSubject().getIdentifier(),
+                nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
+                nominativeDataImportJob.getPatient().getPatientID(),
+                nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
+                firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")",
+                subjectName,
+                nominativeDataImportJob.getUploadPercentage().toString(),
+                "",
+                actionDelete
+            };
+            default -> new Object[] {
+                key,
+                nominativeDataImportJob.getSubject().getIdentifier(),
+                nominativeDataImportJob.getPatient().getPatientFirstName() + " " + nominativeDataImportJob.getPatient().getPatientLastName(),
+                nominativeDataImportJob.getPatient().getPatientID(),
+                nominativeDataImportJob.getStudy().getStudyDate().format(formatter),
+                firstSerie.getEquipment().getManufacturer() + " (" + firstSerie.getEquipment().getDeviceSerialNumber() + ")",
+                subjectName,
+                nominativeDataImportJob.getUploadPercentage().toString(),
+                "",
+                ""
+            };
+        };
+        model.addRow(row);
+    }
 
-	class Background_Renderer extends DefaultTableCellRenderer {
+    public void addLineToTable(String absolutePath, ImportJobBase nominativeDataImportJob) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        addRow(model, absolutePath, nominativeDataImportJob);
+    }
 
-		private static final long serialVersionUID = -7514583714509447137L;
+    public void updatePercent(String path, String percentage) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        int nbRow = model.getRowCount();
+        for (int i = 0; i < nbRow; i++) {
+            if (model.getValueAt(i, 0).equals(path)) {
+                model.setValueAt(percentage, i, uploadStateColumn);
+            }
+        }
+    }
+    
+    public void updateSubjectName(String path, String subjectName) {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        int nbRow = model.getRowCount();
+        for (int i = 0; i < nbRow; i++) {
+            if (model.getValueAt(i, 0).equals(path)) {
+                model.setValueAt(subjectName, i, subjectNameColumn);
+            }
+        }
+    }
 
-		Background_Renderer() {
-		}
+    /**
+     * Create the GUI and show it. For thread safety, this method should be invoked
+     * from the event-dispatching thread.
+     */
+    private void showGUI(MainWindow frame) {
+        frame.scrollPaneUpload.getViewport().add(table);
+    }
 
-		@Override
-		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-				int row, int column) {
-			Component tableCellRendererComponent = super.getTableCellRendererComponent(table, value, isSelected,
-					hasFocus, row, column);
-			tableCellRendererComponent.setBackground(Color.LIGHT_GRAY);
-			setHorizontalAlignment(SwingConstants.CENTER);
-			tableCellRendererComponent.setFont(tableCellRendererComponent.getFont().deriveFont(Font.BOLD));
-			return tableCellRendererComponent;
-		}
-	}
+    public void showWindow(final MainWindow frame, final Object[] paths) {
+        // Schedule a job for the event-dispatching thread:
+        // creating and showing this application's GUI.
+        this.paths = paths;
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                showGUI(frame);
+            }
+        });
+    }
 
-	public void udpateMainWindowUploadStatistics(CurrentNominativeDataModel currentNominativeDataModel) {
-		int nbFinishUpload = 0;
-		int nbStartUpload = 0;
-		int nbErrorUpload = 0;
-		int totalUploadPercent = 0;
-		for (Map.Entry<String, NominativeDataUploadJob> entry : currentNominativeDataModel.getCurrentUploads()
-				.entrySet()) {
-			if (entry.getValue() != null) {
-				if (entry.getValue().getUploadPercentage() == null
-					|| entry.getValue().getUploadPercentage().isEmpty()
-					|| "READY".compareTo(entry.getValue().getUploadPercentage()) == 0) {
-					// Do Nothing
-				} else {
-					if (entry.getValue().getUploadPercentage().equals("FINISHED")) {
-						totalUploadPercent += 100;
-						nbFinishUpload++;
-					} else if (entry.getValue().getUploadPercentage().equals("ERROR")) {
-						nbErrorUpload++;
-					} else {
-						nbStartUpload++;
-						int percent = Integer.valueOf(entry.getValue().getUploadPercentage().substring(0,
-								entry.getValue().getUploadPercentage().length() - 2));
-						totalUploadPercent += percent;
-					}
-				}
-			}
-		}
-		if (nbStartUpload != 0) {
-			totalUploadPercent = Math.round(totalUploadPercent / (nbFinishUpload + nbStartUpload));
-			frame.uploadProgressBar.setValue(totalUploadPercent);
-		} else {
-			frame.uploadProgressBar.setValue(0);
-		}
-		frame.startedUploadsLB
-				.setText(frame.resourceBundle.getString("shanoir.uploader.startedUploadsSummary") + nbStartUpload);
-		frame.finishedUploadsLB
-				.setText(frame.resourceBundle.getString("shanoir.uploader.finishedUploadsSummary") + nbFinishUpload);
-		frame.errorUploadsLB
-				.setText(frame.resourceBundle.getString("shanoir.uploader.failedUploadsSummary") + nbErrorUpload);
-		if (nbErrorUpload != 0) {
-			frame.errorAlert.setText(frame.resourceBundle.getString("shanoir.uploader.failedUploadsMessagePart1")
-					+ frame.resourceBundle.getString("shanoir.uploader.failedUploadsMessagePart2"));
-		} else {
-			frame.errorAlert.setText("");
-		}
-	}
+    class BackgroundRenderer extends DefaultTableCellRenderer {
 
-	public void update(Observable o, Object arg) {
-		CurrentNominativeDataModel currentNominativeDataModel = (CurrentNominativeDataModel) o;
-		String[] msg = (String[]) arg;
-		udpateMainWindowUploadStatistics(currentNominativeDataModel);
+        private static final long serialVersionUID = -7514583714509447137L;
 
-		if (msg.length > 1) {
-			if (msg[0].equals("UpdatePercent")) {
-				updatePercent(msg[1], msg[2]);
-			}
+        BackgroundRenderer() {
+        }
 
-			if (msg[0].equals("add")) {
-				addLineToTable(msg[1], currentNominativeDataModel.getCurrentUploads().get(msg[1]));
-			}
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
+            Component tableCellRendererComponent = super.getTableCellRendererComponent(table, value, isSelected,
+                    hasFocus, row, column);
+            tableCellRendererComponent.setBackground(Color.LIGHT_GRAY);
+            setHorizontalAlignment(SwingConstants.CENTER);
+            tableCellRendererComponent.setFont(tableCellRendererComponent.getFont().deriveFont(Font.BOLD));
+            return tableCellRendererComponent;
+        }
+    }
 
-		} else if (msg[0].equals("fill")) {
-			DefaultTableModel model = (DefaultTableModel) table.getModel();
-			int nbRow = model.getRowCount();
-			for (int i = nbRow; i > 0; i--) {
-				model.removeRow(i - 1);
-			}
-			rowsNb = 0;
-			fillTable(currentNominativeDataModel.getCurrentUploads());
-		}
-	}
+    public void udpateMainWindowUploadStatistics(CurrentNominativeDataModel currentNominativeDataModel) {
+        int nbFinishUpload = 0;
+        int nbStartUpload = 0;
+        int nbErrorUpload = 0;
+        int totalUploadPercent = 0;
+        for (Map.Entry<String, ImportJobBase> entry : currentNominativeDataModel.getCurrentUploads()
+                .entrySet()) {
+            if (entry.getValue() != null) {
+                if (entry.getValue().getUploadPercentage() == null
+                        || entry.getValue().getUploadPercentage().isEmpty()
+                        || UploadState.READY.toString().compareTo(entry.getValue().getUploadPercentage()) == 0) {
+                    // Do Nothing
+                } else {
+                    if (entry.getValue().getUploadPercentage().equals(finishedUploadState)
+                            || entry.getValue().getUploadPercentage().equals(checkOKUploadState)
+                            || entry.getValue().getUploadPercentage().equals(checkKOUploadState)
+                            || entry.getValue().getUploadPercentage().equals(serverProcessingUploadState)) {
+                        totalUploadPercent += 100;
+                        nbFinishUpload++;
+                    } else if (entry.getValue().getUploadPercentage().equals(errorUploadState)) {
+                        nbErrorUpload++;
+                    } else {
+                        nbStartUpload++;
+                        int percent = Integer.parseInt(entry.getValue().getUploadPercentage().substring(0,
+                                entry.getValue().getUploadPercentage().length() - 2));
+                        totalUploadPercent += percent;
+                    }
+                }
+            }
+        }
+        if (nbStartUpload != 0) {
+            totalUploadPercent = Math.round(totalUploadPercent / (nbFinishUpload + nbStartUpload));
+            frame.uploadProgressBar.setValue(totalUploadPercent);
+        } else {
+            frame.uploadProgressBar.setValue(0);
+        }
+        frame.startedUploadsLB
+                .setText(frame.resourceBundle.getString("shanoir.uploader.startedUploadsSummary") + nbStartUpload);
+        frame.finishedUploadsLB
+                .setText(frame.resourceBundle.getString("shanoir.uploader.finishedUploadsSummary") + nbFinishUpload);
+        frame.errorUploadsLB
+                .setText(frame.resourceBundle.getString("shanoir.uploader.failedUploadsSummary") + nbErrorUpload);
+        if (nbErrorUpload != 0) {
+            frame.uploadErrorAlert.setText(frame.resourceBundle.getString("shanoir.uploader.failedUploadsMessagePart1")
+                    + frame.resourceBundle.getString("shanoir.uploader.failedUploadsMessagePart2"));
+        } else {
+            frame.uploadErrorAlert.setText("");
+        }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        CurrentNominativeDataModel currentNominativeDataModel = (CurrentNominativeDataModel) o;
+        String[] msg = (String[]) arg;
+        udpateMainWindowUploadStatistics(currentNominativeDataModel);
+
+        if (msg.length > 1) {
+            if (msg[0].equals("UpdatePercent")) {
+                updatePercent(msg[1], msg[2]);
+            }
+            if (msg[0].equals("SubjectName")) {
+                updateSubjectName(msg[1], msg[2]);
+            }
+            if (msg[0].equals("add")) {
+                addLineToTable(msg[1], currentNominativeDataModel.getCurrentUploads().get(msg[1]));
+            }
+        } else if (msg[0].equals("fill")) {
+            DefaultTableModel model = (DefaultTableModel) table.getModel();
+            int nbRow = model.getRowCount();
+            for (int i = nbRow; i > 0; i--) {
+                model.removeRow(i - 1);
+            }
+            rowsNb = 0;
+            fillTable(currentNominativeDataModel.getCurrentUploads());
+        }
+    }
 
 }

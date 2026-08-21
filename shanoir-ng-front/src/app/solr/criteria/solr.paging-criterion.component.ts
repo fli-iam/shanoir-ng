@@ -2,40 +2,43 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { slideDown, slideRight } from '../../shared/animations/animations';
-import { FacetResultPage, FacetField, FacetPageable } from '../solr.document.model';
-import * as shajs from 'sha.js';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+import shajs from 'sha.js';
 import { Router } from '@angular/router';
+import { NgTemplateOutlet } from '@angular/common';
+
+import { FacetResultPage, FacetField, FacetPageable } from '../solr.document.model';
 import { Page } from '../../shared/components/table/pageable.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 
 
 @Component({
     selector: 'solr-paging-criterion',
     templateUrl: 'solr.paging-criterion.component.html',
-    styleUrls: ['solr.criterion.component.css', 'solr.paging-criterion.component.css'], 
-    animations: [slideDown, slideRight],
+    styleUrls: ['solr.criterion.component.css', 'solr.paging-criterion.component.css'],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => SolrPagingCriterionComponent),
-          multi: true,
-        }]  
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => SolrPagingCriterionComponent),
+            multi: true,
+        }
+    ],
+    imports: [FormsModule, NgTemplateOutlet, CheckboxComponent]
 })
 
 export class SolrPagingCriterionComponent implements ControlValueAccessor, OnChanges {
-   
+
     @Input() getPage: (pageable: FacetPageable, facetName: string) => Promise<FacetResultPage>;
     displayedFacets: FacetField[] = [];
     selectedFacets: FacetField[] = [];
@@ -45,10 +48,10 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     hasChecked: boolean = false;
     filterText: string;
     loaded: boolean = false;
-    loadedPromise: Promise<void> = new Promise((resolve, reject) => this.loadedPromiseResolve = resolve);
+    loadedPromise: Promise<void> = new Promise((resolve) => this.loadedPromiseResolve = resolve);
     private loadedPromiseResolve: () => void;
     loading: boolean = false;
-    @Output() onChange: EventEmitter<string[]> = new EventEmitter();
+    @Output() userChange: EventEmitter<string[]> = new EventEmitter();
     private _open: boolean = false;
     currentPage: FacetResultPage;
     maxPage: number = Infinity ;
@@ -58,8 +61,8 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     filterTimeout: number = 0;
     private hash: string;
 
-    protected propagateChange = (_: any) => {};
-    protected propagateTouched = () => {};
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
 
     constructor(private router: Router) {}
 
@@ -69,9 +72,9 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
             this.reloadSettings();
         }
     }
-    
+
     goToPage(pageNumber: number): Promise<void> {
-        let pageable: FacetPageable = new FacetPageable(pageNumber, SolrPagingCriterionComponent.PAGE_SIZE, this.sortMode, this.filterText);
+        const pageable: FacetPageable = new FacetPageable(pageNumber, SolrPagingCriterionComponent.PAGE_SIZE, this.sortMode, this.filterText);
         this.loading = true;
         return this.getPage(pageable, this.facetName).then(page => {
             this.loadPage(page);
@@ -86,9 +89,11 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
 
     loadPage(page: FacetResultPage) {
         if (!page || !page.content || page.content.length == 0) {
+            if (this.currentPage?.number != page?.number - 1) {
+                this.displayedFacets = [];
+                this.currentPage = page ? page : new Page();
+            }
             this.maxPage = this.currentPage ? this.currentPage.number : 1;
-            this.displayedFacets = [];
-            this.currentPage = page ? page : new Page();
         } else {
             if (page.content.length < SolrPagingCriterionComponent.PAGE_SIZE) {
                 this.maxPage = page.number;
@@ -126,14 +131,14 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
         this.displayedFacets.forEach(fac => fac.checked = false);
         this.hasChecked = false;
         this.propagateChange([]);
-        this.onChange.emit([]);
+        this.userChange.emit([]);
     }
 
     clearFilter() {
         this.filterText = "";
         this.onFilterChange();
     }
-    
+
     onCheckChange(facet: FacetField) {
         if (facet.checked) {
             this.selectedFacets.push(facet);
@@ -142,20 +147,20 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
             this.selectedFacets = this.selectedFacets.filter(sel => sel.value != facet.value);
         }
         this.updateHasChecked();
-        let selectedValues: string[] = this.selectedFacets.map(facet => facet.value);
+        const selectedValues: string[] = this.selectedFacets.map(facet => facet.value);
         this.propagateChange(selectedValues);
-        this.onChange.emit(selectedValues);
+        this.userChange.emit(selectedValues);
     }
-    
+
     updateHasChecked() {
         this.hasChecked = this.selectedFacets.length > 0;
     }
-    
+
     onFilterChange() {
         // wait till the user has stopped typing for 500ms before querying
         if (this.filterTimeout <= 0) {
             this.filterTimeout = 500;
-            let everySecondHandler = setInterval(() => {
+            const everySecondHandler = setInterval(() => {
                 this.filterTimeout -= 100;
                 if (this.filterTimeout <= 0) {
                     clearInterval(everySecondHandler);
@@ -194,12 +199,12 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
         this.loadedPromise.then(() => {
             this.selectedFacets = [];
             selectedFacetValues?.forEach(val => {
-                let displayed: FacetField = this.displayedFacets.find(fac => fac.value == val);
+                const displayed: FacetField = this.displayedFacets.find(fac => fac.value == val);
                 if (displayed) {
                     this.selectedFacets.push(displayed);
                     displayed.checked = true;
                 } else {
-                    let facetField: FacetField = new FacetField();
+                    const facetField: FacetField = new FacetField();
                     facetField.checked = true;
                     facetField.field = { name: this.facetName };
                     facetField.key = { name: this.facetName };
@@ -227,17 +232,17 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     }
 
     static getHash(facetName: string, routerUrl: string): string {
-        let username: string = KeycloakService.auth.authz.tokenParsed.name;
-        let stringToBeHashed: string = username + '-' + facetName + '-' + routerUrl;
-        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        let hex = hash.substring(0, 30);
+        const username: string = KeycloakService.auth.authz.tokenParsed.name;
+        const stringToBeHashed: string = username + '-' + facetName + '-' + routerUrl;
+        const hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        const hex = hash.substring(0, 30);
         return hex;
     }
 
     reloadSettings() {
-        let prefStr: string = localStorage.getItem(this.hash);
+        const prefStr: string = localStorage.getItem(this.hash);
         if (prefStr) {
-            let pref: FacetPreferences = JSON.parse(prefStr);
+            const pref: FacetPreferences = JSON.parse(prefStr);
             if (pref.open) {
                 this._open = true;
             }
@@ -246,7 +251,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     }
 
     saveSettings() {
-        let pref: FacetPreferences = new FacetPreferences();
+        const pref: FacetPreferences = new FacetPreferences();
         pref.open = this.open;
         pref.sortMode = this.sortMode;
         localStorage.setItem(this.hash, JSON.stringify(pref));

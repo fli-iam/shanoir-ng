@@ -23,6 +23,7 @@ export enum DatasetType {
   Meg = 'Meg',
   Mesh = 'Mesh',
   Mr = 'Mr',
+  Generic = 'Generic',
   ParameterQuantification = 'ParameterQuantification',
   Pet = 'Pet',
   Registration = 'Registration',
@@ -31,10 +32,13 @@ export enum DatasetType {
   Statistical = 'Statistical',
   Template = 'Template',
   BIDS = 'BIDS',
-  Measurement = 'Measurement'
+  Measurement = 'Measurement',
+  Xa = 'Xa',
+  Sr = 'Sr',
+  Rt = 'Rt'
 } export namespace DatasetType {
 
-  export function all(): Array<DatasetType> {
+  export function all(): DatasetType[] {
       return allOfEnum<DatasetType>(DatasetType);
   }
 
@@ -42,5 +46,5 @@ export enum DatasetType {
       return capitalsAndUnderscoresToDisplayable(type);
   }
 
-  export var options: Option<DatasetType>[] = all().map(prop => new Option<DatasetType>(prop, getLabel(prop)));
+  export const options: Option<DatasetType>[] = all().map(prop => new Option<DatasetType>(prop, getLabel(prop)));
 }

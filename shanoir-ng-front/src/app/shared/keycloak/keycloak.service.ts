@@ -12,6 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Injectable } from '@angular/core';
+import Keycloak from "keycloak-js";
 
 import * as AppUtils from '../../utils/app.utils';
 
@@ -30,27 +31,21 @@ import * as AppUtils from '../../utils/app.utils';
 //   checks the session cookie, generates the token and redirects to us.
 //   It is reliable but slower (because of the two redirections the
 //   authentication is performed twice and the SPA is loaded twice).
-const USE_LOGIN_REQUIRED = (<any>window).SHANOIR_KEYCLOAK_ADAPTER_MODE == "login-required";
-
-declare var Keycloak: any;
+const USE_LOGIN_REQUIRED = (window as any).SHANOIR_KEYCLOAK_ADAPTER_MODE == "login-required";
 
 @Injectable()
 export class KeycloakService {
     static auth: any = {};
+    static clientId = 'shanoir-ng-front';
     // static auth: any = { loggedIn: true };
     private gettingToken: boolean = false;
     private tokenPromise: Promise<string>;
 
-    static init(): Promise<any> {
-
-        if (window.location.href.endsWith('/account-request')) {
-            return Promise.resolve();
-        }
-
-        const keycloakAuth: any = Keycloak({
+    static init(optionalAuth: boolean = false): Promise<any> {
+        const keycloakAuth: any = new Keycloak({
             url: AppUtils.KEYCLOAK_BASE_URL,
             realm: 'shanoir-ng',
-            clientId: 'shanoir-ng-front',
+            clientId: this.clientId,
         });
         KeycloakService.auth.loggedIn = true; // false;
         function maybe_redirect_to_login_page()
@@ -62,7 +57,7 @@ export class KeycloakService {
                         // login form.
                         // But 'check-sso' only sets/clears the token, we have
                         // to do the redirection explicitely
-                        window.location.replace(keycloakAuth.createLoginUrl());
+                        keycloakAuth.createLoginUrl().then(url => window.location.replace(url));
                 }
         }
 
@@ -83,8 +78,14 @@ export class KeycloakService {
                         keycloakAuth.onAuthLogout = maybe_redirect_to_login_page;
                         resolve(null);
                     } else {
-                        maybe_redirect_to_login_page();
-                        reject();
+                        if (optionalAuth) {
+                            // some pages can be accessible in a either authenticated or unauthenticated context
+                            KeycloakService.auth.loggedIn = false;
+                            resolve(null);
+                        } else {
+                            maybe_redirect_to_login_page();
+                            reject();
+                        }
                     }
                 })
                 .catch(() => {
@@ -101,11 +102,12 @@ export class KeycloakService {
         if (!this.gettingToken) {
             this.gettingToken = true;
             this.tokenPromise = new Promise<string>((resolve, reject) => {
-                if (KeycloakService.auth.authz.token) {
+                if (KeycloakService.auth?.authz?.token) {
                     KeycloakService.auth.authz.updateToken(5).then(() => {
                         this.gettingToken = false;
-                        resolve(<string>KeycloakService.auth.authz.token);
+                        resolve(KeycloakService.auth.authz.token as string);
                     }).catch(() => {
+                        console.error('Failed to refresh token');
                         reject();
                     });
                 }
@@ -115,14 +117,42 @@ export class KeycloakService {
     }
 
     getRefreshToken(): Promise<string> {
-        this.tokenPromise = new Promise<string>((resolve, reject) => {
-            if (KeycloakService.auth.authz.token) {
-                resolve(<string>KeycloakService.auth.authz.refreshToken);
-            } else {
-                reject();
-            }
+        // Force a token refresh (updateToken(-1)) so the returned refresh token is freshly
+        // rotated and the Keycloak session is validated. If the session is no longer active,
+        // updateToken rejects, which lets callers block instead of handing out a stale token.
+        return KeycloakService.auth.authz.updateToken(-1).then(
+            () => KeycloakService.auth.authz.refreshToken as string
+        );
+    }
+
+    /**
+     * Obtain a Keycloak OFFLINE refresh token for the current user, without disrupting the
+     * active session.
+     *
+     * Unlike {@link getRefreshToken}, which returns the session-bound refresh token (invalid
+     * once the user logs out), this requests a token with the 'offline_access' scope. Offline
+     * tokens survive logout and SSO session expiry, so they can be persisted to run executions
+     * on the user's behalf long after they have left (see execution templates / auto-exec).
+     *
+     * A throwaway adapter instance performs a silent check-sso (hidden iframe, no redirect)
+     * reusing the existing SSO session; only its offline refresh token is returned.
+     */
+    getOfflineToken(): Promise<string> {
+        const offlineKeycloak: any = new Keycloak({
+            url: AppUtils.KEYCLOAK_BASE_URL,
+            realm: 'shanoir-ng',
+            clientId: KeycloakService.clientId,
         });
-        return this.tokenPromise;
+        return offlineKeycloak.init({
+            onLoad: 'check-sso',
+            silentCheckSsoRedirectUri: AppUtils.SILENT_CHECK_SSO_URL,
+            scope: 'offline_access',
+        }).then((authenticated: boolean) => {
+            if (!authenticated || !offlineKeycloak.refreshToken) {
+                throw new Error('Could not obtain an offline token for the current user.');
+            }
+            return offlineKeycloak.refreshToken as string;
+        });
     }
 
 

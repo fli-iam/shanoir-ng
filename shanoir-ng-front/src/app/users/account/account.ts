@@ -14,10 +14,10 @@
 
 export class Account {
     username:string;
-    authorities:Array<string>;
+    authorities:string[];
     authenticated = true;
 
-    constructor(account?:{username:string, authorities:Array<string>}) {
+    constructor(account?:{username:string, authorities:string[]}) {
         if(account) {
             this.username = account.username;
             this.authorities = account.authorities;

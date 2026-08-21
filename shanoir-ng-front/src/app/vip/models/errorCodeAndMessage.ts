@@ -17,5 +17,5 @@ export interface ErrorCodeAndMessage {
     /**
      * optional pieces of information about the error(s)
      */
-    errorDetails?: { [key: string]: any; };
+    errorDetails?: Record<string, any>;
 }

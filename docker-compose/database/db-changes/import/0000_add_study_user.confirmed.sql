@@ -1,1 +1,0 @@
-ALTER TABLE study_user ADD COLUMN confirmed bit NOT NULL DEFAULT TRUE;

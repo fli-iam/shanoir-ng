@@ -13,7 +13,6 @@
  */
 import * as AppUtils from '../../utils/app.utils';
 
-import { process } from '../../process';
 
 // PRECLINICAL Rest Service
 export const PRECLINICAL_API_ROOT_URL:string = AppUtils.BACKEND_API_PRECLINICAL_MS_URL;
@@ -57,7 +56,6 @@ export const PRECLINICAL_API_EXAMINATION_URL:string = PRECLINICAL_API_ROOT_URL +
 export const PRECLINICAL_API_PROTOCOL_URL:string = PRECLINICAL_API_ROOT_URL + '/protocol';
 
 export const PRECLINICAL_API_EXTRA_DATA_PATH:string = PRECLINICAL_API_ROOT_URL + '/extradata';
-export const PRECLINICAL_API_EXTRA_DATA_PHYSIO_PATH:string = PRECLINICAL_API_ROOT_URL + '/physiologicaldata';
 export const PRECLINICAL_API_EXTRA_DATA_BLOODGAS_PATH:string = PRECLINICAL_API_ROOT_URL + '/bloodgasdata';
 //export const PRECLINICAL_API_EXTRA_DATA_UPLOAD_PATH:string = PRECLINICAL_API_EXTRA_DATA_PATH + '/upload';
 export const PRECLINICAL_API_EXTRA_DATA_UPLOAD_PATH:string = PRECLINICAL_API_ROOT_URL + '/upload/extradata/upload';
@@ -95,4 +93,3 @@ export const PRECLINICAL_CONTRAST_AGENT_NAME = 'name';
 
 //BRUKER api
 export const PRECLINICAL_API_BRUKER_UPLOAD:string = PRECLINICAL_API_ROOT_URL + '/bruker/upload';
-

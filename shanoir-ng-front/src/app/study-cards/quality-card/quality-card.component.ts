@@ -11,14 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { Component, ComponentRef, EventEmitter, ViewChild } from '@angular/core';
+import { FormArray, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { firstValueFrom, Observable, race } from 'rxjs';
+import { map } from 'rxjs/operators';
+
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { ExaminationService } from 'src/app/examinations/shared/examination.service';
+import { ServiceLocator } from 'src/app/utils/locator.service';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
-import { slideDown } from '../../shared/animations/animations';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
@@ -32,16 +38,23 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { QualityCard } from '../shared/quality-card.model';
-import { QualityCardService } from '../shared/quality-card.service';
+import { Interval, QualityCardService } from '../shared/quality-card.service';
 import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import * as AppUtils from '../../utils/app.utils';
+import { TestQualityCardOptionsComponent } from '../test-quality-card-options/test-quality-card-options.component';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+
 
 @Component({
     selector: 'quality-card',
     templateUrl: 'quality-card.component.html',
     styleUrls: ['quality-card.component.css'],
-    animations: [slideDown]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, CheckboxComponent, StudyCardRulesComponent, LoadingBarComponent, TableComponent, TooltipComponent]
 })
 export class QualityCardComponent extends EntityComponent<QualityCard> {
 
@@ -67,20 +80,21 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         {headerName: 'Details', field: 'message', wrap: true}
     ];
     forceStudyId: number;
+    nbExaminations: number;
+    progress: number;
+    readonly NB_EXAM_THRESHOLD: number = 50;
 
     constructor(
             private route: ActivatedRoute,
             private qualityCardService: QualityCardService, 
             private studyService: StudyService,
+            private examinationService: ExaminationService,
             private studyRightsService: StudyRightsService,
             keycloakService: KeycloakService,
             coilService: CoilService,
             private confirmService: ConfirmDialogService) {
-        super(route, 'quality-card');
+        super(route);
 
-        this.mode = this.activatedRoute.snapshot.data['mode'];
-        this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
-        this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
         coilService.getAll().then(coils => this.allCoils = coils);
 
         this.subscriptions.push(this.activatedRoute.params.subscribe(
@@ -88,30 +102,32 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
                 this.forceStudyId = +params['studyId'];
             }
         ));
-     }
+    }
+
+    protected getRoutingName(): string {
+        return 'quality-card';
+    }
 
     getService(): EntityService<QualityCard> {
         return this.qualityCardService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromQualitycard(this.qualityCard);
+    }
+
     get qualityCard(): QualityCard { return this.entity; }
-    set qualityCard(qc: QualityCard) { this.entity = qc; }
+    set qualityCard(qc: QualityCard) { this.entity = qc; }
 
     initView(): Promise<void> {
-        let scFetchPromise: Promise<void> = this.qualityCardService.get(this.id).then(sc => {
-            this.qualityCard = sc;
-        });
-        this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res));
-        return scFetchPromise;
+        this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res);
+        return Promise.resolve();  
     }
 
     initEdit(): Promise<void> {
-        let scFetchPromise: Promise<void> = this.qualityCardService.get(this.id).then(sc => {
-            this.qualityCard = sc;
-        });
-        this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res));
+        this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res);
         this.fetchStudies();
-        return scFetchPromise;
+        return Promise.resolve();  
     }
 
     initCreate(): Promise<void> {
@@ -132,11 +148,12 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     buildForm(): FormGroup {
-        let form: FormGroup = this.formBuilder.group({
+        const form: FormGroup = this.formBuilder.group({
             'name': [this.qualityCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.qualityCard.study, [Validators.required]],
             'toCheckAtImport': [this.qualityCard.toCheckAtImport, [Validators.required]],
-            'rules': [this.qualityCard.rules, [StudyCardRulesComponent.validator]]
+            'rules': [this.qualityCard.rules, [StudyCardRulesComponent.validator]],
+            'conditions': new FormArray([]),
         });
         return form;
     }
@@ -165,14 +182,34 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     onShowErrors() {
-        this.form.markAsDirty();
+        this.markControlsDirty(this.form);
         this.showRulesErrors = !this.showRulesErrors;
+    }
+
+    private markControlsDirty(group: FormGroup | FormArray): void {
+        Object.keys(group.controls).forEach((key: string) => {
+            const abstractControl = group.controls[key];
+            if (abstractControl instanceof FormGroup || abstractControl instanceof FormArray) {
+                this.markControlsDirty(abstractControl);
+            } else {
+                abstractControl.markAsDirty();
+            }
+        });
+    }
+
+    addConditionForm(form: FormGroup): FormGroup {
+        if (this.mode != 'view') {
+            setTimeout(() => { // prevent "changed after check" error
+                (this.form.get('conditions') as FormArray).push(form);
+            });
+        }
+        return this.form;
     }
 
     apply() {
         this.confirmService.confirm(
             'Apply Quality Card', 
-            `Do you want to apply the quality card named "${this.qualityCard.name}" all over the study "${this.qualityCard.study.name}" ? This would permanentely overwrite previous quality tags for the study's subjects.`
+            `Do you want to apply the quality card named "${this.qualityCard.name}" all over the study "${this.qualityCard.study.name}" ? This would permanently overwrite previous quality tags set on dataset acquisitions.`
         ).then(accept => {
             if (accept) {
                 this.applying = true;
@@ -188,31 +225,76 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     test() {
         this.testing = true;
         this.report = null;
-        this.qualityCardService.testOnStudy(this.qualityCard.id).then(result => {
+
+        this.examinationService.findExaminationIdsByStudy(this.qualityCard.study.id).then(examIds => {
+            this.nbExaminations = examIds.length;
+            if (examIds?.length > 0) {
+                if (examIds.length > this.NB_EXAM_THRESHOLD) {
+                    this.openSetTestInterval(this.nbExaminations).then(response => {
+                        if (!response) {
+                            this.performTest();
+                        } else if (response instanceof Interval) {
+                            this.performTest((response as Interval).from, (response as Interval).to);
+                        }
+                    }).finally(() => {
+                        this.testing = false;
+                    });
+                } else {
+                    this.performTest();
+                }
+            }
+        });    
+    }
+
+    openSetTestInterval(nbExaminations: number): Promise<Interval | 'cancel'> {
+        const modalRef: ComponentRef<TestQualityCardOptionsComponent> = ServiceLocator.createComponent(TestQualityCardOptionsComponent);
+        modalRef.instance.nbExaminations = nbExaminations;
+        return this.waitForEnd(modalRef);
+    }
+
+    private waitForEnd(modalRef: ComponentRef<{ test: EventEmitter<any>, closeModal: EventEmitter<void> }>): Promise<Interval | 'cancel'> {
+        const resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
+        const result: Observable<any> = race([
+            modalRef.instance.test, 
+            modalRef.instance.closeModal.pipe(map(() => 'cancel'))
+        ]);
+        firstValueFrom(result)
+            .then(ret => {
+                modalRef.destroy();
+                resPromise.resolve(ret);
+            })
+            .catch(error => {
+                modalRef.destroy();
+                resPromise.reject(error);
+        });
+        return resPromise;
+    }
+
+    performTest(start?: number, stop?: number) {
+        this.qualityCardService.testOnStudy(this.qualityCard.id, start, stop).then(result => {
             this.report = new BrowserPaging(result, this.reportColumns);
             this.reportIsTest = true;
         }).finally(() => this.testing = false);
     }
 
-
     getPage(pageable: FilterablePageable): Promise<Page<any>> {
         return Promise.resolve(this.report.getPage(pageable));
     }
 
-    downloadReport() {
-        if (!this.report) return;
+    static downloadReport(report: {columnDefs: any[], items: any[]}, name?: string) {
+        if (!report) return;
         let csvStr: string = '';
-        csvStr += this.report.columnDefs.map(col => col.headerName).join(',');
-        for (let entry of this.report.items) {
-            csvStr += '\n' + this.report.columnDefs.map(col => '"' + TableComponent.getCellValue(entry, col) + '"').join(',');
+        csvStr += report.columnDefs.map(col => col.headerName).join(',');
+        for (const entry of report.items) {
+            csvStr += '\n' + report.columnDefs.map(col => '"' + TableComponent.getCellValue(entry, col) + '"').join(',');
         }
         const csvBlob = new Blob([csvStr], {
             type: 'text/csv'
         });
-        AppUtils.browserDownloadFile(csvBlob, this.getReportFileName());
+        AppUtils.browserDownloadFile(csvBlob, 'qcReport_' + (name ? name + '_' : '') + Date.now().toLocaleString('fr-FR'));
     }
 
-    private getReportFileName(): string {
-        return 'qcReport_' + this.qualityCard.name + '_' + Date.now().toLocaleString('fr-FR');
+    protected downloadReport() {
+        QualityCardComponent.downloadReport(this.report, this.qualityCard?.name);
     }
 }

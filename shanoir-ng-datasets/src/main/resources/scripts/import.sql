@@ -1,12 +1,12 @@
 -- Shanoir NG - Import, manage and share neuroimaging data
 -- Copyright (C) 2009-2019 Inria - https://www.inria.fr/
 -- Contact us on https://project.inria.fr/shanoir/
--- 
+--
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
 -- the Free Software Foundation, either version 3 of the License, or
 -- (at your option) any later version.
--- 
+--
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -22,56 +22,21 @@ use datasets;
 -- INSERT INTO `study_card_condition` VALUES (2,528446,'tse_vfl_WIP607',2,3),(3,1573009,'200',6,5),(4,1573009,'150',5,5),(5,1573009,'150',5,6),(6,1573013,'781.00',2,6);
 
 INSERT INTO study
-	(id, name)
+	(id, name, is_draft)
 VALUES
-	(1, 'DemoStudy');
-	
+	(1, 'DemoStudy', 0);
+
 INSERT INTO subject
-	(id, name)
+	(id, name, study_id)
 VALUES
-	(1, 'subject1');
+	(1, 'subject1', 1);
 
 INSERT INTO center
     (id, name)
 VALUES
     (1, 'CHU Rennes');
 
-INSERT INTO subject_study
-    (id, study_id, subject_id)
-VALUES
-    (1, 1, 1);
-
 INSERT INTO study_cards
 	(id, acquisition_equipment_id, disabled, last_edit_timestamp, name, nifti_converter_id, study_id)
-VALUES 
-	(1,1,false,0,'StudyCard1',1,1),
-	(2,null,false,0,'QualityCard_UCAN',null,1);
-
-INSERT INTO study_card_rule
-	(id, study_card_id, scope)
 VALUES
-	(1,2,'DatasetAcquisition'),
-	(2,2,'Dataset');
-
-INSERT INTO study_card_condition
-	(id, dicom_tag, operation, scope)
-VALUES 
-	(1,2,4,'StudyCardDICOMCondition'),
-	(2,2,4,'StudyCardDICOMCondition');
-
-INSERT INTO study_card_condition_join
-	(study_card_rule_id, condition_id) 
-VALUES
-	(1,1),
-	(2,2);
-
-INSERT INTO study_card_condition_values
-	(study_card_condition_id, value)
-VALUES
-	(1,'tof'),
-	(1,'flight'),
-	(2,'gado'),
-	(2,'gd'),
-	(2,'gadolinium'),
-	(2,'contrast'),
-	(2,'enhanced');
+	(1,1,false,0,'StudyCard1',1,1);

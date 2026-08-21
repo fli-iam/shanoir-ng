@@ -2,21 +2,20 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 package org.shanoir.ng.studycard.model.condition;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -26,7 +25,10 @@ import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 /**
  * Condition valid for the given DatasetAcquisition if every of it's Datasets metadata fulfill the condition
@@ -34,11 +36,11 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("ExamMetadataCondOnDatasets")
 @JsonTypeName("ExamMetadataCondOnDatasets")
-public class ExamMetadataCondOnDatasets extends StudyCardMetadataConditionWithCardinality<Dataset>{
-	
-	private static final Logger LOG = LoggerFactory.getLogger(ExamMetadataCondOnDatasets.class);
+public class ExamMetadataCondOnDatasets extends StudyCardMetadataCondition<Dataset> {
 
-	@Override
+    private static final Logger LOG = LoggerFactory.getLogger(ExamMetadataCondOnDatasets.class);
+
+    @Override
     public DatasetMetadataField getShanoirField() {
         return DatasetMetadataField.getEnum(shanoirField);
     }
@@ -47,16 +49,17 @@ public class ExamMetadataCondOnDatasets extends StudyCardMetadataConditionWithCa
     public void setShanoirField(MetadataFieldInterface<Dataset> field) {
         shanoirField = field.getId();
     }
-	
+
     public boolean fulfilled(List<DatasetAcquisition> acquisitions) {
         return fulfilled(acquisitions, null);
     }
-    
+
     public boolean fulfilled(List<DatasetAcquisition> acquisitions, StringBuffer errorMsg) {
         if (acquisitions == null) throw new IllegalArgumentException("datasets can not be null");
         DatasetMetadataField field = this.getShanoirField();
         if (field == null) throw new IllegalArgumentException("field can not be null");
-        int nbOk = 0; int total = 0;
+        int nbOk = 0;
+        int total = 0;
         for (DatasetAcquisition acquisition : acquisitions) {
             if (acquisition.getDatasets() != null) {
                 for (Dataset dataset : acquisition.getDatasets()) {
@@ -67,34 +70,28 @@ public class ExamMetadataCondOnDatasets extends StudyCardMetadataConditionWithCa
                     } catch (CheckedIllegalClassException e) {
                         valueFromDb = null;
                     }
-                    if (valueFromDb != null) {
-                        // get all possible values, that can fulfill the condition
-                        for (String value : this.getValues()) {
-                            if (textualCompare(this.getOperation(), valueFromDb, value)) {
-                                LOG.info("condition fulfilled: ds.name=" + valueFromDb + ", value=" + value);
-                                nbOk++;
-                                break;
-                            } 
-                        }
-                    }                
+                    if (valueFromDb != null && textualCompare(this.getOperation(), valueFromDb)) {
+                        LOG.info("condition fulfilled: ds.name = " + valueFromDb);
+                        nbOk++;
+                    }
                 }
             }
         }
         boolean complies = cardinalityComplies(nbOk, total);
         if (!complies) {
             if (getCardinality() == -1) {
-                errorMsg.append("condition [" + toString() + "] failed because only " + nbOk + " out of all (" + total + ") acquisitions complied");
+                errorMsg.append("\ncondition [" + toString() + "] failed because only " + nbOk + " out of all (" + total + ") acquisitions complied");
             } else if (getCardinality() == 0) {
-                errorMsg.append("condition [" + toString() + "] failed because " + nbOk + " acquisitions complied where 0 was required");
+                errorMsg.append("\ncondition [" + toString() + "] failed because " + nbOk + " acquisitions complied where 0 was required");
             } else {
-                errorMsg.append("condition [" + toString() + "] failed because only " + nbOk + " out of " + total + " acquisitions complied");
+                errorMsg.append("\ncondition [" + toString() + "] failed because only " + nbOk + " out of " + total + " acquisitions complied");
             }
         } else {
-            errorMsg.append("condition [" + toString() + "] succeed");
+            errorMsg.append("\ncondition [" + toString() + "] succeed");
         }
         return complies;
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -104,13 +101,13 @@ public class ExamMetadataCondOnDatasets extends StudyCardMetadataConditionWithCa
             sb.append("none of the ");
         } else {
             sb.append("at least ")
-                .append(getCardinality())
-                .append(" of the ");
+                    .append(getCardinality())
+                    .append(" of the ");
         }
         sb.append("Dataset metadata field '").append(getShanoirField().name())
-            .append("' ").append(getOperation().name())
-            .append(" ")
-            .append(StringUtils.join(getValues(), " or "));        
+                .append("' ").append(getOperation().name())
+                .append(" ")
+                .append(StringUtils.join(getValues(), " or "));
         return sb.toString();
     }
 

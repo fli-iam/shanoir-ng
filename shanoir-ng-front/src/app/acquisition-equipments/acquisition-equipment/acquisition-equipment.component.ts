@@ -13,26 +13,32 @@
  */
 
 import { Component } from '@angular/core';
-import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
+import { AbstractControl, AsyncValidatorFn, UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { of } from "rxjs";
 
-import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
+
 import { CenterService } from '../../centers/shared/center.service';
-import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
+import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { IdName } from '../../shared/models/id-name.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { ManufacturerModel } from '../shared/manufacturer-model.model';
 import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
-import {StudyCardService} from "../../study-cards/shared/study-card.service";
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 
 @Component({
     selector: 'acquisition-equipment-detail',
-    templateUrl: 'acquisition-equipment.component.html'
+    templateUrl: 'acquisition-equipment.component.html',
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, HelpMessageComponent, RouterLink, SelectBoxComponent, TooltipComponent, ManufacturerModelPipe]
 })
 
 export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEquipment> {
@@ -41,9 +47,8 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     public centers: IdName[];
     public centersFromStudyCard;
     public datasetModalityTypeStr: string;
-    private nonEditableCenter: boolean = false;
-    private lastSubmittedManufAndSerial: ManufacturerAndSerial;
-    fromImport: string;
+    private currentManufAndSerialAndCenter: ManufacturerAndSerialAndCenter;
+    private fromImport: string;
 
     get acqEquip(): AcquisitionEquipment { return this.entity; }
     set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
@@ -53,82 +58,85 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             private acqEquipService: AcquisitionEquipmentService,
             private manufModelService: ManufacturerModelService,
             private centerService: CenterService,
-            private studyCardService: StudyCardService,
             public manufacturerModelPipe: ManufacturerModelPipe,
             protected router: Router) {
 
-        super(route, 'acquisition-equipment');
+        super(route);
 
-        this.fromImport = this.router.getCurrentNavigation()?.extras?.state?.fromImport;
+        this.fromImport = this.router.lastSuccessfulNavigation()?.extras?.state?.fromImport;
+    }
+
+    protected getRoutingName(): string {
+        return 'acquisition-equipment';
     }
 
     getService(): EntityService<AcquisitionEquipment> {
         return this.acqEquipService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromEquipment(this.acqEquip);
+    }
+
     async initView(): Promise<void> {
-        this.acqEquip = await this.acqEquipService.get(this.id);
         this.updateAcquEq();
     }
 
     initEdit(): Promise<void> {
+        this.currentManufAndSerialAndCenter = new ManufacturerAndSerialAndCenter(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber, this.acqEquip.center);
         this.getManufModels();
         return Promise.all([
-            this.centerService.getCentersNames(),
-            this.acqEquipService.get(this.id)
-        ]).then(([centers, ae]) => {
+            this.centerService.getCentersNames()
+        ]).then(([centers]) => {
             this.centers = centers;
-            this.acqEquip = ae;
             this.updateAcquEq();
         });
     }
 
-    async initCreate(): Promise<void> {
+    initCreate(): Promise<void> {
         this.entity = new AcquisitionEquipment();
         this.prefill();
         if (this.centersFromStudyCard == null) {
-            this.centerService.getCentersNames().then(centers => this.centers = centers);
+            this.centerService.getCentersNames().then(centers => {
+                this.centers = centers
+            });
         }
         else {
             this.centers = this.centersFromStudyCard;
         }
         this.getManufModels();
+        return Promise.resolve();
     }
 
     private prefill() {
-        this.centersFromStudyCard = this.breadcrumbsService.currentStep.getPrefilledValue('sc_center');
-        this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
-        if (this.nonEditableCenter) {
-            this.acqEquip.center = this.breadcrumbsService.currentStep.getPrefilledValue('center');
-        } else if (this.acqEquip.center) {
-            // Clean center
-            let centerSelected: Center = new Center();
-            centerSelected.id = this.acqEquip.center.id;
-            centerSelected.name = this.acqEquip.center.name;
-            this.acqEquip.center = centerSelected;
+        if (this.breadcrumbsService.currentStep.isPrefilled('centers')) {
+            this.breadcrumbsService.currentStep.getPrefilledValue('centers').then(res => {
+                this.centersFromStudyCard = res;
+            });
+        }
+        if (this.fromImport) {
+            this.acqEquip.serialNumber = this.fromImport.split('-')[2] != "null" ? this.fromImport.split('-')[2] : "";
         }
     }
 
     private updateAcquEq(): void {
-        let mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == this.acqEquip.manufacturerModel.datasetModalityType);
+        const mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == this.acqEquip.manufacturerModel.datasetModalityType);
         if (mod) this.datasetModalityTypeStr = DatasetModalityType.getLabel(mod);
     }
 
     buildForm(): UntypedFormGroup {
-        if (this.fromImport) {
-            this.acqEquip.serialNumber = this.fromImport.split('-')[2] != "null" ? this.fromImport.split('-')[2] : "";
-        }
-
-        let form: UntypedFormGroup = this.formBuilder.group({
-            'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator, this.noSpacesStartAndEndValidator]],
-            'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
-            'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required],
+        const form: UntypedFormGroup = this.formBuilder.group({
+            'serialNumber': [this.acqEquip.serialNumber, [this.noSpacesStartAndEndValidator]],
+            'manufacturerModel': [this.acqEquip.manufacturerModel,[Validators.required]],
+            'center': [this.acqEquip.center, [Validators.required]],
+        },
+        {
+            asyncValidators: [this.uniqueEquipmentValidator]
         });
-        this.registerManufAndSerialUnicityValidator(form);
         return form;
     }
 
-    private getManufModels(manufModelId?: number): void {
+    private getManufModels(): void {
         this.manufModelService.getAll()
             .then(manufModels => this.manufModels = manufModels);
     }
@@ -138,45 +146,35 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     openNewManufModel() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/manufacturer-model/create']).then(success => {
-            this.subscriptions.push(
-                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as AcquisitionEquipment).manufacturerModel = entity as ManufacturerModel;
-                })
-            );
-        });
-    }
-
-    private registerManufAndSerialUnicityValidator(form: UntypedFormGroup) {
-        this.onSubmitValidatedFields.push('serialNumber');
-        this.subscriptions.push(
-            form.get('manufacturerModel').valueChanges.subscribe(value => {
-                form.get('serialNumber').updateValueAndValidity();
-            })
-        );
-    }
-
-    private manufAndSerialUnicityValidator = (control: AbstractControl): ValidationErrors | null => {
-        if (this.saveError && this.saveError.hasFieldError('manufacturerModel - serialNumber', 'unique')
-                && this.acqEquip.manufacturerModel.id == this.lastSubmittedManufAndSerial.manuf.id
-                && this.acqEquip.serialNumber == this.lastSubmittedManufAndSerial.serial) {
-            return {unique: true};
-        }
-        return null;
+        this.navigateToAttributeCreateStep('/manufacturer-model/create', 'manufacturerModel');
     }
 
     private noSpacesStartAndEndValidator = (control: AbstractControl): ValidationErrors | null => {
-        let valueStr: string = control.value;
+        const valueStr: string = control.value;
         if (valueStr && (valueStr.startsWith(' ') || valueStr.endsWith(' '))) {
             return { spaces: true }
         }
         return null;
     }
 
-    save(): Promise<AcquisitionEquipment> {
-        this.lastSubmittedManufAndSerial = new ManufacturerAndSerial(this.acqEquip.manufacturerModel, this.acqEquip.serialNumber);
-        return super.save();
+    private uniqueEquipmentValidator: AsyncValidatorFn = async (form: AbstractControl): Promise<ValidationErrors | null> => {
+        if (!form) return of(null);
+
+        const serialNumber = form.get('serialNumber')?.value as string;
+        const manufacturerModel = form.get('manufacturerModel')?.value as ManufacturerModel;
+        const center = form.get('center')?.value as Center;
+
+        if (!serialNumber || !manufacturerModel || !center) return null;
+        if (serialNumber == this.currentManufAndSerialAndCenter?.serial && manufacturerModel.id == this.currentManufAndSerialAndCenter?.manuf.id && center.id == this.currentManufAndSerialAndCenter?.center.id) return null;
+        
+        try {
+            if (typeof serialNumber == 'string') {
+                const exists = await this.acqEquipService.checkDuplicate(serialNumber, manufacturerModel, center);
+                return exists ? {unique: true} : null;
+            }
+        } catch {
+            return null;
+        }
     }
 
     viewCenter(center: Center) {
@@ -184,10 +182,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 }
 
-export class ManufacturerAndSerial {
+export class ManufacturerAndSerialAndCenter {
     constructor(
         public manuf: ManufacturerModel,
-        public serial: string
+        public serial: string,
+        public center: Center
     ) {}
 }
-

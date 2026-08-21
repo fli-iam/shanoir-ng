@@ -2,147 +2,75 @@ package org.shanoir.uploader.action;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.UploadState;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
-import org.shanoir.uploader.upload.UploadJob;
-import org.shanoir.uploader.upload.UploadJobManager;
-import org.shanoir.uploader.upload.UploadState;
-import org.shanoir.uploader.utils.Util;
+import org.shanoir.uploader.nominativeData.NominativeDataImportJobManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class prepares the upload to a Shanoir server instance,
  * but does not call the server itself.
- * 
- * @author mkain
  *
+ * @author mkain
  */
 public class ImportFinishRunnable implements Runnable {
 
-	private static Logger logger = Logger.getLogger(ImportFinishRunnable.class);
-	
-	public static final String IMPORT_JOB_JSON = "import-job.json";
+    private static final Logger logger = LoggerFactory.getLogger(ImportFinishRunnable.class);
 
-	private static final String ANONYMIZATION_PROFILE = "anonymization.profile";
+    private final File uploadFolder;
 
-	private UploadJob uploadJob;
-	
-	private File uploadFolder;
-	
-	private ImportJob importJob;
-	
-	private String subjectName;
+    private final ImportJobBase importJob;
+    
+    private final Anonymizer anonymizer = new Anonymizer();
 
-	private Anonymizer anonymizer = new Anonymizer();
-	
-	public ImportFinishRunnable(final UploadJob uploadJob, final File uploadFolder, final ImportJob importJob, final String subjectName) {
-		this.uploadJob = uploadJob;
-		this.uploadFolder = uploadFolder;
-		this.importJob = importJob;
-		this.subjectName = subjectName;
-	}
+    /** Invoked exactly once, on whatever thread this Runnable finishes on,
+     *  whether anonymization succeeded or failed. Used by the caller to
+     *  release its per-folder in-progress guard and restore UI state. */
+    private final Runnable onDone;
 
-	public void run() {		
-		/**
-		 * Anonymize the DICOM files
-		 */
-		boolean anonymizationSuccess = false;
-		try {
-			String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ANONYMIZATION_PROFILE);
-			anonymizationSuccess = anonymizer.pseudonymize(uploadFolder, anonymizationProfile, subjectName);
-		} catch (IOException e) {
-			logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
-		}
+    public ImportFinishRunnable(final File uploadFolder, final ImportJobBase importJob) {
+        this(uploadFolder, importJob, null);
+    }
 
-		if (anonymizationSuccess) {
-			/**
-			 * Write import-job.json to disk
-			 */
-			try {
-				File importJobJson = new File(uploadFolder, IMPORT_JOB_JSON);
-				importJobJson.createNewFile();
-				Util.objectMapper.writeValue(importJobJson, importJob);
-			} catch (IOException e) {
-				logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
-			}
-			
-			/**
-			 * Write the UploadJob and schedule upload
-			 * We keep UploadJob here to start the upload and handle errors without
-			 * developing something new with shanoir-exchange.json
-			 */
-			uploadJob.setUploadState(UploadState.START_AUTOIMPORT);
-			UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
-			uploadJobManager.writeUploadJob(uploadJob);
-			logger.info(uploadFolder.getName() + ": DICOM files scheduled for upload.");
-			// try to run the UploadService
-			runUploadService();
-		} else {
-			// NOTIFY THAT ANONYMIZATION HAS FAILED.
-			logger.error(uploadFolder.getName() + ": Error during anonymization.");
-		}
-	}
+    public ImportFinishRunnable(final File uploadFolder, final ImportJobBase importJob,
+            final Runnable onDone) {
+        this.uploadFolder = uploadFolder;
+        this.importJob = importJob;
+        this.onDone = onDone;
+    }
 
-	/**
-	 * This method starts the UploadService.
-	 */
-	private void runUploadService() {
-		boolean uploadServiceRunning = checkIfUploadServiceIsRunning();
-		if (uploadServiceRunning) {
-			// do nothing
-		} else {
-			Scheduler scheduler = ShUpOnloadConfig.getScheduler();
-			Trigger oldTrigger = ShUpOnloadConfig.getTrigger();
-			Trigger newTrigger = TriggerBuilder
-					.newTrigger()
-					.withSchedule(
-							SimpleScheduleBuilder
-									.simpleSchedule()
-									.withIntervalInSeconds(
-											ShUpConfig.UPLOAD_SERVICE_INTERVAL)
-									.repeatForever()).build();
-			try {
-				scheduler.rescheduleJob(oldTrigger.getKey(), newTrigger);
-			} catch (SchedulerException sE) {
-				logger.error(sE.getMessage(), sE);
-			}
-		}
-	}
-	
-	/**
-	 * This method checks if the UploadService is currently running.
-	 * 
-	 * @return
-	 */
-	private boolean checkIfUploadServiceIsRunning() {
-		List<JobExecutionContext> currentJobs;
-		try {
-			if (ShUpOnloadConfig.getScheduler() != null) {
-				currentJobs = ShUpOnloadConfig.getScheduler()
-						.getCurrentlyExecutingJobs();
-				for (JobExecutionContext jobCtx : currentJobs) {
-					JobKey jobKey = jobCtx.getJobDetail().getKey();
-					if (jobKey.getName().equalsIgnoreCase(
-							ShUpConfig.UPLOAD_SERVICE_JOB)) {
-						return true;
-					}
-				}
-			}
-		} catch (SchedulerException sE) {
-			logger.error(sE.getMessage(), sE);
-		}
-		return false;
-	}
+    public void run() {
+        try {
+            boolean anonymizationSuccess = false;
+            try {
+                String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ShUpConfig.ANONYMIZATION_PROFILE);
+                anonymizationSuccess = anonymizer.pseudonymize(uploadFolder, anonymizationProfile, importJob.getSubjectName(), importJob.getStudyInstanceUID());
+            } catch (IOException e) {
+                logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+            }
+
+            if (anonymizationSuccess) {
+                try {
+                    importJob.setUploadState(UploadState.START_IMPORT_JOB);
+                    NominativeDataImportJobManager importJobManager = new NominativeDataImportJobManager(uploadFolder.getAbsolutePath());
+                    importJobManager.writeImportJob(importJob);
+                } catch (Exception e) {
+                    logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+                }
+                logger.info(uploadFolder.getName() + " scheduled for upload.");
+            } else {
+                logger.error(uploadFolder.getName() + ": Error during anonymization.");
+            }
+        } finally {
+            // Always release the guard/UI state, even on unexpected exceptions.
+            if (onDone != null) {
+                onDone.run();
+            }
+        }
+    }
 
 }

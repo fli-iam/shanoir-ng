@@ -2,82 +2,94 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 import { Component } from '@angular/core';
-import {  Validators, UntypedFormGroup } from '@angular/forms';
-import {  ActivatedRoute } from '@angular/router';
+import { Validators, UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
 
 import { PathologyModel }    from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
 import { Pathology }   from '../../pathology/shared/pathology.model';
 import { PathologyService } from '../../pathology/shared/pathology.service';
-import { slideDown } from '../../../../shared/animations/animations';
-import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../../../shared/select/select.component';
 
 
 @Component({
     selector: 'pathologyModel-form',
     templateUrl: 'pathologyModel-form.component.html',
-    providers: [PathologyModelService, PathologyService],
-    animations: [slideDown]
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent]
 })
-@ModesAware
 export class PathologyModelFormComponent extends EntityComponent<PathologyModel>{
 
     pathologies: Pathology[];
     uploadUrl: string;
+    downloadUrl: string;
+    hasAdministrateRight: boolean = false;
+    hasDownloadRight: boolean = false;
+    downloadState: TaskState = new TaskState();
     fileToUpload: File = null;
 
-    public isModelUnique = true;
+    isModelUnique = true;
 
     constructor(
         private route: ActivatedRoute,
-        private modelService: PathologyModelService, 
-        private pathologyService: PathologyService) 
-        {
+        private pathologyService: PathologyService,
+        private pathologyModelService: PathologyModelService,
+        private studyRightsService: StudyRightsService,
+    ) {
+        super(route);
+    }
 
-            super(route, 'preclinical-pathology-model');
-            this.manageSaveEntity();
-        }
+    protected getRoutingName(): string {
+        return 'preclinical-pathology-model';
+    }
 
-    get model(): PathologyModel { return this.entity; }
-    set model(model: PathologyModel) { this.entity = model; }
+    get pathologyModel(): PathologyModel { return this.entity; }
+    set pathologyModel(model: PathologyModel) { this.entity = model; }
+
 
     getService(): EntityService<PathologyModel> {
-        return this.modelService;
+        return this.pathologyModelService;
     }
 
     initView(): Promise<void> {
-        return this.modelService.get(this.id).then(model => {
-            this.model = model;
-        });
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasAdministrateRight = true;
+            this.hasDownloadRight = true;
+            return;
+        } else {
+            this.hasAdministrateRight = this.keycloakService.isUserAdminOrExpert();
+            this.hasDownloadRight = this.keycloakService.isUserAdminOrExpert();
+        }
     }
 
     initEdit(): Promise<void> {
         this.loadData();
-        return this.modelService.get(this.id).then(model => {
-            this.model = model;
-            if(this.pathologies){
-                for(let patho of this.pathologies){
-                    if(patho.id == model.pathology.id) 
-                        this.model.pathology = patho;
-                }
+        if(this.pathologies){
+            for(const patho of this.pathologies){
+                if(patho.id == this.pathologyModel.pathology.id)
+                    this.pathologyModel.pathology = patho;
             }
-            //Generate url for upload
-            this.uploadUrl = this.modelService.getUploadUrl(this.model.id);
-        });
+        }
+        //Generate url for upload
+        this.uploadUrl = this.pathologyModelService.getUploadUrl(this.pathologyModel.id);
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
@@ -88,10 +100,10 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
 
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
-            'name': [this.model.name, Validators.required],
-            'pathology': [this.model.pathology, Validators.required],
-            'comment': [this.model.comment],
-            'specifications': [this.model.filename]
+            'name': [this.pathologyModel.name, [Validators.required, this.registerOnSubmitValidator('unique', 'name')]],
+            'pathology': [this.pathologyModel.pathology, Validators.required],
+            'comment': [this.pathologyModel.comment],
+            'filename': [this.pathologyModel.filename]
         });
     }
 
@@ -100,19 +112,19 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
             this.onSave.subscribe(response => {
                 if (this.fileToUpload){
                     //Then upload specifications file
-                    this.modelService.postFile(this.fileToUpload, response.id);
+                    this.pathologyModelService.postFile(this.fileToUpload, response.id);
                 }
             })
         );
-       
+
     }
 
     goToAddPathology(){
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/preclinical-pathology/create']).then(success => {
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/preclinical-pathology/create']).then(() => {
             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                 this.pathologies.push(entity as Pathology);
-                (currentStep.entity as PathologyModel).pathology = entity as Pathology;
+                this.entity.pathology = entity as Pathology;
             });
         });
     }
@@ -122,15 +134,86 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
             this.pathologies = pathologies;
         });
     }
-    
+
     fileChangeEvent(files: FileList){
     	this.fileToUpload = files.item(0);
-    	this.model.filename = this.fileToUpload.name;
+    	this.pathologyModel.filename = this.fileToUpload.name;
+    	const filenameCtrl = this.form.get('filename');
+    	filenameCtrl.markAsDirty();
+    	filenameCtrl.updateValueAndValidity();
     }
-    
-    
-    
-    
 
+    public save(): Promise<PathologyModel> {
+        if (this.pathologyModel.id) {
+            return this.updatePathologyModel().then(pathologyModel => {
+                if (this.fileToUpload)
+                    this.pathologyModelService.postFile(this.fileToUpload, pathologyModel.id)
+                        .subscribe({
+                            next: () => this.consoleService.log('info', 'File uploaded successfully'),
+                            error: () => this.consoleService.log('error', 'File upload failed')
+                        });
 
+                this.onSave.next(pathologyModel);
+                this.chooseRouteAfterSave(pathologyModel);
+                this.consoleService.log('info', 'Preclinical-pathology-model ' + pathologyModel.name + ' has been successfully saved under the id ' + pathologyModel.id);
+                return pathologyModel;
+            }).catch(reason => {
+                this.footerState.loading = false;
+                this.catchSavingErrors(reason);
+                return null;
+            });
+        } else {
+            return this.addPathologyModel().then(async pathologyModel => {
+                if (pathologyModel == null) return;
+
+                if (this.fileToUpload)
+                    this.pathologyModelService.postFile(this.fileToUpload, pathologyModel.id)
+                        .subscribe({
+                            next: () => this.consoleService.log('info', 'File uploaded successfully'),
+                            error: () => this.consoleService.log('error', 'File upload failed')
+                        });
+
+                this.onSave.next(pathologyModel);
+                this.chooseRouteAfterSave(pathologyModel);
+                this.consoleService.log('info', 'Preclinical-pathology-model ' + pathologyModel.name + ' has been successfully saved under the id ' + pathologyModel.id);
+                return pathologyModel;
+            }).catch(reason => {
+                this.footerState.loading = false;
+                this.catchSavingErrors(reason);
+                return null;
+            });
+        }
+    }
+
+    async addPathologyModel(): Promise<PathologyModel> {
+        if (!this.pathologyModel) return Promise.resolve(null);
+        try {
+            this.pathologyModel = await this.pathologyModelService.create(this.pathologyModel);;
+            return this.pathologyModel;
+        } catch (reason) {
+            return this.catchSavingErrors(reason);
+        }
+    }
+
+    async updatePathologyModel(): Promise<PathologyModel> {
+        if (!this.pathologyModel) return Promise.resolve(null);
+        try {
+            await this.pathologyModelService.update(this.pathologyModel.id, this.pathologyModel);
+            return this.pathologyModel;
+        } catch (reason) {
+            return this.catchSavingErrors(reason);
+        }
+    }
+
+    downloadModelSpecifications() {
+        if (this.pathologyModel.filename) {
+        	this.pathologyModelService.downloadFile(this.pathologyModel);
+        } else {
+        	this.openInformationDialog(this.pathologyModel);
+        }
+    }
+
+    openInformationDialog = (pathologyModel: PathologyModel) => {
+        this.confirmDialogService .inform('Download Specifications', 'No specifications have been found for ' + pathologyModel.name);
+    }
 }

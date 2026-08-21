@@ -1,1 +1,0 @@
-alter table subject_study_tag change tags_id tag_id bigint(20);

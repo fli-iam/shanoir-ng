@@ -1,157 +1,118 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader;
 
 import java.io.File;
 
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.Trigger;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.service.rest.UrlConfig;
 
 /**
- * 
+ *
  * This class contains all dynamic data needed by ShanoirUploader upon startup.
- * 
+ *
  * @author atouboul
  * @author mkain
- * 
+ *
  */
 public class ShUpOnloadConfig {
 
-	private static File workFolder;
+    private static File workFolder;
 
-	private static IDicomServerClient dicomServerClient;
+    private static IDicomServerClient dicomServerClient;
 
-	private static JobDataMap jobDataMap = new JobDataMap();
+    private static CurrentNominativeDataController currentNominativeDataController;
 
-	private static JobDataMap jobDataMapMain = new JobDataMap();
+    private static ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
-	private static JobDetail uploadServiceJob;
+    private static Pseudonymizer pseudonymizer;
 
-	private static Trigger trigger;
+    private static UrlConfig urlConfig = new UrlConfig();
 
-	private static Scheduler scheduler;
+    private static boolean autoImportEnabled;
 
-	private static CurrentNominativeDataController currentNominativeDataController;
+    /** Constructeur privé */
+    private ShUpOnloadConfig() {
+    }
 
-	private static ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+    /** Instance unique pré-initialisée */
+    private static final ShUpOnloadConfig INSTANCE = new ShUpOnloadConfig();
 
-	private static UrlConfig urlConfig = new UrlConfig();
+    /** Point d'accès pour l'instance unique du singleton */
+    public static ShUpOnloadConfig getInstance() {
+        return INSTANCE;
+    }
 
-	private static boolean autoImportEnabled;
+    public static File getWorkFolder() {
+        return workFolder;
+    }
 
-	private static String tokenString;
+    public static void setWorkFolder(File workFolder) {
+        ShUpOnloadConfig.workFolder = workFolder;
+    }
 
-	/** Constructeur privé */
-	private ShUpOnloadConfig() {
-	}
+    public static IDicomServerClient getDicomServerClient() {
+        return dicomServerClient;
+    }
 
-	/** Instance unique pré-initialisée */
-	private static ShUpOnloadConfig INSTANCE = new ShUpOnloadConfig();
+    public static void setDicomServerClient(IDicomServerClient dicomServerClient) {
+        ShUpOnloadConfig.dicomServerClient = dicomServerClient;
+    }
 
-	/** Point d'accès pour l'instance unique du singleton */
-	public static ShUpOnloadConfig getInstance() {
-		return INSTANCE;
-	}
+    public static CurrentNominativeDataController getCurrentNominativeDataController() {
+        return currentNominativeDataController;
+    }
 
-	public static File getWorkFolder() {
-		return workFolder;
-	}
+    public static void setCurrentNominativeDataController(
+            CurrentNominativeDataController currentNominativeDataController) {
+        ShUpOnloadConfig.currentNominativeDataController = currentNominativeDataController;
+    }
 
-	public static void setWorkFolder(File workFolder) {
-		ShUpOnloadConfig.workFolder = workFolder;
-	}
+    public static ShanoirUploaderServiceClient getShanoirUploaderServiceClient() {
+        return shanoirUploaderServiceClient;
+    }
 
-	public static IDicomServerClient getDicomServerClient() {
-		return dicomServerClient;
-	}
+    public static void setShanoirUploaderServiceClient(ShanoirUploaderServiceClient shanoirUploaderServiceClient) {
+        ShUpOnloadConfig.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
+    }
 
-	public static void setDicomServerClient(IDicomServerClient dicomServerClient) {
-		ShUpOnloadConfig.dicomServerClient = dicomServerClient;
-	}
+    public static UrlConfig getUrlConfig() {
+        return urlConfig;
+    }
 
-	public static JobDataMap getJobDataMap() {
-		return jobDataMap;
-	}
+    public static void setUrlConfig(UrlConfig urlConfig) {
+        ShUpOnloadConfig.urlConfig = urlConfig;
+    }
 
-	public static void setJobDataMap(JobDataMap jobDataMap) {
-		ShUpOnloadConfig.jobDataMap = jobDataMap;
-	}
+    public static boolean isAutoImportEnabled() {
+        return autoImportEnabled;
+    }
 
-	public static JobDataMap getJobDataMapMain() {
-		return jobDataMapMain;
-	}
+    public static void setAutoImportEnabled(boolean autoImportEnabled) {
+        ShUpOnloadConfig.autoImportEnabled = autoImportEnabled;
+    }
 
-	public static void setJobDataMapMain(JobDataMap jobDataMapMain) {
-		ShUpOnloadConfig.jobDataMapMain = jobDataMapMain;
-	}
+    public static Pseudonymizer getPseudonymizer() {
+        return pseudonymizer;
+    }
 
-	public static JobDetail getUploadServiceJob() {
-		return uploadServiceJob;
-	}
-
-	public static void setUploadServiceJob(JobDetail uploadServiceJob) {
-		ShUpOnloadConfig.uploadServiceJob = uploadServiceJob;
-	}
-
-	public static Trigger getTrigger() {
-		return trigger;
-	}
-
-	public static void setTrigger(Trigger trigger) {
-		ShUpOnloadConfig.trigger = trigger;
-	}
-
-	public static Scheduler getScheduler() {
-		return scheduler;
-	}
-
-	public static void setScheduler(Scheduler scheduler) {
-		ShUpOnloadConfig.scheduler = scheduler;
-	}
-
-	public static CurrentNominativeDataController getCurrentNominativeDataController() {
-		return currentNominativeDataController;
-	}
-
-	public static void setCurrentNominativeDataController(
-			CurrentNominativeDataController currentNominativeDataController) {
-		ShUpOnloadConfig.currentNominativeDataController = currentNominativeDataController;
-	}
-
-	public static ShanoirUploaderServiceClient getShanoirUploaderServiceClient() {
-		return shanoirUploaderServiceClient;
-	}
-	
-	public static void setShanoirUploaderServiceClient(ShanoirUploaderServiceClient shanoirUploaderServiceClient) {
-		ShUpOnloadConfig.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
-	}
-
-	public static UrlConfig getUrlConfig() {
-		return urlConfig;
-	}
-
-	public static void setUrlConfig(UrlConfig urlConfig) {
-		ShUpOnloadConfig.urlConfig = urlConfig;
-	}
-
-	public static boolean isAutoImportEnabled() {
-		return autoImportEnabled;
-	}
-
-	public static void setAutoImportEnabled(boolean autoImportEnabled) {
-		ShUpOnloadConfig.autoImportEnabled = autoImportEnabled;
-	}
-	
-	public static String getTokenString() throws Exception  {
-		return tokenString;
-	}
-	
-	public static void setTokenString(String tokenString) {
-		ShUpOnloadConfig.tokenString = tokenString;
-	}
+    public static void setPseudonymizer(Pseudonymizer pseudonymizer) {
+        ShUpOnloadConfig.pseudonymizer = pseudonymizer;
+    }
 
 }

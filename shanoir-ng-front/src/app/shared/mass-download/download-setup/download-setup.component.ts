@@ -2,72 +2,161 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { Format } from 'src/app/datasets/shared/dataset.service';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AngularDeviceInformationService } from 'angular-device-information';
+import { Subscription } from 'rxjs';
+import { NgTemplateOutlet } from '@angular/common';
+
+import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+
+import { DatasetType } from "../../../datasets/shared/dataset-type.model";
+import { Dataset } from "../../../datasets/shared/dataset.model";
+import { Option, SelectBoxComponent } from '../../select/select.component';
 import { GlobalService } from '../../services/global.service';
-import { Option } from '../../select/select.component';
+import { DownloadInputIds, DownloadSetup, MassDownloadService } from '../mass-download.service';
+import { TooltipComponent } from '../../components/tooltip/tooltip.component';
+import { CheckboxComponent } from '../../checkbox/checkbox.component';
+import { TreeNodeComponent } from '../../components/tree/tree-node.component';
+import { SizePipe } from '../../utils/size.pipe';
 
 @Component({
     selector: 'download-setup',
     templateUrl: 'download-setup.component.html',
-    styleUrls: ['download-setup.component.css']
+    styleUrls: ['download-setup.component.css'],
+    imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent, TooltipComponent, CheckboxComponent, TreeNodeComponent, NgTemplateOutlet, SizePipe]
 })
 
-export class DownloadSetupComponent implements OnInit {
+export class DownloadSetupComponent implements OnInit, OnDestroy {
 
-    @Output() go: EventEmitter<{format: Format, nbQueues: number, unzip: boolean}> = new EventEmitter();
-    @Output() close: EventEmitter<void> = new EventEmitter();
+    @Output() go: EventEmitter<DownloadSetup> = new EventEmitter();
+    @Output() closeModal: EventEmitter<void> = new EventEmitter();
+    @Input() inputIds: DownloadInputIds;
+    @Input() totalSize?: number;
     form: UntypedFormGroup;
-    @Input() format: Format; 
-    @Input() options: DownloadSetupOptions = new DownloadSetupOptions();
-    @ViewChild('window') window: ElementRef;
+    loading: boolean;
+    loaded: boolean = false;
+    format: Format;
+    converter: number;
+    datasets: Dataset[] | DatasetLight[];
+    hasDicom: boolean = false;
     formatOptions: Option<Format>[] = [
-        new Option<Format>('dcm', 'Dicom', null, null, null, !this.options.hasDicom),
-        new Option<Format>('nii', 'Nifti', null, null, null, !this.options.hasNii),
-        new Option<Format>('eeg', 'EEG', null, null, null, !this.options.hasEeg),
-        new Option<Format>('BIDS', 'BIDS', null, null, null, !this.options.hasBids),
+        new Option<Format>('dcm', 'Dicom', null, null, null, false),
+        new Option<Format>('nii', 'Nifti', null, null, null, false),
     ];
-        
-    constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService) {
-        globalService.onNavigate.subscribe(() => {
-            this.cancel();
-        });
-    }
+    niftiConverters: Option<number>[] = [
+        new Option<number>(null, 'Existing nifti (if available)', null, null, null, false),
+        new Option<number>(1, 'Dcm2nii_2008_03_31', null, null, null, false),
+        new Option<number>(2, 'McVerter_2_0_7', null, null, null, false),
+        new Option<number>(4, 'Dcm2nii_2014_08_04', null, null, null, false),
+        new Option<number>(5, 'McVerter_2_1_0', null, null, null, false),
+        new Option<number>(6, 'Dcm2niix', null, null, null, false),
+        new Option<number>(7, 'Dicomifier', null, null, null, false),
+        new Option<number>(8, 'MriConverter', null, null, null, false),
+    ];
+    winOs: boolean;
+    @ViewChild('window') window: ElementRef;
+    protected subscriptions: Subscription[] = [];
 
-    ngOnInit(): void {
+    constructor(
+            private formBuilder: UntypedFormBuilder,
+            globalService: GlobalService,
+            deviceInformationService: AngularDeviceInformationService,
+            private massDownloadService: MassDownloadService,
+            private datasetService: DatasetService) {
+
+        this.subscriptions.push(
+            globalService.onNavigate.subscribe(() => {
+                this.cancel();
+            })
+        );
+        this.winOs = deviceInformationService.getDeviceInfo()?.os?.toLocaleLowerCase().includes('windows');
         this.form = this.buildForm();
     }
 
+    ngOnInit(): void {
+        if (this.inputIds) {
+            let fetchDatasets: Promise<Dataset[] | DatasetLight[]>;
+            if (this.inputIds.studyId) {
+                if (this.inputIds.subjectId) {
+                    fetchDatasets = this.datasetService.getByStudyIdAndSubjectId(this.inputIds.studyId, this.inputIds.subjectId);
+                } else {
+                    fetchDatasets = this.datasetService.getByStudyId(this.inputIds.studyId);
+                }
+            } else if (this.inputIds.examinationId) {
+                fetchDatasets = this.datasetService.getByExaminationId(this.inputIds.examinationId);
+            } else if (this.inputIds.acquisitionId) {
+                fetchDatasets = this.datasetService.getByAcquisitionId(this.inputIds.acquisitionId);
+            } else if (this.inputIds.datasetIds) {
+                fetchDatasets = this.datasetService.getByIds(new Set(this.inputIds.datasetIds));
+            }
+            if (fetchDatasets) {
+                this.loading = true;
+                fetchDatasets.then(
+                    datasetsResult => {
+                        this.datasets = datasetsResult;
+                        this.hasDicom = this.hasDicomInDatasets(this.datasets);
+                    }
+                ).finally(() => {
+                    this.loading = false;
+                    this.loaded = true;
+                });
+            }
+        }
+        // Empty converter by default
+        this.converter = 6;
+    }
+
     private buildForm(): UntypedFormGroup {
-        let formGroup = this.formBuilder.group({
+        const formGroup = this.formBuilder.group({
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
+            'converter': [null, [this.massDownloadService.requiredIfTypeIsNii()]],
             'nbQueues': [4, [Validators.required, Validators.min(1), Validators.max(1024)]],
-            'unzip': [false, []],
+            'unzip': [false],
+            'subjectFolders': [true],
+            'examinationFolders': [true],
+            'acquisitionFolders': [false],
+            'datasetFolders': [false]
         });
+        if (this.winOs) {
+            formGroup.addControl('shortPath', new UntypedFormControl(false));
+        }
+        this.subscriptions.push(formGroup.get('unzip').valueChanges.subscribe(val => {
+            formGroup.get('datasetFolders').setValue(val);
+        }));
+
+        this.subscriptions.push(formGroup.get('format').valueChanges.subscribe(() => {
+            formGroup.get('converter').updateValueAndValidity();
+        }));
         return formGroup;
     }
 
     downloadNow() {
-        this.go.emit({
-            format: this.form.get('format').value, 
-            nbQueues: this.form.get('nbQueues').value,
-            unzip: this.form.get('unzip').value
-        });
+        const setup: DownloadSetup = new DownloadSetup(this.form.get('format').value);
+        setup.nbQueues = this.form.get('nbQueues').value;
+        setup.unzip = this.form.get('unzip').value;
+        setup.subjectFolders = this.form.get('subjectFolders').value;
+        setup.examinationFolders = this.form.get('examinationFolders').value;
+        setup.acquisitionFolders = this.form.get('acquisitionFolders').value;
+        setup.datasetFolders = this.form.get('datasetFolders').value;
+        setup.converter = (this.form.get('format').value == 'nii') ? this.form.get('converter')?.value : null;
+        if (this.form.get('shortPath')) setup.shortPath = this.form.get('shortPath').value;
+        setup.datasets = this.datasets;
+        this.go.emit(setup);
     }
-    
+
     cancel() {
-        this.close.emit();
+        this.closeModal.emit();
     }
 
     @HostListener('click', ['$event'])
@@ -76,11 +165,46 @@ export class DownloadSetupComponent implements OnInit {
             this.cancel();
         }
     }
-}
 
-export class DownloadSetupOptions {
-    hasDicom?: boolean = true;
-    hasNii?: boolean = true;
-    hasEeg?: boolean = false;
-    hasBids?: boolean = false;
+    // This method checks if the list of given datasets has dicom or not.
+    private hasDicomInDatasets(datasets: {type: DatasetType | string, hasProcessings: boolean}[]) {
+        for (const dataset of datasets) {
+            if (!this.isNonDicomDatasetType(dataset.type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Matches DatasetType labels and legacy enum names from DatasetLight (e.g. GENERIC vs Generic). */
+    private isNonDicomDatasetType(type: DatasetType | string): boolean {
+        const normalized = typeof type === 'string' ? type.toLowerCase() : String(type).toLowerCase();
+        return normalized === DatasetType.Eeg.toLowerCase()
+            || normalized === DatasetType.BIDS.toLowerCase()
+            || normalized === DatasetType.Generic.toLowerCase();
+    }
+
+    ngOnDestroy() {
+        for(const subscribtion of this.subscriptions) {
+            subscribtion.unsubscribe();
+        }
+    }
+
+    hasError(fieldName: string, errors: string[]) {
+        const formError = this.formErrors(fieldName);
+        if (formError) {
+            for (const errorName of errors) {
+                if (formError[errorName]) return true;
+            }
+        }
+        return false;
+    }
+
+    formErrors(field: string): any {
+        if (!this.form) return;
+        const control = this.form.get(field);
+        if (control && !control.valid) {
+            return control.errors;
+        }
+    }
 }

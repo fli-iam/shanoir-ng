@@ -11,34 +11,45 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ElementRef, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
-import {DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
+
+import { MassDownloadService } from "../../shared/mass-download/mass-download.service";
+import { DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+
+import { MetadataNodeComponent } from './metadata-node.component';
+import { ProcessingNodeComponent } from './processing-node.component';
 
 
 @Component({
     selector: 'simple-dataset-node',
-    templateUrl: 'dataset-node.component.html'
+    templateUrl: 'dataset-node.component.html',
+    imports: [TreeNodeComponent, FormsModule, DropdownMenuComponent, RouterLink, MenuItemComponent, MetadataNodeComponent, forwardRef(() => ProcessingNodeComponent)]
 })
 
-export class SimpleDatasetNodeComponent implements OnChanges {
+export class SimpleDatasetNodeComponent extends TreeNodeAbstractComponent<DatasetNode> implements OnChanges {
 
     @Input() input: DatasetNode | Dataset;
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: DatasetNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
-    @Input() hasBox: boolean = false;
     @Input() related: boolean = false;
     detailsPath: string = '/dataset/details/';
-    @Output() onSimpleDatasetDelete: EventEmitter<void> = new EventEmitter();
+    @Output() simpleDatasetDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
-        private router: Router,
-        private datasetService: DatasetService) {
+            private router: Router,
+            private datasetService: DatasetService,
+            private downloadService: MassDownloadService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -49,15 +60,19 @@ export class SimpleDatasetNodeComponent implements OnChanges {
                 throw new Error('not implemented yet');
             }
         }
-    }
+    } 
 
     toggleMenu() {
-        this.menuOpened = !this.menuOpened;
+        this.menuOpened = this.withMenu && !this.menuOpened;
     }
 
-    download(format: string) {
+    download() {
+        if (this.loading) {
+            return;
+        }
         this.loading = true;
-        this.datasetService.downloadFromId(this.node.id, format).then(() => this.loading = false);
+        this.downloadService.downloadByIds([this.node.id], this.downloadState)
+            .then(() => this.loading = false);
     }
 
     showDatasetDetails() {
@@ -74,12 +89,24 @@ export class SimpleDatasetNodeComponent implements OnChanges {
         this.datasetService.get(this.node.id).then(entity => {
             this.datasetService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.onSimpleDatasetDelete.emit();
+                    this.simpleDatasetDelete.emit();
                 }
             });
         })
     }
+
     onProcessingDelete(index: number) {
         (this.node.processings as ProcessingNode[]).splice(index, 1) ;
+    }
+
+    loadProcessings() {
+        if (this.node.processings == UNLOADED) {
+            this.loading = true;
+            this.datasetService.get(this.node.id).then(dataset => {
+                this.node.processings = dataset.processings.map(p => ProcessingNode.fromProcessing(p, this.node, this.node.canDelete, this.node.canDownload));
+            }).finally(() => {
+                this.loading = false;
+            });
+        }
     }
 }

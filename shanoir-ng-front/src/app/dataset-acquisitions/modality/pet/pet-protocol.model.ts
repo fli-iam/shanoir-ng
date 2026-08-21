@@ -24,7 +24,8 @@ export class PetProtocol {
     energyWindowLowerLimit: number
     energyWindowUpperLimit: number
     numberOfIterations: string
-    numberOfSlices: number
+    sliceThickness: number;
+    numberOfSlices: number;
     numberOfSubsets: string
     radionuclideHalfLife: number
     radionuclideTotalDose: number

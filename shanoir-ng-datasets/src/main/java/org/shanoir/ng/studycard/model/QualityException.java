@@ -2,19 +2,21 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 package org.shanoir.ng.studycard.model;
 
-import org.shanoir.ng.examination.model.Examination;
+import java.util.List;
+
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 
@@ -23,30 +25,27 @@ import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
  */
 public class QualityException extends Exception {
 
-    private Examination examination;
-    
+    private DatasetAcquisition datasetAcquisition;
+
+    private List<String> qualityCardNames;
+
     private QualityCardResult qualityResult;
-    
-   
-    public QualityException(Examination examination, QualityCardResult qualityResult) {
-        super();
-        this.examination = examination;
+
+
+    public QualityException(DatasetAcquisition datasetAcquisition, QualityCardResult qualityResult, List<String> qualityCardNames, Throwable cause) {
+        super(cause);
+        this.datasetAcquisition = datasetAcquisition;
+        this.qualityCardNames = qualityCardNames;
         this.qualityResult = qualityResult;
     }
-    
-	public QualityException(Examination examination, QualityCardResult qualityResult, Throwable cause) {
-		super(cause);
-		this.examination = examination;
-		this.qualityResult = qualityResult;
-	}
 
 
-    public Examination getExamination() {
-        return examination;
+    public DatasetAcquisition getDatasetAcquisition() {
+        return datasetAcquisition;
     }
 
-    public void setExamination(Examination examination) {
-        this.examination = examination;
+    public void setDatasetAcquisition(DatasetAcquisition datasetAcquisition) {
+        this.datasetAcquisition = datasetAcquisition;
     }
 
     public QualityCardResult getQualityResult() {
@@ -57,23 +56,36 @@ public class QualityException extends Exception {
         this.qualityResult = qualityResult;
     }
 
-    public String buildErrorMessage() {
+    public List<String> getQualityCardNames() {
+        return qualityCardNames;
+    }
+
+    public void setQualityCardNames(List<String> qualityCardNames) {
+        this.qualityCardNames = qualityCardNames;
+    }
+
+    public String buildErrorMessage() { // TODO : improve error messages
         StringBuilder sb = new StringBuilder();
-        sb.append("Quality checks didn't pass at import.");
-        sb.append("\n");
-        sb.append("Study : ")
-            .append(this.getExamination().getStudy().getName())
-            .append(" (").append(this.getExamination().getStudy().getId()).append(")");
-        sb.append("\n");
-        sb.append("Subject : ")
-            .append(this.getExamination().getSubject().getName())
-            .append(" (").append(this.getExamination().getSubject().getId()).append(")");
-        sb.append("\n");
-        sb.append("Examination : ")
-            .append(this.getExamination().getComment())
-            .append(" (").append(this.getExamination().getId()).append(")");
-        sb.append("\n");
-        sb.append("Examination : ");
+        if (this.getDatasetAcquisition() == null) {
+            sb.append("Quality check failed because none of the dataset acquisitions passed the quality check.\n");
+        } else {
+            sb.append("Study : ")
+                .append(this.getDatasetAcquisition().getExamination().getStudy().getName())
+                .append(" (").append(this.getDatasetAcquisition().getExamination().getStudy().getId()).append(")");
+            sb.append("\n");
+            sb.append("Subject : ")
+                .append(this.getDatasetAcquisition().getExamination().getSubject().getName())
+                .append(" (").append(this.getDatasetAcquisition().getExamination().getSubject().getId()).append(")");
+            sb.append("\n");
+            sb.append("Examination : ")
+                .append(this.getDatasetAcquisition().getExamination().getComment())
+                .append(" (").append(this.getDatasetAcquisition().getExamination().getId()).append(")");
+            sb.append("\n");
+            sb.append("Dataset Acquisition : ");
+            sb.append(this.getDatasetAcquisition().getSeriesInstanceUID() != null ? this.getDatasetAcquisition().getSeriesInstanceUID() : this.getDatasetAcquisition().getId())
+                .append(" (").append(this.getDatasetAcquisition().getId()).append(")");
+            sb.append("\n");
+        }
         for (QualityCardResultEntry qcResult : this.getQualityResult()) {
             sb.append("\n- ");
             sb.append(qcResult.getMessage());

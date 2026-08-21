@@ -23,18 +23,20 @@ export enum DatasetModalityType {
     // MEG = 'MG',
     // SPECT = 'SPECT',
     EEG = 'EEG_DATASET',
-    NIRS = 'NIRS_DATASET'
+    NIRS = 'NIRS_DATASET',
+    XA = 'XA_DATASET'
 
 
 } export namespace DatasetModalityType {
 
-    export function all(): Array<DatasetModalityType> {
+    export function all(): DatasetModalityType[] {
         return allOfEnum<DatasetModalityType>(DatasetModalityType);
     }
 
     export function getLabel(type: DatasetModalityType): string {
-        return capitalsAndUnderscoresToDisplayable(type.split('_')[0]);
+        if (type === undefined || type === null) return null;
+        else return capitalsAndUnderscoresToDisplayable(type.split('_')[0]);
     }
 
-    export var options: Option<DatasetModalityType>[] = all().map(prop => new Option<DatasetModalityType>(prop, getLabel(prop)));
+    export const options: Option<DatasetModalityType>[] = all().map(prop => new Option<DatasetModalityType>(prop, getLabel(prop)));
 }

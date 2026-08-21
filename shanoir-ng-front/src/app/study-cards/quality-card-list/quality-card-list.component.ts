@@ -24,7 +24,8 @@ import { QualityCardService } from '../shared/quality-card.service';
 
 @Component({
     selector: 'quality-card-list',
-    templateUrl: 'quality-card-list.component.html'
+    templateUrl: 'quality-card-list.component.html',
+    imports: [TableComponent]
 })
 export class QualityCardListComponent extends BrowserPaginEntityListComponent<QualityCard> {
     
@@ -54,7 +55,7 @@ export class QualityCardListComponent extends BrowserPaginEntityListComponent<Qu
     }
 
     getColumnDefs(): ColumnDefinition[] {
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             { headerName: "Name", field: "name" },
             { headerName: "Study", field: 'study.name', defaultField: 'study.id',
 			 	route: (qualityCard: QualityCard) => '/study/details/' + qualityCard.study.id

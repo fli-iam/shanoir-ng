@@ -1,93 +1,123 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.shared.email;
 
+import java.util.List;
 import java.util.Map;
 
 /**
  * This class represents an EMAIL to be sent after datasets have been imported.
- * 
+ *
  * @author JCD, mkain
  *
  */
 public class EmailDatasetsImported extends EmailBase {
 
-	private Map<Long, String> datasets;
-    
-	private String subjectName;
+    private Map<Long, String> datasets;
 
-	private String examinationId;
-    
-	private String examDate;
+    private String subjectName;
 
-	private String studyCard;
+    private String examinationId;
 
-	/**
-	 * @return the datasets
-	 */
-	public Map<Long, String> getDatasets() {
-		return datasets;
-	}
+    private String examDate;
 
-	/**
-	 * @param datasets the datasets to set
-	 */
-	public void setDatasets(Map<Long, String>  datasets) {
-		this.datasets = datasets;
-	}
+    private String studyCard;
 
-	/**
-	 * @return the subjectName
-	 */
-	public String getSubjectName() {
-		return subjectName;
-	}
+    private List<String> qualityCards;
 
-	/**
-	 * @param subjectName the subjectName to set
-	 */
-	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
-	}
+    /**
+     * @return the datasets
+     */
+    public Map<Long, String> getDatasets() {
+        return datasets;
+    }
 
-	/**
-	 * @return the examinationId
-	 */
-	public String getExaminationId() {
-		return examinationId;
-	}
+    /**
+     * @param datasets the datasets to set
+     */
+    public void setDatasets(Map<Long, String>  datasets) {
+        this.datasets = datasets;
+    }
 
-	/**
-	 * @param examinationId the examinationId to set
-	 */
-	public void setExaminationId(String examinationId) {
-		this.examinationId = examinationId;
-	}
+    /**
+     * @return the subjectName
+     */
+    public String getSubjectName() {
+        return subjectName;
+    }
 
-	/**
-	 * @return the examDate
-	 */
-	public String getExamDate() {
-		return examDate;
-	}
+    /**
+     * @param subjectName the subjectName to set
+     */
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
+    }
 
-	/**
-	 * @param examDate the examDate to set
-	 */
-	public void setExamDate(String examDate) {
-		this.examDate = examDate;
-	}
+    /**
+     * @return the examinationId
+     */
+    public String getExaminationId() {
+        return examinationId;
+    }
 
-	/**
-	 * @return the studyCard
-	 */
-	public String getStudyCard() {
-		return studyCard;
-	}
+    /**
+     * @param examinationId the examinationId to set
+     */
+    public void setExaminationId(String examinationId) {
+        this.examinationId = examinationId;
+    }
 
-	/**
-	 * @param studyCard the studyCard to set
-	 */
-	public void setStudyCard(String studyCard) {
-		this.studyCard = studyCard;
-	}
-	
+    /**
+     * @return the examDate
+     */
+    public String getExamDate() {
+        return examDate;
+    }
+
+    /**
+     * @param examDate the examDate to set
+     */
+    public void setExamDate(String examDate) {
+        this.examDate = examDate;
+    }
+
+    /**
+     * @return the studyCard
+     */
+    public String getStudyCard() {
+        return studyCard;
+    }
+
+    /**
+     * @param studyCard the studyCard to set
+     */
+    public void setStudyCard(String studyCard) {
+        this.studyCard = studyCard;
+    }
+
+    /**
+     * @return the qualityCards
+     */
+    public List<String> getQualityCards() {
+        return qualityCards;
+    }
+
+    /**
+     * @param qualityCards the qualityCards to set
+     */
+    public void setQualityCards(List<String> qualityCards) {
+        this.qualityCards = qualityCards;
+    }
 }

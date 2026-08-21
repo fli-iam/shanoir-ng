@@ -13,12 +13,18 @@
  */
 import { Injectable } from '@angular/core';
 
+import { CoilService } from 'src/app/coils/shared/coil.service';
+import { Coil } from 'src/app/coils/shared/coil.model';
+
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
+
 import { DicomService } from './dicom.service';
 import { QualityCardDTO } from './quality-card.dto.model';
 import { QualityCard, QualityCardRule } from './quality-card.model';
 import { DicomTag, Operation, StudyCardCondition } from './study-card.model';
+import { StudyCardDTOService } from './study-card.dto';
+import { StudyCardDTOServiceAbstract } from './study-card.dto.abstract';
 
 
 @Injectable()
@@ -26,7 +32,8 @@ export class QualityCardDTOService {
 
     constructor(
         private studyService: StudyService,
-        private dicomService: DicomService
+        private dicomService: DicomService,
+        private coilService: CoilService
     ) {}
 
     /**
@@ -40,19 +47,34 @@ export class QualityCardDTOService {
         return Promise.all([
             this.studyService.get(dto.studyId).then(study => result.study = study),
             this.dicomService.getDicomTags().then(tags => this.completeDicomTagNames(result, tags)),
-        ]).then(([]) => {
+            this.coilService.getAll().then(coils => this.completeCoils(result, coils))
+        ]).then(() => {
             return result;
         });
     }
 
     private completeDicomTagNames(result: QualityCard, tags: DicomTag[]) {
         if (result.rules) {
-            for (let rule of result.rules) {
+            for (const rule of result.rules) {
                 if (rule.conditions) {
-                    for (let condition of rule.conditions) {
+                    for (const condition of rule.conditions) {
                         condition.dicomTag = tags.find(tag => !!condition.dicomTag && tag.code == condition.dicomTag.code);
                     }
                 }
+            }
+        }
+    }
+
+    private completeCoils(result: QualityCard, coils: Coil[]) {
+        if (result.rules) {
+            for (const rule of result.rules) {
+                rule.conditions?.forEach(cond => {
+                    cond.values?.forEach((val, index) => {
+                        if (StudyCardDTOService.isCoil(cond.shanoirField)) {
+                            if (val instanceof Coil) cond.values[index] = coils.find(coil => coil.id == (val as Coil).id);
+                        }
+                    });
+                });
             }
         }
     }
@@ -64,21 +86,21 @@ export class QualityCardDTOService {
     public toEntityList(dtos: QualityCardDTO[], result?: QualityCard[]): Promise<QualityCard[]>{
         if (!result) result = [];
         if (dtos) {
-            for (let dto of dtos ? dtos : []) {
-                let entity = new QualityCard();
+            for (const dto of dtos ? dtos : []) {
+                const entity = new QualityCard();
                 QualityCardDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
         }
         return Promise.all([
             this.studyService.getStudiesNames().then(studies => {
-                for (let entity of result) {
+                for (const entity of result) {
                     if (entity.study) 
                         entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
                 }
             }),
             this.dicomService.getDicomTags().then(tags => {
-                for (let entity of result) {
+                for (const entity of result) {
                     this.completeDicomTagNames(entity, tags)
                 }
             })   
@@ -96,16 +118,26 @@ export class QualityCardDTOService {
         }
         entity.rules = [];
         if (dto.rules) {
-            for (let ruleDTO of dto.rules) {
-                let rule: QualityCardRule = new QualityCardRule();
+            for (const ruleDTO of dto.rules) {
+                const rule: QualityCardRule = new QualityCardRule();
                 rule.tag = ruleDTO.qualityTag;
+                rule.orConditions = ruleDTO.orConditions;
                 if (ruleDTO.conditions) {
                     rule.conditions = [];
-                    for (let conditionDTO of ruleDTO.conditions) {
-                        let condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
-                        condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null);
+                    for (const conditionDTO of ruleDTO.conditions) {
+                        const condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
+                        condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null, null, null);
                         condition.shanoirField = conditionDTO.shanoirField;
-                        condition.values = conditionDTO.values;
+                        if (StudyCardDTOServiceAbstract.isCoil(condition.shanoirField) && !Number.isNaN(Number(conditionDTO.values?.[0]))) {
+                            condition.values = [];
+                            conditionDTO.values?.forEach(dtoVal => {
+                                const value = new Coil();
+                                value.id = +dtoVal;
+                                condition.values.push(value);
+                            });
+                        } else {
+                            condition.values = conditionDTO.values;
+                        }
                         condition.operation = conditionDTO.operation as Operation;
                         condition.cardinality = conditionDTO.cardinality;
                         rule.conditions.push(condition);

@@ -2,427 +2,512 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 package org.shanoir.ng.datasetacquisition.model.mr;
 
-import jakarta.persistence.*;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.DiscriminatorType;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+
 /**
  * MR protocol.
- * 
+ *
  * @author msimon
  *
  */
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="dtype",
-discriminatorType = DiscriminatorType.INTEGER)
+@DiscriminatorColumn(name = "dtype",
+        discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("1")
 public class MrProtocolMetadata extends AbstractEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -5850582993918561681L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -5850582993918561681L;
 
-	/**
-	 * (0008,0008) Image Type or (0008, 9209) Acquisition contrast (see Dicom p
-	 * 682 et al).
-	 */
-	private Integer acquisitionContrast;
+    /**
+     * (0008,0008) Image Type or (0008, 9209) Acquisition contrast (see Dicom p
+     * 682 et al).
+     */
+    private Integer acquisitionContrast;
 
-	/**
-	 * (0018,1049) Contrast/Bolus Ingredient Concentration. The unit of measure
-	 * of injected volume must be in mg/ml.
-	 */
-	private Double contrastAgentConcentration;
+    /**
+     * (0018,1049) Contrast/Bolus Ingredient Concentration. The unit of measure
+     * of injected volume must be in mg/ml.
+     */
+    private Double contrastAgentConcentration;
 
-	/**
-	 * From (0018,0010) Contrast or bolus agent and (0018,1048) Contrast/bolus
-	 * ingredient.
-	 */
-	private Integer contrastAgentUsed;
+    /**
+     * From (0018,0010) Contrast or bolus agent and (0018,1048) Contrast/bolus
+     * ingredient.
+     */
+    private Integer contrastAgentUsed;
 
-	/**
-	 * Volume : volume injected in milliliters of diluted contrast agent. The
-	 * unit of measure of injected volume must be in ml.
-	 */
-	private Double injectedVolume;
+    /**
+     * Volume : volume injected in milliliters of diluted contrast agent. The
+     * unit of measure of injected volume must be in ml.
+     */
+    private Double injectedVolume;
 
-	/**
-	 * From (0018,0021) Sequence variant where you can find MTC (standing for
-	 * Magnetization Transfer Contrast).
-	 */
-	private Boolean magnetizationTransfer;
+    /**
+     * From (0018,0021) Sequence variant where you can find MTC (standing for
+     * Magnetization Transfer Contrast).
+     */
+    private Boolean magnetizationTransfer;
 
-	/**
-	 * Derived from (0018,0091) Echo train length (Number of lines in k- space
-	 * acquired per excitation per image) and from the (0018,9032) Geometry
-	 * category of k-Space traversal.
-	 */
-	private Integer mrSequenceKSpaceFill;
+    /**
+     * Derived from (0018,0091) Echo train length (Number of lines in k- space
+     * acquired per excitation per image) and from the (0018,9032) Geometry
+     * category of k-Space traversal.
+     */
+    private Integer mrSequenceKSpaceFill;
 
-	/** Corresponding Dicom information : (0018,0024) Sequence name. */
-	private String mrSequenceName;
-	
-	/** (0018, 0020) Scanning sequence Description  */
-	@ElementCollection
-	private List<Integer> mrScanningSequence;
-	
-	/** (0018, 0021) Sequence Variant of the scanning sequence */
-	@ElementCollection
-	private List<Integer> mrSequenceVariant;
+    /** Corresponding Dicom information : (0018,0024) Sequence name. */
+    private String mrSequenceName;
 
-	/** Corresponding Dicom information : (0018,1030) Protocol name. */
-	private String name;
+    /** (0018, 0020) Scanning sequence Description  */
+    @ElementCollection
+    private List<Integer> mrScanningSequence;
 
-	/** From (0018,1041) Parallel acquisition Contrast/Bolus. */
-	private Boolean parallelAcquisition;
+    /** (0018, 0021) Sequence Variant of the scanning sequence */
+    @ElementCollection
+    private List<Integer> mrSequenceVariant;
 
-	/**
-	 * From dicom tag (0018,9078) VR=CS, VM=1 Parallel Acquisition Technique.
-	 */
-	private Integer parallelAcquisitionTechnique;
+    /** Corresponding Dicom information : (0018,1030) Protocol name. */
+    private String name;
 
-	/** Receiving coil. */
-	private Long receivingCoilId;
+    /** From (0018,1041) Parallel acquisition Contrast/Bolus. */
+    private Boolean parallelAcquisition;
 
-	/** From (0018, 9151) Frame reference Date time. */
-	private Integer sliceOrder;
+    /**
+     * From dicom tag (0018,9078) VR=CS, VM=1 Parallel Acquisition Technique.
+     */
+    private Integer parallelAcquisitionTechnique;
 
-	/** Cannot be easily found from DICOM data elements. */
-	private Integer sliceOrientationAtAcquisition;
+    /** Receiving coil. */
+    private Long receivingCoilId;
 
-	/**
-	 * From dicom tag (0018,9069) VR=FD, VM=1 Parallel Reduction Factor
-	 * In-plane.
-	 */
-	private Double timeReductionFactorForTheInPlaneDirection;
+    /** From (0018, 9151) Frame reference Date time. */
+    private Integer sliceOrder;
 
-	/**
-	 * From dicom tag (0018,9155) VR=FD, VM=1 Parallel Reduction Factor
-	 * out-of-plane.
-	 */
-	private Double timeReductionFactorForTheOutOfPlaneDirection;
+    /** Cannot be easily found from DICOM data elements. */
+    private Integer sliceOrientationAtAcquisition;
 
-	/** Transmitting coil. */
-	private Long transmittingCoilId;
+    /**
+     * From dicom tag (0018,9069) VR=FD, VM=1 Parallel Reduction Factor
+     * In-plane.
+     */
+    private Double timeReductionFactorForTheInPlaneDirection;
 
-	/**
-	 * @return the acquisitionContrast
-	 */
-	public AcquisitionContrast getAcquisitionContrast() {
-		return AcquisitionContrast.getContrast(acquisitionContrast);
-	}
+    /**
+     * From dicom tag (0018,9155) VR=FD, VM=1 Parallel Reduction Factor
+     * out-of-plane.
+     */
+    private Double timeReductionFactorForTheOutOfPlaneDirection;
 
-	/**
-	 * @param acquisitionContrast
-	 *            the acquisitionContrast to set
-	 */
-	public void setAcquisitionContrast(AcquisitionContrast acquisitionContrast) {
-		if (acquisitionContrast == null) {
-			this.acquisitionContrast = null;
-		} else {
-			this.acquisitionContrast = acquisitionContrast.getId();
-		}
-	}
+    /** Transmitting coil. */
+    private Long transmittingCoilId;
+
+    public MrProtocolMetadata() {
+
+    }
+
+    public MrProtocolMetadata(MrProtocolMetadata mrProcMD) {
+        if (mrProcMD != null) {
+            if (mrProcMD.getAcquisitionContrast() != null) {
+                this.acquisitionContrast = mrProcMD.getAcquisitionContrast().getId();
+            } else {
+                this.acquisitionContrast = null;
+            }
+
+            if (mrProcMD.getContrastAgentConcentration() != null) {
+                this.contrastAgentConcentration = mrProcMD.getContrastAgentConcentration();
+            } else {
+                this.contrastAgentConcentration = null;
+            }
+
+            if (mrProcMD.getContrastAgentUsed() != null) {
+                this.contrastAgentUsed = mrProcMD.getContrastAgentUsed().getId();
+            } else {
+                this.contrastAgentUsed = null;
+            }
+            this.injectedVolume = mrProcMD.getInjectedVolume();
+            this.magnetizationTransfer = mrProcMD.getMagnetizationTransfer();
+
+            if (mrProcMD.getMrSequenceKSpaceFill() != null) {
+                this.mrSequenceKSpaceFill = mrProcMD.getMrSequenceKSpaceFill().getId();
+            } else {
+                this.mrSequenceKSpaceFill = null;
+            }
+            this.mrSequenceName = mrProcMD.getMrSequenceName();
+
+            if (mrProcMD.getMrScanningSequence() != null) {
+                this.mrScanningSequence = new ArrayList<>(mrProcMD.getMrScanningSequence().size());
+                for (MrScanningSequence mrss : mrProcMD.getMrScanningSequence()) {
+                    this.mrScanningSequence.add(MrScanningSequence.getScanningSequence(mrss.getId()).getId());
+                }
+            } else {
+                this.mrScanningSequence = null;
+            }
+
+            if (mrProcMD.getMrSequenceVariant() != null) {
+                this.mrSequenceVariant = new ArrayList<>(mrProcMD.getMrSequenceVariant().size());
+                for (MrSequenceVariant mrsv : mrProcMD.getMrSequenceVariant()) {
+                    this.mrSequenceVariant.add(mrsv.getId());
+                }
+            } else {
+                this.mrSequenceVariant = null;
+            }
+
+            this.name = mrProcMD.getName();
+            this.parallelAcquisition = mrProcMD.getParallelAcquisition();
+
+            if (mrProcMD.getParallelAcquisitionTechnique() != null) {
+                this.parallelAcquisitionTechnique = mrProcMD.getParallelAcquisitionTechnique().getId();
+            } else {
+                this.parallelAcquisitionTechnique = null;
+            }
+            this.receivingCoilId = mrProcMD.getReceivingCoilId();
+
+            if (mrProcMD.getSliceOrder() != null) {
+                this.sliceOrder = mrProcMD.getSliceOrder().getId();
+            } else {
+                this.sliceOrder = null;
+            }
+
+            if (mrProcMD.getSliceOrientationAtAcquisition() != null) {
+                this.sliceOrientationAtAcquisition = mrProcMD.getSliceOrientationAtAcquisition().getId();
+            } else {
+                this.sliceOrientationAtAcquisition = null;
+            }
+            this.timeReductionFactorForTheInPlaneDirection = mrProcMD.getTimeReductionFactorForTheInPlaneDirection();
+            this.timeReductionFactorForTheOutOfPlaneDirection = mrProcMD.getTimeReductionFactorForTheOutOfPlaneDirection();
+            this.transmittingCoilId = mrProcMD.getTransmittingCoilId();
+        }
+    }
+
+    /**
+     * @return the acquisitionContrast
+     */
+    public AcquisitionContrast getAcquisitionContrast() {
+        return AcquisitionContrast.getContrast(acquisitionContrast);
+    }
+
+    /**
+     * @param acquisitionContrast
+     *            the acquisitionContrast to set
+     */
+    public void setAcquisitionContrast(AcquisitionContrast acquisitionContrast) {
+        if (acquisitionContrast == null) {
+            this.acquisitionContrast = null;
+        } else {
+            this.acquisitionContrast = acquisitionContrast.getId();
+        }
+    }
 
 
-	/**
-	 * @return the contrastAgentConcentration
-	 */
-	public Double getContrastAgentConcentration() {
-		return contrastAgentConcentration;
-	}
+    /**
+     * @return the contrastAgentConcentration
+     */
+    public Double getContrastAgentConcentration() {
+        return contrastAgentConcentration;
+    }
 
-	/**
-	 * @param contrastAgentConcentration
-	 *            the contrastAgentConcentration to set
-	 */
-	public void setContrastAgentConcentration(Double contrastAgentConcentration) {
-		this.contrastAgentConcentration = contrastAgentConcentration;
-	}
+    /**
+     * @param contrastAgentConcentration
+     *            the contrastAgentConcentration to set
+     */
+    public void setContrastAgentConcentration(Double contrastAgentConcentration) {
+        this.contrastAgentConcentration = contrastAgentConcentration;
+    }
 
-	/**
-	 * @return the contrastAgentUsed
-	 */
-	public ContrastAgentUsed getContrastAgentUsed() {
-		return ContrastAgentUsed.getConstrastAgent(contrastAgentUsed);
-	}
+    /**
+     * @return the contrastAgentUsed
+     */
+    public ContrastAgentUsed getContrastAgentUsed() {
+        return ContrastAgentUsed.getConstrastAgent(contrastAgentUsed);
+    }
 
-	/**
-	 * @param contrastAgentUsed
-	 *            the contrastAgentUsed to set
-	 */
-	public void setContrastAgentUsed(ContrastAgentUsed contrastAgentUsed) {
-		if (contrastAgentUsed == null) {
-			this.contrastAgentUsed = null;
-		} else {
-			this.contrastAgentUsed = contrastAgentUsed.getId();
-		}
-	}
+    /**
+     * @param contrastAgentUsed
+     *            the contrastAgentUsed to set
+     */
+    public void setContrastAgentUsed(ContrastAgentUsed contrastAgentUsed) {
+        if (contrastAgentUsed == null) {
+            this.contrastAgentUsed = null;
+        } else {
+            this.contrastAgentUsed = contrastAgentUsed.getId();
+        }
+    }
 
-	/**
-	 * @return the injectedVolume
-	 */
-	public Double getInjectedVolume() {
-		return injectedVolume;
-	}
+    /**
+     * @return the injectedVolume
+     */
+    public Double getInjectedVolume() {
+        return injectedVolume;
+    }
 
-	/**
-	 * @param injectedVolume
-	 *            the injectedVolume to set
-	 */
-	public void setInjectedVolume(Double injectedVolume) {
-		this.injectedVolume = injectedVolume;
-	}
+    /**
+     * @param injectedVolume
+     *            the injectedVolume to set
+     */
+    public void setInjectedVolume(Double injectedVolume) {
+        this.injectedVolume = injectedVolume;
+    }
 
-	/**
-	 * @return the magnetizationTransfer
-	 */
-	public Boolean getMagnetizationTransfer() {
-		return magnetizationTransfer;
-	}
+    /**
+     * @return the magnetizationTransfer
+     */
+    public Boolean getMagnetizationTransfer() {
+        return magnetizationTransfer;
+    }
 
-	/**
-	 * @param magnetizationTransfer
-	 *            the magnetizationTransfer to set
-	 */
-	public void setMagnetizationTransfer(Boolean magnetizationTransfer) {
-		this.magnetizationTransfer = magnetizationTransfer;
-	}
+    /**
+     * @param magnetizationTransfer
+     *            the magnetizationTransfer to set
+     */
+    public void setMagnetizationTransfer(Boolean magnetizationTransfer) {
+        this.magnetizationTransfer = magnetizationTransfer;
+    }
 
-	/**
-	 * @return the mrSequenceKSpaceFill
-	 */
-	public MrSequenceKSpaceFill getMrSequenceKSpaceFill() {
-		return MrSequenceKSpaceFill.getKSpaceFill(mrSequenceKSpaceFill);
-	}
+    /**
+     * @return the mrSequenceKSpaceFill
+     */
+    public MrSequenceKSpaceFill getMrSequenceKSpaceFill() {
+        return MrSequenceKSpaceFill.getKSpaceFill(mrSequenceKSpaceFill);
+    }
 
-	/**
-	 * @param mrSequenceKSpaceFill
-	 *            the mrSequenceKSpaceFill to set
-	 */
-	public void setMrSequenceKSpaceFill(MrSequenceKSpaceFill mrSequenceKSpaceFill) {
-		if (mrSequenceKSpaceFill == null) {
-			this.mrSequenceKSpaceFill = null;
-		} else {
-			this.mrSequenceKSpaceFill = mrSequenceKSpaceFill.getId();
-		}
-	}
+    /**
+     * @param mrSequenceKSpaceFill
+     *            the mrSequenceKSpaceFill to set
+     */
+    public void setMrSequenceKSpaceFill(MrSequenceKSpaceFill mrSequenceKSpaceFill) {
+        if (mrSequenceKSpaceFill == null) {
+            this.mrSequenceKSpaceFill = null;
+        } else {
+            this.mrSequenceKSpaceFill = mrSequenceKSpaceFill.getId();
+        }
+    }
 
-	/**
-	 * @return the mrSequenceName
-	 */
-	public String getMrSequenceName() {
-		return mrSequenceName;
-	}
+    /**
+     * @return the mrSequenceName
+     */
+    public String getMrSequenceName() {
+        return mrSequenceName;
+    }
 
-	/**
-	 * @param mrSequenceName
-	 *            the mrSequenceName to set
-	 */
-	public void setMrSequenceName(String mrSequenceName) {
-		this.mrSequenceName = mrSequenceName;
-	}
+    /**
+     * @param mrSequenceName
+     *            the mrSequenceName to set
+     */
+    public void setMrSequenceName(String mrSequenceName) {
+        this.mrSequenceName = mrSequenceName;
+    }
 
-	public List<MrScanningSequence> getMrScanningSequence() {
-		List<MrScanningSequence> mrScanningSequenceList = new ArrayList<>();
-		if (mrScanningSequence != null) {
-			for (Integer mrScanningSequenceId : mrScanningSequence) {
-				mrScanningSequenceList.add(MrScanningSequence.getScanningSequence(mrScanningSequenceId));
-			}
-		}
-		return mrScanningSequenceList;
-	}
+    public List<MrScanningSequence> getMrScanningSequence() {
+        List<MrScanningSequence> mrScanningSequenceList = new ArrayList<>();
+        if (mrScanningSequence != null) {
+            for (Integer mrScanningSequenceId : mrScanningSequence) {
+                mrScanningSequenceList.add(MrScanningSequence.getScanningSequence(mrScanningSequenceId));
+            }
+        }
+        return mrScanningSequenceList;
+    }
 
-	public void setMrScanningSequence(List<String> mrScanningSequenceList) {
-		if (mrScanningSequenceList != null && !mrScanningSequenceList.isEmpty()) {
-			mrScanningSequence = new ArrayList<>();
-			for (String scanningSequence : mrScanningSequenceList) {
-				mrScanningSequence.add(MrScanningSequence.getIdByType(scanningSequence).getId());
-			}
-		}
-	}
+    public void setMrScanningSequence(List<String> mrScanningSequenceList) {
+        if (mrScanningSequenceList != null && !mrScanningSequenceList.isEmpty()) {
+            mrScanningSequence = new ArrayList<>();
+            for (String scanningSequence : mrScanningSequenceList) {
+                mrScanningSequence.add(MrScanningSequence.getIdByType(scanningSequence).getId());
+            }
+        }
+    }
 
-	
-	public List<MrSequenceVariant> getMrSequenceVariant() {
-		List<MrSequenceVariant> mrSequenceVariantList = new ArrayList<>();
-		if (mrSequenceVariant != null) {
-			for (Integer mrScanningSequenceId : mrSequenceVariant) {
-				mrSequenceVariantList.add(MrSequenceVariant.getSequenceVariant(mrScanningSequenceId));
-			}
-		}
-		return mrSequenceVariantList;
-	}
 
-	public void setMrSequenceVariant(List<String> mrSequenceVariantList) {
-		if (mrSequenceVariantList != null && !mrSequenceVariantList.isEmpty()) {
-			mrSequenceVariant = new ArrayList<>();
-			for (String sequenceVariant : mrSequenceVariantList) {
-				mrSequenceVariant.add(MrSequenceVariant.getIdByType(sequenceVariant).getId());
-			}
-		}
-	}
+    public List<MrSequenceVariant> getMrSequenceVariant() {
+        List<MrSequenceVariant> mrSequenceVariantList = new ArrayList<>();
+        if (mrSequenceVariant != null) {
+            for (Integer mrScanningSequenceId : mrSequenceVariant) {
+                mrSequenceVariantList.add(MrSequenceVariant.getSequenceVariant(mrScanningSequenceId));
+            }
+        }
+        return mrSequenceVariantList;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    public void setMrSequenceVariant(List<String> mrSequenceVariantList) {
+        if (mrSequenceVariantList != null && !mrSequenceVariantList.isEmpty()) {
+            mrSequenceVariant = new ArrayList<>();
+            for (String sequenceVariant : mrSequenceVariantList) {
+                mrSequenceVariant.add(MrSequenceVariant.getIdByType(sequenceVariant).getId());
+            }
+        }
+    }
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @return the parallelAcquisition
-	 */
-	public Boolean getParallelAcquisition() {
-		return parallelAcquisition;
-	}
+    /**
+     * @param name
+     *            the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @param parallelAcquisition
-	 *            the parallelAcquisition to set
-	 */
-	public void setParallelAcquisition(Boolean parallelAcquisition) {
-		this.parallelAcquisition = parallelAcquisition;
-	}
+    /**
+     * @return the parallelAcquisition
+     */
+    public Boolean getParallelAcquisition() {
+        return parallelAcquisition;
+    }
 
-	/**
-	 * @return the parallelAcquisitionTechnique
-	 */
-	public ParallelAcquisitionTechnique getParallelAcquisitionTechnique() {
-		return ParallelAcquisitionTechnique.getTechnique(parallelAcquisitionTechnique);
-	}
+    /**
+     * @param parallelAcquisition
+     *            the parallelAcquisition to set
+     */
+    public void setParallelAcquisition(Boolean parallelAcquisition) {
+        this.parallelAcquisition = parallelAcquisition;
+    }
 
-	/**
-	 * @param parallelAcquisitionTechnique
-	 *            the parallelAcquisitionTechnique to set
-	 */
-	public void setParallelAcquisitionTechnique(ParallelAcquisitionTechnique parallelAcquisitionTechnique) {
-		if (parallelAcquisitionTechnique == null) {
-			this.parallelAcquisitionTechnique = null;
-		} else {
-			this.parallelAcquisitionTechnique = parallelAcquisitionTechnique.getId();
-		}
-	}
+    /**
+     * @return the parallelAcquisitionTechnique
+     */
+    public ParallelAcquisitionTechnique getParallelAcquisitionTechnique() {
+        return ParallelAcquisitionTechnique.getTechnique(parallelAcquisitionTechnique);
+    }
 
-	/**
-	 * @return the receivingCoilId
-	 */
-	public Long getReceivingCoilId() {
-		return receivingCoilId;
-	}
+    /**
+     * @param parallelAcquisitionTechnique
+     *            the parallelAcquisitionTechnique to set
+     */
+    public void setParallelAcquisitionTechnique(ParallelAcquisitionTechnique parallelAcquisitionTechnique) {
+        if (parallelAcquisitionTechnique == null) {
+            this.parallelAcquisitionTechnique = null;
+        } else {
+            this.parallelAcquisitionTechnique = parallelAcquisitionTechnique.getId();
+        }
+    }
 
-	/**
-	 * @param receivingCoilId
-	 *            the receivingCoilId to set
-	 */
-	public void setReceivingCoilId(Long receivingCoilId) {
-		this.receivingCoilId = receivingCoilId;
-	}
+    /**
+     * @return the receivingCoilId
+     */
+    public Long getReceivingCoilId() {
+        return receivingCoilId;
+    }
 
-	/**
-	 * @return the sliceOrder
-	 */
-	public SliceOrder getSliceOrder() {
-		return SliceOrder.getOrder(sliceOrder);
-	}
+    /**
+     * @param receivingCoilId
+     *            the receivingCoilId to set
+     */
+    public void setReceivingCoilId(Long receivingCoilId) {
+        this.receivingCoilId = receivingCoilId;
+    }
 
-	/**
-	 * @param sliceOrder
-	 *            the sliceOrder to set
-	 */
-	public void setSliceOrder(SliceOrder sliceOrder) {
-		if (sliceOrder == null) {
-			this.sliceOrder = null;
-		} else {
-			this.sliceOrder = sliceOrder.getId();
-		}
-	}
+    /**
+     * @return the sliceOrder
+     */
+    public SliceOrder getSliceOrder() {
+        return SliceOrder.getOrder(sliceOrder);
+    }
 
-	/**
-	 * @return the sliceOrientationAtAcquisition
-	 */
-	public SliceOrientationAtAcquisition getSliceOrientationAtAcquisition() {
-		return SliceOrientationAtAcquisition.getOrientation(sliceOrientationAtAcquisition);
-	}
+    /**
+     * @param sliceOrder
+     *            the sliceOrder to set
+     */
+    public void setSliceOrder(SliceOrder sliceOrder) {
+        if (sliceOrder == null) {
+            this.sliceOrder = null;
+        } else {
+            this.sliceOrder = sliceOrder.getId();
+        }
+    }
 
-	/**
-	 * @param sliceOrientationAtAcquisition
-	 *            the sliceOrientationAtAcquisition to set
-	 */
-	public void setSliceOrientationAtAcquisition(SliceOrientationAtAcquisition sliceOrientationAtAcquisition) {
-		if (sliceOrientationAtAcquisition == null) {
-			this.sliceOrientationAtAcquisition = null;
-		} else {
-			this.sliceOrientationAtAcquisition = sliceOrientationAtAcquisition.getId();
-		}
-	}
+    /**
+     * @return the sliceOrientationAtAcquisition
+     */
+    public SliceOrientationAtAcquisition getSliceOrientationAtAcquisition() {
+        return SliceOrientationAtAcquisition.getOrientation(sliceOrientationAtAcquisition);
+    }
 
-	/**
-	 * @return the timeReductionFactorForTheInPlaneDirection
-	 */
-	public Double getTimeReductionFactorForTheInPlaneDirection() {
-		return timeReductionFactorForTheInPlaneDirection;
-	}
+    /**
+     * @param sliceOrientationAtAcquisition
+     *            the sliceOrientationAtAcquisition to set
+     */
+    public void setSliceOrientationAtAcquisition(SliceOrientationAtAcquisition sliceOrientationAtAcquisition) {
+        if (sliceOrientationAtAcquisition == null) {
+            this.sliceOrientationAtAcquisition = null;
+        } else {
+            this.sliceOrientationAtAcquisition = sliceOrientationAtAcquisition.getId();
+        }
+    }
 
-	/**
-	 * @param timeReductionFactorForTheInPlaneDirection
-	 *            the timeReductionFactorForTheInPlaneDirection to set
-	 */
-	public void setTimeReductionFactorForTheInPlaneDirection(Double timeReductionFactorForTheInPlaneDirection) {
-		this.timeReductionFactorForTheInPlaneDirection = timeReductionFactorForTheInPlaneDirection;
-	}
+    /**
+     * @return the timeReductionFactorForTheInPlaneDirection
+     */
+    public Double getTimeReductionFactorForTheInPlaneDirection() {
+        return timeReductionFactorForTheInPlaneDirection;
+    }
 
-	/**
-	 * @return the timeReductionFactorForTheOutOfPlaneDirection
-	 */
-	public Double getTimeReductionFactorForTheOutOfPlaneDirection() {
-		return timeReductionFactorForTheOutOfPlaneDirection;
-	}
+    /**
+     * @param timeReductionFactorForTheInPlaneDirection
+     *            the timeReductionFactorForTheInPlaneDirection to set
+     */
+    public void setTimeReductionFactorForTheInPlaneDirection(Double timeReductionFactorForTheInPlaneDirection) {
+        this.timeReductionFactorForTheInPlaneDirection = timeReductionFactorForTheInPlaneDirection;
+    }
 
-	/**
-	 * @param timeReductionFactorForTheOutOfPlaneDirection
-	 *            the timeReductionFactorForTheOutOfPlaneDirection to set
-	 */
-	public void setTimeReductionFactorForTheOutOfPlaneDirection(Double timeReductionFactorForTheOutOfPlaneDirection) {
-		this.timeReductionFactorForTheOutOfPlaneDirection = timeReductionFactorForTheOutOfPlaneDirection;
-	}
+    /**
+     * @return the timeReductionFactorForTheOutOfPlaneDirection
+     */
+    public Double getTimeReductionFactorForTheOutOfPlaneDirection() {
+        return timeReductionFactorForTheOutOfPlaneDirection;
+    }
 
-	/**
-	 * @return the transmittingCoilId
-	 */
-	public Long getTransmittingCoilId() {
-		return transmittingCoilId;
-	}
+    /**
+     * @param timeReductionFactorForTheOutOfPlaneDirection
+     *            the timeReductionFactorForTheOutOfPlaneDirection to set
+     */
+    public void setTimeReductionFactorForTheOutOfPlaneDirection(Double timeReductionFactorForTheOutOfPlaneDirection) {
+        this.timeReductionFactorForTheOutOfPlaneDirection = timeReductionFactorForTheOutOfPlaneDirection;
+    }
 
-	/**
-	 * @param transmittingCoilId
-	 *            the transmittingCoilId to set
-	 */
-	public void setTransmittingCoilId(Long transmittingCoilId) {
-		this.transmittingCoilId = transmittingCoilId;
-	}
+    /**
+     * @return the transmittingCoilId
+     */
+    public Long getTransmittingCoilId() {
+        return transmittingCoilId;
+    }
+
+    /**
+     * @param transmittingCoilId
+     *            the transmittingCoilId to set
+     */
+    public void setTransmittingCoilId(Long transmittingCoilId) {
+        this.transmittingCoilId = transmittingCoilId;
+    }
 
 }

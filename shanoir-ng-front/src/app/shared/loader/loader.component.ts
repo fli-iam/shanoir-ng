@@ -13,12 +13,15 @@
  */
 
 import { Component } from '@angular/core';
+
 import { LoaderService } from './loader.service';
+
 
 @Component({
     selector: 'loader',
     templateUrl: './loader.component.html',
-    styleUrls: ['./loader.component.css']
+    styleUrls: ['./loader.component.css'],
+    imports: []
 })
 export class LoaderComponent {
 

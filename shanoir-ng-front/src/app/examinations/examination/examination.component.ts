@@ -11,15 +11,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { AbstractControl, FormGroup, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { NgClass } from '@angular/common';
 
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection } from 'src/app/studies/study/tree.service';
+
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
+import { dateDisplay } from "../../shared/./localLanguage/localDate.abstract";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
@@ -27,28 +33,27 @@ import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { ExaminationNode } from '../../tree/tree.model';
+import { Subject } from "../../subjects/shared/subject.model";
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Format } from 'src/app/datasets/shared/dataset.service';
-import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setup/download-setup.component';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
+import { InstrumentAssessmentComponent } from '../instrument-assessment/instrument-assessment.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
-    selector: 'examination',
-    templateUrl: 'examination.component.html'
+    selector: 'examination-detail',
+    templateUrl: 'examination.component.html',
+    imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, InstrumentAssessmentComponent, LocalDateFormatPipe]
 })
 
-export class ExaminationComponent extends EntityComponent<Examination> {
+export class ExaminationComponent extends EntityComponent<Examination> implements OnDestroy {
 
     @ViewChild('input') private fileInput: ElementRef;
 
     public centers: IdName[];
     public studies: IdName[];
-    public subjects: SubjectWithSubjectStudy[];
-    examinationExecutives: Object[];
+    public subjects: Subject[];
     files: File[] = [];
     public inImport: boolean;
     public readonly ImagesUrlUtil = ImagesUrlUtil;
@@ -56,11 +61,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasAdministrateRight: boolean = false;
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
-    pattern: string = '[^:|<>&\/]+';
-    examNode: Examination | ExaminationNode;
+    pattern: RegExp = /[^:|<>&/]+/;
     downloadState: TaskState = new TaskState();
-
-    datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
+    dateDisplay = dateDisplay;
+    datasetIds: Promise<number[]> = new Promise(() => { return; });
     datasetIdsLoaded: boolean = false;
     noDatasets: boolean = false;
 	hasEEG: boolean = false;
@@ -68,19 +72,24 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasBids: boolean = false;
     unit = UnitOfMeasure;
     defaultUnit = this.unit.KG;
-
+    private studyFirstChange: boolean = true;
 
     constructor(
-            private route: ActivatedRoute,
-            private examinationService: ExaminationService,
-            private centerService: CenterService,
-            private studyService: StudyService,
-            private studyRightsService: StudyRightsService,
-            public breadcrumbsService: BreadcrumbsService,
-            private downloadService: MassDownloadService) {
-
-        super(route, 'examination');
+        private route: ActivatedRoute,
+        protected examinationService: ExaminationService,
+        protected centerService: CenterService,
+        protected studyService: StudyService,
+        protected studyRightsService: StudyRightsService,
+        public breadcrumbsService: BreadcrumbsService,
+        protected downloadService: MassDownloadService,
+        private userRightsService: StudyRightsService
+    ) {
+        super(route);
         this.inImport = this.breadcrumbsService.isImporting();
+    }
+
+    protected getRoutingName(): string {
+        return 'examination';
     }
 
     public setFile() {
@@ -89,7 +98,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     set examination(examination: Examination) {
         this.entity = examination;
-        this.examNode = this.breadcrumbsService.currentStep.data.examinationNode ? this.breadcrumbsService.currentStep.data.examinationNode : examination;
     }
     get examination(): Examination { return this.entity; }
 
@@ -97,49 +105,40 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         return this.examinationService;
     }
 
-    set entity(exam: Examination) {
-        super.entity = exam;
-        this.getSubjects();
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromExamination(this.examination);
     }
 
-    get entity(): Examination {
-        return super.entity;
-    }
 
     initView(): Promise<void> {
-        return this.examinationService.get(this.id).then((examination: Examination) => {
-            this.examination = examination;
-            if(!this.examination.weightUnitOfMeasure){
-                this.examination.weightUnitOfMeasure = this.defaultUnit;
-            }
-            if (this.keycloakService.isUserAdmin()) {
-                this.hasAdministrateRight = true;
-                this.hasDownloadRight = true;
-                this.hasImportRight = true;
-                return;
-            } else {
-                return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
-                    this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
-                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                });
-            }
-        });
+        if(!this.examination.weightUnitOfMeasure){
+            this.examination.weightUnitOfMeasure = this.defaultUnit;
+        }
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasAdministrateRight = true;
+            this.hasDownloadRight = true;
+            this.hasImportRight = true;
+            return Promise.resolve();
+        } else {
+            return this.studyRightsService.getMyRightsForStudy(this.examination.study.id).then(rights => {
+                this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
+                this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+            });
+        }
     }
 
     initEdit(): Promise<void> {
-        this.getCenters();
         this.getStudies();
-        return this.examinationService.get(this.id).then((examination: Examination) => {
-            this.examination = examination
-            if(!this.examination.weightUnitOfMeasure){
-                this.examination.weightUnitOfMeasure = this.defaultUnit;
-            }
-        }).then(exam => this.getSubjects());
+        this.getSubjects(this.examination.study?.id);
+        this.getCenters(this.examination.study?.id);
+        if(!this.examination.weightUnitOfMeasure){
+            this.examination.weightUnitOfMeasure = this.defaultUnit;
+        }
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
-        this.getCenters();
         this.getStudies();
         this.examination = new Examination();
         this.examination.weightUnitOfMeasure = this.defaultUnit;
@@ -147,38 +146,74 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     buildForm(): UntypedFormGroup {
-        return this.formBuilder.group({
+        const form: FormGroup = this.formBuilder.group({
             'study': [{value: this.examination.study, disabled: this.inImport}, Validators.required],
-            'subject': [{value: this.examination.subject, disabled: this.inImport}],
-            'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
-            'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
+            'subject': [{value: this.examination.subject, disabled: this.inImport || !this.examination.study}, Validators.required],
+            'center': [{value: this.examination.center, disabled: this.inImport || !this.examination.study}, Validators.required],
+            'examinationDate': [{value: this.examination.examinationDate, disabled: this.inImport && this.examination.examinationDate}, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],
+            'dataReuseAgreement': [{value: this.examination.dataReuseAgreement, disabled: this.mode == 'view'}],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight],
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
+        const examinationDateCtrl: AbstractControl = form.get('examinationDate');
+        this.subscriptions.push(
+            examinationDateCtrl.valueChanges.subscribe(value => {
+                if (value && this.inImport && examinationDateCtrl.enabled) examinationDateCtrl.disable();
+            }),
+            form.get('study').valueChanges.subscribe(value => {
+                if (this.inImport) {
+                    this.fillSubjectsAndCentersWithPrefilled();
+                    return;
+                }
+                if (!this.studyFirstChange) {
+                    this.examination.subject = null;
+                    this.examination.center = null;
+                    if (value?.id) {
+                        this.getSubjects(value.id);
+                        this.getCenters(value.id);
+                        if (form.get('subject').disabled) form.get('subject').enable();
+                        if (form.get('center').disabled) form.get('center').enable();
+                    } else {
+                        this.centers = [];
+                        this.subjects = [];
+                        if (form.get('subject').enabled) form.get('subject').disable();
+                        if (form.get('center').enabled) form.get('center').disable();
+                    }
+                }
+                this.studyFirstChange = false;
+            })
+        );
+        return form;
     }
 
-    download(format: Format) {
-        this.downloadService.downloadAllByExaminationId(this.examination?.id, format);
+    private async fillSubjectsAndCentersWithPrefilled() {
+        const prefilledExam = await this.breadcrumbsService.currentStep.getPrefilledValue("entity");
+        if (this.entity?.subject && this.entity?.center) {
+            this.examination = prefilledExam;
+            if (this.examination.study?.id) {
+                await this.getSubjects(this.examination.study.id);
+                await this.getCenters(this.examination.study.id);
+            }
+        }
     }
 
     downloadAll() {
-        let options: DownloadSetupOptions = new DownloadSetupOptions();
-        options.hasBids = this.hasBids;
-        options.hasDicom = this.hasDicom;
-        options.hasNii = this.hasDicom;
-        options.hasEeg = this.hasEEG; 
-        this.downloadService.downloadAllByExaminationId(this.examination?.id, null, options, this.downloadState);
+        this.downloadService.downloadAllByExaminationId(this.examination?.id,this.downloadState);
     }
 
-    openViewer() {  
-	    window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+    openViewer() {
+	    window.open(environment.viewerUrl + '/viewer?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
-    getCenters(): void {
+    openSegmentationViewer() {
+        window.open(environment.viewerUrl + '/segmentation?StudyInstanceUIDs=1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
+    }
+
+    getCenters(studyId: number): void {
         this.centerService
-            .getCentersNames()
+            .getCentersNamesByStudyId(studyId)
             .then(centers => {
                 this.centers = centers;
             });
@@ -189,13 +224,21 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
+                this.userRightsService.getMyRights().then(rights => {
+                    if (!this.keycloakService.isUserAdmin()) {
+                        // filter studies to only those with import or admin rights
+                        this.studies = this.studies.filter(study => {
+                            const studyRights = rights.get(study.id);
+                            return studyRights && (studyRights.includes(StudyUserRight.CAN_IMPORT) || studyRights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                        });
+                    }
+                });
             });
     }
 
-    getSubjects(): void {
-        if (!this.examination || !this.examination.study) return;
+    getSubjects(studyId: number): void {
         this.studyService
-            .findSubjectsByStudyId(this.examination.study.id)
+            .findSubjectsByStudyId(studyId)
             .then(subjects => this.subjects = subjects);
     }
 
@@ -207,17 +250,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         }
     }
 
-    onStudyChange() {
-        this.getSubjects();
-    }
-
-    instAssessment() {
-    }
-
     public async hasEditRight(): Promise<boolean> {
 	   return this.keycloakService.isUserAdmin() || this.hasImportRight;
     }
-
 
     public async hasDeleteRight(): Promise<boolean> {
          return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
@@ -235,7 +270,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     public attachNewFile(event: any) {
-        let newFile = event.target.files[0];
+        const newFile = event.target.files[0];
         this.examination.extraDataFilePathList.push(newFile.name);
         this.files.push(newFile);
         this.form.markAsDirty();
@@ -243,14 +278,15 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     public save(): Promise<Examination> {
-        return super.save().then(result => {
+        return super.save(() => {
+            const uploads: Promise<void>[] = [];
             // Once the exam is saved, save associated files
-            for (let file of this.files) {
-                this.examinationService.postFile(file, this.entity.id);
+            for (const file of this.files) {
+                uploads.push(this.examinationService.postFile(file, this.entity.id));
             }
-            return result;
-        }).catch(reason => { if (reason.status == 403) {
-            this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbiden.');
+            return Promise.all(uploads).then(() => null);
+        }).then(() => null).catch(reason => { if (reason.status == 403) {
+            this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbidden.');
             return null;
         } else {
             throw reason;
@@ -261,47 +297,11 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         return element.split('\\').pop().split('/').pop();
     }
 
-    onExaminationNodeInit(node: ExaminationNode) {
-        node.open = true;
-        this.breadcrumbsService.currentStep.data.examinationNode = node;
-        this.fetchDatasetIdsFromTree();
-    }
-
-    fetchDatasetIdsFromTree() {
-        if (!this.datasetIdsLoaded) {
-            let node: ExaminationNode = this.breadcrumbsService.currentStep.data.examinationNode;
-            let found: boolean = false;
-            // first look into the tree
-            let datasetIds: number[] = [];
-            if (node && node.datasetAcquisitions != 'UNLOADED') {
-                found = true;
-                node.datasetAcquisitions.forEach(dsAcq => {
-                    if (dsAcq.datasets != 'UNLOADED') {
-                        dsAcq.datasets.forEach(ds => {
-                            datasetIds.push(ds.id);
-							if (ds.type == 'Eeg') {
-								this.hasEEG = true;
-							} else if (ds.type == 'BIDS') {
-                                this.hasBids = true;
-                            } else {
-								this.hasDicom = true;
-							}
-                        });
-                    } else {
-                        found = false;
-                        return;
-                    }
-                });
-            }
-            if (found) {
-                this.datasetIdsLoaded = true;
-                this.datasetIds = Promise.resolve(datasetIds);
-                this.noDatasets = datasetIds.length == 0;
-            }
-        }
-    }
-
     getUnit(key: string) {
         return UnitOfMeasure.getLabelByKey(key);
+    }
+
+    downloadFile(file) {
+        this.examinationService.downloadFile(file, this.examination.id, this.downloadState);
     }
 }

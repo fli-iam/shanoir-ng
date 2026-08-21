@@ -13,54 +13,61 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
-import {ActivatedRoute, Router} from '@angular/router';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import {ShanoirValidators} from "../../shared/validators/shanoir-validators";
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { HelpMessageComponent } from '../../shared/help-message/help-message.component';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
 @Component({
     selector: 'center-detail',
     templateUrl: 'center.component.html',
-    styleUrls: ['center.component.css']
+    styleUrls: ['center.component.css'],
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, HelpMessageComponent, AcquisitionEquipmentPipe]
 })
 
 export class CenterComponent extends EntityComponent<Center> {
 
     isNameUniqueError: boolean = false;
-    phoneNumberPatternError: boolean = false;
     openAcqEq: boolean = true;
-    fromImport: string;
-
-    constructor(
-            private route: ActivatedRoute,
-            protected router: Router,
-            private centerService: CenterService) {
-
-        super(route, 'center');
-        this.fromImport = this.router.getCurrentNavigation()?.extras?.state?.fromImport;
-    }
 
     get center(): Center { return this.entity; }
     set center(center: Center) { this.entity = center; }
+
+    constructor(
+            private route: ActivatedRoute,
+            private centerService: CenterService) {
+
+        super(route);
+    }
+
+    protected getRoutingName(): string {
+        return 'center';
+    }
 
     getService(): EntityService<Center> {
         return this.centerService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromCenter(this.center);
+    }
+
     initView(): Promise<void> {
-        return this.centerService.get(this.id).then(center => {
-            this.center = center;
-        });
+        return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        return this.centerService.get(this.id).then(center => {
-            this.center = center;
-        });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
@@ -69,17 +76,13 @@ export class CenterComponent extends EntityComponent<Center> {
     }
 
     buildForm(): UntypedFormGroup {
-        if (this.fromImport) {
-            this.center.name = this.fromImport.split(' - ')[0] != "null" ? this.fromImport.split(' - ')[0] : "";
-            this.center.street = this.fromImport.split(' - ')[1] != "null" ? this.fromImport.split(' - ')[1] : "";
-        }
         return this.formBuilder.group({
-            'name': [this.center.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
+            'name': [this.center.name, [ShanoirValidators.required, ShanoirValidators.minLength(2), ShanoirValidators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'street': [this.center.street],
-            'postalCode': [this.center.postalCode],
+            'postalCode': [this.center.postalCode, [Validators.pattern(/^[0-9]*$/)]],
             'city': [this.center.city],
             'country': [this.center.country],
-            'phoneNumber': [this.center.phoneNumber],
+            'phoneNumber': [this.center.phoneNumber, ShanoirValidators.isPhoneNumber()],
             'website': [this.center.website]
         });
     }

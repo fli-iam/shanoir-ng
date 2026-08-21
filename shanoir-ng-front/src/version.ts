@@ -1,7 +1,11 @@
-const { gitDescribeSync } = require('git-describe');
-const { version } = require('../package.json');
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { resolve, relative } = require('path');
+
+const { gitDescribeSync } = require('git-describe');
 const { writeFileSync } = require('fs-extra');
+
+const { version } = require('../package.json');
+
 
 const gitInfo = gitDescribeSync({
     match: 'NG_v[0-9]*',
@@ -9,6 +13,9 @@ const gitInfo = gitDescribeSync({
 });
 
 gitInfo.version = version;
+if (gitInfo.hash.startsWith('g'))  {
+    gitInfo.hash = gitInfo.hash.substring(1);
+}
 
 const file = resolve(__dirname, '..', 'src', 'environments', 'version.ts');
 writeFileSync(file,

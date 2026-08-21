@@ -1,183 +1,207 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
-import java.util.Date;
+import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JOptionPane;
 
-import org.apache.log4j.Logger;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
-import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.MainWindow;
+import org.shanoir.uploader.utils.ImportUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the logic when the download or copy button is clicked.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 public class DownloadOrCopyActionListener implements ActionListener {
 
-	private static Logger logger = Logger.getLogger(DownloadOrCopyActionListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DownloadOrCopyActionListener.class);
 
-	private MainWindow mainWindow;
-	private ResourceBundle resourceBundle;
-	private Pseudonymizer pseudonymizer;
-	private IdentifierCalculator identifierCalculator;
-	
-	// Introduced here to inject into DownloadOrCopyRunnable
-	private IDicomServerClient dicomServerClient;
-	
-	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
+    private MainWindow mainWindow;
+    
+    private ResourceBundle resourceBundle;
+    
+    public Pseudonymizer pseudonymizer;
+    
+    public IdentifierCalculator identifierCalculator;
 
-	public DownloadOrCopyActionListener(final MainWindow mainWindow, final Pseudonymizer pseudonymizer, final IDicomServerClient dicomServerClient, final ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer) {
-		this.mainWindow = mainWindow;
-		this.resourceBundle = mainWindow.resourceBundle;
-		this.pseudonymizer = pseudonymizer;
-		this.identifierCalculator = new IdentifierCalculator();
-		this.dicomServerClient = dicomServerClient;
-		this.dicomFileAnalyzer = dicomFileAnalyzer;
-	}
+    // Introduced here to inject into DownloadOrCopyRunnable
+    private IDicomServerClient dicomServerClient;
 
-	/**
-	 * This method contains all the logic which is performed when the download from PACS
-	 * or copy from CD/DVD button is clicked.
-	 */
-	public void actionPerformed(final ActionEvent event) {
-		if (mainWindow.dicomTree == null) {
-			return;
-		}
-		/**
-		 * 1. Read values from GUI, entered by user
-		 */
-		DicomDataTransferObject dicomData = mainWindow.getSAL().getDicomData();
-		dicomData = completeDicomDataWithGUIValues(dicomData);
-		if (dicomData == null) {
-			return;
-		}
-		/**
-		 * 2. Generate subject identifier and hash values
-		 */
-		try {
-			dicomData = generateSubjectIdentifierAndHashValues(dicomData);
-		} catch (PseudonymusException e) {
-			logger.error(e.getMessage(), e);
-			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
-			return;
-		} catch (UnsupportedEncodingException e) {
-			logger.error(e.getMessage(), e);
-			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
-			return;
-		} catch (NoSuchAlgorithmException e) {
-			logger.error(e.getMessage(), e);
-			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
-			return;
-		}
-		
-		/**
-		 * 3. Download from PACS or copy from CD/DVD and write upload-job.xml + nominative-data-job.xml
-		 */
-		final String filePathDicomDir = mainWindow.getFindDicomActionListener().getFilePathDicomDir();
-		final Set<SerieTreeNode> selectedSeries = mainWindow.getSAL().getSelectedSeries();
-		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, selectedSeries, dicomData);
-		Thread thread = new Thread(runnable);
-		thread.start();
-		
-		// clear previous selection, but keep tree open in the tab
-		mainWindow.isDicomObjectSelected = false;
-		mainWindow.dicomTree.getSelectionModel().clearSelection();
-		mainWindow.getSAL().setDicomData(null);
-		mainWindow.getSAL().setSelectedSeries(null);
-	
-		JOptionPane.showMessageDialog(mainWindow.frame,
-			    resourceBundle.getString("shanoir.uploader.downloadOrCopy.confirmation.message"),
-			    resourceBundle.getString("shanoir.uploader.downloadOrCopy.confirmation.title"),
-			    JOptionPane.INFORMATION_MESSAGE);
-	}
+    private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
-	/**
-	 * This method reads the data entered by the user with the GUI
-	 * and puts it into the DicomDataTransferObject, when the user
-	 * clicks on the download or copy button.
-	 * 
-	 * @param dicomData
-	 * @return
-	 */
-	private DicomDataTransferObject completeDicomDataWithGUIValues(final DicomDataTransferObject dicomData) {
-		try {
-			Date birthDate = ShUpConfig.formatter.parse(mainWindow.birthDateTF.getText());
-			dicomData.setBirthDate(birthDate);
-			if (mainWindow.mSexR.isSelected())
-				dicomData.setSex("M");
-			if (mainWindow.fSexR.isSelected())
-				dicomData.setSex("F");
-			return completeDicomData(dicomData);					
-		} catch (ParseException e) {
-			logger.error("Unable to convert BirthDate using formatter", e);
-			return null;
-		}
-	}
+    private final ReentrantLock lock = new ReentrantLock();
 
-	private DicomDataTransferObject completeDicomData(final DicomDataTransferObject dicomData) throws ParseException {
-		if (mainWindow.lastNameTF.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.import.start.lastname.empty"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
-			return null;
-		}
-		dicomData.setLastName(mainWindow.lastNameTF.getText());
-		if (mainWindow.firstNameTF.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.import.start.firstname.empty"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
-			return null;
-		}
-		dicomData.setFirstName(mainWindow.firstNameTF.getText());
-		if (mainWindow.birthNameTF.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.import.start.birthname.empty"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
-			return null;
-		}
-		dicomData.setBirthName(mainWindow.birthNameTF.getText());
-		return dicomData;
-	}
+    public DownloadOrCopyActionListener(final MainWindow mainWindow, final Pseudonymizer pseudonymizer, final IDicomServerClient dicomServerClient, final ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer) {
+        this.mainWindow = mainWindow;
+        this.resourceBundle = mainWindow.resourceBundle;
+        this.pseudonymizer = pseudonymizer;
+        this.identifierCalculator = new IdentifierCalculator();
+        this.dicomServerClient = dicomServerClient;
+        this.dicomFileAnalyzer = dicomFileAnalyzer;
+    }
 
-	private DicomDataTransferObject generateSubjectIdentifierAndHashValues(DicomDataTransferObject dicomData) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
-		String subjectIdentifier = null;
-		// OFSEP mode
-		if (ShUpConfig.isModePseudonymus()) {
-			dicomData = pseudonymizer.createHashValuesWithPseudonymus(dicomData);
-			subjectIdentifier = identifierCalculator.calculateIdentifierWithHashs(dicomData.getFirstNameHash1(), dicomData.getBirthNameHash1(), dicomData.getBirthDateHash());
-		// Neurinfo mode
-		} else {
-			subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
-		}
-		dicomData.setSubjectIdentifier(subjectIdentifier);
-		return dicomData;
-	}
+    /**
+     * This method contains all the logic which is performed when the download from PACS
+     * or copy from CD/DVD button is clicked.
+     */
+    public void actionPerformed(final ActionEvent event) {
+        if (mainWindow.dicomTree == null) {
+            return;
+        }
+        final Map<String, ImportJobBase> importJobs = mainWindow.getSAL().getImportJobs();
+        for (ImportJobBase importJob : importJobs.values()) {
+            if (importJob.getSeries() == null || importJob.getSeries().isEmpty()) {
+                JOptionPane.showMessageDialog(mainWindow.frame,
+                        "No serie selected.",
+                        resourceBundle.getString("shanoir.uploader.select.error.title"),
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        /**
+         * 1. Read values from GUI, entered by user
+         */
+        Patient patient = null;
+        Patient firstPatient = null;
+        Subject firstSubject = null;
+        for (ImportJobBase importJob : importJobs.values()) {
+            // for the moment: one patient verification, extend later for n-patient verification
+            patient = adjustPatientWithPatientVerificationGUIValues(importJob.getPatient());
+            if (firstPatient == null) {
+                firstPatient = patient;
+                try {
+                    firstSubject = ImportUtils.createSubjectFromPatient(patient, pseudonymizer, identifierCalculator);
+                    importJob.setSubject(firstSubject);
+                } catch (PseudonymusException e) {
+                    LOG.error(e.getMessage(), e);
+                    JOptionPane.showMessageDialog(mainWindow.frame,
+                            resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
+                            resourceBundle.getString("shanoir.uploader.select.error.title"),
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                } catch (UnsupportedEncodingException e) {
+                    LOG.error(e.getMessage(), e);
+                    JOptionPane.showMessageDialog(mainWindow.frame,
+                            resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
+                            resourceBundle.getString("shanoir.uploader.select.error.title"),
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                } catch (NoSuchAlgorithmException e) {
+                    LOG.error(e.getMessage(), e);
+                    JOptionPane.showMessageDialog(mainWindow.frame,
+                            resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.phv"),
+                            resourceBundle.getString("shanoir.uploader.select.error.title"),
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } else {
+                if (firstPatient.getPatientID().equals(patient.getPatientID())) {
+                    importJob.setSubject(firstSubject);
+                } else {
+                    return; // multi-patient not yet implemented, stop here
+                }
+            }
+        }
+
+        /**
+         * 3. Download from PACS or copy from CD/DVD and write import-job.json
+         */
+        final String filePathDicomDir = mainWindow.getFindDicomActionListener().getFilePathDicomDir();
+        Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, false, mainWindow.frame, mainWindow.downloadProgressBar, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, importJobs);
+        if (lock.tryLock()) {
+            try {
+                Thread thread = new Thread(runnable);
+                thread.start();
+            } catch (Exception e) {
+                LOG.error("An error occured while running the thread.", e);
+            } finally {
+                lock.unlock();
+            }
+        } else {
+            LOG.warn("A previous thread is still running. Please wait until it is finished.");
+        }
+
+        // clear previous selection, but keep tree open in the tab
+        mainWindow.isDicomObjectSelected = false;
+        mainWindow.dicomTree.getSelectionModel().clearSelection();
+
+        JOptionPane.showMessageDialog(mainWindow.frame,
+                resourceBundle.getString("shanoir.uploader.downloadOrCopy.confirmation.message"),
+                resourceBundle.getString("shanoir.uploader.downloadOrCopy.confirmation.title"),
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * This method reads the data entered by the user with the GUI
+     * and puts it into a Patient object to adjust the already existing
+     * values coming from the DICOM, when the user clicks on the download or copy button.
+     *
+     * @param Patient patient
+     * @return
+     */
+    private Patient adjustPatientWithPatientVerificationGUIValues(Patient patient) {
+        if (mainWindow.firstNameTF.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(mainWindow.frame,
+                    resourceBundle.getString("shanoir.uploader.import.start.firstname.empty"),
+                    resourceBundle.getString("shanoir.uploader.select.error.title"),
+                    JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+        String firstName = mainWindow.firstNameTF.getText();
+        if (mainWindow.lastNameTF.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(mainWindow.frame,
+                    resourceBundle.getString("shanoir.uploader.import.start.lastname.empty"),
+                    resourceBundle.getString("shanoir.uploader.select.error.title"),
+                    JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+        String lastName = mainWindow.lastNameTF.getText();
+        if (mainWindow.birthNameTF.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(mainWindow.frame,
+                    resourceBundle.getString("shanoir.uploader.import.start.birthname.empty"),
+                    resourceBundle.getString("shanoir.uploader.select.error.title"),
+                    JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+        String birthName = mainWindow.birthNameTF.getText();
+        String birthDate = mainWindow.birthDateTF.getText();
+        return org.shanoir.uploader.utils.ImportUtils.adjustPatientWithPatientVerification(patient, firstName, lastName, birthName, birthDate);
+    }
+
+    public boolean isRunning() {
+        return lock.isLocked();
+    }
 
 }

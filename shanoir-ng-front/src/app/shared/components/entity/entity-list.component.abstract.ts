@@ -11,13 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Directive, OnDestroy } from '@angular/core';
+import { Directive, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
+import { TreeService } from 'src/app/studies/study/tree.service';
+
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { capitalizeFirstLetter } from '../../../utils/app.utils';
-import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
 import { ConsoleService } from '../../console/console.service';
@@ -26,12 +27,14 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
 import { ColumnDefinition } from '..//table/column.definition.type';
+
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
 
 @Directive()
-export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
+export abstract class EntityListComponent<T extends Entity> implements OnInit, OnDestroy {
 
+    @Input() embedded: boolean = false;
     abstract table: TableComponent;
     columnDefs: ColumnDefinition[];
     customActionDefs: any[];
@@ -42,6 +45,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     protected consoleService: ConsoleService;
     protected breadcrumbsService: BreadcrumbsService;
     public windowService: WindowService;
+    protected treeService: TreeService;
     public onDelete: Subject<{entity: Entity, error?: ShanoirError}> =  new Subject();
     public onAdd: Subject<any> =  new Subject<any>();
     protected subscriptions: Subscription[] = [];
@@ -54,29 +58,36 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private showId: boolean = true;
 
     abstract getService(): EntityService<T>;
+    getOnDeleteConfirmMessage?(entity: T): string;
 
     constructor(
             protected readonly ROUTING_NAME: string) {
 
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);
-        this.router = ServiceLocator.injector.get(Router);
-        this.confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
-        this.consoleService = ServiceLocator.injector.get(ConsoleService);
-        this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
-        this.keycloakService = ServiceLocator.injector.get(KeycloakService);
-        this.windowService = ServiceLocator.injector.get(WindowService);
+        this.router = inject(Router);
+        this.confirmDialogService = inject(ConfirmDialogService);
+        this.consoleService = inject(ConsoleService);
+        this.breadcrumbsService = inject(BreadcrumbsService);
+        this.keycloakService = inject(KeycloakService);
+        this.windowService = inject(WindowService);
+        this.treeService = inject(TreeService);
 
         this.computeOptions();
         this.columnDefs = this.getColumnDefs();
         this.completeColDefs();
         this.customActionDefs = this.getCustomActionsDefs();
         this.completeCustomActions();
-        this.breadcrumbsService.markMilestone();
-        this.breadcrumbsService.nameStep(capitalizeFirstLetter(ROUTING_NAME) + ' list');
+    }
+
+    ngOnInit(): void {
+        if (!this.embedded) {
+            this.breadcrumbsService.markMilestone();
+            this.breadcrumbsService.nameStep(capitalizeFirstLetter(this.ROUTING_NAME) + ' list');
+        }
     }
 
     private computeOptions() {
-        let options = this.getOptions();
+        const options = this.getOptions();
         if (options.edit != undefined) this.edit = options.edit;
         if (options.view != undefined) this.view = options.view;
         if (options.delete != undefined) this.delete = options.delete;
@@ -99,7 +110,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private completeCustomActions(): void {
         if (this.new) {
             this.customActionDefs.push({
-                title: "New",awesome: "fa-solid fa-plus", action: item => this.router.navigate([this.entityRoutes.getRouteToCreate()])
+                title: "New",awesome: "fa-solid fa-plus", action: () => this.router.navigate([this.entityRoutes.getRouteToCreate()])
             });
         }
     }
@@ -113,33 +124,48 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {
-        this.confirmDialogService
-            .confirm(
-                'Delete ' + this.ROUTING_NAME,
-                'Are you sure you want to delete the ' + this.ROUTING_NAME
-                + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
+        const dialogTitle : string = 'Delete ' + this.ROUTING_NAME;
+        const dialogMsg : string = 'Are you sure you want to finally delete the ' + this.ROUTING_NAME
+            + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?';
+
+        let deleteConfirmMsg: string;
+        if (this.getOnDeleteConfirmMessage) {
+            deleteConfirmMsg = this.getOnDeleteConfirmMessage(entity);
+        } else {
+            deleteConfirmMsg = '';
+        }
+            this.confirmDialogService.confirm(
+                dialogTitle,
+                dialogMsg + deleteConfirmMsg
             ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
                         this.onDelete.next({entity: entity});
-                        this.table.refresh().then(() => {
-                            this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
-                        });
-                    }).catch(reason => {
-                        if (!reason){
-                            return;
-                        }
-                        if (reason instanceof ShanoirError && reason.code == 422) {
-                            this.dealWithDeleteError(reason, entity);
-                            return;
-                        } else if (reason.error){
-                            this.dealWithDeleteError(new ShanoirError(reason), entity);
-                            return;
-                        }
-                        throw Error(reason);
+                        setTimeout(() => {
+                            this.table.refresh().then(() => {
+                                if (this.ROUTING_NAME == 'examination') {
+                                    this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
+                                } else {
+                                    this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
+                                }
+                            });
+                        }, 1000);
+                        this.treeService.updateTree();
                     });
                 }
-            })
+            }).catch(reason => {
+                if (!reason) {
+                    return;
+                }
+                if (reason instanceof ShanoirError && reason.code == 422) {
+                    this.dealWithDeleteError(reason, entity);
+                    return;
+                } else if (reason.error) {
+                    this.dealWithDeleteError(new ShanoirError(reason), entity);
+                    return;
+                }
+                throw Error(reason);
+            });
     }
 
     private dealWithDeleteError(error: ShanoirError, entity: any) {
@@ -155,20 +181,20 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
      * Can be overriden to set options
      */
     protected getOptions(): any {
-        return {};
+        return { };
     }
 
     /**
      * Can be overriden to enable/disable the edit button for this item
      */
-    protected canEdit(item: T): boolean {
+    protected canEdit(_item: T): boolean {
         return true;
     }
 
     /**
      * Can be overriden to enable/disable the delete button for this item
      */
-    protected canDelete(item: T): boolean {
+    protected canDelete(_item: T): boolean {
         return true;
     }
 
@@ -201,15 +227,8 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         return this.entityRoutes.getRouteToView(item.id);
     }
 
-    dateRenderer(date: number): string {
-        if (date) {
-            return new Date(date).toLocaleDateString();
-        }
-        return null;
-    };
-
     ngOnDestroy() {
-        for(let subscribtion of this.subscriptions) {
+        for(const subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

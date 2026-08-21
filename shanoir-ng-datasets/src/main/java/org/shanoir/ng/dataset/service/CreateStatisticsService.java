@@ -1,0 +1,248 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+package org.shanoir.ng.dataset.service;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.utils.DatasetFileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ParameterMode;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.StoredProcedureQuery;
+
+@Service
+public class CreateStatisticsService {
+
+    @Autowired
+    private ShanoirEventService eventService;
+
+    @Autowired
+    private DatasetRepository datasetRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+    private static final String ZIP = ".zip";
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    public static final String TSV_FILE_PREFIX = "shanoirExportStatistics";
+    private static final Logger LOG = LoggerFactory.getLogger(CreateStatisticsService.class);
+
+    private File recreateFile(final String fileName) throws IOException {
+        File file = new File(fileName);
+        if (file.exists()) {
+            file.delete();
+        }
+        file.createNewFile();
+        return file;
+    }
+
+    @Async
+    @Transactional
+    public void createStats(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp, ShanoirEvent event, String params) throws IOException {
+        float progress = 0;
+        String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+        File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
+        File zipFile = recreateFile(userDir + File.separator + TSV_FILE_PREFIX + "_" + event.getId() + ZIP);
+        int startRow = 0;
+        int blocSize = 50000;
+
+        event.setMessage("Querying size...");
+        eventService.publishEvent(event);
+
+        int procedureSize = querySize(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
+        if (procedureSize > -1) {
+
+            if (procedureSize < blocSize) {
+                blocSize = procedureSize;
+            }
+
+            // Get the data
+            try (FileOutputStream fos = new FileOutputStream(zipFile);
+                    ZipOutputStream zos = new ZipOutputStream(fos)) {
+
+                ZipEntry zipEntry = new ZipEntry(TSV_FILE_PREFIX + "_" + event.getId() + ".tsv");
+                zos.putNextEntry(zipEntry);
+                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(zos);
+
+                try (BufferedWriter writer = new BufferedWriter(outputStreamWriter)) {
+
+                    while (true) {
+                        event.setMessage("Querying results: " + (startRow + blocSize) + "/" + procedureSize);
+                        eventService.publishEvent(event);
+                        //"getStatistics" is the name of the MySQL procedure
+                        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("getStatistics");
+
+                        //Declare the parameters in the same order
+                        query.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
+                        query.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
+                        query.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
+                        query.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+                        query.registerStoredProcedureParameter(5, Integer.class, ParameterMode.IN);
+                        query.registerStoredProcedureParameter(6, Integer.class, ParameterMode.IN);
+
+                        //Pass the parameter values
+                        query.setParameter(1, studyNameInRegExp);
+                        query.setParameter(2, studyNameOutRegExp);
+                        query.setParameter(3, subjectNameInRegExp);
+                        query.setParameter(4, subjectNameOutRegExp);
+                        query.setParameter(5, startRow);
+                        query.setParameter(6, blocSize);
+
+                        //Execute query
+                        @SuppressWarnings("unchecked")
+                        List<Object[]> results = query.getResultList();
+
+                        if (results.isEmpty()) {
+                            break;
+                        }
+
+                        for (Object[] or : results) {
+                            List<String> strings = Arrays.stream(or).map(object -> Objects.toString(object, null)).collect(Collectors.toList());
+                            writer.write(String.join("\t", strings));
+                            writer.write('\n');
+                        }
+
+                        progress += (1f + blocSize) / procedureSize;
+                        event.setProgress(progress);
+                        eventService.publishEvent(event);
+
+                        startRow += blocSize;
+                        if (startRow > procedureSize) {
+                            break;
+                        }
+                    }
+
+                    writer.flush();
+
+                }
+
+            } catch (Exception e) {
+                event.setStatus(ShanoirEvent.ERROR);
+                event.setMessage("Error during fetching of statistics.");
+                event.setProgress(-1f);
+                eventService.publishEvent(event);
+                LOG.error("Error during fetching of statistics with id : " + event.getId());
+                LOG.error(e.getMessage(), e);
+            } finally {
+                event.setObjectId(String.valueOf(event.getId()));
+                event.setProgress(1f);
+                event.setMessage("Statistics fetched with params : " + params + "\nDownload available for 6 hours");
+                event.setStatus(ShanoirEvent.SUCCESS);
+                eventService.publishEvent(event);
+            }
+        } else {
+            event.setStatus(ShanoirEvent.ERROR);
+            event.setMessage("Error during calculation of statistics size.");
+            event.setProgress(-1f);
+            eventService.publishEvent(event);
+        }
+    }
+
+    private int querySize(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) {
+        StoredProcedureQuery querySize = entityManager.createStoredProcedureQuery("getStatisticsSize");
+
+        querySize.registerStoredProcedureParameter(1, String.class, ParameterMode.IN);
+        querySize.registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
+        querySize.registerStoredProcedureParameter(3, String.class, ParameterMode.IN);
+        querySize.registerStoredProcedureParameter(4, String.class, ParameterMode.IN);
+        querySize.setParameter(1, studyNameInRegExp);
+        querySize.setParameter(2, studyNameOutRegExp);
+        querySize.setParameter(3, subjectNameInRegExp);
+        querySize.setParameter(4, subjectNameOutRegExp);
+
+        Object sizeRes = querySize.getSingleResult();
+        int size = (sizeRes != null) ? ((Number) sizeRes).intValue() : -1;
+
+        return size;
+    }
+
+    /**
+     * Compute overall statistics by calling the corresponding stored procedure.
+     * Used to insert daily stats into the overall_statistics table.
+     *
+     * @throws Exception
+     */
+    public void computeOverallStatistics() throws Exception {
+        // Call the stored procedure to compute Studies, subjects and dataset_acquisition counts
+        datasetRepository.computeOverallStatistics();
+
+        //calculate total storage volume by summing volumes by format for each study
+        Long totalStorageVolume = datasetRepository.findDatasetsExpressionSizesSum();
+
+        //update overall_statistics table with total storage volume for current date
+        datasetRepository.addTotalStorageVolume(totalStorageVolume);
+    }
+
+    // cron every 5 minutes to delete old tsv files (older than 6 hours)
+    @Scheduled(cron = "0 0/5 * * * ?")
+    public void deleteOldTsvFiles() {
+        LOG.info("CRON - delete old tsv files");
+
+        String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+        long expirationTime = System.currentTimeMillis() - 6 * 60 * 60 * 1000;
+
+        try (Stream<Path> paths = Files.walk(Paths.get(tmpDir), 2)) {
+            paths
+                .filter(Files::isRegularFile)
+                .filter(path -> path.getFileName().toString().startsWith(TSV_FILE_PREFIX))
+                .filter(path -> isOlderThan(path, expirationTime))
+                    .forEach(this::deleteFileSafely);
+        } catch (IOException e) {
+            LOG.error("Error while listing user directories", e);
+        }
+    }
+
+    private boolean isOlderThan(Path path, long expirationTime) {
+        try {
+            return Files.getLastModifiedTime(path).toMillis() < expirationTime;
+        } catch (IOException e) {
+            LOG.error("Error while checking age for {}", path, e);
+            return false;
+        }
+    }
+
+    private void deleteFileSafely(Path path) {
+        try {
+            Files.delete(path);
+            LOG.info("Deleted old TSV file {}", path);
+        } catch (IOException e) {
+            LOG.error("Error while deleting {}", path, e);
+        }
+    }
+}

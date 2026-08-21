@@ -12,19 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { FormGroup, FormsModule } from '@angular/forms';
 
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
-import { Option } from '../../shared/select/select.component';
+import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { SuperPromise } from '../../utils/super-promise';
 import { QualityCardRule } from '../shared/quality-card.model';
 import { StudyCardCondition } from '../shared/study-card.model';
+import { ToggleSwitchComponent } from '../../shared/switch/switch.component';
+
 import { ShanoirMetadataField } from './action/action.component';
+import { StudyCardConditionComponent } from './condition/condition.component';
 
 
 @Component({
     selector: 'quality-card-rule',
     templateUrl: 'quality-card-rule.component.html',
-    styleUrls: ['study-card-rule.component.css']
+    styleUrls: ['study-card-rule.component.css'],
+    imports: [StudyCardConditionComponent, ToggleSwitchComponent, FormsModule, SelectBoxComponent]
 })
 export class QualityCardRuleComponent implements OnChanges {
 
@@ -32,18 +37,18 @@ export class QualityCardRuleComponent implements OnChanges {
     @Input() rule: QualityCardRule;
     private rulePromise: SuperPromise<QualityCardRule> = new SuperPromise(); 
     @Input() conditionFields: ShanoirMetadataField[];
-    @Output() change: EventEmitter<QualityCardRule> = new EventEmitter();
+    @Output() userChange: EventEmitter<QualityCardRule> = new EventEmitter();
     @Output() moveUp: EventEmitter<void> = new EventEmitter();
     @Output() moveDown: EventEmitter<void> = new EventEmitter();
-    @Output() copy: EventEmitter<void> = new EventEmitter();
+    @Output() copyRule: EventEmitter<void> = new EventEmitter();
     @Output() delete: EventEmitter<void> = new EventEmitter();
     @Input() showErrors: boolean = false;
     touched: boolean = false;
     tagOptions = [new Option('VALID', 'Valid', undefined, 'green', 'fa-solid fa-circle-check'), 
             new Option('WARNING', 'Warning', undefined, 'chocolate', 'fa-solid fa-triangle-exclamation'), 
             new Option('ERROR', 'Error', undefined, 'red', 'fa-solid fa-times-circle')];
-
     conditionFieldOptions: Option<string>[];
+    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
 
     constructor(public elementRef: ElementRef) { }
 
@@ -64,15 +69,15 @@ export class QualityCardRuleComponent implements OnChanges {
     }
 
     addNewCondition() {
-        let cond = new StudyCardCondition('StudyCardDICOMCondition');
+        const cond = new StudyCardCondition('AcqDICOMConditionOnDatasets');
         cond.values = [null];
         this.rule.conditions.push(cond);
-        this.change.emit(this.rule);
+        this.userChange.emit(this.rule);
     }
 
     deleteCondition(index: number) {
         this.rule.conditions.splice(index, 1);
-        this.change.emit(this.rule);
+        this.userChange.emit(this.rule);
     }
 
     @HostListener('document:click', ['$event.target'])

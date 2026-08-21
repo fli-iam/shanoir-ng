@@ -20,4 +20,5 @@ div.warning { color: orangered; }
 .done, .error { font-size: 35px; font-weight: bold; }
 .done { color: darkgreen; }
 .error { color: var(--color-error); }
+.error .details { font-size: 12px; }
 input[type="checkbox"] { padding: 0; margin: 0 0 0 5px; vertical-align: text-bottom; }

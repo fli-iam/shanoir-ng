@@ -13,8 +13,8 @@
  */
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Coil } from '../../coils/shared/coil.model';
-import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { Study } from '../../studies/shared/study.model';
+
 import { StudyCardDTO } from './study-card.dto.model';
 import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition, StudyCardRule } from './study-card.model';
 
@@ -22,9 +22,6 @@ import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition
 /** This was separated from the rest of the service to prevent a circular dependency warning from angular. */
 export abstract class StudyCardDTOServiceAbstract {
 
-    constructor() {}
-
-    
     static isCoil(assigmentField: string): boolean {
         return assigmentField?.toLowerCase().includes('coil');
     }
@@ -40,18 +37,14 @@ export abstract class StudyCardDTOServiceAbstract {
             entity.acquisitionEquipment = new AcquisitionEquipment();
             entity.acquisitionEquipment.id = dto.acquisitionEquipmentId;
         }
-        if (dto.niftiConverterId) {
-            entity.niftiConverter = new NiftiConverter();
-            entity.niftiConverter.id = dto.niftiConverterId;
-        }
         entity.rules = [];
         if (dto.rules) {
-            for (let ruleDTO of dto.rules) {
-                let rule: StudyCardRule = new StudyCardRule(ruleDTO.scope);
+            for (const ruleDTO of dto.rules) {
+                const rule: StudyCardRule = new StudyCardRule(ruleDTO.scope);
                 if (ruleDTO.assignments) {
                     rule.assignments = [];
-                    for (let assigmentDTO of ruleDTO.assignments) {
-                        let assigment: StudyCardAssignment = new StudyCardAssignment('Dataset');
+                    for (const assigmentDTO of ruleDTO.assignments) {
+                        const assigment: StudyCardAssignment = new StudyCardAssignment(assigmentDTO.scope);
                         assigment.field = assigmentDTO.field;
                         if (this.isCoil(assigment.field) && !Number.isNaN(Number(assigmentDTO.value))) {
                             assigment.value = new Coil();
@@ -64,11 +57,20 @@ export abstract class StudyCardDTOServiceAbstract {
                 }
                 if (ruleDTO.conditions) {
                     rule.conditions = [];
-                    for (let conditionDTO of ruleDTO.conditions) {
-                        let condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
-                        if (conditionDTO.dicomTag) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null);
+                    for (const conditionDTO of ruleDTO.conditions) {
+                        const condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
+                        if (conditionDTO.dicomTag != undefined) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null, null, null);
                         condition.shanoirField = conditionDTO.shanoirField;
-                        condition.values = conditionDTO.values;
+                        if (this.isCoil(condition.shanoirField) && !Number.isNaN(Number(conditionDTO.values?.[0]))) {
+                            condition.values = [];
+                            conditionDTO.values?.forEach(dtoVal => {
+                                const value = new Coil();
+                                value.id = +dtoVal;
+                                condition.values.push(value);
+                            });
+                        } else {
+                            condition.values = conditionDTO.values;
+                        }
                         condition.operation = conditionDTO.operation as Operation;
                         condition.cardinality = conditionDTO.cardinality;
                         rule.conditions.push(condition);

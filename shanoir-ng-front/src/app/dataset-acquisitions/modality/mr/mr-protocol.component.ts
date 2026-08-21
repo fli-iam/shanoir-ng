@@ -13,9 +13,11 @@
  */
 import {Component, forwardRef, Input} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
+
 import {Mode} from '../../../shared/components/entity/entity.component.abstract';
-import {MrProtocol} from './mr-protocol.model';
 import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
+
+import {MrProtocol} from './mr-protocol.model';
 
 
 @Component({
@@ -23,18 +25,19 @@ import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
     templateUrl: 'mr-protocol.component.html',
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => MrProtocolComponent),
-          multi: true,
-        }]
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => MrProtocolComponent),
+            multi: true,
+        }
+    ]
 })
 export class MrProtocolComponent implements ControlValueAccessor {
 
     public protocol: MrProtocol;
     @Input() private mode: Mode;
     protected disabled: boolean = false;
-    protected propagateChange = (_: any) => {};
-    protected propagateTouched = () => {};
+    protected propagateChange: (any) => void = () => { return; };
+    protected propagateTouched = () => { return; };
 
     writeValue(obj: any): void {
         this.protocol = obj;

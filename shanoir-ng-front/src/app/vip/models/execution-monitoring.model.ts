@@ -13,8 +13,8 @@
  */
 
 import { DatasetProcessing } from "src/app/datasets/shared/dataset-processing.model";
+
 import { StatusEnum } from "./execution";
-import {ParameterResourcesDto} from "./parameter-resources.dto";
 
 
 export class ExecutionMonitoring extends DatasetProcessing {
@@ -28,5 +28,4 @@ export class ExecutionMonitoring extends DatasetProcessing {
     startDate?: number;
     endDate?: number;
     outputProcessing?: string;
-    parametersResources: ParameterResourcesDto[];
 }

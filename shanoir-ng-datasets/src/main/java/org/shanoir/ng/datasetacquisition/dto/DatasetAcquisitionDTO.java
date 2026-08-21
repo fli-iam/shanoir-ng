@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -15,121 +15,182 @@
 package org.shanoir.ng.datasetacquisition.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.model.StudyCard;
 
 public class DatasetAcquisitionDTO {
-	
-	private Long id;
 
-	private Long acquisitionEquipmentId;
+    private Long id;
 
-	private ExaminationDTO examination;
-	
-	private StudyCard studyCard;
-	
-	private Long studyCardTimestamp;
+    private Long acquisitionEquipmentId;
 
-	private Integer rank;
+    private ExaminationDTO examination;
 
-	private String softwareRelease;
+    private StudyCard studyCard;
 
-	private Integer sortingIndex;
-	
-	private String type;
+    private Long studyCardTimestamp;
 
-	private Object protocol;
+    private Integer rank;
 
-	private LocalDate creationDate;
+    private String softwareRelease;
 
-	
-	public Long getId() {
-		return id;
-	}
+    private Integer sortingIndex;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    private String type;
 
-	public Long getAcquisitionEquipmentId() {
-		return acquisitionEquipmentId;
-	}
+    private Object protocol;
 
-	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
-		this.acquisitionEquipmentId = acquisitionEquipmentId;
-	}
+    private LocalDate importDate;
 
-	public ExaminationDTO getExamination() {
-		return examination;
-	}
+    private String username;
 
-	public void setExamination(ExaminationDTO examination) {
-		this.examination = examination;
-	}
+    private Long source;
 
-	public StudyCard getStudyCard() {
-		return studyCard;
-	}
+    private List<Long> copies;
 
-	public void setStudyCard(StudyCard studyCard) {
-		this.studyCard = studyCard;
-	}
+    private LocalDateTime acquisitionStartTime;
 
-	public Long getStudyCardTimestamp() {
-		return studyCardTimestamp;
-	}
+    private QualityTag qualityTag;
 
-	public void setStudyCardTimestamp(Long studyCardTimestamp) {
-		this.studyCardTimestamp = studyCardTimestamp;
-	}
+    private List<String> extraDataFilePathList;
 
-	public Integer getRank() {
-		return rank;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setRank(Integer rank) {
-		this.rank = rank;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getSoftwareRelease() {
-		return softwareRelease;
-	}
+    public Long getAcquisitionEquipmentId() {
+        return acquisitionEquipmentId;
+    }
 
-	public void setSoftwareRelease(String softwareRelease) {
-		this.softwareRelease = softwareRelease;
-	}
+    public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
+        this.acquisitionEquipmentId = acquisitionEquipmentId;
+    }
 
-	public Integer getSortingIndex() {
-		return sortingIndex;
-	}
+    public ExaminationDTO getExamination() {
+        return examination;
+    }
 
-	public void setSortingIndex(Integer sortingIndex) {
-		this.sortingIndex = sortingIndex;
-	}
+    public void setExamination(ExaminationDTO examination) {
+        this.examination = examination;
+    }
 
-	public String getType() {
-		return type;
-	}
+    public StudyCard getStudyCard() {
+        return studyCard;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    public void setStudyCard(StudyCard studyCard) {
+        this.studyCard = studyCard;
+    }
 
-	public Object getProtocol() {
-		return protocol;
-	}
+    public Long getStudyCardTimestamp() {
+        return studyCardTimestamp;
+    }
 
-	public void setProtocol(Object protocol) {
-		this.protocol = protocol;
-	}
+    public void setStudyCardTimestamp(Long studyCardTimestamp) {
+        this.studyCardTimestamp = studyCardTimestamp;
+    }
 
-	public LocalDate getCreationDate() {
-		return creationDate;
-	}
+    public Integer getRank() {
+        return rank;
+    }
 
-	public void setCreationDate(LocalDate creationDate) {
-		this.creationDate = creationDate;
-	}
-	
+    public void setRank(Integer rank) {
+        this.rank = rank;
+    }
+
+    public String getSoftwareRelease() {
+        return softwareRelease;
+    }
+
+    public void setSoftwareRelease(String softwareRelease) {
+        this.softwareRelease = softwareRelease;
+    }
+
+    public Integer getSortingIndex() {
+        return sortingIndex;
+    }
+
+    public void setSortingIndex(Integer sortingIndex) {
+        this.sortingIndex = sortingIndex;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Object getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(Object protocol) {
+        this.protocol = protocol;
+    }
+
+    public LocalDate getImportDate() {
+        return importDate;
+    }
+
+    public void setImportDate(LocalDate importDate) {
+        this.importDate = importDate;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public Long getSource() {
+        return source;
+    }
+
+    public void setSource(Long source) {
+        this.source = source;
+    }
+
+    public List<Long> getCopies() {
+        return copies;
+    }
+
+    public void setCopies(List<Long> copies) {
+        this.copies = copies;
+    }
+
+    public LocalDateTime getAcquisitionStartTime() {
+        return acquisitionStartTime;
+    }
+
+    public void setAcquisitionStartTime(LocalDateTime acquisitionStartTime) {
+        this.acquisitionStartTime = acquisitionStartTime;
+    }
+
+    public QualityTag getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualityTag(QualityTag qualityTag) {
+        this.qualityTag = qualityTag;
+    }
+
+    public List<String> getExtraDataFilePathList() {
+        return extraDataFilePathList;
+    }
+
+    public void setExtraDataFilePathList(List<String> extraDataFilePathList) {
+        this.extraDataFilePathList = extraDataFilePathList;
+    }
 }

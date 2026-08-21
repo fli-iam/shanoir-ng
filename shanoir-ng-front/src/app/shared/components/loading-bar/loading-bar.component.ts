@@ -14,11 +14,15 @@
 
 import { Component, HostBinding, Input } from '@angular/core';
 
+import { getSizeStr } from 'src/app/utils/app.utils';
+
+
 
 @Component({
     selector: 'progress-bar',
     templateUrl: 'loading-bar.component.html',
-    styleUrls: ['loading-bar.component.css']
+    styleUrls: ['loading-bar.component.css'],
+    imports: []
 })
 
 export class LoadingBarComponent {
@@ -53,18 +57,6 @@ export class LoadingBarComponent {
     }
 
     getSizeStr(size: number): string {
-
-        const base: number = 1024;
-        const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-        if(size == null || size == 0){
-            return "0 " + units[0];
-        }
-
-        const exponent: number = Math.floor(Math.log(size) / Math.log(base));
-        let value: number = Math.round(parseFloat((size / Math.pow(base, exponent)).toFixed(2)));
-        let unit: string = units[exponent];
-
-        return value + " " + unit;
+        return getSizeStr(size);
     }
 } 

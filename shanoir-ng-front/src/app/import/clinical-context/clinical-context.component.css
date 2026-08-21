@@ -21,3 +21,11 @@ a { text-decoration: underline; }
 
 .global-loading { color: var(--color-b); }
 .global-loading i { font-size: 30px; color: var(--color-b-light2); }
+
+.new-subject { margin-left: 20px !important; }
+.new-subject:active,
+.new-subject:enabled:hover { cursor: pointer; }
+.secondary { font-size: 8px; margin-right: 7px; margin-left: 2px; }
+
+.subject-select { width: 185px; }
+.examination-select { width: 154px; }

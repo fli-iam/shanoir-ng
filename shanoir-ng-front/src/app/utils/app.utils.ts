@@ -12,18 +12,19 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { HttpResponse } from '@angular/common/http';
 import { Pipe, PipeTransform } from '@angular/core';
-import { environment } from '../../environments/environment';
-import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { TaskState, TaskStatus } from '../async-tasks/task.model';
-import { ServiceLocator } from './locator.service';
 
+import { environment } from '@env/environment';
+
+// Emails
+export const SHANOIR_DPO_EMAIL = environment.dpoMail;
+export const SHANOIR_CONTACT_EMAIL = environment.contactMail;
 
 // Base urls
-let url = window.location;
-const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
-export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
+const url = window.location;
+export const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
+export const KEYCLOAK_BASE_URL = environment.keycloakUrl;
 export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/welcome";
 export const LOGIN_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
 export const SILENT_CHECK_SSO_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/assets/silent-check-sso.html";
@@ -32,6 +33,8 @@ export const SILENT_CHECK_SSO_URL = url.protocol + "//" + url.hostname + "/shano
 // Users http api
 export const BACKEND_API_USERS_MS_URL: string = BACKEND_API_URL + "/users";
 export const BACKEND_API_USER_URL: string = BACKEND_API_USERS_MS_URL + '/users';
+export const BACKEND_API_USER_EVENTS: string = BACKEND_API_USERS_MS_URL + '/events';
+export const BACKEND_API_COUNT_ENDPOINT: string = '/count';
 export const BACKEND_API_USER_ACCOUNT_REQUEST_URL: string = BACKEND_API_USERS_MS_URL + '/accountrequest';
 export const BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL: string = '/confirmaccountrequest';
 export const BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL: string = '/denyaccountrequest';
@@ -40,13 +43,17 @@ export const BACKEND_API_USER_ACCESS_REQUEST: string = BACKEND_API_USERS_MS_URL 
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_USER: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byUser';
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_ADMIN: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byAdmin';
 export const BACKEND_API_ACCESS_REQUEST_RESOLVE: string = BACKEND_API_USERS_MS_URL + '/accessrequest/resolve/';
+export const BACKEND_API_USER_PUBLIC_COUNT: string = BACKEND_API_USER_URL + BACKEND_API_COUNT_ENDPOINT;
+export const BACKEND_API_MASS_EMAIL_URL: string = BACKEND_API_USERS_MS_URL + '/massemail';
 
-
+// ShanoirEvents http api
+export const BACKEND_API_EVENTS_COUNT_DAYS_PARAM: string = '30';
+export const BACKEND_API_USER_PUBLIC_COUNT_LAST_MONTH_EVENTS: string = BACKEND_API_USER_EVENTS + BACKEND_API_COUNT_ENDPOINT;
 
 
 export const BACKEND_API_ROLE_ALL_URL: string = BACKEND_API_USERS_MS_URL + '/roles';
 
-const BACKEND_API_STUDIES_MS_URL: string = BACKEND_API_URL + '/studies';
+export const BACKEND_API_STUDIES_MS_URL: string = BACKEND_API_URL + '/studies';
 // Centers http api
 export const BACKEND_API_CENTER_URL: string = BACKEND_API_STUDIES_MS_URL + '/centers';
 export const BACKEND_API_CENTER_NAMES_URL: string = BACKEND_API_CENTER_URL + '/names';
@@ -55,14 +62,16 @@ export const BACKEND_API_CENTER_STUDY_URL: string = BACKEND_API_CENTER_URL + '/s
 
 // Studies http api
 export const BACKEND_API_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies';
+export const BACKEND_API_STUDY_STUDIES_LIGHT_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies/light';
 export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '/names';
 export const BACKEND_API_STUDY_DELETE_USER: string = BACKEND_API_STUDY_URL + '/studyUser';
-export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_STUDY_URL + '/namesAndCenters';
 export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights';
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_URL + '/public';
-export const BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL: string = BACKEND_API_STUDY_URL + '/public/data';
-export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_URL + '/public/connected';
+export const BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/data';
+export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_PUBLIC_STUDIES_URL + '/connected';
+export const BACKEND_API_STUDY_COPY_DATASETS: string = BACKEND_API_STUDY_URL + '/copyDatasets';
+export const BACKEND_API_STUDY_FILES: string = BACKEND_API_STUDY_URL + '/files';
 
 
 // Profile API
@@ -86,9 +95,10 @@ export const BACKEND_API_SUBJECT_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL 
 export const BACKEND_API_COIL_URL: string = BACKEND_API_STUDIES_MS_URL + '/coils';
 
 // Datasets http api
-const BACKEND_API_DATASET_MS_URL: string = BACKEND_API_URL + '/datasets';
+export const BACKEND_API_DATASET_MS_URL: string = BACKEND_API_URL + '/datasets';
 export const BACKEND_API_DATASET_URL: string = BACKEND_API_DATASET_MS_URL + '/datasets';
 export const BACKEND_API_PROCESSED_DATASET_URL: string = BACKEND_API_DATASET_URL + '/processedDataset';
+export const BACKEND_API_OVERALL_STATISTICS_URL: string = BACKEND_API_DATASET_URL + '/overallStatistics';
 
 // Dataset processing api
 export const BACKEND_API_DATASET_PROCESSING_URL: string = BACKEND_API_DATASET_MS_URL + '/datasetProcessing';
@@ -111,6 +121,7 @@ export const BACKEND_API_UPDATE_TASKS_URL: string = BACKEND_API_TASKS_URL + '/up
 
 // Examinations http api
 export const BACKEND_API_EXAMINATION_URL: string = BACKEND_API_DATASET_MS_URL + '/examinations';
+export const BACKEND_API_EXTRA_DATA_FILES_URL: string = BACKEND_API_EXAMINATION_URL + '/files';
 export const BACKEND_API_EXAMINATION_PRECLINICAL_URL: string = BACKEND_API_EXAMINATION_URL + '/preclinical';
 
 // Acquisition equipment http api
@@ -148,16 +159,22 @@ export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL
 export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
 
 // vip
-export const VIP_BASE_URL : string = environment.vipUrl + "/rest";
+export const BACKEND_API_VIP_URL: string = BACKEND_API_DATASET_MS_URL + '/vip';
+export const BACKEND_API_VIP_EXEC_URL : string = BACKEND_API_VIP_URL + "/execution";
+export const BACKEND_API_VIP_PIPE_URL : string = BACKEND_API_VIP_URL + "/pipeline";
+export const BACKEND_API_VIP_EXEC_TEMPLATE_URL : string = BACKEND_API_DATASET_MS_URL + "/execution-template";
+export const BACKEND_API_VIP_EXEC_TEMPLATE_FILTER_URL : string = BACKEND_API_DATASET_MS_URL + "/execution-template-filter";
+export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/execution-monitoring';
 
-export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/executionMonitoring';
+// Custom sentence to introduce the Shanoir instance on welcome page
+export const FRONTEND_WELCOME_INTRODUCTION: string = "This is an instance of the Shanoir database.";
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
     if (error.error && error.error.details) {
-        let fieldErrors = error.error.details.fieldErrors || '';
+        const fieldErrors = error.error.details.fieldErrors || '';
         if (fieldErrors[fieldName]) {
-            for (let fieldError of fieldErrors[fieldName]) {
+            for (const fieldError of fieldErrors[fieldName]) {
                 if (fieldError.code == 'unique') {
                     hasUniqueError = true;
                 }
@@ -168,96 +185,32 @@ export function hasUniqueError(error: any, fieldName: string): boolean {
 }
 
 export function browserDownloadFile(blob: Blob, filename: string) {
-    if (window.navigator.msSaveBlob) {
-        // IE 10+
-        window.navigator.msSaveBlob(blob, filename);
-    } else {
-        var link = document.createElement('a');
-        // Browsers that support HTML5 download attribute
-        if (link.download !== undefined) {
-            var url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+    const link = document.createElement('a');
+    // Browsers that support HTML5 download attribute
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 }
 
 export function browserDownloadFileFromResponse(response: HttpResponse<any>) {
-    browserDownloadFile(response.body, getFilename(response));
-}
-
-export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
-    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
-    return http.get(
-        url,
-        {
-            reportProgress: true,
-            responseType: 'blob',
-            params: params
-        }
-    )
-    .map(response => {
-        return response;
-    })
-    .toPromise();
-}
-
-export function downloadWithStatusGET(url: string, params?: HttpParams, state ?: TaskState): Observable<TaskState> {
-    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
-    let obs: Observable<HttpEvent<Blob>> = http.get(
-        url,
-        {
-            reportProgress: true,
-            observe: 'events',
-            responseType: 'blob',
-            params: params
-        }
-    );
-    obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
-    return obs.map(event => {
-        state = extractProgression(event);
-        return state;
-    });
-}
-
-export function downloadWithStatusPOST(url: string, formData: FormData, state ?: TaskState): Observable<TaskState> {
-    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
-    let obs: Observable<HttpEvent<Blob>> = http.post(
-        url,
-        formData,
-        {
-            reportProgress: true,
-            observe: 'events',
-            responseType: 'blob'
-        }
-    );
-    obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
-    return obs.map(event => {
-        state = extractProgression(event);
-        return state;
-    });
-}
-
-export function extractProgression(event: HttpEvent<any>): TaskState {
-    switch (event.type) {
-        case HttpEventType.Sent:
-        case HttpEventType.ResponseHeader:
-            return new TaskState(TaskStatus.QUEUED, 0);
-        case HttpEventType.DownloadProgress:
-            return new TaskState(TaskStatus.IN_PROGRESS, event.loaded);
-        case HttpEventType.Response:
-            return new TaskState(TaskStatus.DONE);
+    if (response.body) {
+        browserDownloadFile(response.body, getFilename(response));
+    } else {
+        throw new Error('can\'t download, server response is empty');
     }
 }
 
 export function getFilename(response: HttpResponse<any>): string {
-    const prefix = 'attachment;filename=';
-    let contentDispHeader: string = response.headers.get('Content-Disposition');
-    return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    const contentDispHeader: string = response.headers.get('Content-Disposition');
+    if (!contentDispHeader) return null;
+    const match = contentDispHeader.match(/filename="?([^"]+)"?/);
+    return match ? match[1].trim() : null;
 }
 
 export function pad(n, width, z?): string {
@@ -275,7 +228,7 @@ export function pad(n, width, z?): string {
 * order, until it finds one where predicate returns true. If such an element is found,
 * findLastIndex immediately returns that element index. Otherwise, findLastIndex returns -1.
 */
-export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): number {
+export function findLastIndex<T>(array: T[], predicate: (value: T, index: number, obj: T[]) => boolean): number {
     let l = array.length;
     while (l--) {
         if (predicate(array[l], l, array))
@@ -302,7 +255,7 @@ export class TimesPipe implements PipeTransform {
 @Pipe({ name: 'getValues' })
 export class GetValuesPipe implements PipeTransform {
     transform(map: Map<any, any>): any[] {
-        let ret = [];
+        const ret = [];
         map.forEach((val, key) => {
             ret.push({
                 key: key,
@@ -313,9 +266,9 @@ export class GetValuesPipe implements PipeTransform {
     }
 }
 
-export function allOfEnum<T>(enumClass): Array<T> {
-    let list: Array<T> = [];
-    for (let key in enumClass) {
+export function allOfEnum<T>(enumClass): T[] {
+    const list: T[] = [];
+    for (const key in enumClass) {
         if (!(enumClass[key] instanceof Function)) list.push(enumClass[key]);
     }
     return list;
@@ -329,6 +282,13 @@ export function capitalizeFirstLetter(str: string) {
 export function capitalsAndUnderscoresToDisplayable(str: string) {
     if (!str) return;
     return capitalizeFirstLetter(str.replace(new RegExp('_', 'g'), ' ').toLowerCase());
+}
+
+@Pipe({ name: 'camel' })
+export class CamelPipe implements PipeTransform {
+    transform(value: string): any {
+        return capitalsAndUnderscoresToDisplayable(value);
+    }
 }
 
 export function camelToSpaces(str: string): string {
@@ -354,10 +314,10 @@ function deepEquals(x, y) {
         return false;
     } else {
         for (const p in x) {
-            if (!x.hasOwnProperty(p)) {
+            if (!Object.prototype.hasOwnProperty.call(x, p)) {
                 continue; // other properties were tested using x.constructor === y.constructor
             }
-            if (!y.hasOwnProperty(p)) {
+            if (!Object.prototype.hasOwnProperty.call(y, p)) {
                 return false; // allows to compare x[ p ] and y[ p ] when set to undefined
             }
             if (x[p] === y[p]) {
@@ -371,18 +331,18 @@ function deepEquals(x, y) {
             }
         }
         for (const p in y) {
-            if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) {
+            if (Object.prototype.hasOwnProperty.call(y, p) && !Object.prototype.hasOwnProperty.call(x, p)) {
                 return false;
             }
         }
         return true;
     }
-};
+}
 
 export function objectsEqual(value1, value2) {
-    if (value1 == value2) return true;
-    else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
-    else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
+    if (value1 === value2) return true;
+    else if (value1 && value2 && value1.id && value2.id) return value1.id === value2.id;
+    else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals === 'function' && typeof value2.equals === 'function') return value1.equals(value2);
     else return deepEquals(value1, value2);
 }
 
@@ -391,9 +351,40 @@ export function arraysEqual(array1: any[], array2: any[]) {
 }
 
 export function isDarkColor(colorInp: string): boolean {
+    if (!colorInp) return false;
     colorInp = colorInp?.replace('#', '');
-    var r = parseInt(colorInp.substring(0, 2), 16); // hexToR
-    var g = parseInt(colorInp.substring(2, 4), 16); // hexToG
-    var b = parseInt(colorInp.substring(4, 6), 16); // hexToB
+    const r = parseInt(colorInp.substring(0, 2), 16); // hexToR
+    const g = parseInt(colorInp.substring(2, 4), 16); // hexToG
+    const b = parseInt(colorInp.substring(4, 6), 16); // hexToB
     return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
+}
+
+export function getSizeStr(size: number): string {
+    if (size == null) {
+        return "";
+    }
+    const base: number = 1024;
+    const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    if (size == 0) {
+        return "0 " + units[0];
+    }
+    const exponent: number = Math.floor(Math.log(size) / Math.log(base));
+    const value: number = Math.round(parseFloat((size / Math.pow(base, exponent)).toFixed(2)));
+    const unit: string = units[exponent];
+    return value + " " + unit;
+}
+
+type UnionKeys<T> = T extends T ? keyof T : never;
+type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never;
+export type StrictUnion<T> = StrictUnionHelper<T, T>
+
+const INVALID_FILENAME_CHARS = /[<>:"/\\|?*\n\r\t]/g
+
+export function sanitizeFilename(name) {
+  return name
+    .replace(INVALID_FILENAME_CHARS, '_')
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/\.+$/, '')
 }

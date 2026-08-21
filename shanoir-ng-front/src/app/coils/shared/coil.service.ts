@@ -13,11 +13,13 @@
  */
 
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import * as AppUtils from '../../utils/app.utils';
-import { Coil, CoilDTO } from './coil.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { HttpClient } from '@angular/common/http';
+
+import { Coil, CoilDTO } from './coil.model';
 
 @Injectable()
 export class CoilService extends EntityService<Coil> {
@@ -30,10 +32,13 @@ export class CoilService extends EntityService<Coil> {
 
     getEntityInstance() { return new Coil(); }
 
+    findByCenter(centerId: number): Promise<Coil[]> {
+        return firstValueFrom(this.http.get<any>(this.API_URL + '/byCenter/' + centerId))
+            .then(list => this.mapEntityList(list, null));
+    }
+
     public stringify(entity: Coil) {
-        let dto = new CoilDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
-            return this.customReplacer(key, value, dto);
-        });
+        const dto = new CoilDTO(entity);
+        return JSON.stringify(dto, this.customReplacer);
     }
 }

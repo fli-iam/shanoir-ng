@@ -11,20 +11,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Field } from '../../shared/reflect/field.decorator';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { StudyCenter } from '../../studies/shared/study-center.model';
 
 
 export class Center extends Entity {
-    acquisitionEquipments: AcquisitionEquipment[];
-    city: string;
-    country: string;
-    id: number;
-    name: string;
-    phoneNumber: string;
-    postalCode: string;
-    street: string;
-    website: string;
-    studyCenterList: StudyCenter[] = [];
+    @Field() id: number;
+    @Field() acquisitionEquipments: AcquisitionEquipment[];
+    @Field() city: string;
+    @Field() country: string;
+    @Field() name: string;
+    @Field() phoneNumber: string;
+    @Field() postalCode: string;
+    @Field() street: string;
+    @Field() website: string;
+    @Field() studyCenterList: StudyCenter[] = [];
 }

@@ -13,21 +13,21 @@
  */
 
 import { Component, ViewChild, ViewContainerRef } from '@angular/core';
-import { Step } from '../../breadcrumbs/breadcrumbs.service';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
+import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import {ShanoirError} from "../../shared/models/error.model";
-import {Center} from "../../centers/shared/center.model";
 
 @Component({
     selector: 'acquisition-equipment-list',
-    templateUrl: 'acquisition-equipment-list.component.html'
+    templateUrl: 'acquisition-equipment-list.component.html',
+    imports: [TableComponent]
 })
 
 export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListComponent<AcquisitionEquipment> {
@@ -65,10 +65,10 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
 
     // Grid columns definition
     getColumnDefs(): ColumnDefinition[] {
-        let columnDefs: ColumnDefinition[] = [
+        const columnDefs: ColumnDefinition[] = [
             {
-                headerName: "Acquisition equipment", field: "name", cellRenderer: function (params: any) {
-                    let acqEquip: AcquisitionEquipment = params.data;
+                headerName: "Center equipment", field: "name", cellRenderer: function (params: any) {
+                    const acqEquip: AcquisitionEquipment = params.data;
                     if (!acqEquip) return;
                     return acqEquip.manufacturerModel.manufacturer.name + " - " + acqEquip.manufacturerModel.name + " "
                         + (acqEquip.manufacturerModel.magneticField ? (acqEquip.manufacturerModel.magneticField + "T") : "")
@@ -81,12 +81,20 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
                 route: (acqEquip: AcquisitionEquipment) => '/manufacturer/details/' + acqEquip.manufacturerModel.manufacturer.id
             },
             {
+                headerName: "Modality", field: "manufacturerModel.datasetModalityType", cellRenderer: function (params: any) {
+                    const mod = DatasetModalityType.all().find(dsMod => dsMod.toString() == params.data.manufacturerModel.datasetModalityType);
+                    if (mod) return DatasetModalityType.getLabel(mod);
+                }
+            },
+            {
                 headerName: "Manufacturer model name", field: "manufacturerModel.name",
                 route: (acqEquip: AcquisitionEquipment) => '/manufacturer-model/details/' + acqEquip.manufacturerModel.id
             },
-            { headerName: "Serial number", field: "serialNumber", width: "200px" },
             {
-                headerName: "Center", field: "center.name",
+                headerName: "Serial number", field: "serialNumber", width: "200px"
+            },
+            {
+                headerName: "Acquisition Center", field: "center.name",
                 route: (acqEquip: AcquisitionEquipment) => '/center/details/' + acqEquip.center.id
             }
         ];
@@ -103,10 +111,10 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
     }
 
     openCreateCoil(acqEquip: AcquisitionEquipment) {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/coil/create'], ).then(success => {
-            this.breadcrumbsService.currentStep.addPrefilled('center', acqEquip.center);
-            this.breadcrumbsService.currentStep.addPrefilled('manufacturerModel', acqEquip.manufacturerModel);
+        const currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/coil/create'], ).then(() => {
+            this.breadcrumbsService.currentStep.addPrefilled('entity.center', acqEquip.center, true);
+            this.breadcrumbsService.currentStep.addPrefilled('entity.manufacturerModel', acqEquip.manufacturerModel, true);
             currentStep.waitFor(this.breadcrumbsService.currentStep);
         });
     }

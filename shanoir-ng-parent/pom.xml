@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<groupId>org.shanoir-ng</groupId>
 	<artifactId>shanoir-ng</artifactId>
-	<version>3.1.2</version>
+	<version>3.4.0</version>
 	<packaging>pom</packaging>
 
 	<name>shanoir-ng-parent</name>
@@ -29,28 +29,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<modules>
 		<module>../shanoir-ng-keycloak-auth</module>
 		<module>../shanoir-ng-back</module>
+        <module>../shanoir-ng-storage</module>
 		<module>../shanoir-ng-front</module>
 		<module>../shanoir-uploader</module>
 	</modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>17</java.version>
+		<java.version>21</java.version>
 		<sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
 		<sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
 		<sonar.language>java</sonar.language>
 	</properties>
 
 	<build>
+	    <pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.5.2</version>
+					<configuration>
+						<useSystemClassLoader>false</useSystemClassLoader><!-- due to a bug with openJDK -->
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<useSystemClassLoader>false</useSystemClassLoader><!-- due to a bug with openJDK -->
-				</configuration>
-				<version>2.18.1</version>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -76,7 +81,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<goal>report</goal>
 						</goals>
 					</execution>
-					<!-- <execution> <id>post-unit-test</id> <phase>test</phase> <goals> 
+                    <!-- <execution> <id>post-unit-test</id> <phase>test</phase> <goals>
 						<goal>report</goal> </goals> </execution> -->
 				</executions>
 			</plugin>

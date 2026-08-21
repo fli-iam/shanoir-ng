@@ -12,9 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { BloodGasData } from '../../bloodGasData/shared/bloodGasData.model';
+import { ExtraData } from '../../extraData/shared/extradata.model';
 
-export class BloodGasDataFile extends BloodGasData {
+export class BloodGasDataFile extends ExtraData {
 	bloodGasDataFile: File;
-
 }

@@ -2,35 +2,39 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { AnimationCallbackEvent, Component, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DatePipe } from '@angular/common';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
+import { environment } from '../../../environments/environment';
+import { VERSION } from '../../../environments/version';
+import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { SolrService } from '../../solr/solr.service';
-import { disapearUp, slideDown } from '../animations/animations';
-import { KeycloakService } from '../keycloak/keycloak.service';
+import { StudyService } from '../../studies/shared/study.service';
+import { UserService } from '../../users/shared/user.service';
+import { ConfirmDialogService } from "../components/confirm-dialog/confirm-dialog.service";
 import { ConsoleService } from '../console/console.service';
+import { KeycloakService } from '../keycloak/keycloak.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ImagesUrlUtil } from '../utils/images-url.util';
-import { VERSION } from '../../../environments/version';
-import { StudyService } from '../../studies/shared/study.service';
-import { environment } from '../../../environments/environment';
-import { UserService } from '../../users/shared/user.service';
-
+import { LoadingBarComponent } from '../components/loading-bar/loading-bar.component';
 
 
 @Component({
     selector: 'side-menu',
     templateUrl: 'side-menu.component.html',
     styleUrls: ['side-menu.component.css', environment.production ? 'prod.css' : 'dev.css'],
-    animations: [ slideDown, disapearUp ]
+    imports: [RouterLink, RouterLinkActive, LoadingBarComponent, DatePipe]
 })
 
 export class SideMenuComponent {
@@ -41,27 +45,33 @@ export class SideMenuComponent {
     public state: SideMenuState;
     public VERSION = VERSION;
     private sessionKey: string = KeycloakService.auth.userId + 'menuState';
-    accessRequestsToValidate: number;
+    protected accessRequestsToValidate: number;
+
 
 
     constructor(
-            public keycloakService: KeycloakService, 
+            public keycloakService: KeycloakService,
             private solrService: SolrService,
+            private datasetAcquisitionService: DatasetAcquisitionService,
             private consoleService: ConsoleService,
             public notificationsService: NotificationsService,
             private studyService: StudyService,
-            private userService: UserService) {
+            private userService: UserService,
+            private confirmDialogService: ConfirmDialogService,
+            private destroyRef: DestroyRef) {
 
         if (KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed) {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
             this.userId = KeycloakService.auth.userId;
         }
 
-        let storedState = sessionStorage.getItem(this.sessionKey);
+        const storedState = sessionStorage.getItem(this.sessionKey);
         if (storedState) this.state = JSON.parse(storedState) as SideMenuState;
         else this.state = new SideMenuState();
 
-        this.userService.accessRequets.subscribe(nb => {
+        this.userService.accessRequets
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(nb => {
             if (nb) {
                 this.accessRequestsToValidate = nb;
             } else {
@@ -82,14 +92,45 @@ export class SideMenuComponent {
     isUserAdmin(): boolean {
         return this.keycloakService.isUserAdmin();
     }
-    
+
     canUserImportFromPACS(): boolean {
         return this.keycloakService.canUserImportFromPACS();
     }
 
     indexToSolr() {
-        this.solrService.indexAll().then(() => {
-            this.consoleService.log('info', 'Indexation launched !');
+        this.confirmDialogService.confirm('Index solr',
+            'Indexing Solr can take some time, it won\'t be available during this time. Are you sure ?')
+            .then(userChoice => {
+                if (userChoice) {
+                    this.solrService.indexAll().then(() => {
+                        this.consoleService.log('info', 'Indexation launched !');
+                    });
+                }
+            });
+    }
+
+    /**
+     * Cleans up the acquisitions emptied before their removal was proposed on dataset deletion.
+     * The list is fetched first so that the administrator sees what would be deleted.
+     */
+    cleanUpEmptyAcquisitions() {
+        this.datasetAcquisitionService.getEmpty().then(empty => {
+            if (empty.length == 0) {
+                this.consoleService.log('info', 'No empty dataset acquisition to clean up.');
+                return;
+            }
+            this.confirmDialogService.confirm('Clean up empty acquisitions',
+                'The following ' + empty.length + ' dataset acquisition(s) hold no dataset anymore and would be deleted : '
+                + empty.map(acquisition => '"' + acquisition.name + '" (id n° ' + acquisition.id + ')').join(', ')
+                + '.<br/><br/>Are you sure ?')
+                .then(userChoice => {
+                    if (userChoice) {
+                        this.datasetAcquisitionService.deleteEmpty().then(deleted => {
+                            this.consoleService.log('info', deleted.length + ' empty dataset acquisition(s) deleted',
+                                ['ids : ' + deleted.join(', ')]);
+                        });
+                    }
+                });
         });
     }
 
@@ -97,8 +138,17 @@ export class SideMenuComponent {
         return this.studyService.duasToSign;
     }
 
+    studiesToApprove(): number {
+        return this.studyService.draftStudies;
+    }
+
     saveState() {
         sessionStorage.setItem(this.sessionKey, JSON.stringify(this.state));
+    }
+
+    setSubmenuHeight(event: AnimationCallbackEvent) {
+        const el = event.target as HTMLElement;
+        el.style.setProperty('--submenu-height', `${el.scrollHeight}px`);
     }
 }
 

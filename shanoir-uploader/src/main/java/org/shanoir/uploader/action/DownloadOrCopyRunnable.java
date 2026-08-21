@@ -1,115 +1,179 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.action;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Iterator;
+import java.io.IOException;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
-import org.apache.log4j.Logger;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.UploadState;
+import org.shanoir.ng.utils.Utils;
+import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.query.SerieTreeNode;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
-import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
-import org.shanoir.uploader.upload.UploadJob;
-import org.shanoir.uploader.upload.UploadJobManager;
-import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.shanoir.uploader.utils.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * This class downloads the files from the PACS or copies
- * them from the CD/DVD to an upload folder and creates the
- * upload-job.xml.
- * 
+ * This class downloads as a separate thread the DICOM files from the PACS
+ * OR copies the DICOM files from the CD/DVD/local file system to an upload
+ * folder.
+ * Multiple DICOM-studies/exams are managed within one thread, each as an
+ * ImportJob. This class creates the import-job.json (and upload-job.xml
+            +  * nominative-upload-job.xml for legacy reasons). The .xmls will be removed
+ * later.
+ *
  * @author mkain
  *
  */
 public class DownloadOrCopyRunnable implements Runnable {
 
-	private static Logger logger = Logger.getLogger(DownloadOrCopyRunnable.class);
-	
-	private boolean isFromPACS;
-	
-	private IDicomServerClient dicomServerClient;
-	
-	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
-	
-	private String filePathDicomDir;
+    private static final Logger LOG = LoggerFactory.getLogger(DownloadOrCopyRunnable.class);
 
-	private Set<SerieTreeNode> selectedSeries;
+    private boolean isFromPACS;
 
-	private DicomDataTransferObject dicomData;
-	
-	public DownloadOrCopyRunnable(boolean isFromPACS, final IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, final String filePathDicomDir,
-		final Set<SerieTreeNode> selectedSeries, final DicomDataTransferObject dicomData) {
-		this.isFromPACS = isFromPACS;
-		this.dicomFileAnalyzer = dicomFileAnalyzer;
-		this.dicomServerClient = dicomServerClient; // used with PACS import
-		if(!isFromPACS && filePathDicomDir != null) {
-			this.filePathDicomDir = new String(filePathDicomDir); // used with CD/DVD import
-		}
-		this.selectedSeries = selectedSeries;
-		this.dicomData = dicomData;
-	}
+    private boolean isTableImport;
 
-	@Override
-	public void run() {
-		File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
-		List<String> allFileNames = null;
-		try {
-			/**
-			 * 1. Download from PACS or copy from CD/DVD/local file system
-			 */
-			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, selectedSeries, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
-		
-			/**
-			 * 2. Fill MRI information into serie from first DICOM file of each serie
-			 * This has already been done for CD/DVD import, but not yet here for PACS.
-			 */
-			if (this.isFromPACS) {
-				for (Iterator iterator = selectedSeries.iterator(); iterator.hasNext();) {
-					SerieTreeNode serieTreeNode = (SerieTreeNode) iterator.next();
-					dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serieTreeNode.getSerie(), null, isFromPACS);
-				}
-			}
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage(), e);
-		}
-		
-		/**
-		 * 3. Write the UploadJob and schedule upload
-		 */
-		UploadJob uploadJob = new UploadJob();
-		ImportUtils.initUploadJob(selectedSeries, dicomData, uploadJob);
-		if (allFileNames == null) {
-			uploadJob.setUploadState(UploadState.ERROR);
-		}
-		UploadJobManager uploadJobManager = new UploadJobManager(uploadFolder.getAbsolutePath());
-		uploadJobManager.writeUploadJob(uploadJob);
+    private IDicomServerClient dicomServerClient;
 
-		/**
-		 * 4. Write the NominativeDataUploadJobManager for displaying the download state
-		 */
-		NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
-		ImportUtils.initDataUploadJob(selectedSeries, dicomData, dataJob);
-		if (allFileNames == null) {
-			dataJob.setUploadState(UploadState.ERROR);
-		}
-		NominativeDataUploadJobManager uploadDataJobManager = new NominativeDataUploadJobManager(
-				uploadFolder.getAbsolutePath());
-		uploadDataJobManager.writeUploadDataJob(dataJob);
-		ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, dataJob);
-		
-		logger.info(uploadFolder.getName() + ": finished: " + toString());
-	}
+    private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
-	@Override
-	public String toString() {
-		return "DownloadOrCopyRunnable [isFromPACS=" + isFromPACS + ", dicomServerClient=" + dicomServerClient
-				+ ", filePathDicomDir=" + filePathDicomDir + ", selectedSeries=" + selectedSeries + ", dicomData="
-				+ dicomData.toString() + "]";
-	}
+    private String filePathDicomDir;
+
+    private Map<String, ImportJobBase> importJobs;
+
+    private JFrame frame;
+
+    private JProgressBar downloadProgressBar;
+
+    public DownloadOrCopyRunnable(boolean isFromPACS, boolean isTableImport, JFrame frame, JProgressBar downloadProgressBar,
+            final IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer,
+            final String filePathDicomDir, Map<String, ImportJobBase> importJobs) {
+        this.isFromPACS = isFromPACS;
+        this.isTableImport = isTableImport;
+        this.frame = frame;
+        this.downloadProgressBar = downloadProgressBar;
+        this.dicomFileAnalyzer = dicomFileAnalyzer;
+        this.dicomServerClient = dicomServerClient; // used with PACS import
+        if (!isFromPACS && filePathDicomDir != null) {
+            this.filePathDicomDir = new String(filePathDicomDir); // used with CD/DVD import
+        }
+        this.importJobs = importJobs;
+    }
+
+    @Override
+    public void run() {
+        LOG.info(importJobs.size() + " DICOM study(ies) selected for download or copy.");
+        StringBuilder downloadOrCopyReportSummary = new StringBuilder();
+        for (String studyInstanceUID : importJobs.keySet()) {
+            StringBuilder downloadOrCopyReportPerStudy = new StringBuilder();
+            ImportJobBase importJob = importJobs.get(studyInstanceUID);
+            downloadOrCopyReportPerStudy.append("DICOM study: ["
+                    + importJob.getStudy().getStudyDate() + "], "
+                    + importJob.getStudy().getStudyDescription() + "\n");
+            File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(),
+                    importJob.getSubject().getIdentifier());
+            importJob.setWorkFolder(uploadFolder.getAbsolutePath());
+            List<Serie> series = importJob.getSeries();
+            downloadOrCopyReportPerStudy.append(series.size() + " series selected for download or copy.\n\n");
+            List<String> allFileNames = null;
+            downloadProgressBar.setValue(0);
+            try {
+                /**
+                 * 1. Download from PACS or copy from CD/DVD/local file system
+                 */
+                allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(
+                        this.isFromPACS, downloadProgressBar, downloadOrCopyReportPerStudy, studyInstanceUID, series,
+                        uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
+                /**
+                 * 2. Fill MRI information into all series from first DICOM file of each serie
+                 */
+                for (Serie serie : series) {
+                    dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), importJob.getPatient(),
+                            importJob.getStudy(), serie, isFromPACS);
+                }
+            } catch (FileNotFoundException e) {
+                LOG.error(e.getMessage(), e);
+                // as exception occurred, we set allFileNames to null, to force ERROR state of import
+                allFileNames = null;
+            }
+
+            /**
+             * Set the upload parameters of the importJob object
+             */
+            importJob.setTimestamp(System.currentTimeMillis());
+
+            if (allFileNames == null) {
+                importJob.setUploadState(UploadState.ERROR);
+            } else {
+                importJob.setUploadState(UploadState.READY);
+            }
+
+            importJob.setUploadPercentage("");
+
+            /**
+             * Write import-job.json to disk
+             */
+            try {
+                File importJobJson = new File(uploadFolder, ShUpConfig.IMPORT_JOB_JSON);
+                importJobJson.createNewFile();
+                Util.mapper.writeValue(importJobJson, importJob);
+            } catch (IOException e) {
+                LOG.error(uploadFolder.getName() + ": " + e.getMessage(), e);
+            }
+
+            ShUpOnloadConfig.getCurrentNominativeDataController().addNewNominativeData(uploadFolder, importJob);
+            LOG.info(
+                    uploadFolder.getName() + ": finished for DICOM study: " + importJob.getStudy().getStudyDescription()
+                            + ", " + importJob.getStudy().getStudyDate() + " of patient: "
+                            + Utils.sha256(importJob.getPatient().getPatientName()));
+
+            downloadOrCopyReportSummary.append(downloadOrCopyReportPerStudy.toString() + "\n\n");
+        }
+        if (isTableImport) {
+            LOG.info(downloadOrCopyReportSummary.toString());
+        } else {
+            /**
+             * Display downloadOrCopy summary to user.
+             */
+            JTextArea textArea = new JTextArea(downloadOrCopyReportSummary.toString());
+            textArea.setEditable(false);
+            textArea.setWrapStyleWord(true);
+            textArea.setLineWrap(true);
+            textArea.setCaretPosition(0);
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            scrollPane.setPreferredSize(new java.awt.Dimension(650, 550));
+            JOptionPane.showMessageDialog(
+                    frame,
+                    scrollPane,
+                    "Download or copy report",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
 
 }

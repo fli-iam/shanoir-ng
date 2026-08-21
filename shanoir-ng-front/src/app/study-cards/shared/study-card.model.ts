@@ -13,19 +13,18 @@
  */
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Coil } from '../../coils/shared/coil.model';
-import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
 import { Study } from '../../studies/shared/study.model';
+import { Field } from '../../shared/reflect/field.decorator';
 
 
 export class StudyCard extends Entity {
 
-    id: number;
-    name: string;
-    study: Study;
-    acquisitionEquipment: AcquisitionEquipment;
-    niftiConverter: NiftiConverter;
-    rules: StudyCardRule[] = [];
+    @Field() id: number;
+    @Field() name: string;
+    @Field() study: Study;
+    @Field() acquisitionEquipment: AcquisitionEquipment;
+    @Field() rules: StudyCardRule[] = [];
 }
 
 
@@ -35,17 +34,18 @@ export class StudyCardRule {
 
     assignments: StudyCardAssignment[];
     conditions: StudyCardCondition[];
+    orConditions: boolean = false;
 
     static copy(rule: StudyCardRule): StudyCardRule {
-        let copy: StudyCardRule = new StudyCardRule(rule.scope);
+        const copy: StudyCardRule = new StudyCardRule(rule.scope);
         copy.assignments = rule.assignments.map(ass => {
-            let assCopy: StudyCardAssignment = new StudyCardAssignment(ass.scope);
+            const assCopy: StudyCardAssignment = new StudyCardAssignment(ass.scope);
             assCopy.field = ass.field;
             assCopy.value = ass.value;
             return assCopy;
         });
         copy.conditions = rule.conditions.map(con => {
-            let conCopy: StudyCardCondition = new StudyCardCondition(con.scope);
+            const conCopy: StudyCardCondition = new StudyCardCondition(con.scope);
             conCopy.dicomTag = con.dicomTag;
             conCopy.shanoirField = con.shanoirField;
             conCopy.values = [...con.values];
@@ -84,26 +84,54 @@ export class StudyCardCondition {
     shanoirField: string;
     dicomTag: DicomTag;
     operation: Operation;
-    values: string[] = [];
-    cardinality: number;
+    values: (string | Coil)[] = [];
+    private _cardinality: number = -1; // -1 means condition on every dataset / acquisition
 
-    constructor(public scope: ConditionScope) {}
+    set cardinality(value: number) {
+        if (!["DatasetDICOMConditionOnDataset", "DatasetMetadataCondOnDataset", "AcqMetadataCondOnAcq"].includes(this.scope)) {
+            this._cardinality = value;
+        }
+    }
+
+    get cardinality(): number {
+        return this._cardinality;
+    }
+
+    constructor(public scope: ConditionScope) {
+        if (["DatasetDICOMConditionOnDataset", "DatasetMetadataCondOnDataset", "AcqMetadataCondOnAcq"].includes(scope)) {
+            this._cardinality = -1;
+        }
+    }
+
+    get type(): 'string' | 'Coil' {
+        if (this.values?.[0] instanceof Coil) {
+            return 'Coil';
+        } else {
+            return 'string';
+        }
+    }
 }
+
+export type FieldType = 'String' | 'Long' | 'Float' | 'Double' | 'Integer' | 'Binary' | 'Date' | 'FloatArray' | 'IntArray';
+
+export type VM = {min: number, max: {number: number, multiplier: boolean}};
 
 export class DicomTag {
 
     constructor(
         public code: number,
-        public label: string) {};
+        public label: string,
+        public type: FieldType,
+        public vm: VM) {};
 
     equals(other: DicomTag): boolean {
         return this.code == other.code;
     }
 }
 
-export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'DOES_NOT_CONTAIN' | 'SMALLER_THAN' | 'BIGGER_THAN';
+export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'DOES_NOT_CONTAIN' | 'SMALLER_THAN' | 'BIGGER_THAN' | 'DOES_NOT_START_WITH' | 'NOT_EQUALS' | 'DOES_NOT_END_WITH' | 'PRESENT' | 'ABSENT';
 
-export type ConditionScope = 'StudyCardDICOMCondition' | 'AcqMetadataCondOnAcq' | 'AcqMetadataCondOnDatasets' | 
+export type ConditionScope = 'ExamDICOMConditionOnDatasets' | 'AcqDICOMConditionOnDatasets' | 'DatasetDICOMConditionOnDataset' | 'AcqMetadataCondOnAcq' | 'AcqMetadataCondOnDatasets' | 
     'DatasetMetadataCondOnDataset' | 'ExamMetadataCondOnAcq' | 'ExamMetadataCondOnDatasets';
 
 export type MetadataFieldScope = 'Dataset' | 'DatasetAcquisition';

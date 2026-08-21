@@ -12,9 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, EventEmitter, forwardRef, HostListener, Input, OnChanges, Output, PipeTransform, SimpleChanges } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+
 import {arraysEqual, isDarkColor, objectsEqual} from '../../utils/app.utils';
 import { Option } from '../select/select.component';
+
 
 
 @Component({
@@ -23,10 +25,12 @@ import { Option } from '../select/select.component';
     styleUrls: ['multi-select.component.css'],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => MultiSelectComponent),
-          multi: true,
-        }]
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => MultiSelectComponent),
+            multi: true,
+        }
+    ],
+    imports: [FormsModule]
 })
 
 export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
@@ -39,9 +43,9 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     @Input() disabled: boolean = false;
     @Input() readOnly: boolean = false;
     @Input() placeholder: string;
-    @Output() onTouch = new EventEmitter();
-    private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    @Output() touch = new EventEmitter();
+    private onTouchedCallback = () => { return; };
+    private onChangeCallback: (any) => void = () => { return; };
     modelArray: any[];
     selectedOptions: Option<any>[] = [];
 
@@ -54,8 +58,8 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
         if (changes.optionArr && this.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
             this.options = [];
             this.optionArr.forEach(item => {
-                let label: string = this.getLabel(item);
-                let newOption: Option<any> = new Option<any>(item, label);
+                const label: string = this.getLabel(item);
+                const newOption: Option<any> = new Option<any>(item, label);
                 if (item.color) newOption.color = item.color;
                 if (item.backgroundColor) newOption.backgroundColor = item.backgroundColor;
                 this.options.push(newOption);
@@ -110,13 +114,15 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
         this.selectedOptions = [];
         this.modelArray.forEach(modelValue => {
             const selected: Option<any> = this.options.find(option => objectsEqual(option.value, modelValue));
-            selected.disabled = true;
-            if (selected) this.selectedOptions.push(selected);
+            if (selected) {
+                selected.disabled = true;
+                this.selectedOptions.push(selected);
+            }
         });
     }
 
     onSelectOption(e: any) {
-        let option: Option<{id: number}> = this.options?.find(opt => objectsEqual(opt?.value, e));
+        const option: Option<{id: number}> = this.options?.find(opt => objectsEqual(opt?.value, e));
         this.modelArray.push(option.value);
         this.selectedOptions.push(option);
         option.disabled = true;
@@ -135,7 +141,7 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     onFocusOut(event: FocusEvent) {
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
             this.onTouchedCallback();
-            this.onTouch.emit();
+            this.touch.emit();
         }
     }
 

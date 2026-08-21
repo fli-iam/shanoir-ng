@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -17,6 +17,7 @@ package org.shanoir.ng.study.service;
 import java.util.List;
 import java.util.Map;
 
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.StudyUser;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -30,23 +31,44 @@ import org.springframework.stereotype.Service;
 @Service
 public interface StudyUserService {
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<StudyUserRight> getRightsForStudy(Long studyId);
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    List<StudyUserRight> getRightsForStudy(Long studyId);
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	Map<Long, List<StudyUserRight>> getRights();
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	boolean hasOneStudyToImport();
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    Map<Long, List<StudyUserRight>> getRights();
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<StudyUser> findStudyUsersByStudyId(Long studyId);
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    boolean hasOneStudyToImport();
 
-	/**
-	 * Deletes all study_user in study microservice when deleting a user.
-	 * @param eventAsString
-	 * @throws AmqpRejectAndDontRequeueException
-	 */
-	void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException;
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    List<StudyUser> findStudyUsersByStudyId(Long studyId);
+
+    /**
+     * Persists a new StudyUser membership and broadcasts the change to all
+     * microservices that maintain a local rights cache.
+     *
+     * @param studyUser the relationship to create (study must already be set)
+     * @return the saved entity with its generated id
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    StudyUser addStudyUserToStudy(StudyUser studyUser) throws MicroServiceCommunicationException;
+
+    /**
+     * Removes a single StudyUser membership by its composite key and broadcasts
+     * the deletion. This is the programmatic counterpart of the GUI remove path
+     * already used by {@code StudyService.removeUserFromStudy}.
+     *
+     * @param studyId the study
+     * @param userId  the user to remove
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+    void removeStudyUserFromStudy(Long studyId, Long userId) throws MicroServiceCommunicationException;
+
+    /**
+     * Deletes all study_user in study microservice when deleting a user.
+     * @param eventAsString
+     * @throws AmqpRejectAndDontRequeueException
+     */
+    void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException;
 
 }

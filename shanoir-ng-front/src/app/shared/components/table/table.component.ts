@@ -11,29 +11,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
+import { Router, RouterLink, RouterLinkActive } from "@angular/router";
+import shajs from 'sha.js';
+import { NgTemplateOutlet } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
+import { VarDirective } from 'src/app/utils/ng-var.directive';
+
+import { Task, TaskStatus } from '../../../async-tasks/task.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { GlobalService } from '../../services/global.service';
-import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
-import * as shajs from 'sha.js';
-import { slideDown } from '../../animations/animations';
+import * as AppUtils from '../../../utils/app.utils';
+import { isDarkColor } from "../../../utils/app.utils";
 import { KeycloakService } from '../../keycloak/keycloak.service';
+import { NotificationsService } from '../../notifications/notifications.service';
+import { GlobalService } from '../../services/global.service';
+import { SessionService } from '../../services/session.service';
+import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
+import { CheckboxComponent } from '../../checkbox/checkbox.component';
+import { MultiSelectComponent } from '../../multi-select/multi-select.component';
+import { LoadingBarComponent } from '../loading-bar/loading-bar.component';
+
+import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
 import { ColumnDefinition } from './column.definition.type';
-import {isDarkColor} from "../../../utils/app.utils";
-import {Router} from "@angular/router";
-import {formatDate} from "@angular/common";
+import { TableSearchComponent } from './search/search.component';
+import { PagerComponent } from './pager/pager.component';
 
 @Component({
     selector: 'shanoir-table',
     templateUrl: 'table.component.html',
     styleUrls: ['table.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    animations: [slideDown]
+    imports: [VarDirective, RouterLink, RouterLinkActive, CheckboxComponent, FormsModule, MultiSelectComponent, LoadingBarComponent, TableSearchComponent, NgTemplateOutlet, PagerComponent]
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
-    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>> | Page<any>;
+    @Input() getPage: (pageable: Pageable, forceRefresh?: boolean, eager?: boolean) => Promise<Page<any>> | Page<any>;
     @Input() rowRoute: (item: any) => string;
     @Input() columnDefs: ColumnDefinition[];
     @Input() subRowsDefs: ColumnDefinition[];
@@ -46,16 +59,19 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() browserSearch: boolean = true;
     @Input() collapseControls: boolean = false;
     @Input() editMode: boolean = false;
-    @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
-    @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
+    @Output() rowClick: EventEmitter<object> = new EventEmitter<object>();
+    @Output() rowEdit: EventEmitter<object> = new EventEmitter<object>();
     @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
+    @Input() greyedCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
-    page: Page<Object>;
+    @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
+    page: Page<object>;
     isLoading: boolean = false;
     maxResultsField: number;
-    lastSortedCol: Object = null;
+    pageNumber: number;
+    lastSortedCol: any = null;
     lastSortedAsc: boolean = true;
     currentPage: number = 1;
     loaderImageUrl: string = "assets/images/loader.gif";
@@ -77,7 +93,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             private elementRef: ElementRef,
             private breadcrumbsService: BreadcrumbsService,
             private globalClickService: GlobalService,
-            protected router: Router ) {
+            protected router: Router,
+            private dialogService: ConfirmDialogService,
+            private notificationService: NotificationsService,
+            private sessionService: SessionService) {
         this.maxResultsField = this.maxResults;
     }
 
@@ -107,10 +126,11 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     ngOnInit() {
         this.subscriptions.push(this.globalClickService.onGlobalMouseUp.subscribe(() => this.stopDrag()));
-        this.subscriptions.push(fromEvent(window, 'resize').subscribe( evt => {
+        this.subscriptions.push(fromEvent(window, 'resize').subscribe(() => {
             this.checkCompactMode();
         }));
         this.checkCompactMode();
+        this.registerRefresh.emit(this.refresh.bind(this));
     }
 
     private computeItemVars() {
@@ -127,13 +147,13 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private checkCompactMode() {
-        let width: number = this.elementRef.nativeElement.offsetWidth;
+        const width: number = this.elementRef.nativeElement.offsetWidth;
         this.compactMode = width < 620;
     }
 
     private reloadPreviousState() {
-        let currentStep = this.breadcrumbsService.currentStep
-        let savedState = currentStep && currentStep.data.tableState ? currentStep.data.tableState[this.hash] : null;
+        const currentStep = this.breadcrumbsService.currentStep
+        const savedState = currentStep && currentStep.data.tableState ? currentStep.data.tableState[this.hash] : null;
         if (savedState) {
             this.lastSortedCol = this.columnDefs.find(col => col && savedState.lastSortedCol && col.field == savedState.lastSortedCol.field);
             this.lastSortedAsc = savedState.lastSortedAsc;
@@ -153,15 +173,15 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    get items(): Object[] {
+    get items(): any[] {
         return this.page ? this.page.content : [];
     }
 
 
-    sortBy(col: Object): void {
+    sortBy(col: any): void {
         if (col['disableSorting'] || col["type"] == "button") return;
-        let defaultAsc: boolean = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
-        let asc: boolean = col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
+        const defaultAsc: boolean = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
+        const asc: boolean = col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
         this.lastSortedCol = col;
         this.lastSortedAsc = asc;
         this.goToPage(1);
@@ -175,22 +195,23 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
 
-    onRowClick(item: Object) {
-        if (this.rowClick.observers.length > 0 && !this.rowDisabled(item)) this.rowClick.emit(item);
+    onRowClick(item: any) {
+        if (this.rowClick.observed && !this.rowDisabled(item)) this.rowClick.emit(item);
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }
 
-
-    public static getCellValue(item: Object, col: ColumnDefinition): any {
-        if (col.hasOwnProperty("cellRenderer")) {
-            let params = new Object();
+    public static getCellValue(item: any, col: ColumnDefinition): any {
+        if (Object.prototype.hasOwnProperty.call(col, "cellRenderer")) {
+            const params = new Object();
             params["data"] = item;
             return col["cellRenderer"](params);
         } else if (!col.field) {
             return null;
         } else {
-            let fieldValue = this.getFieldRawValue(item, col["field"]);
-            if (fieldValue) return fieldValue;
+            const fieldValue = this.getFieldRawValue(item, col["field"]);
+            if (fieldValue) {
+                return fieldValue;
+            }
             else if (col.defaultField)
                 return this.getFieldRawValue(item, col["defaultField"]);
             else
@@ -198,7 +219,21 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    public static getFieldRawValue(obj: Object, path: string): any {
+    public static harmonizeToDate(value: any): Date {
+        let date: Date;
+        if (value instanceof Date) {
+            date = value;
+        } else if (!Number.isNaN(Date.parse(value))) {
+            date = new Date(Date.parse(value));
+        } else if (Number.isInteger(value)) {
+            date = new Date(value);
+        } else {
+            date = this.stringToDate(value);
+        }
+        return date;
+    }
+
+    public static getFieldRawValue(obj: any, path: string): any {
         if (!path) return;
         function index(robj: any, i: string) { return robj ? robj[i] : undefined };
         return path.split('.').reduce(index, obj);
@@ -207,21 +242,21 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Get a cell content, resolving a renderer if necessary
      */
-    getCellValue(item: Object, col: ColumnDefinition): any {
+    getCellValue(item: any, col: ColumnDefinition): any {
         return TableComponent.getCellValue(item, col);
     }
 
     /**
      * Just get the field value, but not using any renderer!
      */
-    getFieldRawValue(obj: Object, path: string): any {
+    getFieldRawValue(obj: any, path: string): any {
         return TableComponent.getFieldRawValue(obj, path);
     }
 
     /**
      * Set the property value
      */
-    private setFieldRawValue(obj: Object, path: string, value: any) {
+    private setFieldRawValue(obj: any, path: string, value: any) {
         if (path == undefined || path == null) return;
         const split = path.split('.');
         let currentObj = obj;
@@ -234,7 +269,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Triggered when a field is edited
      */
-    onFieldEdit(obj: Object, col: Object, value: any) {
+    onFieldEdit(obj: any, col: any, value: any) {
         this.setFieldRawValue(obj, col['field'], value);
         this.rowEdit.emit(obj);
         if (col['onEdit']) col['onEdit'](obj, value);
@@ -243,18 +278,16 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Convert a cell content to a displayable string
      */
-    renderCell(item: Object, col: ColumnDefinition): any {
-        let result: any = this.getCellValue(item, col);
+    renderCell(item: any, col: ColumnDefinition): any {
+        const result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
-        } else if (col.type == 'date') {
-            let date: Date;
-            if (result instanceof Date) {
-                date = result;
-            } else {
-                date = this.stringToDate(result);
-            }
-            return date?.toLocaleDateString(undefined, {year: "numeric", month: "2-digit", day: "2-digit"}) || result;
+        } else if ((col.type == 'date' || col.type == 'dateTime') && !col.cellRenderer) {
+            const date: Date = TableComponent.harmonizeToDate(result);
+            let dateFormat;
+            if (col.type == 'dateTime') dateFormat = {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false };
+            else dateFormat = {year: "numeric", month: "2-digit", day: "2-digit"};
+            return date?.toLocaleDateString(undefined, dateFormat) || result;
         } else if (result.text) {
             return result;
         } else {
@@ -262,17 +295,18 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    private stringToDate(dateString: String): Date {
+    private static stringToDate(dateString: string): Date {
         if (!dateString) return null;
-        let split: string[] = dateString.split('-');
+        dateString += '';
+        const split: string[] = dateString.split('-');
         if (split.length != 3) return null;
-        let splitNum: number[] = split.map(elt => parseInt(elt));
+        const splitNum: number[] = split.map(elt => parseInt(elt));
         if (splitNum.includes(NaN)) return null;
         return new Date(splitNum[2],splitNum[1],splitNum[0]);
     }
 
     getCellGraphics(item: any, col: ColumnDefinition): any {
-        if (col.hasOwnProperty("cellGraphics")) {
+        if (Object.prototype.hasOwnProperty.call(col, "cellGraphics")) {
             return col["cellGraphics"](item);
         } else return null;
     }
@@ -282,7 +316,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
      */
     isFieldBoolean(col: ColumnDefinition): boolean {
         if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
-        let val = this.getCellValue(this.items[0], col);
+        const val = this.getCellValue(this.items[0], col);
         return col.type == 'boolean' || this.isValueBoolean(val);
     }
 
@@ -322,7 +356,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
      * Get a column type and format it to be used a dom element class
      */
     getColTypeStr(col: ColumnDefinition): string {
-        let type: string = this.getColType(col);
+        const type: string = this.getColType(col);
         return type != null ? "col-" + type : "";
     }
 
@@ -330,17 +364,27 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
      * Get a cell type and format it to be used a dom element class
      */
     getCellTypeStr(col: ColumnDefinition): string {
-        let type: string = this.getColType(col);
+        const type: string = this.getColType(col);
         return type != null ? "cell-" + type : "";
+    }
+
+    jumpToPage(p: number) {
+        if (p <= this.page.totalPages) {
+            this.goToPage(p);
+        } else if (p < 0) {
+            this.goToPage(1);
+        } else {
+            this.goToPage(this.page.totalPages);
+        }
     }
 
     goToPage(p: number, forceRefresh: boolean = false): Promise<Page<any>> {
         this.currentPage = p;
         this.isLoading = true;
-        let getPage: Page<any> | Promise<Page<any>> =  this.getPage(this.getPageable(), forceRefresh)
+        const getPage: Page<any> | Promise<Page<any>> = this.getPage(this.getPageable(), forceRefresh)
         if (getPage instanceof Promise) {
             return getPage.then(page => {
-                    this.pageLoaded.emit(page);
+                this.pageLoaded.emit(page);
                 return this.computePage(page);
             }).catch(reason => {
                 setTimeout(() => {
@@ -355,6 +399,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 return page;
             });
         }
+
     }
 
     private computePage(page: Page<any>): Page<any> {
@@ -373,6 +418,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
      * Call to refresh from outside
      */
     public refresh(page?: number): Promise<Page<any>> {
+        if (page < 1) throw new Error('page must be >= 1');
         if (page == undefined) {
             return this.goToPage(this.currentPage, true);
         } else {
@@ -382,10 +428,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     private getPageable(): Pageable {
         this.saveState();
-        let orders: Order[] = [];
+        const orders: Order[] = [];
         if (this.lastSortedCol) {
             if (this.lastSortedCol['orderBy']) {
-                for (let orderBy of this.lastSortedCol['orderBy']) {
+                for (const orderBy of this.lastSortedCol['orderBy']) {
                     orders.push(new Order(this.lastSortedAsc ? 'ASC' : 'DESC', orderBy));
                 }
             } else {
@@ -409,7 +455,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private saveState() {
-        let currentStep = this.breadcrumbsService.currentStep
+        const currentStep = this.breadcrumbsService.currentStep
         if(currentStep) {
             if (!this.breadcrumbsService.currentStep.data.tableState) this.breadcrumbsService.currentStep.data.tableState = [];
             this.breadcrumbsService.currentStep.data.tableState[this.hash] = {
@@ -426,7 +472,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     saveSettings() {
-        let pref: TablePreferences = new TablePreferences();
+        const pref: TablePreferences = new TablePreferences();
         pref.colWidths = this.columnDefs.map(col => { return {width: col.width, hidden: col.hidden}; });
         if (this.subRowsDefs) {
             pref.colWidths = pref.colWidths.concat(this.subRowsDefs.map(col => { return {width: col.width, hidden: col.hidden}; }));
@@ -436,9 +482,9 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     reloadSettings() {
-        let prefStr: string = localStorage.getItem(this.hash);
+        const prefStr: string = localStorage.getItem(this.hash);
         if (prefStr) {
-            let pref: TablePreferences = JSON.parse(prefStr);
+            const pref: TablePreferences = JSON.parse(prefStr);
             this.maxResults = pref.pageSize;
             this.columnDefs.forEach((col, i) => {
                 col.width = pref.colWidths[i]?.width;
@@ -479,9 +525,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    unSelectAll() {
-    }
-
     clearSelection() {
         this.selection = new Set();
         this.emitSelectionChange();
@@ -490,7 +533,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     computeSelectAll() {
         if (this.page && this.page.content) {
-            let selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.has(row['id']));
+            const selectedOnCurrentPage: any[] = this.page.content.filter(row => this.selection.has(row['id']));
             if (selectedOnCurrentPage.length == this.page.content.length) {
                 this.selectAll = true;
             } else if (selectedOnCurrentPage.length == 0) {
@@ -506,7 +549,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         this.selectionChange.emit(this.selection);
     }
 
-    onSelectChange(item: Object, selected: boolean) {
+    onSelectChange(item: any, selected: boolean) {
         if (selected) {
             if (item['id']) this.selection.add(item['id']);
         } else {
@@ -516,7 +559,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         this.emitSelectionChange();
     }
 
-    isSelected(item: Object): boolean {
+    isSelected(item: any): boolean {
         if (!item['id']) {
             this.selectionAllowed = false;
             throw new Error('TableComponent : if you are going to use the selectionAllowed input your items must have an id. (it\'s like in a night club)');
@@ -525,7 +568,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private getDefaultSorting() {
-        for (let col of this.columnDefs) {
+        for (const col of this.columnDefs) {
             if (col.defaultSortCol) {
                 this.lastSortedCol = col;
                 this.lastSortedAsc = col.defaultAsc != undefined ? col.defaultAsc : true;
@@ -535,12 +578,16 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     cellEditable(item, col) {
-        let colEditable: boolean = typeof col.editable === 'function' ? col.editable(item) : col.editable;
+        const colEditable: boolean = typeof col.editable === 'function' ? col.editable(item) : col.editable;
         return colEditable && !this.rowDisabled(item);
     }
 
     rowDisabled(item): boolean {
         return this.disableCondition && this.disableCondition(item);
+    }
+
+    rowGreyedOut(item): boolean {
+        return this.rowDisabled(item) || (this.greyedCondition && this.greyedCondition(item));
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
@@ -560,8 +607,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     moveDrag(event: MouseEvent) {
         if (this.currentDrag) {
-            let leftDragWidth: number = event.pageX - this.currentDrag.leftOrigin;
-            let nextIndex: number = this.currentDrag.columns.slice(this.currentDrag.leftColIndex + 1).findIndex(col => !col.hidden);
+            const leftDragWidth: number = event.pageX - this.currentDrag.leftOrigin;
+            const nextIndex: number = this.currentDrag.columns.slice(this.currentDrag.leftColIndex + 1).findIndex(col => !col.hidden);
             if (leftDragWidth >= 10) {
                 this.currentDrag.columns[this.currentDrag.leftColIndex].width = (leftDragWidth + 0) + 'px';
                 if (this.currentDrag.totalWidth - leftDragWidth < 10 && nextIndex != -1) {
@@ -584,10 +631,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private getHash(): string {
-        let username: string = KeycloakService.auth.authz.tokenParsed.name;
-        let stringToBeHashed: string = username + '_' + this.columnDefs.map(col => col.headerName + '-' + col.headerName).join('_');
-        let hash = shajs('sha').update(stringToBeHashed).digest('hex');
-        let hex = hash.substring(0, 30);
+        const username: string = KeycloakService.auth.authz.tokenParsed.name;
+        const stringToBeHashed: string = username + '_' + this.columnDefs.map(col => col.headerName + '-' + col.headerName).join('_');
+        const hash = shajs('sha').update(stringToBeHashed).digest('hex');
+        const hex = hash.substring(0, 30);
         return hex;
     }
 
@@ -601,6 +648,95 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             col.hidden = this.colSave[this.columnDefs.length + i].hidden;
         });
         this.saveSettings();
+    }
+
+    exportTable() {
+        const MAX_ROWS: number = 50000;
+        if (this.page.totalElements > MAX_ROWS) {
+            this.dialogService.error('Too Many Rows', 'You are trying to export ' + this.page.totalElements
+                + ' rows, the current max is at ' + MAX_ROWS + ', sorry.');
+        } else {
+            let task: Task;
+            let csvStr: string = '';
+            const exportedColumns: ColumnDefinition[] = this.columnDefs.filter(col => !col.hidden && !['button', 'progress'].includes(col.type));
+            csvStr += exportedColumns.map(col => col.headerName).join(','); // headers
+            let completion: Promise<void> = Promise.resolve();
+            const startTs: number = performance.now();
+            for (let i = 0; i < this.page.totalPages; i++) { // here we could use a fixed page size
+                const pageable: Pageable = this.getPageable();
+                pageable.pageNumber = i + 1;
+                completion = completion.then(() => { // load pages sequentially
+                    const getPage: Page<any> | Promise<Page<any>> = this.getPage(pageable, false, true)
+                    if (!task 
+                            && (performance.now() - startTs > 5000) 
+                            && (i / this.page.totalPages < 0.8)) {
+                        task = this.startNofification(i / this.page.totalPages);
+                    } else if (task) {
+                        task.progress = i / this.page.totalPages;
+                        task.lastUpdate = new Date();
+                        this.notificationService.pushLocalTask(task);
+                    }
+                    if (getPage instanceof Promise) {
+                        return getPage.then(page => {
+                            for (const entry of page.content) {
+                                csvStr += '\n' + exportedColumns.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
+                            }
+                        });
+                    } else if (getPage instanceof Page) {
+                        for (const entry of getPage.content) {
+                            csvStr += '\n' + exportedColumns.map(col => '"' + this.exportCsvCell(entry, col) + '"').join(',');
+                        }
+                        return Promise.resolve();
+                    }
+                });
+            }
+            completion.then(() => {
+                const csvBlob = new Blob([csvStr], {
+                    type: 'text/csv'
+                });
+                AppUtils.browserDownloadFile(csvBlob, 'tableExport_' + new Date().toLocaleString('fr-FR'));
+                if (task) {
+                    task.progress = 1;
+                    task.status = TaskStatus.DONE;
+                    task.lastUpdate = new Date();
+                    this.notificationService.pushLocalTask(task);
+                }
+            }).catch(() => {
+                if (task) {
+                    task.status = TaskStatus.ERROR;
+                    task.lastUpdate = new Date();
+                    this.notificationService.pushLocalTask(task);
+                }
+            });
+        }
+    }
+
+    private startNofification(progress: number): Task {
+        const task: Task = new Task();
+        task.id = Date.now();
+        task.creationDate = new Date();
+        task.lastUpdate = task.creationDate;
+        task.message = "Exporting table";
+        task.progress = progress;
+        task.status = TaskStatus.IN_PROGRESS;
+        task.eventType = 'exportTable.event';
+        task.sessionId = this.sessionService.sessionId;
+        this.notificationService.pushLocalTask(task);
+        return task;
+    }
+
+    /** Deal with the dates */
+    private exportCsvCell(entry: any, col: ColumnDefinition): string {
+        const value = TableComponent.getCellValue(entry, col);
+        if (value == null) return '';
+        if (value instanceof Date) {
+            if (col.type == 'date') {
+                return value.toISOString().substring(0, 10);
+            } else if (col.type == 'dateTime') {
+                return value.toISOString();
+            }
+        }
+        return value.toString();
     }
 
     deploy(i: number) {

@@ -14,6 +14,8 @@
 
 import {Component, ViewChild} from '@angular/core'
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
 import { Therapy } from '../shared/therapy.model';
 import { TherapyService } from '../shared/therapy.service';
 import { TherapyType } from "../../../shared/enum/therapyType";
@@ -21,18 +23,15 @@ import { SubjectTherapyService } from '../../subjectTherapy/shared/subjectTherap
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
-import { ServiceLocator } from '../../../../utils/locator.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
-import { ConsoleService } from '../../../../shared/console/console.service';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
 
 @Component({
-  selector: 'therapy-list',
-  templateUrl:'therapy-list.component.html',
-  styleUrls: ['therapy-list.component.css'], 
-  providers: [TherapyService]
+    selector: 'therapy-list',
+    templateUrl: 'therapy-list.component.html',
+    styleUrls: ['therapy-list.component.css'],
+    imports: [TableComponent]
 })
 export class TherapiesListComponent  extends BrowserPaginEntityListComponent<Therapy> {
   @ViewChild('therapiesTable') table: TableComponent;

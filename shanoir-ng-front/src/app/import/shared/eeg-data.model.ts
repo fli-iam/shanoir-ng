@@ -12,8 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { SimpleSubject } from "../../subjects/shared/subject.model";
-import { Sex } from "../../subjects/shared/subject.types";
 import { EegDatasetDTO } from "../../datasets/shared/dataset.dto"
 
 export class EegImportJob {
@@ -23,9 +21,9 @@ export class EegImportJob {
     subjectId: number;
     acquisitionEquipmentId: number;
     datasets: EegDatasetDTO[];
-    coordinatesSystem: String;
-    subjectName: String;
-    studyName: String;
+    coordinatesSystem: string;
+    subjectName: string;
+    studyName: string;
     timestamp: number;
 }
 

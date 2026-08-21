@@ -2,91 +2,88 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component,  Input, Output, EventEmitter } from '@angular/core';
-import { UntypedFormGroup} from '@angular/forms';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { BloodGasData }    from '../shared/bloodGasData.model';
-import { BloodGasDataFile }    from '../shared/bloodGasDataFile.model';
-import { ExtraDataService } from '../../extraData/shared/extradata.service';
-
-import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { ModesAware } from "../../../shared/mode/mode.decorator";
-import { slideDown } from '../../../../shared/animations/animations';
-import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { ExtraData } from '../../extraData/shared/extradata.model';
-import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { UploaderComponent } from 'src/app/shared/components/uploader/uploader.component';
+
+import { ExtraDataService } from '../../extraData/shared/extradata.service';
+import { BloodGasDataFile } from '../shared/bloodGasDataFile.model';
+import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
+import * as PreclinicalUtils from '../../../utils/preclinical.utils';
+import { ExtraData } from '../../extraData/shared/extradata.model';
+import { FormFooterComponent } from '../../../../shared/components/form-footer/form-footer.component';
 
 
 @Component({
-  selector: 'bloodgas-data-upload-form',
-  templateUrl: 'bloodGasData-form.component.html',
-  providers: [ExtraDataService],
-  animations: [slideDown]
+    selector: 'bloodgas-data-upload-form',
+    templateUrl: 'bloodGasData-form.component.html',
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, UploaderComponent]
 })
-@ModesAware
-export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
+export class BloodGasDataFormComponent extends EntityComponent<BloodGasDataFile> {
 
-    @Input() examination_id:number;
-    @Input() isStandalone:boolean = false;
-    @Input() canModify: Boolean = false;
-  
-    fileToUpload: File = null;
+    @Input() examinationId:number;
+    @Input() canModify: boolean = false;
+
     @Output() bloodGasDataReady = new EventEmitter();
 
     constructor(
         private route: ActivatedRoute,
         private extradatasService: ExtraDataService) {
 
-        super(route, 'preclinical-bloodgasdata');
+        super(route);
     }
 
-    get bloodGasData(): BloodGasData { return this.entity; }
-    set bloodGasData(bloodGasData: BloodGasData) { this.entity = bloodGasData; }
-    
-    getService(): EntityService<BloodGasData> {
+    protected getRoutingName(): string {
+        return 'preclinical-bloodgasdata';
+    }
+
+    get bloodGasData(): BloodGasDataFile { return this.entity; }
+    set bloodGasData(bloodGasData: BloodGasDataFile) { this.entity = bloodGasData; }
+
+    getService(): EntityService<any> {
         return this.extradatasService;
     }
-   
-    initView(): Promise<void> {
-        this.entity = new BloodGasData();
-        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
-            this.loadExaminationExtraDatas(extradatas);
+
+    protected fetchEntity: () => Promise<BloodGasDataFile> = () => {
+        return  this.extradatasService.getExtraDatas(this.examinationId).then(extradatas => {
+            return this.loadExaminationExtraDatas(extradatas);
         });
+    }
+
+    initView(): Promise<void> {
         return Promise.resolve();
     }
 
     initEdit(): Promise<void> {
-        this.entity = new BloodGasData();
-        this.extradatasService.getExtraDatas(this.examination_id).then(extradatas => {
-            this.loadExaminationExtraDatas(extradatas);
-        });
         return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
-        this.entity = new BloodGasData();
+        this.entity = new BloodGasDataFile();
         return Promise.resolve();
     }
 
-    loadExaminationExtraDatas(extradatas: ExtraData[]){
-    	for (let ex of extradatas) {
+    loadExaminationExtraDatas(extradatas: ExtraData[]): BloodGasDataFile {
+    	for (const ex of extradatas) {
     		// instanceof does not work??
-    		if (ex.extradatatype != "Physiological data"){
-    			this.bloodGasData = <BloodGasData>ex;
+    		if (ex.extraDataType == "Blood gas data") {
+    			return ex as BloodGasDataFile;
     		}
     	}
+        return new BloodGasDataFile();
     }
 
     buildForm(): UntypedFormGroup {
@@ -94,34 +91,35 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
         });
     }
 
-
-    public save(): Promise<BloodGasData> {
+    public save(): Promise<BloodGasDataFile> {
         return this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA,this.bloodGasData).then((bloodGasData) => {
             this.chooseRouteAfterSave(this.bloodGasData);
             this.consoleService.log('info', 'New preclinical bloodgasdata successfully saved with n° ' + bloodGasData.id);
             return bloodGasData;
         });
     }
-    
+
     downloadFile() {
         this.extradatasService.downloadFile(this.entity.id);
     }
 
     fileChangeEvent(files: FileList){
-    	this.fileToUpload = files.item(0);
-    	this.bloodGasData.filename= this.fileToUpload.name;
-    	let bloodGasDataFile: BloodGasDataFile = new BloodGasDataFile();
-    	bloodGasDataFile.filename = this.fileToUpload.name;
-    	bloodGasDataFile.bloodGasDataFile = this.fileToUpload;
-    	if(!this.isStandalone){
-    	 	this.bloodGasDataReady.emit(bloodGasDataFile);
-    	 }
-      	this.bloodGasData = new BloodGasData();
+    	this.bloodGasData.filename = files.item(0)?.name;
+    	this.bloodGasData.bloodGasDataFile = files.item(0);
+    	if(this.embedded){
+    	 	this.bloodGasDataReady.emit(this.bloodGasData);
+        }
+    }
+
+    deleteFile() {
+        this.bloodGasData.filename = null;
+        this.bloodGasData.bloodGasDataFile = null;
+        if (this.embedded) {
+            this.bloodGasDataReady.emit(this.bloodGasData);
+        }
     }
 
     public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
-
-    
 }

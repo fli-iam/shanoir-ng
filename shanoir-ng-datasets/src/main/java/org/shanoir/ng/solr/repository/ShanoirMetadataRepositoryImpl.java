@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -19,19 +19,22 @@
  */
 package org.shanoir.ng.solr.repository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 /**
  * @author yyao
@@ -42,389 +45,100 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unchecked")
 public class ShanoirMetadataRepositoryImpl implements ShanoirMetadataRepositoryCustom {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ShanoirMetadataRepositoryImpl.class);
-	
-	@PersistenceContext
-	private EntityManager em;
-	
-	@Override
-	public List<ShanoirMetadata> findAllAsSolrDoc() {
-		List<ShanoirMetadata> result = new ArrayList<>();
-		Query mrQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, mdm.mr_dataset_nature as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, mrp.slice_thickness as sliceThickness, mrp.pixel_bandwidth as pixelBandwidth, mrp.magnetic_field_strength as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN mr_dataset_acquisition mda on mda.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN mr_protocol mrp on mrp.id = mda.mr_protocol_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm, mr_dataset md"
-				+ " LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id"
-				+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id", "SolrResult");
-		Query petQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, pet_dataset pd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND pd.id = d.id", "SolrResult");
-		Query ctQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, ct_dataset cd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id;", "SolrResult");
-		Query genericQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, generic_dataset cd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id", "SolrResult");
-		Query eegQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, eeg_dataset ed, dataset_metadata dm"
-				+ " WHERE d.origin_metadata_id = dm.id AND ed.id = d.id", "SolrResult");
-		Query bidsQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, bids_dataset ed, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND ed.id = d.id", "SolrResult");
-		Query processedQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId"
-				+ ", dm.name as datasetName"
-				+ ", dm.dataset_modality_type as datasetType"
-				+ ", null as datasetNature"
-				+ ", d.creation_date as datasetCreationDate"
-				+ ", e.id as examinationId"
-				+ ", e.comment as examinationComment"
-				+ ", e.examination_date as examinationDate"
-				+ ", ae.name as acquisitionEquipmentName"
-				+ ", su.name as subjectName"
-				+ ", sust.subject_type as subjectType"
-				+ ", su.id as subjectId"
-				+ ", st.name as studyName"
-				+ ", e.study_id as studyId"
-				+ ", c.name as centerName"
-				+ ", c.id as centerId"
-				+ ", null as sliceThickness"
-				+ ", null as pixelBandwidth"
-				+ ", null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset dp ON dp.id ="
-				+ " (SELECT dataset_id from input_of_dataset_processing WHERE processing_id = d.dataset_processing_id LIMIT 1)"
-				+ " LEFT JOIN dataset_acquisition da on da.id = dp.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm"
-				+ " WHERE d.origin_metadata_id = dm.id"
-				+ " AND d.dataset_processing_id is not null;", "SolrResult");
-		Query measurementQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, "
-						+ "d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName,"
-						+ "su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, "
-						+ "null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
-				+ " LEFT JOIN dataset_acquisition da on da.id = refd.dataset_acquisition_id"				
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, measurement_dataset md, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id", "SolrResult");
+    private static final Logger LOG = LoggerFactory.getLogger(ShanoirMetadataRepositoryImpl.class);
 
-		result.addAll(mrQuery.getResultList());
-		result.addAll(petQuery.getResultList());
-		result.addAll(ctQuery.getResultList());
-		result.addAll(eegQuery.getResultList());
-		result.addAll(bidsQuery.getResultList());
-		result.addAll(genericQuery.getResultList());
-		result.addAll(processedQuery.getResultList());
-		result.addAll(measurementQuery.getResultList());
+    @PersistenceContext
+    private EntityManager em;
 
-		return result;
-	}
+    public List<ShanoirMetadata> findAllAsSolrDoc() {
+        List<ShanoirMetadata> result = new ArrayList<>();
+        result.addAll(findSolrProcessed(""));
+        result.addAll(findSolrAcquisitions(" AND d.dataset_processing_id IS NULL"));
+        return result;
+    }
 
-	@Override
-	public ShanoirMetadata findOneSolrDoc(Long datasetId) {
-		List<ShanoirMetadata> result = new ArrayList<>();
+    public List<ShanoirMetadata> findSpecificSolrDoc(String queryType) {
+        Query query = em.createNativeQuery(queryType, RESULTSET_MAPPING);
+        return query.getResultList();
+    }
 
-		Query mrQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, mdm.mr_dataset_nature as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, mrp.slice_thickness as sliceThickness, mrp.pixel_bandwidth as pixelBandwidth, mrp.magnetic_field_strength as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN mr_dataset_acquisition mda on mda.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN mr_protocol mrp on mrp.id = mda.mr_protocol_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm, mr_dataset md"
-				+ " LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id"
-				+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id AND d.id = " + datasetId + ";", "SolrResult");
-		Query petQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, pet_dataset pd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND pd.id = d.id AND d.id = " + datasetId + ";", "SolrResult");
-		Query ctQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, ct_dataset cd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id AND d.id = " + datasetId + ";", "SolrResult");
-		Query genericQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, generic_dataset gd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND gd.id = d.id AND d.id = " + datasetId + ";", "SolrResult");
-		Query eegQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, eeg_dataset ed, dataset_metadata dm"
-				+ " WHERE d.origin_metadata_id = dm.id AND ed.id = d.id AND d.id = " + datasetId + ";", "SolrResult");
-		Query bidsQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, bids_dataset ed, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND ed.id = d.id AND d.id = " + datasetId + ";", "SolrResult");
-		Query processedQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId"
-				+ ", dm.name as datasetName"
-				+ ", dm.dataset_modality_type as datasetType"
-				+ ", null as datasetNature"
-				+ ", d.creation_date as datasetCreationDate"
-				+ ", e.id as examinationId"
-				+ ", e.comment as examinationComment"
-				+ ", e.examination_date as examinationDate"
-				+ ", ae.name as acquisitionEquipmentName"
-				+ ", su.name as subjectName"
-				+ ", sust.subject_type as subjectType"
-				+ ", su.id as subjectId"
-				+ ", st.name as studyName"
-				+ ", e.study_id as studyId"
-				+ ", c.name as centerName"
-				+ ", c.id as centerId"
-				+ ", null as sliceThickness"
-				+ ", null as pixelBandwidth"
-				+ ", null as magneticFieldStrength"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset dp ON dp.id ="
-				+ " (SELECT dataset_id from input_of_dataset_processing WHERE processing_id = d.dataset_processing_id LIMIT 1)"
-				+ " LEFT JOIN dataset_acquisition da on da.id = dp.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm"
-				+ " WHERE d.origin_metadata_id = dm.id"
-				+ " AND d.id = " + datasetId
-				+ " AND d.dataset_processing_id is not null;", "SolrResult");
-		Query measurementQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, "
-						+ "null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, "
-						+ "e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, "
-						+ "e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
-				+ " LEFT JOIN dataset_acquisition da on da.id = refd.dataset_acquisition_id"				
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, measurement_dataset md, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id AND d.id = " + datasetId + ";", "SolrResult");
-		
-		result.addAll(mrQuery.getResultList());
-		result.addAll(petQuery.getResultList());
-		result.addAll(ctQuery.getResultList());
-		result.addAll(eegQuery.getResultList());
-		result.addAll(bidsQuery.getResultList());
-		result.addAll(genericQuery.getResultList());
-		result.addAll(processedQuery.getResultList());
-		result.addAll(measurementQuery.getResultList());
-		
-		List<ShanoirMetadata> processedResult = processedQuery.getResultList();
-		
-		if (!processedResult.isEmpty()) {
-			return processedResult.get(0);
-		}
-		
-		if (result.size() != 1) {
-			LOG.error("Solr query returned multiple result for a single query. Please check database consistency.");
-			return null;
-		}
-		
-		return result.get(0);
-	}
+    public ShanoirMetadata findOneSolrDoc(Long datasetId) {
+        List<ShanoirMetadata> processed = findSolrProcessed(" AND d.id = " + datasetId);
+        if (!processed.isEmpty()) {
+            if (processed.size() > 1) {
+                LOG.error("Multiple processed metadata rows for dataset [{}]", datasetId);
+                return null;
+            }
+            return processed.get(0);
+        }
 
-	@Override
-	public List<ShanoirMetadata> findSolrDocs(List<Long> datasetIds) {
-		if (CollectionUtils.isEmpty(datasetIds)) {
-			return Collections.emptyList();
-		}
-		String ids = datasetIds.stream().map(element -> element.toString()).collect(Collectors.joining(","));
-		List<ShanoirMetadata> result = new ArrayList<>();
+        List<ShanoirMetadata> acquisitions = findSolrAcquisitions(" AND d.id = " + datasetId + " AND d.dataset_processing_id IS NULL");
+        if (acquisitions.isEmpty()) {
+            return null;
+        }
+        if (acquisitions.size() > 1) {
+            LOG.error("Solr query returned multiple result for dataset [{}]. Please check database consistency.", datasetId);
+            return null;
+        }
+        return acquisitions.get(0);
+    }
 
-		Query mrQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, mdm.mr_dataset_nature as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, mrp.slice_thickness as sliceThickness, mrp.pixel_bandwidth as pixelBandwidth, mrp.magnetic_field_strength as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN mr_dataset_acquisition mda on mda.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN mr_protocol mrp on mrp.id = mda.mr_protocol_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, dataset_metadata dm, mr_dataset md"
-				+ " LEFT JOIN mr_dataset_metadata mdm ON md.updated_mr_metadata_id = mdm.id"
-				+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id AND d.id IN (" + ids + ");", "SolrResult");
-		Query petQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, pet_dataset pd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND pd.id = d.id AND d.id IN (" + ids + ");", "SolrResult");
-		Query ctQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, ct_dataset cd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND cd.id = d.id AND d.id IN (" + ids + ");", "SolrResult");
-		Query genericQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, generic_dataset gd, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND gd.id = d.id AND d.id IN (" + ids + ");", "SolrResult");
-		Query eegQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, eeg_dataset ed, dataset_metadata dm"
-				+ " WHERE d.origin_metadata_id = dm.id AND ed.id = d.id AND d.id IN (" + ids + ");", "SolrResult");
-		Query bidsQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset_acquisition da on da.id = d.dataset_acquisition_id"
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, bids_dataset ed, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND ed.id = d.id AND d.id IN (" + ids + ");", "SolrResult");
-		Query measurementQuery = em.createNativeQuery(
-				"SELECT d.id as datasetId, dm.name as datasetName, dm.dataset_modality_type as datasetType, "
-						+ "null as datasetNature, d.creation_date as datasetCreationDate, e.id as examinationId, e.comment as examinationComment, "
-						+ "e.examination_date as examinationDate, ae.name as acquisitionEquipmentName, su.name as subjectName, sust.subject_type as subjectType, su.id as subjectId, st.name as studyName, "
-						+ "e.study_id as studyId, c.name as centerName, c.id as centerId, null as sliceThickness, null as pixelBandwidth, null as magneticFieldStrength\n"
-				+ " FROM dataset d"
-				+ " LEFT JOIN dataset refd ON refd.id = d.referenced_dataset_for_superimposition_id"
-				+ " LEFT JOIN dataset_acquisition da on da.id = refd.dataset_acquisition_id"				
-				+ " LEFT JOIN examination e ON e.id = da.examination_id"
-				+ " LEFT JOIN acquisition_equipment ae ON ae.id = da.acquisition_equipment_id"
-				+ " LEFT JOIN study st ON st.id = e.study_id"
-				+ " LEFT JOIN center c ON c.id = e.center_id"
-				+ " LEFT JOIN subject_study sust ON sust.subject_id = d.subject_id AND sust.study_id = e.study_id"
-				+ " LEFT JOIN subject su ON su.id = d.subject_id, measurement_dataset md, dataset_metadata dm"
-				+ " WHERE d.updated_metadata_id = dm.id AND md.id = d.id AND d.id IN (" + ids + ");", "SolrResult");
-		
-		result.addAll(mrQuery.getResultList());
-		result.addAll(petQuery.getResultList());
-		result.addAll(ctQuery.getResultList());
-		result.addAll(eegQuery.getResultList());
-		result.addAll(bidsQuery.getResultList());
-		result.addAll(genericQuery.getResultList());
-		result.addAll(measurementQuery.getResultList());
+    public List<ShanoirMetadata> findSolrDocs(List<Long> datasetIds) {
+        if (CollectionUtils.isEmpty(datasetIds)) {
+            return Collections.emptyList();
+        }
 
-		return result;
-	}
+        String ids = datasetIds.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(","));
+
+        List<ShanoirMetadata> result = new ArrayList<>();
+        result.addAll(findSolrProcessed(" AND d.id IN (" + ids + ")"));
+        result.addAll(findSolrAcquisitions(" AND d.id IN (" + ids + ")" + " AND d.dataset_processing_id IS NULL"));
+
+        return result;
+    }
+
+    private List<ShanoirMetadata> findSolrAcquisitions(String clause) {
+        List<ShanoirMetadata> result = new ArrayList<>();
+        for (String baseQuery : ACQUISITION_QUERIES) {
+            Query query = em.createNativeQuery(baseQuery + clause, RESULTSET_MAPPING);
+            result.addAll(query.getResultList());
+        }
+        return result;
+    }
+
+    private List<ShanoirMetadata> findSolrProcessed(String clause) {
+        Query processedQuery = em.createNativeQuery(PROCESSED_QUERY + clause, RESULTSET_MAPPING);
+        return processedQuery.getResultList();
+    }
+
+    public Map<Long, List<String>> findAllTags(List<Long> datasetIds) {
+
+        List<Object[]> result = new ArrayList<>();
+
+        String clause = "";
+
+        if (datasetIds != null && !datasetIds.isEmpty()) {
+            String ids = datasetIds.stream().map(Object::toString).collect(Collectors.joining(","));
+            clause = " AND d.id IN (" + ids + ")";
+        }
+
+        Query subjectTagQuery = em.createNativeQuery(SUBJECT_TAG_QUERY + clause);
+        result.addAll(subjectTagQuery.getResultList());
+
+        Query studyTagQuery = em.createNativeQuery(STUDY_TAG_QUERY + clause);
+        result.addAll(studyTagQuery.getResultList());
+
+        Map<Long, List<String>> tags = new HashMap<>();
+
+        for (Object[] row : result) {
+            Long id = (Long) row[0];
+            tags.putIfAbsent(id, new ArrayList<>());
+            tags.get(id).add((String) row[1]);
+        }
+
+        return tags;
+
+    }
 }

@@ -1,23 +1,18 @@
-/*
- * (The MIT license)
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
  *
- * Copyright (c) 2012 - 2015 Wolfgang Halbeisen (halbeisen.wolfgang@gmail.com) and Codemart (beniamin.oniga@codemart.ro, lia.domide@codemart.ro)
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
- * and associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies
- * or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
- * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+
+
 package org.shanoir.ng.importer.eeg.edf;
 
 
@@ -34,238 +29,238 @@ import java.util.Date;
  * Changed for issue #3 from Github: https://github.com/MIOB/EDF4J/issues/3
  */
 public class EDFAnnotationFileHeaderBuilder {
-	
-	private String recordingId;
-	private String recordingStartDate;
-	private String startDate;
-	private String startTime;
-	private double durationOfRecord;
-	private Integer numberOfChannels;
-	private Integer numberOfRecords;
 
-	private String patientCode = "X";
-	private String patientSex = "X";
-	private String patientBirthdate = "X";
-	private String patientName = "X";
-	private String recordingHospital = "X";
-	private String recordingTechnician = "X";
-	private String recordingEquipment = "X";
-	private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yy");
-	private final SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("HH.mm.ss");
+    private String recordingId;
+    private String recordingStartDate;
+    private String startDate;
+    private String startTime;
+    private double durationOfRecord;
+    private Integer numberOfChannels;
+    private Integer numberOfRecords;
 
-	private String[] channelLabels;
-	private String[] transducerTypes;
-	private String[] dimensions;
-	private Double[] minInUnits;
-	private Double[] maxInUnits;
-	private Integer[] digitalMin;
-	private Integer[] digitalMax;
-	private String[] prefilterings;
-	private Integer[] numberOfSamples;
-	private byte[][] reserveds;
+    private String patientCode = "X";
+    private String patientSex = "X";
+    private String patientBirthdate = "X";
+    private String patientName = "X";
+    private String recordingHospital = "X";
+    private String recordingTechnician = "X";
+    private String recordingEquipment = "X";
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yy");
+    private final SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("HH.mm.ss");
 
-	public EDFAnnotationFileHeaderBuilder recordingId(String recordingId) {
-		if (recordingId == null) {
-			throw new IllegalArgumentException("Invalid statement: recordingId is null");
-		}
-		this.recordingId = nonSpaceString(recordingId);
-		return this;
-	}
+    private String[] channelLabels;
+    private String[] transducerTypes;
+    private String[] dimensions;
+    private Double[] minInUnits;
+    private Double[] maxInUnits;
+    private Integer[] digitalMin;
+    private Integer[] digitalMax;
+    private String[] prefilterings;
+    private Integer[] numberOfSamples;
+    private byte[][] reserveds;
 
-	public EDFAnnotationFileHeaderBuilder startOfRecording(Date startOfRecording) {
-		if (startOfRecording == null) {
-			throw new IllegalArgumentException("Invalid statement: startOfRecording is null");
-		}
-		recordingStartDate = new SimpleDateFormat("dd-MMM-yyyy").format(startOfRecording).toUpperCase();
-		startDate = simpleDateFormat.format(startOfRecording);
-		startTime = simpleTimeFormat.format(startOfRecording);
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder recordingId(String recordingId) {
+        if (recordingId == null) {
+            throw new IllegalArgumentException("Invalid statement: recordingId is null");
+        }
+        this.recordingId = nonSpaceString(recordingId);
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder durationOfRecord(double val) {
-		if (val <= 0) {
-			throw new IllegalArgumentException("Invalid statement: durationOfRecord is <= 0");
-		}
-		durationOfRecord = val;
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder startOfRecording(Date startOfRecording) {
+        if (startOfRecording == null) {
+            throw new IllegalArgumentException("Invalid statement: startOfRecording is null");
+        }
+        recordingStartDate = new SimpleDateFormat("dd-MMM-yyyy").format(startOfRecording).toUpperCase();
+        startDate = simpleDateFormat.format(startOfRecording);
+        startTime = simpleTimeFormat.format(startOfRecording);
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder patientCode(String val) {
-		if (val == null) {
-			throw new IllegalArgumentException("Invalid statement: patientCode is null");
-		}
-		patientCode = nonSpaceString(val);
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder durationOfRecord(double val) {
+        if (val <= 0) {
+            throw new IllegalArgumentException("Invalid statement: durationOfRecord is <= 0");
+        }
+        durationOfRecord = val;
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder patientIsMale(boolean val) {
-		patientSex = val ? "M" : "F";
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder patientCode(String val) {
+        if (val == null) {
+            throw new IllegalArgumentException("Invalid statement: patientCode is null");
+        }
+        patientCode = nonSpaceString(val);
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder patientBirthdate(Date birthdate) {
-		if (birthdate == null) {
-			throw new IllegalArgumentException("Invalid statement: birthdate is null");
-		}
-		patientBirthdate = new SimpleDateFormat("dd-MMM-yyyy").format(birthdate).toUpperCase();
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder patientIsMale(boolean val) {
+        patientSex = val ? "M" : "F";
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder patientName(String val) {
-		if (val == null) {
-			throw new IllegalArgumentException("Invalid statement: patientName is null");
-		}
-		patientName = nonSpaceString(val);
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder patientBirthdate(Date birthdate) {
+        if (birthdate == null) {
+            throw new IllegalArgumentException("Invalid statement: birthdate is null");
+        }
+        patientBirthdate = new SimpleDateFormat("dd-MMM-yyyy").format(birthdate).toUpperCase();
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder recordingHospital(String val) {
-		if (val == null) {
-			throw new IllegalArgumentException("Invalid statement: recordingHospital is null");
-		}
-		recordingHospital = nonSpaceString(val);
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder patientName(String val) {
+        if (val == null) {
+            throw new IllegalArgumentException("Invalid statement: patientName is null");
+        }
+        patientName = nonSpaceString(val);
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder recordingTechnician(String val) {
-		if (val == null) {
-			throw new IllegalArgumentException("Invalid statement: recordingTechnician is null");
-		}
-		recordingTechnician = nonSpaceString(val);
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder recordingHospital(String val) {
+        if (val == null) {
+            throw new IllegalArgumentException("Invalid statement: recordingHospital is null");
+        }
+        recordingHospital = nonSpaceString(val);
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder recordingEquipment(String val) {
-		if (val == null) {
-			throw new IllegalArgumentException("Invalid statement: recordingEquipment is null");
-		}
-		recordingEquipment = nonSpaceString(val);
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder recordingTechnician(String val) {
+        if (val == null) {
+            throw new IllegalArgumentException("Invalid statement: recordingTechnician is null");
+        }
+        recordingTechnician = nonSpaceString(val);
+        return this;
+    }
 
-	public void numberOfChannels(int val) {
-		if (val <= 0) {
-			throw new IllegalArgumentException("Invalid statement: numberOfChannels is <= 0");
-		}
-		numberOfChannels = val;
-	}
+    public EDFAnnotationFileHeaderBuilder recordingEquipment(String val) {
+        if (val == null) {
+            throw new IllegalArgumentException("Invalid statement: recordingEquipment is null");
+        }
+        recordingEquipment = nonSpaceString(val);
+        return this;
+    }
 
-	public void numberOfRecords(int val) {
-		if (val <= 0) {
-			throw new IllegalArgumentException("Invalid statement: numberOfRecords is <= 0");
-		}
-		numberOfRecords = val;
-	}
+    public void numberOfChannels(int val) {
+        if (val <= 0) {
+            throw new IllegalArgumentException("Invalid statement: numberOfChannels is <= 0");
+        }
+        numberOfChannels = val;
+    }
 
-	public EDFAnnotationFileHeaderBuilder channelLabels(String[] channelLabels) {
-		this.channelLabels = channelLabels;
-		return this;
-	}
+    public void numberOfRecords(int val) {
+        if (val <= 0) {
+            throw new IllegalArgumentException("Invalid statement: numberOfRecords is <= 0");
+        }
+        numberOfRecords = val;
+    }
 
-	public EDFAnnotationFileHeaderBuilder transducerTypes(String[] transducerTypes) {
-		this.transducerTypes = transducerTypes;
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder channelLabels(String[] channelLabels) {
+        this.channelLabels = channelLabels;
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder dimensions(String[] dimensions) {
-		this.dimensions = dimensions;
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder transducerTypes(String[] transducerTypes) {
+        this.transducerTypes = transducerTypes;
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder minInUnits(Double[] minInUnits) {
-		this.minInUnits = minInUnits;
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder dimensions(String[] dimensions) {
+        this.dimensions = dimensions;
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder maxInUnits(Double[] maxInUnits) {
-		this.maxInUnits = maxInUnits;
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder minInUnits(Double[] minInUnits) {
+        this.minInUnits = minInUnits;
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder digitalMin(Integer[] digitalMin) {
-		this.digitalMin = digitalMin;
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder maxInUnits(Double[] maxInUnits) {
+        this.maxInUnits = maxInUnits;
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder digitalMax(Integer[] digitalMax) {
-		this.digitalMax = digitalMax;
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder digitalMin(Integer[] digitalMin) {
+        this.digitalMin = digitalMin;
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder prefilterings(String[] prefilterings) {
-		this.prefilterings = prefilterings;
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder digitalMax(Integer[] digitalMax) {
+        this.digitalMax = digitalMax;
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder numberOfSamples(Integer[] numberOfSamples) {
-		this.numberOfSamples = numberOfSamples;
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder prefilterings(String[] prefilterings) {
+        this.prefilterings = prefilterings;
+        return this;
+    }
 
-	public EDFAnnotationFileHeaderBuilder reserveds(byte[][] reserveds) {
-		this.reserveds = reserveds;
-		return this;
-	}
+    public EDFAnnotationFileHeaderBuilder numberOfSamples(Integer[] numberOfSamples) {
+        this.numberOfSamples = numberOfSamples;
+        return this;
+    }
 
-	private String nonSpaceString(String val) {
-		return val.replaceAll(" ", "_");
-	}
+    public EDFAnnotationFileHeaderBuilder reserveds(byte[][] reserveds) {
+        this.reserveds = reserveds;
+        return this;
+    }
 
-	public EDFHeader build() {
-		assert recordingStartDate != null;
-		assert startDate != null;
-		assert startTime != null;
-		assert durationOfRecord > 0;
+    private String nonSpaceString(String val) {
+        return val.replaceAll(" ", "_");
+    }
 
-		EDFHeader header = new EDFHeader();
-		header.idCode = createStringWithSpaces(String.valueOf(0), EDFConstants.IDENTIFICATION_CODE_SIZE);
-		header.subjectID = createStringWithSpaces(buildPatientString(), EDFConstants.LOCAL_SUBJECT_IDENTIFICATION_SIZE);
-		header.recordingID = recordingId != null ? recordingId : createStringWithSpaces(buildRecordingString(), EDFConstants.LOCAL_REOCRDING_IDENTIFICATION_SIZE);
+    public EDFHeader build() {
+        assert recordingStartDate != null;
+        assert startDate != null;
+        assert startTime != null;
+        assert durationOfRecord > 0;
 
-		header.startDate = startDate != null ? startDate : simpleDateFormat.format(new Date());
-		header.startDate = appendSpacesToString(header.startDate, EDFConstants.START_DATE_SIZE - header.startDate.length());
+        EDFHeader header = new EDFHeader();
+        header.setIdCode(createStringWithSpaces(String.valueOf(0), EDFConstants.IDENTIFICATION_CODE_SIZE));
+        header.setSubjectID(createStringWithSpaces(buildPatientString(), EDFConstants.LOCAL_SUBJECT_IDENTIFICATION_SIZE));
+        header.setRecordingID(recordingId != null ? recordingId : createStringWithSpaces(buildRecordingString(), EDFConstants.LOCAL_REOCRDING_IDENTIFICATION_SIZE));
 
-		header.startTime = startTime != null ? startTime : simpleTimeFormat.format(new Date());
-		header.startTime = appendSpacesToString(header.startTime, EDFConstants.START_TIME_SIZE - header.startTime.length());
+        header.setStartDate(startDate != null ? startDate : simpleDateFormat.format(new Date()));
+        header.setStartDate(appendSpacesToString(header.getStartDate(), EDFConstants.START_DATE_SIZE - header.getStartDate().length()));
 
-		header.formatVersion = createStringWithSpaces("", EDFConstants.DATA_FORMAT_VERSION_SIZE);
-		header.numberOfRecords = numberOfRecords != null ? numberOfRecords : 1;
-		header.durationOfRecords = durationOfRecord;
-		header.numberOfChannels = numberOfChannels != null ? numberOfChannels : 1;
-		header.bytesInHeader = EDFConstants.HEADER_SIZE_RECORDING_INFO +
-				header.numberOfChannels * EDFConstants.HEADER_SIZE_PER_CHANNEL;
+        header.setStartTime(startTime != null ? startTime : simpleTimeFormat.format(new Date()));
+        header.setStartTime(appendSpacesToString(header.getStartTime(), EDFConstants.START_TIME_SIZE - header.getStartTime().length()));
 
-		header.channelLabels = channelLabels;
-		header.transducerTypes = transducerTypes;
-		header.dimensions = dimensions;
-		header.minInUnits = minInUnits;
-		header.maxInUnits = maxInUnits;
-		header.digitalMin = digitalMin;
-		header.digitalMax = digitalMax;
-		header.prefilterings = prefilterings;
-		header.numberOfSamples = numberOfSamples;
-		header.reserveds = reserveds;
+        header.setFormatVersion(createStringWithSpaces("", EDFConstants.DATA_FORMAT_VERSION_SIZE));
+        header.setNumberOfRecords(numberOfRecords != null ? numberOfRecords : 1);
+        header.setDurationOfRecords(durationOfRecord);
+        header.setNumberOfChannels(numberOfChannels != null ? numberOfChannels : 1);
+        header.setBytesInHeader(EDFConstants.HEADER_SIZE_RECORDING_INFO
+                + header.getNumberOfChannels() * EDFConstants.HEADER_SIZE_PER_CHANNEL);
 
-		return header;
-	}
+        header.setChannelLabels(channelLabels);
+        header.setTransducerTypes(transducerTypes);
+        header.setDimensions(dimensions);
+        header.setMinInUnits(minInUnits);
+        header.setMaxInUnits(maxInUnits);
+        header.setDigitalMin(digitalMin);
+        header.setDigitalMax(digitalMax);
+        header.setPrefilterings(prefilterings);
+        header.setNumberOfSamples(numberOfSamples);
+        header.setReserveds(reserveds);
 
-	private String createStringWithSpaces(String root, int totalSize) {
-		return appendSpacesToString(root, totalSize - root.length());
-	}
+        return header;
+    }
 
-	private String appendSpacesToString(String original, int times) {
+    private String createStringWithSpaces(String root, int totalSize) {
+        return appendSpacesToString(root, totalSize - root.length());
+    }
 
-		char[] repeat = new char[times];
-		Arrays.fill(repeat, ' ');
-		return original + new String(repeat);
-	}
+    private String appendSpacesToString(String original, int times) {
 
-	private String buildPatientString() {
-		return patientCode + " " + patientSex + " " + patientBirthdate + " " + patientName;
-	}
+        char[] repeat = new char[times];
+        Arrays.fill(repeat, ' ');
+        return original + new String(repeat);
+    }
 
-	private String buildRecordingString() {
-		return "Startdate" + " " + recordingStartDate + " " + recordingHospital + " " + recordingTechnician +
-				" " + recordingEquipment;
-	}
+    private String buildPatientString() {
+        return patientCode + " " + patientSex + " " + patientBirthdate + " " + patientName;
+    }
+
+    private String buildRecordingString() {
+        return "Startdate" + " " + recordingStartDate + " " + recordingHospital + " " + recordingTechnician
+                + " " + recordingEquipment;
+    }
 }

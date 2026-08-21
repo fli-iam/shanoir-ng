@@ -1,4 +1,3 @@
-import { ExaminationPipe } from "../examinations/shared/examination.pipe";
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -13,55 +12,210 @@ import { ExaminationPipe } from "../examinations/shared/examination.pipe";
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { ExaminationDatasetAcquisitionDTO } from "../dataset-acquisitions/shared/dataset-acquisition.dto";
+import { DatasetAcquisition } from "../dataset-acquisitions/shared/dataset-acquisition.model";
+import { DatasetProcessing } from "../datasets/shared/dataset-processing.model";
+import { Dataset } from "../datasets/shared/dataset.model";
+import { DatasetProcessingType } from "../enum/dataset-processing-type.enum";
+import { ExaminationPipe } from "../examinations/shared/examination.pipe";
 import { SubjectExamination } from "../examinations/shared/subject-examination.model";
+import { StudyUserRight } from "../studies/shared/study-user-right.enum";
+import { SimpleStudy } from "../studies/shared/study.model";
 import { QualityTag } from "../study-cards/shared/quality-card.model";
 import { Tag } from '../tags/tag.model';
+import { SuperPromise } from "../utils/super-promise";
+import {Subject} from "../subjects/shared/subject.model";
 
-interface ShanoirNode {
-    open: boolean;
-    id: number;
-    label: string;
-    title: string;
+export abstract class ShanoirNode {
+
+    abstract title: string;
+    private _opened: boolean = false;
+    private openPromise: Promise<void>;
+    protected readonly routeBase: string;
+    getTop: () => number; // to scroll to the node
+    fake: boolean = false;
+
+    constructor(
+        public parent: ShanoirNode,
+        public id: number,
+        public label: string
+    ) {}
+
+    public selected: boolean = false;
+
+    open(): Promise<void> {
+        this.fake = false;
+        if (!this._opened) {
+            if (this.parent) {
+                this.parent.open();
+            }
+            setTimeout(() => {
+                // removing timeout may cause random bugs in the tree
+                this._opened = true;
+            });
+            return SuperPromise.timeoutPromise().then(() => (this.openPromise || Promise.resolve()));
+        } else {
+            return Promise.resolve();
+        }
+    }
+
+    close() {
+        this._opened = false;
+    }
+
+    registerOpenPromise(promise: Promise<void>) {
+        this.openPromise = promise;
+    }
+
+    get opened(): boolean {
+        return this._opened;
+    }
+
+    set opened(opened: boolean) {
+        if (opened) {
+            this.open();
+        } else {
+            this.close();
+        }
+    }
+
+    get route(): string {
+        return this.routeBase + this.id;
+    }
 }
 
 export type UNLOADED = 'UNLOADED';
 export const UNLOADED: UNLOADED = 'UNLOADED';
 
 
-export class StudyNode implements ShanoirNode {
+export class StudyNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
-        public subjects: SubjectNode[] | UNLOADED,
-        public centers: CenterNode[] | UNLOADED,
-        public studyCards: StudyCardNode[] | UNLOADED,
-        public members: MemberNode[] | UNLOADED
-    ) {}
+        private subjects: SubjectNode[] | UNLOADED,
+        private centers: CenterNode[] | UNLOADED,
+        private studyCards: StudyCardNode[] | UNLOADED,
+        private qualityCards: QualityCardNode[] | UNLOADED,
+        private members: MemberNode[] | UNLOADED,
+        public rights: StudyUserRight[]
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
-    public subjectsOpen: boolean = false;
-    public centersOpen: boolean = false;
-    public studycardsOpen: boolean = false;
-    public membersOpen: boolean = false;
-    public title = "study"
+    public subjectsNode: SubjectsNode = new SubjectsNode(this, null, 'Subjects', this.subjects);
+    public centersNode: CentersNode = new CentersNode(this, null, 'Centers', this.centers);
+    public studyCardsNode: StudyCardsNode = new StudyCardsNode(this, null, 'Study Cards', this.studyCards);
+    public qualityCardsNode: QualityCardsNode = new QualityCardsNode(this, null, 'Quality Cards', this.qualityCards);
+    public membersNode: MembersNode = new MembersNode(this, null, 'Members', this.members);
+    title = 'study';
+    protected readonly routeBase = '/study/details/';
+}
+
+export class SubjectsNode extends ShanoirNode {
+
+    constructor(
+        public parent: ShanoirNode,
+        public id: number,
+        public label: string,
+        public subjects: SubjectNode[] | UNLOADED
+    ) {
+        super(parent, id, label);
+    }
+
+    public title = "subjects";
+}
+
+export class CentersNode extends ShanoirNode {
+
+    constructor(
+        public parent: ShanoirNode,
+        public id: number,
+        public label: string,
+        public centers: CenterNode[] | UNLOADED
+    ) {
+        super(parent, id, label);
+    }
+
+    public title = "centers";
+}
+
+export abstract class CardsNode extends ShanoirNode {
+
+    load: SuperPromise<void> = new SuperPromise();
+
+    constructor(
+        public parent: ShanoirNode,
+        public id: number,
+        public label: string,
+        private _cards: CardNode[] | UNLOADED
+    ) {
+        super(parent, id, label);
+        this.registerOpenPromise(this.load);
+    }
+
+    set cards(cards: CardNode[] | UNLOADED) {
+        this._cards = cards;
+        if (cards && cards != UNLOADED) {
+            this.load.resolve();
+        }
+    }
+
+    get cards(): CardNode[] | UNLOADED {
+        return this._cards;
+    }
+
+    public abstract title;
+}
+
+export class StudyCardsNode extends CardsNode {
+
+    public title = "studycards";
+}
+
+export class QualityCardsNode extends CardsNode {
+
+    public title = "qualitycards";
+}
+
+export class MembersNode extends ShanoirNode {
+
+    constructor(
+        public parent: ShanoirNode,
+        public id: number,
+        public label: string,
+        public members: MemberNode[] | UNLOADED
+    ) {
+        super(parent, id, label);
+    }
+
+    public title = "members";
 }
 
 
-export abstract class SubjectNode implements ShanoirNode {
-
+export abstract class SubjectNode extends ShanoirNode {
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public tags: Tag[],
         public examinations: ExaminationNode[] | UNLOADED,
         public qualityTag: QualityTag,
-        public canDeleteChildren: boolean
+        public canDeleteChildren: boolean,
+        public canDownload: boolean
     ) {
+        super(parent, id, label);
         if (!tags) tags = [];
-        else tags = tags.map(t => t.clone());
+        else tags = tags.map(t => {
+            const tag: Tag = new Tag();
+            tag.id = t.id;
+            tag.color = t.color;
+            tag.name = t.name;
+            return tag;
+        });
         if (qualityTag) {
-            let tag: Tag = new Tag();
+            const tag: Tag = new Tag();
             tag.id = -1;
             if (qualityTag == QualityTag.VALID) {
                 tag.name = 'Valid';
@@ -77,172 +231,366 @@ export abstract class SubjectNode implements ShanoirNode {
         }
     }
 
-    public open: boolean = false;
-    public title: string;
     public awesome: string;
 }
 
 export class ClinicalSubjectNode extends SubjectNode {
     public title = "subject";
     public awesome = "fas fa-user-injured";
+    qualityTag: QualityTag;
+
+    public static fromSubject(subject: Subject, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): ClinicalSubjectNode {
+        return new ClinicalSubjectNode(
+            parent,
+            subject.id,
+            subject.name,
+            subject.tags,
+            UNLOADED,
+            subject.qualityTag,
+            canDeleteChildren,
+            canDownload);
+    }
+
+    protected readonly routeBase = '/subject/details/';
 }
 
-export class PreclinicalSubjectNode extends SubjectNode {
+export class AnimalSubjectNode extends SubjectNode {
     public title = "preclinical-subject";
     public awesome = "fas fa-hippo";
+
+    public static fromSubject(subject: Subject, parent: ShanoirNode, canDeleteChildren: boolean, canDownload: boolean): AnimalSubjectNode {
+        return new AnimalSubjectNode(
+            parent,
+            subject.id,
+            subject.name,
+            subject.tags,
+            UNLOADED,
+            subject.qualityTag,
+            canDeleteChildren,
+            canDownload);
+    }
+
+    protected readonly routeBase = '/preclinical-subject/details/';
 }
 
 
-export class ExaminationNode implements ShanoirNode {
+export class ExaminationNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public datasetAcquisitions: DatasetAcquisitionNode[] | UNLOADED,
         public extraDataFilePathList: string[] | UNLOADED,
-        public canDelete: boolean
-    ) {}
+        public canDelete: boolean,
+        public canDownload,
+        public preclinical: boolean
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
+    public selected: boolean = false;
     public extraDataOpen: boolean = false;
-    public title: string = "examination";
+    public title: string = this.preclinical ? 'preclinical examination' : 'examination';
+    protected readonly routeBase = this.preclinical ? '/preclinical-examination/details/' : '/examination/details/';
+
+    public static fromExam(exam: SubjectExamination, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): ExaminationNode {
+        const node: ExaminationNode = new ExaminationNode(
+            parent,
+            exam.id,
+            new ExaminationPipe().transform(exam),
+            null,
+            exam.extraDataFilePathList,
+            canDelete,
+            canDownload,
+            exam.preclinical
+        );
+        node.datasetAcquisitions = UNLOADED;
+        return node;
+    }
 }
 
 
-export class DatasetAcquisitionNode implements ShanoirNode {
+export class DatasetAcquisitionNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public datasets: DatasetNode[] | UNLOADED,
-        public canDelete: boolean
-    ) {}
+        public qualityTag: QualityTag,
+        public extraDataFilePathList: string[] | UNLOADED,
+        public canDelete: boolean,
+        public canDownload: boolean
+    ) {
+        super(parent, id, label);
+        if (qualityTag) {
+            const tag: Tag = new Tag();
+            tag.id = -1;
+            if (qualityTag == QualityTag.VALID) {
+                tag.name = 'Valid';
+                tag.color = 'green';
+            } else if (qualityTag == QualityTag.WARNING) {
+                tag.name = 'Warning';
+                tag.color = 'chocolate';
+            } else if (qualityTag == QualityTag.ERROR) {
+                tag.name = 'Error';
+                tag.color = 'red';
+            }
+        }
+    }
 
-    public open: boolean = false;
+    public selected: boolean = false;
+    public extraDataOpen: boolean = false;
     public title: string = "dataset-acquisition";
+    protected readonly routeBase = '/dataset-acquisition/details/';
+
+    public static fromAcquisition(dsAcq: DatasetAcquisition | ExaminationDatasetAcquisitionDTO, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): DatasetAcquisitionNode {
+        const node: DatasetAcquisitionNode = new DatasetAcquisitionNode(
+            parent,
+            dsAcq.id,
+            dsAcq.name,
+            null,
+            dsAcq.qualityTag,
+            dsAcq.extraDataFilePathList,
+            canDelete,
+            canDownload
+        );
+        node.datasets = UNLOADED;
+        // dsAcq.datasets ? dsAcq.datasets.map(ds => DatasetNode.fromDataset(ds, false, node, canDelete, canDownload)) : [];
+        return node;
+    }
 }
 
 
-export class DatasetNode implements ShanoirNode {
+export class DatasetNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
+        public tags: Tag[],
         public type: string,
         public processings: ProcessingNode[] | UNLOADED,
         public processed: boolean,
-        public canDelete: boolean
-    ) {}
+        public canDelete: boolean,
+        public canDownload: boolean,
+        public inPacs: boolean,
+        public metadata: MetadataNode
+    ) {
+        super(parent, id, label);
+        this.tags = !tags ? [] : tags;
+        if(processed){
+            this.title = "processed-dataset";
+            this.awesome = "fas fa-camera-rotate";
+        }
+    }
 
-    public open: boolean = false;
     public selected: boolean = false;
-
+    public awesome: string = "fas fa-camera"
     public title: string = "dataset";
+    protected readonly routeBase = '/dataset/details/';
 
+    public static fromDataset(dataset: Dataset, processed: boolean, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): DatasetNode {
+        const node: DatasetNode = new DatasetNode(
+            parent,
+            dataset.id,
+            dataset.name,
+            dataset.tags,
+            dataset.type,
+            null,
+            processed,
+            canDelete,
+            canDownload,
+            dataset.inPacs,
+            null
+        );
+        node.processings = UNLOADED;
+        //dataset.processings ? dataset.processings.map(proc => ProcessingNode.fromProcessing(proc, node, canDelete, canDownload)) : [];
+        const metadataNode: MetadataNode = new MetadataNode(node, node?.id, 'Dicom Metadata');
+        node.metadata = metadataNode;
+        return node;
+    }
 }
 
 
-export class ProcessingNode implements ShanoirNode {
+export class ProcessingNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public datasets: DatasetNode[] | UNLOADED,
-        public canDelete: boolean
-    ) {}
+        public canDelete: boolean,
+        public canDownload: boolean
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "processing";
+    protected readonly routeBase = '/dataset-processing/details/';
+
+    public static fromProcessing(processing: DatasetProcessing, parent: ShanoirNode, canDelete: boolean, canDownload: boolean): ProcessingNode {
+        const node: ProcessingNode = new ProcessingNode(
+            parent,
+            processing.id,
+            processing.comment ? processing.comment : DatasetProcessingType.getLabel(processing.datasetProcessingType),
+            UNLOADED,
+            canDelete,
+            canDownload
+        );
+        return node;
+    }
 }
 
 
-export class CenterNode implements ShanoirNode {
+export class CenterNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
-        public acquisitionEquipments: AcquisitionEquipmentNode[] | UNLOADED
-    ) {}
+        public acquisitionEquipments: AcquisitionEquipmentNode[] | UNLOADED,
+        public coils: CoilNode[] | UNLOADED
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "center";
+    protected readonly routeBase = '/center/details/';
 }
 
 
-export class AcquisitionEquipmentNode implements ShanoirNode {
+export class AcquisitionEquipmentNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public studyCards: StudyCardNode[] | UNLOADED,
         public canDelete: boolean
-    ) {}
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "acquisition-equipment";
+    protected readonly routeBase = '/acquisition-equipment/details/';
 }
 
 
-export class StudyCardNode implements ShanoirNode {
+export class CoilNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
+        public id: number,
+        public label: string
+    ) {
+        super(parent, id, label);
+    }
+
+    public title: string = "coil";
+    protected readonly routeBase = '/coil/details/';
+}
+
+
+export abstract class CardNode extends ShanoirNode {
+
+    constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public canDelete: boolean
-    ) {}
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
-    public title: string = "study-card";
+    public abstract type: 'studycard' | 'qualitycard';
+    public abstract title: string;
 }
 
 
-export class MemberNode implements ShanoirNode {
+export class StudyCardNode extends CardNode {
+
+    public title: string = "study-card";
+    public type: 'studycard' | 'qualitycard' = 'studycard';
+    protected readonly routeBase = '/study-card/details/';
+}
+
+
+export class QualityCardNode extends CardNode {
+
+    public title: string = "quality-card";
+    public type: 'studycard' | 'qualitycard' = 'qualitycard';
+    protected readonly routeBase = '/quality-card/details/';
+}
+
+
+export class MemberNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public rights: RightNode[] | UNLOADED
-    ) {}
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "member";
+    protected readonly routeBase = '/user/details/';
 }
 
 
-export class RightNode implements ShanoirNode {
+export class RightNode extends ShanoirNode {
 
-    constructor(
-        public id: number,
-        public label: string
-    ) {}
-
-    public open: boolean = false;
     public title: string = "right";
 }
 
 
-export class ReverseSubjectNode implements ShanoirNode {
+export class ReverseSubjectNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
-        public studies: ReverseStudyNode[] | UNLOADED
-    ) {}
+        public studies: ReverseStudyNode | UNLOADED
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "subject";
+    protected readonly routeBase = '/subject/details/';
 }
 
 
-export class ReverseStudyNode implements ShanoirNode {
+export class ReverseStudyNode extends ShanoirNode {
 
     constructor(
+        public parent: ShanoirNode,
         public id: number,
         public label: string,
         public tags: Tag[],
         public examinations: ExaminationNode[] | UNLOADED
-    ) {}
+    ) {
+        super(parent, id, label);
+    }
 
-    public open: boolean = false;
     public title: string = "study";
+    protected readonly routeBase = '/study/details/';
+
+    public static fromStudy(study: SimpleStudy, tags: Tag[], parent: ShanoirNode): ReverseStudyNode {
+        return new ReverseStudyNode(
+            parent,
+            study.id,
+            study.name,
+            tags,
+            UNLOADED
+        );
+    }
+}
+
+export class MetadataNode extends ShanoirNode {
+
+    public title: string = "metadata";
+    protected readonly routeBase = '/dataset/details/dicom/';
 }

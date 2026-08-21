@@ -11,30 +11,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { inject, Injectable, OnDestroy } from '@angular/core';
+import { Subscription, firstValueFrom } from 'rxjs';
 
-import { Injectable, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { ServiceLocator } from "../../../utils/locator.service";
 import { ConsoleService } from "../../console/console.service";
 import { ShanoirError } from "../../models/error.model";
 import { ConfirmDialogService } from "../confirm-dialog/confirm-dialog.service";
 import { Page } from '../table/pageable.model';
+
 import { Entity } from './entity.abstract';
 
 @Injectable()
 export abstract class EntityService<T extends Entity> implements OnDestroy {
 
     abstract API_URL: string;
-
     abstract getEntityInstance(entity?: T): T;
-
-    protected confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
-    protected consoleService = ServiceLocator.injector.get(ConsoleService);
-
+    getOnDeleteConfirmMessage?(entity: Entity): Promise<string>;
+    protected confirmDialogService = inject(ConfirmDialogService);
+    protected consoleService = inject(ConsoleService);
     protected subscriptions: Subscription[] = [];
-
-    // protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
     constructor(
         protected http: HttpClient) {
@@ -45,19 +41,17 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     }
 
     getAll(): Promise<T[]> {
-        return this.http.get<any[]>(this.API_URL)
-            .toPromise()
+        return firstValueFrom(this.http.get<any[]>(this.API_URL))
             .then(this.mapEntityList);
     }
 
     getAllAdvanced(): { quick: Promise<T[]>, complete: Promise<T[]> } {
-        let res = {quick: null, complete: null};
+        const res = {quick: null, complete: null};
         res.complete = new Promise((resolve, reject) => {
-            res.quick = this.http.get<any[]>(this.API_URL)
-                .toPromise()
+            res.quick = firstValueFrom(this.http.get<any[]>(this.API_URL))
                 .then((all) => {
-                    let quickRes: T[] = [];
-                    let mapPromise = this.mapEntityList(all, quickRes);
+                    const quickRes: T[] = [];
+                    const mapPromise = this.mapEntityList(all, quickRes);
                     res.complete = mapPromise
                     resolve(mapPromise);
                     return quickRes;
@@ -66,21 +60,27 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
         return res;
     }
 
-    delete(id: number): Promise<void> {
-        return this.http.delete<void>(this.API_URL + '/' + id)
-            .toPromise();
+    delete(id: number, params?: HttpParams): Promise<void> {
+        return firstValueFrom(this.http.delete<void>(this.API_URL + '/' + id, params ? { params: params } : {}));
     }
 
-    deleteWithConfirmDialog(name: string, entity: Entity): Promise<boolean> {
+    deleteWithConfirmDialog(name: string, entity: Entity, customMsg?: string, deleteParams?: HttpParams): Promise<boolean> {
+        const dialogTitle : string = 'Delete ' + name;
+        const defaultMsg : string = 'Are you sure you want to finally delete the ' + name
+            + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?';
+
         return this.confirmDialogService
             .confirm(
-                'Delete ' + name,
-                'Are you sure you want to delete the ' + name
-                + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
+                dialogTitle,
+                customMsg || defaultMsg,
             ).then(res => {
                 if (res) {
-                    return this.delete(entity.id).then(() => {
-                        this.consoleService.log('info', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' was sucessfully deleted');
+                    return this.delete(entity.id, deleteParams).then(() => {
+                        if (name == 'examination') {
+                            this.consoleService.log('info', 'The ' + name + ' n°' + entity.id + ' has sucessfully started to delete. Check the job page to see its progress.');
+                        } else {
+                            this.consoleService.log('info', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' was sucessfully deleted');
+                        }
                         return true;
                     }).catch(reason => {
                         if(!reason){
@@ -92,43 +92,40 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
                             this.consoleService.log('warn', warn);
                             return false;
                         }
-                        if(reason instanceof ShanoirError && reason.code == 422){
-                            if(reason.message){
+                        if(reason instanceof ShanoirError && reason.code == 422) {
+                            if (reason.message) {
                                 warn = warn + ' ' + reason.message;
                             }
                             this.consoleService.log('warn', warn);
                             return false;
                         }
 
-                        throw Error(reason);
-                    });
-                }
-                return false;
-            })
+                    throw Error(reason);
+                });
+            }
+            return false;
+        })
     }
 
-    get(id: number, mode: 'eager' | 'lazy' = 'eager'): Promise<T> {
-        return this.http.get<any>(this.API_URL + '/' + id)
-            .toPromise()
+    get(id: number | bigint, mode: 'eager' | 'lazy' = 'eager'): Promise<T> {
+        return firstValueFrom(this.http.get<any>(this.API_URL + '/' + id))
             .then(entity => this.mapEntity(entity, null, mode));
     }
 
     create(entity: T): Promise<T> {
-        return this.http.post<any>(this.API_URL, this.stringify(entity))
-            .toPromise()
+        return firstValueFrom(this.http.post<any>(this.API_URL, this.stringify(entity)))
             .then(this.mapEntity);
     }
 
     update(id: number, entity: T): Promise<void> {
-        return this.http.put<any>(this.API_URL + '/' + id, this.stringify(entity))
-            .toPromise();
+        return firstValueFrom(this.http.put<any>(this.API_URL + '/' + id, this.stringify(entity)));
     }
 
-    protected mapEntity = (entity: any, quickResult?: T, mode: 'eager' | 'lazy' = 'eager'): Promise<T> => {
+    protected mapEntity = (entity: any, quickResult?: T, _mode: 'eager' | 'lazy' = 'eager'): Promise<T> => {
         return Promise.resolve(this.toRealObject(entity));
     }
 
-    protected mapEntityList = (entities: any[], quickResult?: T[]): Promise<T[]> => {
+    protected mapEntityList = (entities: any[], _quickResult?: T[]): Promise<T[]> => {
         return Promise.resolve(entities?.map(entity => this.toRealObject(entity)) || []);
     }
 
@@ -140,10 +137,10 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
         });
     }
 
-    protected toRealObject(entity: T): T {
-        let trueObject = Object.assign(this.getEntityInstance(entity), entity);
+    protected toRealObject(entity: any): T {
+        const trueObject = Object.assign(this.getEntityInstance(entity), entity);
         Object.keys(entity).forEach(key => {
-            let value = entity[key];
+            const value = entity[key];
             // For Date Object, put the json object to a real Date object
             if (String(key).indexOf("Date") > -1 && value) {
                 trueObject[key] = new Date(value);
@@ -153,26 +150,31 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
     }
 
     public stringify(obj: any) {
-        return JSON.stringify(obj, (key, value) => {
-            return this.customReplacer(key, value, obj);
-        });
+        return JSON.stringify(obj, this.customReplacer);
     }
 
-    protected getIgnoreList() {
+    protected static getIgnoreList() {
         return ['_links'];
     }
 
-    protected customReplacer = (key, value, entity) => {
-        if (this.getIgnoreList().indexOf(key) > -1) return undefined;
-        else if (entity[key] instanceof Date) return this.datePattern(entity[key]);
+    /** Custom replacer, 'this' is the parent object of the current key/value */
+    protected customReplacer(key, value) {
+        if (EntityService.getIgnoreList().indexOf(key) > -1) return undefined;
+        else if (this[key] instanceof Date) return EntityService.datePattern(this[key]);
         else return value;
     }
 
-    private datePattern(date: Date): string {
+    private static datePattern(date: Date): string {
         return date.getFullYear()
             + '-'
             + ('0' + (date.getMonth() + 1)).slice(-2)
             + '-'
             + ('0' + date.getDate()).slice(-2);
     }
+
+    public arrayFrom404(e: HttpErrorResponse) {
+        if (e.status == 404) return [];
+        else throw e;
+    }
+
 }

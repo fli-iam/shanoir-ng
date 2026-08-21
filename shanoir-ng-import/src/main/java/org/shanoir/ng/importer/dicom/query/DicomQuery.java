@@ -2,96 +2,179 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 package org.shanoir.ng.importer.dicom.query;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
- * ImportFromPACS: the user can query a PACS to chose
- * his series to be imported by Shanoir. This class contains
- * the query executed by the end user and send to the PACS.
- * 
+ * This class contains the C-FIND query attributes entered
+ * by the user and send to the PACS to retrieve entities.
+ * By default, patient root query is used, that is why the
+ * attribute studyRootQuery is false by default.
+ *
  * @author mkain
  *
  */
 public class DicomQuery {
 
-	@NotNull
-	@Size(max=64)
+    @NotNull
+    @Size(max = 64)
     @JsonProperty("patientName")
     private String patientName;
-    
-	@NotNull
-	@Size(max=64)
+
+    @NotNull
+    @Size(max = 64)
     @JsonProperty("patientID")
     private String patientID;
-    
-	@NotNull
-	@Size(max=8)
+
+    @NotNull
+    @Size(max = 8)
     @JsonProperty("patientBirthDate")
     private String patientBirthDate;
-    
-	@NotNull
-	@Size(max=64)
+
+    @NotNull
+    @Size(max = 64)
     @JsonProperty("studyDescription")
     private String studyDescription;
-    
-	@NotNull
-	@Size(max=8)
+
+    @NotNull
+    @Size(max = 8)
     @JsonProperty("studyDate")
     private String studyDate;
 
-	public String getPatientName() {
-		return patientName;
-	}
+    @JsonProperty("modality")
+    private String modality;
 
-	public String getPatientID() {
-		return patientID;
-	}
+    // default is patient root query
+    @JsonProperty("studyRootQuery")
+    private boolean studyRootQuery;
 
-	public String getPatientBirthDate() {
-		return patientBirthDate;
-	}
+    private    String studyFilter;
 
-	public String getStudyDescription() {
-		return studyDescription;
-	}
+    private String minStudyDateFilter;
 
-	public String getStudyDate() {
-		return studyDate;
-	}
+    private String serieFilter;
 
-	public void setPatientName(String patientName) {
-		this.patientName = patientName;
-	}
+    public String getPatientName() {
+        return patientName;
+    }
 
-	public void setPatientID(String patientID) {
-		this.patientID = patientID;
-	}
+    public String getPatientID() {
+        return patientID;
+    }
 
-	public void setPatientBirthDate(String patientBirthDate) {
-		this.patientBirthDate = patientBirthDate;
-	}
+    public String getPatientBirthDate() {
+        return patientBirthDate;
+    }
 
-	public void setStudyDescription(String studyDescription) {
-		this.studyDescription = studyDescription;
-	}
+    public boolean isStudyRootQuery() {
+        return studyRootQuery;
+    }
 
-	public void setStudyDate(String studyDate) {
-		this.studyDate = studyDate;
-	}
-    
+    public void setStudyRootQuery(boolean studyRootQuery) {
+        this.studyRootQuery = studyRootQuery;
+    }
+
+    public String getStudyDescription() {
+        return studyDescription;
+    }
+
+    public String getStudyDate() {
+        return studyDate;
+    }
+
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
+
+    public void setPatientID(String patientID) {
+        this.patientID = patientID;
+    }
+
+    public void setPatientBirthDate(String patientBirthDate) {
+        this.patientBirthDate = patientBirthDate;
+    }
+
+    public void setStudyDescription(String studyDescription) {
+        this.studyDescription = studyDescription;
+    }
+
+    public void setStudyDate(String studyDate) {
+        this.studyDate = studyDate;
+    }
+
+    public String getModality() {
+        return modality;
+    }
+
+    public void setModality(String modality) {
+        this.modality = modality;
+    }
+
+    public String[] displayDicomQuery() {
+        String queryLevel = null;
+        if (studyRootQuery) {
+            queryLevel = "STUDY";
+        } else {
+            queryLevel = "PATIENT";
+        }
+        return new String[] {
+                queryLevel,
+                patientName,
+                patientID,
+                patientBirthDate,
+                studyDescription,
+                studyDate,
+                modality,
+                studyFilter,
+                minStudyDateFilter,
+                serieFilter
+        };
+    }
+
+    public String getStudyFilter() {
+        return studyFilter;
+    }
+
+    public void setStudyFilter(String studyFilter) {
+        this.studyFilter = studyFilter;
+    }
+
+    public String getMinStudyDateFilter() {
+        return minStudyDateFilter;
+    }
+
+    public void setMinStudyDateFilter(String minStudyDateFilter) {
+        this.minStudyDateFilter = minStudyDateFilter;
+    }
+
+    public String getSerieFilter() {
+        return serieFilter;
+    }
+
+    public void setSerieFilter(String serieFilter) {
+        this.serieFilter = serieFilter;
+    }
+
+    @Override
+    public String toString() {
+        return "DicomQuery [patientname = " + patientName + ", patientID=" + patientID + ", patientBirthDate="
+                + patientBirthDate + ", studyDescription=" + studyDescription + ", studyDate=" + studyDate
+                + ", modality=" + modality + ", studyRootQuery=" + studyRootQuery + ", studyFilter=" + studyFilter
+                + ", minStudyDateFilter=" + minStudyDateFilter + ", serieFilter=" + serieFilter + "]";
+    }
+
 }

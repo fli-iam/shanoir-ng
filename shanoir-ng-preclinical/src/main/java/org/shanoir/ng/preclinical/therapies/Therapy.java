@@ -2,16 +2,15 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 package org.shanoir.ng.preclinical.therapies;
 
 import java.util.Objects;
@@ -30,114 +29,114 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+
 /**
  * Therapy
  */
 @Entity
 @Table(name = "therapy")
-@JsonPropertyOrder({ "_links", "name","therapyType","comment" })
-public class Therapy extends HalEntity   {
-	
-  @JsonProperty("name")
-  @Unique
-  private String name = null;
-  
-  @JsonProperty("comment")
-  private String comment = null;
-  
-  @JsonProperty("therapyType")
-  @NotNull
-  @Enumerated(EnumType.STRING)
-  private TherapyType therapyType;
+@JsonPropertyOrder({"_links", "name", "therapyType", "comment"})
+public class Therapy extends HalEntity {
 
-  /**
-	* Init HATEOAS links
-	*/
-  @PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "therapy/" + getId());
-  }
-  
-  public Therapy name(String name) {
-    this.name = name;
-    return this;
-  }
+    @JsonProperty("name")
+    @Unique
+    private String name = null;
 
-  @Schema(name = "none")
-  public String getName() {
-    return name;
-  }
+    @JsonProperty("comment")
+    private String comment = null;
 
-  public void setName(String name) {
-    this.name = name;
-  }
-  
-  public Therapy comment(String comment) {
-    this.comment = comment;
-    return this;
-  }
-  
-  @Schema(name = "none")
-  public String getComment() {
-    return comment;
-  }
+    @JsonProperty("therapyType")
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private TherapyType therapyType;
 
-  public void setComment(String comment) {
-    this.comment = comment;
-  }
-  
-  public Therapy therapyType(TherapyType therapyType) {
-    this.therapyType = therapyType;
-    return this;
-  }
-
-  @Schema(name = "none")
-  public TherapyType getTherapyType() {
-    return therapyType;
-  }
-
-  public void setTherapyType(TherapyType therapyType) {
-    this.therapyType = therapyType;
-  }
-
-  @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "therapy/" + getId());
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public Therapy name(String name) {
+        this.name = name;
+        return this;
     }
-    Therapy therapy = (Therapy) o;
-    return Objects.equals(this.name, therapy.name) &&
-    		Objects.equals(this.therapyType, therapy.therapyType);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(name);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class Therapy {\n");
-    
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    therapy type: ").append(toIndentedString(therapyType)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
+    @Schema(name = "none")
+    public String getName() {
+        return name;
     }
-    return o.toString().replace("\n", "\n    ");
-  }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Therapy comment(String comment) {
+        this.comment = comment;
+        return this;
+    }
+
+    @Schema(name = "none")
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public Therapy therapyType(TherapyType therapyType) {
+        this.therapyType = therapyType;
+        return this;
+    }
+
+    @Schema(name = "none")
+    public TherapyType getTherapyType() {
+        return therapyType;
+    }
+
+    public void setTherapyType(TherapyType therapyType) {
+        this.therapyType = therapyType;
+    }
+
+    @Override
+    public boolean equals(java.lang.Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Therapy therapy = (Therapy) o;
+        return Objects.equals(this.name, therapy.name)
+                && Objects.equals(this.therapyType, therapy.therapyType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class Therapy {\n");
+
+        sb.append("    name: ").append(toIndentedString(name)).append("\n");
+        sb.append("    therapy type: ").append(toIndentedString(therapyType)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(java.lang.Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
 }
-

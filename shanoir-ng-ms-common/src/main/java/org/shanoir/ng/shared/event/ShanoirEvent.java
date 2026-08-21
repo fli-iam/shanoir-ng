@@ -1,173 +1,216 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.shared.event;
 
+import java.util.Map;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Transient;
 
 public class ShanoirEvent {
 
-	public static final int ERROR = -1;
-	public static final int SUCCESS = 1;
-	public static final int IN_PROGRESS = 2;
+    public static final int ERROR = -1;
+    public static final int SUCCESS = 1;
+    public static final int IN_PROGRESS = 2;
 
-	protected Long id;
-	
-	protected String eventType;
-	
-	protected String objectId;
+    private Long id;
 
-	protected Long userId;
+    private String eventType;
 
-	protected String message;
+    private String objectId;
 
-	protected int status;
+    private Long userId;
 
-	protected Float progress;
+    private String message;
 
-	protected Long studyId;
-	
-	private Long timestamp;
+    private String report;
 
-   
-	public ShanoirEvent() {
-	}
+    private int status;
 
-	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status) {
-		this.eventType = eventType;
-		this.objectId = objectId;
-		this.userId = userId;
-		this.message = message;
-		this.status = status;
-		// Generate an ID
-		this.id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
-	}
+    private Float progress;
 
-	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, Long studyId) {
-		this.eventType = eventType;
-		this.objectId = objectId;
-		this.userId = userId;
-		this.message = message;
-		this.status = status;
-		this.studyId = studyId;
-		// Generate an ID
-		this.id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
-	}
+    private Long studyId;
 
-	public ShanoirEvent(String eventType, String objectId, Long userId, String message,	int status, float progress) {
-		this(eventType, objectId, userId, message, status);
-		this.progress = Float.valueOf(progress);
-	}
+    private Long timestamp;
 
-	/**
-	 * @return the id
-	 */
-	public Long getId() {
-		return id;
-	}
+    @Transient
+    @JsonProperty("eventProperties")
+    private Map<String, String> eventProperties;
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
 
-	/**
-	 * @return the eventType
-	 */
-	public String getEventType() {
-		return eventType;
-	}
+    public ShanoirEvent() {
+    }
 
-	/**
-	 * @param eventType the eventType to set
-	 */
-	public void setEventType(String eventType) {
-		this.eventType = eventType;
-	}
+    public ShanoirEvent(String eventType, String objectId, Long userId, String message, int status) {
+        this.eventType = eventType;
+        setObjectId(objectId);
+        this.userId = userId;
+        this.message = message;
+        this.status = status;
+        // Generate an ID
+        this.id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+    }
 
-	/**
-	 * @return the objectId
-	 */
-	public String getObjectId() {
-		return objectId;
-	}
+    public ShanoirEvent(String eventType, String objectId, Long userId, String message, int status, Long studyId) {
+        this.eventType = eventType;
+        setObjectId(objectId);
+        this.userId = userId;
+        this.message = message;
+        this.status = status;
+        this.studyId = studyId;
+        // Generate an ID
+        this.id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+    }
 
-	/**
-	 * @param objectId the objectId to set
-	 */
-	public void setObjectId(String objectId) {
-		this.objectId = objectId;
-	}
+    public ShanoirEvent(String eventType, String objectId, Long userId, String message, int status, float progress) {
+        this(eventType, objectId, userId, message, status);
+        this.progress = Float.valueOf(progress);
+    }
 
-	/**
-	 * @return the userId
-	 */
-	public Long getUserId() {
-		return userId;
-	}
+    public ShanoirEvent(String eventType, String objectId, Long userId, String message, int status, float progress, Long studyId) {
+        this(eventType, objectId, userId, message, status, studyId);
+        this.progress = Float.valueOf(progress);
+    }
 
-	/**
-	 * @param userId the userId to set
-	 */
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
 
-	/**
-	 * @return the message
-	 */
-	public String getMessage() {
-		return message;
-	}
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	/**
-	 * @param message the message to set
-	 */
-	public void setMessage(String message) {
-		this.message = message;
-	}
+    /**
+     * @return the eventType
+     */
+    public String getEventType() {
+        return eventType;
+    }
 
-	/**
-	 * @return the status
-	 */
-	public int getStatus() {
-		return status;
-	}
+    /**
+     * @param eventType the eventType to set
+     */
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
 
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(int status) {
-		this.status = status;
-	}
+    /**
+     * @return the objectId
+     */
+    public String getObjectId() {
+        return objectId;
+    }
 
-	/**
-	 * @return the progress
-	 */
-	public Float getProgress() {
-		return progress;
-	}
+    /**
+     * @param objectId the objectId to set
+     */
+    public void setObjectId(String objectId) {
+        if (objectId != null && objectId.length() > 255) {
+            this.objectId = objectId.substring(0, 250) + "...";
+        } else {
+            this.objectId = objectId;
+        }
+    }
 
-	/**
-	 * @param progress the progress to set
-	 */
-	public void setProgress(Float progress) {
-		this.progress = progress;
-	}
+    /**
+     * @return the userId
+     */
+    public Long getUserId() {
+        return userId;
+    }
 
-	/**
-	 * @return the studyId
-	 */
-	public Long getStudyId() {
-		return studyId;
-	}
+    /**
+     * @param userId the userId to set
+     */
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	/**
-	 * @param studyId the studyId to set
-	 */
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}   
-    
+    /**
+     * @return the message
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * @param message the message to set
+     */
+    public void setMessage(String message) {
+        this.message = message == null ? null : message.replaceAll("\uFFFD", "?");
+    }
+
+    public String getReport() {
+        return report;
+    }
+
+    public void setReport(String report) {
+        //.replaceAll("[^a-zA-Z0-9]+", "");
+        this.report = report == null ? null : report.replaceAll("\uFFFD", "?");
+    }
+
+    /**
+     * @return the status
+     */
+    public int getStatus() {
+        return status;
+    }
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    /**
+     * @return the progress
+     */
+    public Float getProgress() {
+        return progress;
+    }
+
+    /**
+     * @param progress the progress to set
+     */
+    public void setProgress(Float progress) {
+        this.progress = progress;
+    }
+
+    /**
+     * @return the studyId
+     */
+    public Long getStudyId() {
+        return studyId;
+    }
+
+    /**
+     * @param studyId the studyId to set
+     */
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
+
     public Long getTimestamp() {
         return timestamp;
     }
@@ -176,4 +219,11 @@ public class ShanoirEvent {
         this.timestamp = timestamp;
     }
 
+    public Map<String, String> getEventProperties() {
+        return eventProperties;
+    }
+
+    public void setEventProperties(Map<String, String> eventProperties) {
+        this.eventProperties = eventProperties;
+    }
 }

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -21,8 +21,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class JSONUtils {
-    
+public final class JSONUtils {
+
+    private JSONUtils() { }
+
     /**
      * Determine if two JSONObjects are similar.
      * They must contain the same set of names which must be associated with
@@ -31,12 +33,12 @@ public class JSONUtils {
      * @param other The other JSONObject
      * @return true if they are equal
      */
-     public static boolean equals(JSONObject o1, JSONObject o2) {
+    public static boolean equals(JSONObject o1, JSONObject o2) {
         try {
             if (!(o2 instanceof JSONObject)) {
                 return false;
             }
-            if (!o1.names().equals(((JSONObject)o2).names())) {
+            if (!o1.names().equals(((JSONObject) o2).names())) {
                 return false;
             }
             JSONArray names1 = o1.names();
@@ -44,24 +46,24 @@ public class JSONUtils {
                 String name = names1.getString(i);
                 Object valueThis = o1.get(name);
                 Object valueOther = o2.get(name);
-                if(valueThis == valueOther) {
+                if (valueThis == valueOther) {
                     continue;
                 }
-                if(valueThis == null) {
+                if (valueThis == null) {
                     return false;
                 }
                 if (valueThis instanceof JSONObject) {
-                    if (!(valueOther instanceof JSONObject) || !equals((JSONObject)valueThis, (JSONObject)valueOther)) {
+                    if (!(valueOther instanceof JSONObject) || !equals((JSONObject) valueThis, (JSONObject) valueOther)) {
                         return false;
                     }
                 } else if (valueThis instanceof JSONArray) {
-                    if (!(valueOther instanceof JSONArray) || !equals((JSONArray)valueThis, (JSONArray)valueOther)) {
+                    if (!(valueOther instanceof JSONArray) || !equals((JSONArray) valueThis, (JSONArray) valueOther)) {
                         return false;
                     }
                 } else if (valueThis instanceof Number && valueOther instanceof Number) {
-                    if (!isNumberSimilar((Number)valueThis, (Number)valueOther)) {
+                    if (!isNumberSimilar((Number) valueThis, (Number) valueOther)) {
                         return false;
-                    };
+                    }
                 } else if (!valueThis.equals(valueOther)) {
                     return false;
                 }
@@ -71,14 +73,14 @@ public class JSONUtils {
             return false;
         }
     }
-     
+
     /**
      * Determine if two JSONArrays are similar.
      * They must contain similar sequences.
      *
      * @param other The other JSONArray
      * @return true if they are equal
-     * @throws JSONException 
+     * @throws JSONException
      */
     public static boolean equals(JSONArray o1, JSONArray o2) throws JSONException {
         if (!(o2 instanceof JSONArray)) {
@@ -91,22 +93,22 @@ public class JSONUtils {
         for (int i = 0; i < len; i += 1) {
             Object valueThis = o1.get(i);
             Object valueOther = o2.get(i);
-            if(valueThis == valueOther) {
+            if (valueThis == valueOther) {
                 continue;
             }
-            if(valueThis == null) {
+            if (valueThis == null) {
                 return false;
             }
             if (valueThis instanceof JSONObject) {
-                if (!(valueOther instanceof JSONObject) || !equals((JSONObject)valueThis, (JSONObject)valueOther)) {
+                if (!(valueOther instanceof JSONObject) || !equals((JSONObject) valueThis, (JSONObject) valueOther)) {
                     return false;
                 }
             } else if (valueThis instanceof JSONArray) {
-                if (!(valueOther instanceof JSONArray) || !equals((JSONArray)valueThis, (JSONArray)valueOther)) {
+                if (!(valueOther instanceof JSONArray) || !equals((JSONArray) valueThis, (JSONArray) valueOther)) {
                     return false;
                 }
             } else if (valueThis instanceof Number && valueOther instanceof Number) {
-                if (!isNumberSimilar((Number)valueThis, (Number)valueOther)) {
+                if (!isNumberSimilar((Number) valueThis, (Number) valueOther)) {
                     return false;
                 }
             } else if (!valueThis.equals(valueOther)) {
@@ -115,7 +117,7 @@ public class JSONUtils {
         }
         return true;
     }
-    
+
     /**
      * Compares two numbers to see if they are similar.
      *
@@ -138,10 +140,10 @@ public class JSONUtils {
         }
         // if the classes are the same and implement Comparable
         // then use the built in compare first.
-        if(l.getClass().equals(r.getClass()) && l instanceof Comparable) {
+        if (l.getClass().equals(r.getClass()) && l instanceof Comparable) {
             @SuppressWarnings({ "rawtypes", "unchecked" })
-            int compareTo = ((Comparable)l).compareTo(r);
-            return compareTo==0;
+            int compareTo = ((Comparable) l).compareTo(r);
+            return compareTo == 0;
         }
         // BigDecimal should be able to handle all of our number types that we support through
         // documentation. Convert to BigDecimal first, then use the Compare method to
@@ -153,7 +155,7 @@ public class JSONUtils {
         }
         return lBigDecimal.compareTo(rBigDecimal) == 0;
     }
-    
+
     /**
      * @param val value to convert
      * @param defaultValue default value to return is the conversion doesn't work or is null.
@@ -162,22 +164,22 @@ public class JSONUtils {
      * @return BigDecimal conversion of the original value, or the defaultValue if unable
      *          to convert.
      */
-     private static BigDecimal objectToBigDecimal(Object val, BigDecimal defaultValue, boolean exact) {
+    private static BigDecimal objectToBigDecimal(Object val, BigDecimal defaultValue, boolean exact) {
         if (val == null) {
             return defaultValue;
         }
-        if (val instanceof BigDecimal){
+        if (val instanceof BigDecimal) {
             return (BigDecimal) val;
         }
-        if (val instanceof BigInteger){
+        if (val instanceof BigInteger) {
             return new BigDecimal((BigInteger) val);
         }
-        if (val instanceof Double || val instanceof Float){
-            if (!numberIsFinite((Number)val)) {
+        if (val instanceof Double || val instanceof Float) {
+            if (!numberIsFinite((Number) val)) {
                 return defaultValue;
             }
             if (exact) {
-                return new BigDecimal(((Number)val).doubleValue());
+                return new BigDecimal(((Number) val).doubleValue());
             } else {
                 // use the string constructor so that we maintain "nice" values for doubles and floats
                 // the double constructor will translate doubles to "exact" values instead of the likely
@@ -186,7 +188,7 @@ public class JSONUtils {
             }
         }
         if (val instanceof Long || val instanceof Integer
-                || val instanceof Short || val instanceof Byte){
+                || val instanceof Short || val instanceof Byte) {
             return new BigDecimal(((Number) val).longValue());
         }
         // don't check if it's a string in case of unchecked Number subclasses
@@ -206,4 +208,3 @@ public class JSONUtils {
         return true;
     }
 }
-

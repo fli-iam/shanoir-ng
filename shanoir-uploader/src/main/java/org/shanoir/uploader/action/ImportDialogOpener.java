@@ -1,323 +1,295 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.action;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
-import org.apache.log4j.Logger;
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
+import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
-import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
-import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.uploader.upload.UploadJob;
+import org.shanoir.uploader.utils.ImportUtils;
+import org.shanoir.uploader.utils.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class implements the logic when the start import button is clicked.
- * 
+ *
  * @author mkain
- * 
+ *
  */
 public class ImportDialogOpener {
 
-	private static Logger logger = Logger.getLogger(ImportDialogOpener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ImportDialogOpener.class);
 
-	private MainWindow mainWindow;
+    private MainWindow mainWindow;
 
-	private ImportDialog importDialog;
+    private ImportDialog importDialog;
 
-	private ResourceBundle resourceBundle;
+    private ResourceBundle resourceBundle;
 
-	private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
+    private ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 
-	public ImportDialogOpener(final MainWindow mainWindow,
-			final ShanoirUploaderServiceClient shanoirUploaderServiceClient) {
-		this.mainWindow = mainWindow;
-		this.resourceBundle = mainWindow.resourceBundle;
-		this.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
-	}
+    public ImportDialogOpener(final MainWindow mainWindow,
+            final ShanoirUploaderServiceClient shanoirUploaderServiceClient) {
+        this.mainWindow = mainWindow;
+        this.resourceBundle = mainWindow.resourceBundle;
+        this.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
+    }
 
-	public void openImportDialog(UploadJob uploadJob, File uploadFolder) {
-		try {
-			Date studyDate = ShUpConfig.formatter.parse(uploadJob.getStudyDate());
-			// get items on server
-			Subject subject = getSubject(uploadJob);
-			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
-			List<Examination> examinationDTOs = getExaminations(subject);
-			// init components of GUI and listeners
-			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
-			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, examinationDTOs, studyDate, importStudyCardFilterDocumentListener);
-			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBIL);
-			importDialog = new ImportDialog(this.mainWindow,
-					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
-					importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
-			// update import dialog with items from server
-			updateImportDialogForSubject(subject); // this has to be done after init of dialog
-			updateImportDialogForNewExamFields(studyDate, uploadJob.getStudyDescription());
-			updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
-			updateImportDialogForMRICenter(uploadJob);
-			importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
-			importDialog.mrExaminationExamExecutiveCB.setVisible(false);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			return;
-		}
-		importDialog.setVisible(true);
-	}
-	
-	/**
-	 * @param uploadJob
-	 */
-	private void updateImportDialogForMRICenter(final UploadJob uploadJob) {
-		SerieTreeNode firstSerie = uploadJob.getSeries().iterator().next();
- 		String institutionName = firstSerie.getMriInformation().getInstitutionName();
-		String institutionAddress = firstSerie.getMriInformation().getInstitutionAddress();
-		String stationName = firstSerie.getMriInformation().getStationName();
-		String manufacturer = firstSerie.getMriInformation().getManufacturer();
-		String manufacturersModelName = firstSerie.getMriInformation().getManufacturersModelName();
-		String magneticFieldStrength = firstSerie.getMriInformation().getMagneticFieldStrength();
-		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
-		importDialog.mriCenterText.setText(institutionName);
-		importDialog.mriCenterAddressText.setText(institutionAddress);
-		importDialog.mriStationNameText.setText(stationName);
-		importDialog.mriManufacturerText.setText(manufacturer);
-		importDialog.mriManufacturersModelNameText.setText(manufacturersModelName);
-		importDialog.mriMagneticFieldStrengthText.setText(magneticFieldStrength);
-		importDialog.mriDeviceSerialNumberText.setText(deviceSerialNumber);
-	}
+    public void openImportDialog(ImportJobBase importJob, File importFolder) {
+        try {
+            Date studyDate = ShUpConfig.FORMATTER.parse(Util.convertLocalDateToString(importJob.getStudy().getStudyDate()));
+            Subject subject = null;
+            // Profile OFSEP: search with identifier
+            if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
+                subject = getSubject(importJob);
+            } // else Profile Neurinfo: no search with identifier, user selects existing subject
+            List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
+            LOG.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
+            List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob, acquisitionEquipments);
+            // Init components of GUI and listeners
+            ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
+            InstitutionDicom institutionDicom = null;
+            EquipmentDicom equipmentDicom = null;
+            Serie serieWithInstitutionAndEquipment = importJob.getFirstSerieWithInstitutionAndEquipment();
+            if (serieWithInstitutionAndEquipment != null) {
+                institutionDicom = serieWithInstitutionAndEquipment.getInstitution();
+                equipmentDicom = serieWithInstitutionAndEquipment.getEquipment();
+            } else {
+                LOG.warn("None of the selected series contains both institution and equipment information.");
+            }
+            ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, institutionDicom, equipmentDicom, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
+            ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder, subject);
+            importDialog = new ImportDialog(this.mainWindow,
+                    ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
+                    importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
+            // Update import dialog with items from server
+            updateImportDialogForSubject(subject); // this has to be done after init of the dialog
+            updateImportDialogForNewExamFields(studyDate, importJob.getStudy().getStudyDescription(), importJob.getExaminationDataReuseAgreement());
+            updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
+            importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
+            importDialog.mrExaminationExamExecutiveCB.setVisible(false);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            return;
+        }
+        importDialog.setVisible(true);
+    }
 
-	/**
-	 * This method calls the backend service and transforms DTO into model objects.
-	 * 
-	 * @param dicomData
-	 * @param equipmentDicom
-	 * @throws Exception 
-	 */
-	private List<Study> getStudiesWithStudyCards(final UploadJob uploadJob) throws Exception {
-		SerieTreeNode firstSerie = uploadJob.getSeries().iterator().next();
-		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
-		List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
-		if (studies != null) {
-			logger.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
-			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
-			logger.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
-			List<StudyCard> studyCards = getAllStudyCards(studies);
-			for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
-				Study study = (Study) iterator.next();
-				study.setCompatible(new Boolean(false));
-				Boolean compatibleStudyCard = false;
-				if (studyCards != null) {
-					logger.info("getAllStudyCards: " + studyCards.size() + " studycards found.");
-					List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
-					for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
-						StudyCard studyCard = (StudyCard) itStudyCards.next();
-						// filter all study cards related to the selected study
-						if (study.getId().equals(studyCard.getStudyId())) {
-							studyCardsStudy.add(studyCard);
-							Long acquisitionEquipmentId = studyCard.getAcquisitionEquipmentId();
-							for (Iterator<AcquisitionEquipment> acquisitionEquipmentsIt = acquisitionEquipments.iterator(); acquisitionEquipmentsIt.hasNext();) {
-								AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) acquisitionEquipmentsIt.next();
-								// find the correct equipment
-								if (acquisitionEquipment.getId().equals(acquisitionEquipmentId)) {
-									studyCard.setAcquisitionEquipment(acquisitionEquipment);
-									// check if values from server are complete, no sense for comparison if no serial number on server
-									if (acquisitionEquipment != null
-										&& acquisitionEquipment.getManufacturerModel() != null
-										&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null
-										&& acquisitionEquipment.getSerialNumber() != null) {
-										// check if values are present in DICOM
-										if (deviceSerialNumber != null && !"".equals(deviceSerialNumber)) {
-											if (acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0
-												|| deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber())) {
-												studyCard.setCompatible(true);
-												compatibleStudyCard = true;
-											} else {
-												studyCard.setCompatible(false);
-											}
-										// no match with server
-										} else {
-											studyCard.setCompatible(false); // no match, as no value from DICOM or from server exists
-										}
-									// set in-compatible in case of missing server values
-									} else {
-										studyCard.setCompatible(false);
-									}								
-									break; // correct equipment found, break for-loop acqEquip
-								}
-							}
-						}
-					}
-					if (compatibleStudyCard) {
-						study.setCompatible(true);
-					} else {
-						study.setCompatible(false);
-					}
-					study.setStudyCards(studyCardsStudy);
-				}
-			}
-			return studies;
-		} else {
-			return null;
-		}
-	}
+    /**
+     * This method calls the backend service and transforms DTO into model objects.
+     *
+     * @param dicomData
+     * @param equipmentDicom
+     * @throws Exception
+     */
+    private List<Study> getStudiesWithStudyCards(final ImportJobBase importJob,
+            List<AcquisitionEquipment> acquisitionEquipments) throws Exception {
+        List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
+        if (studies != null) {
+            LOG.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
+            List<StudyCard> studyCards = ImportUtils.getAllStudyCards(studies);
+            Serie serieWithInstitutionAndEquipment = importJob.getFirstSerieWithInstitutionAndEquipment();
+            EquipmentDicom equipmentDicomForCompatibility = serieWithInstitutionAndEquipment != null
+                    ? serieWithInstitutionAndEquipment.getEquipment()
+                    : null;
+            if (studyCards != null) {
+                LOG.info("getAllStudyCards for studies: " + studyCards.size() + " studycards found.");
+                for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
+                    Study study = (Study) iterator.next();
+                    study.setCompatible(new Boolean(false));
+                    Boolean compatibleStudyCard = false;
+                    if (studyCards != null && study.isWithStudyCards()) {
+                        List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
+                        for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
+                            StudyCard studyCard = (StudyCard) itStudyCards.next();
+                            // filter all study cards related to the selected study
+                            if (study.getId().equals(studyCard.getStudyId())) {
+                                studyCardsStudy.add(studyCard);
+                                for (AcquisitionEquipment acquisitionEquipment : acquisitionEquipments) {
+                                    // find the correct equipment for each study card and add it
+                                    if (acquisitionEquipment.getId().equals(studyCard.getAcquisitionEquipmentId())) {
+                                        studyCard.setAcquisitionEquipment(acquisitionEquipment);
+                                    }
+                                }
+                                // If at least one study card is compatible, then study is compatible
+                                if (equipmentDicomForCompatibility != null
+                                        && ImportUtils.flagStudyCardCompatible(studyCard,
+                                                equipmentDicomForCompatibility)) {
+                                    compatibleStudyCard = true;
+                                }
+                            }
+                        }
+                        if (compatibleStudyCard) {
+                            study.setCompatible(true);
+                        } else {
+                            study.setCompatible(false);
+                        }
+                        study.setStudyCards(studyCardsStudy);
+                    }
+                }
+            }
+            return studies;
+        } else {
+            return null;
+        }
+    }
 
-	private List<StudyCard> getAllStudyCards(List<Study> studies) throws IOException {
-		IdList idList = new IdList();
-		for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
-			Study study = (Study) iterator.next();
-			idList.getIdList().add(study.getId());
-		}
-		List<StudyCard> studyCards = shanoirUploaderServiceClient.findStudyCardsByStudyIds(idList);
-		return studyCards;
-	}
+    /**
+     * @param studiesWithStudyCards
+     */
+    private void updateImportDialogForStudyAndStudyCard(List<Study> studiesWithStudyCards) {
+        importDialog.studyCB.removeAllItems();
+        importDialog.studyCardCB.removeAllItems();
+        if (studiesWithStudyCards != null && !studiesWithStudyCards.isEmpty()) {
+            boolean firstCompatibleStudyFound = false;
+            studiesWithStudyCards.sort(Comparator.comparing(Study::getName));
+            for (Study study : studiesWithStudyCards) {
+                importDialog.studyCB.addItem(study);
+                if (study.getCompatible() != null
+                        && study.getCompatible()
+                        && !firstCompatibleStudyFound) {
+                    importDialog.studyCB.setSelectedItem(study);
+                    firstCompatibleStudyFound = true;
+                    boolean firstCompatibleStudyCardFound = false;
+                    for (StudyCard studyCard : study.getStudyCards()) {
+                        if (studyCard.getCompatible() != null
+                                && studyCard.getCompatible()
+                                && !firstCompatibleStudyCardFound) {
+                            importDialog.studyCardCB.setSelectedItem(studyCard);
+                            firstCompatibleStudyCardFound = true;
+                        }
+                    }
+                }
+            }
+            if (!firstCompatibleStudyFound) {
+                // this selectItem adds study cards to the stuyCardCB in case of no
+                // compatible study found, see ImportStudyAndStudyCardCBItemListener
+                Study firstStudy = studiesWithStudyCards.get(0);
+                importDialog.studyCB.setSelectedItem(firstStudy);
+                if (firstStudy.getStudyCards() != null && !firstStudy.getStudyCards().isEmpty()) {
+                    StudyCard firstStudyCard = firstStudy.getStudyCards().get(0);
+                    // this selectItem adds centers to the newly-create-exam
+                    importDialog.studyCardCB.setSelectedItem(firstStudyCard);
+                }
+            }
+        }
+        importDialog.studyCB.setValueSet(false);
+    }
 
-	/**
-	 * @param studiesWithStudyCards
-	 */
-	private void updateImportDialogForStudyAndStudyCard(List<Study> studiesWithStudyCards) {
-		importDialog.studyCB.removeAllItems();
-		importDialog.studyCardCB.removeAllItems();
-		if (studiesWithStudyCards != null && !studiesWithStudyCards.isEmpty()) {
-			boolean firstCompatibleStudyFound = false;
-			for (Study study : studiesWithStudyCards) {
-				importDialog.studyCB.addItem(study);
-				if (study.getCompatible() != null
-					&& study.getCompatible()
-					&& !firstCompatibleStudyFound) {
-					importDialog.studyCB.setSelectedItem(study);
-					firstCompatibleStudyFound = true;
-					boolean firstCompatibleStudyCardFound = false;
-					for (StudyCard studyCard : study.getStudyCards()) {
-						if (studyCard.getCompatible() != null
-							&& studyCard.getCompatible()
-							&& !firstCompatibleStudyCardFound) {
-							importDialog.studyCardCB.setSelectedItem(studyCard);
-							firstCompatibleStudyCardFound = true;
-						}
-					}
-				}
-			}
-			if (!firstCompatibleStudyFound) {
-				// this selectItem adds study cards to the stuyCardCB in case of no
-				// compatible study found, see ImportStudyAndStudyCardCBItemListener
-				Study firstStudy = studiesWithStudyCards.get(0);
-				importDialog.studyCB.setSelectedItem(firstStudy);
-				if (firstStudy.getStudyCards() != null && !firstStudy.getStudyCards().isEmpty()) {
-					StudyCard firstStudyCard = firstStudy.getStudyCards().get(0);
-					// this selectItem adds centers to the newly-create-exam
-					importDialog.studyCardCB.setSelectedItem(firstStudyCard);					
-				}
-			}
-		}
-		importDialog.studyCB.setValueSet(false);
-	}
+    private Subject getSubject(final ImportJobBase importJob) throws Exception {
+        String identifier = importJob.getSubject().getIdentifier();
+        if (identifier != null) {
+            return shanoirUploaderServiceClient
+                .findSubjectBySubjectIdentifier(identifier);
+        }
+        return null;
+    }
 
-	/**
-	 * @param dicomData
-	 * @throws Exception
-	 */
-	private Subject getSubject(final UploadJob uploadJob) throws Exception {
-		Subject foundSubject = null;
-		if (uploadJob.getSubjectIdentifier() != null) {
-			foundSubject = shanoirUploaderServiceClient
-					.findSubjectBySubjectIdentifier(uploadJob.getSubjectIdentifier());
-		}
-		return foundSubject;
-	}
+    private void updateImportDialogForSubject(Subject subject) {
+        /**
+         * Insert subject specific items into combo boxes from model classes.
+         * Should be there nevertheless if subject exists or not.
+         */
+        // Insert ImageObjectCategory objects
+        for (int i = 0; i < ImagedObjectCategory.values().length; i++) {
+            importDialog.subjectImageObjectCategoryCB.addItem(ImagedObjectCategory.values()[i]);
+        }
+        // Insert String here, as the model does not contain "", the unknown, not selected hemdom
+        importDialog.subjectLanguageHemisphericDominanceCB.addItem("");
+        importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
+        importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
+        importDialog.subjectManualHemisphericDominanceCB.addItem("");
+        importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
+        importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
+        for (int i = 0; i < SubjectType.values().length; i++) {
+            importDialog.subjectTypeCB.addItem(SubjectType.values()[i]);
+        }
+        // Existing subject found with identifier: only profile OFSEP, not Neurinfo
+        if (subject != null) {
+            importDialog.subjectTextField.setText(subject.getName());
+            importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
+            importDialog.subjectTextField.setEnabled(false);
+            importDialog.subjectTextField.setEditable(false);
+            importDialog.subjectTextField.setValueSet(true);
+            importDialog.existingSubjectsCB.setVisible(false);
+            importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+            importDialog.existingSubjectsCB.setEnabled(false);
+            importDialog.existingSubjectsCB.setEditable(false);
+            ImportStudyAndStudyCardCBItemListener.updateImportDialogForExistingSubject(subject, importDialog);
+        // No existing subject found with identifier:
+        } else {
+            // Profile Neurinfo: enable manual edition
+            if (ShUpConfig.isModeSubjectNameManual()) {
+                importDialog.subjectTextField.setText("");
+                importDialog.subjectTextField.setBackground(Color.WHITE);
+                importDialog.subjectTextField.setEnabled(true);
+                importDialog.subjectTextField.setEditable(true);
+                importDialog.existingSubjectsCB.setEditable(true);
+            // Profile OFSEP: display, that subject will be created automatically
+            } else if (ShUpConfig.isModeSubjectNameAutoIncrement()) {
+                importDialog.subjectTextField
+                        .setText(resourceBundle.getString("shanoir.uploader.import.subject.autofill"));
+                importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
+                importDialog.subjectTextField.setEnabled(false);
+                importDialog.subjectTextField.setEditable(false);
+                importDialog.existingSubjectsCB.setVisible(false);
+                importDialog.existingSubjectsCB.setBackground(Color.LIGHT_GRAY);
+                importDialog.existingSubjectsCB.setEnabled(false);
+                importDialog.existingSubjectsCB.setEditable(false);
+            }
+            importDialog.subjectTextField.setValueSet(false);
+            importDialog.subjectImageObjectCategoryCB.setEnabled(true);
+            importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.LIVING_HUMAN_BEING);
+            importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
+            importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");
+            importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
+            importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
+            importDialog.subjectPersonalCommentTextArea.setText("");
+            importDialog.subjectPersonalCommentTextArea.setBackground(Color.WHITE);
+            importDialog.subjectPersonalCommentTextArea.setEditable(true);
+        }
+    }
 
-	private void updateImportDialogForSubject(Subject subject) {
-		/**
-		 * Insert subject specific items into combo boxes from model classes.
-		 * Should be there nevertheless if subject exists or not.
-		 */
-		// Insert ImageObjectCategory objects
-		for (int i = 0; i < ImagedObjectCategory.values().length; i++) {
-			importDialog.subjectImageObjectCategoryCB.addItem(ImagedObjectCategory.values()[i]);					
-		}
-		// Insert String here, as the model does not contain "", the unknown, not selected hemdom
-		importDialog.subjectLanguageHemisphericDominanceCB.addItem("");
-		importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
-		importDialog.subjectLanguageHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
-		importDialog.subjectManualHemisphericDominanceCB.addItem("");
-		importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Left.getName());
-		importDialog.subjectManualHemisphericDominanceCB.addItem(HemisphericDominance.Right.getName());
-		for (int i = 0; i < SubjectType.values().length; i++) {
-			importDialog.subjectTypeCB.addItem(SubjectType.values()[i]);
-		}
-		// Existing subject found with identifier:
-		if (subject != null) {
-			// Manage subject values here:
-			importDialog.subjectTextField.setText(subject.getName());
-			importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
-			importDialog.subjectTextField.setEnabled(false);
-			importDialog.subjectTextField.setEditable(false);
-			importDialog.subjectTextField.setValueSet(true);
-			importDialog.subjectImageObjectCategoryCB.setSelectedItem(subject.getImagedObjectCategory());
-			importDialog.subjectImageObjectCategoryCB.setEnabled(false);
-			importDialog.subjectLanguageHemisphericDominanceCB
-					.setSelectedItem(subject.getLanguageHemisphericDominance());
-			importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(false);
-			importDialog.subjectManualHemisphericDominanceCB
-					.setSelectedItem(subject.getManualHemisphericDominance());
-			importDialog.subjectManualHemisphericDominanceCB.setEnabled(false);
-			importDialog.subjectPersonalCommentTextArea.setBackground(Color.LIGHT_GRAY);
-			importDialog.subjectPersonalCommentTextArea.setEditable(false);
-		// No existing subject found with identifier:
-		} else {
-			// Common name
-			if (ShUpConfig.isModeSubjectCommonNameManual()) {
-				importDialog.subjectTextField.setText("");
-				importDialog.subjectTextField.setBackground(Color.WHITE);
-				importDialog.subjectTextField.setEnabled(true);
-				importDialog.subjectTextField.setEditable(true);
-			} else if (ShUpConfig.isModeSubjectCommonNameAutoIncrement()) {
-				importDialog.subjectTextField
-						.setText(resourceBundle.getString("shanoir.uploader.import.subject.autofill"));
-				importDialog.subjectTextField.setBackground(Color.LIGHT_GRAY);
-				importDialog.subjectTextField.setEnabled(false);
-				importDialog.subjectTextField.setEditable(false);
-			}
-			importDialog.subjectTextField.setValueSet(false);
-			importDialog.subjectImageObjectCategoryCB.setEnabled(true);
-			importDialog.subjectImageObjectCategoryCB.setSelectedItem(ImagedObjectCategory.LIVING_HUMAN_BEING);			
-			importDialog.subjectLanguageHemisphericDominanceCB.setEnabled(true);
-			importDialog.subjectLanguageHemisphericDominanceCB.setSelectedItem("");			
-			importDialog.subjectManualHemisphericDominanceCB.setEnabled(true);
-			importDialog.subjectManualHemisphericDominanceCB.setSelectedItem("");
-			importDialog.subjectPersonalCommentTextArea.setText("");
-			importDialog.subjectPersonalCommentTextArea.setBackground(Color.WHITE);
-			importDialog.subjectPersonalCommentTextArea.setEditable(true);
-		}
-	}
-
-	private List<Examination> getExaminations(Subject subjectDTO) throws Exception {
-		if (subjectDTO != null) {
-			List<Examination> examinationList = shanoirUploaderServiceClient
-					.findExaminationsBySubjectId(subjectDTO.getId());
-			return examinationList;
-		}
-		return null;
-	}
-
-	private void updateImportDialogForNewExamFields(Date studyDate, String studyDescription)
-			throws ParseException {
-		importDialog.mrExaminationNewDateModel.setValue(studyDate);
-		importDialog.mrExaminationCommentTF.setText(studyDescription);
-	}
+    private void updateImportDialogForNewExamFields(Date studyDate, String studyDescription, Boolean examinationDataReuseAgreement)
+            throws ParseException {
+        importDialog.mrExaminationNewDateModel.setValue(studyDate);
+        importDialog.mrExaminationCommentTF.setText(studyDescription);
+        importDialog.mrExaminationDataReuseAgreementCB.setSelected(Objects.nonNull(examinationDataReuseAgreement) && examinationDataReuseAgreement);
+    }
 
 }

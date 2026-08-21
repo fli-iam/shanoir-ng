@@ -1,1 +1,0 @@
-UPDATE study SET profile_id=2 WHERE profile_id IS NULL;

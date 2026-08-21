@@ -15,15 +15,16 @@
 import { Component } from '@angular/core';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
-import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
-import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { StudyService } from '../studies/shared/study.service';
+
 import { DataUserAgreement } from './shared/dua.model';
+import { DUASigningComponent } from './dua-signing/dua-signing.component';
 
 @Component({
     selector: 'dua',
     templateUrl: 'dua.component.html',
-    styleUrls: ['dua.component.css'] 
+    styleUrls: ['dua.component.css'],
+    imports: [DUASigningComponent]
 })
 
 export class DUAComponent {

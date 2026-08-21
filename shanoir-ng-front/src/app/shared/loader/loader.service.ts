@@ -19,16 +19,7 @@ export class LoaderService {
 
     private counter: number = 0;
 
-    // private open() {
-    //     if (!this.opened) {
-    //         this.opened = true;
-    //         Promise
-    //         this.appRef.then(appRef => appRef.tick());
-    //     }
-    // }
-
     startLoader() {
-        let prev = this.counter;
         this.counter++;
     }
 

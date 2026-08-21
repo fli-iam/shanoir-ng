@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -18,9 +18,7 @@ import org.shanoir.ng.shared.paging.FacetPageable;
 import org.shanoir.ng.utils.Range;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,293 +26,365 @@ import java.util.Map;
  *
  */
 public class ShanoirSolrQuery {
-	
-	private Collection<String> studyName;
 
-	private Collection<Long> studyId;
+    private Collection<String> studyName;
 
-	private Collection<String> subjectName;
+    private Collection<Long> studyId;
 
-	private Collection<String> subjectType;
+    private Collection<String> subjectName;
 
-	private Collection<Long> subjectId;
+    private Collection<String> subjectType;
 
-	private Collection<Long> examinationId;
+    private Collection<Long> subjectId;
 
-	private Collection<String> examinationComment;
+    private Collection<Integer> sortingIndex;
 
-	private Collection<String> acquisitionEquipmentName;
-	
-	private	Collection<String> datasetName;
-	
-	private	Collection<String> centerName;
+    private Collection<Boolean> dataReuseAgreement;
 
-	private Collection<Long> centerId;
-	
-	private	Collection<String> tags;
+    private Collection<Long> examinationId;
 
-	private LocalDate datasetStartDate;
-	
-	private LocalDate datasetEndDate;
-	
-	private	Collection<String> datasetType;
-	
-	private Collection<String> datasetNature;
-	
-	private String searchText;
-	
-	private boolean expertMode;
-	
-	private Range<Float> sliceThickness;
-	
-	private Range<Float> pixelBandwidth;
-	
-	private Range<Float> magneticFieldStrength;
-	
-	private Map<String, FacetPageable> facetPaging;
-	
-	/**
-	 * @return the studyName
-	 */
-	public Collection<String> getStudyName() {
-		return studyName;
-	}
+    private Collection<String> examinationComment;
 
-	/**
-	 * @param studyName the studyName to set
-	 */
-	public void setStudyName(Collection<String> studyName) {
-		this.studyName = studyName;
-	}
+    private Collection<String> acquisitionEquipmentName;
 
-	/**
-	 * @return the subjectName
-	 */
-	public Collection<String> getSubjectName() {
-		return subjectName;
-	}
+    private    Collection<String> datasetName;
 
-	/**
-	 * @param subjectName the subjectName to set
-	 */
-	public void setSubjectName(Collection<String> subjectName) {
-		this.subjectName = subjectName;
-	}
+    private    Collection<String> centerName;
 
-	public Collection<String> getSubjectType() {
-		return subjectType;
-	}
+    private Collection<Long> centerId;
 
-	public void setSubjectType(Collection<String> subjectType) {
-		this.subjectType = subjectType;
-	}
+    private    Collection<String> tags;
 
-	public Collection<Long> getExaminationId() {
-		return examinationId;
-	}
+    private LocalDate datasetStartDate;
 
-	public void setExaminationId(Collection<Long> examinationId) {
-		this.examinationId = examinationId;
-	}
+    private LocalDate datasetEndDate;
 
-	/**
-	 * @return the examinationComment
-	 */
-	public Collection<String> getExaminationComment() {
-		return examinationComment;
-	}
+    private LocalDate importStartDate;
 
-	/**
-	 * @param examinationComment the examinationComment to set
-	 */
-	public void setExaminationComment(Collection<String> examinationComment) {
-		this.examinationComment = examinationComment;
-	}
+    private LocalDate importEndDate;
 
-	public Collection<String> getAcquisitionEquipmentName() {
-		return acquisitionEquipmentName;
-	}
+    private    Collection<String> datasetType;
 
-	public void setAcquisitionEquipmentName(Collection<String> acquisitionEquipmentName) {
-		this.acquisitionEquipmentName = acquisitionEquipmentName;
-	}
+    private Collection<String> datasetNature;
 
-	/**
-	 * @return the datasetName
-	 */
-	public Collection<String> getDatasetName() {
-		return datasetName;
-	}
+    private String searchText;
 
-	/**
-	 * @param datasetName the datasetName to set
-	 */
-	public void setDatasetName(Collection<String> datasetName) {
-		this.datasetName = datasetName;
-	}
+    private boolean expertMode;
 
-	public Collection<String> getCenterName() {
-		return centerName;
-	}
+    private Range<Float> sliceThickness;
 
-	public void setCenterName(Collection<String> centerName) {
-		this.centerName = centerName;
-	}
+    private Range<Float> pixelBandwidth;
 
-	/**
-	 * @return the studyId
-	 */
-	public Collection<Long> getStudyId() {
-		return studyId;
-	}
+    private Range<Float> magneticFieldStrength;
 
-	/**
-	 * @param studyId the studyId to set
-	 */
-	public void setStudyId(Collection<Long> studyId) {
-		this.studyId = studyId;
-	}
+    private Collection<Boolean> processed;
 
-	/**
-	 * @return the datasetStartDate
-	 */
-	public LocalDate getDatasetStartDate() {
-		return datasetStartDate;
-	}
+    private Collection<String> username;
 
-	/**
-	 * @param datasetStartDate the datasetStartDate to set
-	 */
-	public void setDatasetStartDate(LocalDate datasetStartDate) {
-		this.datasetStartDate = datasetStartDate;
-	}
+    private Collection<String> qualityTag;
 
-	/**
-	 * @return the datasetEndDate
-	 */
-	public LocalDate getDatasetEndDate() {
-		return datasetEndDate;
-	}
+    private Map<String, FacetPageable> facetPaging;
 
-	/**
-	 * @param datasetEndDate the datasetEndDate to set
-	 */
-	public void setDatasetEndDate(LocalDate datasetEndDate) {
-		this.datasetEndDate = datasetEndDate;
-	}
+    /**
+     * @return the studyName
+     */
+    public Collection<String> getStudyName() {
+        return studyName;
+    }
 
-	/**
-	 * @return the datasetType
-	 */
-	public Collection<String> getDatasetType() {
-		return datasetType;
-	}
+    /**
+     * @param studyName the studyName to set
+     */
+    public void setStudyName(Collection<String> studyName) {
+        this.studyName = studyName;
+    }
 
-	/**
-	 * @param datasetType the datasetType to set
-	 */
-	public void setDatasetType(Collection<String> datasetType) {
-		this.datasetType = datasetType;
-	}
+    /**
+     * @return the subjectName
+     */
+    public Collection<String> getSubjectName() {
+        return subjectName;
+    }
 
-	/**
-	 * @return the datasetNature
-	 */
-	public Collection<String> getDatasetNature() {
-		return datasetNature;
-	}
+    /**
+     * @param subjectName the subjectName to set
+     */
+    public void setSubjectName(Collection<String> subjectName) {
+        this.subjectName = subjectName;
+    }
 
-	/**
-	 * @param datasetNature the datasetNature to set
-	 */
-	public void setDatasetNature(Collection<String> datasetNature) {
-		this.datasetNature = datasetNature;
-	}
+    public Collection<String> getSubjectType() {
+        return subjectType;
+    }
 
-	public String getSearchText() {
-		return searchText;
-	}
+    public void setSubjectType(Collection<String> subjectType) {
+        this.subjectType = subjectType;
+    }
 
-	public void setSearchText(String searchText) {
-		this.searchText = searchText;
-	}
+    public Collection<Long> getExaminationId() {
+        return examinationId;
+    }
 
-	public boolean isExpertMode() {
-		return expertMode;
-	}
-	
-	public boolean getExpertMode() {
-		return isExpertMode();
-	}
+    public void setExaminationId(Collection<Long> examinationId) {
+        this.examinationId = examinationId;
+    }
 
-	public void setExpertMode(boolean expertMode) {
-		this.expertMode = expertMode;
-	}
+    /**
+     * @return the examinationComment
+     */
+    public Collection<String> getExaminationComment() {
+        return examinationComment;
+    }
 
-	public Range<Float> getSliceThickness() {
-		return sliceThickness;
-	}
+    /**
+     * @param examinationComment the examinationComment to set
+     */
+    public void setExaminationComment(Collection<String> examinationComment) {
+        this.examinationComment = examinationComment;
+    }
 
-	public void setSliceThickness(Range<Float> sliceThickness) {
-		this.sliceThickness = sliceThickness;
-	}
+    public Collection<String> getAcquisitionEquipmentName() {
+        return acquisitionEquipmentName;
+    }
 
-	public Range<Float> getPixelBandwidth() {
-		return pixelBandwidth;
-	}
+    public void setAcquisitionEquipmentName(Collection<String> acquisitionEquipmentName) {
+        this.acquisitionEquipmentName = acquisitionEquipmentName;
+    }
 
-	public void setPixelBandwidth(Range<Float> pixelBandwidth) {
-		this.pixelBandwidth = pixelBandwidth;
-	}
+    /**
+     * @return the datasetName
+     */
+    public Collection<String> getDatasetName() {
+        return datasetName;
+    }
 
-	public Range<Float> getMagneticFieldStrength() {
-		return magneticFieldStrength;
-	}
+    /**
+     * @param datasetName the datasetName to set
+     */
+    public void setDatasetName(Collection<String> datasetName) {
+        this.datasetName = datasetName;
+    }
 
-	public void setMagneticFieldStrength(Range<Float> magneticFieldStrength) {
-		this.magneticFieldStrength = magneticFieldStrength;
-	}
+    public Collection<String> getCenterName() {
+        return centerName;
+    }
 
-	/**
-	 * @return the tags
-	 */
-	public Collection<String> getTags() {
-		return tags;
-	}
+    public void setCenterName(Collection<String> centerName) {
+        this.centerName = centerName;
+    }
 
-	/**
-	 * @param tags the tags to set
-	 */
-	public void setTags(Collection<String> tags) {
-		this.tags = tags;
-	}
+    /**
+     * @return the studyId
+     */
+    public Collection<Long> getStudyId() {
+        return studyId;
+    }
 
-	public Map<String, FacetPageable> getFacetPaging() {
-		return facetPaging;
-	}
+    /**
+     * @param studyId the studyId to set
+     */
+    public void setStudyId(Collection<Long> studyId) {
+        this.studyId = studyId;
+    }
 
-	public void setFacetPaging(Map<String, FacetPageable> facetPaging) {
-		this.facetPaging = facetPaging;
-	}
-	
-	public Range<LocalDate> getDatasetDateRange() {
-		return new Range<LocalDate>(getDatasetStartDate(), getDatasetEndDate());
-	}
+    /**
+     * @return the datasetStartDate
+     */
+    public LocalDate getDatasetStartDate() {
+        return datasetStartDate;
+    }
 
-	public Collection<Long> getSubjectId() {
-		return subjectId;
-	}
+    /**
+     * @param datasetStartDate the datasetStartDate to set
+     */
+    public void setDatasetStartDate(LocalDate datasetStartDate) {
+        this.datasetStartDate = datasetStartDate;
+    }
 
-	public void setSubjectId(Collection<Long> subjectId) {
-		this.subjectId = subjectId;
-	}
+    /**
+     * @return the datasetEndDate
+     */
+    public LocalDate getDatasetEndDate() {
+        return datasetEndDate;
+    }
 
-	public Collection<Long> getCenterId() {
-		return centerId;
-	}
+    /**
+     * @param datasetEndDate the datasetEndDate to set
+     */
+    public void setDatasetEndDate(LocalDate datasetEndDate) {
+        this.datasetEndDate = datasetEndDate;
+    }
 
-	public void setCenterId(Collection<Long> centerId) {
-		this.centerId = centerId;
-	}
+    public LocalDate getImportStartDate() {
+        return importStartDate;
+    }
 
+    public void setImportStartDate(LocalDate importStartDate) {
+        this.importStartDate = importStartDate;
+    }
+
+    public LocalDate getImportEndDate() {
+        return importEndDate;
+    }
+
+    public void setImportEndDate(LocalDate importEndDate) {
+        this.importEndDate = importEndDate;
+    }
+
+    /**
+     * @return the datasetType
+     */
+    public Collection<String> getDatasetType() {
+        return datasetType;
+    }
+
+    /**
+     * @param datasetType the datasetType to set
+     */
+    public void setDatasetType(Collection<String> datasetType) {
+        this.datasetType = datasetType;
+    }
+
+    /**
+     * @return the datasetNature
+     */
+    public Collection<String> getDatasetNature() {
+        return datasetNature;
+    }
+
+    /**
+     * @param datasetNature the datasetNature to set
+     */
+    public void setDatasetNature(Collection<String> datasetNature) {
+        this.datasetNature = datasetNature;
+    }
+
+    public String getSearchText() {
+        return searchText;
+    }
+
+    public void setSearchText(String searchText) {
+        this.searchText = searchText;
+    }
+
+    public boolean isExpertMode() {
+        return expertMode;
+    }
+
+    public boolean getExpertMode() {
+        return isExpertMode();
+    }
+
+    public void setExpertMode(boolean expertMode) {
+        this.expertMode = expertMode;
+    }
+
+    public Range<Float> getSliceThickness() {
+        return sliceThickness;
+    }
+
+    public void setSliceThickness(Range<Float> sliceThickness) {
+        this.sliceThickness = sliceThickness;
+    }
+
+    public Range<Float> getPixelBandwidth() {
+        return pixelBandwidth;
+    }
+
+    public void setPixelBandwidth(Range<Float> pixelBandwidth) {
+        this.pixelBandwidth = pixelBandwidth;
+    }
+
+    public Range<Float> getMagneticFieldStrength() {
+        return magneticFieldStrength;
+    }
+
+    public void setMagneticFieldStrength(Range<Float> magneticFieldStrength) {
+        this.magneticFieldStrength = magneticFieldStrength;
+    }
+
+    /**
+     * @return the tags
+     */
+    public Collection<String> getTags() {
+        return tags;
+    }
+
+    /**
+     * @param tags the tags to set
+     */
+    public void setTags(Collection<String> tags) {
+        this.tags = tags;
+    }
+
+    public Map<String, FacetPageable> getFacetPaging() {
+        return facetPaging;
+    }
+
+    public void setFacetPaging(Map<String, FacetPageable> facetPaging) {
+        this.facetPaging = facetPaging;
+    }
+
+    public Range<LocalDate> getDatasetDateRange() {
+        return new Range<LocalDate>(getDatasetStartDate(), getDatasetEndDate());
+    }
+    public Range<LocalDate> getImportDateRange() {
+        return new Range<LocalDate>(getImportStartDate(), getImportEndDate());
+    }
+
+    public Collection<Long> getSubjectId() {
+        return subjectId;
+    }
+
+    public void setSubjectId(Collection<Long> subjectId) {
+        this.subjectId = subjectId;
+    }
+
+    public Collection<Integer> getSortingIndex() {
+        return sortingIndex;
+    }
+
+    public void setSortingIndex(Collection<Integer> sortingIndex) {
+        this.sortingIndex = sortingIndex;
+    }
+
+    public Collection<Long> getCenterId() {
+        return centerId;
+    }
+
+    public void setCenterId(Collection<Long> centerId) {
+        this.centerId = centerId;
+    }
+
+    public Collection<Boolean> getProcessed() {
+        return processed;
+    }
+
+    public void setProcessed(Collection<Boolean> processed) {
+        this.processed = processed;
+    }
+
+    public Collection<String> getUsername() {
+        return username;
+    }
+
+    public void setUsername(Collection<String> username) {
+        this.username = username;
+    }
+
+    public Collection<Boolean> getDataReuseAgreement() {
+        return dataReuseAgreement;
+    }
+
+    public void setDataReuseAgreement(Collection<Boolean> dataReuseAgreement) {
+        this.dataReuseAgreement = dataReuseAgreement;
+    }
+
+    public Collection<String> getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualitytag(Collection<String> qualityTag) {
+        this.qualityTag = qualityTag;
+    }
 }

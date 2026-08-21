@@ -2,25 +2,26 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 package org.shanoir.ng.studycard.model;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import jakarta.persistence.*;
+import java.util.List;
+
 import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
@@ -28,7 +29,16 @@ import org.shanoir.ng.studycard.model.rule.DatasetAcquisitionRule;
 import org.shanoir.ng.studycard.model.rule.DatasetRule;
 import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
 
 /**
  * Study card.
@@ -65,11 +75,11 @@ public class StudyCard extends HalEntity implements Card {
 
     /** The study for which is defined the study card. */
     private Long studyId;
-    
+
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name="study_card_id")
+    @JoinColumn(name = "study_card_id")
     private List<StudyCardRule<?>> rules;
-    
+
     private Long lastEditTimestamp;
 
     /**
@@ -135,14 +145,14 @@ public class StudyCard extends HalEntity implements Card {
     public void setLastEditTimestamp(Long lastEditTimestamp) {
         this.lastEditTimestamp = lastEditTimestamp;
     }
-    
+
     /**
     * Application during import, when dicoms are present in tmp directory.
     * @param acquisition
     * @param dicomAttributes
     * @return true if the application had any effect on acquisitions
     */
-    public boolean apply(DatasetAcquisition acquisition, Attributes dicomAttributes) {
+    public boolean apply(DatasetAcquisition acquisition, AcquisitionAttributes<?> dicomAttributes) throws IllegalStateException {
         boolean changeInAtLeastOneAcquisition = false;
         if (this.getRules() != null) {
             for (StudyCardRule<?> rule : this.getRules()) {
@@ -152,7 +162,16 @@ public class StudyCard extends HalEntity implements Card {
                 } else if (rule instanceof DatasetRule && acquisition.getDatasets() != null) {
                     for (Dataset dataset : acquisition.getDatasets()) {
                         changeInAtLeastOneAcquisition = true;
-                        ((DatasetRule) rule).apply(dataset, dicomAttributes);                       
+                        Attributes attributes;
+                        if (String.class.equals(dicomAttributes.getParametrizedType())) {
+                            // @SuppressWarnings("unchecked") doesn't work ...
+                            attributes = ((AcquisitionAttributes<String>) dicomAttributes).getDatasetAttributes(dataset.getSOPInstanceUID());
+                        } else if (Long.class.equals(dicomAttributes.getParametrizedType())) {
+                            attributes = ((AcquisitionAttributes<Long>) dicomAttributes).getDatasetAttributes(dataset.getId());
+                        } else {
+                            throw new IllegalStateException("the parametrized type of AcquisitionAttributes is not implemented, use String or Long");
+                        }
+                        ((DatasetRule) rule).apply(dataset, attributes);
                     }
                 } else {
                     throw new IllegalStateException("unknown type of rule");
@@ -163,5 +182,5 @@ public class StudyCard extends HalEntity implements Card {
         acquisition.setStudyCardTimestamp(this.getLastEditTimestamp());
         return changeInAtLeastOneAcquisition;
     }
-   
+
 }

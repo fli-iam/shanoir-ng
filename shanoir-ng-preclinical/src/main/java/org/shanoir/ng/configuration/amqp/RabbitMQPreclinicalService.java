@@ -1,42 +1,42 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.configuration.amqp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
-import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class RabbitMQPreclinicalService {
 
     private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the event.";
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
-    private AnimalSubjectService subjectService;
+    private AnimalSubjectService animalSubjectService;
 
     @Autowired
     private SubjectPathologyService subjectPathologyService;
@@ -45,42 +45,57 @@ public class RabbitMQPreclinicalService {
     private SubjectTherapyService subjectTherapyService;
 
     @Autowired
-    private ShanoirEventService eventService;
+    private ObjectMapper objectMapper;
+
 
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQPreclinicalService.class);
 
+    public record CopyRequest(Long sourceId, Long targetId) { }
+
     /**
      * Receives a shanoirEvent as a json object, concerning a subject deletion
-     * @param eventAsString the task as a json string.
+     * @param subjectIdAsStr the subject's id to delete, as string
      */
-    @RabbitListener(bindings = @QueueBinding(
-            key = ShanoirEventType.DELETE_SUBJECT_EVENT,
-            value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
-            exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-                    autoDelete = "false", durable = "true", type= ExchangeTypes.TOPIC))
-    )
+    @RabbitListener(queues = RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE)
     @Transactional
-    public void deleteAnimalSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
+    public void deleteAnimalSubject(String subjectIdAsStr) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
         try {
+            Long subjectId = Long.valueOf(subjectIdAsStr);
 
-            ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
-            Long subjectId = Long.valueOf(event.getObjectId());
+            AnimalSubject animalSubject = animalSubjectService.getById(subjectId);
 
-            AnimalSubject animalSubject = subjectService.getBySubjectId(subjectId);
-
-            if(animalSubject == null){
+            if (animalSubject == null) {
                 return;
             }
             Long id = animalSubject.getId();
 
             subjectPathologyService.deleteByAnimalSubject(animalSubject);
             subjectTherapyService.deleteByAnimalSubject(animalSubject);
-            subjectService.deleteBySubjectId(subjectId);
+            animalSubjectService.deleteById(subjectId);
 
             LOG.info("Animal subject [{}] has been deleted following deletion of subject [{}]", id, subjectId);
 
-            eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_PRECLINICAL_SUBJECT_EVENT, subjectId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        } catch (Exception e) {
+            LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
+            throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
+        }
+    }
+
+
+    @RabbitListener(queues = RabbitMQConfiguration.COPY_ANIMAL_SUBJECT_QUEUE)
+    @Transactional
+    public void createAnimalSubject(String copyRequestStr) throws AmqpRejectAndDontRequeueException {
+        SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+        try {
+            CopyRequest copyRequest = objectMapper.readValue(copyRequestStr, CopyRequest.class);
+            AnimalSubject sourceAnimalSubject = animalSubjectService.getById(copyRequest.sourceId());
+            if (sourceAnimalSubject == null) {
+                return;
+            }
+            AnimalSubject newAnimalSubject = new AnimalSubject(sourceAnimalSubject);
+            newAnimalSubject.setId(copyRequest.targetId());
+            animalSubjectService.save(newAnimalSubject);
 
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the event. {}", e.getMessage());

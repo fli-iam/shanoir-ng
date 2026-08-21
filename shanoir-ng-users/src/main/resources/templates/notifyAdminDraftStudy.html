@@ -1,0 +1,49 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head></head>
+<body>
+    <p><span>Dear administrator,</span></p>
+    <p>A study has been <b th:text="${action}"></b> on <a th:href="${serverAddress}">Shanoir</a>
+        <b>by:</b> <span th:text="${firstname}"></span> <span th:text="${lastname}"></span> (<span th:text="${email}"></span>)
+    </p>
+    <hr/>
+    <h3>Study Information</h3>
+    <p><b>Name:</b> <span th:text="${studyName}"></span></p>
+    <p th:if="${description}"><b>Description:</b> <span th:text="${description}"></span></p>
+    <p th:if="${license}"><b>License:</b> <span th:text="${license}"></span></p>
+    <p th:if="${startDate}"><b>Start date:</b> <span th:text="${startDate}"></span></p>
+    <p th:if="${endDate}"><b>End date:</b> <span th:text="${endDate}"></span></p>
+    <p th:if="${studyStatus}"><b>Status:</b> <span th:text="${studyStatus}"></span></p>
+    <p th:if="${profile}"><b>Profile:</b> <span th:text="${profile}"></span></p>
+    <p th:if="${studyCardPolicy}"><b>Study card policy:</b> <span th:text="${studyCardPolicy}"></span></p>
+    <p><b>Clinical:</b> <span th:text="${clinical} ? 'Yes' : 'No'"></span></p>
+    <p><b>Challenge:</b> <span th:text="${challenge} ? 'Yes' : 'No'"></span></p>
+    <hr/>
+    <p th:if="${expectedNbOfSubjects}"><b>Expected number of subjects:</b> <span th:text="${expectedNbOfSubjects}"></span></p>
+    <p th:if="${expectedNbOfCenters}"><b>Expected number of centers:</b> <span th:text="${expectedNbOfCenters}"></span></p>
+    <p th:if="${averageExaminationSize}"><b>Average examination size (MB):</b> <span th:text="${averageExaminationSize}"></span></p>
+    <p th:if="${estimatedTotalVolume}"><b>Estimated total volume (MB):</b> <span th:text="${estimatedTotalVolume}"></span></p>
+    <p th:if="${inclusionRate}"><b>Inclusion rate:</b> <span th:text="${inclusionRate}"></span> <span th:text="${inclusionRateUnit}"></span></p>
+    <p th:if="${sponsor}"><b>Sponsor:</b> <span th:text="${sponsor}"></span></p>
+    <p th:if="${principalInvestigator}"><b>Principal investigator:</b> <span th:text="${principalInvestigator}"></span></p>
+    <p th:if="${scientificAdvisor}"><b>Scientific advisor:</b> <span th:text="${scientificAdvisor}"></span></p>
+
+    <hr/>
+    <p>You can view and approve the study here: <a th:href="${serverAddress}">View Study</a></p>
+    <p>Regards,</p>
+</body>
+</html>

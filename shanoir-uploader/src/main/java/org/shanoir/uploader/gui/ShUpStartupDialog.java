@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.uploader.gui;
 
 import java.awt.BorderLayout;
@@ -17,7 +31,10 @@ import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.border.EmptyBorder;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.init.StartupStateContext;
 import org.shanoir.uploader.service.rest.ServiceConfiguration;
@@ -32,140 +49,181 @@ import org.shanoir.uploader.service.rest.ServiceConfiguration;
  *
  */
 @SuppressWarnings("serial")
+@Component
 public class ShUpStartupDialog extends JFrame {
 
-	private static Logger logger = Logger.getLogger(ShUpStartupDialog.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ShUpStartupDialog.class);
 
-	public JFrame frame = this;
-	public JPanel contentPanel;
-	public JPanel startupPanel;
-	public JPanel imagePanel;
-	public ProxyConfigurationPanel proxyPanel;
-	public LoginConfigurationPanel loginPanel;
-	public SelectProfileConfigurationPanel selectProfilePanel;
-	public JPanel logPanel;
-	public JPanel additionalPanel = null; // handle the additional panel that can be info, proxy or login panel
-	private static JTextPane startupText;
+    public JFrame frame = this;
+    public JPanel contentPanel;
+    public JPanel startupPanel;
+    public JPanel imagePanel;
 
-	public JTextArea startupTextArea;
+    @Autowired
+    public ProxyConfigurationPanel proxyPanel;
 
-	public ShUpStartupDialog(StartupStateContext sSC) {
-		setTitle("ShanoirUploader " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setLayout(new FlowLayout());
-		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-		int x = (int) ((dimension.getWidth() - frame.getWidth()) / 2);
-		int y = (int) ((dimension.getHeight() - frame.getHeight()) / 2);
-		setBounds(x - 200, y - 300, 400, 600);
-		contentPanel = new JPanel();
-		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-		initTitle();
-		try {
-			initLogo();
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-		initInfoPanel();
-		initProxyPanel(sSC);
-		initSelectProfileManualConfigurationPanel(sSC);
-		initLoginPanel(sSC);
-		initStartupText();
-		setContentPane(contentPanel);
-	}
+    @Autowired
+    public LoginConfigurationPanel loginPanel;
 
-	private void initTitle() {
-		startupPanel = new JPanel();
-		startupText = new JTextPane();
-		Font font = new Font("Serif", Font.BOLD, 20);
-		startupText.setFont(font);
-		startupText.setText(ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.title"));
-		startupText.setBackground(contentPanel.getBackground());
-		startupText.setEditable(false);
-		startupPanel.add(startupText);
-		contentPanel.add(startupPanel);
-	}
+    @Autowired
+    public SelectProfileConfigurationPanel selectProfilePanel;
 
-	private void initLogo() throws IOException {
-		imagePanel = new JPanel();
-		ImageIcon icon = DicomTreeCellRenderer.createImageIcon("/images/logo.shanoirUp_transp.128x128.png");
-		JLabel lbl = new JLabel();
-		lbl.setIcon(icon);
-		imagePanel.add(lbl);
-		contentPanel.add(imagePanel);
-	}
+    @Autowired
+    public OtpInputPanel otpInputPanel;
 
-	private void initInfoPanel() {
-		additionalPanel = new JPanel();
-		additionalPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		additionalPanel.setLayout(new BorderLayout(0, 0));
-		contentPanel.add(additionalPanel);
-	}
+    @Autowired
+    public OtpSetupPanel otpSetupPanel;
 
-	private void initProxyPanel(StartupStateContext sSC) {
-		proxyPanel = new ProxyConfigurationPanel(sSC);
-	}
+    public JPanel logPanel;
 
-	private void initLoginPanel(StartupStateContext sSC) {
-		loginPanel = new LoginConfigurationPanel(sSC);
-	}
-	
-	private void initSelectProfileManualConfigurationPanel(StartupStateContext sSC) {
-		selectProfilePanel = new SelectProfileConfigurationPanel(sSC);
-	}
+    public JPanel additionalPanel = null; // handle the additional panel that can be info, proxy or login panel
 
-	private void initStartupText() {
-		logPanel = new JPanel();
-		logPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		logPanel.setLayout(new BorderLayout(0, 0));
-		contentPanel.add(logPanel);
-		startupTextArea = new JTextArea(10, 120);
-		startupTextArea.setMargin(new Insets(5, 5, 5, 5));
-		startupTextArea.setEditable(false);
-		logPanel.add(BorderLayout.CENTER, startupTextArea);
-	}
+    private static JTextPane startupText;
 
-	public void updateStartupText(String text) {
-		startupTextArea.setText(startupTextArea.getText() + text);
-	}
+    public JTextArea startupTextArea;
 
-	public void showProxyForm() {
-		ServiceConfiguration sc = ServiceConfiguration.getInstance();
-		additionalPanel.removeAll();
-		proxyPanel.httpConnect.setEnabled(true);
-		proxyPanel.enableProxyCB.setSelected(sc.isProxyEnabled());
-		proxyPanel.secureSslProxyCB.setSelected(sc.isProxySecure());
-		String proxyHost = sc.getProxyHost();
-		if (proxyHost != null)
-			proxyPanel.httpHostText.setText(proxyHost);
-		String proxyPort = sc.getProxyPort();
-		if (proxyPort != null)
-			proxyPanel.httpPortText.setText(proxyPort);
-		String proxyUser = sc.getProxyUser();
-		if (proxyUser != null)
-			proxyPanel.httpLoginText.setText(proxyUser);
-		additionalPanel.add(proxyPanel);
-		proxyPanel.repaint();
-		proxyPanel.revalidate();
-	}
+    public void configure(StartupStateContext sSC) {
+        setTitle("ShanoirUploader " + ShUpConfig.SHANOIR_UPLOADER_VERSION);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new FlowLayout());
+        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (int) ((dimension.getWidth() - frame.getWidth()) / 2);
+        int y = (int) ((dimension.getHeight() - frame.getHeight()) / 2);
+        setBounds(x - 200, y - 300, 400, 820);
+        contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        initTitle();
+        try {
+            initLogo();
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        initInfoPanel();
+        initProxyPanel(sSC);
+        initSelectProfileManualConfigurationPanel(sSC);
+        initLoginPanel(sSC);
+        initStartupText();
+        setContentPane(contentPanel);
+    }
 
-	public void showLoginForm() {
-		additionalPanel.removeAll();
-		loginPanel.connect.setEnabled(true);
-		loginPanel.setFocusable(true);
-		loginPanel.requestFocusInWindow();
-		frame.getRootPane().setDefaultButton(loginPanel.connect);
-		additionalPanel.add(loginPanel);
-		loginPanel.repaint();
-		loginPanel.revalidate();
-	}
+    private void initTitle() {
+        startupPanel = new JPanel();
+        startupText = new JTextPane();
+        Font font = new Font("Serif", Font.BOLD, 20);
+        startupText.setFont(font);
+        startupText.setText(ShUpConfig.resourceBundle.getString("shanoir.uploader.startup.title"));
+        startupText.setBackground(contentPanel.getBackground());
+        startupText.setEditable(false);
+        startupPanel.add(startupText);
+        contentPanel.add(startupPanel);
+    }
 
-	public void showSelectProfileForm() {
-		additionalPanel.removeAll();
-		selectProfilePanel.setFocusable(true);
-		selectProfilePanel.requestFocusInWindow();
-		additionalPanel.add(selectProfilePanel);
-		selectProfilePanel.repaint();
-		selectProfilePanel.revalidate();
-	}
+    private void initLogo() throws IOException {
+        imagePanel = new JPanel();
+        ImageIcon icon = DicomTreeCellRenderer.createImageIcon("/images/logo.shanoirUp_transp.128x128.png");
+        JLabel lbl = new JLabel();
+        lbl.setIcon(icon);
+        imagePanel.add(lbl);
+        contentPanel.add(imagePanel);
+    }
+
+    private void initInfoPanel() {
+        additionalPanel = new JPanel();
+        additionalPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        additionalPanel.setLayout(new BorderLayout(0, 0));
+        contentPanel.add(additionalPanel);
+    }
+
+    private void initProxyPanel(StartupStateContext sSC) {
+        proxyPanel.configure(sSC);
+    }
+
+    private void initLoginPanel(StartupStateContext sSC) {
+        loginPanel.configure(sSC);
+    }
+
+    private void initSelectProfileManualConfigurationPanel(StartupStateContext sSC) {
+        selectProfilePanel.configure(sSC);
+    }
+
+    private void initStartupText() {
+        logPanel = new JPanel();
+        logPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        logPanel.setLayout(new BorderLayout(0, 0));
+        contentPanel.add(logPanel);
+        startupTextArea = new JTextArea(10, 120);
+        startupTextArea.setMargin(new Insets(5, 5, 5, 5));
+        startupTextArea.setEditable(false);
+        logPanel.add(BorderLayout.CENTER, startupTextArea);
+    }
+
+    public void updateStartupText(String text) {
+        startupTextArea.setText(startupTextArea.getText() + text);
+    }
+
+    public void showProxyForm() {
+        ServiceConfiguration sc = ServiceConfiguration.getInstance();
+        additionalPanel.removeAll();
+        proxyPanel.httpConnect.setEnabled(true);
+        proxyPanel.enableProxyCB.setSelected(sc.isProxyEnabled());
+        proxyPanel.secureSslProxyCB.setSelected(sc.isProxySecure());
+        String proxyHost = sc.getProxyHost();
+        if (proxyHost != null)
+            proxyPanel.httpHostText.setText(proxyHost);
+        String proxyPort = sc.getProxyPort();
+        if (proxyPort != null)
+            proxyPanel.httpPortText.setText(proxyPort);
+        String proxyUser = sc.getProxyUser();
+        if (proxyUser != null)
+            proxyPanel.httpLoginText.setText(proxyUser);
+        additionalPanel.add(proxyPanel);
+        proxyPanel.repaint();
+        proxyPanel.revalidate();
+    }
+
+    public void showLoginForm() {
+        additionalPanel.removeAll();
+        loginPanel.connect.setEnabled(true);
+        loginPanel.setFocusable(true);
+        loginPanel.requestFocusInWindow();
+        frame.getRootPane().setDefaultButton(loginPanel.connect);
+        additionalPanel.add(loginPanel);
+        loginPanel.repaint();
+        loginPanel.revalidate();
+    }
+
+    public void showSelectProfileForm() {
+        additionalPanel.removeAll();
+        selectProfilePanel.setFocusable(true);
+        selectProfilePanel.requestFocusInWindow();
+        additionalPanel.add(selectProfilePanel);
+        selectProfilePanel.repaint();
+        selectProfilePanel.revalidate();
+    }
+
+    public void showOtpInputForm() {
+        additionalPanel.removeAll();
+        otpInputPanel.submit.setEnabled(true);
+        otpInputPanel.otpText.setText("");
+        otpInputPanel.setFocusable(true);
+        otpInputPanel.requestFocusInWindow();
+        frame.getRootPane().setDefaultButton(otpInputPanel.submit);
+        additionalPanel.add(otpInputPanel);
+        otpInputPanel.repaint();
+        otpInputPanel.revalidate();
+    }
+
+    public void showOtpSetupForm() {
+        additionalPanel.removeAll();
+        otpSetupPanel.submit.setEnabled(true);
+        otpSetupPanel.otpText.setText("");
+        otpSetupPanel.deviceLabelText.setText("");
+        otpSetupPanel.setFocusable(true);
+        otpSetupPanel.requestFocusInWindow();
+        frame.getRootPane().setDefaultButton(otpSetupPanel.submit);
+        additionalPanel.add(otpSetupPanel);
+        otpSetupPanel.repaint();
+        otpSetupPanel.revalidate();
+    }
 
 }

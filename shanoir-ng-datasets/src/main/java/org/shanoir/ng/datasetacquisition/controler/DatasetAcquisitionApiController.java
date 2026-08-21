@@ -2,23 +2,25 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 package org.shanoir.ng.datasetacquisition.controler;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.Valid;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
@@ -34,7 +36,16 @@ import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -44,212 +55,356 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @Controller
 public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionApiController.class);
-	
-	@Autowired
-	private DatasetAcquisitionService datasetAcquisitionService;
-	
-	@Autowired
-	private ImporterService importerService;
+    private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionApiController.class);
 
-	@Autowired
-	private EegImporterService eegImporterService;
+    @Autowired
+    private DatasetAcquisitionService datasetAcquisitionService;
 
-	@Autowired
-	private ObjectMapper objectMapper;
-	
-	@Autowired
-	private DatasetAcquisitionMapper dsAcqMapper;
-	
-	@Autowired
-	private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
-	
-	@Autowired
-	private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
-	
-	@Override
-	public ResponseEntity<Void> createNewDatasetAcquisition(
-			@Parameter(name = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
-		try {
-			importerService.createAllDatasetAcquisition(importJob, KeycloakUtil.getTokenUserId());
-		} catch (ShanoirException e) {
-			ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error", e);
-			throw new RestServiceException(error);
-		}
-		importerService.cleanTempFiles(importJob.getWorkFolder());
-		return new ResponseEntity<Void>(HttpStatus.OK);
-	}
+    @Autowired
+    private ImporterService importerService;
 
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE)
-	@RabbitHandler
-	@Transactional
-	public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
+    @Autowired
+    private EegImporterService eegImporterService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private DatasetAcquisitionMapper dsAcqMapper;
+
+    @Autowired
+    private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
+
+    @Autowired
+    private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
+
+    @Autowired
+    private ShanoirEventService eventService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private StorageService storageService;
+
+    private final HttpServletRequest request;
+
+    @Autowired
+    public DatasetAcquisitionApiController(final HttpServletRequest request) {
+        this.request = request;
+    }
+
+    @Override
+    public ResponseEntity<Void> createNewDatasetAcquisition(
+            @Parameter(description = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
+        try {
+            importerService.createAllDatasetAcquisition(importJob, KeycloakUtil.getTokenUserId());
+        } catch (ShanoirException e) {
+            ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error", e);
+            throw new RestServiceException(error);
+        }
+        importerService.cleanTempFiles(importJob.getWorkFolder());
+        return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+
+    @RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        EegImportJob importJob = objectMapper.readValue(importJobAsString.getBody(), EegImportJob.class);
+        eegImporterService.createEegDataset(importJob);
+        try {
+            importerService.cleanTempFiles(importJob.getWorkFolder());
+        } catch (Exception e) {
+            LOG.warn("Could not clean temp files for workFolder {}: {}", importJob.getWorkFolder(), e.getMessage());
+        }
+        return HttpStatus.OK.value();
+    }
 
-		EegImportJob importJob = objectMapper.readValue(importJobAsString.getBody(), EegImportJob.class);
-		
-		eegImporterService.createEegDataset(importJob);
-		importerService.cleanTempFiles(importJob.getWorkFolder());
-		return HttpStatus.OK.value();
-	}
+    @RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, containerFactory = "multipleConsumersFactory")
+    @RabbitHandler
+    @Transactional
+    @WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
+    public void createNewDatasetAcquisition(Message importJobStr) throws IOException, AmqpRejectAndDontRequeueException {
+        ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
+        try {
+            createAllDatasetAcquisitions(importJob, importJob.getUserId());
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw new AmqpRejectAndDontRequeueException(e);
+            // finally is called even if we throw an exception here
+        } finally {
+            // if the json could not be parsed, no way to know workFolder
+            // so better to throw the exception, as no possibility to clean
+            importerService.cleanTempFiles(importJob.getWorkFolder());
+        }
+    }
 
-	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET)
-	@RabbitHandler
-	@Transactional
-	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
-	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
-	    ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
-		try {
-			createAllDatasetAcquisitions(importJob, importJob.getUserId());
-		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
-			throw new AmqpRejectAndDontRequeueException(e);
-			// finally is called even if we throw an exception here
-		} finally {
-			// if the json could not be parsed, no way to know workFolder
-			// so better to throw the exception, as no possibility to clean
-			importerService.cleanTempFiles(importJob.getWorkFolder());
-		}
-	}
-	
-	private void createAllDatasetAcquisitions(ImportJob importJob, Long userId) throws Exception {
-		LOG.info("Start dataset acquisition creation of importJob: {} for user {}", importJob.getWorkFolder(), userId);
-		long startTime = System.currentTimeMillis();
-		importerService.createAllDatasetAcquisition(importJob, userId);
-		long endTime = System.currentTimeMillis();
-		long duration = endTime - startTime;
-		LOG.info("Creation of dataset acquisition required " + duration + " millis.");
-	}
-	
-	@Override
-	public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findByStudyCard(
-			@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
-		List<DatasetAcquisition> daList = datasetAcquisitionService.findByStudyCard(studyCardId);
-		if (daList == null || daList.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} else {
-			return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
-		}
-	}
+    private void createAllDatasetAcquisitions(ImportJob importJob, Long userId) throws Exception {
+        LOG.info("Start dataset acquisition creation of importJob: {} for user {}", importJob.getWorkFolder(), userId);
+        long startTime = System.currentTimeMillis();
+        importerService.createAllDatasetAcquisition(importJob, userId);
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+        LOG.info("Creation of dataset acquisition required " + duration + " millis.");
+    }
 
-	@Override
-	public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
-			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId) {
-		
-		List<DatasetAcquisition> daList = datasetAcquisitionService.findByExamination(examinationId);
-		daList.sort(new Comparator<DatasetAcquisition>() {
+    @Override
+    public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findByStudyCard(
+              Long studyCardId) {
+        List<DatasetAcquisition> daList = datasetAcquisitionService.findByStudyCard(studyCardId);
+        if (daList == null || daList.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
+        }
+    }
 
-			@Override
-			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
-				return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0) 
-						- (o2.getSortingIndex() != null ? o2.getSortingIndex() : 0);
-			}
-		});
-		if (daList.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} else {
-			return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(daList), HttpStatus.OK);
-		}
-	}
-	
-	@Override
-	public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
-			@Parameter(name = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
-		
-		List<DatasetAcquisition> daList = datasetAcquisitionService.findByDatasetId(datasetIds);
-		
-		daList.sort(new Comparator<DatasetAcquisition>() {
-			@Override
-			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
-				return o1.getExamination() != null && o2.getExamination() != null 
-						? Long.compare(o1.getExamination().getStudyId(), o2.getExamination().getStudyId())
-						: 0;
-			}
-		});
-		if (daList.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} else {
-			return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
-		}
-	}
-	
-	@Override
-	public ResponseEntity<Void> deleteDatasetAcquisition(
-			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
-			throws RestServiceException {
-		try {
-			datasetAcquisitionService.deleteById(datasetAcquisitionId);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (IOException | SolrServerException | ShanoirException e) {
-			LOG.error("Error while deleting dataset acquisition: ", e);
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+    @Override
+    public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(Long examinationId) {
+        List<DatasetAcquisition> daList = datasetAcquisitionService.findByExamination(examinationId);
+        daList.sort(new Comparator<DatasetAcquisition>() {
 
-	@Override
-	public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
-			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId) {
-		
-		final DatasetAcquisition datasetAcquisition = datasetAcquisitionService.findById(datasetAcquisitionId);
-		if (datasetAcquisition == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition), HttpStatus.OK);
-	}
+            @Override
+            public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
+                return (o1.getSortingIndex() != null ? o1.getSortingIndex() : 0)
+                        - (o2.getSortingIndex() != null ? o2.getSortingIndex() : 0);
+            }
+        });
+        if (daList.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(daList), HttpStatus.OK);
+        }
+    }
 
-	@Override
-	public ResponseEntity<Page<DatasetAcquisitionDTO>> findDatasetAcquisitions(final Pageable pageable) throws RestServiceException {
-		Page<DatasetAcquisition> datasetAcquisitions = datasetAcquisitionService.findPage(pageable);
-		if (datasetAcquisitions == null || datasetAcquisitions.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
-	}
-	
-	
+    @Override
+    public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
+            @Parameter(description = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
 
-	@Override
-	public ResponseEntity<Void> updateDatasetAcquisition(
-			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
-			@Parameter(name = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition,
-			final BindingResult result) throws RestServiceException {
+        List<DatasetAcquisition> daList = datasetAcquisitionService.findByDatasetId(datasetIds);
 
-		validate(result);
-		try {
-			datasetAcquisitionService.update(dsAcqMapper.datasetAcquisitionDTOToDatasetAcquisition(datasetAcquisition));
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
-	
-	
-	private void validate(BindingResult result) throws RestServiceException {
-		final FieldErrorMap errors = new FieldErrorMap(result);
-		if (!errors.isEmpty()) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
-			throw new RestServiceException(error);
-		}
-	}
+        daList.sort(new Comparator<DatasetAcquisition>() {
+            @Override
+            public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
+                return o1.getExamination() != null && o2.getExamination() != null
+                        ? Long.compare(o1.getExamination().getStudyId(), o2.getExamination().getStudyId())
+                        : 0;
+            }
+        });
+        if (daList.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteDatasetAcquisition(
+              Long datasetAcquisitionId)
+            throws RestServiceException {
+        try {
+            Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
+
+            ShanoirEvent event = new ShanoirEvent(
+                    ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                    String.valueOf(datasetAcquisitionId),
+                    KeycloakUtil.getTokenUserId(),
+                    "Starting deletion of acquisition with id : " + datasetAcquisitionId,
+                    ShanoirEvent.IN_PROGRESS,
+                    0,
+                    studyId);
+
+            eventService.publishEvent(event);
+
+            datasetAcquisitionService.deleteById(datasetAcquisitionId, event);
+
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
+
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (IOException | SolrServerException | ShanoirException e) {
+            LOG.error("Error while deleting dataset acquisition: ", e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionsLeftEmptyBy(List<Long> datasetIds) {
+        List<DatasetAcquisition> leftEmpty = datasetAcquisitionService.findAcquisitionsLeftEmptyBy(datasetIds);
+        if (CollectionUtils.isEmpty(leftEmpty)) {
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(leftEmpty), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findEmptyDatasetAcquisitions(Long studyId) {
+        List<DatasetAcquisition> empty = datasetAcquisitionService.findEmptyAcquisitions(studyId);
+        if (CollectionUtils.isEmpty(empty)) {
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(empty), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<Long>> deleteEmptyDatasetAcquisitions(Long studyId) {
+        List<DatasetAcquisition> empty = datasetAcquisitionService.findEmptyAcquisitions(studyId);
+
+        ShanoirEvent event = new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                studyId != null ? String.valueOf(studyId) : null,
+                KeycloakUtil.getTokenUserId(),
+                "Starting the clean up of " + empty.size() + " empty dataset acquisition(s)",
+                ShanoirEvent.IN_PROGRESS,
+                0f,
+                studyId);
+        eventService.publishEvent(event);
+
+        List<Long> deleted = new ArrayList<>();
+        int handled = 0;
+        for (DatasetAcquisition acquisition : empty) {
+            try {
+                datasetAcquisitionService.deleteEmptyAcquisition(acquisition.getId());
+                deleted.add(acquisition.getId());
+            } catch (EntityNotFoundException | RestServiceException e) {
+                LOG.warn("Could not remove the empty dataset acquisition {}", acquisition.getId(), e);
+            }
+            // the ones that could not be removed still make the clean up progress
+            handled++;
+            event.setProgress((float) handled / empty.size());
+            eventService.publishEvent(event);
+        }
+
+        event.setMessage(deleted.size() + " empty dataset acquisition(s) deleted.");
+        event.setProgress(1f);
+        event.setStatus(ShanoirEvent.SUCCESS);
+        eventService.publishEvent(event);
+
+        LOG.info("Clean up of empty dataset acquisitions: {} removed", deleted.size());
+        return new ResponseEntity<>(deleted, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
+              Long datasetAcquisitionId) {
+
+        final DatasetAcquisition datasetAcquisition = datasetAcquisitionService.findById(datasetAcquisitionId);
+        if (datasetAcquisition == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Page<DatasetAcquisitionDTO>> findDatasetAcquisitions(final Pageable pageable) throws RestServiceException {
+        Page<DatasetAcquisition> datasetAcquisitions = datasetAcquisitionService.findPage(pageable);
+        if (datasetAcquisitions == null || datasetAcquisitions.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> updateDatasetAcquisition(
+              Long datasetAcquisitionId,
+            @Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition,
+            final BindingResult result) throws RestServiceException {
+
+        validate(result);
+        try {
+            datasetAcquisitionService.update(dsAcqMapper.datasetAcquisitionDTOToDatasetAcquisition(datasetAcquisition));
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Void> addExtraData(
+            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+            @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+        try {
+            if (storageService.existsAcquisitionExtraData(datasetAcquisitionId, file.getOriginalFilename())) {
+                LOG.warn("Extra-data file {} already exists for dataset acquisition {}, upload rejected.",
+                        file.getOriginalFilename(), datasetAcquisitionId);
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
+            }
+        } catch (StorageException e) {
+            LOG.error("Error checking existing extra-data file {} for dataset acquisition {}",
+                    file.getOriginalFilename(), datasetAcquisitionId, e);
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        if (datasetAcquisitionService.addExtraData(datasetAcquisitionId, file) != null) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @Override
+    public void downloadExtraData(
+            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
+            HttpServletResponse response) throws RestServiceException, IOException {
+        try {
+            Resource fileToDownload = storageService.loadAcquisitionExtraData(datasetAcquisitionId, fileName);
+            if (fileToDownload != null) {
+                String contentType = request.getServletContext().getMimeType(fileName);
+                if (contentType == null) {
+                    contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+                }
+                response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+                response.setContentType(contentType);
+                if (fileToDownload.isReadable() && fileToDownload.contentLength() > 0) {
+                    response.setContentLengthLong(fileToDownload.contentLength());
+                }
+                try (InputStream is = fileToDownload.getInputStream()) {
+                    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+                    response.flushBuffer();
+                }
+            } else {
+                response.sendError(HttpStatus.NO_CONTENT.value());
+                return;
+            }
+        } catch (StorageException e) {
+            LOG.error("Error downloading file {} for dataset acquisition {}: {}", fileName, datasetAcquisitionId, e);
+        }
+    }
+
+    private void validate(BindingResult result) throws RestServiceException {
+        final FieldErrorMap errors = new FieldErrorMap(result);
+        if (!errors.isEmpty()) {
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+            throw new RestServiceException(error);
+        }
+    }
+
 }

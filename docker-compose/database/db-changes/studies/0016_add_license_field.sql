@@ -1,1 +1,0 @@
-ALTER TABLE study ADD COLUMN license varchar(255) DEFAULT NULL;

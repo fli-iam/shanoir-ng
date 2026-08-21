@@ -23,8 +23,8 @@ Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is now open sour
 
 * Shanoir-NG is based on a microservice architecture, that heavily uses Docker.
 * Each Docker container integrates one microservice, mostly based on Spring Boot.
-* Each microservice exposes a REST interface on using Swagger 2, as definition format.
-* The front-end/web interface is implemented on using "Angular 2" (now 5) technology.
+* Each microservice exposes a REST interface on using Swagger/OpenAPI 3, as definition format.
+* The front-end/web interface is implemented on using Angular 19 technology.
 * Nginx and Keycloak (on using OpenID-Connect) are used to glue everything together.
 * Internally dcm4che3 is used to handle all DICOM concerns and dcm4chee 5 arc-light as backup PACS.
 * Furthermore dcm2niix is used for the DICOM to NIfTI conversion and Papaya Viewer for DICOM/NIfTI web view.
@@ -56,9 +56,11 @@ Then the shanoir-downloader project can be simply managed as a normal git repo (
     - Run Docker in admin mode
     - Delete, if needed, %appData%/Docker/settings.json (Docker will create another one, see https://forums.docker.com/t/solved-docker-failed-to-start-docker-desktop-for-windows/106976/6)
     
-* Install Java 17
-    - Download and install : https://www.oracle.com/fr/java/technologies/javase/jdk11-archive-downloads.html
-    - Add enviromnent variable : JAVA_HOME = C:\Program Files\Java\jdk-11.0.16
+* Install Java 21
+    - Download and install : https://www.oracle.com/java/technologies/javase/jdk21-archive-downloads.html
+    - Add enviromnent variable :
+      		On Windows (as environment variable): JAVA_HOME = C:\Program Files\Java\jdk-21.0.1
+      		On Mac (in your .bashrc or .zshrc file): export JAVA_HOME=$(/usr/libexec/java_home)
 
 * Install Maven
     - Download : https://maven.apache.org/download.cgi
@@ -89,8 +91,14 @@ Then the shanoir-downloader project can be simply managed as a normal git repo (
 * Fork GitHub project
 * Clone
 * Edit .env file and set SHANOIR_MIGRATION=init
+
+* Using locally built docker images
 * Run "mvn clean install -DskipTests" in shanoir-ng/shanoir-ng-parent/ folder
+* Run docker-compose -f docker-compose-dev.yml up --build in shanoir-ng/
+
+* Using github packages images
 * Run docker-compose up --build in shanoir-ng/
+
 * Load data manually from Docker Desktop :
     - Open terminal in database microservice
     - Run command : mysql -uroot -ppassword
@@ -100,8 +108,7 @@ Then the shanoir-downloader project can be simply managed as a normal git repo (
 
 Shanoir  : https://shanoir-ng-nginx/shanoir-ng/home
 
-Keycloak : http://localhost:8080/auth/admin/master/console/#/realms/shanoir-ng/roles
-
+Keycloak : https://shanoir-ng-nginx/auth/admin/master/console/#/realms/shanoir-ng/roles
 
 ## DEPLOY
 * Install docker and docker-compose:
@@ -129,14 +136,14 @@ Keycloak : http://localhost:8080/auth/admin/master/console/#/realms/shanoir-ng/r
 and will not be found if you run docker-compose elsewhere; results in errors after
 * Access to shanoir-ng: https://shanoir-ng-nginx
 
-If you want to login, please configure a user in Keycloak :
+If you want to login, please configure a user in Keycloak.
 
 Please note, that the MS Users does for security reasons not publicly expose his REST-interface.
 
 # Requirements
 
 To build and deploy Shanoir, you will need:
-* Java 17 (since migration to Spring Boot 3.1.2)
+* Java 21 (since migration to Spring Boot 3.1.2)
 * docker (https://docs.docker.com/install/)
 * docker-compose 3 (https://docs.docker.com/compose/install/)
 * maven 3
@@ -157,6 +164,9 @@ The following sections give detailed informations about each step.
 The default docker-compose configuration is well-suited for a development
 environment. Each microservice is hosted in a separate container and the
 application data are stored in named volumes.
+
+Shanoir is now based on github packages for the microservices images.
+If you want to build your own 'local' images, you have to run shanoir with docker-compose-dev.yml file.
 
 Before deploying, some configuration is required:
 
@@ -213,6 +223,10 @@ Procedure:
   ```
   docker-compose build
   ```
+  
+* In order to use these built images, when running "docker compose" command,
+  you have to precise docker-compose-dev.yml file.
+  Otherwise, github packages are used by default.
 
 ## CONFIGURE
 
@@ -220,20 +234,24 @@ Shanoir is configured with environment variables. It is mostly handled with a a
 set of *facade* variables named `SHANOIR_*` (which cover the most typical
 setups).
 
-Name                  | Value             | Description                             |
---------------------- | ----------------- | --------------------------------------- | 
-`SHANOIR_URL_HOST`    | *hostname*        | hostname where shanoir is reachable     |
-`SHANOIR_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED) |
-`SHANOIR_SMTP_HOST`   | *hostname*        | SMTP relay for outgoing e-mails         |
-`SHANOIR_ADMIN_EMAIL` | *e-mail address*  | contact address of the administrator (for outgoing e-mails) |
-`SHANOIR_ADMIN_NAME`  | *name*            | name of the administrator (for outgoing e-mails) |
-`SHANOIR_PREFIX`      | *slug* (optional) | prefix for container names (needed if you deploy multiple shanoir instances on the same host) |
+Name                  | Value             | Description                                                                                                                                                                         |
+--------------------- | ----------------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| 
+`SHANOIR_URL_HOST`    | *hostname*        | hostname where shanoir is reachable                                                                                                                                                 |
+`SHANOIR_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED)                                                                                                                                |
+`SHANOIR_SMTP_HOST`   | *hostname*        | SMTP relay for outgoing e-mails                                                                                                                                                     |
+`SHANOIR_NOTIFICATION_EMAIL` | *e-mail address*  | contact address for the notifications (for outgoing e-mails)                                                                                                                        |
+`SHANOIR_NOTIFICATION_NAME`  | *name*            | name of the notification people (for outgoing e-mails)                                                                                                                              |
+`SHANOIR_PREFIX`      | *slug* (optional) | prefix for container names (needed if you deploy multiple shanoir instances on the same host)                                                                                       |
 `SHANOIR_X_FORWARDED` | `generate\|trust`  | configures whether the nginx container generates the `X-Forwarded-*` HTTP headers (if running stand-alone) or trusts the existing headers (if located behind another reverse-proxy) |
-`SHANOIR_CERTIFICATE` | `auto\|manual`     | auto-generates a self-signed TLS certificate (NOT RECOMMENDED) or use a manually installed certificate |
-`SHANOIR_MIGRATION`   | `auto\|init\|never\|manual\|export\|import` | Normal runs should use `auto` in development and `never` in production. Other values are for controlling deployment and migrations (see below). |
-`SHANOIR_KEYCLOAK_USER`<br>`SHANOIR_KEYCLOAK_PASSWORD` | *username/password* | Keycloak admin account used by shanoir for managing user accounts |
-`SHANOIR_VIEWER_OHIF_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED) |
-`SHANOIR_VIEWER_OHIF_URL_HOST`    | *hostname*         | hostname where the OHFI-Viewer is reachable     |
+`SHANOIR_CERTIFICATE` | `auto\|manual`     | auto-generates a self-signed TLS certificate (NOT RECOMMENDED) or use a manually installed certificate                                                                              |
+`SHANOIR_MIGRATION`   | `auto\|init\|never\|manual\|export\|import` | Normal runs should use `auto` in development and `never` in production. Other values are for controlling deployment and migrations (see below).                                     |
+`SHANOIR_KEYCLOAK_USER`<br>`SHANOIR_KEYCLOAK_PASSWORD` | *username/password* | Keycloak admin account used by shanoir for managing user accounts                                                                                                                   |
+`SHANOIR_KEYCLOAK_URL` | *url* (optional)  | **public** base URL of the Keycloak server, as reached by browsers. This is also the URL used to validate the `iss` claim of incoming tokens, so it must match the issuer Keycloak puts in them. Defaults to `${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth` (the embedded Keycloak). |
+`SHANOIR_KEYCLOAK_INTERNAL_URL` | *url* (optional)  | base URL of the Keycloak server as reached **from inside the containers** (JWKS download, admin API). Defaults to the value of `SHANOIR_KEYCLOAK_URL`; the shipped `.env` sets it to `http://keycloak:8080/auth` so that the microservices talk to the Keycloak container directly instead of looping through nginx. |
+`SHANOIR_KEYCLOAK_ADAPTER_MODE` | `check-sso\|login-required` | authentication mode of the javascript adapter. `check-sso` (default) is fast but relies on a hidden iframe and tends to break when Keycloak is served from a different hostname; `login-required` redirects and is slower but reliable. |
+`SHANOIR_KEYCLOAK_API` | `limited\|full`   | which parts of the Keycloak API nginx exposes under `/auth/`. `limited` (default) exposes only what ordinary users of the `shanoir-ng` realm need; `full` also exposes the master realm and the admin console. |
+`SHANOIR_VIEWER_OHIF_URL_SCHEME`  | `http\|https`      | https (over TLS), http (plain text, NOT RECOMMENDED)                                                                                                                                |
+`SHANOIR_VIEWER_OHIF_URL_HOST`    | *hostname*         | hostname where the OHFI-Viewer is reachable                                                                                                                                         |
 
 **Notes**
 * You must ensure that the hostname `SHANOIR_URL_HOST` can be resolved from the
@@ -249,6 +267,26 @@ Name                  | Value             | Description                         
       `shanoir-ng-nginx`)
   * in production, you should have a the relevant A/AAAA configured in your DNS
     zone
+* Keycloak is addressed through two separate variables because browsers and
+  containers do not reach it the same way:
+  * `SHANOIR_KEYCLOAK_URL` is the **public** URL. It is handed to the browser
+    (through `assets/env.js` and the OHIF viewer config) and is used by the
+    microservices as the expected token issuer. The value must be exactly the
+    issuer that Keycloak writes into the `iss` claim, otherwise every
+    authenticated request is rejected.
+  * `SHANOIR_KEYCLOAK_INTERNAL_URL` is the URL the containers use for
+    server-to-server calls (JWKS, admin API). It never reaches the browser.
+  * Both default to the embedded Keycloak, so a standard deployment does not
+    need to set either of them.
+  * Pointing these at an **external** Keycloak server is experimental. It is
+    not enough to change the URLs: the `shanoir-ng` realm has to be imported
+    on that server, the `shanoir-ng-keycloak-auth.jar` provider has to be
+    installed there (the realm's authentication flows reference the
+    `shanoir-ng-post-auth` authenticator), the redirect URIs of every client
+    have to be updated, and that server must be reachable from the containers
+    while itself being able to reach the users microservice. Expect to also
+    set `SHANOIR_KEYCLOAK_ADAPTER_MODE=login-required`, since Keycloak will be
+    on a different hostname.
 * If docker is not running natively and thus you are using docker-machine
   (windows/macos users), you will need to tune the virtualbox machine:
     * increase the amount of allocated RAM
@@ -264,6 +302,9 @@ Name                  | Value             | Description                         
   
 
 ## DEPLOY
+
+For all the following commands, if you want to deploy locally built images,
+you have to add "-f docker-compose-dev.yml" argument to the "docker compose up" command.
 
 0. ensure all containers are stopped and all volumes are destroyed (**CAUTION:
    this destroys all external volumes defined in docker-compose.yml**) 
@@ -301,16 +342,17 @@ New user accounts need to be validated by a shanoir admin. However, on the first
 run, there is not admin account so you will need to create it on the keycloak
 server directly:
 
-1. go to Keycloak admin interface: http://localhost:8080/auth/admin/
+1. go to Keycloak admin interface: https://shanoir-ng-nginx/auth/admin/
 2. sign in with the credentials configured in
    `SHANOIR_KEYCLOAK_USER`/`SHANOIR_KEYCLOAK_PASSWORD' (default is `admin`/`&a1A&a1A`)
 3. go to the **shanoir-ng** realm
 4. create/edit the new user and grant the relevant role (eg. `ROLE_ADMIN`). By
-   default, new user accounts are created in Keycloak by the users microservice
+   default, new user accounts are created in Keycloak by the users' microservice
    with temporary passwords, you may reset the password in keycloak's admin
    interface and receive the new password is by e-mail. In development, if you
    do hot have a configured SMTP relay, then you may choose to overide the
    password manually and set `Temporary password: No` to make it persistent.
+   Go to the "Attributes" tab of your User page and create a new attribute "userId" and set the value with a random number not taken by another user.
 
 
 ### PACS dcm4chee
@@ -326,5 +368,5 @@ https://docs.docker.com/storage/volumes/
 
 ## Migrations
 
-TODO
+[db-changes](https://github.com/fli-iam/shanoir-ng/tree/develop/docker-compose/database-migrations/db-changes)
 

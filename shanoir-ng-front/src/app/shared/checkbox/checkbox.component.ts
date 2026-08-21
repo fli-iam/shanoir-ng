@@ -12,9 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, Output, SimpleChanges, HostListener, HostBinding, EventEmitter, forwardRef } from '@angular/core';
+import { Component, Input, Output, HostListener, HostBinding, EventEmitter, forwardRef } from '@angular/core';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
-import { Mode } from '../components/entity/entity.component.abstract';
+
 
 @Component({
     selector: 'checkbox',
@@ -22,22 +22,22 @@ import { Mode } from '../components/entity/entity.component.abstract';
     styleUrls: ['checkbox.component.css'],
     providers: [
         {
-          provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => CheckboxComponent),
-          multi: true,
-        }]   
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => CheckboxComponent),
+            multi: true,
+        }
+    ],
+    imports: []
 })
 export class CheckboxComponent implements ControlValueAccessor { 
     
     @HostBinding('class.on') model: boolean | 'indeterminate' = false;
-    @Output() onChange = new EventEmitter();
-    private onTouchedCallback = () => {};
-    private onChangeCallback = (_: any) => {};
+    @Output() userChange = new EventEmitter();
+    private onTouchedCallback = () => { return; };
+    private onChangeCallback: (any) => void = () => { return; };
     @Input() @HostBinding('class.disabled') disabled: boolean = false;
     @Input() inverse: boolean = false;
     @Input() mode: "edit" | "view";
-
-    constructor() {}
 
     @HostListener('click', []) 
     onClick() {
@@ -61,7 +61,7 @@ export class CheckboxComponent implements ControlValueAccessor {
             this.model = true;
         }
         this.onChangeCallback(this.model);
-        this.onChange.emit(this.model);
+        this.userChange.emit(this.model);
         this.onTouchedCallback();
     }
     

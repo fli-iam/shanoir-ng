@@ -14,12 +14,13 @@
 
 import { Pathology } from '../../pathology/shared/pathology.model';
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
+import { Field } from '../../../../shared/reflect/field.decorator';
 
 export class PathologyModel extends Entity {
-  id: number;
-  name: string;
-  comment: string;
-  filename: string;
-  pathology: Pathology;
+    @Field() id: number;
+    @Field() name: string;
+    @Field() comment: string;
+    @Field() filename: string;
+    @Field() pathology: Pathology;
 }
 

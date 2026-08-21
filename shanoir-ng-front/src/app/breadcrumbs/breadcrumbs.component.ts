@@ -12,39 +12,146 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, HostListener } from '@angular/core';
-import { BreadcrumbsService, Step } from './breadcrumbs.service';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject, Subscription, firstValueFrom } from 'rxjs';
+import { take } from 'rxjs/operators';
+
+import { WaitBurstEnd } from '../utils/wait-burst-end';
+
+import { BreadcrumbsService, Step } from './breadcrumbs.service';
+
 
 @Component({
     selector: 'breadcrumbs',
     templateUrl: 'breadcrumbs.component.html',
-    styleUrls: ['breadcrumbs.component.css']
+    styleUrls: ['breadcrumbs.component.css'],
+    imports: []
 })
 
-export class BreadcrumbsComponent {
+export class BreadcrumbsComponent implements AfterViewInit, OnDestroy, AfterViewChecked {
+
+    private _nbDisplayedSteps: number = 0;
+    private subscriptions: Subscription[] = [];
+    private onViewChecked: Subject<void> = new Subject();
+    private onResizeEnd: WaitBurstEnd;
+    private onViewCheck: WaitBurstEnd;
+    private checkWidthBurst: WaitBurstEnd;
+    protected steps: Step[];
+    protected displayedSteps: Step[];
+    protected nbHidden: number = 0;
 
     constructor(
         private service: BreadcrumbsService,
-        private router: Router) { 
+        private router: Router,
+        private elementRef: ElementRef) { 
+
+            this.onResizeEnd = new WaitBurstEnd(this.checkWidth.bind(this), 500);
+            this.onViewCheck = new WaitBurstEnd(() => this.onViewChecked.next(), 300);
+            this.checkWidthBurst = new WaitBurstEnd(this._checkWidth.bind(this), 200);
+
+            this.subscriptions.push(service.onUpdateSteps.subscribe(ret => {
+                this.steps = ret.steps.filter(step => !step.disabled);
+                setTimeout(() => {
+                    if (ret.operation == 'ADD') {
+                        this.nbDisplayedSteps++;
+                    }
+                    this.displayedSteps = this.steps?.slice(-this.nbDisplayedSteps);
+                    this.checkWidth();
+                });
+            }));
     }
 
-    get steps(): Step[] {
-        return this.service.steps;
+    ngAfterViewChecked(): void {
+        this.onViewCheck.fire();
     }
 
-    clickStep(index: number) {
-        if (index < this.service.steps.length - 1)
-            this.service.goToStep(index);
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    ngAfterViewInit(): void {
+        this.checkWidth();
+    }
+
+    get nbDisplayedSteps(): number {
+        return this._nbDisplayedSteps;
+    }
+
+    set nbDisplayedSteps(nb: number) {
+        this._nbDisplayedSteps = nb;
+        setTimeout(() => {
+            this.displayedSteps = this.steps?.slice(-this.nbDisplayedSteps);
+        });
+    }
+
+    clickStep(step: Step) {
+        this.service.goToStep(step);
     }    
 
     goHome() {
         this.router.navigate(['/home']);
     }
 
+    @HostListener('window:resize')
+    onResize() {
+        this.onResizeEnd.fire();
+    }
+
+    private checkWidth() {
+        this.checkWidthBurst.fire();
+    }
+
+    private _checkWidth() {
+        const componentWidth: number = this.elementRef.nativeElement.offsetWidth;
+        const listWidth: number = this.elementRef.nativeElement.scrollWidth;
+        const nbSteps: number = this.steps.filter(s => !s.disabled)?.length;
+        if (!this.nbDisplayedSteps) this.nbDisplayedSteps = nbSteps;
+        let end: Promise<void>;
+        if (listWidth > componentWidth) { // if overflow, reduce
+            end = this.reduceUntilFit();
+        } else if (this.nbDisplayedSteps > 0 && this.nbDisplayedSteps < nbSteps) { // else, try to expand
+            end = this.tryToExpand();
+        } else {
+            end = Promise.resolve();
+        }
+        end.then(() => {
+            this.nbHidden = this.steps?.length - this.displayedSteps?.length;
+        });
+    }
+
+    private tryToExpand(): Promise<void> {
+        if (this.nbDisplayedSteps >= this.steps.filter(s => !s.disabled)?.length) return Promise.resolve();
+        this.nbDisplayedSteps++;
+        return firstValueFrom(this.onViewChecked.pipe(take(1))).then(() => {
+            const componentWidth: number = this.elementRef.nativeElement.offsetWidth;
+            const listWidth: number = this.elementRef.nativeElement.scrollWidth;
+            if (listWidth > componentWidth) { // if overflow, finally reduce
+                this.nbDisplayedSteps--;
+                return firstValueFrom(this.onViewChecked.pipe(take(1)));
+            } else { // else continue
+                return this.tryToExpand();
+            }
+        });
+    }
+
+    private reduceUntilFit(): Promise<void> {
+        if (this.nbDisplayedSteps <= 0) return Promise.resolve();
+        this.nbDisplayedSteps--;
+        return firstValueFrom(this.onViewChecked.pipe(take(1))).then(() => {
+            const componentWidth: number = this.elementRef.nativeElement.offsetWidth;
+            const listWidth: number = this.elementRef.nativeElement.scrollWidth;
+            if (listWidth > componentWidth) { // if overflow, reduce again
+                return this.reduceUntilFit();
+            } else {
+                return Promise.resolve();
+            }
+        });
+    }
+
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {
         if (event.key == '²') {
-            console.log('breadcrumbs', this.service.steps);
+            console.log('breadcrumbs', this.steps);
         }
     }
 }

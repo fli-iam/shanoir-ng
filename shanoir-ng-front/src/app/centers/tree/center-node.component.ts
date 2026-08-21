@@ -11,35 +11,47 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
-import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
-import {AcquisitionEquipmentNode, CenterNode, DatasetNode, UNLOADED} from '../../tree/tree.model';
+import { AcquisitionEquipmentService } from 'src/app/acquisition-equipments/shared/acquisition-equipment.service';
+import { CoilService } from 'src/app/coils/shared/coil.service';
+import { TreeNodeAbstractComponent } from 'src/app/shared/components/tree/tree-node.abstract.component';
+import { TreeService } from 'src/app/studies/study/tree.service';
+
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
+import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { AcquisitionEquipmentNode, CenterNode, CoilNode, UNLOADED } from '../../tree/tree.model';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
-import {KeycloakService} from "../../shared/keycloak/keycloak.service";
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { DropdownMenuComponent } from '../../shared/components/dropdown-menu/dropdown-menu.component';
+import { MenuItemComponent } from '../../shared/components/dropdown-menu/menu-item/menu-item.component';
+import { EquipmentNodeComponent } from '../../acquisition-equipments/tree/equipment-node.component';
+import { CoilNodeComponent } from '../../coils/coil/tree/coil-node.component';
 
 
 @Component({
     selector: 'center-node',
-    templateUrl: 'center-node.component.html'
+    templateUrl: 'center-node.component.html',
+    imports: [TreeNodeComponent, DropdownMenuComponent, RouterLink, MenuItemComponent, EquipmentNodeComponent, CoilNodeComponent]
 })
 
-export class CenterNodeComponent implements OnChanges {
+export class CenterNodeComponent extends TreeNodeAbstractComponent<CenterNode> implements OnChanges {
 
     @Input() input: CenterNode | Center;
-    @Output() selectedChange: EventEmitter<void> = new EventEmitter();
-    node: CenterNode;
-    loading: boolean = false;
-    menuOpened: boolean = false;
+    @Output() equipementNodeSelect: EventEmitter<number> = new EventEmitter();
     detailsPath: string = '/center/details/';
 
     constructor(
-        private router: Router,
-        private centerService: CenterService,
-        private acquisitionEquipmentPipe: AcquisitionEquipmentPipe,
-        private keycloakService: KeycloakService) {
+            private centerService: CenterService,
+            private acquisitionEquipmentService: AcquisitionEquipmentService,
+            private acquisitionEquipmentPipe: AcquisitionEquipmentPipe,
+            private coilService: CoilService,
+            private keycloakService: KeycloakService,
+            protected treeService: TreeService,
+            elementRef: ElementRef) {
+        super(elementRef);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -49,28 +61,58 @@ export class CenterNodeComponent implements OnChanges {
             } else {
                 throw new Error('not implemented yet');
             }
+            this.node.registerOpenPromise(this.contentLoaded);
         }
     }
 
     hasChildren(): boolean | 'unknown' {
-        if (!this.node.acquisitionEquipments) return false;
-        else if (this.node.acquisitionEquipments == 'UNLOADED') return 'unknown';
-        else return this.node.acquisitionEquipments.length > 0;
+        if (!this.node.acquisitionEquipments && !this.node.coils) return false;
+        else if (this.node.acquisitionEquipments == UNLOADED && this.node.coils == UNLOADED ) return 'unknown';
+        else return this.node.acquisitionEquipments?.length + this.node.coils?.length > 0;
     }
 
-    loadEquipments() {
+    loadEquipments(): Promise<void> {
         this.loading = true;
-        this.centerService.get(this.node.id).then(
+        return this.centerService.get(this.node.id).then(
             center =>  {
-                if (center) {
+                if (center.acquisitionEquipments) {
                     this.node.acquisitionEquipments = center.acquisitionEquipments.map(
-                            acqEq => new AcquisitionEquipmentNode(acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED', this.keycloakService.isUserAdminOrExpert()));
+                            acqEq => new AcquisitionEquipmentNode(this.node, acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED', this.keycloakService.isUserAdminOrExpert()));
+                    this.loading = false;
+                    this.node.open();
+                } else {
+                    return this.acquisitionEquipmentService.getAllByCenter(this.node.id).then(eqs => {
+                        this.node.acquisitionEquipments = eqs.map(acqEq => new AcquisitionEquipmentNode(this.node, acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED', this.keycloakService.isUserAdminOrExpert()));
+                        this.loading = false;
+                        this.node.open();
+                    });
                 }
-                this.loading = false;
-                this.node.open = true;
             }).catch(() => {
                 this.loading = false;
             });
+    }
+
+    loadCoils(): Promise<void> {
+        this.loading = true;
+        return this.coilService.findByCenter(this.node.id).then(
+            coils =>  {
+                if (coils) {
+                    this.node.coils = coils.map(coil => new CoilNode(this.node, coil.id, coil.name));
+                }
+                this.loading = false;
+                this.node.open();
+            }).catch(() => {
+                this.loading = false;
+            });
+    }
+
+    onFirstOpen() {
+        Promise.all([
+            this.loadEquipments(),
+            this.loadCoils()
+        ]).then(() => {
+            this.contentLoaded.resolve();
+        });
     }
 
     onEquipmentDelete(index: number) {

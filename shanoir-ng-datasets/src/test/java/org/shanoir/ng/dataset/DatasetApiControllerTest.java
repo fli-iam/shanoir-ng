@@ -2,50 +2,50 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 package org.shanoir.ng.dataset;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.junit.jupiter.api.BeforeEach;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
-import org.shanoir.ng.bids.service.BIDSServiceImpl;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetMetadata;
-import org.shanoir.ng.dataset.security.DatasetSecurityService;
+import org.shanoir.ng.dataset.service.CreateStatisticsService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.service.DicomSRImporterService;
+import org.shanoir.ng.importer.service.DicomImporterService;
+import org.shanoir.ng.importer.service.DicomSEGAndSRImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.importer.service.ProcessedDatasetImporterService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.repository.StudyRepository;
-import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.shared.security.ControlerSecurityService;
-import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.shared.service.SubjectService;
+import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,205 +57,144 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
- * Unit tests for dataset controller.
- *
- * @author msimon
- *
+ * Tests of the dataset controller, focused on the removal of the acquisitions that a deletion
+ * leaves empty.
  */
 @WebMvcTest(controllers = DatasetApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class DatasetApiControllerTest {
 
-	private static final String REQUEST_PATH = "/datasets";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
+    @MockBean
+    private DatasetMapper datasetMapper;
 
-	@Autowired
-	private MockMvc mvc;
+    @MockBean
+    private MrDatasetMapper mrDatasetMapper;
 
-	@MockBean
-	private DatasetService datasetServiceMock;
+    @MockBean
+    private EegDatasetMapper eegDatasetMapper;
 
-	@MockBean
-	private DatasetMapper datasetMapperMock;
+    @MockBean
+    private DatasetService datasetService;
 
-	@MockBean
-	private MrDatasetMapper mrDatasetMapperMock;
+    @MockBean
+    private CreateStatisticsService createStatisticsService;
 
-	@MockBean
-	private ExaminationService examinationService;
+    @MockBean
+    private ExaminationService examinationService;
 
-	@MockBean
-	private WADODownloaderService downloader;
-	
-	@MockBean(name = "datasetSecurityService")
-	private DatasetSecurityService datasetSecurityService;
-	
-	@MockBean(name = "controlerSecurityService")
-	private ControlerSecurityService controlerSecurityService;
-	
-    @TempDir
-    private File tempDir;
+    @MockBean
+    private SubjectService subjectService;
 
-	@MockBean
-	private EegDatasetMapper eegDatasetMapper;
+    @MockBean
+    private ImporterService importerService;
 
-	@MockBean
-	private BIDSServiceImpl bidsService;
+    @MockBean
+    private ProcessedDatasetImporterService processedDatasetImporterService;
 
-	@MockBean
-	private SubjectRepository subjectRepository;
+    @MockBean
+    private WADODownloaderService downloader;
 
-	@MockBean
-	private ShanoirEventService eventService;
-	
-	@MockBean
-	private StudyRepository studyRepo;
+    @MockBean
+    private ShanoirEventService eventService;
 
-	@MockBean
-	private RabbitTemplate rabbitTemplate;
-	
-	@MockBean
-	private ImporterService importerService;
-	
-	@MockBean
-	private DicomSRImporterService dicomSRImporterService;
-	
-	@MockBean
-	private DatasetDownloaderServiceImpl datasetDownloaderService;
-	
-	@Autowired
-	private ObjectMapper mapper;
+    @MockBean
+    private RabbitTemplate rabbitTemplate;
 
-	private Subject subject = new Subject(3L, "name");
-	private Study study = new Study(1L, "studyName");
+    @MockBean
+    private SolrService solrService;
 
-	private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
-	private DatasetMetadata updatedMetadata = new DatasetMetadata();
-	private Examination exam = new Examination();
+    @MockBean(name = "datasetDownloaderServiceImpl")
+    private DatasetDownloaderServiceImpl datasetDownloaderService;
 
-	@BeforeEach
-	public void setup() throws ShanoirException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException, SolrServerException {
-		doNothing().when(datasetServiceMock).deleteById(1L);
-		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
-		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
-		given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
-		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(Dataset.class))).willReturn(true);
-		dsAcq.setRank(2);
-		dsAcq.setSortingIndex(2);
-		exam.setId(1L);
-		exam.setStudy(new Study());
-		exam.getStudy().setId(1L);
-		dsAcq.setExamination(exam);
-		updatedMetadata.setComment("comment");
-		updatedMetadata.setName("test 1");
-	}
+    @MockBean
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDAndSubjectNameHandler;
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void deleteDatasetTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isNoContent());
-	}
+    @MockBean
+    private StorageService storageService;
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void findDatasetByIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isOk());
-	}
+    @MockBean
+    private DatasetAcquisitionService datasetAcquisitionService;
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void updateDatasetTest() throws Exception {
-		Dataset ds = ModelsUtil.createMrDataset();
-		ds.setId(1L);
-		String json = mapper.writeValueAsString(ds);
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(json)).andExpect(status().isNoContent());
-	}
+    /** Needed by the STOWRSMultipartRequestFilter, which is part of the web slice. */
+    @MockBean
+    private DicomSEGAndSRImporterService dicomSEGAndSRImporterService;
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testMassiveDownloadByDatasetsIdNoIds() {
-		// GIVEN a list of datasets to export
+    @MockBean
+    private DicomImporterService dicomImporterService;
 
-		// WHEN we export all the datasets with no datasets ID
-		try {
-			mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
-					.param("format", "nii")
-					.param("datasetIds", ""))
-			.andExpect(status().isForbidden());
-		} catch (Exception e) {
-			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"Please use a valid sets of dataset IDs.\",\"details\":null}");
-		}
+    @Autowired
+    private MockMvc mvc;
 
+    @Test
+    @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
+    public void testDeleteDatasetRemovesTheAcquisitionItLeavesEmpty() throws Exception {
+        given(datasetService.findById(11L)).willReturn(datasetOfAcquisition(11L, 1L));
+        given(datasetAcquisitionService.isEmptyAndRemovable(1L)).willReturn(true);
 
-		// THEN we expect an error
-	}
+        mvc.perform(MockMvcRequestBuilders.delete("/datasets/11").param("deleteEmptyAcquisitions", "true"))
+                .andExpect(status().isNoContent());
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testMassiveDownloadByDatasetsIdToMuchIds() {
-		// GIVEN a list of datasets to export
-		StringBuilder strb = new StringBuilder();
-		for (int i = 0; i < 505 ; i++) {
-			strb.append(i).append(",");
-		}
-		String ids = strb.substring(0, strb.length() -1);
+        verify(datasetService).deleteById(11L);
+        verify(datasetAcquisitionService).deleteEmptyAcquisition(1L);
+    }
 
-		// WHEN we export all the datasets with no datasets ID
-		try {
-			mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
-					.param("format", "nii")
-					.param("datasetIds", ids))
-			.andExpect(status().isForbidden());
-		} catch (Exception e) {
-			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"You can't download more than 50 datasets.\",\"details\":null}");
-		}
-		// THEN we expect an error
-	}
+    @Test
+    @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
+    public void testDeleteDatasetKeepsTheAcquisitionThatIsNotRemovable() throws Exception {
+        given(datasetService.findById(11L)).willReturn(datasetOfAcquisition(11L, 1L));
+        given(datasetAcquisitionService.isEmptyAndRemovable(1L)).willReturn(false);
 
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testMassiveDownloadByStudyIdTooMuchDatasets() throws Exception {
-		// GIVEN a study with more then 50 datasets to export
+        mvc.perform(MockMvcRequestBuilders.delete("/datasets/11").param("deleteEmptyAcquisitions", "true"))
+                .andExpect(status().isNoContent());
 
-		List<Dataset> hugeList = new ArrayList<Dataset>();
-		for (int i = 0; i < 501 ; i++) {
-			hugeList.add(new MrDataset());
-		}
-		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(hugeList);
+        verify(datasetService).deleteById(11L);
+        verify(datasetAcquisitionService, never()).deleteEmptyAcquisition(Mockito.anyLong());
+    }
 
-		try {
-		// WHEN we export all the datasets
-		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
-				.param("format", "nii")
-				.param("studyId", "1"))
-		.andExpect(status().isForbidden());
-		} catch (Exception e) {
-			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"This study has more than 50 datasets, that is the limit. Please download them from solr search.\",\"details\":null}");
-		}
-	}
+    @Test
+    @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
+    public void testDeleteDatasetLeavesTheAcquisitionAloneByDefault() throws Exception {
+        given(datasetService.findById(11L)).willReturn(datasetOfAcquisition(11L, 1L));
 
-	@Test
-	public void testCorrectDatasetDownloadName() {
-		// We want to test this code:
-		// datasetName = datasetName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-		assertEquals("abc_ABC___123.-tru____", "abc ABCé('123.-tru_ç&ù".replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
-	}
+        mvc.perform(MockMvcRequestBuilders.delete("/datasets/11"))
+                .andExpect(status().isNoContent());
 
+        verify(datasetService).deleteById(11L);
+        verify(datasetAcquisitionService, never()).isEmptyAndRemovable(Mockito.anyLong());
+        verify(datasetAcquisitionService, never()).deleteEmptyAcquisition(Mockito.anyLong());
+    }
+
+    @Test
+    @WithMockKeycloakUser(id = 1, username = "dummy-admin", authorities = { "ROLE_ADMIN" })
+    public void testDeleteDatasetsChecksEachParentAcquisitionOnce() throws Exception {
+        given(datasetService.findByIdIn(List.of(11L, 12L, 21L))).willReturn(List.of(
+                datasetOfAcquisition(11L, 1L),
+                datasetOfAcquisition(12L, 1L),
+                datasetOfAcquisition(21L, 2L)));
+        given(datasetAcquisitionService.isEmptyAndRemovable(1L)).willReturn(true);
+        given(datasetAcquisitionService.isEmptyAndRemovable(2L)).willReturn(false);
+
+        mvc.perform(MockMvcRequestBuilders.delete("/datasets/delete")
+                        .param("deleteEmptyAcquisitions", "true")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("[11, 12, 21]"))
+                .andExpect(status().isNoContent());
+
+        verify(datasetService).deleteByIdIn(List.of(11L, 12L, 21L));
+        verify(datasetAcquisitionService).isEmptyAndRemovable(1L);
+        verify(datasetAcquisitionService).isEmptyAndRemovable(2L);
+        verify(datasetAcquisitionService).deleteEmptyAcquisition(1L);
+        verify(datasetAcquisitionService, never()).deleteEmptyAcquisition(2L);
+    }
+
+    private Dataset datasetOfAcquisition(Long datasetId, Long acquisitionId) {
+        DatasetAcquisition acquisition = new GenericDatasetAcquisition();
+        acquisition.setId(acquisitionId);
+        Dataset dataset = new MrDataset();
+        dataset.setId(datasetId);
+        dataset.setDatasetAcquisition(acquisition);
+        return dataset;
+    }
 }

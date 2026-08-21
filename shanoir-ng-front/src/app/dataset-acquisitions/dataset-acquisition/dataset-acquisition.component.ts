@@ -11,46 +11,53 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, ViewChild} from '@angular/core';
-import { UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+
+import { TaskState } from 'src/app/async-tasks/task.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Selection } from 'src/app/studies/study/tree.service';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
+import { DatasetService } from "../../datasets/shared/dataset.service";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { StudyRightsService } from "../../studies/shared/study-rights.service";
+import { StudyUserRight } from "../../studies/shared/study-user-right.enum";
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
+import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
-import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
-import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import {DatasetAcquisitionNode} from '../../tree/tree.model';
-import {DatasetService} from "../../datasets/shared/dataset.service";
-import {LoadingBarComponent} from "../../shared/components/loading-bar/loading-bar.component";
-import {StudyUserRight} from "../../studies/shared/study-user-right.enum";
-import {StudyRightsService} from "../../studies/shared/study-rights.service";
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setup/download-setup.component';
-
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
+import { MrProtocolComponent } from '../modality/mr/mr-protocol.component';
+import { CtProtocolComponent } from '../modality/ct/ct-protocol.component';
+import { PetProtocolComponent } from '../modality/pet/pet-protocol.component';
+import { XaProtocolComponent } from '../modality/xa/xa-protocol.component';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
-    selector: 'dataset-acquisition',
+    selector: 'dataset-acquisition-detail',
     templateUrl: 'dataset-acquisition.component.html',
-    styleUrls: ['dataset-acquisition.component.css']
+    styleUrls: ['dataset-acquisition.component.css'],
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, RouterLink, MrProtocolComponent, CtProtocolComponent, PetProtocolComponent, XaProtocolComponent, LoadingBarComponent, LocalDateFormatPipe, AcquisitionEquipmentPipe]
 })
 export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisition> {
 
     public studyCards: StudyCard[];
     public acquisitionEquipments: AcquisitionEquipment[];
-    acquisitionNode: DatasetAcquisition | DatasetAcquisitionNode;
     hasDownloadRight: boolean = false;
+    hasAdministrateRight: boolean = false;
     noDatasets: boolean = false;
-    hasEEG: boolean = false;
     hasDicom: boolean = false;
-    hasBids: boolean = false;
     protected downloadState: TaskState = new TaskState();
+    @ViewChild('input') private fileInput: ElementRef;
+    files: File[] = [];
 
     constructor(
             private route: ActivatedRoute,
@@ -61,54 +68,59 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             private studyRightsService: StudyRightsService,
             public acqEqPipe: AcquisitionEquipmentPipe,
             private downloadService: MassDownloadService) {
-        super(route, 'dataset-acquisition');
+        super(route);
+        // the deletion of the last dataset of this acquisition removes it : this page is then gone
+        this.subscriptions.push(
+            this.datasetService.onAcquisitionsRemoved.subscribe(ids => {
+                if (this.datasetAcquisition?.examination?.id && ids.includes(this.datasetAcquisition.id)) {
+                    this.router.navigate(['/examination/details/' + this.datasetAcquisition.examination.id]);
+                }
+            }));
+    }
+
+    protected getRoutingName(): string {
+        return 'dataset-acquisition';
     }
 
     getService(): EntityService<DatasetAcquisition> {
         return this.datasetAcquisitionService;
     }
 
+    protected getTreeSelection: () => Selection = () => {
+        return Selection.fromAcquisition(this.datasetAcquisition);
+    }
+
     get datasetAcquisition(): DatasetAcquisition { return this.entity; }
     set datasetAcquisition(datasetAcquisition: DatasetAcquisition) {
-        this.acquisitionNode = this.breadcrumbsService.currentStep.data.datasetAcquisitionNode ? this.breadcrumbsService.currentStep.data.datasetAcquisitionNode : datasetAcquisition;
         this.entity = datasetAcquisition;
     }
 
     initView(): Promise<void> {
-        return this.datasetAcquisitionService.get(this.id).then(dsAcq => {
-            this.datasetAcquisition = dsAcq;
-            this.datasetService.getByAcquisitionId(dsAcq.id).then(datasets => {
-                dsAcq.datasets = datasets;
-                this.datasetAcquisition.datasets.forEach(ds => {
-                    this.noDatasets = false;
-                    if (ds.type == 'Eeg') {
-                        this.hasEEG = true;
-                    } else if (ds.type == 'BIDS') {
-                        this.hasBids = true;
-                    } else {
-                        this.hasDicom = true;
-                    }
-                });
-            })
-
-            if (this.keycloakService.isUserAdmin()) {
-                this.hasDownloadRight = true;
-                return;
-            } else {
-                return this.studyRightsService.getMyRightsForStudy(dsAcq.examination.study.id).then(rights => {
-                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
-                });
-            }
-
-        });
+        this.datasetService.getByAcquisitionId(this.datasetAcquisition.id).then(datasets => {
+            this.datasetAcquisition.datasets = datasets;
+            this.datasetAcquisition.datasets?.forEach(ds => {
+                this.noDatasets = false;
+                if (ds.type != 'Eeg' && ds.type != 'BIDS') {
+                    this.hasDicom = true;
+                }
+            });
+        })
+        if (this.keycloakService.isUserAdmin()) {
+            this.hasDownloadRight = true;
+            this.hasAdministrateRight = true;
+            return Promise.resolve();
+        } else {
+            return this.studyRightsService.getMyRightsForStudy(this.datasetAcquisition.examination.study.id).then(rights => {
+                this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+            });
+        }
     }
 
     initEdit(): Promise<void> {
         this.studyCardService.getAll().then(scs => this.studyCards = scs);
         this.acqEqService.getAll().then(aes => this.acquisitionEquipments = aes);
-        return this.datasetAcquisitionService.get(this.id).then(dsAcq => {
-            this.datasetAcquisition = dsAcq;
-        });
+        return Promise.resolve();
     }
 
     initCreate(): Promise<void> {
@@ -121,12 +133,12 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'type': [this.datasetAcquisition.type],
-            'study-card': [this.datasetAcquisition.studyCard],
-            'acq-eq': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
-            //'examination': [this.datasetAcquisition.examination, [Validators.required]],
+            'studyCard': [this.datasetAcquisition.studyCard],
+            'acquisitionEquipment': [this.datasetAcquisition.acquisitionEquipment, [Validators.required]],
             'rank': [this.datasetAcquisition.rank],
-            'software-release': [this.datasetAcquisition.softwareRelease],
-            'sorting-index': [this.datasetAcquisition.sortingIndex],
+            'acquisitionStartTime': [this.datasetAcquisition.acquisitionStartTime],
+            'softwareRelease': [this.datasetAcquisition.softwareRelease],
+            'sortingIndex': [this.datasetAcquisition.sortingIndex],
             'protocol': [this.datasetAcquisition.protocol]
         });
     }
@@ -135,17 +147,61 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
         return this.keycloakService.isUserAdminOrExpert(); // TODO
     }
 
-    onNodeInit(node: DatasetAcquisitionNode) {
-        node.open = true;
-        this.breadcrumbsService.currentStep.data.datasetAcquisitionNode = node;
+    downloadAll() {
+        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, this.downloadState);
     }
 
-    downloadAll() {
-        let options: DownloadSetupOptions = new DownloadSetupOptions();
-        options.hasBids = this.hasBids;
-        options.hasNii = this.hasDicom;
-        options.hasDicom = this.hasDicom;
-        options.hasEeg = this.hasEEG; 
-        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, options, this.downloadState);
+    public setFile() {
+        this.fileInput.nativeElement.click();
+    }
+
+    public attachNewFile(event: any) {
+        for (const newFile of Array.from(event.target.files as FileList)) {
+            if (this.datasetAcquisition.extraDataFilePathList.includes(newFile.name)) {
+                this.consoleService.log('warn', 'A file named "' + newFile.name + '" is already attached and was skipped.');
+                continue;
+            }
+            this.datasetAcquisition.extraDataFilePathList.push(newFile.name);
+            this.files.push(newFile);
+        }
+        event.target.value = null;
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
+    }
+
+    public deleteFile(file: any) {
+        this.datasetAcquisition.extraDataFilePathList = this.datasetAcquisition.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
+        this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
+    }
+
+    getFileName(element): string {
+        return element.split('\\').pop().split('/').pop();
+    }
+
+    downloadFile(file) {
+        this.datasetAcquisitionService.downloadFile(file, this.datasetAcquisition.id, this.downloadState);
+    }
+
+    public save(): Promise<DatasetAcquisition> {
+        return super.save(() => {
+            const uploads: Promise<void>[] = [];
+            // Once the acquisition is saved, save associated extra-data files
+            for (const file of this.files) {
+                uploads.push(
+                    this.datasetAcquisitionService.postFile(file, this.entity.id).catch(error => {
+                        // 409: a file with the same name already exists on the server; keep the
+                        // existing one and skip this upload instead of failing the whole save.
+                        if (error?.status === 409) {
+                            this.consoleService.log('warn', 'A file named "' + file.name + '" already exists on this acquisition and was not re-uploaded.');
+                            return;
+                        }
+                        throw error;
+                    })
+                );
+            }
+            return Promise.all(uploads).then(() => null);
+        });
     }
 }

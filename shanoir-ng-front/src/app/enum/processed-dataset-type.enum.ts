@@ -19,11 +19,12 @@ export enum ProcessedDatasetType {
 
     RECONSTRUCTEDDATASET = 'RECONSTRUCTEDDATASET',
     NONRECONSTRUCTEDDATASET = 'NONRECONSTRUCTEDDATASET',
+    EXECUTION_RESULT = 'EXECUTION_RESULT',
     UNDEFINED = 'UNDEFINED'
 
 } export namespace ProcessedDatasetType {
 
-    export function all(): Array<ProcessedDatasetType> {
+    export function all(): ProcessedDatasetType[] {
         return allOfEnum<ProcessedDatasetType>(ProcessedDatasetType);
     }
 
@@ -33,10 +34,12 @@ export enum ProcessedDatasetType {
                 return 'Non-reconstructed'
             case ProcessedDatasetType.RECONSTRUCTEDDATASET:
                 return 'Reconstructed'
+            case ProcessedDatasetType.EXECUTION_RESULT:
+                return 'Execution result'
             default:
                 return 'Undefined'
         }
     }
 
-    export var options: Option<ProcessedDatasetType>[] = all().map(prop => new Option<ProcessedDatasetType>(prop, getLabel(prop)));
+    export const options: Option<ProcessedDatasetType>[] = all().map(prop => new Option<ProcessedDatasetType>(prop, getLabel(prop)));
 }

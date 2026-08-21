@@ -14,38 +14,63 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
 
-
     @Autowired
     private DatasetAcquisitionRepository repository;
+
+    @Autowired
+    private ExaminationRepository examRepository;
 
     @Autowired
     private SecurityService securityService;
@@ -59,13 +84,33 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     @Autowired
     private DatasetService datasetService;
 
+    @Autowired
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
+
+    @Autowired
+    private DICOMWebService dicomWebService;
+
+    @Autowired
+    private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
+    @Autowired
+    private DatasetAcquisitionAsyncService datasetAcquisitionAsyncService;
+
+    @Autowired
+    private StorageService storageService;
+
+    @Autowired
+    private DatasetRepository datasetRepository;
+
+    private static final Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionServiceImpl.class);
+
     @Override
     public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             return repository.findByStudyCardId(studyCardId);
         } else {
             List<Pair<Long, Long>> studyCenters = new ArrayList<>();
-            Set<Long> unrestrictedStudies = new HashSet<Long>();
+            Set<Long> unrestrictedStudies = new HashSet<>();
             securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
             return repository.findByStudyCardIdAndStudyCenterOrStudyIdIn(studyCardId, studyCenters, unrestrictedStudies);
         }
@@ -78,7 +123,17 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     public List<DatasetAcquisition> findByExamination(Long examinationId) {
-        return repository.findByExaminationId(examinationId);
+        Optional<Examination> exam = examRepository.findByIdWithEagerAcquisitions(examinationId);
+        if (exam.isPresent()) {
+            return exam.get().getDatasetAcquisitions();
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public Optional<DatasetAcquisition> findByExaminationAndSeriesInstanceUIDWithDatasets(Long examinationId, String seriesInstanceUID) {
+        return repository.findByExaminationAndSeriesInstanceUIDWithDatasets(examinationId, seriesInstanceUID);
     }
 
     private DatasetAcquisition updateValues(DatasetAcquisition from, DatasetAcquisition to) {
@@ -89,6 +144,26 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         to.setSoftwareRelease(from.getSoftwareRelease());
         to.setSortingIndex(from.getSortingIndex());
         to.setStudyCard(from.getStudyCard());
+        to.setAcquisitionStartTime(from.getAcquisitionStartTime()); // immutable
+        to.setQualityTag(from.getQualityTag());
+        // Update extra data paths => delete files not present in the new list anymore
+        if (to.getExtraDataFilePathList() != null) {
+            for (String filePath : to.getExtraDataFilePathList()) {
+                if (from.getExtraDataFilePathList() == null || !from.getExtraDataFilePathList().contains(filePath)) {
+                    try {
+                        storageService.deleteAcquisitionExtraData(to.getId(), filePath);
+                    } catch (StorageException e) {
+                        LOG.warn("Could not delete extra-data file {} for dataset acquisition {}", filePath, to.getId(), e);
+                    }
+                }
+            }
+        }
+        // Persist a de-duplicated list so the same file name is never stored twice, whatever the client sends
+        if (from.getExtraDataFilePathList() != null) {
+            to.setExtraDataFilePathList(from.getExtraDataFilePathList().stream().distinct().collect(Collectors.toList()));
+        } else {
+            to.setExtraDataFilePathList(null);
+        }
         return to;
     }
 
@@ -113,21 +188,40 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             return repository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
         }
     }
-    
+
     @Override
     public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
-    	Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
-    	for (DatasetAcquisition acquisition: result) {
-            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, acquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-    	}
-    	return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
+        Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
+        result.forEach(a -> indexDatasets(a));
+        return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
-    public DatasetAcquisition create(DatasetAcquisition entity) {
+    public DatasetAcquisition create(DatasetAcquisition entity, boolean indexDatasetsToSolr) {
         DatasetAcquisition savedEntity = repository.save(entity);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        if (indexDatasetsToSolr) {
+            indexDatasets(savedEntity);
+        }
         return savedEntity;
+    }
+
+    private void indexDatasets(DatasetAcquisition datasetAcquisition) {
+        DatasetAcquisition acq = findByIdWithDatasets(datasetAcquisition.getId());
+        if (acq != null && acq.getDatasets() != null && !acq.getDatasets().isEmpty()) {
+            List<Long> datasetIds = acq.getDatasets().stream()
+                    .map(Dataset::getId)
+                    .collect(Collectors.toList());
+            solrService.indexDatasets(datasetIds);
+            LOG.info("Indexed {} datasets for acquisition {}", datasetIds.size(), datasetAcquisition.getId());
+        } else {
+            LOG.warn("No datasets found for acquisition {}", datasetAcquisition.getId());
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DatasetAcquisition findByIdWithDatasets(Long id) {
+        return repository.findByIdWithDatasets(id).orElseThrow();
     }
 
     @Override
@@ -139,7 +233,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         updateValues(entity, entityDb);
         DatasetAcquisition acq = repository.save(entityDb);
 
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, entity.getExamination().getStudyId()));
 
         return acq;
     }
@@ -172,27 +266,233 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return updatedAcqs;
     }
 
+    /**
+     * Deletes children datasets then delete current acquisition
+     * @param entity
+     * @param event
+     * @throws ShanoirException
+     * @throws SolrServerException
+     * @throws IOException
+     * @throws RestServiceException
+     */
+    public void delete(DatasetAcquisition entity, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+        // Do not delete entity if it is the source. If getSourceId() is not null, it means it's a copy
+        List<DatasetAcquisition> childDsAc = repository.findBySourceId(entity.getId());
+        if (!CollectionUtils.isEmpty(childDsAc)) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This datasetAcquisition is linked to another datasetAcquisition that was copied."
+                    ));
+        } else {
+            // Delete the extra-data files attached to this acquisition
+            try {
+                storageService.deleteDirectoryAcquisitionExtraData(entity.getId());
+            } catch (StorageException e) {
+                LOG.warn("Could not delete extra-data directory for dataset acquisition {}", entity.getId(), e);
+            }
+            List<Dataset> datasets = entity.getDatasets();
+            if (datasets != null) {
+                List<Long> datasetIds = new ArrayList<>();
+                for (Dataset ds : datasets) {
+                    if (event != null) {
+                        float progressMax = Float.valueOf(event.getEventProperties().get("progressMax"));
+                        event.setProgress(event.getProgress() + (1f / progressMax));
+                        shanoirEventService.publishEvent(event);
+                    }
+
+                    datasetIds.add(ds.getId());
+                    datasetService.deleteByIdCascade(ds.getId());
+                }
+                if (!datasetIds.isEmpty()) solrService.deleteFromIndex(datasetIds);
+            }
+            // the acquisition itself only goes once its datasets are gone, this method being
+            // called asynchronously by the acquisition deletion, its caller can not do it
+            repository.deleteById(entity.getId());
+        }
+    }
+
+    /**
+     * Call by acquisition-details > delete. Also reject current acquisition from pacs
+     * @param id
+     * @param event
+     * @throws ShanoirException
+     * @throws SolrServerException
+     * @throws IOException
+     * @throws RestServiceException
+     */
     @Override
     @Transactional
-    public void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException {
+    public void deleteById(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
+        final DatasetAcquisition acquisition = repository.findById(id).orElse(null);
+        if (acquisition == null) {
+            throw new EntityNotFoundException("Cannot find entity with id = " + id);
+        }
+
+        Map<String, String> eventProperties = new HashMap<>();
+        eventProperties.put("progressMax", String.valueOf(acquisition.getDatasets().size()));
+        event.setEventProperties(eventProperties);
+        event.setMessage("Delete DatasetAcquisition with id : " + id);
+        shanoirEventService.publishEvent(event);
+
+        String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUID(acquisition.getExamination());
+        String seriesInstanceUID = seriesInstanceUIDHandler.findSeriesInstanceUID(acquisition);
+
+        if (acquisition.getSource() == null)
+            dicomWebService.rejectAcquisitionFromPacs(studyInstanceUID, seriesInstanceUID);
+
+        datasetAcquisitionAsyncService.deleteByIdAsync(acquisition, event);
+    }
+
+    /**
+     * Called by examination delete. Does not call reject from pacs as examination delete already does it
+     * @param id
+     * @param event
+     * @throws ShanoirException
+     * @throws SolrServerException
+     * @throws IOException
+     * @throws RestServiceException
+     */
+    public void deleteByIdCascade(Long id, ShanoirEvent event) throws ShanoirException, SolrServerException, IOException, RestServiceException {
         final DatasetAcquisition entity = repository.findById(id).orElse(null);
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
         }
-        // Remove from solr index and PACS
-        if (entity.getDatasets() != null) {
-            for (Dataset ds : entity.getDatasets()) {
-                solrService.deleteFromIndex(ds.getId());
-                datasetService.deleteDatasetFromPacs(ds);
+        if (event != null) {
+            event.setMessage("Delete examination - datasetAcquisition with id : " + id);
+            shanoirEventService.publishEvent(event);
+        }
+        delete(entity, event);
+
+        shanoirEventService.publishEvent(new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                id.toString(),
+                KeycloakUtil.getTokenUserId(),
+                "Dataset acquisition " + id + " deleted.",
+                ShanoirEvent.SUCCESS,
+                1f,
+                entity.getExamination().getStudyId()));
+    }
+
+    @Override
+    public boolean isEmptyAndRemovable(Long id) throws EntityNotFoundException {
+        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        if (entity == null) {
+            throw new EntityNotFoundException("Cannot find entity with id = " + id);
+        }
+        return datasetRepository.countByDatasetAcquisitionId(id) == 0 && isRemovable(entity);
+    }
+
+    /**
+     * An emptied acquisition may only be removed automatically when it does not carry any data
+     * of its own: extra-data files are uploaded on the acquisition itself and would be lost,
+     * and a copy keeps a reference to the acquisition it was copied from.
+     *
+     * @param entity the acquisition
+     * @return true when nothing but datasets is attached to this acquisition
+     */
+    private boolean isRemovable(DatasetAcquisition entity) {
+        if (!CollectionUtils.isEmpty(entity.getExtraDataFilePathList())) {
+            return false;
+        }
+        return CollectionUtils.isEmpty(repository.findBySourceId(entity.getId()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DatasetAcquisition> findAcquisitionsLeftEmptyBy(List<Long> datasetIds) {
+        if (CollectionUtils.isEmpty(datasetIds)) {
+            return Collections.emptyList();
+        }
+        // number of datasets about to be deleted, per acquisition
+        Map<Long, Integer> deletedCountByAcquisitionId = new HashMap<>();
+        for (Dataset dataset : datasetRepository.findAllById(datasetIds)) {
+            if (dataset.getDatasetAcquisition() != null) {
+                deletedCountByAcquisitionId.merge(dataset.getDatasetAcquisition().getId(), 1, Integer::sum);
             }
         }
-        repository.deleteById(id);
-        shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+        List<DatasetAcquisition> leftEmpty = new ArrayList<>();
+        for (Map.Entry<Long, Integer> deletedCount : deletedCountByAcquisitionId.entrySet()) {
+            Long acquisitionId = deletedCount.getKey();
+            // the acquisition is left empty when all the datasets it holds are being deleted
+            if (datasetRepository.countByDatasetAcquisitionId(acquisitionId) == deletedCount.getValue()) {
+                repository.findById(acquisitionId).filter(this::isRemovable).ifPresent(leftEmpty::add);
+            }
+        }
+        return leftEmpty;
     }
-    
+
+    @Override
+    public List<DatasetAcquisition> findEmptyAcquisitions(Long studyId) {
+        List<DatasetAcquisition> empty = studyId != null ? repository.findEmptyByStudyId(studyId) : repository.findEmpty();
+        return empty.stream().filter(this::isRemovable).toList();
+    }
+
+    /**
+     * Deletes an acquisition that does not hold any dataset anymore. Contrary to
+     * {@link #deleteById(Long, ShanoirEvent)} this does not reject the series from the pacs:
+     * every dataset of the acquisition has already been deleted one by one, and each of those
+     * deletions rejected its own files, so nothing is left in the pacs to reject here.
+     */
+    @Override
+    @Transactional
+    public void deleteEmptyAcquisition(Long id) throws EntityNotFoundException, RestServiceException {
+        final DatasetAcquisition entity = repository.findById(id).orElse(null);
+        if (entity == null) {
+            throw new EntityNotFoundException("Cannot find entity with id = " + id);
+        }
+        if (datasetRepository.countByDatasetAcquisitionId(id) != 0) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This datasetAcquisition still holds datasets, it can not be removed as an empty one."
+                    ));
+        }
+        if (!isRemovable(entity)) {
+            throw new RestServiceException(
+                    new ErrorModel(
+                            HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                            "This datasetAcquisition holds extra data or has been copied, it can not be removed automatically."
+                    ));
+        }
+        Long studyId = entity.getExamination() != null ? entity.getExamination().getStudyId() : null;
+        try {
+            storageService.deleteDirectoryAcquisitionExtraData(id);
+        } catch (StorageException e) {
+            LOG.warn("Could not delete extra-data directory for dataset acquisition {}", id, e);
+        }
+        repository.deleteById(id);
+        LOG.info("Empty dataset acquisition with id {} has been removed", id);
+        shanoirEventService.publishEvent(new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                id.toString(),
+                KeycloakUtil.getTokenUserId(),
+                "Dataset acquisition " + id + " deleted, it did not hold any dataset anymore.",
+                ShanoirEvent.SUCCESS,
+                1f,
+                studyId));
+    }
+
     @Override
     public boolean existsByStudyCardId(Long studyCardId) {
         return repository.existsByStudyCard_Id(studyCardId);
+    }
+
+    @Override
+    public String addExtraData(final Long acquisitionId, final MultipartFile file) {
+        try {
+            LOG.info("Saving file {} for dataset acquisition: {}", file.getOriginalFilename(), acquisitionId);
+            return storageService.storeAcquisitionExtraData(
+                    acquisitionId,
+                    file.getOriginalFilename(),
+                    file.getInputStream(),
+                    file.getContentType(),
+                    file.getSize());
+        } catch (Exception e) {
+            LOG.error("Error while uploading file {} for dataset acquisition: {}. File not uploaded. {}",
+                    file.getOriginalFilename(), acquisitionId, e);
+            return null;
+        }
     }
 
 }

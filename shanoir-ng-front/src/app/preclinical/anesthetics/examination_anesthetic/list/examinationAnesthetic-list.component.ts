@@ -12,20 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component, Input, ViewChild, ViewContainerRef} from '@angular/core'
+import {Component, ViewChild} from '@angular/core'
+
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 import { ExaminationAnesthetic } from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
 import { TableComponent } from '../../../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
-  selector: 'examination-anesthetics-list',
-  templateUrl:'examinationAnesthetic-list.component.html',
-  styleUrls: ['examinationAnesthetic-list.component.css'], 
-  providers: [ExaminationAnestheticService]
+    selector: 'examination-anesthetics-list',
+    templateUrl: 'examinationAnesthetic-list.component.html',
+    styleUrls: ['examinationAnesthetic-list.component.css'],
+    imports: [TableComponent]
 })
 export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityListComponent<ExaminationAnesthetic>{
   @ViewChild('examinationAnestheticTable') table: TableComponent; 
@@ -44,28 +45,15 @@ export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityList
     }
     
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
-        function castToString(id: number) {
-            return String(id);
-        };
-        let colDef: ColumnDefinition[] = [
+        const colDef: ColumnDefinition[] = [
             {headerName: "Anesthetic", field: "anesthetic.name"},
             {headerName: "Dose", field: "dose", type: "number"},
-            {headerName: "Dose Unit", field: "dose_unit.value"},
+            {headerName: "Dose Unit", field: "doseUnit.value"},
             {headerName: "Injection interval", field: "injectionInterval"},
             {headerName: "Injection site", field: "injectionSite"},
             {headerName: "Injection type", field: "injectionType"},
-            {headerName: "Start Date", field: "startDate", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.startDate);
-            }},
-            {headerName: "End Date", field: "endDate", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.endDate);
-            }}      
+            {headerName: "Start Date", field: "startDate", type: "date"},
+            {headerName: "End Date", field: "endDate", type: "date"}      
         ];
         return colDef;       
     }

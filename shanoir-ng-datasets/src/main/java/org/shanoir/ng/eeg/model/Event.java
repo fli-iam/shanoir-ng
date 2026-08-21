@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.eeg.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -7,6 +21,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import java.util.Date;
@@ -18,101 +33,113 @@ import java.util.Date;
  */
 @Entity
 public class Event extends HalEntity {
-	
-	/** Serial version ID. */
-	private static final long serialVersionUID = 1L;
+
+    /** Serial version ID. */
+    private static final long serialVersionUID = 1L;
 
     @JsonProperty("type")
-	private String type;
-    
-    @JsonProperty("description")
-	private String description;
-    
-    @JsonProperty("position")
-	private String position;
-    
-    @JsonProperty("points")
-	private int points;
-    
-    @JsonProperty("channelNumber")
-	private int channelNumber;
-    
-    @JsonProperty("date")
-	private Date date;
+    private String type;
 
-	/** Associated dataset. */
+    @JsonProperty("description")
+    private String description;
+
+    @JsonProperty("position")
+    private String position;
+
+    @JsonProperty("points")
+    private int points;
+
+    @JsonProperty("channelNumber")
+    private int channelNumber;
+
+    @JsonProperty("date")
+    private Date date;
+
+    /** Associated dataset. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dataset_id")
     @JsonIgnore
-	private EegDataset dataset;
+    private EegDataset dataset;
 
-    
-    
-	public String getDescription() {
-		return description;
-	}
+    public Event() {
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    }
 
-	public String getPosition() {
-		return position;
-	}
+    public Event(Event other, Dataset d) {
+        this.type = other.getType();
+        this.description = other.getDescription();
+        this.position = other.getPosition();
+        this.points = other.getPoints();
+        this.channelNumber = other.getChannelNumber();
+        this.date = other.getDate();
+        this.dataset = (EegDataset) d;
+    }
 
-	public void setPosition(String position) {
-		this.position = position;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public int getPoints() {
-		return points;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public void setPoints(int points) {
-		this.points = points;
-	}
+    public String getPosition() {
+        return position;
+    }
 
-	public int getChannelNumber() {
-		return channelNumber;
-	}
+    public void setPosition(String position) {
+        this.position = position;
+    }
 
-	public void setChannelNumber(int channelNumber) {
-		this.channelNumber = channelNumber;
-	}
+    public int getPoints() {
+        return points;
+    }
 
-	public Date getDate() {
-		return date;
-	}
+    public void setPoints(int points) {
+        this.points = points;
+    }
 
-	public void setDate(Date date) {
-		this.date = date;
-	}
+    public int getChannelNumber() {
+        return channelNumber;
+    }
 
-	/**
-	 * @return the type
-	 */
-	public String getType() {
-		return type;
-	}
+    public void setChannelNumber(int channelNumber) {
+        this.channelNumber = channelNumber;
+    }
 
-	/**
-	 * @param type the type to set
-	 */
-	public void setType(String type) {
-		this.type = type;
-	}
-	
-	/**
-	 * @return the dataset
-	 */
-	public EegDataset getDataset() {
-		return dataset;
-	}
+    public Date getDate() {
+        return date;
+    }
 
-	/**
-	 * @param dataset the dataset to set
-	 */
-	public void setDataset(EegDataset dataset) {
-		this.dataset = dataset;
-	}
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    /**
+     * @return the type
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * @param type the type to set
+     */
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    /**
+     * @return the dataset
+     */
+    public EegDataset getDataset() {
+        return dataset;
+    }
+
+    /**
+     * @param dataset the dataset to set
+     */
+    public void setDataset(EegDataset dataset) {
+        this.dataset = dataset;
+    }
 }

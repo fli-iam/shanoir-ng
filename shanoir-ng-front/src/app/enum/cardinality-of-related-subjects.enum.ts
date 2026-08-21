@@ -22,7 +22,7 @@ export enum CardinalityOfRelatedSubjects {
 
 } export namespace CardinalityOfRelatedSubjects {
     
-    export function all(): Array<CardinalityOfRelatedSubjects> {
+    export function all(): CardinalityOfRelatedSubjects[] {
         return allOfEnum<CardinalityOfRelatedSubjects>(CardinalityOfRelatedSubjects);
     }
 
@@ -30,5 +30,5 @@ export enum CardinalityOfRelatedSubjects {
         return capitalsAndUnderscoresToDisplayable(type);
     }
 
-    export var options: Option<CardinalityOfRelatedSubjects>[] = all().map(prop => new Option<CardinalityOfRelatedSubjects>(prop, getLabel(prop)));
+    export const options: Option<CardinalityOfRelatedSubjects>[] = all().map(prop => new Option<CardinalityOfRelatedSubjects>(prop, getLabel(prop)));
 }

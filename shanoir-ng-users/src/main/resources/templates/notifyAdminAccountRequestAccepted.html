@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <head></head>
 <body>
     <p><span>Dear administrator,</span></p>
-    <p>The account request for <span th:text="${user.firstName}"></span> <span th:text="${user.lastName}"></span> (<span th:text="${user.email}"></span>) has been granted by an administrator.</p>
+    <p>The account request for <span th:text="${user.firstName}"></span> <span th:text="${user.lastName}"></span> (<span th:text="${user.email}"></span>) has been granted by <span th:text="${adminName}"></span>.</p>
     <p><span th:text="Regards"></span></p>
 </body>
 </html>

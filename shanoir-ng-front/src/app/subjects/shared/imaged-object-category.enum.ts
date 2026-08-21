@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { allOfEnum, capitalsAndUnderscoresToDisplayable } from "../../utils/app.utils";
+import { capitalsAndUnderscoresToDisplayable } from "../../utils/app.utils";
 import { Option } from "../../shared/select/select.component";
 
 export enum ImagedObjectCategory {
@@ -32,8 +32,8 @@ export enum ImagedObjectCategory {
         return all(preclinical).map(prop => new Option<ImagedObjectCategory>(prop, getLabel(prop)));
     }
 
-    export function all(preclinical: boolean = false): Array<ImagedObjectCategory> {
-    	let allPreclinicalImagedObjectCategory: ImagedObjectCategory[] = [];
+    export function all(preclinical: boolean = false): ImagedObjectCategory[] {
+    	const allPreclinicalImagedObjectCategory: ImagedObjectCategory[] = [];
         if (preclinical){
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.LIVING_ANIMAL);
         	allPreclinicalImagedObjectCategory.push(ImagedObjectCategory.ANIMAL_CADAVER);

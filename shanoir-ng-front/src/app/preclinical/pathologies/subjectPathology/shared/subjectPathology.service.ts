@@ -13,11 +13,14 @@
  */
 
 import { Injectable } from '@angular/core';
-import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
-import { SubjectPathology } from './subjectPathology.model';
-import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSubject.model';
-import * as PreclinicalUtils from '../../../utils/preclinical.utils';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+
+import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
+import { AnimalSubject } from '../../../animalSubject/shared/animalSubject.model';
+import * as PreclinicalUtils from '../../../utils/preclinical.utils';
+
+import { SubjectPathology } from './subjectPathology.model';
 
 @Injectable()
 export class SubjectPathologyService extends EntityService<SubjectPathology>{
@@ -30,56 +33,49 @@ export class SubjectPathologyService extends EntityService<SubjectPathology>{
     
     getEntityInstance() { return new SubjectPathology(); }
 
-    getSubjectPathologies(preclinicalSubject: PreclinicalSubject): Promise<SubjectPathology[]> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
-        return this.http.get<SubjectPathology[]>(url)
-            .toPromise()
+    getSubjectPathologies(animalSubject: AnimalSubject): Promise<SubjectPathology[]> {
+        const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
+        return firstValueFrom(this.http.get<SubjectPathology[]>(url))
             .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
     
     
-    getSubjectPathology(preclinicalSubject: PreclinicalSubject, pid: string): Promise<SubjectPathology>{
-    	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${pid}`;
-        return this.http.get<SubjectPathology>(url)
-            .toPromise()
+    getSubjectPathology(animalSubject: AnimalSubject, pid: string): Promise<SubjectPathology>{
+    	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${pid}`;
+        return firstValueFrom(this.http.get<SubjectPathology>(url))
             .then((entity) => this.toRealObject(entity));
     }
   
 
 
-    updateSubjectPathology(preclinicalSubject: PreclinicalSubject, subjectPathology: SubjectPathology): Promise<SubjectPathology> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${subjectPathology.id}`;
-        return this.http
-            .put<SubjectPathology>(url, this.stringify(subjectPathology))
-            .toPromise()
+    updateSubjectPathology(animalSubject: AnimalSubject, subjectPathology: SubjectPathology): Promise<SubjectPathology> {
+        const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${subjectPathology.id}`;
+        return firstValueFrom(this.http
+            .put<SubjectPathology>(url, this.stringify(subjectPathology)))
             .then((entity) => entity? this.toRealObject(entity) : entity);
     }
 
-    createSubjectPathology(preclinicalSubject: PreclinicalSubject, subjectPathology: SubjectPathology): Promise<SubjectPathology> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}`;
-        return this.http
-            .post<SubjectPathology>(url, JSON.stringify(subjectPathology))
-            .toPromise()
+    createSubjectPathology(animalSubject: AnimalSubject, subjectPathology: SubjectPathology): Promise<SubjectPathology> {
+        const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}`;
+        return firstValueFrom(this.http
+            .post<SubjectPathology>(url, JSON.stringify(subjectPathology)))
             .then((entity) => this.toRealObject(entity));
     }
 
-    deleteSubjectPathology(preclinicalSubject: PreclinicalSubject, subjectPathology: SubjectPathology): Promise<any> {
-        const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${subjectPathology.id}`;
-        return this.http.delete<void>(url)
-            .toPromise();
+    deleteSubjectPathology(animalSubject: AnimalSubject, subjectPathology: SubjectPathology): Promise<any> {
+        const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/${subjectPathology.id}`;
+        return firstValueFrom(this.http.delete<void>(url));
     }
     
     deleteAllPathologiesForAnimalSubject(animalSubjectId: number): Promise<any> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${animalSubjectId}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
-        return this.http.delete(url)
-            .toPromise()
+        return firstValueFrom(this.http.delete(url))
             .then(res => res);
     }
 
     getAllSubjectForPathologyModel(pid: number): Promise<SubjectPathology[]> {
     	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}${PreclinicalUtils.PRECLINICAL_ALL_URL}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/model/${pid}/`;
-    	return this.http.get<SubjectPathology[]>(url)
-            .toPromise()
+    	return firstValueFrom(this.http.get<SubjectPathology[]>(url))
             .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);      
     }
 

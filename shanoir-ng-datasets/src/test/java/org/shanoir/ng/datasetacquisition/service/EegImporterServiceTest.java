@@ -1,8 +1,37 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.datasetacquisition.service;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -18,18 +47,10 @@ import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterMailService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -37,7 +58,7 @@ public class EegImporterServiceTest {
 
     @InjectMocks
     @Spy
-    EegImporterService service = new EegImporterService();
+    private EegImporterService service = new EegImporterService();
 
     @Mock
     private ImporterMailService mailService;
@@ -57,7 +78,10 @@ public class EegImporterServiceTest {
     public void setUp() throws IOException {
         exam = new Examination();
         exam.setExaminationDate(LocalDate.now());
-        exam.setId(1l);
+        exam.setId(1L);
+        Subject subject = new Subject();
+        subject.setId(1L);
+        exam.setSubject(subject);
         given(examinationService.findById(Mockito.anyLong())).willReturn(exam);
     }
 
@@ -88,7 +112,6 @@ public class EegImporterServiceTest {
 
         dataset.setChannels(Collections.singletonList(chan));
         dataset.setEvents(Collections.singletonList(event));
-        importJob.setSubjectId(Long.valueOf(1));
         importJob.setStudyId(Long.valueOf(1));
         importJob.setExaminationId(Long.valueOf(1));
         importJob.setAcquisitionEquipmentId(Long.valueOf(1));
@@ -109,7 +132,7 @@ public class EegImporterServiceTest {
         assertTrue(task.getStatus() == 1);
 
         // Check what we save at the end
-        verify(datasetAcquisitionService).create(datasetAcquisitionCapturer.capture());
+        verify(datasetAcquisitionService).create(datasetAcquisitionCapturer.capture(), Mockito.anyBoolean());
         DatasetAcquisition hack = datasetAcquisitionCapturer.getValue();
 
         EegDataset ds = (EegDataset) hack.getDatasets().get(0);
