@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -295,6 +296,9 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                 LOG.debug("StudyInstanceUID used from ImportJob: {}", studyInstanceUID);
                 studyInstanceUIDs.put(studyInstanceUIDVendor, studyInstanceUID);
             }
+            String seriesInstanceUIDVendor = datasetAttributes.getString(Tag.SeriesInstanceUID);
+            String seriesNumberVendor = datasetAttributes.getString(Tag.SeriesNumber);
+            String seriesDescriptionVendor = datasetAttributes.getString(Tag.SeriesDescription);
 
             String manufacturer = datasetAttributes.getString(Tag.Manufacturer);
             Set<String> tagsToDeleteForCurrentManufacturer = getTagsToDeleteForManufacturer(manufacturer);
@@ -350,18 +354,17 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                 }
             }
 
+            stats.recordStudyUID(studyInstanceUIDVendor, studyInstanceUIDs.get(studyInstanceUIDVendor));
+            stats.recordSeriesUID(studyInstanceUIDVendor, seriesInstanceUIDVendor,
+                    seriesInstanceUIDs.get(seriesInstanceUIDVendor), seriesDescriptionVendor, seriesNumberVendor);
+            stats.recordInstance(studyInstanceUIDVendor, seriesInstanceUIDVendor);
+
             // Special anonymization of patient data if isShanoirAnonymization
             if (isShanoirAnonymization) {
                 anonymizePatientMetaData(datasetAttributes, patientName, patientID, patientBirthDateAttr, stats);
             }
 
-            // Determine the file's FINAL SOPInstanceUID (whatever action applied, or
-            // none at all). Used to correlate this file back to the Instance
-            // it came from.
             String finalSopInstanceUID = datasetAttributes.getString(Tag.SOPInstanceUID);
-            // Determine the file's FINAL SeriesInstanceUID (regenerated if the tag was
-            // anonymized above, unchanged otherwise). Used to pick/create the target
-            // per-series folder under importJobDir.
             String finalSeriesInstanceUID = datasetAttributes.getString(Tag.SeriesInstanceUID);
 
             LOG.debug("finish anonymization: begin storage");
@@ -753,6 +756,16 @@ public class AnonymizationServiceImpl implements AnonymizationService {
      * {@link AnonymizationServiceImpl#anonymize}) to produce one aggregated
      * report at the end of the job.
      *
+     * In addition, tracks the actual DICOM hierarchy that matters most when
+     * checking a big pseudonymization run (patient-study-series-instance): for
+     * every study, its old -> new StudyInstanceUID mapping and, nested under it,
+     * for every one of its series, the old -> new SeriesInstanceUID mapping plus
+     * how many instances (i.e. how many freshly generated SOPInstanceUIDs, one
+     * per file) were produced for that series. This is what lets a big study
+     * (e.g. 60+ series, DICOM Enhanced) be checked at a glance: one Study/Series
+     * UID mapping each, and a per-series instance count that should match the
+     * expected number of files in that series.
+     *
      * Uses AtomicLong/ConcurrentHashMap rather than plain counters because
      * {@link AnonymizationServiceImpl#performAnonymization} is public API and
      * may be invoked concurrently by external multi-threaded callers (see the
@@ -764,6 +777,17 @@ public class AnonymizationServiceImpl implements AnonymizationService {
         private final Map<String, AtomicLong> publicByType = new ConcurrentHashMap<>();
         private final Map<String, AtomicLong> privateByType = new ConcurrentHashMap<>();
 
+        // Study -> Series -> instance-count hierarchy, keyed by the ORIGINAL
+        // (pre-anonymization) UIDs.
+        private final Map<String, StudyReport> studyReports = new ConcurrentHashMap<>();
+
+        private final AtomicLong studyUidsGenerated = new AtomicLong();
+        private final AtomicLong studyUidsReused = new AtomicLong();
+        private final AtomicLong seriesUidsGenerated = new AtomicLong();
+        private final AtomicLong seriesUidsReused = new AtomicLong();
+        private final AtomicLong instancesRecorded = new AtomicLong();
+        private final AtomicLong instancesUnattributed = new AtomicLong();
+
         private void record(boolean isPrivate, String type) {
             totalModified.incrementAndGet();
             (isPrivate ? privateByType : publicByType)
@@ -771,18 +795,98 @@ public class AnonymizationServiceImpl implements AnonymizationService {
                     .incrementAndGet();
         }
 
+        /**
+         * Records the old -> new StudyInstanceUID mapping. Safe to call once per
+         * file of the study: the mapping is created on first sight (and counted as
+         * "generated") and left untouched (and counted as "reused") on every
+         * subsequent call for the same old StudyInstanceUID. No-op if either UID is
+         * null (e.g. the file had no StudyInstanceUID, or it wasn't anonymized this
+         * run).
+         */
+        void recordStudyUID(String oldStudyInstanceUID, String newStudyInstanceUID) {
+            if (oldStudyInstanceUID == null || newStudyInstanceUID == null) {
+                return;
+            }
+            StudyReport existing = studyReports.putIfAbsent(oldStudyInstanceUID, new StudyReport(newStudyInstanceUID));
+            if (existing == null) {
+                studyUidsGenerated.incrementAndGet();
+            } else {
+                studyUidsReused.incrementAndGet();
+            }
+        }
+
+        /**
+         * Records the old -> new SeriesInstanceUID mapping, nested under its study.
+         * Same "first sight generates, subsequent calls reuse" semantics as
+         * {@link #recordStudyUID}. Must be called after {@link #recordStudyUID} for
+         * the same file, so the study report already exists with its real
+         * StudyInstanceUID mapping when the series gets attached to it.
+         *
+         * @param seriesDescription
+         *            the file's SeriesDescription (e.g. "t1", "flair"), carried into
+         *            the report purely as descriptive metadata so the series
+         *            overview log line is readable by name, not just by UID; only
+         *            used the first time this series is seen, ignored on reuse
+         */
+        void recordSeriesUID(String oldStudyInstanceUID, String oldSeriesInstanceUID, String newSeriesInstanceUID,
+                String seriesDescription, String seriesNumber) {
+            if (oldStudyInstanceUID == null || oldSeriesInstanceUID == null || newSeriesInstanceUID == null) {
+                return;
+            }
+            StudyReport studyReport = studyReports.computeIfAbsent(oldStudyInstanceUID, k -> new StudyReport(null));
+            SeriesReport existing = studyReport.seriesReports.putIfAbsent(oldSeriesInstanceUID,
+                    new SeriesReport(newSeriesInstanceUID, seriesDescription, seriesNumber));
+            if (existing == null) {
+                seriesUidsGenerated.incrementAndGet();
+            } else {
+                seriesUidsReused.incrementAndGet();
+            }
+        }
+
+        /**
+         * Records one processed instance (i.e. one file - always given a freshly
+         * generated SOPInstanceUID, never reused) under its study/series, so the
+         * per-series instance count can be checked against the expected number of
+         * files in that series. If the study or series UID is missing, the instance
+         * is still counted, but only in the "unattributed" total, since it cannot
+         * be placed in the hierarchy.
+         */
+        void recordInstance(String oldStudyInstanceUID, String oldSeriesInstanceUID) {
+            if (oldStudyInstanceUID == null || oldSeriesInstanceUID == null) {
+                instancesUnattributed.incrementAndGet();
+                return;
+            }
+            StudyReport studyReport = studyReports.computeIfAbsent(oldStudyInstanceUID, k -> new StudyReport(null));
+            SeriesReport seriesReport = studyReport.seriesReports.computeIfAbsent(oldSeriesInstanceUID,
+                    k -> new SeriesReport(null, null, null));
+            seriesReport.instanceCount.incrementAndGet();
+            instancesRecorded.incrementAndGet();
+        }
+
         public long getTotalModified() {
             return totalModified.get();
         }
 
         /**
+         * Read-only view of the study -> series -> instance-count hierarchy, for
+         * callers that want to consume the report programmatically (e.g. assert the
+         * per-series instance counts against the expected file counts) instead of,
+         * or in addition to, reading it from the logs.
+         */
+        public Map<String, StudyReport> getStudyReports() {
+            return Collections.unmodifiableMap(studyReports);
+        }
+
+        /**
          * Logs the aggregated report at INFO level: total tags modified, then a
-         * breakdown by type for public tags and for private tags.
+         * breakdown by type for public tags and for private tags, and finally the
+         * study -> series -> instance-count hierarchy with old/new UID mappings.
          */
         public void logSummary() {
             LOG.info("Pseudonymization report: {} tag(s) modified in total.", totalModified.get());
             logScope("public", publicByType);
             logScope("private", privateByType);
+            logHierarchy();
         }
 
         private void logScope(String scope, Map<String, AtomicLong> byType) {
@@ -790,6 +894,127 @@ public class AnonymizationServiceImpl implements AnonymizationService {
             LOG.info("  {} tags modified: {}", scope, scopeTotal);
             byType.forEach((type, count) -> LOG.info("    - {}: {}", type, count.get()));
         }
+
+        /**
+         * Logs, per study and per series, the old -> new UID mapping and the number
+         * of instances (SOPInstanceUIDs generated) found for that series, so that
+         * for a big study with many series it can be verified at a glance that:
+         * (a) exactly one StudyInstanceUID and one SeriesInstanceUID mapping exists
+         * per study/series, and (b) the instance count per series matches the
+         * expected number of files.
+         */
+        private void logHierarchy() {
+            LOG.info("Study/Series/Instance report: {} study/studies, {} StudyInstanceUID(s) generated ({} reused),"
+                    + " {} SeriesInstanceUID(s) generated ({} reused), {} instance(s)/SOPInstanceUID(s) generated"
+                    + "{}.",
+                    studyReports.size(), studyUidsGenerated.get(), studyUidsReused.get(), seriesUidsGenerated.get(),
+                    seriesUidsReused.get(), instancesRecorded.get(),
+                    instancesUnattributed.get() > 0
+                            ? " (" + instancesUnattributed.get() + " instance(s) could not be attributed to a"
+                                    + " study/series, and are excluded from the breakdown below)"
+                            : "");
+            studyReports.forEach((oldStudyUID, studyReport) -> {
+                long studyInstanceTotal = studyReport.seriesReports.values().stream()
+                        .mapToLong(seriesReport -> seriesReport.instanceCount.get()).sum();
+                LOG.info("  Study  {} -> {}  : {} series, {} instance(s) total", oldStudyUID,
+                        studyReport.newStudyInstanceUID, studyReport.seriesReports.size(), studyInstanceTotal);
+                LOG.info("    Series overview: {}", buildSeriesOverview(studyReport));
+            });
+        }
+
+        private String buildSeriesOverview(StudyReport studyReport) {
+            StringBuilder overview = new StringBuilder();
+            studyReport.seriesReports.entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue(java.util.Comparator.comparing(
+                            seriesReport -> seriesReport.seriesNumber,
+                            java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))))
+                    .forEach(entry -> {
+                        String oldSeriesUID = entry.getKey();
+                        SeriesReport seriesReport = entry.getValue();
+                        if (overview.length() > 0) {
+                            overview.append(", ");
+                        }
+                        String description = seriesReport.seriesDescription != null
+                                && !seriesReport.seriesDescription.isEmpty() ? seriesReport.seriesDescription : "?";
+                        overview.append(System.lineSeparator()).append(description)
+                                .append('(').append(oldSeriesUID).append(" -> ").append(seriesReport.newSeriesInstanceUID)
+                                .append("): ").append(seriesReport.instanceCount.get()).append(" instance(s)");
+                    });
+            return overview.toString();
+        }
+
+        /**
+         * Old -> new StudyInstanceUID mapping, together with the mapping and
+         * instance counts of all series belonging to that study.
+         */
+        public static final class StudyReport {
+
+            private final String newStudyInstanceUID;
+
+            private final Map<String, SeriesReport> seriesReports = new ConcurrentHashMap<>();
+
+            private StudyReport(String newStudyInstanceUID) {
+                this.newStudyInstanceUID = newStudyInstanceUID;
+            }
+
+            public String getNewStudyInstanceUID() {
+                return newStudyInstanceUID;
+            }
+
+            public Map<String, SeriesReport> getSeriesReports() {
+                return Collections.unmodifiableMap(seriesReports);
+            }
+        }
+
+        /**
+         * Old -> new SeriesInstanceUID mapping, together with the number of
+         * instances (files) processed for that series, i.e. the number of
+         * SOPInstanceUIDs generated for it.
+         */
+        public static final class SeriesReport {
+
+            private final String newSeriesInstanceUID;
+
+            private final String seriesDescription;
+
+            private final Integer seriesNumber;
+
+            private final AtomicLong instanceCount = new AtomicLong();
+
+            private SeriesReport(String newSeriesInstanceUID, String seriesDescription, String seriesNumber) {
+                this.newSeriesInstanceUID = newSeriesInstanceUID;
+                this.seriesDescription = seriesDescription;
+                this.seriesNumber = parseSeriesNumber(seriesNumber);
+            }
+
+            private static Integer parseSeriesNumber(String seriesNumber) {
+                if (seriesNumber == null || seriesNumber.isEmpty()) {
+                    return null;
+                }
+                try {
+                    return Integer.valueOf(seriesNumber.trim());
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+
+            public String getNewSeriesInstanceUID() {
+                return newSeriesInstanceUID;
+            }
+
+            public String getSeriesDescription() {
+                return seriesDescription;
+            }
+
+            public Integer getSeriesNumber() {
+                return seriesNumber;
+            }
+
+            public long getInstanceCount() {
+                return instanceCount.get();
+            }
+        }
+
     }
 
 }
