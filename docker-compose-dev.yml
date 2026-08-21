@@ -20,7 +20,9 @@ services:
       context: docker-compose
       target: keycloak-database
     environment:
-      - MYSQL_DATABASE=keycloak
+      - MARIADB_DATABASE=keycloak
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -29,12 +31,18 @@ services:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
       - shanoir_ng_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
     #command: ["start-dev"]   # default is "start" to run in production mode
     environment:
-      - SHANOIR_ADMIN_EMAIL
-      - SHANOIR_ADMIN_NAME
+      - SHANOIR_NOTIFICATION_EMAIL
+      - SHANOIR_NOTIFICATION_NAME
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
@@ -42,6 +50,7 @@ services:
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
+      - SHANOIR_KEYCLOAK_URL
       - SHANOIR_ALLOWED_ADMIN_IPS
       - SHANOIR_SMTP_HOST
       - SHANOIR_SMTP_PORT
@@ -62,7 +71,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - "keycloak-database"
+      keycloak-database:
+          condition: service_healthy
   #
   # RabbitMQ: inter-microservices communication
   #
@@ -103,10 +113,9 @@ services:
       context: docker-compose
       target: database
     command: --max_allowed_packet 20000000
-    env_file:
-      - ./docker-compose/database/variables.env
     environment:
-      - SHANOIR_MIGRATION
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_AUTO_UPGRADE=1
     ulimits:
       nofile:
         soft: 262144
@@ -117,6 +126,28 @@ services:
      - "3307:3306"
     networks:
       - shanoir_ng_network
+    healthcheck:
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-ppassword" ]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
+  #
+  # Migrations for the database
+  #
+  database-migrations:
+    container_name: "${SHANOIR_PREFIX}database-migrations"
+    build:
+      context: docker-compose
+      target: database-migrations
+    environment:
+      - SHANOIR_MIGRATION
+    networks:
+      - shanoir_ng_network
+    depends_on:
+      database:
+        condition: service_healthy  # wait for MariaDB to be ready
+    restart: "no" # don't restart after it exits cleanly
   #
   # Users microservice
   #
@@ -129,13 +160,18 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_INSTANCE_NAME
+      - SHANOIR_KEYCLOAK_URL
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
-      - SHANOIR_ADMIN_EMAIL
+      - SHANOIR_NOTIFICATION_EMAIL
+      - SHANOIR_NOTIFICATION_NAME
       - SHANOIR_CERTIFICATE
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_MIGRATION
+      - DEV_USERS_DEFAULT_PASSWORD
       - VIP_SERVICE_EMAIL
       - SHANOIR_SMTP_HOST
       - SHANOIR_SMTP_PORT
@@ -150,8 +186,10 @@ services:
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
+      database-migrations:
+        condition: service_completed_successfully
       database:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_started
   #
@@ -166,13 +204,20 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_URL
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_MIGRATION
+      - SHANOIR_STORAGE_TYPE
+      - S3_ENDPOINT
+      - S3_REGION
+      - S3_ACCESS_KEY_ID
+      - S3_SECRET_ACCESS_KEY
+      - S3_BUCKET_STUDIES
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
-      - "studies-data:/var/studies-data"
-      # This is related to participants.tsv file
-      - "datasets-data:/var/datasets-data"
+      - "studies-data:/var/studies-data" # persistent
+      - "bids-data:/var/bids-data" # temporary, participants.tsv
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
@@ -182,8 +227,10 @@ services:
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
+      database-migrations:
+        condition: service_completed_successfully
       database:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_started
       users:
@@ -200,6 +247,8 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_URL
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -217,8 +266,10 @@ services:
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
+      database-migrations:
+        condition: service_completed_successfully
       database:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_started
       users:
@@ -235,17 +286,28 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_URL
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_MIGRATION
+      - SHANOIR_STORAGE_TYPE
+      - S3_ENDPOINT
+      - S3_REGION
+      - S3_ACCESS_KEY_ID
+      - S3_SECRET_ACCESS_KEY
+      - S3_BUCKET_DATASETS
       - VIP_URL_SCHEME
       - VIP_URL_HOST
       - VIP_CLIENT_SECRET
+      - SHANOIR_CONTINUANCE_HOUR
+      - SHANOIR_SHUTDOWN_HOUR
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
+      - "datasets-data:/var/datasets-data" # persistent
+      - "bids-data:/var/bids-data" # temporary
       - "tmp:/tmp"
-      - "datasets-data:/var/datasets-data"
     networks:
       - shanoir_ng_network
     ports:
@@ -254,8 +316,10 @@ services:
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
+      database-migrations:
+        condition: service_completed_successfully
       database:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_started
       users:
@@ -274,12 +338,20 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
+      - SHANOIR_KEYCLOAK_URL
+      - SHANOIR_KEYCLOAK_INTERNAL_URL
       - SHANOIR_MIGRATION
+      - SHANOIR_STORAGE_TYPE
+      - S3_ENDPOINT
+      - S3_REGION
+      - S3_ACCESS_KEY_ID
+      - S3_SECRET_ACCESS_KEY
+      - S3_BUCKET_PRECLINICAL
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
+      - "preclinical-data:/var/preclinical-data" # persistent
       - "tmp:/tmp"
-      - "extra-data:/var/extra-data"
     networks:
       - shanoir_ng_network
     ports:
@@ -288,8 +360,10 @@ services:
     depends_on:
       init-cert-and-logs:
         condition: service_completed_successfully
+      database-migrations:
+        condition: service_completed_successfully
       database:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_started
       users:
@@ -300,6 +374,7 @@ services:
   #
   nifti-conversion:
     container_name: "${SHANOIR_PREFIX}nifti-conversion"
+    platform: linux/x86_64
     build:
       context: docker-compose
       target: nifti-conversion
@@ -311,6 +386,8 @@ services:
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - "datasets-data:/var/datasets-data"
+      # NIfTI conversion writes into BIDS-tree
+      - "bids-data:/var/bids-data" # temporary
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
@@ -342,6 +419,8 @@ services:
   ldap:
     container_name: "${SHANOIR_PREFIX}ldap"
     image: dcm4che/slapd-dcm4chee:2.6.2-27.0
+    environment:
+      LDAP_INIT_CMDS: /etc/openldap/configure.sh /opt/shanoir/ldap-first-start.sh
     logging:
       driver: json-file
       options:
@@ -354,6 +433,7 @@ services:
     volumes:
       - "dcm4chee-ldap-data:/var/lib/openldap/openldap-data"
       - "dcm4chee-sldap-data:/etc/openldap/slapd.d"
+      - "./docker-compose/dcm4chee/ldap-first-start.sh:/opt/shanoir/ldap-first-start.sh:ro"
   dcm4chee-database:
     container_name: "${SHANOIR_PREFIX}dcm4chee-database"
     image: dcm4che/postgres-dcm4chee:14.4-27
@@ -408,14 +488,21 @@ services:
       - SHANOIR_URL_HOST
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
+      - SHANOIR_VIEWER_OHIF_INTERACTION_NUM_REQUESTS
+      - SHANOIR_VIEWER_OHIF_THUMBNAIL_NUM_REQUESTS
+      - SHANOIR_VIEWER_OHIF_PREFETCH_NUM_REQUESTS
       - SHANOIR_X_FORWARDED
       - SHANOIR_INSTANCE_NAME
       - SHANOIR_INSTANCE_COLOR
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
+      - SHANOIR_KEYCLOAK_URL
       - SHANOIR_KEYCLOAK_ADAPTER_MODE
+      - SHANOIR_KEYCLOAK_API
       - VIP_URL_SCHEME
       - VIP_URL_HOST
+      - SHANOIR_DPO_EMAIL
+      - SHANOIR_CONTACT_EMAIL
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
@@ -431,18 +518,36 @@ services:
       - "datasets"
       - "preclinical"
 
+  bids-validator:
+    container_name: "${SHANOIR_PREFIX}bids-validator"
+    build:
+      context: docker-compose
+      target: bids-validator
+    environment:
+      - AMQP_URL=amqp://guest:guest@rabbitmq:5672/
+      - IN_QUEUE=bids.validate
+      - OUT_QUEUE=bids.validated
+      - DATA_ROOT=/var/bids-data
+    volumes:
+      - "bids-data:/var/bids-data" # temporary
+    depends_on:
+      - rabbitmq
+    networks:
+      - shanoir_ng_network
+
 volumes:
   keycloak-database-data:
   rabbitmq-data:
   database-data:
-  datasets-data:
-  extra-data:
   studies-data:
+  datasets-data:
+  preclinical-data:
   dcm4chee-ldap-data:
   dcm4chee-sldap-data:
   dcm4chee-database-data:
   dcm4chee-arc-wildfly-data:
   dcm4chee-arc-storage-data:
+  bids-data:
   solr-data:
   certificate-share-data:
   tmp:

@@ -45,4 +45,14 @@ public interface MetadataFieldInterface<T> {
      * @return id
      */
     public int getId();
+
+    /**
+     * Whether this field's value should be compared numerically (EQUALS, NOT_EQUALS,
+     * SMALLER_THAN, BIGGER_THAN) rather than textually.
+     *
+     * @return true if numeric
+     */
+    default boolean isNumeric() {
+        return false;
+    }
 }

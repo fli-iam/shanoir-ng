@@ -12,10 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterOutlet } from '@angular/router';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { findLastIndex } from '../utils/app.utils';
+
 
 export type ImportMode = 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | 'Processed Dataset';
 
@@ -23,7 +26,7 @@ export type ImportMode = 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' | 'Process
     selector: 'imports',
     templateUrl: 'import.component.html',
     styleUrls: ['import.component.css'],
-    standalone: false
+    imports: [FormsModule, RouterOutlet]
 })
 export class ImportComponent {
 

@@ -28,6 +28,7 @@ import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +44,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.core.io.Resource;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -68,7 +68,9 @@ public interface DatasetApi {
     @DeleteMapping(value = "/{datasetId}", produces = {"application/json"})
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<Void> deleteDataset(
-            @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId)
+            @Parameter(description = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
+            @Parameter(description = "remove the dataset acquisition too when this deletion leaves it empty")
+            @RequestParam(value = "deleteEmptyAcquisitions", defaultValue = "false") boolean deleteEmptyAcquisitions)
             throws RestServiceException, EntityNotFoundException;
 
     @Operation(summary = "", description = "Deletes several datasets")
@@ -82,7 +84,9 @@ public interface DatasetApi {
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
     ResponseEntity<Void> deleteDatasets(
             @Parameter(description = "ids of the datasets", required = true) @Valid
-            @RequestBody(required = true) List<Long> datasetIds)
+            @RequestBody(required = true) List<Long> datasetIds,
+            @Parameter(description = "remove the dataset acquisitions too when this deletion leaves them empty")
+            @RequestParam(value = "deleteEmptyAcquisitions", defaultValue = "false") boolean deleteEmptyAcquisitions)
             throws RestServiceException;
 
     @Operation(summary = "", description = "Deletes nifti files from a study")
@@ -357,7 +361,7 @@ public interface DatasetApi {
         @ApiResponse(responseCode = "500", description = "unexpected error")})
     @GetMapping(value = "/download/event/{eventId}", produces = {"application/zip"})
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(
+    ResponseEntity<ByteArrayResource> downloadByEventId(
             @Parameter(description = "id of the event", required = true) @PathVariable("eventId") String eventId)
             throws RestServiceException, IOException;
 
@@ -409,6 +413,5 @@ public interface DatasetApi {
             @RequestBody List<Long> datasetIds,
             @Parameter(description = "Keys of the metadata to extract", required = true) @Valid
             @RequestParam List<String> metadataKeys) throws Exception;
+
 }
-
-

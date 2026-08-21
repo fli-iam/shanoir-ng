@@ -41,6 +41,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 
 /**
@@ -64,7 +65,24 @@ public class User extends HalEntity implements UserDetails {
     private AccountRequestInfo accountRequestInfo;
 
     @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
-    private Boolean canAccessToDicomAssociation;
+    @NotNull
+    private Boolean canAccessToDicomAssociation = Boolean.FALSE;
+
+    /**
+     * Keycloak two-factor (TOTP) authentication enabled flag. Not persisted in database:
+     * the state lives in Keycloak and is read/applied through it. Only meaningful for admins.
+     */
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @Transient
+    private Boolean twoFactorEnabled;
+
+    /**
+     * Keycloak account enabled (activated) flag. Not persisted in database:
+     * the state lives in Keycloak and is read/applied through it. Only meaningful for admins.
+     */
+    @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
+    @Transient
+    private Boolean keycloakEnabled;
 
     @VisibleOnlyBy(roles = { "ROLE_ADMIN" })
     @LocalDateAnnotations
@@ -163,7 +181,7 @@ public class User extends HalEntity implements UserDetails {
      * @return the canAccessToDicomAssociation
      */
     public Boolean isCanAccessToDicomAssociation() {
-        return canAccessToDicomAssociation;
+        return canAccessToDicomAssociation != null ? canAccessToDicomAssociation : Boolean.FALSE;
     }
 
     /**
@@ -171,7 +189,37 @@ public class User extends HalEntity implements UserDetails {
      *            the canAccessToDicomAssociation to set
      */
     public void setCanAccessToDicomAssociation(final Boolean canAccessToDicomAssociation) {
-        this.canAccessToDicomAssociation = canAccessToDicomAssociation;
+        this.canAccessToDicomAssociation = canAccessToDicomAssociation != null ? canAccessToDicomAssociation : Boolean.FALSE;
+    }
+
+    /**
+     * @return whether Keycloak two-factor authentication is enabled
+     */
+    public Boolean getTwoFactorEnabled() {
+        return twoFactorEnabled;
+    }
+
+    /**
+     * @param twoFactorEnabled
+     *            the two-factor authentication enabled flag to set
+     */
+    public void setTwoFactorEnabled(final Boolean twoFactorEnabled) {
+        this.twoFactorEnabled = twoFactorEnabled;
+    }
+
+    /**
+     * @return whether the user is enabled (activated) in Keycloak
+     */
+    public Boolean getKeycloakEnabled() {
+        return keycloakEnabled;
+    }
+
+    /**
+     * @param keycloakEnabled
+     *            the Keycloak enabled (activated) flag to set
+     */
+    public void setKeycloakEnabled(final Boolean keycloakEnabled) {
+        this.keycloakEnabled = keycloakEnabled;
     }
 
     /**

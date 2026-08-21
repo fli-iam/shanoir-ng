@@ -19,6 +19,7 @@ import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -72,9 +73,14 @@ public class DatasetProcessing extends AbstractEntity {
     /** Authenticated user that created the processing */
     private String username;
 
-    public DatasetProcessing() {
+    /** Status of the processing, similar to executionMonitoring status */
+    private ExecutionStatus processingStatus;
 
-    }
+    /** Index of the processing in its monitoring context */
+    private int monitoringIndex;
+
+
+    public DatasetProcessing() { }
 
     public DatasetProcessing(DatasetProcessing dproc) {
         this.comment = dproc.getComment();
@@ -89,6 +95,8 @@ public class DatasetProcessing extends AbstractEntity {
         this.studyId = dproc.getStudyId();
         this.parent = dproc.getParent();
         this.username = dproc.getUsername();
+        this.monitoringIndex = dproc.getMonitoringIndex();
+        this.processingStatus = dproc.getProcessingStatus();
     }
 
     /**
@@ -203,5 +211,21 @@ public class DatasetProcessing extends AbstractEntity {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public ExecutionStatus getProcessingStatus() {
+        return processingStatus;
+    }
+
+    public void setProcessingStatus(ExecutionStatus processingStatus) {
+        this.processingStatus = processingStatus;
+    }
+
+    public int getMonitoringIndex() {
+        return monitoringIndex;
+    }
+
+    public void setMonitoringIndex(int monitoringIndex) {
+        this.monitoringIndex = monitoringIndex;
     }
 }

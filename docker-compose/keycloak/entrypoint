@@ -4,9 +4,9 @@ set -e
 
 . /bin/entrypoint_common
 
-require  SHANOIR_ADMIN_EMAIL
-require  SHANOIR_ADMIN_NAME
+require  SHANOIR_KEYCLOAK_URL
 optional SHANOIR_PREFIX
+optional SHANOIR_USERS_HOST
 require  SHANOIR_SMTP_HOST
 require  SHANOIR_SMTP_PORT
 require  SHANOIR_SMTP_AUTH
@@ -19,9 +19,11 @@ require  SHANOIR_URL_HOST
 require  SHANOIR_VIEWER_OHIF_URL_SCHEME
 require  SHANOIR_VIEWER_OHIF_URL_HOST
 
+: ${SHANOIR_USERS_HOST:=${SHANOIR_PREFIX}users}
+
 mkdir -p /tmp/import
-sed "	s/SHANOIR_ADMIN_NAME/$SHANOIR_ADMIN_NAME/g
-		s/SHANOIR_ADMIN_EMAIL/$SHANOIR_ADMIN_EMAIL/g
+sed "	s/SHANOIR_NOTIFICATION_NAME/$SHANOIR_NOTIFICATION_NAME/g
+		s/SHANOIR_NOTIFICATION_EMAIL/$SHANOIR_NOTIFICATION_EMAIL/g
 		s/SHANOIR_SMTP_HOST/$SHANOIR_SMTP_HOST/g
 		s/SHANOIR_SMTP_PORT/$SHANOIR_SMTP_PORT/g
 		s/SHANOIR_SMTP_AUTH/$SHANOIR_SMTP_AUTH/g
@@ -47,15 +49,10 @@ export KC_PROXY_HEADERS="${KC_PROXY_HEADERS:-xforwarded}"
 export KC_HTTP_ENABLED="${KC_HTTP_ENABLED:-true}"
 export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
 
-# we disable strict hostname checking by default because:
-# - the reverse proxy in production implements this check
-# - since the 'nginx' container does not expose the master realm to the
-#   outside, disabling strict checking allows us to reach the admin console
-#   at http://localhost:8080/auth/admin/
-export KC_HOSTNAME_STRICT=false
-export KC_HOSTNAME_STRICT_BACKCHANNEL=false
+export KC_HOSTNAME="$SHANOIR_KEYCLOAK_URL"
+export KC_HOSTNAME_BACKCHANNEL_DYNAMIC="${KC_HOSTNAME_BACKCHANNEL_DYNAMIC:-true}"
 
-export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"${DB_PORT:-3306}"/"${DB_DATABASE:-keycloak}"
+export KC_DB_URL=jdbc:mariadb://"${KC_DB_URL_HOST:-${SHANOIR_PREFIX}keycloak-database}":"${KC_DB_URL_PORT:-3306}"/"${KC_DB_URL_DATABASE:-keycloak}"
 export KC_DB_USERNAME="${DB_USER:-keycloak}"
 export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
 
@@ -65,7 +62,7 @@ export KC_BOOTSTRAP_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
 
 require  SHANOIR_MIGRATION
 STARTED_PATTERN=' \[io.quarkus\] \(main\) Keycloak .* started in [0-9.]+*s'
-extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
+extra=("-Dms.users.url=http://${SHANOIR_USERS_HOST}:9901"
        "-Dallowed.admin.ips=${SHANOIR_ALLOWED_ADMIN_IPS}")
 
 case "$SHANOIR_MIGRATION" in

@@ -62,7 +62,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
+
+import org.shanoir.ng.shared.dto.StudyExaminationsDTO;
 
 @Service
 public class RabbitMQStudiesService {
@@ -100,12 +103,25 @@ public class RabbitMQStudiesService {
     @Autowired
     private AcquisitionEquipmentService acquisitionEquipmentService;
 
-    @RabbitListener(bindings = @QueueBinding(
-            key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
-            value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_QUEUE, durable = "true"),
-            exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-            autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "multipleConsumersFactory"
-            )
+    /**
+     * Receives a shanoirEvent as a json object, concerning an examination
+     * creation
+     *
+     * @param commandArrStr the task as a json string.
+     */
+    @RabbitListener(
+            bindings = @QueueBinding(
+                key = ShanoirEventType.CREATE_EXAMINATION_EVENT,
+                value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDY_QUEUE, durable = "true"),
+                exchange = @Exchange(
+                    value = RabbitMQConfiguration.EVENTS_EXCHANGE,
+                    ignoreDeclarationExceptions = "true",
+                    autoDelete = "false",
+                    durable = "true",
+                    type = ExchangeTypes.TOPIC
+                )
+            ),
+            containerFactory = "singleConsumerFactory")
     @RabbitHandler
     @Transactional
     public void linkExamination(final ShanoirEvent event) {
@@ -134,6 +150,38 @@ public class RabbitMQStudiesService {
             throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
         }
     }
+
+    /**
+     * Receives a shanoirEvent as a json object, concerning an multiple examinations creation     *
+     * @param commandArrStr the task as a json string.
+     */
+    @RabbitListener(
+            bindings = @QueueBinding(
+                key = ShanoirEventType.CREATE_EXAMINATIONS_EVENT,
+                value = @Queue(value = RabbitMQConfiguration.EXAMINATION_STUDIES_QUEUE, durable = "true"),
+                exchange = @Exchange(
+                    value = RabbitMQConfiguration.EVENTS_EXCHANGE,
+                    ignoreDeclarationExceptions = "true",
+                    autoDelete = "false",
+                    durable = "true",
+                    type = ExchangeTypes.TOPIC
+                )
+            ),
+            containerFactory = "singleConsumerFactory")
+    @RabbitHandler
+    @Transactional
+    public void linkExaminations(final String eventStr) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        try {
+            ShanoirEvent event =  mapper.readValue(eventStr, ShanoirEvent.class);
+            StudyExaminationsDTO examinations = mapper.readValue(event.getMessage(), StudyExaminationsDTO.class);
+            studyService.addExaminationsToStudy(examinations.getExaminations(), examinations.getStudyId());
+        } catch (Exception e) {
+            LOG.error("Could not index examinations on given study ", e);
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());
+        }
+    }
+
 
     /**
      * Receives a shanoirEvent as a json object, concerning an examination creation
@@ -338,11 +386,8 @@ public class RabbitMQStudiesService {
     public String getStudyDraftState(String studyIdStr) {
         try {
             Long studyId = Long.valueOf(studyIdStr);
-            Study study = studyRepo.findById(studyId).orElse(null);
-            if (study == null) {
-                return "NOT_FOUND";
-            }
-            return String.valueOf(study.getIsDraft());
+            String isDraft = studyRepo.findIsDraftById(studyId).map(String::valueOf).orElse("NOT_FOUND");
+            return isDraft;
         } catch (Exception e) {
             LOG.error("Error getting study draft state", e);
             return "ERROR";

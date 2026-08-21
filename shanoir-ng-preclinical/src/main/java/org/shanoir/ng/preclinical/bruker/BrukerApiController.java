@@ -61,7 +61,7 @@ public class BrukerApiController implements BrukerApi {
     public static final int KB = 1024;
     public static final int BUFFER_SIZE = 2 * KB;
 
-    @Value("${preclinical.uploadBrukerFolder}")
+    @Value("${storage.file-system.uploadBrukerFolder}")
     private String brukerFolder;
 
     @Autowired

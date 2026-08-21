@@ -31,7 +31,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 @Component({
     selector: 'dataset-list',
     templateUrl: 'dataset-list.component.html',
-    standalone: false
+    imports: [TableComponent]
 })
 
 export class DatasetListComponent extends EntityListComponent<Dataset>{
@@ -53,6 +53,20 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
 
     getService(): EntityService<Dataset> {
         return this.datasetService;
+    }
+
+    /**
+     * Goes through the dataset service so that the deletion of the last dataset of an acquisition
+     * offers to remove that acquisition too, like everywhere else datasets are deleted.
+     */
+    protected override openDeleteConfirmDialog = (entity: Dataset) => {
+        this.datasetService.deleteWithConfirmDialog(this.ROUTING_NAME, entity).then(deleted => {
+            if (deleted) {
+                this.onDelete.next({entity: entity});
+                setTimeout(() => this.table.refresh(), 1000);
+                this.treeService.updateTree();
+            }
+        });
     }
 
     getPage(pageable: Pageable): Promise<Page<Dataset>> {

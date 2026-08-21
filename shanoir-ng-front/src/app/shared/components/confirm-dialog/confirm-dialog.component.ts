@@ -16,11 +16,12 @@ import { Component } from '@angular/core';
 
 import { SuperPromise } from 'src/app/utils/super-promise';
 
+
 @Component({
     selector: 'confirm-dialog',
     templateUrl: 'confirm-dialog.component.html',
     styleUrls: ['confirm-dialog.component.css'],
-    standalone: false
+    imports: []
 })
 export class ConfirmDialogComponent {
 

@@ -29,7 +29,7 @@ import { StudyUser } from '../../studies/shared/study-user.model';
     selector: 'user-list',
     templateUrl: 'user-list.component.html',
     styleUrls: ['user-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 
 export class UserListComponent extends BrowserPaginEntityListComponent<User>{
@@ -97,7 +97,7 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
             {headerName: "Role", field: "role.displayName", width: "63px"},
             {headerName: "Creation", field: "creationDate", type: "date"},
             {headerName: "Expiration", field: "expirationDate", type: "date"},
-            {headerName: "Active", field: "valid", type: "boolean", cellRenderer: function (params: any) {
+            {headerName: "Expired", field: "valid", type: "boolean", cellRenderer: function (params: any) {
                 return !params.data.expirationDate || params.data.expirationDate >= new Date();
             }},
             {headerName: "Last Login", field: "lastLogin", type: "date"}

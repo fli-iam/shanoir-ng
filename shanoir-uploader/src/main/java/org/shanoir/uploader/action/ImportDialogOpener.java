@@ -22,9 +22,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
-import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
 import org.shanoir.uploader.ShUpConfig;
@@ -68,7 +70,7 @@ public class ImportDialogOpener {
         this.shanoirUploaderServiceClient = shanoirUploaderServiceClient;
     }
 
-    public void openImportDialog(ImportJob importJob, File importFolder) {
+    public void openImportDialog(ImportJobBase importJob, File importFolder) {
         try {
             Date studyDate = ShUpConfig.FORMATTER.parse(Util.convertLocalDateToString(importJob.getStudy().getStudyDate()));
             Subject subject = null;
@@ -81,16 +83,23 @@ public class ImportDialogOpener {
             List<Study> studiesWithStudyCards = getStudiesWithStudyCards(importJob, acquisitionEquipments);
             // Init components of GUI and listeners
             ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
-            InstitutionDicom institutionDicom = importJob.getFirstSelectedSerie().getInstitution();
-            EquipmentDicom equipmentDicom = importJob.getFirstSelectedSerie().getEquipment();
+            InstitutionDicom institutionDicom = null;
+            EquipmentDicom equipmentDicom = null;
+            Serie serieWithInstitutionAndEquipment = importJob.getFirstSerieWithInstitutionAndEquipment();
+            if (serieWithInstitutionAndEquipment != null) {
+                institutionDicom = serieWithInstitutionAndEquipment.getInstitution();
+                equipmentDicom = serieWithInstitutionAndEquipment.getEquipment();
+            } else {
+                LOG.warn("None of the selected series contains both institution and equipment information.");
+            }
             ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, institutionDicom, equipmentDicom, subject, studyDate, importStudyCardFilterDocumentListener, shanoirUploaderServiceClient);
-            ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder, subject, importStudyAndStudyCardCBIL);
+            ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, importFolder, subject);
             importDialog = new ImportDialog(this.mainWindow,
                     ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
                     importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
             // Update import dialog with items from server
             updateImportDialogForSubject(subject); // this has to be done after init of the dialog
-            updateImportDialogForNewExamFields(studyDate, importJob.getStudy().getStudyDescription());
+            updateImportDialogForNewExamFields(studyDate, importJob.getStudy().getStudyDescription(), importJob.getExaminationDataReuseAgreement());
             updateImportDialogForStudyAndStudyCard(studiesWithStudyCards);
             importDialog.mrExaminationExamExecutiveLabel.setVisible(false);
             importDialog.mrExaminationExamExecutiveCB.setVisible(false);
@@ -108,11 +117,16 @@ public class ImportDialogOpener {
      * @param equipmentDicom
      * @throws Exception
      */
-    private List<Study> getStudiesWithStudyCards(final ImportJob importJob, List<AcquisitionEquipment> acquisitionEquipments) throws Exception {
+    private List<Study> getStudiesWithStudyCards(final ImportJobBase importJob,
+            List<AcquisitionEquipment> acquisitionEquipments) throws Exception {
         List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
         if (studies != null) {
             LOG.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
             List<StudyCard> studyCards = ImportUtils.getAllStudyCards(studies);
+            Serie serieWithInstitutionAndEquipment = importJob.getFirstSerieWithInstitutionAndEquipment();
+            EquipmentDicom equipmentDicomForCompatibility = serieWithInstitutionAndEquipment != null
+                    ? serieWithInstitutionAndEquipment.getEquipment()
+                    : null;
             if (studyCards != null) {
                 LOG.info("getAllStudyCards for studies: " + studyCards.size() + " studycards found.");
                 for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
@@ -133,8 +147,9 @@ public class ImportDialogOpener {
                                     }
                                 }
                                 // If at least one study card is compatible, then study is compatible
-                                if (ImportUtils.flagStudyCardCompatible(
-                                        studyCard, importJob.getFirstSelectedSerie().getEquipment())) {
+                                if (equipmentDicomForCompatibility != null
+                                        && ImportUtils.flagStudyCardCompatible(studyCard,
+                                                equipmentDicomForCompatibility)) {
                                     compatibleStudyCard = true;
                                 }
                             }
@@ -196,7 +211,7 @@ public class ImportDialogOpener {
         importDialog.studyCB.setValueSet(false);
     }
 
-    private Subject getSubject(final ImportJob importJob) throws Exception {
+    private Subject getSubject(final ImportJobBase importJob) throws Exception {
         String identifier = importJob.getSubject().getIdentifier();
         if (identifier != null) {
             return shanoirUploaderServiceClient
@@ -270,10 +285,11 @@ public class ImportDialogOpener {
         }
     }
 
-    private void updateImportDialogForNewExamFields(Date studyDate, String studyDescription)
+    private void updateImportDialogForNewExamFields(Date studyDate, String studyDescription, Boolean examinationDataReuseAgreement)
             throws ParseException {
         importDialog.mrExaminationNewDateModel.setValue(studyDate);
         importDialog.mrExaminationCommentTF.setText(studyDescription);
+        importDialog.mrExaminationDataReuseAgreementCB.setSelected(Objects.nonNull(examinationDataReuseAgreement) && examinationDataReuseAgreement);
     }
 
 }

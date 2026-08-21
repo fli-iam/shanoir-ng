@@ -137,3 +137,5 @@ tr.opened { border-left: 1px solid var(--grey); border-top: 1px solid var(--grey
  input[type="number"]:focus {
      -moz-appearance: number-input;
  }
+
+ .download-link { color: var(--color-a); margin-left: 7px; cursor: pointer; display: inline-block; }

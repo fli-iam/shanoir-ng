@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.studycard.model;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import jakarta.persistence.*;
+import java.util.List;
+
 import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
@@ -29,7 +29,16 @@ import org.shanoir.ng.studycard.model.rule.DatasetAcquisitionRule;
 import org.shanoir.ng.studycard.model.rule.DatasetRule;
 import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
 
 /**
  * Study card.
@@ -143,7 +152,7 @@ public class StudyCard extends HalEntity implements Card {
     * @param dicomAttributes
     * @return true if the application had any effect on acquisitions
     */
-    public boolean apply(DatasetAcquisition acquisition, AcquisitionAttributes<?> dicomAttributes) {
+    public boolean apply(DatasetAcquisition acquisition, AcquisitionAttributes<?> dicomAttributes) throws IllegalStateException {
         boolean changeInAtLeastOneAcquisition = false;
         if (this.getRules() != null) {
             for (StudyCardRule<?> rule : this.getRules()) {

@@ -167,13 +167,15 @@ public class ImportFromTableWindow extends JFrame {
             resourceBundle.getString("shanoir.uploader.import.table.column.dicom.filter.study.description"),
             resourceBundle.getString("shanoir.uploader.import.table.column.dicom.filter.study.min.date"),
             resourceBundle.getString("shanoir.uploader.import.table.column.dicom.filter.serie.description"),
-            "PATIENT_VERIFICATION_FIRSTNAME",
-            "PATIENT_VERIFICATION_LASTNAME",
-            "PATIENT_VERIFICATION_BIRTHNAME",
-            "PATIENT_VERIFICATION_BIRTHDATE",
+            resourceBundle.getString("shanoir.uploader.import.table.column.verification.name.first"),
+            resourceBundle.getString("shanoir.uploader.import.table.column.verification.name.last"),
+            resourceBundle.getString("shanoir.uploader.import.table.column.verification.name.birth"),
+            resourceBundle.getString("shanoir.uploader.import.table.column.verification.birth.date"),
             resourceBundle.getString("shanoir.uploader.import.table.column.studycard"),
+            resourceBundle.getString("shanoir.uploader.import.table.column.center.id"),
             resourceBundle.getString("shanoir.uploader.import.table.column.common.name"),
             resourceBundle.getString("shanoir.uploader.import.table.column.comment"),
+            resourceBundle.getString("shanoir.uploader.import.table.column.data.reuse.agreement"),
             resourceBundle.getString("shanoir.uploader.import.table.column.error")
         };
         // Create table with data
@@ -208,8 +210,9 @@ public class ImportFromTableWindow extends JFrame {
         table.getColumnModel().getColumn(15).setMinWidth(150);
         table.getColumnModel().getColumn(16).setMinWidth(150);
         table.getColumnModel().getColumn(17).setMinWidth(150);
+        table.getColumnModel().getColumn(18).setMinWidth(300);
         // State
-        table.getColumnModel().getColumn(18).setMinWidth(350);
+        table.getColumnModel().getColumn(19).setMinWidth(350);
 
         // Add the table to the frame
         JPanel tablePanel = new JPanel(new BorderLayout());
@@ -288,8 +291,14 @@ public class ImportFromTableWindow extends JFrame {
             rowData.addAll(Arrays.asList(importJob.getDicomQuery().displayDicomQuery()));
             rowData.addAll(Arrays.asList(importJob.getPatientVerification().displayPatientVerification()));
             rowData.add(importJob.getStudyCardName());
+            if (importJob.getCenterId() == null) {
+                rowData.add("");
+            } else {
+                rowData.add(String.valueOf(importJob.getCenterId()));
+            }
             rowData.add(importJob.getSubjectName());
             rowData.add(importJob.getExaminationComment());
+            rowData.add(importJob.getExaminationDataReuseAgreement().toString());
             model.addRow(rowData.toArray());
         }
         this.error.setVisible(inError);

@@ -84,6 +84,11 @@
             <artifactId>shanoir-ng-study-rights</artifactId>
             <version>3.4.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.shanoir-ng</groupId>
+            <artifactId>shanoir-ng-storage</artifactId>
+            <version>3.4.0</version>
+        </dependency>
 
         <dependency>
             <groupId>com.mysql</groupId>

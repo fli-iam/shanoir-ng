@@ -31,7 +31,7 @@ import { ShanoirError } from '../../../../shared/models/error.model';
     selector: 'therapy-list',
     templateUrl: 'therapy-list.component.html',
     styleUrls: ['therapy-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class TherapiesListComponent  extends BrowserPaginEntityListComponent<Therapy> {
   @ViewChild('therapiesTable') table: TableComponent;

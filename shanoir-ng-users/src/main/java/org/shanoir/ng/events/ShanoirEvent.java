@@ -23,6 +23,7 @@ import jakarta.persistence.Table;
 @Table(name = "events",
         indexes = {
             @Index(name = "i_user_type", columnList = "userId, eventType"),
+            @Index(name = "i_last_update", columnList = "lastUpdate")
         }
     )
 public class ShanoirEvent extends ShanoirEventLight {

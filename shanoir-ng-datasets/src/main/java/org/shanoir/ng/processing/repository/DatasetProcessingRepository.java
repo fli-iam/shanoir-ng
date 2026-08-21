@@ -17,6 +17,7 @@ package org.shanoir.ng.processing.repository;
 import java.util.List;
 import java.util.Optional;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -43,6 +44,57 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      */
     List<DatasetProcessing> findAllByInputDatasets_Id(Long datasetId);
 
+    /**
+     * Find all processings that are linked to the given datasets through INPUT_OF_DATASET_PROCESSING
+     * table, in one single query, with the output datasets fetched along
+     *
+     * @param datasetIds
+     * @return
+     */
+    @EntityGraph(attributePaths = "outputDatasets")
+    List<DatasetProcessing> findAllByInputDatasets_IdIn(List<Long> datasetIds);
+
+    /**
+     * Find all dataset processing by comment and type.
+     *
+     * @param comment Comment.
+     * @param type Dataset processing type.
+     * @return List of dataset processing.
+     */
+    @Query(value = "WITH candidates AS ( "
+            + "SELECT processing.id AS id "
+            + "FROM dataset_processing AS processing "
+            + "    INNER JOIN execution_monitoring AS monitoring ON monitoring.id = processing.id "
+            + "WHERE processing.dataset_processing_type = :type "
+            + "    AND processing.comment LIKE :comment "
+            + "    AND monitoring.name LIKE '%post_processing' "
+            + "    AND monitoring.status = 1), "
+            + "processing_inputs AS ( "
+            + "SELECT proc.id AS processing_id, "
+            + "    proc.parent_id AS monitoring_id, "
+            + "    GROUP_CONCAT(inputs.dataset_id ORDER BY inputs.dataset_id) AS input_signature "
+            + "FROM input_of_dataset_processing AS inputs "
+            + "    INNER JOIN dataset_processing proc ON proc.id = inputs.processing_id"
+            + "    INNER JOIN candidates c ON c.id = proc.parent_id "
+            + "GROUP BY proc.id ), "
+            + "ranked AS ( "
+            + "SELECT pi.processing_id AS id, "
+            + "    ROW_NUMBER() OVER (PARTITION BY pi.input_signature ORDER BY monitoring.start_date DESC) AS rn "
+            + "FROM processing_inputs pi "
+            + "    INNER JOIN execution_monitoring monitoring ON monitoring.id = pi.monitoring_id) "
+            + "SELECT id FROM ranked WHERE rn = 1 ORDER BY id", nativeQuery = true)
+    List<Long> findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(String comment, int type);
+
+    /**
+     * Find all processings that are linked to given monitoring through parent_id column
+     *
+     * @param monitoringId
+     * @return
+     */
+    @Query(value = "SELECT DISTINCT processing.id FROM dataset_processing as processing "
+            + "WHERE processing.parent_id = :monitoringId", nativeQuery = true)
+    List<Long> findAllIdsByMonitoringId(Long monitoringId);
+
     List<DatasetProcessing> findAllByParentId(Long id);
 
     /**
@@ -57,4 +109,21 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id "
             + "WHERE acquisition.examination_id IN (:examinationIds)", nativeQuery = true)
     List<Long> findAllIdsByExaminationIds(List<Long> examinationIds);
+
+    /**
+     * Find all identifying fields for a given processing id
+     *
+     * @param processingId
+     * @return
+     */
+    @Query(value = "SELECT processing.monitoring_index as monitoringIndex, monitoring.identifier as monitoringIdentifier FROM dataset_processing as processing "
+            + "INNER JOIN dataset_processing as parent on parent.id = processing.parent_id "
+            + "INNER JOIN execution_monitoring as monitoring on monitoring.id = parent.id "
+            + "WHERE processing.id = :processingId", nativeQuery = true)
+    IdentificationData findIdentificationDataFromProcessingId(Long processingId);
+
+    interface IdentificationData {
+        Long getMonitoringIndex();
+        String getMonitoringIdentifier();
+    }
 }

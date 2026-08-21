@@ -31,6 +31,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>25</java.version>
         <spring.version>4.0.2</spring.version>
+        <mapstruct.version>1.5.3.Final</mapstruct.version>
+        <keycloak.version>26.2.5</keycloak.version>
         <dcm4che.version>5.31.1</dcm4che.version>
         <checkstyle.header.file>${project.basedir}/../shanoir-ng-back/java-header</checkstyle.header.file>
         <checkstyle.config.file>${project.basedir}/../shanoir-ng-back/checkstyle.xml</checkstyle.config.file>
@@ -98,7 +100,38 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <version>7.0.2</version>
         </dependency>
 
-        <!-- DCM4CHE -->
+        <!-- duplicate definition, but only here to avoid warning in maven compile -->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-ant</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+
+        <!-- Keycloak -->
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-admin-client</artifactId>
+            <version>26.0.5</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.activation</groupId>
+                    <artifactId>jakarta.activation</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- DCM4CHE dependencies -->
         <dependency>
             <groupId>org.dcm4che</groupId>
             <artifactId>dcm4che-core</artifactId>

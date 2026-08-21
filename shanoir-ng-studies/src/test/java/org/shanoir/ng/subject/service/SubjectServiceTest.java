@@ -29,15 +29,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.studyexamination.StudyExaminationRepository;
-import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.PseudonymusHashValues;
@@ -47,13 +42,12 @@ import org.shanoir.ng.subject.model.UserPersonalCommentSubject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 /**
  * Subject service test.
@@ -65,47 +59,41 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 public class SubjectServiceTest {
 
-    private static final Long SUBJECT_ID = 1L;
+    private static final Long TEMP_ID = 1L;
 
-    @Mock
+    @MockitoBean
     private SubjectRepository subjectRepository;
 
-    @Mock
-    private RabbitTemplate rabbitTemplate;
+    @MockitoBean
+    private ShanoirEventService eventService;
 
-    @Mock
-    private SubjectMapper subjectMapperMock;
-
-    @InjectMocks
+    @Autowired
     private SubjectServiceImpl subjectService;
-
-    @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
-    private StudyExaminationRepository studyExaminationRepository;
 
     @BeforeEach
     public void setup() {
-        given(subjectRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createSubject()));
-        given(subjectRepository.findById(SUBJECT_ID)).willReturn(Optional.of(ModelsUtil.createSubject()));
         List<Subject> subjects = new ArrayList<Subject>();
         Subject subject = createSubjectToUpdate();
         subject.setStudy(ModelsUtil.createStudy());
         subjects.add(subject);
+
+        given(subjectRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createSubject()));
+        given(subjectRepository.findById(TEMP_ID)).willReturn(Optional.of(ModelsUtil.createSubjectWithStudy(TEMP_ID)));
         given(subjectRepository.findByName(ModelsUtil.SUBJECT_NAME)).willReturn(subjects);
         given(subjectRepository.findByName("new name")).willReturn(subjects);
         given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectToSave());
+
     }
 
     @Test
     @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void deleteByIdTest() throws EntityNotFoundException {
-        subjectService.deleteById(SUBJECT_ID);
+        subjectService.deleteById(TEMP_ID);
         Mockito.verify(subjectRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void findAllTest() {
         final List<Subject> subjects = subjectService.findAll();
         Assertions.assertNotNull(subjects);
@@ -114,21 +102,24 @@ public class SubjectServiceTest {
     }
 
     @Test
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
     public void findByIdTest() {
-        final Subject subject = subjectService.findById(SUBJECT_ID);
+        final Subject subject = subjectService.findById(TEMP_ID);
         Assertions.assertNotNull(subject);
         Assertions.assertTrue(ModelsUtil.SUBJECT_NAME.equals(subject.getName()));
         Mockito.verify(subjectRepository, Mockito.times(1)).findById(Mockito.anyLong());
     }
 
     @Test
-    public void saveTest() throws MicroServiceCommunicationException, ShanoirException {
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void saveTest() throws ShanoirException {
         subjectService.create(createSubjectToSave(), true);
         Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
     }
 
     @Test
-    public void updateTest() throws RestServiceException, ShanoirException {
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void updateTest() throws ShanoirException {
         Subject subject = createSubjectToUpdate();
         subject.setStudy(ModelsUtil.createStudy());
         final Subject updatedSubject = subjectService.update(subject);
@@ -138,7 +129,8 @@ public class SubjectServiceTest {
     }
 
     @Test
-    public void updateTestChangeName() throws EntityNotFoundException, MicroServiceCommunicationException, RestServiceException {
+    @WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
+    public void updateTestChangeName() {
         try {
             Subject updated = createSubjectToUpdate();
             updated.setName("new name");
@@ -152,15 +144,14 @@ public class SubjectServiceTest {
     }
 
     private Subject createSubjectToUpdate() {
-        final Subject subject = new Subject();
-        subject.setId(SUBJECT_ID);
+        final Subject subject = ModelsUtil.createSubjectWithStudy(TEMP_ID);
         subject.setSex(Sex.F);
         subject.setName(ModelsUtil.SUBJECT_NAME);
         return subject;
     }
 
     private Subject createSubjectToSave() {
-        final Subject subject = new Subject();
+        final Subject subject = ModelsUtil.createSubjectWithStudy(TEMP_ID);
         subject.setBirthDate(Instant.ofEpochMilli(1392122691000L).atZone(ZoneId.systemDefault()).toLocalDate());
         subject.setIdentifier("Titi");
         subject.setImagedObjectCategory(ImagedObjectCategory.PHANTOM);

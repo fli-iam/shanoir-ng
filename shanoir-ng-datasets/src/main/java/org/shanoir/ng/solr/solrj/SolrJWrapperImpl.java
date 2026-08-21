@@ -78,6 +78,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
     private static final String SUBJECT_NAME_FACET = "subjectName";
     private static final String SUBJECT_ID_FACET = "subjectId";
     private static final String SORTING_INDEX_FACET = "sortingIndex";
+    private static final String DATA_REUSE_AGREEMENT_FACET = "dataReuseAgreement";
     private static final String SUBJECT_TYPE_FACET = "subjectType";
     private static final String STUDY_NAME_FACET = "studyName";
     private static final String STUDY_ID_FACET = "studyId";
@@ -90,6 +91,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
     private static final String PROCESSED_FACET = "processed";
     private static final String IMPORT_DATE_FACET = "importDate";
     private static final String USERNAME_IMPORT_FACET = "username";
+    private static final String QUALITY_TAG_FACET = "qualityTag";
     private static final String UNKNOWN = "<none>";
 
     private static final String[] DOCUMENT_FACET_LIST = {
@@ -109,6 +111,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             STUDY_ID_FACET,
             SUBJECT_ID_FACET,
             SORTING_INDEX_FACET,
+            DATA_REUSE_AGREEMENT_FACET,
             SUBJECT_TYPE_FACET,
             CENTER_ID_FACET,
             SLICE_THICKNESS_FACET,
@@ -117,7 +120,8 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             TAGS_FACET,
             PROCESSED_FACET,
             IMPORT_DATE_FACET,
-            USERNAME_IMPORT_FACET
+            USERNAME_IMPORT_FACET,
+            QUALITY_TAG_FACET
     };
 
     private static final String[] TEXTUAL_FACET_LIST = {
@@ -131,7 +135,9 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             STUDY_NAME_FACET,
             CENTER_NAME_FACET,
             TAGS_FACET,
-            PROCESSED_FACET
+            PROCESSED_FACET,
+            DATA_REUSE_AGREEMENT_FACET,
+            QUALITY_TAG_FACET
     };
 
     @Autowired
@@ -503,7 +509,9 @@ public class SolrJWrapperImpl implements SolrJWrapper {
         addFilterQuery(query, DATASET_NATURE_FACET, shanoirQuery.getDatasetNature());
         addFilterQuery(query, CENTER_NAME_FACET, shanoirQuery.getCenterName());
         addFilterQuery(query, TAGS_FACET, shanoirQuery.getTags());
+        addFilterQuery(query, QUALITY_TAG_FACET, shanoirQuery.getQualityTag());
         addFilterQueryFromBoolean(query, PROCESSED_FACET, shanoirQuery.getProcessed());
+        addFilterQueryFromBoolean(query, DATA_REUSE_AGREEMENT_FACET, shanoirQuery.getDataReuseAgreement());
         addFilterQueryFromRange(query, SLICE_THICKNESS_FACET, shanoirQuery.getSliceThickness());
         addFilterQueryFromRange(query, PIXEL_BANDWIDTH_FACET, shanoirQuery.getPixelBandwidth());
         addFilterQueryFromRange(query, MAGNETIC_FIELD_STRENGHT_FACET, shanoirQuery.getMagneticFieldStrength());
@@ -539,6 +547,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             solrDoc.setSubjectName((String) document.getFirstValue("subjectName"));
             solrDoc.setSubjectId((Long) document.getFirstValue("subjectId"));
             solrDoc.setSortingIndex((Integer) document.getFirstValue("sortingIndex"));
+            solrDoc.setDataReuseAgreement((Boolean) document.getFirstValue("dataReuseAgreement"));
             if (document.getFieldValues("tags") != null) {
                 solrDoc.setTags(document.getFieldValues("tags").stream()
                         .map(object -> Objects.toString(object, null))
@@ -553,8 +562,10 @@ public class SolrJWrapperImpl implements SolrJWrapper {
             solrDoc.setPixelBandwidth((Double) document.getFirstValue("pixelBandwidth"));
             solrDoc.setMagneticFieldStrength((Double) document.getFirstValue("magneticFieldStrength"));
             solrDoc.setProcessed((Boolean) document.getFirstValue("processed"));
+            solrDoc.setDataReuseAgreement((Boolean) document.getFirstValue("dataReuseAgreement"));
             solrDoc.setImportDate((Date) document.getFirstValue("importDate"));
             solrDoc.setUsername((String) document.getFirstValue("username"));
+            solrDoc.setQualityTag((String) document.getFirstValue("qualityTag"));
             solrDocuments.add(solrDoc);
         }
         SolrResultPage<ShanoirSolrDocument> page = new SolrResultPage<>(solrDocuments, pageable, documents.getNumFound(), null);

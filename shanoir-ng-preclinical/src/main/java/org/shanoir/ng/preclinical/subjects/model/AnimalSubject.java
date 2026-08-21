@@ -67,6 +67,26 @@ public class AnimalSubject implements AbstractEntityInterface {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "animalSubject", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubjectTherapy> subjectTherapies = new ArrayList<>();
 
+    public AnimalSubject(AnimalSubject source) {
+        this.specie = source.getSpecie();
+        this.strain = source.getStrain();
+        this.biotype = source.getBiotype();
+        this.provider = source.getProvider();
+        this.stabulation = source.getStabulation();
+        for (SubjectPathology subjectPathology : source.getSubjectPathologies()) {
+            SubjectPathology newSubjectPathology = new SubjectPathology(subjectPathology);
+            newSubjectPathology.setAnimalSubject(this);
+            this.subjectPathologies.add(newSubjectPathology);
+        }
+        for (SubjectTherapy subjectTherapy : source.getSubjectTherapies()) {
+            SubjectTherapy newSubjectTherapy = new SubjectTherapy(subjectTherapy);
+            newSubjectTherapy.setAnimalSubject(this);
+            this.subjectTherapies.add(newSubjectTherapy);
+        }
+    }
+
+    public AnimalSubject() { }
+
     /**
      * none
      *

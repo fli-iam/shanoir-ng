@@ -15,6 +15,9 @@
 package org.shanoir.ng.datasetacquisition.controler;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -33,12 +36,16 @@ import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.storage.StorageException;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -50,18 +57,25 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @Controller
@@ -96,6 +110,16 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    private StorageService storageService;
+
+    private final HttpServletRequest request;
+
+    @Autowired
+    public DatasetAcquisitionApiController(final HttpServletRequest request) {
+        this.request = request;
+    }
+
     @Override
     public ResponseEntity<Void> createNewDatasetAcquisition(
             @Parameter(description = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
@@ -111,12 +135,15 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
     @RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    @Transactional
     public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         EegImportJob importJob = objectMapper.readValue(importJobAsString.getBody(), EegImportJob.class);
         eegImporterService.createEegDataset(importJob);
-        importerService.cleanTempFiles(importJob.getWorkFolder());
+        try {
+            importerService.cleanTempFiles(importJob.getWorkFolder());
+        } catch (Exception e) {
+            LOG.warn("Could not clean temp files for workFolder {}: {}", importJob.getWorkFolder(), e.getMessage());
+        }
         return HttpStatus.OK.value();
     }
 
@@ -205,7 +232,18 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         try {
             Long studyId = datasetAcquisitionService.findById(datasetAcquisitionId).getExamination().getStudyId();
 
-            datasetAcquisitionService.deleteById(datasetAcquisitionId, null);
+            ShanoirEvent event = new ShanoirEvent(
+                    ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                    String.valueOf(datasetAcquisitionId),
+                    KeycloakUtil.getTokenUserId(),
+                    "Starting deletion of acquisition with id : " + datasetAcquisitionId,
+                    ShanoirEvent.IN_PROGRESS,
+                    0,
+                    studyId);
+
+            eventService.publishEvent(event);
+
+            datasetAcquisitionService.deleteById(datasetAcquisitionId, event);
 
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
 
@@ -216,6 +254,62 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             LOG.error("Error while deleting dataset acquisition: ", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionsLeftEmptyBy(List<Long> datasetIds) {
+        List<DatasetAcquisition> leftEmpty = datasetAcquisitionService.findAcquisitionsLeftEmptyBy(datasetIds);
+        if (CollectionUtils.isEmpty(leftEmpty)) {
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(leftEmpty), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findEmptyDatasetAcquisitions(Long studyId) {
+        List<DatasetAcquisition> empty = datasetAcquisitionService.findEmptyAcquisitions(studyId);
+        if (CollectionUtils.isEmpty(empty)) {
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(empty), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<Long>> deleteEmptyDatasetAcquisitions(Long studyId) {
+        List<DatasetAcquisition> empty = datasetAcquisitionService.findEmptyAcquisitions(studyId);
+
+        ShanoirEvent event = new ShanoirEvent(
+                ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT,
+                studyId != null ? String.valueOf(studyId) : null,
+                KeycloakUtil.getTokenUserId(),
+                "Starting the clean up of " + empty.size() + " empty dataset acquisition(s)",
+                ShanoirEvent.IN_PROGRESS,
+                0f,
+                studyId);
+        eventService.publishEvent(event);
+
+        List<Long> deleted = new ArrayList<>();
+        int handled = 0;
+        for (DatasetAcquisition acquisition : empty) {
+            try {
+                datasetAcquisitionService.deleteEmptyAcquisition(acquisition.getId());
+                deleted.add(acquisition.getId());
+            } catch (EntityNotFoundException | RestServiceException e) {
+                LOG.warn("Could not remove the empty dataset acquisition {}", acquisition.getId(), e);
+            }
+            // the ones that could not be removed still make the clean up progress
+            handled++;
+            event.setProgress((float) handled / empty.size());
+            eventService.publishEvent(event);
+        }
+
+        event.setMessage(deleted.size() + " empty dataset acquisition(s) deleted.");
+        event.setProgress(1f);
+        event.setStatus(ShanoirEvent.SUCCESS);
+        eventService.publishEvent(event);
+
+        LOG.info("Clean up of empty dataset acquisitions: {} removed", deleted.size());
+        return new ResponseEntity<>(deleted, HttpStatus.OK);
     }
 
     @Override
@@ -238,8 +332,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);
     }
 
-
-
     @Override
     public ResponseEntity<Void> updateDatasetAcquisition(
               Long datasetAcquisitionId,
@@ -256,6 +348,56 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
         }
     }
 
+    @Override
+    public ResponseEntity<Void> addExtraData(
+            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+            @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+        try {
+            if (storageService.existsAcquisitionExtraData(datasetAcquisitionId, file.getOriginalFilename())) {
+                LOG.warn("Extra-data file {} already exists for dataset acquisition {}, upload rejected.",
+                        file.getOriginalFilename(), datasetAcquisitionId);
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
+            }
+        } catch (StorageException e) {
+            LOG.error("Error checking existing extra-data file {} for dataset acquisition {}",
+                    file.getOriginalFilename(), datasetAcquisitionId, e);
+            return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        if (datasetAcquisitionService.addExtraData(datasetAcquisitionId, file) != null) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @Override
+    public void downloadExtraData(
+            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName,
+            HttpServletResponse response) throws RestServiceException, IOException {
+        try {
+            Resource fileToDownload = storageService.loadAcquisitionExtraData(datasetAcquisitionId, fileName);
+            if (fileToDownload != null) {
+                String contentType = request.getServletContext().getMimeType(fileName);
+                if (contentType == null) {
+                    contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+                }
+                response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
+                response.setContentType(contentType);
+                if (fileToDownload.isReadable() && fileToDownload.contentLength() > 0) {
+                    response.setContentLengthLong(fileToDownload.contentLength());
+                }
+                try (InputStream is = fileToDownload.getInputStream()) {
+                    org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+                    response.flushBuffer();
+                }
+            } else {
+                response.sendError(HttpStatus.NO_CONTENT.value());
+                return;
+            }
+        } catch (StorageException e) {
+            LOG.error("Error downloading file {} for dataset acquisition {}: {}", fileName, datasetAcquisitionId, e);
+        }
+    }
 
     private void validate(BindingResult result) throws RestServiceException {
         final FieldErrorMap errors = new FieldErrorMap(result);
@@ -264,4 +406,5 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
             throw new RestServiceException(error);
         }
     }
+
 }

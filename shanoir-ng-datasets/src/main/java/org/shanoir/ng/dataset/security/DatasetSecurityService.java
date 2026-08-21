@@ -25,22 +25,24 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.DatasetForRights;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetRightsDTO;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionForRights;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.web.SeriesInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.ExaminationForRightsDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.UserRights;
@@ -56,6 +58,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class DatasetSecurityService {
@@ -88,6 +92,9 @@ public class DatasetSecurityService {
     private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDHandler;
 
     @Autowired
+    private SeriesInstanceUIDHandler seriesInstanceUIDHandler;
+
+    @Autowired
     private RabbitTemplate rabbitTemplate;
 
     /**
@@ -105,6 +112,63 @@ public class DatasetSecurityService {
             return false;
         }
         return studyRightsService.hasRightOnStudy(studyId, rightStr);
+    }
+
+    /**
+     * Check that the connected user is allowed to visualize the series requested
+     * by the viewer. A series that carries a dataset-level virtual UID, e.g. a
+     * SEG or SR annotation, is subject to the per-dataset visualization rule
+     * (see {@link #hasRightToVisualizeDataset(Long)}); any other series, e.g. a
+     * regular acquisition, is left to the examination-level rights check.
+     *
+     * @param seriesOrDatasetUID the virtual UID requested by the viewer
+     * @return true or false
+     */
+    public boolean hasRightToVisualizeSeries(String seriesOrDatasetUID) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        if (!seriesInstanceUIDHandler.isDatasetUID(seriesOrDatasetUID)) {
+            return true;
+        }
+        return hasRightToVisualizeDataset(seriesInstanceUIDHandler.extractDatasetId(seriesOrDatasetUID));
+    }
+
+    /**
+     * Check that the connected user is allowed to visualize the given dataset
+     * in the viewer.
+     *
+     * The CAN_DOWNLOAD right is required in every case, but it is already
+     * enforced upstream by the viewer endpoints (see DICOMWebApi), so this
+     * method only adds the ownership rule on top: when the dataset has no owner
+     * (username is null), any user who reached this point can open it; when it
+     * is owned, e.g. an annotation imported with the CAN_ANNOTATE right, only
+     * its owner (who still needs the CAN_ANNOTATE right), a user with the
+     * CAN_ANNOTATE_REVIEW right, or a study administrator (CAN_ADMINISTRATE) can open it.
+     *
+     * @param datasetId the dataset id
+     * @return true or false
+     */
+    @Transactional
+    public boolean hasRightToVisualizeDataset(Long datasetId) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
+        if (dataset == null) {
+            return false;
+        }
+        Long owner = dataset.getUserId();
+        if (owner == null) {
+            return true;
+        }
+        Long studyId = dataset.getStudyId();
+        if (owner.equals(KeycloakUtil.getTokenUserId())
+                && hasRightOnStudy(studyId, StudyUserRight.CAN_ANNOTATE.name())) {
+            return true;
+        }
+        return hasRightOnStudy(studyId, StudyUserRight.CAN_ANNOTATE_REVIEW.name())
+                || hasRightOnStudy(studyId, StudyUserRight.CAN_ADMINISTRATE.name());
     }
 
     /**
@@ -328,15 +392,18 @@ public class DatasetSecurityService {
      * @return true or false
      * @throws EntityNotFoundException
      */
+    @Transactional
     public boolean hasRightOnDataset(Long datasetId, String rightStr) throws EntityNotFoundException {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }
-        Dataset dataset = datasetRepository.findById(datasetId).orElse(null);
-        if (dataset == null) {
+        DatasetRightsDTO dto = datasetRepository.findRightsDtoBaseById(datasetId);
+        if (dto == null) {
             throw new EntityNotFoundException("Cannot find dataset with id " + datasetId);
         }
-        return hasRightOnTrustedDataset(dataset, rightStr);
+        Set<Long> related = datasetRepository.findRelatedStudyIds(datasetId);
+        dto.setRelatedStudies(related);
+        return hasRightOnTrustedDataset(dto, rightStr);
     }
 
     /**
@@ -474,7 +541,44 @@ public class DatasetSecurityService {
         return hasRightOnStudiesCenter(dataset.getCenterId(), studies, rightStr);
     }
 
+    /**
+     * Check that the connected user has the given right for the given dataset.
+     *
+     * @param dataset the dataset
+     * @param rightStr the right
+     * @return true or false
+     */
+    public boolean hasRightOnTrustedDataset(DatasetRightsDTO dataset, String rightStr) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        if (dataset == null) {
+            throw new IllegalArgumentException("Dataset cannot be null here.");
+        }
+
+        Long studyId = getStudyIdFromDataset(dataset);
+
+        Set<Long> studies = new HashSet<>();
+        studies.add(studyId);
+        CollectionUtils.emptyIfNull(dataset.getRelatedStudies()).forEach(s -> studies.add(s.getId()));
+        return hasRightOnStudiesCenter(dataset.getCenterId(), studies, rightStr);
+    }
+
     private static Long getStudyIdFromDataset(Dataset dataset) {
+        Long studyId;
+        if (dataset.getDatasetProcessing() != null) {
+            studyId = dataset.getDatasetProcessing().getStudyId();
+        } else if (dataset.getDatasetAcquisition() != null
+                && dataset.getDatasetAcquisition().getExamination() != null
+                && dataset.getDatasetAcquisition().getExamination().getStudyId() != null) {
+            studyId = dataset.getDatasetAcquisition().getExamination().getStudyId();
+        } else {
+            throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");
+        }
+        return studyId;
+    }
+
+    private static Long getStudyIdFromDataset(DatasetRightsDTO dataset) {
         Long studyId;
         if (dataset.getDatasetProcessing() != null) {
             studyId = dataset.getDatasetProcessing().getStudyId();
@@ -731,6 +835,42 @@ public class DatasetSecurityService {
                 Long centerId = ds.getDatasetAcquisition().getExamination().getCenterId();
                 // check rightStr on study, then check center rights
                 if (!userRights.hasStudyRights(studyId, rightStr) || !userRights.hasStudyCenterRights(studyId, centerId)) {
+                    toRemove.add(ds);
+                }
+            }
+        });
+        list.removeAll(toRemove);
+        return true;
+    }
+
+    /**
+     * Filter out the annotation datasets, e.g. displayed in the study tree, that
+     * the connected user is not allowed to see, mirroring the per-dataset
+     * visualization rule of the viewer (see {@link #hasRightToVisualizeDataset(Long)}):
+     * an annotation with no owner (username null) stays visible to everyone, while
+     * an owned one is kept only for its owner (with the CAN_ANNOTATE right), a
+     * user with the CAN_ANNOTATE_REVIEW right, or a study administrator (CAN_ADMINISTRATE).
+     * Non-annotation datasets carry no owner and are never removed here.
+     *
+     * @param list the datasets to filter in place
+     * @return true
+     */
+    public boolean filterAnnotationDatasetList(List<Dataset> list) {
+        if (KeycloakUtil.isAdmin()) {
+            return true;
+        }
+        Long userId = KeycloakUtil.getTokenUserId();
+        UserRights userRights = studyRightsService.getUserRights();
+        Set<Dataset> toRemove = new HashSet<>();
+        list.forEach((Dataset ds) -> {
+            Long owner = ds.getUserId();
+            if (owner != null) {
+                Long studyId = ds.getStudyId();
+                boolean canSeeAllAnnotations = userRights.hasStudyRights(studyId, StudyUserRight.CAN_ANNOTATE_REVIEW.name())
+                        || userRights.hasStudyRights(studyId, StudyUserRight.CAN_ADMINISTRATE.name());
+                boolean ownAnnotator = owner.equals(userId)
+                        && userRights.hasStudyRights(studyId, StudyUserRight.CAN_ANNOTATE.name());
+                if (!canSeeAllAnnotations && !ownAnnotator) {
                     toRemove.add(ds);
                 }
             }
@@ -1098,28 +1238,64 @@ public class DatasetSecurityService {
     /**
      * Check that the connected user has the CAN_EXECUTE right for every dataset in the execution candidate.
      *
-     * @param executionCandidate the execution candidate
+     * @param executionCandidates the execution candidates
      * @return true or false
      * @throws EntityNotFoundException
      */
-    public boolean hasRightOnExecutionCandidate(ExecutionCandidateDTO executionCandidate) throws EntityNotFoundException {
+    public boolean hasRightOnExecutionCandidates(List<ExecutionCandidateDTO> executionCandidates) throws EntityNotFoundException {
         if (KeycloakUtil.isAdmin()) {
             return true;
         }
-        if (executionCandidate == null) {
+        if (executionCandidates == null || executionCandidates.isEmpty()) {
             throw new IllegalArgumentException("Execution candidate cannot be null here.");
         }
         Set<Long> dsIds = new HashSet<>();
-        if (executionCandidate.getDatasetParameters() != null) {
-            for (DatasetParameterDTO param : executionCandidate.getDatasetParameters()) {
-                if (param.getDatasetIds() != null) {
-                    dsIds.addAll(param.getDatasetIds());
+        for (ExecutionCandidateDTO executionCandidate : executionCandidates) {
+            if (executionCandidate.getDatasetParameters() != null) {
+                for (DatasetParameterDTO param : executionCandidate.getDatasetParameters()) {
+                    if (param.getDatasetIds() != null) {
+                        dsIds.addAll(param.getDatasetIds());
+                    }
                 }
             }
         }
         return hasRightOnEveryDataset(new ArrayList<>(dsIds), StudyUserRight.CAN_EXECUTE.toString());
     }
 
+    /**
+     * Check that the GIVEN user has the CAN_SEE_ALL right for every dataset.
+     * @param datasetIds
+     * @param userId
+     * @param role
+     * @return true or false
+     */
+    @Transactional
+    public boolean checkDatasetRelatedDatasets(List<Long> datasetIds, Long userId, KeycloakUtil.UserRole role) {
+        // If the entry is empty, return an empty list
+        if (KeycloakUtil.UserRole.ADMIN.equals(role) || datasetIds == null || datasetIds.isEmpty()) {
+            return true;
+        }
+        List<DatasetForRights> dtos = datasetRepository.findDatasetsForRights(datasetIds)
+                .stream()
+                .map(ds -> new DatasetForRights(ds.getId(), ds.getCenterId(), ds.getStudyId(), ds.getRelatedStudiesIds()))
+                .collect(Collectors.toList());
+        UserRights userRights = studyRightsService.getUserRights(userId);
+        for (DatasetForRights dataset : dtos) {
+            Set<Long> studyIds = dataset.getAllStudiesIds();
+            Long centerId = dataset.getCenterId();
+            if (!userRights.hasStudiesCenterRights(studyIds, centerId, StudyUserRight.CAN_SEE_ALL.toString())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check that the given study is a draft.
+     *
+     * @param studyId the study id
+     * @return true or false
+     */
     public boolean isDraftStudy(Long studyId) {
         Study study = studyRepository.findById(studyId).orElse(null);
         if (study == null) {

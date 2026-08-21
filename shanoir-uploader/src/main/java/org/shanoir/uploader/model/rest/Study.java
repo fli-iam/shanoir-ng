@@ -1,19 +1,18 @@
 package org.shanoir.uploader.model.rest;
 
+import java.util.Date;
 import java.util.List;
 
 import org.shanoir.uploader.ShUpConfig;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 /**
  * Light implementation of Study object from ms studies.
  * ShUp has no dependency to ms studies, what is wanted
- * so far, to keep the coupling more lose. ShUp is a tool
- * for imports: dependency to ms import and ms datasets.
+ * so far, to keep the coupling more loose. ShUp is a tool
+ * for imports: dependencies to ms import and ms datasets.
  */
 public class Study implements Comparable<Study> {
-
-    public static final String SC_MANDATORY = "MANDATORY";
-
-    public static final String SC_DISABLED = "DISABLED";
 
     private Long id;
 
@@ -27,7 +26,27 @@ public class Study implements Comparable<Study> {
 
     private Boolean compatible;
 
+    private Boolean isDraft;
+
     private String studyCardPolicy;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
+    private Date startDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Europe/Paris")
+    private Date endDate;
+
+    private StudyExtraDetails extraDetails;
+
+    private Profile profile;
+
+    public StudyExtraDetails getExtraDetails() {
+        return extraDetails;
+    }
+
+    public void setExtraDetails(StudyExtraDetails extraDetails) {
+        this.extraDetails = extraDetails;
+    }
 
     public Long getId() {
         return id;
@@ -102,11 +121,46 @@ public class Study implements Comparable<Study> {
     }
 
     public boolean isWithStudyCards() {
-        if(SC_MANDATORY.equals(studyCardPolicy)) {
-            return true;
-        } else if(SC_DISABLED.equals(studyCardPolicy)) {
-            return false;
-        } else { return true; }
+        if (studyCardPolicy != null) {
+            if (studyCardPolicy.equals(StudyCardPolicy.MANDATORY.getIdString())) {
+                return true;
+            } else if (studyCardPolicy.equals(StudyCardPolicy.DISABLED.getIdString())) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public Boolean getIsDraft() {
+        return isDraft;
+    }
+
+    public void setIsDraft(Boolean isDraft) {
+        this.isDraft = isDraft;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 
 }

@@ -17,19 +17,14 @@ package org.shanoir.ng.dataset.controler;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -47,9 +42,11 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.OverallStatistics;
 import org.shanoir.ng.dataset.service.CreateStatisticsService;
+import org.shanoir.ng.dataset.service.CsvCopyService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -69,6 +66,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -76,8 +74,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -92,7 +90,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.context.event.EventListener;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -111,14 +108,7 @@ public class DatasetApiController implements DatasetApi {
 
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
 
-    private static final String SUB_PREFIX = "sub-";
-
-    private static final String SES_PREFIX = "ses-";
-
     private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
-
-    @Value("${datasets-data}")
-    private String niftiStorageDir;
 
     @Autowired
     private DatasetMapper datasetMapper;
@@ -169,12 +159,18 @@ public class DatasetApiController implements DatasetApi {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private StorageService storageService;
+
+    @Autowired
+    private DatasetAcquisitionService datasetAcquisitionService;
+
     /** Number of downloadable datasets. */
     private static final int DATASET_LIMIT = 500;
 
     @Override
     public ResponseEntity<Void> deleteDataset(
-            final Long datasetId) throws EntityNotFoundException, RestServiceException {
+            final Long datasetId, final boolean deleteEmptyAcquisitions) throws EntityNotFoundException, RestServiceException {
         try {
             Dataset ds = datasetService.findById(datasetId);
             if (ds == null) {
@@ -182,8 +178,12 @@ public class DatasetApiController implements DatasetApi {
             }
             LOG.info("Deletion of dataset with ID: " + ds.getId());
             Long studyId = datasetService.getStudyId(ds);
+            Long acquisitionId = ds.getDatasetAcquisition() != null ? ds.getDatasetAcquisition().getId() : null;
             datasetService.deleteById(datasetId);
             solrService.deleteFromIndex(datasetId);
+            if (deleteEmptyAcquisitions && acquisitionId != null) {
+                removeAcquisitionsLeftEmpty(Collections.singleton(acquisitionId));
+            }
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.RELOAD_BIDS, objectMapper.writeValueAsString(studyId));
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (EntityNotFoundException | RestServiceException e) {
@@ -197,21 +197,51 @@ public class DatasetApiController implements DatasetApi {
     @Override
     public ResponseEntity<Void> deleteDatasets(
             @Parameter(description = "ids of the datasets", required = true) @Valid
-            @RequestBody List<Long> datasetIds)
+            @RequestBody List<Long> datasetIds, final boolean deleteEmptyAcquisitions)
             throws RestServiceException {
         try {
             if (datasetIds.size() > DATASET_LIMIT) {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.FORBIDDEN.value(), "This selection includes " + datasetIds.size() + " datasets. You can't delete more than " + DATASET_LIMIT + " datasets."));
             }
+            // the parents have to be collected before their datasets are gone
+            Set<Long> acquisitionIds = deleteEmptyAcquisitions ? findParentAcquisitionIds(datasetIds) : Collections.emptySet();
             datasetService.deleteByIdIn(datasetIds);
             solrService.deleteFromIndex(datasetIds);
+            removeAcquisitionsLeftEmpty(acquisitionIds);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RestServiceException e) {
             throw e;
         } catch (Exception e) {
             ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while deleting dataset. Please check DICOM server configuration.", e.getMessage());
             throw new RestServiceException(e, error);
+        }
+    }
+
+    private Set<Long> findParentAcquisitionIds(List<Long> datasetIds) {
+        return datasetService.findByIdIn(datasetIds).stream()
+                .map(Dataset::getDatasetAcquisition)
+                .filter(Objects::nonNull)
+                .map(DatasetAcquisition::getId)
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Removes the acquisitions that the deletion has just left empty, once and for all of them.
+     * A failure here does not fail the deletion: the datasets are already gone, only their now
+     * empty parent is left behind.
+     *
+     * @param acquisitionIds the acquisitions the deleted datasets belonged to
+     */
+    private void removeAcquisitionsLeftEmpty(Collection<Long> acquisitionIds) {
+        for (Long acquisitionId : acquisitionIds) {
+            try {
+                if (datasetAcquisitionService.isEmptyAndRemovable(acquisitionId)) {
+                    datasetAcquisitionService.deleteEmptyAcquisition(acquisitionId);
+                }
+            } catch (Exception e) {
+                LOG.warn("Could not remove the dataset acquisition {} left empty by the deletion of its datasets", acquisitionId, e);
+            }
         }
     }
 
@@ -510,29 +540,6 @@ public class DatasetApiController implements DatasetApi {
         return new ResponseEntity<>(downloadDataList, HttpStatus.OK);
     }
 
-
-    /**
-     * This method receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
-     * @param urls
-     * @param workFolder
-     * @throws IOException
-     * @throws MessagingException
-     */
-    public void copyFilesForBIDSExport(final List<URL> urls, final File workFolder, final String subjectName,
-            final String sesId, final String modalityLabel) throws IOException {
-        for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-            URL url =  iterator.next();
-            File srcFile = new File(url.getPath());
-            String destFilePath = srcFile.getPath().substring(niftiStorageDir.length() + 1, srcFile.getPath().lastIndexOf('/'));
-            File destFolder = new File(workFolder.getAbsolutePath() + File.separator + destFilePath);
-            destFolder.mkdirs();
-            String extensionType = srcFile.getPath().substring(srcFile.getPath().lastIndexOf(".") + 1);
-            String destFileNameBIDS = SUB_PREFIX + subjectName + "_" + SES_PREFIX + sesId + "_" + modalityLabel + "." + extensionType;
-            File destFile = new File(destFolder.getAbsolutePath() + File.separator + destFileNameBIDS);
-            Files.copy(srcFile.toPath(), destFile.toPath());
-        }
-    }
-
     /**
      * Validate a dataset
      *
@@ -611,51 +618,29 @@ public class DatasetApiController implements DatasetApi {
     }
 
     @Override
-    public ResponseEntity<ByteArrayResource> downloadStatisticsByEventId(String eventId) throws IOException {
+    public ResponseEntity<ByteArrayResource> downloadByEventId(String eventId) throws IOException {
         try {
             String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
             File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-            File zipFile = new File(userDir + File.separator + "shanoirExportStatistics_" + eventId + ZIP);
-
+            File zipFile = new File(userDir + File.separator + CreateStatisticsService.TSV_FILE_PREFIX + "_" + eventId + ZIP);
+            if (!zipFile.exists()) {
+                // if it doesn't exist, maybe we are in the case of a copy report TSV file
+                zipFile = new File(userDir + File.separator + CsvCopyService.TSV_FILE_PREFIX + "_" + eventId + ".tsv");
+                if (!zipFile.exists()) {
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                }
+            }
             byte[] data = Files.readAllBytes(zipFile.toPath());
             ByteArrayResource resource = new ByteArrayResource(data);
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename = " + zipFile.getName())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + zipFile.getName() + "\"")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .contentLength(data.length)
                     .body(resource);
         } catch (Exception e) {
             LOG.error("Error during download of statistics for event with id = " + eventId + ".");
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-    }
-
-    @Scheduled(cron = "0 0 6 * * *", zone = "Europe/Paris")
-    public void deleteStats() {
-        try {
-            String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-            File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-            Path directoryPath = Paths.get(userDir.getPath());
-
-            long currentTime = System.currentTimeMillis();
-            long sixHoursInMillis = TimeUnit.HOURS.toMillis(6);
-            DirectoryStream<Path> directoryStream = Files.newDirectoryStream(directoryPath);
-
-            for (Path filePath : directoryStream) {
-                if (filePath.getFileName().toString().startsWith("shanoirExportStatistics_")) {
-                    BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
-                    FileTime creationTime = attrs.creationTime();
-                    long creationTimeMillis = creationTime.toMillis();
-
-                    if ((currentTime - creationTimeMillis) > sixHoursInMillis) {
-                        Files.delete(filePath);
-                        LOG.error("Statistics file delete after 6 hours : " + filePath.getFileName());
-                    }
-                }
-            }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -710,12 +695,12 @@ public class DatasetApiController implements DatasetApi {
             }
             LOG.info("Metadata file download ended.");
             return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=\"" + file.getName() + "\"")
                     .body(resource);
         } catch (IOException e) {
             ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while shaping HTTP response.", e.getMessage());
             throw new RestServiceException(e, error);
         }
-
     }
+
 }

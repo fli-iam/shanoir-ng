@@ -25,8 +25,10 @@ import java.util.Set;
 
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
-import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.CopyReport;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
+import org.shanoir.ng.dataset.service.CsvCopyService;
 import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -36,9 +38,11 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dataset.RelatedDataset;
+import org.shanoir.ng.shared.dto.StudyExaminationsDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.AcquisitionEquipment;
 import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
@@ -49,12 +53,15 @@ import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.StudyService;
+import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.storage.StorageException;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
-import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,6 +141,15 @@ public class RabbitMQDatasetsService {
     @Autowired
     private StudyService studyService;
 
+    @Autowired
+    private SubjectService subjectService;
+
+    @Autowired
+    private DatasetSecurityService securityService;
+
+    @Autowired
+    private CsvCopyService csvCopyService;
+
     private static final Logger LOG = LoggerFactory.getLogger(RabbitMQDatasetsService.class);
 
     @RabbitListener(bindings = @QueueBinding(
@@ -151,7 +167,7 @@ public class RabbitMQDatasetsService {
         try {
 
             Study updated = objectMapper.readValue(studyAsString, Study.class);
-            bidsService.deleteBidsFolder(updated.getId(), null);
+            bidsService.deleteBidsFolder(updated.getId());
             Study current = this.receiveAndUpdateIdNameEntity(studyAsString, Study.class, studyRepository);
             List<String> errors = studyService.validate(updated, current);
             if (!errors.isEmpty()) {
@@ -191,7 +207,7 @@ public class RabbitMQDatasetsService {
      * @throws JsonMappingException
      */
     @Transactional
-    private void manageSubjectUpdate(final String subjectStr) throws JsonProcessingException, JsonMappingException {
+    protected void manageSubjectUpdate(final String subjectStr) throws JsonProcessingException, JsonMappingException {
         Subject subject = objectMapper.readValue(subjectStr, Subject.class);
         subject = subjectRepository.save(subject);
         LOG.info("Subject replicated in MS Datasets with ID: {} and Name: {}",
@@ -203,7 +219,7 @@ public class RabbitMQDatasetsService {
             studyIds.add(exam.getStudyId());
         }
         for (Study stud : studyRepository.findAllById(studyIds)) {
-            bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+            bidsService.deleteBidsFolder(stud.getId());
         }
         // Update solr references
         List<Long> subjectIdList = new ArrayList<Long>();
@@ -227,7 +243,7 @@ public class RabbitMQDatasetsService {
     }
 
     @Transactional
-    private void manageSubjectBatchUpdate(final String subjectBatchStr) throws JsonProcessingException {
+    protected void manageSubjectBatchUpdate(final String subjectBatchStr) throws JsonProcessingException {
         SubjectBatchDTO batchDTO = objectMapper.readValue(subjectBatchStr, SubjectBatchDTO.class);
         Set<Long> allStudyIds = new HashSet<>();
         List<Long> allSubjectIds = new ArrayList<>();
@@ -242,7 +258,7 @@ public class RabbitMQDatasetsService {
         }
         // Update BIDS for all affected studies
         for (Study stud : studyRepository.findAllById(allStudyIds)) {
-            bidsService.deleteBidsFolder(stud.getId(), stud.getName());
+            bidsService.deleteBidsFolder(stud.getId());
         }
         // Update Solr references in batch
         try {
@@ -266,7 +282,7 @@ public class RabbitMQDatasetsService {
     }
 
     @Transactional
-    private void saveCenter(Center center) {
+    protected void saveCenter(Center center) {
         centerRepository.save(center);
     }
 
@@ -277,7 +293,7 @@ public class RabbitMQDatasetsService {
     }
 
     @Transactional
-    private void deleteCenter(Long centerId) {
+    protected void deleteCenter(Long centerId) {
         centerRepository.deleteById(centerId);
     }
 
@@ -310,38 +326,83 @@ public class RabbitMQDatasetsService {
     }
 
     /**
-     * Receives a shanoirEvent as a json object, concerning a subject deletion
-     * @param subjectIdAsString a string of the subject's id
+     * Receives the deletion event of a subject and deletes its data, completing the task
+     * carried by the event: its progress follows the examinations, and the errors met are
+     * gathered in its report.
+     *
+     * The deletion is done on a best effort basis, an examination that cannot be deleted
+     * does not prevent the other ones from being deleted. This listener is therefore not
+     * transactional on purpose, so that each examination is deleted in its own transaction.
+     *
+     * @param eventAsString the deletion event of the subject, as a json string
      */
     @RabbitListener(queues = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, containerFactory = "singleConsumerFactory")
-    @Transactional
-    public void deleteSubject(String subjectIdAsString) throws AmqpRejectAndDontRequeueException {
+    public void deleteSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        ShanoirEvent event;
+        Long subjectId;
         try {
-            Long subjectId = Long.valueOf(subjectIdAsString);
-            Set<Long> studyIds = new HashSet<>();
-
-            // Inverse order to remove copied examination before its source (if copied)
-            List<Examination> listExam = examinationRepository.findBySubjectId(subjectId);
-            Collections.reverse(listExam);
-
-            // Delete associated examinations and datasets from solr repository
-            for (Examination exam : listExam) {
-                examinationService.deleteById(exam.getId(), null);
-                studyIds.add(exam.getStudyId());
-            }
-
-            // Update BIDS folder
-            for (Study stud : studyRepository.findAllById(studyIds)) {
-                bidsService.deleteBidsFolder(stud.getId(), stud.getName());
-            }
-
-            // Delete subject from datasets database
-            subjectRepository.deleteById(subjectId);
-
+            event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
+            subjectId = Long.valueOf(event.getObjectId());
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
+        }
+
+        StringBuilder report = new StringBuilder();
+        Set<Long> studyIds = new HashSet<>();
+
+        // Keep the name of the subject for the messages, it is deleted below
+        String subjectLabel = subjectService.findById(subjectId)
+                .map(subject -> subject.getName() + " (id: " + subjectId + ")")
+                .orElse("(id: " + subjectId + ")");
+
+        // Inverse order to remove copied examination before its source (if copied)
+        List<Examination> listExam = examinationRepository.findBySubjectId(subjectId);
+        Collections.reverse(listExam);
+
+        // Delete associated examinations and datasets from solr repository
+        int processed = 0;
+        for (Examination exam : listExam) {
+            try {
+                examinationService.deleteById(exam.getId(), null);
+                studyIds.add(exam.getStudyId());
+            } catch (Exception e) {
+                LOG.error("Could not delete examination {} of subject {}", exam.getId(), subjectId, e);
+                report.append("Examination [").append(exam.getId()).append("] could not be deleted: ")
+                        .append(e.getMessage()).append("\n");
+            }
+            processed++;
+            eventService.publishEvent(event, "Deleting subject [" + subjectId + "] : " + processed + "/"
+                    + listExam.size() + " examinations processed.", (float) processed / listExam.size());
+        }
+
+        // Update BIDS folder
+        for (Study stud : studyRepository.findAllById(studyIds)) {
+            try {
+                bidsService.deleteBidsFolder(stud.getId());
+            } catch (Exception e) {
+                LOG.error("Could not delete BIDS folder of study {}", stud.getId(), e);
+                report.append("BIDS folder of study [").append(stud.getId()).append("] could not be deleted: ")
+                        .append(e.getMessage()).append("\n");
+            }
+        }
+
+        // Delete subject from datasets database
+        try {
+            subjectService.delete(subjectId);
+        } catch (Exception e) {
+            LOG.error("Could not delete subject {} from ms datasets", subjectId, e);
+            report.append("Subject [").append(subjectId).append("] could not be deleted from ms datasets: ")
+                    .append(e.getMessage()).append("\n");
+        }
+
+        if (report.isEmpty()) {
+            eventService.publishSuccessEvent(event, "Subject " + subjectLabel + " removed");
+        } else {
+            event.setReport(report.toString());
+            eventService.publishErrorEvent(event, "Subject " + subjectLabel
+                    + " removed, but some of its data could not be deleted.");
         }
     }
 
@@ -380,7 +441,7 @@ public class RabbitMQDatasetsService {
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
-    public String getDetailedStudyStorageVolume(Long studyId) {
+    public String getDetailedStudyStorageVolume(Long studyId) throws StorageException {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         StudyStorageVolumeDTO dto = new StudyStorageVolumeDTO(datasetService.getVolumeByFormat(studyId),
                 examinationService.getExtraDataSizeByStudyId(studyId));
@@ -399,7 +460,11 @@ public class RabbitMQDatasetsService {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         Map<Long, StudyStorageVolumeDTO> studyStorageVolumes = new HashMap<>();
         datasetService.getVolumeByFormatByStudyId(studyIds).forEach((id, volumeByFormat) -> {
-            studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
+            try {
+                studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
+            } catch (StorageException e) {
+                LOG.error(e.getMessage(), e);
+            }
         });
         try {
             return objectMapper.writeValueAsString(studyStorageVolumes);
@@ -417,7 +482,6 @@ public class RabbitMQDatasetsService {
      */
     @RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
-    @Transactional
     @Async
     public void copyDatasetsToStudy(final String data) {
         Map<Long, Examination> examMap = new HashMap<>();
@@ -430,63 +494,109 @@ public class RabbitMQDatasetsService {
         int countCopy = 0;
         int countSuccess = 0;
         int countTotal = 0;
+        List<String> errors = new ArrayList<>();
         float progress = 0f;
         ShanoirEvent event = null;
+
         try {
             RelatedDataset dto = objectMapper.readValue(data, RelatedDataset.class);
-            SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
             Long userId = dto.getUserId();
+            KeycloakUtil.UserRole role = dto.getUserRole();
             Long studyId = dto.getStudyId();
             datasetParentIds = dto.getDatasetIds();
             countTotal = datasetParentIds.size();
-
             event = new ShanoirEvent(
-                    ShanoirEventType.COPY_DATASET_EVENT,
-                    null,
-                    userId,
-                    "Copy of dataset " + countProgress++ + "/" + countTotal + " to study [" + studyId + "].",
-                    ShanoirEvent.IN_PROGRESS,
-                    Float.valueOf(countProgress / countTotal),
-                    studyId
+                ShanoirEventType.COPY_DATASET_EVENT,
+                null,
+                userId,
+                "Copy of dataset " + countProgress++ + "/" + countTotal + " to study [" + studyId + "].",
+                ShanoirEvent.IN_PROGRESS,
+                Float.valueOf(countProgress / countTotal),
+                studyId
             );
+            event.setId(dto.getEventId());
             event.setReport("");
 
+            /** Check rights */
+            if (!securityService.checkDatasetRelatedDatasets(dto.getDatasetIds(), userId, role)) {
+                LOG.error("User {} is not allowed to copy datasets {}, copy aborted.", userId, dto.getDatasetIds());
+                event.setMessage("User don't have the rights to copy these datasets, copy aborted.");
+                event.setStatus(ShanoirEvent.ERROR);
+                event.setProgress(-1f);
+                eventService.publishEvent(event);
+                return;
+            }
+            /* */
+            switch (role) {
+                case ADMIN -> SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN", userId);
+                case EXPERT -> SecurityContextUtil.initAuthenticationContext("ROLE_EXPERT", userId);
+                case USER -> SecurityContextUtil.initAuthenticationContext("ROLE_USER", userId);
+                default -> {
+                    LOG.error("User {} has an unauthorized role {}, copy aborted.", userId, role);
+                    event.setMessage("User has an unauthorized role, copy aborted.");
+                    event.setStatus(ShanoirEvent.ERROR);
+                    event.setProgress(-1f);
+                    eventService.publishEvent(event);
+                    return;
+                }
+            }
+            StudyExaminationsDTO propagatedExams = new StudyExaminationsDTO(studyId);
+            List<CopyReport> cvsReports = new ArrayList<>();
             for (Long datasetParentId : datasetParentIds) {
                 progress += 1f / countTotal;
                 event.setMessage("Copy of dataset [" + datasetParentId + "] to study [" + studyId + "]: " + countProgress++ + "/" + countTotal);
                 event.setProgress(progress);
+                event.setReport(buildReport(datasetParentIds, countProcessed, countAlreadyExist, countCopy, countSuccess, errors));
                 eventService.publishEvent(event);
 
                 LOG.info("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
                 Long dsCount = datasetRepository.countDatasetsBySourceIdAndStudyId(datasetParentId, studyId);
-                Dataset datasetParent = datasetService.findById(datasetParentId);
 
-                if (datasetParent.getSource() != null) {
-                    LOG.info("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
-                    countCopy++;
-                } else if (dsCount != 0) {
+                if (dsCount != 0) {
                     LOG.info("[CopyDatasets] Dataset already exists in this study, copy aborted.");
                     countAlreadyExist++;
-
                 } else {
-                    Object[] result = datasetCopyService.moveDataset(datasetParent, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
-                    Long newDsId = (Long) result[0];
-                    countProcessed += (int) result[1];
-                    countSuccess += (int) result[2];
-                    LOG.info("countProcessed : " + countProcessed);
-                    if (newDsId != null)
-                        newDatasets.add(newDsId);
+                    try {
+                        DatasetCopyService.DatasetCopyResult result = datasetCopyService.moveDataset(datasetParentId, studyId, dto.getSubjectMapping(), examMap, acqMap, userId);
+                        Long newDsId = result.getNewDsId();
+                        countProcessed += result.getCountProcessed();
+                        countSuccess += result.getCountSuccess();
+                        countCopy += result.getCountCopy();
+                        LOG.info("countProcessed : " + countProcessed);
+                        if (newDsId != null) newDatasets.add(newDsId);
+                        propagatedExams.addExam(result.getExaminationId(), result.getCenterId(), result.getSubjectId());
+                        CopyReport cvsReport = new CopyReport();
+                        cvsReport.setSourceDatasetId(datasetParentId);
+                        cvsReport.setTargetDatasetId(newDsId);
+                        cvsReport.setSubjectNewName(result.getSubjectName());
+                        cvsReports.add(cvsReport);
+                    } catch (DatasetCopyService.NotFoundSubjectIdException e) {
+                        LOG.error("[CopyDatasets] No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId);
+                        errors.add("No mapping found for subject with id = " + e.getSubjectId() + ", copy aborted for dataset " + datasetParentId
+                                + ". The csv input might be associating the wrong subject id to the dataset.");
+                    } catch (DatasetCopyService.NotFoundDatasetIdException e) {
+                        LOG.error("[CopyDatasets] No dataset found with id = " + e.getDatasetId() + ", copy aborted for dataset " + datasetParentId);
+                        errors.add("No dataset found with id = " + e.getDatasetId() + ", copy aborted for dataset " + datasetParentId);
+                    } catch (JsonProcessingException e) {
+                        LOG.error("[CopyDatasets] Error processing json during the copy of dataset " + datasetParentId, e);
+                        errors.add("Error processing json during the copy of dataset " + datasetParentId + ": " + e.getMessage());
+                    } catch (Exception e) {
+                        LOG.error("[CopyDatasets] Unexpected error during the copy of dataset " + datasetParentId, e);
+                        errors.add("Unexpected error during the copy of dataset " + datasetParentId + ": " + e.getMessage());
+                    }
                 }
             }
+            if (!cvsReports.isEmpty()) {
+                csvCopyService.writeReportTsvFile(cvsReports, event.getId());
+            }
+            propagateExaminations(propagatedExams);
 
-            event.setMessage("Copy successful for " + countSuccess + "/" + countTotal + " datasets to study [" + studyId + "].\n"
-                    + countCopy + " were already copied datasets.\n"
-                    + countAlreadyExist + " already existed in destination study.\n"
-                    + countProcessed + " are processed datasets and cannot be copied.");
+            event.setMessage("Copy ended");
             event.setStatus(ShanoirEvent.SUCCESS);
             event.setProgress(1.0f);
+            event.setReport(buildReport(datasetParentIds, countProcessed, countAlreadyExist, countCopy, countSuccess, errors));
             eventService.publishEvent(event);
-            if (newDatasets.size() > 0)
+            if (!newDatasets.isEmpty())
                 solrService.indexDatasets(newDatasets);
 
         } catch (Exception e) {
@@ -494,11 +604,37 @@ public class RabbitMQDatasetsService {
                 event.setMessage("[CopyDatasets] Error during the copy of dataset.");
                 event.setStatus(ShanoirEvent.ERROR);
                 event.setProgress(-1f);
+                event.setReport(e.getMessage());
                 eventService.publishEvent(event);
             }
             LOG.error("Something went wrong during the copy. {}", e.getMessage());
             throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
         }
+    }
+
+    private void propagateExaminations(StudyExaminationsDTO propagatedExams) throws ShanoirException {
+        Long userId = KeycloakUtil.getTokenUserId();
+        try {
+            eventService.publishEvent(
+                    new ShanoirEvent(
+                            ShanoirEventType.CREATE_EXAMINATIONS_EVENT,
+                            null,
+                            userId,
+                            objectMapper.writeValueAsString(propagatedExams),
+                            ShanoirEvent.SUCCESS,
+                            propagatedExams.getStudyId()));
+        } catch (JsonProcessingException e) {
+            throw new ShanoirException("Error processing json during the propagation of examinations after dataset copy.", e);
+        }
+    }
+
+    private String buildReport(List<Long> datasetParentIds, int countProcessed, int countAlreadyExist,
+            int countCopy, int countSuccess, List<String> errors) {
+        return "Copy successful for " + countSuccess + "/" + datasetParentIds.size() + " datasets.\n"
+                + countCopy + " were already copied datasets.\n"
+                + countAlreadyExist + " already existed in destination study.\n"
+                + countProcessed + " are processed datasets and cannot be copied.\n"
+                + (!errors.isEmpty() ? "Errors: " + String.join("\n", errors) : "");
     }
 
 }

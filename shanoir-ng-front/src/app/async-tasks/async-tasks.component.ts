@@ -24,13 +24,14 @@ import { BrowserPaging } from '../shared/components/table/browser-paging.model';
 
 import { TaskService } from './task.service';
 import { Task } from './task.model';
+import { TaskStatusComponent } from './status/task-status.component';
 
 
 @Component({
     selector: 'async-tasks',
     templateUrl: 'async-tasks.component.html',
     styleUrls: ['async-tasks.component.css'],
-    standalone: false
+    imports: [TableComponent, TaskStatusComponent]
 })
 
 export class AsyncTasksComponent extends EntityListComponent<Task> implements AfterViewInit {
@@ -71,7 +72,10 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
     getColumnDefs(): ColumnDefinition[] {
         return [
             {
-               headerName: 'Message', field: 'message', width: '100%', type:'link', route: (task: Task) => task.route
+               headerName: 'Message', field: 'message', width: '100%', type:'link',
+               download: item => this.downloadStats(item),
+               downloadCondition: item => ['downloadStatistics.event', 'copyDataset.event'].includes(item.eventType) && item.progress == 1,
+               link: item => item.route
             }, {
                headerName: 'Progress', field: 'progress', width: '110px', type: 'progress',
                cellRenderer: params => { return {progress: params.data?.progress, status: params.data?.status}; }
@@ -79,6 +83,8 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
                headerName: "Creation", field: "creationDate", width: '130px', type: 'dateTime', defaultSortCol: true, defaultAsc: false,
             }, {
                 headerName: "Last update", field: "lastUpdate", width: '130px', type: 'dateTime'
+            }, {
+                headerName: "Route", field: "route", width: '100px'
             }
         ];
     }
@@ -88,7 +94,9 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
     }
 
     downloadStats(item: any) {
-        if (item instanceof Task && item.eventType == "downloadStatistics.event" && item.progress == 1) {
+        if (item instanceof Task
+                && ["downloadStatistics.event", "copyDataset.event"].includes(item.eventType)
+                && item.progress == 1) {
             this.taskService.downloadStats(item);
         }
     }

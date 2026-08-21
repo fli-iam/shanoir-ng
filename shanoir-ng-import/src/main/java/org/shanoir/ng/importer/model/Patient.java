@@ -15,6 +15,7 @@
 package org.shanoir.ng.importer.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.dcm4che3.data.Attributes;
@@ -75,6 +76,7 @@ public class Patient {
         this.patientBirthDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate));
         this.patientSex = attributes.getString(Tag.PatientSex);
         splitPatientName(this.patientName);
+        this.studies = new ArrayList<Study>();
     }
 
     @JsonProperty("studies")

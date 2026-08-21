@@ -29,7 +29,7 @@ import { BrowserPaginEntityListComponent } from '../../../shared/components/enti
     selector: 'contrast-agent-list',
     templateUrl: 'contrastAgent-list.component.html',
     styleUrls: ['contrastAgent-list.component.css'],
-    standalone: false
+    imports: [TableComponent]
 })
 export class ContrastAgentsListComponent extends BrowserPaginEntityListComponent<ContrastAgent>{
   @Input() protocol_id:number;

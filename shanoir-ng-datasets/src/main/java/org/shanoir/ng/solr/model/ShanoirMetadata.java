@@ -19,12 +19,17 @@
  */
 package org.shanoir.ng.solr.model;
 
-import jakarta.persistence.*;
+import java.time.LocalDate;
+
 import org.shanoir.ng.dataset.modality.MrDatasetNature;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
-import java.time.LocalDate;
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.ConstructorResult;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.SqlResultSetMapping;
 
 /**
  * @author yyao
@@ -44,19 +49,21 @@ import java.time.LocalDate;
                 @ColumnResult(name = "sliceThickness", type = Double.class), @ColumnResult(name = "pixelBandwidth", type = Double.class),
                 @ColumnResult(name = "magneticFieldStrength", type = Double.class),
                 @ColumnResult(name = "processed", type = Boolean.class), @ColumnResult(name = "importDate", type = LocalDate.class),
-                @ColumnResult(name = "username", type = String.class), @ColumnResult(name = "sortingIndex", type = Integer.class)
+                @ColumnResult(name = "username", type = String.class), @ColumnResult(name = "sortingIndex", type = Integer.class),
+                @ColumnResult(name = "dataReuseAgreement", type = Boolean.class),
+                @ColumnResult(name = "qualityTag", type = Integer.class)
         })
 })
 
 public class ShanoirMetadata {
 
     @Id
-    private    Long datasetId;
+    private Long datasetId;
 
-    private    String datasetName;
+    private String datasetName;
 
     // DatasetModalityType: MR, CT, PET etc..
-    private    Integer datasetType;
+    private Integer datasetType;
 
     // T1, T2, Diff, etc..
     private Integer datasetNature;
@@ -95,6 +102,8 @@ public class ShanoirMetadata {
 
     private Integer sortingIndex;
 
+    private Boolean dataReuseAgreement;
+
     private boolean processed;
 
     @LocalDateAnnotations
@@ -102,12 +111,15 @@ public class ShanoirMetadata {
 
     private String username;
 
+    // VALID, WARNING, ERROR
+    private Integer qualityTag;
+
     public ShanoirMetadata() { }
 
     public ShanoirMetadata(Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
                             LocalDate datasetCreationDate, Long examinationId, String examinationComment, LocalDate examinationDate, String acquisitionEquipmentName,
                             String subjectName, Integer subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
-                            Double pixelBandwidth, Double magneticFieldStrength, boolean processed, LocalDate importDate, String username, Integer sortingIndex) {
+                            Double pixelBandwidth, Double magneticFieldStrength, boolean processed, LocalDate importDate, String username, Integer sortingIndex, Boolean dataReuseAgreement, Integer qualityTag) {
         this.datasetId = datasetId;
         this.datasetName = datasetName;
         this.datasetType = datasetType;
@@ -121,6 +133,7 @@ public class ShanoirMetadata {
         this.subjectType = subjectType;
         this.subjectId = subjectId;
         this.sortingIndex = sortingIndex;
+        this.dataReuseAgreement = dataReuseAgreement;
         this.studyName = studyName;
         this.studyId = studyId;
         this.centerName = centerName;
@@ -131,6 +144,7 @@ public class ShanoirMetadata {
         this.processed = processed;
         this.importDate = importDate;
         this.username = username;
+        this.qualityTag = qualityTag;
     }
 
     /**
@@ -397,5 +411,21 @@ public class ShanoirMetadata {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public Boolean getDataReuseAgreement() {
+        return dataReuseAgreement;
+    }
+
+    public void setDataReuseAgreement(Boolean dataReuseAgreement) {
+        this.dataReuseAgreement = dataReuseAgreement;
+    }
+
+    public Integer getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualityTag(Integer qualityTag) {
+        this.qualityTag = qualityTag;
     }
 }

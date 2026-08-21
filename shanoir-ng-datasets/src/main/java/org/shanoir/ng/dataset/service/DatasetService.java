@@ -149,6 +149,7 @@ public interface DatasetService {
     List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId);
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_SEE_ALL'))")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterAnnotationDatasetList(returnObject)")
     List<Dataset> findByAcquisition(Long acquisitionId);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -174,4 +175,7 @@ public interface DatasetService {
 
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
     File extractDicomMetadata(List<Long> datasetIds, List<String> metadataKeys) throws Exception;
+
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT','USER') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_SEE_ALL'))")
+    Map<String, String> getSpecificDicomMetadataValues(Dataset dataset, List<String> metadataKeys);
 }

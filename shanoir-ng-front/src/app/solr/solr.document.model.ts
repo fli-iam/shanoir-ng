@@ -32,13 +32,14 @@ export class SolrDocument {
     subjectType: string;
     acquisitionEquipmentName: string;
     subjectId: string;
-
+    dataReuseAgreement: boolean;
     sortingIndex: number;
     studyName: string;
     studyId: string;
     id: number; // only for the table component..
     username: string;
     importDate: Date;
+    qualitytag: string;
 }
 
 export class SolrRequest {
@@ -47,6 +48,7 @@ export class SolrRequest {
     subjectName: string[];
     subjectId: string[];
     sortingIndex: number[];
+    dataReuseAgreement: boolean[];
     subjectType: string[];
     acquisitionEquipmentName: string[];
     examinationId: string[];
@@ -68,6 +70,7 @@ export class SolrRequest {
     sliceThickness: Range = new Range(null, null);
     pixelBandwidth: Range = new Range(null, null);
     magneticFieldStrength: Range = new Range(null, null);
+    qualityTag: string[];
     facetPaging: Map<string, FacetPageable>;
  }
 

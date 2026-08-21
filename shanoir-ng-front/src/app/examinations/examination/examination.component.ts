@@ -12,8 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
-import { AbstractControl, FormGroup, UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { AbstractControl, FormGroup, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { NgClass } from '@angular/common';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -35,11 +36,15 @@ import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from "../../subjects/shared/subject.model";
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { SelectBoxComponent } from '../../shared/select/select.component';
+import { InstrumentAssessmentComponent } from '../instrument-assessment/instrument-assessment.component';
+import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.pipe';
 
 @Component({
     selector: 'examination-detail',
     templateUrl: 'examination.component.html',
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, InstrumentAssessmentComponent, LocalDateFormatPipe]
 })
 
 export class ExaminationComponent extends EntityComponent<Examination> implements OnDestroy {
@@ -76,7 +81,8 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
         protected studyService: StudyService,
         protected studyRightsService: StudyRightsService,
         public breadcrumbsService: BreadcrumbsService,
-        protected downloadService: MassDownloadService
+        protected downloadService: MassDownloadService,
+        private userRightsService: StudyRightsService
     ) {
         super(route);
         this.inImport = this.breadcrumbsService.isImporting();
@@ -146,6 +152,7 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             'center': [{value: this.examination.center, disabled: this.inImport || !this.examination.study}, Validators.required],
             'examinationDate': [{value: this.examination.examinationDate, disabled: this.inImport && this.examination.examinationDate}, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],
+            'dataReuseAgreement': [{value: this.examination.dataReuseAgreement, disabled: this.mode == 'view'}],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight],
             'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
@@ -217,6 +224,15 @@ export class ExaminationComponent extends EntityComponent<Examination> implement
             .getStudiesNames()
             .then(studies => {
                 this.studies = studies;
+                this.userRightsService.getMyRights().then(rights => {
+                    if (!this.keycloakService.isUserAdmin()) {
+                        // filter studies to only those with import or admin rights
+                        this.studies = this.studies.filter(study => {
+                            const studyRights = rights.get(study.id);
+                            return studyRights && (studyRights.includes(StudyUserRight.CAN_IMPORT) || studyRights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                        });
+                    }
+                });
             });
     }
 

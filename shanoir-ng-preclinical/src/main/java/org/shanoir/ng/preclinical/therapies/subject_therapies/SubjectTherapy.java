@@ -68,6 +68,19 @@ public class SubjectTherapy extends HalEntity {
 
     private String molecule;
 
+
+    public SubjectTherapy() { }
+
+    public SubjectTherapy(SubjectTherapy source) {
+        this.therapy = source.getTherapy();
+        this.startDate = source.getStartDate();
+        this.endDate = source.getEndDate();
+        this.dose = source.getDose();
+        this.doseUnit = source.getDoseUnit();
+        this.frequency = source.getFrequency();
+        this.molecule = source.getMolecule();
+    }
+
     /**
      * Init HATEOAS links
      */

@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { TaskState } from 'src/app/async-tasks/task.model';
@@ -25,27 +25,35 @@ import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
+import { PapayaComponent } from '../../shared/components/papaya/papaya.component';
 
 import { MrDataset } from './mr/dataset.mr.model';
+import { CommonDatasetComponent } from './common/dataset.common.component';
+import { MrDatasetComponent } from './mr/dataset.mr.component';
+import { EegDatasetComponent } from './eeg/dataset.eeg.component';
+
 
 
 @Component({
     selector: 'dataset-detail',
     templateUrl: 'dataset.component.html',
     styleUrls: ['dataset.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, CommonDatasetComponent, MrDatasetComponent, EegDatasetComponent, PapayaComponent]
 })
 
 export class DatasetComponent extends EntityComponent<Dataset> {
 
     papayaParams: any;
     hasDownloadRight: boolean = false;
-    private hasAdministrateRight: boolean = false;
+    hasAdministrateRight: boolean = false;
     public downloadState: TaskState = new TaskState();
     isMRS: boolean = false; // MR Spectroscopy
     papayaLoadCallback: () => Promise<any[]>;
+    private removedAcquisitionIds: number[] = [];
 
     constructor(
             private datasetService: DatasetService,
@@ -54,6 +62,31 @@ export class DatasetComponent extends EntityComponent<Dataset> {
             private studyRightsService: StudyRightsService,
             private downloadService: MassDownloadService) {
         super(route);
+        this.subscriptions.push(
+            this.datasetService.onAcquisitionsRemoved.subscribe(ids => this.removedAcquisitionIds = ids));
+    }
+
+    override goToParent(): void {
+        if (!this.goToExaminationOfRemovedAcquisition()) super.goToParent();
+    }
+
+    override goBack(): void {
+        if (!this.goToExaminationOfRemovedAcquisition()) super.goBack();
+    }
+
+    /**
+     * Deleting the last dataset of an acquisition removes that acquisition too, so its page does
+     * not exist anymore : the examination is then where to go once the dataset is deleted.
+     *
+     * @return true when the acquisition was removed and the examination reached
+     */
+    private goToExaminationOfRemovedAcquisition(): boolean {
+        const acquisition: DatasetAcquisition = this.dataset?.datasetAcquisition;
+        if (acquisition?.examination?.id && this.removedAcquisitionIds.includes(acquisition.id)) {
+            this.router.navigate(['/examination/details/' + acquisition.examination.id]);
+            return true;
+        }
+        return false;
     }
 
     protected getRoutingName(): string {

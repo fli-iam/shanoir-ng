@@ -12,19 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { ApplicationRef, Component, HostBinding, Injector, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Injector, OnDestroy, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 
-import { slideDown } from '../animations/animations';
-
 import { ConsoleService, Message } from './console.service';
+
 
 @Component({
     selector: 'shanoir-console',
     templateUrl: './console.component.html',
     styleUrls: ['./console.component.css'],
-    animations: [slideDown],
-    standalone: false
+    imports: []
 })
 export class ConsoleComponent implements OnDestroy {
 
@@ -32,9 +30,10 @@ export class ConsoleComponent implements OnDestroy {
     @HostBinding('class.deployed') deployed: boolean;
     contentOpen: boolean = this._open;
     messages: Message[] = [];
-    private closeTimeout: any;
-    private appRef: Promise<ApplicationRef> = new Promise(() => { return});
     private subscription: Subscription;
+    @Output() registerToggle: EventEmitter<(open: boolean) => void> = new EventEmitter();
+    @Output() consoleOpened: EventEmitter<boolean> = new EventEmitter();
+    @Output() consoleDeployed: EventEmitter<boolean> = new EventEmitter();
 
     constructor(public consoleService: ConsoleService, private injector: Injector) {
         this.messages = consoleService.messages.slice();
@@ -42,7 +41,7 @@ export class ConsoleComponent implements OnDestroy {
         this.deployed = consoleService.deployed;
         this.contentOpen = this._open;
         this.subscription = consoleService.messageObservable.subscribe(this.processNewMsg);
-        setTimeout(() => this.appRef = Promise.resolve(this.injector.get(ApplicationRef)));
+        setTimeout(() => this.registerToggle.emit(this.toggle.bind(this)), 0);
     }
 
     private processNewMsg = (message: Message) => {
@@ -60,23 +59,9 @@ export class ConsoleComponent implements OnDestroy {
         } else {
             this.messages.unshift(message);
         }
-        // if (!this.open) {
-        //     this.open = true; 
-        //     this.closeTimeout = this.setCloseTimeout();
-        // } else if (this.closeTimeout) {
-        //     this.closeTimeout = this.setCloseTimeout();
-        // }
         if (this.messages.length > this.consoleService.MAX) {
             this.messages.splice(this.consoleService.MAX);
         }
-    }
-
-    private setCloseTimeout(): any {
-        clearTimeout(this.closeTimeout);
-        return setTimeout(() => {
-            this.open = false;
-            this.closeTimeout = null;
-        }, 5000);
     }
 
     ngOnDestroy(): void {
@@ -90,24 +75,28 @@ export class ConsoleComponent implements OnDestroy {
 
     set open(open: boolean) {
         if (this._open != open) {
-            clearTimeout(this.closeTimeout);
             this._open = open;
-            if (!open) setTimeout(() => {
+            if (!open) {
                 this.contentOpen = open;
-                this.appRef.then(appRef => appRef.tick());
-            }, 1000);
-            else this.contentOpen = open;
-            this.appRef.then(appRef => appRef.tick());
+            } else this.contentOpen = open;
         }
-        this.closeTimeout = null;
         this.consoleService.open = this._open;
         this.consoleService.deployed = this.deployed;
+        this.consoleOpened.emit(this._open);
+    }
+
+    private toggle(open: boolean) {
+        this.open = open;
+    }
+
+    toggleDeployed(deployed: boolean) {
+        this.deployed = deployed;
+        this.consoleService.deployed = this.deployed;
+        this.consoleDeployed.emit(this.deployed);
     }
 
     toggleDetails(message: Message) {
-        clearTimeout(this.closeTimeout);
         message.detailsOpened = !message.detailsOpened;
-        this.appRef.then(appRef => appRef.tick());
     }
 
 }

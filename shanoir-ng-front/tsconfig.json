@@ -1,32 +1,28 @@
 {
-  "compileOnSave": false,
-  "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "./dist/out-tsc",
-    "paths": {
-      "@env/*": ["src/environments/*"],
-      "file-saver-es": ["@types/file-saver"],
-      "wicg-file-system-access": ["@types/wicg-file-system-access"]
+    "compileOnSave": false,
+    "compilerOptions": {
+        "baseUrl": "./",
+        "outDir": "./dist/out-tsc",
+        "paths": {
+            "@env/*": ["src/environments/*"],
+            "file-saver-es": ["@types/file-saver"],
+            "wicg-file-system-access": ["@types/wicg-file-system-access"]
+        },
+        "esModuleInterop": true,
+        "sourceMap": true,
+        "declaration": false,
+        "experimentalDecorators": true,
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "importHelpers": true,
+        "target": "ES2022",
+        "typeRoots": [
+          "node_modules/@types"
+        ],
+        "useDefineForClassFields": false
     },
-    "esModuleInterop": true,
-    "sourceMap": true,
-    "declaration": false,
-    "experimentalDecorators": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "importHelpers": true,
-    "target": "ES2022",
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2022",
-      "dom"
-    ],
-    "useDefineForClassFields": false
-  },
-  "angularCompilerOptions": {
-    "fullTemplateTypeCheck": true,
-    "strictInjectionParameters": true
-  }
+    "angularCompilerOptions": {
+        "fullTemplateTypeCheck": true,
+        "strictInjectionParameters": true
+    }
 }

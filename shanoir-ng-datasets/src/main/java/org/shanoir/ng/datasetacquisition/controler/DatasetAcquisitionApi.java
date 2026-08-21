@@ -13,6 +13,7 @@
  */
 package org.shanoir.ng.datasetacquisition.controler;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
@@ -26,17 +27,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @Tag(name = "datasetacquisition", description = "the datasetacquisition API")
@@ -82,6 +88,30 @@ public interface DatasetAcquisitionApi {
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
             throws RestServiceException;
 
+    @Operation(summary = "", description = "Returns the dataset acquisitions that hold no dataset at all and that may be removed. Dry run of the deletion below.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @GetMapping(value = "/datasetacquisition/empty", produces = {"application/json"})
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findEmptyDatasetAcquisitions(
+            @Parameter(description = "id of the study to clean up, all of them when not given")
+            @RequestParam(value = "studyId", required = false) Long studyId);
+
+    @Operation(summary = "", description = "Deletes the dataset acquisitions that hold no dataset at all and that may be removed")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "dataset acquisitions deleted"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @DeleteMapping(value = "/datasetacquisition/empty", produces = {"application/json"})
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<List<Long>> deleteEmptyDatasetAcquisitions(
+            @Parameter(description = "id of the study to clean up, all of them when not given")
+            @RequestParam(value = "studyId", required = false) Long studyId);
+
     @Operation(summary = "", description = "If exists, returns the datasetAcquisition corresponding to the given id")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "found datasetAcquisition"),
@@ -121,6 +151,18 @@ public interface DatasetAcquisitionApi {
     ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
             @Parameter(description = "ids of the datasets", required = true) @RequestBody Long[] datasetIds);
 
+    @Operation(summary = "", description = "Returns the dataset acquisitions that the deletion of the given datasets would leave empty, and that may then be removed")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @PostMapping(value = "/datasetacquisition/emptiedByDatasetIds", produces = {"application/json"}, consumes = {"application/json"})
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_ADMINISTRATE'))")
+    ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionsLeftEmptyBy(
+            @Parameter(description = "ids of the datasets about to be deleted", required = true) @Valid
+            @RequestBody(required = true) List<Long> datasetIds);
+
     @Operation(summary = "", description = "Returns a dataset acquisitions page")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),
@@ -147,5 +189,35 @@ public interface DatasetAcquisitionApi {
             @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
             @Parameter(description = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition, BindingResult result)
             throws RestServiceException;
+
+    @Operation(summary = "", description = "Add extra data to a dataset acquisition")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "extra data added"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "409", description = "a file with the same name already exists"),
+        @ApiResponse(responseCode = "422", description = "bad parameters"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @PostMapping(value = "/datasetacquisition/extra-data-upload/{datasetAcquisitionId}",
+            produces = {"application/json"},
+            consumes = {"multipart/form-data"})
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_IMPORT'))")
+    ResponseEntity<Void> addExtraData(
+            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+            @Parameter(description = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
+
+    @Operation(summary = "", description = "Download extra data from a dataset acquisition")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "file downloaded"),
+        @ApiResponse(responseCode = "204", description = "no content"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "422", description = "bad parameters"),
+        @ApiResponse(responseCode = "500", description = "unexpected error")})
+    @GetMapping(value = "/datasetacquisition/extra-data-download/{datasetAcquisitionId}/{fileName:.+}/")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_SEE_ALL'))")
+    void downloadExtraData(
+            @Parameter(description = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+            @Parameter(description = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
 }

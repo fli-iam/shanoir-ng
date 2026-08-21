@@ -12,35 +12,43 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { NgClass } from '@angular/common';
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { ExaminationComponent } from 'src/app/examinations/examination/examination.component';
+import { DatepickerComponent } from 'src/app/shared/date-picker/date-picker.component';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../../centers/shared/center.service';
 import { Examination } from '../../../examinations/shared/examination.model';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
+import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer.component';
+import { LocalDateFormatPipe } from '../../../shared/localLanguage/localDateFormat.pipe';
+import { SelectBoxComponent } from '../../../shared/select/select.component';
 import { StudyRightsService } from '../../../studies/shared/study-rights.service';
 import { StudyService } from '../../../studies/shared/study.service';
+import { ExaminationAnestheticFormComponent } from '../../anesthetics/examination_anesthetic/edit/examinationAnesthetic-form.component';
 import { ExaminationAnesthetic } from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../../anesthetics/examination_anesthetic/shared/examinationAnesthetic.service';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
 import { ContrastAgent } from '../../contrastAgent/shared/contrastAgent.model';
+import { BloodGasDataFormComponent } from '../../extraData/bloodGasData/add/bloodGasData-form.component';
 import { BloodGasDataFile } from '../../extraData/bloodGasData/shared/bloodGasDataFile.model';
 import { ExtraData } from '../../extraData/extraData/shared/extradata.model';
 import { ExtraDataService } from '../../extraData/extraData/shared/extradata.service';
+import { PhysiologicalDataFormComponent } from '../../extraData/physiologicalData/add/physiologicalData-form.component';
 import { PhysiologicalDataFile } from '../../extraData/physiologicalData/shared/physiologicalDataFile.model';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { AnimalExaminationService } from '../shared/animal-examination.service';
-
 
 @Component({
     selector: 'examination-preclinical-form',
     templateUrl: 'animal-examination-form.component.html',
     styleUrls: ['animal-examination.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, RouterLink, SelectBoxComponent, DatepickerComponent, ExaminationAnestheticFormComponent, PhysiologicalDataFormComponent, BloodGasDataFormComponent, LocalDateFormatPipe]
 })
 export class AnimalExaminationFormComponent extends ExaminationComponent {
 
@@ -51,6 +59,8 @@ export class AnimalExaminationFormComponent extends ExaminationComponent {
     examAnesthetic: ExaminationAnesthetic = new ExaminationAnesthetic();
     animalSubjectId: number;
     examinationExtradatas: ExtraData[] = [];
+    private physioUploadFile: File;
+    private bloodGasUploadFile: File;
 
     constructor(
             route: ActivatedRoute,
@@ -63,8 +73,9 @@ export class AnimalExaminationFormComponent extends ExaminationComponent {
             private animalExaminationService: AnimalExaminationService,
             private examAnestheticService: ExaminationAnestheticService,
             private extradatasService: ExtraDataService,
-            private animalSubjectService: AnimalSubjectService) {
-        super(route, examinationService, centerService, studyService, studyRightsService, breadcrumbsService, downloadService);
+            private animalSubjectService: AnimalSubjectService,
+            userRightsService: StudyRightsService) {
+        super(route, examinationService, centerService, studyService, studyRightsService, breadcrumbsService, downloadService, userRightsService);
         this.manageSaveEntity();
     }
 
@@ -183,12 +194,9 @@ export class AnimalExaminationFormComponent extends ExaminationComponent {
 
     onUploadPhysiologicalData(event) {
         const firstInit: boolean = !this.physioDataFile;
-        const fileChanged: boolean = this.physioDataFile?.physiologicalDataFile?.name != event?.physiologicalDataFile?.name;
         this.physioDataFile = event;
         this.physioDataFile.extraDataType = "Physiological data";
-        if (fileChanged) {
-            this.files.push(this.physioDataFile.physiologicalDataFile);
-        }
+        this.physioUploadFile = this.syncUploadFile(this.physioUploadFile, this.physioDataFile.physiologicalDataFile);
         if (!firstInit) {
             this.form.markAsDirty();
             this.form.updateValueAndValidity();
@@ -198,9 +206,23 @@ export class AnimalExaminationFormComponent extends ExaminationComponent {
     onUploadBloodGasData(event) {
         this.bloodGasDataFile = event;
         this.bloodGasDataFile.extraDataType = "Blood gas data";
-        this.files.push(this.bloodGasDataFile.bloodGasDataFile);
+        this.bloodGasUploadFile = this.syncUploadFile(this.bloodGasUploadFile, this.bloodGasDataFile.bloodGasDataFile);
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
+    }
+
+    // Keeps this.files in sync when the chosen extra-data file changes or is cleared,
+    // so a removed file is not uploaded on save. Returns the newly tracked file.
+    private syncUploadFile(previous: File, next: File): File {
+        if (previous === next) return previous;
+        if (previous) {
+            const idx = this.files.indexOf(previous);
+            if (idx >= 0) this.files.splice(idx, 1);
+        }
+        if (next) {
+            this.files.push(next);
+        }
+        return next;
     }
 
     onExamAnestheticChange(event) {

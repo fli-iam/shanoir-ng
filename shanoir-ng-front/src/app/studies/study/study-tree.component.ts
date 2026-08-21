@@ -26,6 +26,8 @@ import { ExecutionDataService } from '../../vip/execution.data-service';
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { RightsError } from '../../shared/models/error.model';
 import { environment } from "../../../environments/environment";
+import { DoubleAwesomeComponent } from '../../shared/double-awesome/double-awesome.component';
+import { StudyNodeComponent } from '../tree/study-node.component';
 
 import { TreeService } from './tree.service';
 
@@ -33,7 +35,7 @@ import { TreeService } from './tree.service';
     selector: 'study-tree',
     templateUrl: 'study-tree.component.html',
     styleUrls: ['study-tree.component.css'],
-    standalone: false
+    imports: [DoubleAwesomeComponent, StudyNodeComponent]
 })
 
 export class StudyTreeComponent implements OnDestroy {
@@ -96,8 +98,8 @@ export class StudyTreeComponent implements OnDestroy {
 
     get selectionEmpty(): boolean {
         return !this.loaded || (
-            !(this.selectedDatasetNodes?.length > 0) 
-            && !(this.selectedAcquisitionNodes?.length > 0) 
+            !(this.selectedDatasetNodes?.length > 0)
+            && !(this.selectedAcquisitionNodes?.length > 0)
             && !(this.selectedExaminationNodes?.length > 0)
         );
     }
@@ -129,13 +131,13 @@ export class StudyTreeComponent implements OnDestroy {
         }).catch(e => {
             if (e instanceof RightsError) {
                 this.dialogService.error('error', 'Sorry, you don\'t have the right to copy all the datasets you have selected.'
-                    + ' You must have ADMIN right on all the studies of the selected datasets to proceed with the copy.'
+                    + ' You must have IMPORT right on all the studies of the selected datasets to proceed with the copy.'
                 );
             }
         });
     }
 
-    getSelectedDatasetIdsIncludingExamAndAcq(mustHaveRight?: 'download'): Promise<Set<number>> /* throws RightsError */ {        
+    getSelectedDatasetIdsIncludingExamAndAcq(mustHaveRight?: 'download'): Promise<Set<number>> /* throws RightsError */ {
         // Check directly selected datasets for download rights
         if (mustHaveRight === 'download' && this.selectedDatasetNodes.find(dsNode => !dsNode.canDownload)) {
             return Promise.reject(new RightsError());
@@ -161,6 +163,14 @@ export class StudyTreeComponent implements OnDestroy {
     }
 
     openInViewer() {
+        const deniedNodes = [...(this.selectedExaminationNodes || []), ...(this.selectedAcquisitionNodes || [])]
+            .filter(node => !node.canDownload);
+        if (deniedNodes.length > 0) {
+            this.dialogService.error('error', 'Sorry, you don\'t have the right to view all the data you have selected.'
+                + ' You must have DOWNLOAD right on all the studies of the selected examinations and acquisitions to open them in the viewer.'
+            );
+            return;
+        }
         const studies: Set<string> = new Set();
         const series: Set<string> = new Set();
         if (this.selectedExaminationNodes?.length > 0) {
@@ -200,16 +210,16 @@ export class StudyTreeComponent implements OnDestroy {
         this.selectedAcquisitionNodes = acqNodes;
         this.selectedExaminationNodes = examNodes;
         this.canOpenDicomMultiExam = this.canOpenDicomSingleExam = false;
- 
+
         if (this.selectedExaminationNodes.length == 0) {
             if (this.selectedAcquisitionNodes.length > 0) {
                 this.canOpenDicomSingleExam = (!this.selectedAcquisitionNodes.find(acqNode => acqNode.parent.id != this.selectedAcquisitionNodes[0]?.parent.id));
                 this.canOpenDicomMultiExam = !this.canOpenDicomSingleExam;
-            } 
+            }
         }
         else if (this.selectedExaminationNodes.length == 1) {
             if (this.selectedAcquisitionNodes.length > 0) {
-                this.canOpenDicomSingleExam = 
+                this.canOpenDicomSingleExam =
                     (!this.selectedAcquisitionNodes.find(acqNode => acqNode.parent.id != this.selectedAcquisitionNodes[0]?.parent.id || acqNode.parent.id != this.selectedExaminationNodes[0].id));
                     this.canOpenDicomMultiExam = !this.canOpenDicomSingleExam;
             } else {
@@ -219,7 +229,7 @@ export class StudyTreeComponent implements OnDestroy {
             this.canOpenDicomSingleExam = false;
             this.canOpenDicomMultiExam = true;
         }
-        
+
     }
 
     private searchSelectedInDatasetNodes(dsNodes: DatasetNode[] | 'UNLOADED'): DatasetNode[] {
@@ -253,5 +263,3 @@ export class StudyTreeComponent implements OnDestroy {
     }
 
 }
-
-

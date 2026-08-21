@@ -74,6 +74,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <artifactId>shanoir-ng-ms-common</artifactId>
             <version>3.4.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.shanoir-ng</groupId>
+            <artifactId>shanoir-ng-storage</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+
+        <!-- SpringFox Swagger UI -->
+				<dependency>
+					<groupId>com.fasterxml.jackson.datatype</groupId>
+					<artifactId>jackson-datatype-joda</artifactId>
+				</dependency>
 
         <dependency>
             <groupId>com.mysql</groupId>

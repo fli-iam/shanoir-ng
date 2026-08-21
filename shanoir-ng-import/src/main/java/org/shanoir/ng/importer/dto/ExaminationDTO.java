@@ -54,6 +54,10 @@ public class ExaminationDTO {
 
     private List<String> extraDataFilePathList;
 
+    private Boolean dataReuseAgreement = Boolean.FALSE;
+
+    private String studyInstanceUID;
+
     /**
      * @return the id
      */
@@ -202,6 +206,22 @@ public class ExaminationDTO {
             return study.getId();
         }
         return null;
+    }
+
+    public Boolean getDataReuseAgreement() {
+        return dataReuseAgreement;
+    }
+
+    public void setDataReuseAgreement(Boolean dataReuseAgreement) {
+        this.dataReuseAgreement = dataReuseAgreement;
+    }
+
+    public String getStudyInstanceUID() {
+        return studyInstanceUID;
+    }
+
+    public void setStudyInstanceUID(String studyInstanceUID) {
+        this.studyInstanceUID = studyInstanceUID;
     }
 
 }

@@ -29,6 +29,8 @@ public class Examination {
 
     private String studyInstanceUID;
 
+    private boolean dataReuseAgreement;
+
     public Examination() {
         super();
     }
@@ -153,4 +155,11 @@ public class Examination {
         this.studyInstanceUID = studyInstanceUID;
     }
 
+    public boolean isDataReuseAgreement() {
+        return dataReuseAgreement;
+    }
+
+    public void setDataReuseAgreement(boolean dataReuseAgreement) {
+        this.dataReuseAgreement = dataReuseAgreement;
+    }
 }

@@ -87,7 +87,8 @@ public class Examination extends HalEntity {
 
     /** List of extra files directly attached to the examinations. */
     @ElementCollection
-    @CollectionTable(name = "extra_data_file_path")
+    @CollectionTable(name = "examination_extra_data_file_path",
+            joinColumns = @JoinColumn(name = "examination_id"))
     @Column(name = "path")
     private List<String> extraDataFilePathList;
 
@@ -154,6 +155,8 @@ public class Examination extends HalEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "source", cascade = CascadeType.ALL)
     private List<Examination> copies;
 
+    private Boolean dataReuseAgreement = Boolean.FALSE;
+
     public Examination() {
     }
 
@@ -183,6 +186,7 @@ public class Examination extends HalEntity {
         this.source = other.source;
         this.copies = other.copies;
         this.studyInstanceUID = other.studyInstanceUID;
+        this.dataReuseAgreement = other.dataReuseAgreement;
     }
 
     /**
@@ -474,4 +478,11 @@ public class Examination extends HalEntity {
                 + ", preclinical=" + preclinical + ", studyInstanceUID=" + studyInstanceUID + "]";
     }
 
+    public Boolean getDataReuseAgreement() {
+        return dataReuseAgreement;
+    }
+
+    public void setDataReuseAgreement(Boolean dataReuseAgreement) {
+        this.dataReuseAgreement = dataReuseAgreement;
+    }
 }
