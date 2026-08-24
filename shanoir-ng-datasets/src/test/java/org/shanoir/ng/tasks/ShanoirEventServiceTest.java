@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.tasks;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -26,9 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Test class for AsyncTaskService.
@@ -62,12 +62,12 @@ public class ShanoirEventServiceTest {
         service.publishEvent(t);
 
         // THEN the task is sent using RabbitMQ and sent to the front
-        ArgumentCaptor<ShanoirEvent> argumentCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
-        Mockito.verify(rabbitTemplate).convertAndSend(Mockito.eq(RabbitMQConfiguration.EVENTS_EXCHANGE), Mockito.eq(t.getEventType()), argumentCatcher.capture());
-        String message = argumentCatcher.getValue().getMessage();
-        assertNotNull(message);
-        assertTrue(message.contains(t.getId().toString()));
-        assertTrue(message.contains(t.getMessage()));
-        assertTrue(message.contains("" + t.getUserId()));
+        ArgumentCaptor<ShanoirEvent> argumentCaptor = ArgumentCaptor.forClass(ShanoirEvent.class);
+        Mockito.verify(rabbitTemplate).convertAndSend(Mockito.eq(RabbitMQConfiguration.EVENTS_EXCHANGE), Mockito.eq(t.getEventType()), argumentCaptor.capture());
+        ShanoirEvent event = argumentCaptor.getValue();
+        assertNotNull(event);
+        assertTrue(event.getId().equals(t.getId()));
+        assertTrue(event.getMessage().equals(t.getMessage()));
+        assertTrue(event.getUserId().equals(t.getUserId()));
     }
 }
