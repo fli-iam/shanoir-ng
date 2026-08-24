@@ -302,6 +302,7 @@ public class UserServiceTest {
         accountRequestInfo.setFunction("function");
         accountRequestInfo.setInstitution("institution");
         accountRequestInfo.setStudyId(1L);
+        accountRequestInfo.setStudyName("test");
         user.setAccountRequestDemand(true);
         user.setAccountRequestInfo(accountRequestInfo);
         user.setId(null);
