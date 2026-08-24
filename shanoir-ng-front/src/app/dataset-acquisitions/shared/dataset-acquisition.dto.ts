@@ -13,7 +13,7 @@
  */
 import { Injectable } from '@angular/core';
 
-import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
+import { QualityTag } from '@app/study-cards/shared/quality-card.model';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';

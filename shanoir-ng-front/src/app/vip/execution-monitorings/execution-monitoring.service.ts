@@ -16,7 +16,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable, firstValueFrom } from "rxjs";
 
-import { EntityService } from "src/app/shared/components/entity/entity.abstract.service";
+import { EntityService } from "@app/shared/components/entity/entity.abstract.service";
 
 import { ExecutionMonitoring } from "../models/execution-monitoring.model";
 import * as AppUtils from "../../utils/app.utils";

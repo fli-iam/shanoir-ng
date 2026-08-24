@@ -11,13 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormArray, FormGroup, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { Selection } from '@app/studies/study/tree.service';
+import { DUAAssistantComponent } from '@app/dua/dua-assistant.component';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
@@ -40,11 +40,13 @@ import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.comp
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
 import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
+import { QualityCardRule } from '../shared/quality-card.model';
 
 @Component({
     selector: 'study-card',
     templateUrl: 'study-card.component.html',
     styleUrls: ['study-card.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, TooltipComponent, StudyCardRulesComponent, AcquisitionEquipmentPipe]
 })
 export class StudyCardComponent extends EntityComponent<StudyCard> implements OnDestroy {
@@ -284,6 +286,10 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
             }
         }
         this.navigateToAttributeCreateStep('/acquisition-equipment/create', 'acquisitionEquipment', options);
+    }
+
+    onSelectedRulesChange(rules: (StudyCardRule | QualityCardRule)[]) {
+        this.selectedRules = rules as StudyCardRule[];
     }
 
 }

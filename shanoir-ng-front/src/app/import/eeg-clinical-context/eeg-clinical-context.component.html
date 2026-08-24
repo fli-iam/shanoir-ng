@@ -35,20 +35,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <select-box
                         [(ngModel)]="study"
                         (userChange)="onSelectStudy()"
-                        [viewRoute]="'/study/details/' + study?.id"
+                        [viewRoute]="'/study/details/' + $safeNavigationMigration(study?.id)"
                         [viewDisabled]="!study"
                         [options]="studyOptions"
-                        [disabled]="loading"></select-box>
+                        [disabled]="loading != 0"></select-box>
                 </span>
             </li>
             <li>
                 <label [class.required-label]="!useStudyCard">Select a center</label>
                 <span class="right-col">
                     <select-box
-                        [disabled]="!study || loading"
+                        [disabled]="!study || loading != 0"
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
-                        [viewRoute]="'/center/details/' + center?.id"
+                        [viewRoute]="'/center/details/' + $safeNavigationMigration(center?.id)"
                         [viewDisabled]="!center"
                         (newClick)="openCreateCenter()"
                         [newHidden]="hasCompatibleCenters"
@@ -75,10 +75,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label [class.required-label]="!useStudyCard">Select a center equipment</label>
                 <span class="right-col">
                     <select-box
-                        [disabled]="!center || loading"
+                        [disabled]="!center || loading != 0"
                         [(ngModel)]="acquisitionEquipment"
                         (userChange)="onContextChange()"
-                        [viewRoute]="'/acquisition-equipment/details/' + acquisitionEquipment?.id"
+                        [viewRoute]="'/acquisition-equipment/details/' + $safeNavigationMigration(acquisitionEquipment?.id)"
                         [viewDisabled]="!acquisitionEquipment"
                         (newClick)="openCreateAcqEqt()"
                         [newHidden]="hasCompatibleEquipments"
@@ -111,10 +111,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label class="required-label">Select a subject</label>
                 <span class="right-col">
                     <select-box
-                        [disabled]="loading || !study || !acquisitionEquipment"
+                        [disabled]="loading != 0 || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
                         (userChange)="onSelectSubject()"
-                        [viewRoute]="'/subject/details/' + subject?.id"
+                        [viewRoute]="'/subject/details/' + $safeNavigationMigration(subject?.id)"
                         [viewDisabled]="!subject"
                         [optionArr]="subjects"></select-box>
                     <button class="new-subject" (click)="openCreateSubject()" [disabled]="!study || !acquisitionEquipment">
@@ -137,10 +137,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label class="required-label">Select an examination</label>
                 <span class="right-col">
                     <select-box
-                        [disabled]="!study || !subject || loading"
+                        [disabled]="!study || !subject || loading != 0"
                         [(ngModel)]="examination"
                         (userChange)="onSelectExam()"
-                        [viewRoute]="'/examination/details/' + examination?.id"
+                        [viewRoute]="'/examination/details/' + $safeNavigationMigration(examination?.id)"
                         [viewDisabled]="!examination"
                         [optionArr]="examinations"
                         [pipe]="subjectExaminationLabelPipe"></select-box>

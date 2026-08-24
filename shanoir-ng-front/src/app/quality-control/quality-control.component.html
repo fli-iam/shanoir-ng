@@ -22,7 +22,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <table>
     @for (qualityCard of qualityCards; track qualityCard) {
         <tr>
-            <td class="sc-name left-icon" [routerLink]="'/quality-card/details/' + qualityCard?.id" routerLinkActive="active" title="open details">
+            <td class="sc-name left-icon" [routerLink]="'/quality-card/details/' + $safeNavigationMigration(qualityCard?.id)" routerLinkActive="active" title="open details">
                 <i class="fa-solid fa-shuffle"></i>
                 {{ qualityCard.name }}
             </td>

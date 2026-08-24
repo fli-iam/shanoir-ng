@@ -11,12 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, inject, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, forwardRef, inject, Input, OnChanges, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import { IdName } from 'src/app/shared/models/id-name.model';
-import { ConsoleService } from 'src/app/shared/console/console.service';
+import { AccessRequestService } from '@app/users/access-request/access-request.service';
+import { IdName } from '@app/shared/models/id-name.model';
+import { ConsoleService } from '@app/shared/console/console.service';
 
 import { Center } from '../../centers/shared/center.model';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
@@ -46,6 +46,7 @@ import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
             multi: true,
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent]
 })
 
@@ -197,7 +198,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         return !!su.centers?.find(c => c.id == center.id);
     }
 
-    onUserClick(studyUser: StudyUser) {
+    onUserClick(studyUser: any) {
+        studyUser = studyUser as StudyUser;
         if (this.pannelStudyUser && (this.pannelStudyUser.id == studyUser.id)) {
             this.closePannel();
         } else {

@@ -11,13 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, forwardRef, Input, Output, OnInit, DestroyRef } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, Output, OnInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, UntypedFormBuilder, UntypedFormGroup, NG_VALUE_ACCESSOR, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
+import { ConfirmDialogService } from '@app/shared/components/confirm-dialog/confirm-dialog.service';
 
 import { StudyService } from '../../studies/shared/study.service';
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
@@ -34,6 +34,7 @@ import { AccountRequestInfo } from './account-request-info.model';
             multi: true,
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent]
 })
 export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit {

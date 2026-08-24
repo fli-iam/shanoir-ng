@@ -1,9 +1,9 @@
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import {Component, Input, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { ColumnDefinition } from '@app/shared/components/table/column.definition.type';
 
 import { TableComponent } from "../../shared/components/table/table.component";
 import { ExecutionTemplate } from "../models/execution-template";
@@ -15,6 +15,7 @@ import { ExecutionTemplateService } from "./execution-template.service";
 @Component({
     selector: 'execution-template-list',
     templateUrl: './execution-template-list.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, TableComponent]
     
 })

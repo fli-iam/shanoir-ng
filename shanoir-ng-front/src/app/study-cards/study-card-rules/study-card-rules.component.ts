@@ -12,17 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {
-    Component,
-    ElementRef,
-    EventEmitter,
-    forwardRef,
-    HostListener,
-    Input,
-    OnChanges,
-    Output,
-    QueryList,
-    SimpleChanges,
-    ViewChildren,
+  Component,
+  ElementRef,
+  EventEmitter,
+  forwardRef,
+  HostListener,
+  Input,
+  OnChanges,
+  Output,
+  QueryList,
+  SimpleChanges,
+  ViewChildren,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, FormGroup, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
@@ -60,6 +61,7 @@ import { QualityCardRuleComponent } from './quality-card-rule.component';
             useExisting: forwardRef(() => StudyCardRulesComponent),
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [StudyCardRuleComponent, QualityCardRuleComponent]
 })
 export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor {

@@ -12,20 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {
-    AfterViewInit,
-    Component,
-    ElementRef,
-    EventEmitter,
-    forwardRef,
-    HostBinding,
-    HostListener,
-    Input,
-    OnChanges,
-    OnDestroy,
-    Output,
-    PipeTransform,
-    SimpleChanges,
-    ViewChild,
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  forwardRef,
+  HostBinding,
+  HostListener,
+  Input,
+  OnChanges,
+  OnDestroy,
+  Output,
+  PipeTransform,
+  SimpleChanges,
+  ViewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -47,6 +48,7 @@ import { GlobalService } from '../services/global.service';
             multi: true,
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, RouterLink]
 })
 
@@ -655,8 +657,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
 export class Option<T> {
 
-    compatible: boolean = undefined;
-    backgroundColor: string;
+    compatible?: boolean = undefined;
+    backgroundColor?: string;
       
     constructor(
         public value: T,

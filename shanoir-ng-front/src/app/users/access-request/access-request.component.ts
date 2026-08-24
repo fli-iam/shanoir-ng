@@ -12,12 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { IdName } from 'src/app/shared/models/id-name.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { IdName } from '@app/shared/models/id-name.model';
 
 import { UserService } from '../shared/user.service'
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
@@ -32,6 +32,7 @@ import { AccessRequestService } from './access-request.service';
     selector: 'access-request',
     templateUrl: 'access-request.component.html',
     styleUrls: ['access-request.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent]
 })
 

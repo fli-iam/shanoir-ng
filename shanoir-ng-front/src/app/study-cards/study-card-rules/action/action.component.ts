@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Observable, Subscription , of } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 
@@ -25,6 +25,7 @@ import { AutoAdjustInputComponent } from '../../../shared/auto-ajust-input/auto-
     selector: 'action',
     templateUrl: 'action.component.html',
     styleUrls: ['action.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SelectBoxComponent, FormsModule, AutoAdjustInputComponent]
 })
 export class StudyCardActionComponent implements OnChanges, OnDestroy {

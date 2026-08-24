@@ -12,20 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {
-    ChangeDetectorRef,
-    Component,
-    EventEmitter,
-    forwardRef,
-    Input,
-    OnChanges,
-    Output,
-    SimpleChanges,
-    ViewChild, AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  forwardRef,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  ViewChild, AfterViewInit,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
+import { QualityTag } from '@app/study-cards/shared/quality-card.model';
 
 import { CheckboxComponent } from '../../checkbox/checkbox.component';
 import { Tag } from '../../../tags/tag.model';
@@ -43,6 +44,7 @@ export const CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR: any = {
     templateUrl: 'tree-node.component.html',
     styleUrls: ['tree-node.component.css'],
     providers: [CUSTOM_INPUT_CONTROL_VALUE_ACCESSOR],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [RouterLink, FormsModule, TooltipComponent]
 })
 

@@ -11,11 +11,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormArray, FormControl, FormGroup, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-import { Coil } from 'src/app/coils/shared/coil.model';
+import { Coil } from '@app/coils/shared/coil.model';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
@@ -32,6 +32,7 @@ import { DicomTagPipe } from './dicom-tag.pipe';
     selector: 'condition',
     templateUrl: 'condition.component.html',
     styleUrls: ['condition.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SelectBoxComponent, FormsModule, ReactiveFormsModule, AutoAdjustInputComponent, DicomTagPipe]
 })
 export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges {
@@ -58,6 +59,11 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         new Option('DOES_NOT_END_WITH', '! ends with'),
         new Option('PRESENT', 'present'),
         new Option('ABSENT', 'absent'),
+    ];
+    cardinalityTypeOptions: Option<'NONE' | 'ALL' | 'AT_LEAST'>[] = [
+        new Option('NONE', 'for no'),
+        new Option('ALL', 'for every'),
+        new Option('AT_LEAST', 'for at least'),
     ];
     @Output() delete: EventEmitter<void> = new EventEmitter();
     init: boolean = false;
