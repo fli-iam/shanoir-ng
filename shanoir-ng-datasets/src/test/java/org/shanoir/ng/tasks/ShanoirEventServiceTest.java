@@ -63,7 +63,7 @@ public class ShanoirEventServiceTest {
 
         // THEN the task is sent using RabbitMQ and sent to the front
         ArgumentCaptor<ShanoirEvent> argumentCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
-        Mockito.verify(rabbitTemplate).convertAndSend(Mockito.eq(RabbitMQConfiguration.EVENTS_EXCHANGE), Mockito.eq(t.getEventType()), argumentCatcher);
+        Mockito.verify(rabbitTemplate).convertAndSend(Mockito.eq(RabbitMQConfiguration.EVENTS_EXCHANGE), Mockito.eq(t.getEventType()), argumentCatcher.capture());
         String message = argumentCatcher.getValue().getMessage();
         assertNotNull(message);
         assertTrue(message.contains(t.getId().toString()));
