@@ -68,8 +68,8 @@ spring:
   session:
     store-type: none
   mail:
-    host: ${SHANOIR_SMTP_HOST}
-    port: ${SHANOIR_SMTP_PORT}
+    host: ${SHANOIR_SMTP_HOST:localhost}
+    port: ${SHANOIR_SMTP_PORT:25}
     username: ${SHANOIR_SMTP_USERNAME:}
     password: ${SHANOIR_SMTP_PASSWORD:}
     properties:
@@ -82,8 +82,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${SHANOIR_KEYCLOAK_URL}/realms/shanoir-ng
-          jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL}/realms/shanoir-ng/protocol/openid-connect/certs
+          issuer-uri: ${SHANOIR_KEYCLOAK_URL:localhost}/realms/shanoir-ng
+          jwk-set-uri: ${SHANOIR_KEYCLOAK_INTERNAL_URL:http://keycloak:8080/auth}/realms/shanoir-ng/protocol/openid-connect/certs
 springdoc:
   api-docs:
     path: "/api-docs"

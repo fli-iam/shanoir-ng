@@ -46,6 +46,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     | tee /etc/apt/sources.list.d/adoptium.list
 
 FROM base-debian-with-adoptium AS jdk
+RUN mkdir -pv /var/log/shanoir-ng-logs
+RUN chmod 777 /var/log/shanoir-ng-logs
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq && apt-get install -qqy temurin-25-jdk maven bzip2 git
 
@@ -54,8 +56,6 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get update -qq \
     && apt-get install -qqy temurin-25-jre ca-certificates-java \
     && update-ca-certificates
-
-RUN mkdir -pv /var/log/shanoir-ng-logs
 
 COPY --link \
     common/entrypoint_common \
