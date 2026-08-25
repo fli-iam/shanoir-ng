@@ -185,7 +185,8 @@ public class AccessRequestApiController implements AccessRequestApi {
         for (AccessRequest accessRequest : accessRequests) {
             if (accessRequest.getExpirationDate() == null) {
                 // If it's an account request, set the expiration date to the asked expiration date
-                if (accessRequest.getUser().isAccountRequestDemand() && accessRequest.getUser().getAccountRequestInfo() != null) {
+                if (Boolean.TRUE.equals(accessRequest.getUser().isAccountRequestDemand())
+                        && accessRequest.getUser().getAccountRequestInfo() != null) {
                     accessRequest.setExpirationDate(accessRequest.getUser().getAccountRequestInfo().getStudyExpirationDate());
                 } else {
                     // pre-fetch expiration date so the 6 months or so starts at validation time, not at request time
