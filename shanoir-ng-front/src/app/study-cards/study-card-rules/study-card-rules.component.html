@@ -70,12 +70,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </div>
             </span>
         }
-        @if (cardType == 'qualitycard') {
-            <span (click)="addNewExamRule()" class="dataset">
-                <i class="fas fa-plus"></i>
-                <div>Add a rule</div>
-            </span>
-        }
         @if (cardType == 'studycard') {
             <span (click)="importRules.emit()">
                 <i class="fas fa-file-import"></i>

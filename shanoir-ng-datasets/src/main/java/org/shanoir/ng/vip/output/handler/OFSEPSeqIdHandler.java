@@ -31,7 +31,6 @@ import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.property.model.DatasetProperty;
 import org.shanoir.ng.property.service.DatasetPropertyService;
@@ -43,7 +42,6 @@ import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
 import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
-import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,13 +135,10 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     private StudyRepository studyRepository;
 
     @Autowired
-    private ProcessingResourceRepository processingResourceRepository;
-
-    @Autowired
     @Lazy
     private DatasetService datasetService;
 
-   public boolean canProcess(String pipelineIdentifier) throws ResultHandlerException {
+    public boolean canProcess(String pipelineIdentifier) throws ResultHandlerException {
         if (Objects.isNull(pipelineIdentifier)) {
             throw new ResultHandlerException("Pipeline identifier can not be null", null);
         }
@@ -385,7 +380,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             JSONObject serie = series.getJSONObject(i);
             Long serieId = serie.getLong(ID);
 
-            List<Dataset> datasets = datasetRepository.findDatasetsByProcessingIdIn(List.of(processing.getId()));
+            List<Dataset> datasets = datasetRepository.findByProcessingIdIn(List.of(processing.getId()));
 
             if (datasets.isEmpty()) {
                 LOG.error("No dataset found for serie/acquisition [" + serieId + "]");
@@ -393,7 +388,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             }
 
             if (Objects.isNull(examinationId)) {
-                examinationId = datasets.get(0).getFirstRealInput().getDatasetAcquisition().getExamination().getId();
+                examinationId = datasetService.getFirstRealInput(datasets.get(0)).getDatasetAcquisition().getExamination().getId();
             }
 
             for (Dataset ds : datasets) {

@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnDestroy, ViewChild} from '@angular/core';
 import { FormArray, FormGroup, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
@@ -27,7 +27,6 @@ import { CenterService } from '../../centers/shared/center.service';
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
@@ -70,7 +69,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
             private acqEqService: AcquisitionEquipmentService,
             private studyRightsService: StudyRightsService,
             private acqEqptLabelPipe: AcquisitionEquipmentPipe,
-            keycloakService: KeycloakService,
             private centerService: CenterService,
             coilService: CoilService) {
         super(route);
@@ -287,8 +285,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
         this.navigateToAttributeCreateStep('/acquisition-equipment/create', 'acquisitionEquipment', options);
     }
 
-    onSelectedRulesChange(rules: (StudyCardRule | QualityCardRule)[]) {
+    onSelectedRulesChange(rules: StudyCardRule[]) {
         this.selectedRules = rules as StudyCardRule[];
     }
-
 }

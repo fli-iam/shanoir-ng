@@ -224,6 +224,10 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
     Set<Long> findDatasetIdsHavingExpressions(List<Long> ids);
 
     @Query("SELECT dataset FROM Dataset dataset "
+            + "WHERE dataset.datasetProcessing.id in :idList")
+    List<Dataset> findByProcessingIdIn(List<Long> idList);
+
+    @Query("SELECT dataset FROM Dataset dataset "
             + "JOIN FETCH dataset.datasetProcessing AS dp "
             + "JOIN FETCH dp.inputDatasets "
             + "WHERE dataset.id = :id")

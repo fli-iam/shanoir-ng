@@ -27,7 +27,6 @@ import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.rt.RtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.xa.XaDatasetAcquisition;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
