@@ -62,6 +62,7 @@ import { BidsTreeComponent } from "../../bids/tree/bids-tree.component";
 import { StudyHistoryComponent } from "../study-history/study-history.component";
 import { LocalDateFormatPipe } from "../../shared/localLanguage/localDateFormat.pipe";
 import { SizePipe } from "../../shared/utils/size.pipe";
+import { DaysLeftPipe } from "../../shared/localLanguage/daysLeft.pipe";
 
 import { Selection } from './tree.service';
 import { CopyFromCsvComponent } from "./copy-csv.component";
@@ -72,7 +73,7 @@ import { CopyFromCsvComponent } from "./copy-csv.component";
     styleUrls: ['study.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent,
-        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent]
+        BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, DaysLeftPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent]
 })
 
 export class StudyComponent extends EntityComponent<Study> {
@@ -98,7 +99,8 @@ export class StudyComponent extends EntityComponent<Study> {
     accessRequests: AccessRequest[];
     isStudyAdmin: boolean;
     subjectTagsInUse: Tag[] = [];
-
+    protected userExpiration: Date;
+    protected userExpirationColor: string;
     public openPrefix: boolean = false;
 
     centerOptions: Option<IdName>[];
@@ -129,10 +131,11 @@ export class StudyComponent extends EntityComponent<Study> {
             private userService: UserService,
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
-            private accessRequestService: AccessRequestService,
+            protected accessRequestService: AccessRequestService,
             protected downloadService: MassDownloadService) {
         super(route);
         this.activeTab = 'general';
+
     }
 
     protected getRoutingName(): string {
@@ -159,6 +162,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public set entity(study: Study) {
         super.entity = study;
         this.updateSubjectTagsInUse();
+        this.computeExpirationDate(study);
     }
 
     public get entity(): Study {
@@ -363,6 +367,19 @@ export class StudyComponent extends EntityComponent<Study> {
         if (startDay === null || endDay === null) return null;
         if (endDay <= startDay) return { order: true };
         return null;
+    }
+
+    private computeExpirationDate(study: Study) {
+        this.userExpiration = study?.studyUserList?.find(su => su.userId == KeycloakService.auth.userId)?.expirationDate;
+        if (this.userExpiration && this.userExpiration > new Date()) {
+            if (this.userExpiration && this.userExpiration < new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000)) {
+                this.userExpirationColor = 'darkorange';
+            } else {
+                this.userExpirationColor = 'green';
+            }
+        } else {
+            this.userExpirationColor = 'red';
+        }
     }
 
     private toDateOnlyTimestamp(value: Date | string): number | null {

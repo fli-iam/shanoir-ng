@@ -131,7 +131,7 @@ public class CenterServiceImpl implements CenterService {
         List<IdName> centers =  centerRepository.findIdsAndNames(studyId);
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return centers;
         StudyUser studyUser = studyUserRepo.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
-        if (studyUser == null) return new ArrayList<>();
+        if (studyUser == null || !studyUser.canAccessStudy()) return new ArrayList<>();
         if (!CollectionUtils.isEmpty(studyUser.getCenters())) {
             centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
         }
@@ -142,7 +142,8 @@ public class CenterServiceImpl implements CenterService {
     public List<Center> findByStudy(Long studyId) {
         List<Center> centers = centerRepository.findByStudy(studyId);
         StudyUser studyUser = studyUserRepo.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
-        if (studyUser != null && !CollectionUtils.isEmpty(studyUser.getCenterIds())) {
+        if (studyUser == null || !studyUser.canAccessStudy()) return new ArrayList<>();
+        if (!CollectionUtils.isEmpty(studyUser.getCenterIds())) {
             centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
         }
         // do this here: because of two bags exception, when annotating this additionally to the query in the repository

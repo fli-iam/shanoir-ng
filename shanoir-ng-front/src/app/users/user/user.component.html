@@ -335,8 +335,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <ol>
                             @for (study of studies; track study; let index = $index) {
                                 <li class="userStudies">
-                                    <span class="studyName">{{ study?.name + ' (' + study?.id + ')' }}</span>
                                     @if (mode == 'edit') {
+                                        <span class="studyName">{{ study?.name + ' (' + study?.id + ')' }}</span>
                                         <span>
                                             <span class="right-col">
                                                 <button type="button" class="deleteButton" (click)="removeStudyFromUser(study, index)">
@@ -344,6 +344,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 </button>
                                             </span>
                                         </span>
+                                    } @else if (mode == 'view') {
+                                        <a href="/study/details/{{ study?.id }}" class="left-icon link">
+                                            <i class="fa-regular fa-folder-open"></i>{{ study?.name }}
+                                        </a>
                                     }
                                 </li>
                             }

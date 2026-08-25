@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
@@ -85,6 +84,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -338,39 +338,42 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     public Page<Dataset> findPage(final Pageable pageable) {
-
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             return repository.findAll(pageable);
         }
 
         Long userId = KeycloakUtil.getTokenUserId();
-        List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 
         // Check if user has restrictions.
         boolean hasRestrictions = false;
         List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(userId));
         Map<Long, List<Long>> studyUserCenters = new HashMap<>();
+        List<Long> accessibleStudyIds = new ArrayList<>();
         for (StudyUser studyUser : studyUsers) {
             if (!CollectionUtils.isEmpty(studyUser.getCenterIds())) {
                 hasRestrictions = true;
                 studyUserCenters.put(studyUser.getStudyId(), studyUser.getCenterIds());
+            } else {
+                studyUserCenters.put(studyUser.getStudyId(), new ArrayList<>());
+            }
+            if (studyUser.canAccessStudy() && studyUser.getStudyUserRights().contains(StudyUserRight.CAN_SEE_ALL)) {
+                accessibleStudyIds.add(studyUser.getStudyId());
             }
         }
 
         if (!hasRestrictions) {
-            return repository.findByDatasetAcquisitionExaminationStudy_IdIn(studyIds, pageable);
+            return repository.findByDatasetAcquisitionExaminationStudy_IdIn(accessibleStudyIds, pageable);
         }
 
         // If yes, get all examinations and filter by centers
-        List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudy_IdIn(studyIds, pageable.getSort()));
+        List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudy_IdIn(accessibleStudyIds, pageable.getSort()));
 
         if (CollectionUtils.isEmpty(datasets)) {
             return new PageImpl<>(datasets);
         }
-
         datasets = datasets.stream().filter(ds ->
                         studyUserCenters.get(ds.getStudyId()) != null
-                                && studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId()))
+                                && (studyUserCenters.get(ds.getStudyId()).isEmpty() || studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId())))
                 .collect(Collectors.toList());
         int size = datasets.size();
 

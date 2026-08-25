@@ -41,7 +41,6 @@ export class CopyFromCsvComponent {
     private confirmService = inject(ConfirmDialogService);
 
     @HostListener('click') onClick() {
-        console.log("CopyFromCsvComponent clicked");
         this.inputEl?.nativeElement.click();
     }
 
