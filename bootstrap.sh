@@ -105,15 +105,22 @@ if [ -n "$build" ] ; then
 	docker build -t "$DEV_IMG" --target=jdk docker-compose
 
 	# 2. run the maven build
+	# Attention: process-aot fixes the Spring config during
+	# Maven build-time already
+	build_sql_init_mode=
+	case "${SHANOIR_MIGRATION:-dev}" in
+		dev|init)	build_sql_init_mode=always ;;
+	esac
+
 	mkdir -p /tmp/home
 	docker run --rm -t -i -v "$PWD:/src" -u "`id -u`:`id -g`" -e HOME="/src/tmp/home" \
 		-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository"	\
+		${build_sql_init_mode:+-e SPRING_SQL_INIT_MODE="$build_sql_init_mode"} \
 		-w /src "$DEV_IMG" sh -c 'cd shanoir-ng-parent && mvn clean install -DskipTests'
 
 	# 3. build the docker images
 	docker compose -f docker-compose-dev.yml build
 fi
-
 if [ -n "$deploy" ] ; then
 	#
 	# Clean stage
