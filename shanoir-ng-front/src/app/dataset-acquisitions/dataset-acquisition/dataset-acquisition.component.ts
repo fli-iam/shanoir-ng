@@ -11,14 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Selection } from 'src/app/studies/study/tree.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { Selection } from '@app/studies/study/tree.service';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
@@ -45,6 +45,7 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
     selector: 'dataset-acquisition-detail',
     templateUrl: 'dataset-acquisition.component.html',
     styleUrls: ['dataset-acquisition.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, RouterLink, MrProtocolComponent, CtProtocolComponent, PetProtocolComponent, XaProtocolComponent, LoadingBarComponent, LocalDateFormatPipe, AcquisitionEquipmentPipe]
 })
 export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisition> {

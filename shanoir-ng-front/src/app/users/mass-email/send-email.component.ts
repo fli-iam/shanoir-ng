@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
@@ -28,6 +28,7 @@ import { MassEmailService } from './mass-email.service';
 @Component({
     selector: 'send-email',
     templateUrl: 'send-email.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, TooltipComponent]
 })
 

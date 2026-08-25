@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, HostListener, ViewContainerRef, OnInit, AfterViewInit, HostBinding } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewContainerRef, OnInit, AfterViewInit, HostBinding, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 
 
@@ -37,6 +37,7 @@ import { ServiceLocator } from './utils/locator.service';
     selector: 'app-root',
     templateUrl: 'app.component.html',
     styleUrls: ['app.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SideMenuComponent, BreadcrumbsComponent, StudyTreeComponent, RouterOutlet, ConsoleComponent, MsgBoxComponent, LoaderComponent]
 })
 

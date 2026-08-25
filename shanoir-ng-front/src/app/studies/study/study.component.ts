@@ -12,18 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { KeyValue, NgClass, KeyValuePipe } from "@angular/common";
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl } from '@angular/forms';
+import { Component, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { UntypedFormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule, AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { Tag } from 'src/app/tags/tag.model';
-import { AccessRequest } from 'src/app/users/access-request/access-request.model';
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import { ExecutionTemplateListComponent } from "src/app/vip/execution-template/execution-template-list.component";
+import { TaskState } from '@app/async-tasks/task.model';
+import { DUAAssistantComponent } from '@app/dua/dua-assistant.component';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { Tag } from '@app/tags/tag.model';
+import { AccessRequest } from '@app/users/access-request/access-request.model';
+import { AccessRequestService } from '@app/users/access-request/access-request.service';
+import { ExecutionTemplateListComponent } from "@app/vip/execution-template/execution-template-list.component";
 
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
@@ -70,6 +70,7 @@ import { CopyFromCsvComponent } from "./copy-csv.component";
     selector: 'study-detail',
     templateUrl: 'study.component.html',
     styleUrls: ['study.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgClass, FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, DatepickerComponent, SelectBoxComponent, CheckboxComponent, TooltipComponent, LoadingBarComponent, TagCreatorComponent, SubjectStudyListComponent, StudyUserListComponent, QualityControlComponent,
         BidsTreeComponent, StudyHistoryComponent, KeyValuePipe, LocalDateFormatPipe, SizePipe, CopyFromCsvComponent, ExecutionTemplateListComponent, StudyEmailMembersComponent]
 })
@@ -326,9 +327,9 @@ export class StudyComponent extends EntityComponent<Study> {
         return formGroup;
     }
 
-    private inclusionRatePairValidator(group: UntypedFormGroup) {
-        const rate = group.get('inclusionRate')?.value;
-        const unit = group.get('inclusionRateUnit')?.value;
+    private inclusionRatePairValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+        const rate = control.get('inclusionRate')?.value;
+        const unit = control.get('inclusionRateUnit')?.value;
 
         if ((rate && !unit) || (!rate && unit)) return { inclusionRatePair: true };
 
@@ -450,7 +451,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.subjectService
             .getAllSubjectsNames()
             .then(subjects => {
-                this.subjects = subjects?.sort(function(a:Subject, b:Subject){
+                this.subjects = subjects?.sort((a:IdName, b:IdName) => {
                     return a.name.localeCompare(b.name);
                 });
             });

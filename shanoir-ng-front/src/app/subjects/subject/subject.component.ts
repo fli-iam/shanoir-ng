@@ -11,18 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, OnDestroy} from '@angular/core';
+import {Component, OnDestroy, ChangeDetectionStrategy} from '@angular/core';
 import { AbstractControl, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule, AsyncValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { NgClass } from '@angular/common';
 import shajs from 'sha.js';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { StudyUserRight } from 'src/app/studies/shared/study-user-right.enum';
-import { StudyRightsService } from 'src/app/studies/shared/study-rights.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { Selection } from '@app/studies/study/tree.service';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { StudyUserRight } from '@app/studies/shared/study-user-right.enum';
+import { StudyRightsService } from '@app/studies/shared/study-rights.service';
 
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
@@ -45,6 +45,7 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
     selector: 'subject-detail',
     templateUrl: 'subject.component.html',
     styleUrls: ['subject.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, NgClass, FormFooterComponent, SelectBoxComponent, DatepickerComponent, CheckboxComponent, TagInputComponent, LocalDateFormatPipe]
 })
 

@@ -15,7 +15,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { ConsoleService } from 'src/app/shared/console/console.service';
+import { ConsoleService } from '@app/shared/console/console.service';
 
 import * as AppUtils from '../../utils/app.utils';
 

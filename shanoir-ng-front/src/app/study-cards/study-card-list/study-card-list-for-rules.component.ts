@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
@@ -29,6 +29,7 @@ import { StudyCardListComponent } from './study-card-list.component';
     selector: 'study-card-list-for-rules',
     templateUrl: 'study-card-list-for-rules.component.html',
     styleUrls: ['study-card-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class StudyCardForRulesListComponent extends StudyCardListComponent implements OnInit {
@@ -74,7 +75,8 @@ export class StudyCardForRulesListComponent extends StudyCardListComponent imple
         };
     }
 
-    onRowClick(sc: StudyCard) {
+    onRowClick(selectedRow: object) {
+        const sc: StudyCard = selectedRow as StudyCard;
         const currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/study-card/select-rule/select/' + sc.id]).then(() => {
             this.breadcrumbsService.currentStep.label = 'Import rule';
