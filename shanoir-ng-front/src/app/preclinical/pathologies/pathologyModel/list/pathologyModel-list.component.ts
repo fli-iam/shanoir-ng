@@ -24,7 +24,6 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
 
-
 @Component({
     selector: 'pathologyModel-list',
     templateUrl: 'pathologyModel-list.component.html',
@@ -94,8 +93,7 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     protected openDeleteConfirmDialog = (entity: PathologyModel) => {
         this.subjectPathologyService.getAllSubjectForPathologyModel(entity.id).then(subjectPathologies => {
     		if (subjectPathologies){
-    			let hasSubjects: boolean  = false;
-    			hasSubjects = subjectPathologies.length > 0;
+    			const hasSubjects: boolean = subjectPathologies.length > 0;
     			if (hasSubjects){
                     this.consoleService.log('warn', 'This pathology model is linked to subjects, it can not be deleted');
     			}else{

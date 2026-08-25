@@ -270,7 +270,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnDest
     }
 
     save(): Promise<Subject> {
-        let savedDate: Date;
+        const savedDate: Date = undefined;
         if (this.mode == 'create') {
             this.subject.identifier = this.generateSubjectIdentifier();
             this.setSubjectBirthDateToFirstOfJanuary();
