@@ -1,4 +1,4 @@
-:host { border: 1px solid black; margin: 10px; display: inline-block; text-align: center; overflow: hidden; border-radius: 30px ;}
+:host { border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); background-color: white; margin: 10px; display: inline-block; text-align: center; overflow: hidden; border-radius: 16px ;}
 :host table { border-collapse: collapse; }
 :host .icon, :host .pannel, :host-title { width: 180px; padding: 0 10px; vertical-align: middle; }
 :host .icon, :host { height: 200px; }
@@ -11,16 +11,16 @@
 :host .pannel table { width: 100%; }
 :host .pannel td { height: auto; }
 
-:host { width: 866px; border-color: blue; }
+:host { width: 866px; }
 .challenge-title { width: auto; margin-top: 15px; margin-bottom: 0; font-size: 30px; }
 .challenge-files { margin: 10px 10px 10px 15px; text-align: left; font-size: 16px; width: 405px; white-space: nowrap; overflow: hidden; }
 .challenge-files li { line-height: 26px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; }
-.challenge-files li:hover { color: blue; }
+.challenge-files li:hover { color: var(--blue); }
 .challenge-files i { margin-right: 10px; font-size: 20px; color: darkslategrey; }
-.left-cell { background-color: blue; color: white; }
+.left-cell { background-color: var(--blue); color: white; }
 .msg { font-size: 16px;  width: 412px; color: white; padding: 0 10px; }
 .challenge-name { font-size: 20px; margin-top: 3px; }
-.challenge-title { color: midnightblue; }
+.challenge-title { color: white; }
 .challenge-title i { margin: 0 15px; }
 
 h2 { margin-bottom: 30px; }
