@@ -45,8 +45,10 @@ import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.QualityException;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.studycard.service.QualityCardService;
+import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
@@ -101,10 +103,13 @@ public class ImporterService {
     private DatasetAcquisitionService datasetAcquisitionService;
 
     @Autowired
+    private QualityCardRepository qualityCardRepository;
+
+    @Autowired
     private QualityCardService qualityCardService;
 
     @Autowired
-    private QualityService qualityService;
+    private StudyCardService studyCardService;
 
     // This constructor will be called everytime a new bean instance is created
     public ImporterService() {
@@ -228,7 +233,7 @@ public class ImporterService {
     private AcquisitionsResult generateAcquisitions(Examination examination, ImportJob importJob,
             ShanoirEvent event) throws Exception {
         StudyCard studyCard = getStudyCard(importJob);
-        List<QualityCard> qualityCards = importJob.isFromShanoirUploader() ? Collections.emptyList() : qualityCardService.findByStudy(examination.getStudyId());
+        List<QualityCard> qualityCards = importJob.isFromShanoirUploader() ? Collections.emptyList() : qualityCardRepository.findByStudyId(examination.getStudyId());
         boolean hasQualityCards = qualityCards != null && !qualityCards.isEmpty();
         Set<DatasetAcquisition> generatedAcquisitions = new HashSet<>();
         QualityCardResult qualityResult = new QualityCardResult();
@@ -263,7 +268,7 @@ public class ImporterService {
                 // apply study card if needed
                 if (studyCard != null) {
                     importJob.setStudyCardName(studyCard.getName());
-                    studyCard.apply(acquisition, dicomAttributes);
+                    studyCardService.applyStudyCardOnAcquisition(studyCard, acquisition, dicomAttributes);
                 }
 
                 // apply quality card if needed
@@ -376,7 +381,7 @@ public class ImporterService {
                 importJob.getExaminationId(),
                 dicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesDescription),
                 qualityCards.stream().map(QualityCard::getName).toList());
-        return qualityService.checkQuality(acquisition, dicomAttributes, qualityCards);
+        return qualityCardService.checkQuality(acquisition, dicomAttributes, qualityCards);
     }
 
     /**

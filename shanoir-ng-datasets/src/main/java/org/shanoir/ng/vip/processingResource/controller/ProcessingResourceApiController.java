@@ -15,7 +15,6 @@
 package org.shanoir.ng.vip.processingResource.controller;
 
 import com.zaxxer.hikari.HikariDataSource;
-import com.zaxxer.hikari.HikariPoolMXBean;
 import jakarta.servlet.http.HttpServletResponse;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -69,7 +68,6 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
                 case "properties":
                     return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
                 case "content":
-                    printStats(completePath);
                     List<Dataset> datasets = datasetRepository.findByResourceIdWithDatasetFiles(completePath);
                     NUMBER_OF_DOWNLOAD.incrementAndGet();
                     if (datasets.isEmpty()) {
@@ -87,21 +85,5 @@ public class ProcessingResourceApiController implements ProcessingResourceApi {
             LOG.error("Error while VIP downloading data", e);
             throw e;
         }
-    }
-
-    public void printStats(String completePath) {
-        HikariPoolMXBean pool = dataSource.getHikariPoolMXBean();
-
-        int active = pool.getActiveConnections();
-        int idle = pool.getIdleConnections();
-        int total = pool.getTotalConnections();
-        int waiting = pool.getThreadsAwaitingConnection();
-
-        LOG.info("For path : " + completePath);
-        LOG.info("Active: " + active);
-        LOG.info("Idle (free): " + idle);
-        LOG.info("Total: " + total);
-        LOG.info("Waiting threads: " + waiting);
-        LOG.info("?umber of downloads : " + NUMBER_OF_DOWNLOAD);
     }
 }

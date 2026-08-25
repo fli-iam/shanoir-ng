@@ -30,7 +30,6 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.hibernate.Hibernate;
-import org.hibernate.SessionFactory;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
@@ -67,7 +66,7 @@ import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.study.rights.UserRights;
-import org.shanoir.ng.studycard.dto.DicomTag;
+import org.shanoir.ng.studycard.model.DicomTag;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -158,9 +157,6 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Autowired
     private SubjectService subjectService;
-
-    @Autowired
-    private SessionFactory sessionFactory;
 
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);

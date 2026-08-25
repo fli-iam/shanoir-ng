@@ -14,25 +14,32 @@
 
 package org.shanoir.ng.studycard.service;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.StandardElementDictionary;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.data.Tag;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.studycard.dto.DicomTag;
-import org.shanoir.ng.studycard.model.DicomTagType;
-import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.model.VM;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.download.AcquisitionAttributes;
+import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.exception.*;
+import org.shanoir.ng.shared.validation.UniqueConstraintManager;
+import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.studycard.model.*;
+import org.shanoir.ng.studycard.model.rule.DatasetAcquisitionRule;
+import org.shanoir.ng.studycard.model.rule.DatasetRule;
 import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -47,98 +54,65 @@ import java.util.List;
 @Service
 public class StudyCardServiceImpl implements StudyCardService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(StudyCardServiceImpl.class);
+
     @Autowired
     private StudyCardRepository studyCardRepository;
 
-    @Override
-    public void deleteById(final Long id) throws EntityNotFoundException, MicroServiceCommunicationException {
-        final StudyCard studyCard = studyCardRepository.findById(id).orElse(null);
-        if (studyCard == null) {
-            throw new EntityNotFoundException(StudyCard.class, id);
-        }
-        studyCardRepository.deleteById(id);
-    }
+    @Autowired
+    private UniqueConstraintManager<StudyCard> uniqueConstraintManager;
 
-    @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
-    public List<StudyCard> findAll() {
-        return Utils.toList(studyCardRepository.findAll());
-    }
+    @Autowired
+    private SolrService solrService;
 
-    @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("returnObject == null || @datasetSecurityService.hasRightOnStudy(returnObject.getStudyId(), 'CAN_SEE_ALL')")
-    public StudyCard findById(final Long id) {
-        return studyCardRepository.findById(id).orElse(null);
-    }
+    @Autowired
+    private DatasetAcquisitionRepository acquisitionRepository;
 
-    @Override
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#card.getStudyId(), 'CAN_ADMINISTRATE'))")
-    public StudyCard save(final StudyCard card) throws MicroServiceCommunicationException {
-        card.setLastEditTimestamp(System.currentTimeMillis());
-        StudyCard savedStudyCard = studyCardRepository.save(card);
-        return savedStudyCard;
-    }
+    @Autowired
+    private DatasetAcquisitionService datasetAcquisitionService;
 
-    @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
-    public List<StudyCard> search(final List<Long> studyIdList) {
-        return studyCardRepository.findByStudyIdIn(studyIdList);
-    }
+    @Autowired
+    private WADODownloaderService downloader;
 
-    @Override
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnCard(#card, 'CAN_ADMINISTRATE'))")
-    public StudyCard update(final StudyCard card) throws EntityNotFoundException, MicroServiceCommunicationException {
+    public void update(final StudyCard card) throws EntityNotFoundException {
         final StudyCard studyCardDb = studyCardRepository.findById(card.getId()).orElse(null);
         if (studyCardDb == null) throw new EntityNotFoundException(StudyCard.class, card.getId());
         updateStudyCardValues(studyCardDb, card);
-        studyCardDb.setLastEditTimestamp(System.currentTimeMillis());
         studyCardRepository.save(studyCardDb);
-        return studyCardDb;
     }
 
-
-    /**
-     * Update some values of template to save them in database.
-     *
-     * @param templateDb template found in database.
-     * @param template template with new values.
-     * @return database template with new values.
-     */
-    private StudyCard updateStudyCardValues(final StudyCard studyCardDb, final StudyCard studyCard) {
-        studyCardDb.setName(studyCard.getName());
-        studyCardDb.setDisabled(studyCard.isDisabled());
-        studyCardDb.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
-        studyCardDb.setId(studyCard.getId());
-        studyCardDb.setNiftiConverterId(studyCard.getNiftiConverterId());
-        studyCardDb.setStudyId(studyCard.getStudyId());
-        if (studyCardDb.getRules() == null) studyCardDb.setRules(new ArrayList<StudyCardRule<?>>());
-        else studyCardDb.getRules().clear();
-        if (studyCard.getRules() != null) studyCardDb.getRules().addAll(studyCard.getRules());
-        return studyCardDb;
+    public void validate(StudyCard studyCard, BindingResult result) throws RestServiceException {
+        final FieldErrorMap errors = new FieldErrorMap()
+                .add(new FieldErrorMap(result))
+                .add(uniqueConstraintManager.validate(studyCard));
+        if (!errors.isEmpty()) {
+            ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
+            throw new RestServiceException(error);
+        }
     }
 
-    @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
-    public List<StudyCard> findByStudy(Long studyId) {
-        return this.studyCardRepository.findByStudyId(studyId);
+    public void applyStudyCard(StudyCard studyCard, StudyCardApply studyCardApplyObject) throws PacsException, EntityNotFoundException {
+        LOG.debug("re-apply studycard n° " + studyCard.getId());
+
+        List<DatasetAcquisition> acquisitions = acquisitionRepository.findByIdsWithDatasetExpressions(studyCardApplyObject.getDatasetAcquisitionIds());
+        applyStudyCard(studyCard, acquisitions);
+
+        // Get all updated dataset ids
+        List<Long> datasetIds = new ArrayList<Long>();
+        for (DatasetAcquisition acquisition : acquisitions) {
+            for (Dataset ds : acquisition.getDatasets()) {
+                datasetIds.add(ds.getId());
+            }
+        }
+
+        // Update solr metadata
+        try {
+            solrService.updateDatasetsAsync(datasetIds);
+        } catch (Exception e) {
+            LOG.error("Solr update failed for datasets {}", datasetIds, e);
+        }
     }
 
-    @Override
-    public List<StudyCard> findStudyCardsByAcqEq(Long acqEqId) {
-        return this.studyCardRepository.findByAcquisitionEquipmentId(acqEqId);
-    }
-
-    @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    public StudyCard findByName(String name) {
-        return studyCardRepository.findByName(name);
-    }
-
-    @Override
     public List<DicomTag> findDicomTags() throws RestServiceException {
         Field[] declaredFields = Tag.class.getDeclaredFields();
         List<DicomTag> dicomTags = new ArrayList<DicomTag>();
@@ -172,5 +146,74 @@ public class StudyCardServiceImpl implements StudyCardService {
             throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Cannot parse the dcm4che lib Tag class static fields", e));
         }
         return dicomTags;
+    }
+
+    public boolean applyStudyCardOnAcquisition(StudyCard studyCard, DatasetAcquisition acquisition, AcquisitionAttributes<?> dicomAttributes) throws IllegalStateException {
+        boolean changeInAtLeastOneAcquisition = false;
+        if (studyCard.getRules() != null) {
+            for (StudyCardRule<?> rule : studyCard.getRules()) {
+                if (rule instanceof DatasetAcquisitionRule) {
+                    changeInAtLeastOneAcquisition = true;
+                    ((DatasetAcquisitionRule) rule).apply(acquisition, dicomAttributes);
+                } else if (rule instanceof DatasetRule && acquisition.getDatasets() != null) {
+                    for (Dataset dataset : acquisition.getDatasets()) {
+                        changeInAtLeastOneAcquisition = true;
+                        Attributes attributes;
+                        if (String.class.equals(dicomAttributes.getParametrizedType())) {
+                            // @SuppressWarnings("unchecked") doesn't work ...
+                            attributes = ((AcquisitionAttributes<String>) dicomAttributes).getDatasetAttributes(dataset.getSOPInstanceUID());
+                        } else if (Long.class.equals(dicomAttributes.getParametrizedType())) {
+                            attributes = ((AcquisitionAttributes<Long>) dicomAttributes).getDatasetAttributes(dataset.getId());
+                        } else {
+                            throw new IllegalStateException("the parametrized type of AcquisitionAttributes is not implemented, use String or Long");
+                        }
+                        ((DatasetRule) rule).apply(dataset, attributes);
+                    }
+                } else {
+                    throw new IllegalStateException("unknown type of rule");
+                }
+            }
+        }
+        acquisition.setStudyCard(studyCard);
+        acquisition.setStudyCardTimestamp(studyCard.getLastEditTimestamp());
+        return changeInAtLeastOneAcquisition;
+    }
+
+    /**
+     * Apply study card on given acquisitions
+     */
+    private void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) throws PacsException, EntityNotFoundException {
+
+        if (CollectionUtils.isEmpty(studyCard.getRules())) {
+            return;
+        }
+
+        boolean changeInAtLeastOneAcquisition = false;
+        for (DatasetAcquisition acquisition : acquisitions) {
+            if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
+                try {
+                    AcquisitionAttributes<Long> dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
+                    changeInAtLeastOneAcquisition |= applyStudyCardOnAcquisition(studyCard, acquisition, dicomAttributes);
+                } catch (PacsException e) {
+                    LOG.error("Error during PACS communication while applying study card on dataset acquisition " + acquisition.getId(), e);
+                }
+            }
+        }
+        if (changeInAtLeastOneAcquisition) { // no need to update, if nothing happened
+            datasetAcquisitionService.update(acquisitions);
+        }
+    }
+
+    private void updateStudyCardValues(final StudyCard studyCardDb, final StudyCard studyCard) {
+        studyCardDb.setName(studyCard.getName());
+        studyCardDb.setDisabled(studyCard.isDisabled());
+        studyCardDb.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
+        studyCardDb.setId(studyCard.getId());
+        studyCardDb.setNiftiConverterId(studyCard.getNiftiConverterId());
+        studyCardDb.setStudyId(studyCard.getStudyId());
+        studyCardDb.setLastEditTimestamp(System.currentTimeMillis());
+        if (studyCardDb.getRules() == null) studyCardDb.setRules(new ArrayList<StudyCardRule<?>>());
+        else studyCardDb.getRules().clear();
+        if (studyCard.getRules() != null) studyCardDb.getRules().addAll(studyCard.getRules());
     }
 }

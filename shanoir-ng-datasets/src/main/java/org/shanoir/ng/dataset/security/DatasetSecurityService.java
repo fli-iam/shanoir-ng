@@ -46,7 +46,6 @@ import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.UserRights;
-import org.shanoir.ng.studycard.model.Card;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
@@ -311,16 +310,20 @@ public class DatasetSecurityService {
         if (cardId == null) {
             return false;
         }
-        Card card;
+
         if ("study".equals(type)) {
-            card = studyCardRepository.findById(cardId).orElse(null);
+            StudyCard card = studyCardRepository.findById(cardId).orElse(null);
+            if (card == null) {
+                throw new EntityNotFoundException("Cannot find card with id " + cardId);
+            }
+            return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr);
         } else if ("quality".equals(type)) {
-            card = qualityCardRepository.findById(cardId).orElse(null);
+            QualityCard card = qualityCardRepository.findById(cardId).orElse(null);
+            if (card == null) {
+                throw new EntityNotFoundException("Cannot find card with id " + cardId);
+            }
+            return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr);
         } else throw new IllegalArgumentException("Bad type argument '" + type + "', should be 'study' or 'quality'");
-        if (card == null) {
-            throw new EntityNotFoundException("Cannot find card with id " + cardId);
-        }
-        return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr);
     }
 
     /**
@@ -700,41 +703,50 @@ public class DatasetSecurityService {
     }
 
     /**
-     * Check the connected user has the given right for the given study card.
-     * If the study card is updated, check the user has the given right in both former and new study cards.
-     *
-     * @param studyCard the study card
-     * @param rightStr the right
-     * @return true or false
-     * @throws EntityNotFoundException
-     */
-    public boolean hasUpdateRightOnStudyCard(StudyCard studyCard, String rightStr) throws EntityNotFoundException {
-        return hasUpdateRightOnCard(studyCard, rightStr);
-    }
-
-    /**
-     * Check the connected user has the given right for the given study card.
-     * If the study card is updated, check the user has the given right in both former and new study cards.
-     *
-     * @param studyCard the study card
-     * @param rightStr the right
-     * @return true or false
-     * @throws EntityNotFoundException
-     */
-    public boolean hasUpdateRightOnQualityCard(QualityCard qualityCard, String rightStr) throws EntityNotFoundException {
-        return hasUpdateRightOnCard(qualityCard, rightStr);
-    }
-
-    /**
-    * Check the connected user has the given right for the given study card.
-    * If the study card is updated, check the user has the given right in both former and new study cards.
+    * Check the connected user has the given right for the given quality card.
+    * If the quality card is updated, check the user has the given right in both former and new quality cards.
     *
-    * @param card the study/quality card
+    * @param card the quality card
     * @param rightStr the right
     * @return true or false
     * @throws EntityNotFoundException
     */
-    public boolean hasUpdateRightOnCard(Card card, String rightStr) throws EntityNotFoundException {
+    public boolean hasUpdateRightOnQualityCard(QualityCard card, String rightStr) throws EntityNotFoundException {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
+        if (card == null) {
+            throw new IllegalArgumentException("Quality card cannot be null here.");
+        }
+        if (card.getId() == null) {
+            throw new IllegalArgumentException("Quality card id cannot be null here.");
+        }
+        if (card.getStudyId() == null) {
+            return false;
+        }
+
+        QualityCard dbCard = qualityCardRepository.findById(card.getId()).orElse(null);
+        if (dbCard == null) {
+            throw new EntityNotFoundException("Cannot find quality card with id " + card.getId());
+        }
+
+        if (card.getStudyId().equals(dbCard.getStudyId())) { // study hasn't changed
+            return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr);
+        } else { // study has changed : check user has right on both studies
+            return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr) && studyRightsService.hasRightOnStudy(dbCard.getStudyId(), rightStr);
+        }
+    }
+
+    /**
+     * Check the connected user has the given right for the given study card.
+     * If the study card is updated, check the user has the given right in both former and new study cards.
+     *
+     * @param card the study card
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasUpdateRightOnStudyCard(StudyCard card, String rightStr) throws EntityNotFoundException {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             return true;
         }
@@ -747,18 +759,11 @@ public class DatasetSecurityService {
         if (card.getStudyId() == null) {
             return false;
         }
-        Card dbCard;
-        if (card instanceof StudyCard) {
-            dbCard = studyCardRepository.findById(card.getId()).orElse(null);
-            if (dbCard == null) {
-                throw new EntityNotFoundException("Cannot find study card with id " + card.getId());
-            }
-        } else if (card instanceof QualityCard) {
-            dbCard = qualityCardRepository.findById(card.getId()).orElse(null);
-            if (dbCard == null) {
-                throw new EntityNotFoundException("Cannot find quality card with id " + card.getId());
-            }
-        } else throw new IllegalStateException("Cannot find the type of card");
+        StudyCard dbCard = studyCardRepository.findById(card.getId()).orElse(null);
+        if (dbCard == null) {
+            throw new EntityNotFoundException("Cannot find study card with id " + card.getId());
+        }
+
         if (card.getStudyId().equals(dbCard.getStudyId())) { // study hasn't changed
             return studyRightsService.hasRightOnStudy(card.getStudyId(), rightStr);
         } else { // study has changed : check user has right on both studies
@@ -1080,22 +1085,43 @@ public class DatasetSecurityService {
     }
 
     /**
-     * Filter study cards in that page checking the connected user has the right on those cards.
+     * Filter quality cards in that page checking the connected user has the right on those cards.
      *
-     * @param list the card list
+     * @param list the quality card list
      * @param rightStr the right
      * @return true
      */
-    public boolean filterCardList(List<Card> list, String rightStr) {
+    public boolean filterQualityCardList(List<QualityCard> list, String rightStr) {
         if (list == null) {
             return true;
         }
         Set<Long> studyIds = new HashSet<>();
-        list.forEach((Card sc) -> {
+        list.forEach((QualityCard sc) -> {
             studyIds.add(sc.getStudyId());
         });
         Set<Long> checkedIds = studyRightsService.hasRightOnStudies(studyIds, rightStr);
-        list.removeIf((Card sc) -> !checkedIds.contains(sc.getStudyId()));
+        list.removeIf((QualityCard sc) -> !checkedIds.contains(sc.getStudyId()));
+
+        return true;
+    }
+
+    /**
+     * Filter study cards in that page checking the connected user has the right on those cards.
+     *
+     * @param list the study card list
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean filterStudyCardList(List<StudyCard> list, String rightStr) {
+        if (list == null) {
+            return true;
+        }
+        Set<Long> studyIds = new HashSet<>();
+        list.forEach((StudyCard sc) -> {
+            studyIds.add(sc.getStudyId());
+        });
+        Set<Long> checkedIds = studyRightsService.hasRightOnStudies(studyIds, rightStr);
+        list.removeIf((StudyCard sc) -> !checkedIds.contains(sc.getStudyId()));
 
         return true;
     }

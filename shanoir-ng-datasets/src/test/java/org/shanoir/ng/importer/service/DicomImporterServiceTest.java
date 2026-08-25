@@ -40,8 +40,8 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -62,7 +62,7 @@ public class DicomImporterServiceTest {
     private static final String USER_NAME = "testUser";
 
     @Mock
-    private StudyService studyService;
+    private StudyRepository studyRepository;
 
     @Mock
     private DatasetSecurityService datasetSecurityService;
@@ -98,7 +98,7 @@ public class DicomImporterServiceTest {
         attributes.setString(Tag.PatientName, VR.PN, "subject01");
         study = new Study();
         study.setId(STUDY_ID);
-        when(studyService.findById(STUDY_ID)).thenReturn(study);
+        when(studyRepository.findById(STUDY_ID)).thenReturn(Optional.of(study));
     }
 
     @Test

@@ -218,7 +218,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         return acq;
     }
 
-    @Override
+    @Transactional
     public Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities) {
         List<Long> ids = new ArrayList<>();
         for (DatasetAcquisition acq : entities) {
