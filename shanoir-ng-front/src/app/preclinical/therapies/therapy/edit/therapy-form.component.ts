@@ -11,11 +11,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ReferenceService } from '../../../reference/shared/reference.service';
@@ -30,6 +30,7 @@ import { SelectBoxComponent } from '../../../../shared/select/select.component';
 @Component({
     selector: 'therapy-form',
     templateUrl: 'therapy-form.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent]
 })
 export class TherapyFormComponent extends EntityComponent<Therapy>{

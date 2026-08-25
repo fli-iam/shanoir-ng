@@ -12,11 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-import { DatasetLight, DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { DatasetLight, DatasetService, Format } from '@app/datasets/shared/dataset.service';
 
 import { DatasetType } from "../../../datasets/shared/dataset-type.model";
 import { Dataset } from "../../../datasets/shared/dataset.model";
@@ -30,6 +30,7 @@ import {DownloadInputIds, MassDownloadService} from '../mass-download.service';
     selector: 'download-setup-alt',
     templateUrl: 'download-setup-alt.component.html',
     styleUrls: ['download-setup-alt.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, SelectBoxComponent]
 })
 
@@ -136,11 +137,18 @@ export class DownloadSetupAltComponent implements OnInit, OnDestroy {
     // This method checks if the list of given datasets has dicom or not.
     private hasDicomInDatasets(datasets: Dataset[] | DatasetLight[]) {
         for (const dataset of datasets) {
-            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && dataset.type != DatasetType.Generic) {
+            if (!this.isNonDicomDatasetType(dataset.type)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private isNonDicomDatasetType(type: DatasetType | string): boolean {
+        const normalized = typeof type === 'string' ? type.toLowerCase() : String(type).toLowerCase();
+        return normalized === DatasetType.Eeg.toLowerCase()
+            || normalized === DatasetType.BIDS.toLowerCase()
+            || normalized === DatasetType.Generic.toLowerCase();
     }
 
     hasError(fieldName: string, errors: string[]) {

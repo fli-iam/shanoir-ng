@@ -12,11 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { DatePipe } from '@angular/common';
-import { AnimationCallbackEvent, Component, DestroyRef } from '@angular/core';
+import { AnimationCallbackEvent, Component, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
+import { AccessRequestService } from '@app/users/access-request/access-request.service';
 
 import { environment } from '../../../environments/environment';
 import { VERSION } from '../../../environments/version';
@@ -35,6 +35,7 @@ import { ImagesUrlUtil } from '../utils/images-url.util';
     selector: 'side-menu',
     templateUrl: 'side-menu.component.html',
     styleUrls: ['side-menu.component.css', environment.production ? 'prod.css' : 'dev.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [RouterLink, RouterLinkActive, LoadingBarComponent, DatePipe]
 })
 

@@ -12,13 +12,13 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { DatepickerComponent } from 'src/app/shared/date-picker/date-picker.component';
-import { IdName } from 'src/app/shared/models/id-name.model';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { DatepickerComponent } from '@app/shared/date-picker/date-picker.component';
+import { IdName } from '@app/shared/models/id-name.model';
 
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer.component';
@@ -32,6 +32,7 @@ import { AccessRequestService } from './access-request.service';
     selector: 'access-request',
     templateUrl: 'access-request.component.html',
     styleUrls: ['access-request.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, SelectBoxComponent, DatepickerComponent]
 })
 

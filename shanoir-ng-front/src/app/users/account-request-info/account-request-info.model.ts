@@ -13,8 +13,8 @@
  */
 
 
-import { Entity } from "src/app/shared/components/entity/entity.abstract";
-import { Field } from "src/app/shared/reflect/field.decorator";
+import { Entity } from "@app/shared/components/entity/entity.abstract";
+import { Field } from "@app/shared/reflect/field.decorator";
 
 export class AccountRequestInfo extends Entity {
     @Field() id: number;

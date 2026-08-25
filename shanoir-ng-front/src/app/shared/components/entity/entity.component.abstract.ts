@@ -28,8 +28,8 @@ import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, UntypedFormG
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { firstValueFrom, Subject, Subscription } from 'rxjs';
 
-import { Selection, TreeService } from 'src/app/studies/study/tree.service';
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { Selection, TreeService } from '@app/studies/study/tree.service';
+import { SuperPromise } from '@app/utils/super-promise';
 
 import { BreadcrumbsService, Step } from '../../../breadcrumbs/breadcrumbs.service';
 import { ConsoleService } from '../../console/console.service';

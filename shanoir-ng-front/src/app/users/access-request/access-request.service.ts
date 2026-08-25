@@ -15,8 +15,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subject, Subscription, firstValueFrom } from 'rxjs';
 
-import { IdName } from 'src/app/shared/models/id-name.model';
-import { KeycloakService } from 'src/app/shared/keycloak/keycloak.service';
+import { IdName } from '@app/shared/models/id-name.model';
+import { KeycloakService } from '@app/shared/keycloak/keycloak.service';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';

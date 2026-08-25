@@ -12,10 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
-import { SuperPromise } from 'src/app/utils/super-promise';
+import { SuperPromise } from '@app/utils/super-promise';
 
 import { DatepickerComponent } from "../../date-picker/date-picker.component";
 
@@ -24,6 +24,7 @@ import { DatepickerComponent } from "../../date-picker/date-picker.component";
     selector: 'confirm-dialog',
     templateUrl: 'confirm-dialog.component.html',
     styleUrls: ['confirm-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [DatepickerComponent, FormsModule]
 })
 export class ConfirmDialogComponent {

@@ -61,10 +61,12 @@ public class AcqMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcqu
                 valueFromDb = null;
             }
             if (valueFromDb != null) {
-                // get all possible values, that can fulfill the condition
-                for (String value : this.getValues()) {
-                    LOG.info("Condition fulfilled: acquisition metadata field value = " + valueFromDb + ", value =" + value);
-                    return true; // as condition values are combined by OR: return if one is true
+                boolean matches = field.isNumeric()
+                        ? numericalCompare(this.getOperation(), valueFromDb)
+                        : textualCompare(this.getOperation(), valueFromDb);
+                if (matches) {
+                    LOG.info("Condition fulfilled: acquisition metadata field value = " + valueFromDb);
+                    return true;
                 }
             }
         }

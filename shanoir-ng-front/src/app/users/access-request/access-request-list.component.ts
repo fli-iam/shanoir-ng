@@ -11,24 +11,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { DatepickerComponent } from "src/app/shared/date-picker/date-picker.component";
+import { DatepickerComponent } from "@app/shared/date-picker/date-picker.component";
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { StudyService } from "../../studies/shared/study.service";
 
+import { AccessRequestStatusPipe } from './acces-request-status.pipe';
 import { AccessRequest } from './access-request.model';
 import { AccessRequestService } from './access-request.service';
-import { AccessRequestStatusPipe } from './acces-request-status.pipe';
 
 @Component({
     selector: 'accessRequestList',
     templateUrl: 'access-request-list.component.html',
     styleUrls: ['access-request-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, RouterLink, DatepickerComponent, AccessRequestStatusPipe]
 })
 

@@ -11,12 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild, OnInit } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Filter } from 'src/app/shared/components/table/pageable.model';
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
+import { Filter } from '@app/shared/components/table/pageable.model';
+import { AccessRequestService } from '@app/users/access-request/access-request.service';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { ConfirmDialogService } from "../../shared/components/confirm-dialog/confirm-dialog.service";
@@ -35,6 +35,7 @@ import { StudyService } from '../shared/study.service';
     selector: 'study-list',
     templateUrl: 'study-list.component.html',
     styleUrls: ['study-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 

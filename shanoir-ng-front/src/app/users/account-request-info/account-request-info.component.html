@@ -21,7 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
                 <span class="right-col">
                     @if (editMode) {
-                        <select-box formControlName="studyId" [options]="studyOptions" (change)="onStudyChange($event)"></select-box>
+                        <select-box formControlName="studyId" [options]="studyOptions" (userChange)="onStudyChange($event)"></select-box>
                         @if (hasError('studyId', ['required'])) {
                             <label
                                 animate.enter="slide-down-error"

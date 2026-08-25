@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <legend>Processed dataset</legend>
                     <label>Processing</label>
                     <span class="right-col">
-                        <a [routerLink]="['/dataset-processing/details/', dataset?.datasetProcessing?.id]">
+                        <a [routerLink]="['/dataset-processing/details/', $safeNavigationMigration(dataset?.datasetProcessing?.id)]">
                             Dataset processing n°{{ dataset.datasetProcessing?.id }}
                         </a>
                     </span>
@@ -43,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li>
                     <label>Dataset Acquisition</label>
                     <span class="right-col">
-                        <a [routerLink]="['/dataset-acquisition/details/', dataset?.datasetAcquisition?.id]">
+                        <a [routerLink]="['/dataset-acquisition/details/', $safeNavigationMigration(dataset?.datasetAcquisition?.id)]">
                             Dataset acquisition n°{{ dataset.datasetAcquisition?.id }}
                         </a>
                     </span>
@@ -53,11 +53,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li>
                     <label>Examination</label>
                     <span class="right-col">
-                        <a [routerLink]="['/examination/details/', dataset?.datasetAcquisition?.examination?.id]">
+                        <a [routerLink]="['/examination/details/', $safeNavigationMigration(dataset?.datasetAcquisition?.examination?.id)]">
                             {{
                                 dataset.datasetAcquisition?.examination?.comment
                                     ? dataset.datasetAcquisition?.examination?.comment
-                                    : (dataset.datasetAcquisition?.examination?.examinationDate | localDateFormatPipe)
+                                    : ($safeNavigationMigration(dataset.datasetAcquisition?.examination?.examinationDate) | localDateFormatPipe)
                             }}
                         </a>
                     </span>
@@ -74,7 +74,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li>
                 <label i18n="Dataset detail|Dataset study@@datasetDetailStudy">Study</label>
                 <span class="right-col">
-                    <a [routerLink]="['/study/details/', dataset.study?.id]">
+                    <a [routerLink]="['/study/details/', $safeNavigationMigration(dataset.study?.id)]">
                         {{ dataset.study?.name }}
                     </a>
                 </span>
@@ -172,7 +172,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label i18n="Dataset detail|Dataset study@@datasetDetailStudy">Study</label>
             <span class="right-col">
-                <a [routerLink]="['/study/details/', dataset.study?.id]">
+                <a [routerLink]="['/study/details/', $safeNavigationMigration(dataset.study?.id)]">
                     {{ dataset.study?.name }}
                 </a>
             </span>

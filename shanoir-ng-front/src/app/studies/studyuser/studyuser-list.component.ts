@@ -11,14 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, inject, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, forwardRef, inject, Input, OnChanges, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { ConsoleService } from 'src/app/shared/console/console.service';
-import { DatepickerComponent } from 'src/app/shared/date-picker/date-picker.component';
-import { LocalDateFormatPipe } from 'src/app/shared/localLanguage/localDateFormat.pipe';
-import { IdName } from 'src/app/shared/models/id-name.model';
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
+import { ConsoleService } from '@app/shared/console/console.service';
+import { DatepickerComponent } from '@app/shared/date-picker/date-picker.component';
+import { LocalDateFormatPipe } from '@app/shared/localLanguage/localDateFormat.pipe';
+import { IdName } from '@app/shared/models/id-name.model';
+import { AccessRequestService } from '@app/users/access-request/access-request.service';
 
 import { Center } from '../../centers/shared/center.model';
 import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
@@ -48,6 +48,7 @@ import { Study } from '../shared/study.model';
             multi: true,
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent, LocalDateFormatPipe, DatepickerComponent],
 })
 
@@ -206,7 +207,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         return !!su.centers?.find(c => c.id == center.id);
     }
 
-    onUserClick(studyUser: StudyUser) {
+    onUserClick(studyUser: any) {
+        studyUser = studyUser as StudyUser;
         if (this.panelStudyUser && (this.panelStudyUser.id == studyUser.id)) {
             this.closePanel();
         } else {

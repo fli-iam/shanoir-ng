@@ -40,22 +40,10 @@ module.exports = tseslint.config(
         },
         rules: {
             '@typescript-eslint/no-deprecated': 'error',
-            '@angular-eslint/directive-selector': [
-                'error',
-                {
-                    type: 'attribute',
-                    //prefix: "app",
-                    style: 'camelCase',
-                },
-            ],
-            '@angular-eslint/component-selector': [
-                'error',
-                {
-                    type: 'element',
-                    //prefix: "app",
-                    style: 'kebab-case',
-                },
-            ],
+            // has to be turned off if we don't use prefixes for selectors, which we don't
+            '@angular-eslint/directive-selector': 'off',
+            // This should be addressed in the future, but it's a lot of work!
+            '@angular-eslint/prefer-on-push-component-change-detection': 'off',
 
             // TypeScript ESLint rules - turn off common errors
             '@typescript-eslint/no-explicit-any': 'off', //

@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
@@ -38,6 +38,7 @@ import { TooltipComponent } from '../../shared/components/tooltip/tooltip.compon
     selector: 'eeg-clinical-context',
     templateUrl: 'eeg-clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TooltipComponent, SelectBoxComponent, FormsModule, TableComponent]
 })
 

@@ -13,7 +13,7 @@
  */
 import { Injectable, ComponentRef } from '@angular/core';
 
-import { ServiceLocator } from 'src/app/utils/locator.service';
+import { ServiceLocator } from '@app/utils/locator.service';
 
 import { ConfirmDialogComponent } from './confirm-dialog.component';
 

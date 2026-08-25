@@ -12,16 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
-import { Component, ElementRef, Input, OnDestroy, OnInit} from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { NgTemplateOutlet } from '@angular/common';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
-import { DatasetService } from 'src/app/datasets/shared/dataset.service';
-import { StudyService } from 'src/app/studies/shared/study.service';
-import { Task, TaskStatus } from 'src/app/async-tasks/task.model';
-import { NotificationsService } from 'src/app/shared/notifications/notifications.service';
-import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { DatasetService } from '@app/datasets/shared/dataset.service';
+import { StudyService } from '@app/studies/shared/study.service';
+import { Task, TaskStatus } from '@app/async-tasks/task.model';
+import { NotificationsService } from '@app/shared/notifications/notifications.service';
+import { LoadingBarComponent } from '@app/shared/components/loading-bar/loading-bar.component';
 
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -35,6 +35,7 @@ import { BidsElement } from '../model/bidsElement.model';
     selector: 'bids-tree',
     templateUrl: 'bids-tree.component.html',
     styleUrls: ['bids-tree.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TreeNodeComponent, NgTemplateOutlet, NgxJsonViewerModule, LoadingBarComponent]
 })
 
@@ -145,6 +146,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
     }
 
     getDetail(component: TreeNodeComponent) {
+        console.log("getDetail", component);
         component.dataLoading = true;
         component.hasChildren = true;
         component.open();

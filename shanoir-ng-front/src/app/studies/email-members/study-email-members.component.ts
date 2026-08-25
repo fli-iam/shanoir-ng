@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
@@ -25,6 +25,7 @@ import { Study } from '../shared/study.model';
 @Component({
     selector: 'study-email-members',
     templateUrl: 'study-email-members.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, TooltipComponent]
 })
 
