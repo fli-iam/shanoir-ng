@@ -4,7 +4,7 @@ import localeEs from '@angular/common/locales/es';
 import localeFr from '@angular/common/locales/fr';
 import { enableProdMode, ErrorHandler, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { bootstrapApplication, BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
@@ -202,8 +202,7 @@ const options = {
         ExecutionTemplateService,
         ExecutionTemplateFilterService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideCharts(withDefaultRegisterables()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
     ]
 }
 

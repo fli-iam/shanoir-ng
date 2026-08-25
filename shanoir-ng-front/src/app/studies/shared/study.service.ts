@@ -15,10 +15,10 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subscription, firstValueFrom } from 'rxjs';
 
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { SingleDownloadService } from 'src/app/shared/mass-download/single-download.service';
-import { Tag } from 'src/app/tags/tag.model';
-import { DownloadUtilsService } from 'src/app/shared/mass-download/download.utils.service';
+import { TaskState } from '@app/async-tasks/task.model';
+import { SingleDownloadService } from '@app/shared/mass-download/single-download.service';
+import { Tag } from '@app/tags/tag.model';
+import { DownloadUtilsService } from '@app/shared/mass-download/download.utils.service';
 
 import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';

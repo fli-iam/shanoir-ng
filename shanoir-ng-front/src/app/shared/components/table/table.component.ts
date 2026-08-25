@@ -18,7 +18,7 @@ import shajs from 'sha.js';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { VarDirective } from 'src/app/utils/ng-var.directive';
+import { VarDirective } from '@app/utils/ng-var.directive';
 
 import { Task, TaskStatus } from '../../../async-tasks/task.model';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';

@@ -12,17 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {
-    Component,
-    ElementRef,
-    EventEmitter,
-    forwardRef,
-    HostListener,
-    Input,
-    OnChanges,
-    Output,
-    QueryList,
-    SimpleChanges,
-    ViewChildren,
+  Component,
+  ElementRef,
+  EventEmitter,
+  forwardRef,
+  HostListener,
+  Input,
+  OnChanges,
+  Output,
+  QueryList,
+  SimpleChanges,
+  ViewChildren,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, FormGroup, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
@@ -60,6 +61,7 @@ import { QualityCardRuleComponent } from './quality-card-rule.component';
             useExisting: forwardRef(() => StudyCardRulesComponent),
         }
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [StudyCardRuleComponent, QualityCardRuleComponent]
 })
 export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor {
@@ -115,8 +117,12 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             new ShanoirMetadataField('Mr Dataset Nature', 'MR_DATASET_NATURE', 'Dataset', MrDatasetNature.options),
 			new ShanoirMetadataField('BIDS data type', 'BIDS_DATA_TYPE', 'DatasetAcquisition', BidsDataType.options)
         ];
-        // here we reference assignment fields but conditions could be different
-        this.conditionFields = this.assignmentFields;
+        // condition-only fields: computed/DICOM-derived values that can be tested but not assigned by a study card
+        this.conditionFields = [
+            ...this.assignmentFields,
+            new ShanoirMetadataField('Number of slices', 'NUMBER_OF_SLICES', 'DatasetAcquisition', null, 'Integer'),
+            new ShanoirMetadataField('Slice thickness', 'SLICE_THICKNESS', 'DatasetAcquisition', null, 'Double'),
+        ];
     }
     
     ngOnChanges(changes: SimpleChanges): void {

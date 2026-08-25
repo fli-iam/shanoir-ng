@@ -11,13 +11,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Observable, Subscription , of } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option, SelectBoxComponent } from '../../../shared/select/select.component';
-import { MetadataFieldScope, StudyCardAssignment } from '../../shared/study-card.model';
+import { FieldType, MetadataFieldScope, StudyCardAssignment } from '../../shared/study-card.model';
 import { AutoAdjustInputComponent } from '../../../shared/auto-ajust-input/auto-ajust-input.component';
 
 
@@ -25,6 +25,7 @@ import { AutoAdjustInputComponent } from '../../../shared/auto-ajust-input/auto-
     selector: 'action',
     templateUrl: 'action.component.html',
     styleUrls: ['action.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SelectBoxComponent, FormsModule, AutoAdjustInputComponent]
 })
 export class StudyCardActionComponent implements OnChanges, OnDestroy {
@@ -165,10 +166,11 @@ export class ShanoirMetadataField {
     public options?: Observable<Option<any>[]>;
 
     constructor(
-            public label: string, 
+            public label: string,
             public field: string,
-            public scope: MetadataFieldScope, 
-            options?: Observable<Option<any>[]> | Option<any>[]) {
+            public scope: MetadataFieldScope,
+            options?: Observable<Option<any>[]> | Option<any>[],
+            public type: FieldType = 'String') {
 
         if (options instanceof Observable) {
             this.options = options;

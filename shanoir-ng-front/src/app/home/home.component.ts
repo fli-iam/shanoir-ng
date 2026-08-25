@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -36,7 +36,8 @@ import { StatisticsBlockComponent } from './statistics/statistics-block.componen
     selector: 'home',
     templateUrl: 'home.component.html',
     styleUrls: ['home.component.css'],
-    imports: [DUASigningComponent, ChallengeBlockComponent, StatisticsBlockComponent, RouterLink, DecimalPipe, DatePipe, EventTypePipe]
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [DUASigningComponent, ChallengeBlockComponent, RouterLink, DecimalPipe, DatePipe, EventTypePipe]
 })
 
 export class HomeComponent {

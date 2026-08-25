@@ -13,7 +13,7 @@
  */
 import { Injectable } from '@angular/core';
 
-import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
+import { QualityTag } from '@app/study-cards/shared/quality-card.model';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
@@ -180,7 +180,7 @@ export class DatasetAcquisitionDTO {
     acquisitionStartTime: Date;
     sortingIndex: number;
     importDate: Date;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS';
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Rt' | 'Generic' | 'Processed' | 'BIDS';
     username: string;
     copies: number[];
     source: number;
@@ -211,7 +211,7 @@ export class ProcessedDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
 export class ExaminationDatasetAcquisitionDTO {
     id: number;
     name: string;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Generic' | 'Processed' | 'BIDS';
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Xa' | 'Rt' | 'Generic' | 'Processed' | 'BIDS';
     datasets: any;
     qualityTag: QualityTag;
     extraDataFilePathList: string[];

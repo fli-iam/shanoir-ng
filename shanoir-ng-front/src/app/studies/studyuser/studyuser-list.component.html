@@ -45,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [getPage]="getPage.bind(this)"
             [columnDefs]="columnDefs"
             (rowClick)="onUserClick($event)"
-            [selectedId]="pannelStudyUser?.id"></shanoir-table>
+            [selectedId]="$safeNavigationMigration(pannelStudyUser?.id)"></shanoir-table>
         @if (pannelStudyUser) {
             <span class="right-col">
                 <div class="pannel">
