@@ -1,4 +1,4 @@
-:host { border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); background-color: white; margin: 10px; display: inline-block; text-align: center; overflow: hidden; border-radius: 16px ;}
+:host { border: none; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); background-color: white; margin: 10px; display: inline-block; text-align: center; overflow: hidden; border-radius: 16px; }
 :host table { border-collapse: collapse; }
 .link { cursor: pointer; }
 :host .icon, :host .pannel, :host-title { width: 180px; padding: 0 10px; vertical-align: middle; }
@@ -18,7 +18,8 @@
 .challenge-files li { line-height: 26px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; }
 .challenge-files li:hover { color: var(--blue); }
 .challenge-files i { margin-right: 10px; font-size: 20px; color: darkslategrey; }
-.left-cell { background-color: var(--blue); color: white; }
+.left-cell { background-color: var(--blue); color: white; transition: background-color 0.15s ease; }
+:host:hover .left-cell { background-color: color-mix(in srgb, var(--blue) 85%, black); }
 .msg { font-size: 16px;  width: 412px; color: white; padding: 0 10px; }
 .challenge-name { font-size: 20px; margin-top: 3px; }
 .challenge-title { color: white; }
