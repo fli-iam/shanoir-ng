@@ -21,7 +21,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Service to send every event created.
@@ -35,8 +35,10 @@ public class ShanoirEventService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    @Autowired
-    private ObjectMapper mapper;
+    @PostConstruct
+    public void debugConverter() {
+        LOG.info("RabbitTemplate converter in use: {}", rabbitTemplate.getMessageConverter().getClass());
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventService.class);
 

@@ -22,6 +22,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
+
 /**
  * Service to send every event created.
  *
@@ -33,6 +35,11 @@ public class ShanoirEventService {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @PostConstruct
+    public void debugConverter() {
+        LOG.info("RabbitTemplate converter in use: {}", rabbitTemplate.getMessageConverter().getClass());
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventService.class);
 
@@ -52,7 +59,6 @@ public class ShanoirEventService {
                 .append("progress=").append(event.getProgress()).append("]");
         LOG.info(builder.toString());
         try {
-            LOG.debug("MessageConverter in use: {}", rabbitTemplate.getMessageConverter().getClass().getName());
             rabbitTemplate.convertAndSend(RabbitMQConfiguration.EVENTS_EXCHANGE, event.getEventType(), event);
         } catch (AmqpException e) {
             LOG.error("Error while sending event: event {}, user: {}, reference: {}",

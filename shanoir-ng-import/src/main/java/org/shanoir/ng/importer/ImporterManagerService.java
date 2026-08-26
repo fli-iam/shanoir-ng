@@ -178,8 +178,7 @@ public class ImporterManagerService {
 
             importJobStatusService.setFinished(statusKey, importJob);
 
-            this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET,
-                    objectMapper.writeValueAsString(importJob));
+            this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, importJob);
             long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());
             LOG.info("user=" + KeycloakUtil.getTokenUserName() + ",size="
                     + ImportUtils.readableFileSize(importJobDirSize) + "," + importJob.toString());

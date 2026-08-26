@@ -21,6 +21,8 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,12 +44,19 @@ public class RabbitMQConfiguration {
     private ConnectionFactory connectionFactory;
 
     @Bean
-    public ContentTypeDelegatingMessageConverter contentTypeDelegatingConverter() {
+    public MessageConverter rabbitMessageConverter() {
         ContentTypeDelegatingMessageConverter converter =
                 new ContentTypeDelegatingMessageConverter(
                         new JacksonJsonMessageConverter());
-        converter.addDelegate("application/json", new JacksonJsonMessageConverter());
-        converter.addDelegate("text/x-json", new JacksonJsonMessageConverter());
+        converter.addDelegate(
+                "text/plain",
+                new SimpleMessageConverter());
+        converter.addDelegate(
+                "application/json",
+                new JacksonJsonMessageConverter());
+        converter.addDelegate(
+                "text/x-json",
+                new JacksonJsonMessageConverter());
         return converter;
     }
 
@@ -61,7 +70,7 @@ public class RabbitMQConfiguration {
         factory.setConsecutiveActiveTrigger(1);
         factory.setAutoStartup(true);
         factory.setPrefetchCount(1);
-        factory.setMessageConverter(contentTypeDelegatingConverter());
+        factory.setMessageConverter(rabbitMessageConverter());
         return factory;
     }
 
@@ -70,14 +79,14 @@ public class RabbitMQConfiguration {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setConcurrentConsumers(1);
-        factory.setMessageConverter(contentTypeDelegatingConverter());
+        factory.setMessageConverter(rabbitMessageConverter());
         return factory;
     }
 
     @Bean
     public RabbitTemplate rabbitTemplate() {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(contentTypeDelegatingConverter());
+        rabbitTemplate.setMessageConverter(rabbitMessageConverter());
         return rabbitTemplate;
     }
 

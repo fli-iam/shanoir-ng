@@ -52,7 +52,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -73,9 +72,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private ShanoirEventService eventService;
@@ -139,7 +135,7 @@ public class BidsImporterApiController implements BidsImporterApi {
                 importJob.setSubjectName(subjectName);
 
                 // Create subject
-                subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, objectMapper.writeValueAsString(subject));
+                subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE_WITH_DATASETS, subject);
                 if (subjectId == null) {
                     throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
                 }
@@ -181,7 +177,7 @@ public class BidsImporterApiController implements BidsImporterApi {
                     examCreated = true;
 
                     // Create multiple examinations for every session folder
-                    examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
+                    examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, examination);
 
                     if (examId == null) {
                         throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
@@ -211,7 +207,7 @@ public class BidsImporterApiController implements BidsImporterApi {
                         }
                         examination = ImportUtils.createExam(studyId, centerId, subjectId, "",
                                 dateResolution.getDate(), subjectName);
-                        examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
+                        examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, examination);
 
                         if (examId == null) {
                             throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
@@ -247,11 +243,11 @@ public class BidsImporterApiController implements BidsImporterApi {
         if (dataTypeFile.isDirectory()) {
             importJob.setWorkFolder(dataTypeFile.getAbsolutePath());
             LOG.debug("We found a data folder " + dataTypeFile.getName());
-            rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, objectMapper.writeValueAsString(importJob));
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, importJob);
         } else {
             LOG.debug("We found an examination extra-data " + dataTypeFile.getAbsolutePath());
             IdName extraData = new IdName(importJob.getExaminationId(), dataTypeFile.getAbsolutePath());
-            this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, objectMapper.writeValueAsString(extraData));
+            this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, extraData);
         }
     }
 
