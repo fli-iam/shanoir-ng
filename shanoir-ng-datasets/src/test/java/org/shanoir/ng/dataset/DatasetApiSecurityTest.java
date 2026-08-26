@@ -223,6 +223,17 @@ public class DatasetApiSecurityTest {
         assertAccessDenied(api::updateDataset, 1L, mockDataset(4L, 4L, 4L, 4L, 4L), mockBindingResult);
 
         //findDatasets(Pageable)
+        // restore a findByUserId() stub granting CAN_SEE_ALL on studies 1 & 2 (as set up in
+        // setCenterRightsContext()), since the updateDataset assertions above re-stubbed it
+        // with a study-1-only StudyUser that starves findPage()'s accessibleStudyIds.
+        StudyUser findDatasetsSu1 = new StudyUser();
+        findDatasetsSu1.setStudyId(1L);
+        findDatasetsSu1.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
+        findDatasetsSu1.setCenterIds(Arrays.asList(new Long[]{1L}));
+        StudyUser findDatasetsSu2 = new StudyUser();
+        findDatasetsSu2.setStudyId(2L);
+        findDatasetsSu2.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL));
+        given(rightsRepository.findByUserId(LOGGED_USER_ID)).willReturn(Arrays.asList(new StudyUser[]{findDatasetsSu1, findDatasetsSu2}));
         assertThat(api.findDatasets(PageRequest.of(0, 10)).getBody()).hasSize(1);
 
         //findDatasetByStudyId(Long)
