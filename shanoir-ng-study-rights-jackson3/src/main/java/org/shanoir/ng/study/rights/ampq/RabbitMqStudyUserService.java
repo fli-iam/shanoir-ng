@@ -67,25 +67,27 @@ public class RabbitMqStudyUserService {
     @RabbitHandler
     @Transactional
     public List<Long> getStudiesICanAdmin(Long userId) {
-        List<StudyUser> sus = Utils.toList(this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+        List<StudyUser> sus = Utils.toList(
+                this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
         if (CollectionUtils.isEmpty(sus)) {
             return null;
         }
-        return sus.stream().map(StudyUser::getStudyId
-        ).collect(Collectors.toList());
+        return sus.stream()
+            .filter(StudyUser::canAccessStudy)
+            .map(StudyUser::getStudyId)
+            .collect(Collectors.toList());
     }
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_ADMINS_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
     public List<Long> getStudyAdmins(Long studyId) {
-        List<StudyUser> admins = Utils.toList(this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+        List<StudyUser> admins = Utils.toList(
+                this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
         if (CollectionUtils.isEmpty(admins)) {
             return null;
         }
-        return admins.stream().map(studyUser ->
-            studyUser.getUserId()
-        ).collect(Collectors.toList());
+        return admins.stream().map(studyUser -> studyUser.getUserId()).collect(Collectors.toList());
     }
 
 }
