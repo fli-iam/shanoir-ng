@@ -16,4 +16,5 @@ update study_user su
 join users.users u on u.id = su.user_id
 set su.expiration_date = u.expiration_date;
 
-alter table account_request_info add COLUMN study_expiration DATE;
+alter table account_request_info add COLUMN study_expiration_date DATE;
+alter table access_request add COLUMN expiration_date DATE;
