@@ -60,7 +60,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 25
 
       - name: Set ShUp version from incremented tag
         run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
@@ -99,7 +99,7 @@ jobs:
             --input target \
             --dest target/packages \
             --vendor "Inria" \
-            --copyright "© 2025 Inria" \
+            --copyright "© 2026 Inria" \
             --name ShanoirUploader \
             --app-version ${{ needs.setup-version.outputs.version_part }} \
             --main-jar shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-jar-with-dependencies.jar \
@@ -129,7 +129,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 25
 
       - name: Set ShUp version from incremented tag
         run: cd shanoir-uploader && mvn versions:set "-DnewVersion=${{ needs.setup-version.outputs.version_part }}"
@@ -169,7 +169,7 @@ jobs:
             --input target `
             --dest target/packages `
             --vendor "Inria" `
-            --copyright "© 2025 Inria" `
+            --copyright "© 2026 Inria" `
             --name ShanoirUploader `
             --app-version ${{ needs.setup-version.outputs.version_part }} `
             --win-upgrade-uuid 123e4567-e89b-12d3-a456-426614174000 `
@@ -198,7 +198,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 25
 
       - name: Set ShUp version from incremented tag
         run: cd shanoir-uploader && mvn versions:set -DnewVersion=${{ needs.setup-version.outputs.version_part }}
@@ -237,7 +237,7 @@ jobs:
             --input target \
             --dest target/packages \
             --vendor "Inria" \
-            --copyright "© 2025 Inria" \
+            --copyright "© 2026 Inria" \
             --name ShanoirUploader \
             --app-version ${{ needs.setup-version.outputs.version_part }} \
             --main-jar shanoir-uploader-${{ needs.setup-version.outputs.version_part }}-jar-with-dependencies.jar \
