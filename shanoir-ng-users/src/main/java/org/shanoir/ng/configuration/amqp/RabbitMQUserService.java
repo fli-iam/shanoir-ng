@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.configuration.amqp;
 
+import java.util.Arrays;
+
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.ShanoirEventsService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -23,7 +25,14 @@ import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
+import org.shanoir.ng.study.rights.command.CommandType;
+import org.shanoir.ng.study.rights.command.StudyUserCommand;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +48,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.module.SimpleModule;
 
 @Component
 @Profile("!test")
@@ -53,6 +63,9 @@ public class RabbitMQUserService {
     private EmailService emailService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private ObjectMapper mapper;
 
     @Autowired
@@ -63,8 +76,46 @@ public class RabbitMQUserService {
             exchange = @Exchange(value = RabbitMQConfiguration.STUDY_USER_EXCHANGE, ignoreDeclarationExceptions = "true",
                     autoDelete = "false", durable = "true", type = ExchangeTypes.FANOUT)), containerFactory = "multipleConsumersFactory"
     )
-    public void receiveMessage(String commandArrStr) {
-        listener.receiveStudyUsers(commandArrStr);
+    public void receiveMessage(String commandArrStr) throws AmqpRejectAndDontRequeueException {
+        try {
+            SimpleModule module = new SimpleModule();
+            module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
+            mapper.registerModule(module);
+            StudyUserCommand[] commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
+            listener.receiveStudyUsers(Arrays.asList(commands));
+            updateAccountExpirationDate(commands);
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException("Failed to process study-user commands.", e);
+        }
+    }
+
+    /**
+     * Update the expiration date of the user account if the expiration date of the study user is after the expiration date of the user account.
+     * This is to avoid that a user account expires before the expiration date of the study user
+     * which would prevent the user from accessing the study.
+     * @param commands
+     */
+    private void updateAccountExpirationDate(StudyUserCommand[] commands) {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+        for (StudyUserCommand command : commands) {
+            // If the command is a create or update command and the study user has an expiration date, check if the user account needs to be updated
+            if ((CommandType.CREATE.equals(command.getType()) || CommandType.UPDATE.equals(command.getType()))
+                    && command.getStudyUser() != null) {
+                StudyUserInterface studyUser = command.getStudyUser();
+                if (studyUser.getExpirationDate() != null) {
+                    User user = userService.findById(studyUser.getUserId());
+                    if (user != null && studyUser.getExpirationDate().isAfter(user.getExpirationDate())) {
+                        user.setExpirationDate(studyUser.getExpirationDate());
+                        try {
+                            userService.update(user);
+                        } catch (EntityNotFoundException e) {
+                            // should not happen, user was found before
+                            LOG.error("Could not update user expiration date for user with id " + user.getId(), e);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @RabbitListener(bindings = @QueueBinding(

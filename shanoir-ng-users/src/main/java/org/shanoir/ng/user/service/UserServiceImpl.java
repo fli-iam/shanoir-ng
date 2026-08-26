@@ -305,7 +305,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    /**
+     * Creates an account request for a user with a default expiration date of one year from now.
+     */
     public User createAccountRequest(final User user) throws PasswordPolicyException, SecurityException {
+        return createAccountRequest(user, LocalDate.now().plusYears(1));
+    }
+
+    @Override
+    public User createAccountRequest(final User user, LocalDate expirationDate) throws PasswordPolicyException, SecurityException {
         /* Password generation */
         final String newPassword = PasswordUtils.generatePassword();
         if (!PasswordUtils.checkPasswordPolicy(newPassword)) {
@@ -313,7 +321,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setRole(roleRepository.findByName("ROLE_USER")); // Set role 'USER'
-        user.setExpirationDate(LocalDate.now().plusYears(1));
+        user.setExpirationDate(expirationDate);
 
         accountRequestInfoRepository.save(user.getAccountRequestInfo()); // Save account request info
         User savedUser = userRepository.save(user);

@@ -15,11 +15,11 @@ import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleCh
 import { Router } from '@angular/router';
 
 import { TreeNodeAbstractComponent } from '../../shared/components/tree/tree-node.abstract.component';
+import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
 import { TreeService } from '../../studies/study/tree.service';
+import { ReverseStudyNodeComponent } from '../../studies/tree/reverse-study-node.component';
 import { ReverseStudyNode, ReverseSubjectNode, ShanoirNode } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
-import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
-import { ReverseStudyNodeComponent } from '../../studies/tree/reverse-study-node.component';
 
 
 @Component({

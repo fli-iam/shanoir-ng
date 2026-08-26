@@ -11,15 +11,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { UserService } from '../shared/user.service';
-import {StudyService} from "../../studies/shared/study.service";
-import {KeycloakService} from "../../shared/keycloak/keycloak.service";
+import { DatepickerComponent } from "@app/shared/date-picker/date-picker.component";
 
+import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
+import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { StudyService } from "../../studies/shared/study.service";
+
+import { AccessRequestStatusPipe } from './acces-request-status.pipe';
 import { AccessRequest } from './access-request.model';
 import { AccessRequestService } from './access-request.service';
 
@@ -27,21 +29,27 @@ import { AccessRequestService } from './access-request.service';
     selector: 'accessRequestList',
     templateUrl: 'access-request-list.component.html',
     styleUrls: ['access-request-list.component.css'],
-    imports: [FormsModule, RouterLink]
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, RouterLink, DatepickerComponent, AccessRequestStatusPipe]
 })
 
 export class AccessRequestListComponent {
     accessRequests: AccessRequest[] = [];
 
     constructor(
-            public userService: UserService,
             public accessRequestService: AccessRequestService,
             public studyService: StudyService,
             public breadcrumbsService: BreadcrumbsService,
             public keycloakService: KeycloakService) {
 
-        userService.getAccessRequestsForAdmin().then(accessRequests => {
+        this.accessRequestService.getAccessRequestsForAdmin().then(accessRequests => {
             this.accessRequests = [...accessRequests];
+            this.studyService.getStudiesNames().then(studies => {
+                this.accessRequests.forEach(ar => {
+                    const study = studies.find(s => s.id == ar.studyId);
+                    if (study) ar.studyName = study.name;
+                });
+            });
         });
 
         setTimeout(() => {
@@ -59,10 +67,11 @@ export class AccessRequestListComponent {
     }
 
     decide(request: AccessRequest, accept: boolean) {
-        this.accessRequestService.resolveRequest(request.id, accept);
-        const index = this.accessRequests.indexOf(request);
-        this.accessRequests.splice(index, 1);
-        this.userService.decreaseAccessRequests();
+        this.accessRequestService.resolveRequest(request.id, accept, request.expirationDate).then(() => {
+            const index = this.accessRequests.indexOf(request);
+            this.accessRequests.splice(index, 1);
+            this.accessRequestService.decreaseAccessRequests();
+        });
     }
 
     public isAdmin(): boolean {

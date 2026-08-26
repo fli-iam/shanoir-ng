@@ -23,7 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 rowRoute: rowRoute ? rowRoute(item) : null,
                 possibleValues:
                     page?._savedContentRendering && page?._savedContentRendering[itemIndex]
-                        ? page._savedContentRendering[itemIndex][colIndex]?.possibleValues
+                        ? $safeNavigationMigration(page._savedContentRendering[itemIndex][colIndex]?.possibleValues)
                         : null,
                 cellValue: getCellValue(item, col),
                 cellGraphics: getCellGraphics(item, col),
@@ -173,8 +173,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <!-- display a progress bar -->
                     @if (col.type == 'progress') {
                         <progress-bar
-                            [progress]="vars.render?.progress != undefined ? vars.render?.progress : vars.render"
-                            width="100"
+                            [progress]="vars.render?.progress != undefined ? $safeNavigationMigration(vars.render?.progress) : vars.render"
+                            [width]="100"
                             [warning]="vars.render?.status == 5 || vars.render?.status == 3"></progress-bar>
                     }
                     @if (colIndex < columnDefs.length - 1) {
@@ -396,7 +396,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 (keyup.enter)="jumpToPage(pageNumber)"
                                 type="number"
                                 [min]="0"
-                                [max]="page?.totalPages" />
+                                [max]="$safeNavigationMigration(page?.totalPages)" />
                         </span>
                         <span (click)="settingsOpened = true" class="clickable" title="Columns settings">
                             <i class="fas fa-cog"></i>

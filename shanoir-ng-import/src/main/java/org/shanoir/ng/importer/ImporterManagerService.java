@@ -259,7 +259,7 @@ public class ImporterManagerService {
         // Get all recpients
         List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(job.getStudyId());
         for (StudyUser user : users) {
-            if (user.isReceiveNewImportReport()) {
+            if (user.isReceiveNewImportReport() && user.canAccessStudy()) {
                 recipients.add(user.getUserId());
             }
         }

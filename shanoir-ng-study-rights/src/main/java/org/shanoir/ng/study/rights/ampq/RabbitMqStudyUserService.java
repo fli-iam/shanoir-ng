@@ -66,6 +66,15 @@ public class RabbitMqStudyUserService {
         }
     }
 
+    public void receiveStudyUsers(Iterable<StudyUserCommand> commands) throws AmqpRejectAndDontRequeueException {
+        try {
+            LOG.debug("Received study-user commands : {}", commands);
+            service.processCommands(commands);
+        } catch (Exception e) {
+            throw new AmqpRejectAndDontRequeueException("Study User Update rejected !!!", e);
+        }
+    }
+
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @Transactional
@@ -75,7 +84,10 @@ public class RabbitMqStudyUserService {
         if (CollectionUtils.isEmpty(sus)) {
             return null;
         }
-        return sus.stream().map(StudyUser::getStudyId).collect(Collectors.toList());
+        return sus.stream()
+            .filter(StudyUser::canAccessStudy)
+            .map(StudyUser::getStudyId)
+            .collect(Collectors.toList());
     }
 
     @RabbitListener(queues = RabbitMQConfiguration.STUDY_ADMINS_QUEUE, containerFactory = "multipleConsumersFactory")

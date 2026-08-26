@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { TableComponent } from '../../../shared/components/table/table.component';
@@ -26,6 +26,7 @@ import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 @Component({
     selector: 'eeg-dataset-details',
     templateUrl: 'dataset.eeg.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 

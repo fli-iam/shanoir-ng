@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.configuration.amqp;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -23,15 +25,17 @@ import java.util.regex.Pattern;
 
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
+import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.service.CenterService;
-import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.dicom.InstitutionDicom;
+import org.shanoir.ng.shared.dto.StudyExaminationsDTO;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.event.UserAccessData;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.message.CreateCenterForStudyMessage;
@@ -56,16 +60,13 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-
-import org.shanoir.ng.shared.dto.StudyExaminationsDTO;
 
 @Service
 public class RabbitMQStudiesService {
@@ -75,6 +76,9 @@ public class RabbitMQStudiesService {
     private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the object.";
 
     private static final String DELIMITER = ":";
+
+    @Value("${shanoir.userDefaultExpirationDays}")
+    private int userDefaultExpirationDays;
 
     @Autowired
     private StudyRepository studyRepo;
@@ -235,27 +239,38 @@ public class RabbitMQStudiesService {
         SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         try {
             ShanoirEvent event =  mapper.readValue(studyStr, ShanoirEvent.class);
+            UserAccessData userAccessData = event.getMessage() != null ? mapper.readValue(event.getMessage(), UserAccessData.class) : null;
             Long userId = event.getUserId();
             Long studyId = Long.valueOf(event.getObjectId());
             // Get the study
             Study studyToUpdate = studyRepo.findById(studyId).orElseThrow();
-
             for (StudyUser su : studyToUpdate.getStudyUserList()) {
-                if (su.getUserId().equals(userId)) {
-                    // user already exists on study
-                    return true;
+                if (su.getUserId().equals(userId)) { // user already exists on study
+                    // check if it's an extension request
+                    if (userAccessData != null && event.getEventType().equals(ShanoirEventType.USER_EXTEND_TO_STUDY_EVENT)
+                            && userAccessData.getExpirationDate().isAfter(su.getExpirationDate())) {
+                        // If it's an extension request, just update the expiration date
+                        su.setExpirationDate(userAccessData.getExpirationDate());
+                        su.setReceivedExpirationNotification(false);
+                        studyService.updateStudyUserToStudy(su, studyToUpdate);
+                        eventService.publishEvent(event);
+                    }
+                    return true; // end of the method, user already exists on study
                 }
             }
-
-            // Create a new StudyUser
+            // Else create a new StudyUser
             StudyUser subscription = new StudyUser();
             subscription.setStudy(studyToUpdate);
             subscription.setUserId(userId);
             subscription.setReceiveNewImportReport(false);
             subscription.setReceiveStudyUserReport(false);
             subscription.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD));
-            subscription.setUserName(event.getMessage());
-
+            if (userAccessData != null) {
+                subscription.setUserName(userAccessData.getUserName());
+                subscription.setExpirationDate(userAccessData.getExpirationDate() != null
+                        ? userAccessData.getExpirationDate()
+                        : LocalDate.now().plusDays(userDefaultExpirationDays));
+            }
             if (studyToUpdate.getDataUserAgreementPaths() != null && !studyToUpdate.getDataUserAgreementPaths().isEmpty()) {
                 subscription.setConfirmed(false);
                 dataUserAgreementService.createDataUserAgreementForUserInStudy(studyToUpdate, subscription.getUserId());
@@ -266,8 +281,7 @@ public class RabbitMQStudiesService {
             eventService.publishEvent(event);
             return true;
         } catch (Exception e) {
-            LOG.error("Could not directly subscribe a user to the study: ", e);
-            return false;
+            throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the study subscription.", e);
         }
     }
 

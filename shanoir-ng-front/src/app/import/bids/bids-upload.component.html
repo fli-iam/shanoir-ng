@@ -69,7 +69,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                     [(ngModel)]="study"
                     (userChange)="onSelectStudy()"
-                    [viewRoute]="'/study/details/' + study?.id"
+                    [viewRoute]="'/study/details/' + $safeNavigationMigration(study?.id)"
                     [viewDisabled]="!study"
                     [options]="studyOptions"></select-box>
             </span>
@@ -80,7 +80,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                     [disabled]="!study || !centerOptions || this.study?.studyCenterList?.length == 1"
                     [(ngModel)]="center"
-                    [viewRoute]="'/center/details/' + center?.id"
+                    [viewRoute]="'/center/details/' + $safeNavigationMigration(center?.id)"
                     [viewDisabled]="!center"
                     [options]="centerOptions"></select-box>
             </span>

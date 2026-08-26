@@ -11,19 +11,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, inject, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+import { Component, forwardRef, inject, Input, OnChanges, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import { IdName } from 'src/app/shared/models/id-name.model';
-import { ConsoleService } from 'src/app/shared/console/console.service';
+import { ConsoleService } from '@app/shared/console/console.service';
+import { DatepickerComponent } from '@app/shared/date-picker/date-picker.component';
+import { LocalDateFormatPipe } from '@app/shared/localLanguage/localDateFormat.pipe';
+import { IdName } from '@app/shared/models/id-name.model';
+import { AccessRequestService } from '@app/users/access-request/access-request.service';
 
 import { Center } from '../../centers/shared/center.model';
+import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { User } from '../../users/shared/user.model';
@@ -32,8 +36,6 @@ import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
-import { TooltipComponent } from '../../shared/components/tooltip/tooltip.component';
-import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
 
 @Component({
     selector: 'studyuser-list',
@@ -46,7 +48,8 @@ import { CheckboxComponent } from '../../shared/checkbox/checkbox.component';
             multi: true,
         }
     ],
-    imports: [FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent]
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, TooltipComponent, SelectBoxComponent, TableComponent, CheckboxComponent, LocalDateFormatPipe, DatepickerComponent],
 })
 
 export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
@@ -65,18 +68,19 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
-    pannelStudyUser: StudyUser;
+    panelStudyUser: StudyUser;
     StudyUserRight = StudyUserRight;
     isAdmin: boolean;
     invitationMail: string;
     invitationFunction: string;
     newUser: User[] = [];
+    minExpirationDate: Date = new Date();
 
     private onTouchedCallback = () => { return; };
     private onChangeCallback: (any) => void = () => { return; };
 
     constructor(private keycloakService: KeycloakService,
-                private accessRequestService: AccessRequestService) {
+                protected accessRequestService: AccessRequestService) {
         this.isAdmin = keycloakService.isUserAdmin();
         this.consoleService = inject(ConsoleService);
     }
@@ -130,33 +134,34 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     private createColumnDefs(deleteButton: boolean) {
         this.columnDefs = [
-            { headerName: 'Username', field: 'userName' },
+            { headerName: 'Username', field: 'userName', width: '200px' },
             // { headerName: 'First Name', field: 'user.firstName' },
             // { headerName: 'Last Name', field: 'user.lastName' },
             // { headerName: 'Email', field: 'user.email', width: '200%' },
-            { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true },
+            { headerName: 'Role', field: 'user.role.displayName', width: '180px', defaultSortCol: true },
             { headerName: 'Confirmed', field: 'confirmed', type: 'boolean', editable: false, width: '54px', disableSorting: true},
             // { headerName: 'Centers', type: 'boolean', editable: false, width: '54px', disableSorting: true,
             //     cellRenderer: (params: any) => !params.data.centers || params.data.centers.length == 0},
+            { headerName: 'Expiration', type: 'date', field: 'expirationDate', width: '120px' },
             { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', disableSorting: true,
                 //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
-            { headerName: 'Can download', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true,
+            { headerName: 'Can download', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), disableSorting: true,
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_DOWNLOAD, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)},
-            { headerName: 'Can import', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true,
+            { headerName: 'Can import', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), disableSorting: true,
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_IMPORT, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
-            { headerName: 'Can execute', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true,
+            { headerName: 'Can execute', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), disableSorting: true,
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_EXECUTE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_EXECUTE)},
-            { headerName: 'Can annotate', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true,
+            { headerName: 'Can annotate', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), disableSorting: true,
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ANNOTATE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ANNOTATE)},
-            { headerName: 'Can review', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true,
+            { headerName: 'Can review', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), disableSorting: true,
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ANNOTATE_REVIEW, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ANNOTATE_REVIEW)},
-            { headerName: 'Can admin', type: 'boolean',  disableSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px',
+            { headerName: 'Can admin', type: 'boolean',  disableSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su),
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
             // { headerName: 'Receive Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
@@ -193,24 +198,30 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         this.onStudyUserEdit();
     }
 
+    onExpirationChange(su: StudyUser, expiration: Date) {
+        su.expirationDate = expiration;
+        this.onStudyUserEdit();
+    }
+
     hasCenter(center: Center, su: StudyUser): boolean {
         return !!su.centers?.find(c => c.id == center.id);
     }
 
-    onUserClick(studyUser: StudyUser) {
-        if (this.pannelStudyUser && (this.pannelStudyUser.id == studyUser.id)) {
-            this.closePannel();
+    onUserClick(studyUser: any) {
+        studyUser = studyUser as StudyUser;
+        if (this.panelStudyUser && (this.panelStudyUser.id == studyUser.id)) {
+            this.closePanel();
         } else {
-            this.openPannel(studyUser);
+            this.openPanel(studyUser);
         }
     }
 
-    openPannel(studyUser: StudyUser) {
-        this.pannelStudyUser = studyUser;
+    openPanel(studyUser: StudyUser) {
+        this.panelStudyUser = studyUser;
     }
 
-    closePannel() {
-        this.pannelStudyUser = null;
+    closePanel() {
+        this.panelStudyUser = null;
     }
 
     private removeStudyUser = (item: StudyUser) => {
@@ -224,7 +235,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         this.onChangeCallback(this.studyUserList);
         this.onTouchedCallback();
         StudyUser.completeMember(item, this.users);
-        this.closePannel();
+        this.closePanel();
     }
 
     onStudyUserEdit() {
@@ -272,9 +283,9 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     onToggleAllCenters(check: boolean) {
         if(!check) {
-            this.pannelStudyUser.centers = [...this.centers];
+            this.panelStudyUser.centers = [...this.centers];
         } else {
-            this.pannelStudyUser.centers = [];
+            this.panelStudyUser.centers = [];
         }
     }
 
@@ -305,7 +316,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         const backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
             this.studyUserList.unshift(backedUpStudyUser);
-            this.pannelStudyUser = backedUpStudyUser;
+            this.panelStudyUser = backedUpStudyUser;
         } else {
             const studyUser: StudyUser = new StudyUser();
             studyUser.userId = selectedUser.id;
@@ -315,7 +326,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             studyUser.studyUserRights = rights;
             studyUser.completeMember(this.users);
             this.studyUserList.unshift(studyUser);
-            this.pannelStudyUser = studyUser;
+            this.panelStudyUser = studyUser;
         }
         this.newUser.unshift(this.studyUserList.at(0).user)
         this.browserPaging.setItems(this.studyUserList);

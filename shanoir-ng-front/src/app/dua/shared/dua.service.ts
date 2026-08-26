@@ -15,7 +15,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
-import { StudyService } from 'src/app/studies/shared/study.service';
+import { StudyService } from '@app/studies/shared/study.service';
 
 import * as AppUtils from '../../utils/app.utils';
 

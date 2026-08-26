@@ -60,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         }
         @if (condition.scope?.includes('DICOMCondition')) {
             <span class="var" title="{{ condition.dicomTag | dicomTagLabel }}">
-                {{ condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag?.code | dicomTagLabel) }}
+                {{ condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag | dicomTagLabel) }}
             </span>
         }
         @if (!condition.scope?.includes('DICOMCondition')) {
@@ -118,11 +118,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [clear]="false"
             placeholder="select cardinality"
             [search]="false"
-            [options]="[
-                { label: 'for no', value: 'NONE' },
-                { label: 'for every', value: 'ALL' },
-                { label: 'for at least', value: 'AT_LEAST' },
-            ]"></select-box>
+            [options]="cardinalityTypeOptions"></select-box>
         @if (cardinalityType == 'AT_LEAST') {
             <input
                 type="number"

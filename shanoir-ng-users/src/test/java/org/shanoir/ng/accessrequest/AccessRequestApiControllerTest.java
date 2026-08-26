@@ -35,12 +35,14 @@ import org.mockito.Mockito;
 import org.shanoir.ng.accessrequest.controller.AccessRequestApiController;
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
+import org.shanoir.ng.accessrequest.model.ValidationDTO;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
@@ -105,6 +107,9 @@ public class AccessRequestApiControllerTest {
 
     @MockitoBean
     private StudyUserRightsRepository studyUserRightsRepository;
+
+    @MockitoBean
+    private StudyRightsService studyRightsService;
 
     private User user = new User();
 
@@ -239,7 +244,7 @@ public class AccessRequestApiControllerTest {
         Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.of(request));
 
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(true)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new ValidationDTO(true, null))))
                 .andExpect(status().isOk());
 
         Mockito.verify(accessRequestService).update(request);
@@ -259,7 +264,7 @@ public class AccessRequestApiControllerTest {
         Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.of(request));
 
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(true)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new ValidationDTO(true, null))))
                 .andExpect(status().isOk());
 
         Mockito.verify(accessRequestService).update(request);
@@ -278,7 +283,7 @@ public class AccessRequestApiControllerTest {
         Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.of(request));
 
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(false)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new ValidationDTO(false, null))))
                 .andExpect(status().isOk());
 
         Mockito.verify(accessRequestService).update(request);
@@ -298,7 +303,7 @@ public class AccessRequestApiControllerTest {
         Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.of(request));
 
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(false)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new ValidationDTO(false, null))))
                 .andExpect(status().isOk());
 
         Mockito.verify(accessRequestService).update(request);
@@ -314,7 +319,7 @@ public class AccessRequestApiControllerTest {
         Mockito.when(accessRequestService.findById(1L)).thenReturn(Optional.empty());
 
         mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/resolve/1").accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(true)))
+                .contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(new ValidationDTO(true, null))))
                 .andExpect(status().isNoContent());
 
         Mockito.verifyNoInteractions(this.userService);
