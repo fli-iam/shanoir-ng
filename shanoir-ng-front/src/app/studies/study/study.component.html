@@ -694,7 +694,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                     }
                                     @default {
-                                        <checkbox [(ngModel)]="useSubjectNamePattern" [ngModelOptions]="{standalone: true}"></checkbox>
+                                        <checkbox [(ngModel)]="useSubjectNamePattern" [ngModelOptions]="{standalone: true}" (ngModelChange)="onPatternFieldChange()"></checkbox>
                                     }
                                 }
                             </span>
@@ -709,23 +709,30 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         name="namePrefix"
                                         [disabled]="mode == 'view'"
                                         [(ngModel)]="namePrefixOption"
-                                        [ngModelOptions]="{standalone: true}">
+                                        [ngModelOptions]="{standalone: true}"
+                                        (ngModelChange)="onPatternFieldChange()">
                                         <option value="study_name">Study name</option>
                                         <option value="custom_name">Custom name(s)</option>
                                     </select>
                                     <br>
                                     @if (namePrefixOption == 'custom_name') {
                                         <span class="multi-value">
-                                            @for (prefix of customNamePrefixes; track $index; let i = $index) {
-                                                <span class="one-value">
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Enter prefix"
-                                                        [disabled]="mode == 'view'"
-                                                        [(ngModel)]="customNamePrefixes[i]"
-                                                        [ngModelOptions]="{standalone: true}" />
-                                                    @if (mode != 'view' && customNamePrefixes.length > 1) {
-                                                        <span class="delete-value" (click)="removeCustomNamePrefix(i)"><i class="far fa-times-circle"></i></span>
+                                            @for (prefix of customNamePrefixes; track $index; let i = $index; let last = $last) {
+                                                <span class="one-value-row">
+                                                    <span class="one-value">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Enter prefix"
+                                                            [disabled]="mode == 'view'"
+                                                            [(ngModel)]="customNamePrefixes[i]"
+                                                            [ngModelOptions]="{standalone: true}"
+                                                            (ngModelChange)="onPatternFieldChange()" />
+                                                        @if (mode != 'view' && customNamePrefixes.length > 1) {
+                                                            <span class="delete-value" (click)="removeCustomNamePrefix(i)"><i class="far fa-times-circle"></i></span>
+                                                        }
+                                                    </span>
+                                                    @if (!last) {
+                                                        <span class="pattern-separator-label">or</span>
                                                     }
                                                 </span>
                                             }
@@ -743,7 +750,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                                 <div class="pattern-field">
                                     Separator :
-                                    <select id="separator" name="separator" [disabled]="mode == 'view'">
+                                    <select
+                                        id="separator"
+                                        name="separator"
+                                        [disabled]="mode == 'view'"
+                                        [(ngModel)]="separator"
+                                        [ngModelOptions]="{standalone: true}"
+                                        (ngModelChange)="onPatternFieldChange()">
                                         <option value="-">-</option>
                                         <option value="_">_</option>
                                         <option value=".">.</option>
@@ -754,7 +767,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                                 <div class="pattern-field">
                                     Subject name identifier length (number of characters) :
-                                    <select id="idLength" name="idLength" [disabled]="mode == 'view'">
+                                    <select
+                                        id="idLength"
+                                        name="idLength"
+                                        [disabled]="mode == 'view'"
+                                        [ngModel]="idLength"
+                                        [ngModelOptions]="{standalone: true}"
+                                        (ngModelChange)="onIdLengthChange($event)">
                                         <option value="2">2</option>
                                         <option value="3">3</option>
                                         <option value="4">4</option>
@@ -769,7 +788,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                                 <div class="pattern-field">
                                     Subject name identifier type :
-                                    <select id="idType" name="idType" [disabled]="mode == 'view'">
+                                    <select
+                                        id="idType"
+                                        name="idType"
+                                        [disabled]="mode == 'view'"
+                                        [(ngModel)]="idType"
+                                        [ngModelOptions]="{standalone: true}"
+                                        (ngModelChange)="onPatternFieldChange()">
                                         <option value="string">String value</option>
                                         <option value="numeric">Numeric value</option>
                                     </select>
@@ -780,7 +805,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                             <div class="pattern-preview">
                                 <span class="pattern-preview-label">Preview :</span>
-                                <code class="pattern-preview-value">StudyName-A8f2</code>
+                                <code class="pattern-preview-value">{{ subjectNamePatternPreview }}</code>
                             </div>
                         }
                     </fieldset>
@@ -832,7 +857,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             <th></th>
                                             <th>
                                                 Subject Prefix (optional)
-                                                <tool-tip>A default prefix for the new subjects created when importing datasets in this study</tool-tip>
+                                                <tool-tip>A default prefix for the new subjects created when importing datasets in this study.
+                                                          Use the Subjects tab to define your subject name pattern.
+                                                </tool-tip>
                                             </th>
                                             <th></th>
                                         </tr>
@@ -848,7 +875,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                     <i class="fas fa-external-link-alt"></i>
                                                 </td>
                                                 <td>
-                                                    <span class="prefix">{{ study.name }}-</span>
+                                                    <span class="prefix">{{ useSubjectNamePattern ? exampleSubjectNamePrefix : study.name }}{{ useSubjectNamePattern ? separator : '-' }}</span>
                                                     <input
                                                         type="text"
                                                         [(ngModel)]="studyCenter.subjectNamePrefix"

@@ -56,3 +56,7 @@ td.volume-storage-total { border-top: 1px solid var(--grey); }
 .copy-button { margin-left: 7px; }
 
 .pattern-use-checkbox { margin-left: 12px; }
+
+.multi-value { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.one-value-row { display: flex; align-items: center; gap: 8px; }
+.one-value-row .pattern-separator-label { font-style: italic; }
