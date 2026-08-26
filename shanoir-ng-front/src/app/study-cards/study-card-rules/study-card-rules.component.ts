@@ -28,6 +28,8 @@ import {
 import { AbstractControl, ControlValueAccessor, FormGroup, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
+import {QualityCardRule} from "@app/study-cards/shared/quality-card.model";
+
 import { Coil } from '../../coils/shared/coil.model';
 import { AcquisitionContrast } from '../../enum/acquisition-contrast.enum';
 import { ContrastAgent } from '../../enum/contrast-agent.enum';
@@ -67,7 +69,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
 
     @Input() mode: Mode | 'select';
     @Input() cardType: 'studycard' | 'qualitycard';
-    rules: StudyCardRule[];
+    rules: (StudyCardRule | QualityCardRule)[];
     @ViewChildren('studyCardRule,qualityCardRule') ruleElements: QueryList<StudyCardRuleComponent | QualityCardRuleComponent>;
     private onTouchedCallback = () => { return; };
     onChangeCallback: (any) => void = () => { return; };
@@ -81,8 +83,8 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     private allCoilsPromise: SuperPromise<Coil[]> = new SuperPromise();
     @Input() showErrors: boolean = false;
     @Output() importRules: EventEmitter<void> = new EventEmitter();
-    @Output() selectedRulesChange: EventEmitter<StudyCardRule[]> = new EventEmitter();
-    selectedRules: Map<number, StudyCardRule> = new Map();
+    @Output() selectedRulesChange: EventEmitter<(StudyCardRule | QualityCardRule)[]> = new EventEmitter();
+    selectedRules: Map<number, (StudyCardRule | QualityCardRule)> = new Map();
     rulesToAnimate: Set<number> = new Set();
     @Input() addSubForm: (subForm: FormGroup) => FormGroup;
 
@@ -226,10 +228,12 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     };
 
     copy(index: number) {
-        const original: StudyCardRule = this.rules.slice(index, index + 1)[0];
+        const original: (QualityCardRule | StudyCardRule) = this.rules.slice(index, index + 1)[0];
         let copy;
         if (original instanceof StudyCardRule) {
             copy = StudyCardRule.copy(original);
+        } else if (original instanceof QualityCardRule) {
+            copy = QualityCardRule.copy(original);
         }
         this.rules.push(copy);
         this.animateRule(this.rules.length - 1);
@@ -244,7 +248,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     }
 
     public static validator = (control: AbstractControl): ValidationErrors | null => {
-        const rules: StudyCardRule[] = control.value;
+        const rules: (StudyCardRule | QualityCardRule)[] = control.value;
         const errors: any = {};
         if (rules) {
             rules.forEach(rule => {
@@ -273,6 +277,10 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
                     if (!rule.assignments || rule.assignments.length == 0) {
                         errors.noAssignment = true;
                     }
+                } else if (rule instanceof QualityCardRule) {
+                    if (!rule.tag) {
+                        errors.missingField = 'quality tag';
+                    }
                 }
             });
         }
@@ -284,7 +292,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         if (this.mode == 'select') {
             if (this.selectedRules.has(i)) this.selectedRules.delete(i);
             else (this.selectedRules.set(i, this.rules[i]));
-            const rulesArr: StudyCardRule[] = [];
+            const rulesArr: (StudyCardRule | QualityCardRule)[] = [];
             this.selectedRules.forEach(rule => rulesArr.push(rule));
             this.selectedRulesChange.emit(rulesArr);
         }

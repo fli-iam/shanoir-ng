@@ -18,6 +18,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 import { Selection } from '@app/studies/study/tree.service';
 import { DUAAssistantComponent } from '@app/dua/dua-assistant.component';
+import {QualityCardRule} from "@app/study-cards/shared/quality-card.model";
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
@@ -55,7 +56,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
     public niftiConverters: IdName[] = [];
     showRulesErrors: boolean = false;
     selectMode: boolean;
-    selectedRules: StudyCardRule[] = [];
+    selectedRules: (StudyCardRule | QualityCardRule)[] = [];
     hasAdministrateRightPromise: Promise<boolean>;
     lockStudy: boolean = false;
     @ViewChild(StudyCardRulesComponent) rulesComponent: StudyCardRulesComponent;
@@ -285,7 +286,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
         this.navigateToAttributeCreateStep('/acquisition-equipment/create', 'acquisitionEquipment', options);
     }
 
-    onSelectedRulesChange(rules: StudyCardRule[]) {
+    onSelectedRulesChange(rules: (StudyCardRule | QualityCardRule)[]) {
         this.selectedRules = rules as StudyCardRule[];
     }
 }
