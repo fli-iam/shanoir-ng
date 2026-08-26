@@ -26,7 +26,6 @@ import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.study.rights.command.CommandType;
@@ -48,7 +47,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.module.SimpleModule;
 
 @Component
 @Profile("!test")
@@ -78,9 +76,6 @@ public class RabbitMQUserService {
     )
     public void receiveMessage(String commandArrStr) throws AmqpRejectAndDontRequeueException {
         try {
-            SimpleModule module = new SimpleModule();
-            module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
-            mapper.registerModule(module);
             StudyUserCommand[] commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
             listener.receiveStudyUsers(Arrays.asList(commands));
             updateAccountExpirationDate(commands);

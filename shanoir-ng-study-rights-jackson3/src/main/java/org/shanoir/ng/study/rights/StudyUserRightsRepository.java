@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.rights;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -51,12 +52,15 @@ public interface StudyUserRightsRepository extends CrudRepository<StudyUser, Lon
     Iterable<StudyUser> findByStudyId(Long studyId);
 
     @Query("select su.studyId from StudyUser su where su.userId = :userId and :right in elements(su.studyUserRights)")
-    List<Long> findDistinctStudyIdByUserId(Long userId, Integer right);
+    List<Long> findDistinctStudyIdByUserId(@Param("userId") Long userId, @Param("right") Integer right);
 
     @Query("select su from StudyUser su where su.userId = :userId and :right in elements(su.studyUserRights)")
-    Iterable<StudyUser> findByUserIdAndRight(Long userId, Integer right);
+    Iterable<StudyUser> findByUserIdAndRight(@Param("userId") Long userId, @Param("right") Integer right);
 
     @Query("select su from StudyUser su where su.studyId = :studyId and :right in elements(su.studyUserRights)")
-    Iterable<StudyUser> findByStudyIdAndRight(Long studyId, Integer right);
+    Iterable<StudyUser> findByStudyIdAndRight(@Param("studyId") Long studyId, @Param("right") Integer right);
 
+    List<StudyUser> findByExpirationDateBetweenAndReceivedExpirationNotificationFalse(LocalDate start, LocalDate end);
+
+    List<StudyUser> findByExpirationDateBetween(LocalDate start, LocalDate end);
 }

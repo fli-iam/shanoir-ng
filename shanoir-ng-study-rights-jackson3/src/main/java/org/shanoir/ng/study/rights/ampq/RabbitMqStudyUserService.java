@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.study.rights.ampq;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,8 +34,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import tools.jackson.databind.json.JsonMapper;
-
 @Service
 @Profile("!test")
 public class RabbitMqStudyUserService {
@@ -49,15 +46,9 @@ public class RabbitMqStudyUserService {
     @Autowired
     private StudyUserRightsRepository studyUserRightsRepository;
 
-    @Autowired
-    private JsonMapper mapper;
-
-    public void receiveStudyUsers(String commandArrStr) throws AmqpRejectAndDontRequeueException {
-        StudyUserCommand[] commands;
+    public void receiveStudyUsers(List<StudyUserCommand> commands) throws AmqpRejectAndDontRequeueException {
         try {
-            LOG.debug("Received study-user commands : {}", commandArrStr);
-            commands = mapper.readValue(commandArrStr, StudyUserCommand[].class);
-            service.processCommands(Arrays.asList(commands));
+            service.processCommands(commands);
         } catch (Exception e) {
             throw new AmqpRejectAndDontRequeueException("Study User Update rejected !!!", e);
         }
