@@ -50,7 +50,7 @@ public class RestServiceException extends Exception {
      * @param code
      */
     public RestServiceException(ErrorModel errorModel) {
-        super();
+        super(errorModel != null ? errorModel.getMessage() : null);
         this.errorModel = errorModel;
     }
 
