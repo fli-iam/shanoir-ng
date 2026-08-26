@@ -22,3 +22,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i class="fas fa-ellipsis-h"></i>
     </div>
 }
+@if (mode == 'view' && falseTimes && ((model == false && !inverse) || (!model && inverse))) {
+    <div class="false-times">
+        <i class="fas fa-times"></i>
+    </div>
+}

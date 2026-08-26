@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -28,6 +28,7 @@ import { ExtensionRequestInfo } from './extension-request-info.model';
     selector: 'extensionRequest',
     templateUrl: 'extension-request.component.html',
     styleUrls: ['extension-request.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [HeaderComponent, FormsModule, ReactiveFormsModule, DatepickerComponent]
 })
 

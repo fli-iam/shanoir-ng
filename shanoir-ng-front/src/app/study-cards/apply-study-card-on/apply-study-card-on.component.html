@@ -32,7 +32,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [(ngModel)]="studycard"
                         [options]="studycardOptions"
                         (userChange)="updateStudyCard()"
-                        [viewRoute]="'/study-card/details/' + studycard?.id"
+                        [viewRoute]="'/study-card/details/' + $safeNavigationMigration(studycard?.id)"
                         [viewDisabled]="!studycard"
                         [readOnly]="!studyCards"></select-box>
                 </span>

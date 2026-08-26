@@ -11,7 +11,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, Input } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, forwardRef, Input, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors, FormsModule } from '@angular/forms';
 
 
@@ -23,7 +24,8 @@ import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErr
                 [disabled]="disabled"
                 [ngModel]="dateString"
                 (ngModelChange)="onModelChange($event)"
-                (focusout)="onTouch()"/>
+                (focusout)="onTouch()"
+                [min]="min ? (min | date:'yyyy-MM-dd') : null"/>
     `,
     styles: [
         ':host { display: inline-block; height: 19px; }',
@@ -38,7 +40,8 @@ import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErr
             multi: true,
         }
     ],
-    imports: [FormsModule]
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [FormsModule, DatePipe]
 })
 export class DatepickerComponent implements ControlValueAccessor {
 
@@ -46,6 +49,7 @@ export class DatepickerComponent implements ControlValueAccessor {
     onTouch: () => void;
     private onChange: (value) => void;
     @Input() disabled: boolean = false;
+    @Input() min: Date;
 
     onModelChange(dateStr: string) {
         if (this.dateString == dateStr) return;
