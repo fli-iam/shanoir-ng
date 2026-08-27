@@ -54,13 +54,14 @@ public interface StudyUserRightsRepository extends CrudRepository<StudyUser, Lon
     @Query("select su.studyId from StudyUser su where su.userId = :userId and :right in elements(su.studyUserRights)")
     List<Long> findDistinctStudyIdByUserId(@Param("userId") Long userId, @Param("right") Integer right);
 
-    @Query("select su from StudyUser su where su.userId = :userId and :right in elements(su.studyUserRights)")
-    Iterable<StudyUser> findByUserIdAndRight(@Param("userId") Long userId, @Param("right") Integer right);
+    @Query("select su from StudyUser su left join fetch su.centerIds where su.userId = :userId and :right in elements(su.studyUserRights)")
+    Iterable<StudyUser> findByUserIdAndRight(Long userId, int right);
 
-    @Query("select su from StudyUser su where su.studyId = :studyId and :right in elements(su.studyUserRights)")
-    Iterable<StudyUser> findByStudyIdAndRight(@Param("studyId") Long studyId, @Param("right") Integer right);
+    @Query("select su from StudyUser su left join fetch su.centerIds where su.studyId = :studyId and :right in elements(su.studyUserRights)")
+    Iterable<StudyUser> findByStudyIdAndRight(Long studyId, int right);
 
     List<StudyUser> findByExpirationDateBetweenAndReceivedExpirationNotificationFalse(LocalDate start, LocalDate end);
 
     List<StudyUser> findByExpirationDateBetween(LocalDate start, LocalDate end);
+
 }

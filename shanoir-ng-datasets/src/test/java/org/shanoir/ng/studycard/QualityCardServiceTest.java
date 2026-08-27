@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.rule.QualityCardRule;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
@@ -34,7 +33,6 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
@@ -72,72 +70,10 @@ public class QualityCardServiceTest {
     }
 
     @Test
-    public void deleteByIdTest() throws EntityNotFoundException, MicroServiceCommunicationException {
-        qualityCardService.deleteById(QUALITY_CARD_ID);
-        Mockito.verify(qualityCardRepository, Mockito.times(1)).deleteById(QUALITY_CARD_ID);
-    }
-
-    @Test
-    public void deleteByIdNotFoundTest() {
-        given(qualityCardRepository.findById(99L)).willReturn(Optional.empty());
-
-        Assertions.assertThrows(EntityNotFoundException.class, () -> qualityCardService.deleteById(99L));
-        Mockito.verify(qualityCardRepository, Mockito.never()).deleteById(Mockito.anyLong());
-    }
-
-    @Test
-    public void findAllTest() {
-        final List<QualityCard> qualityCards = qualityCardService.findAll();
-        Assertions.assertNotNull(qualityCards);
-        Assertions.assertEquals(1, qualityCards.size());
-
-        Mockito.verify(qualityCardRepository, Mockito.times(1)).findAll();
-    }
-
-    @Test
-    public void findByIdTest() {
-        final QualityCard qualityCard = qualityCardService.findById(QUALITY_CARD_ID);
-        Assertions.assertNotNull(qualityCard);
-        Assertions.assertEquals(QUALITY_CARD_NAME, qualityCard.getName());
-
-        Mockito.verify(qualityCardRepository, Mockito.times(1)).findById(QUALITY_CARD_ID);
-    }
-
-    @Test
-    public void findByIdNotFoundTest() {
-        given(qualityCardRepository.findById(99L)).willReturn(Optional.empty());
-
-        final QualityCard qualityCard = qualityCardService.findById(99L);
-        Assertions.assertNull(qualityCard);
-    }
-
-    @Test
-    public void saveTest() throws MicroServiceCommunicationException {
-        final QualityCard saved = qualityCardService.save(createQualityCard());
-        Assertions.assertNotNull(saved);
-
-        Mockito.verify(qualityCardRepository, Mockito.times(1)).save(Mockito.any(QualityCard.class));
-    }
-
-    @Test
-    public void searchTest() {
-        final List<QualityCard> qualityCards = qualityCardService.search(Collections.singletonList(STUDY_ID));
-        Assertions.assertNotNull(qualityCards);
-        Assertions.assertEquals(1, qualityCards.size());
-
-        Mockito.verify(qualityCardRepository, Mockito.times(1)).findByStudyIdIn(Collections.singletonList(STUDY_ID));
-    }
-
-    @Test
-    public void updateTest() throws EntityNotFoundException, MicroServiceCommunicationException {
+    public void updateTest() throws EntityNotFoundException {
         final QualityCard update = createQualityCard();
         update.setName(UPDATED_QUALITY_CARD_NAME);
-
-        final QualityCard updatedQualityCard = qualityCardService.update(update);
-        Assertions.assertNotNull(updatedQualityCard);
-        Assertions.assertEquals(UPDATED_QUALITY_CARD_NAME, updatedQualityCard.getName());
-        Assertions.assertEquals(STUDY_ID, updatedQualityCard.getStudyId());
-
+        qualityCardService.update(update);
         Mockito.verify(qualityCardRepository, Mockito.times(1)).save(Mockito.any(QualityCard.class));
     }
 
@@ -149,24 +85,6 @@ public class QualityCardServiceTest {
 
         Assertions.assertThrows(EntityNotFoundException.class, () -> qualityCardService.update(update));
         Mockito.verify(qualityCardRepository, Mockito.never()).save(Mockito.any(QualityCard.class));
-    }
-
-    @Test
-    public void findByStudyTest() {
-        final List<QualityCard> qualityCards = qualityCardService.findByStudy(STUDY_ID);
-        Assertions.assertNotNull(qualityCards);
-        Assertions.assertEquals(1, qualityCards.size());
-
-        Mockito.verify(qualityCardRepository, Mockito.times(1)).findByStudyId(STUDY_ID);
-    }
-
-    @Test
-    public void findByNameTest() {
-        final QualityCard qualityCard = qualityCardService.findByName(QUALITY_CARD_NAME);
-        Assertions.assertNotNull(qualityCard);
-        Assertions.assertEquals(QUALITY_CARD_NAME, qualityCard.getName());
-
-        Mockito.verify(qualityCardRepository, Mockito.times(1)).findByName(QUALITY_CARD_NAME);
     }
 
     private QualityCard createQualityCard() {

@@ -73,6 +73,7 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -91,6 +92,7 @@ public class RabbitMQDatasetsService {
     private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the event.";
 
     @Autowired
+    @Lazy
     private DatasetService datasetService;
 
     @Autowired
@@ -118,6 +120,7 @@ public class RabbitMQDatasetsService {
     private SolrService solrService;
 
     @Autowired
+    @Lazy
     private ExaminationService examinationService;
 
     @Autowired
