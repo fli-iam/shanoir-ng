@@ -18,7 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 
-public class DatasetAcquisitionDatasetsDTO extends DatasetAcquisitionDTO {
+public class DatasetAcquisitionWithDatasetsDTO extends DatasetAcquisitionDTO {
 
     private List<DatasetDTO> datasets;
 

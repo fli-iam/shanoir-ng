@@ -15,8 +15,6 @@
 package org.shanoir.ng.processing.service;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.processing.model.DatasetProcessing;
@@ -33,15 +31,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
  *
  */
 public interface DatasetProcessingService {
-
-    /**
-     * Find dataset processing by name.
-     *
-     * @param name name.
-     * @return a dataset processing.
-     */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    Optional<DatasetProcessing> findByComment(String comment);
 
     /**
      * Save an entity.
@@ -63,39 +52,6 @@ public interface DatasetProcessingService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     DatasetProcessing update(DatasetProcessing entity) throws EntityNotFoundException;
 
-    /**
-     * Find entity by its id.
-     *
-     * @param id id
-     * @return an entity or null.
-     */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    Optional<DatasetProcessing> findById(Long id);
-
-    /**
-     * Get all entities.
-     *
-     * @return exhaustive list of datasetProcessing.
-     */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    List<DatasetProcessing> findAll();
-
-    /**
-     * Get a list of datasetProcessing having the given dataset as input
-     *
-     * @return a datasetProcessing list.
-     */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    List<DatasetProcessing> findByInputDatasetId(Long datasetId);
-
-
-    /**
-     * Get a list of datasetProcessing having the given monitoring as monitoring
-     *
-     * @return a datasetProcessing list.
-     */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    List<DatasetProcessing> findByMonitoringId(Long monitoringId);
     /**
      * Delete an entity.
      *
@@ -125,5 +81,5 @@ public interface DatasetProcessingService {
      */
     void deleteByParentId(Long id) throws RestServiceException, ShanoirException, SolrServerException, IOException;
 
-    void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException;
+    void validateDatasetProcessing(DatasetProcessing processing) throws RestServiceException, EntityNotFoundException;
 }

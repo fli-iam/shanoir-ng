@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,9 +40,11 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.GenericDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.processing.model.DatasetProcessing;
@@ -67,7 +70,13 @@ class SeriesInstanceUIDHandlerTest {
     private DatasetAcquisitionService acquisitionService;
 
     @Mock
+    private DatasetAcquisitionRepository acquisitionRepository;
+
+    @Mock
     private DatasetService datasetService;
+
+    @Mock
+    private DatasetRepository datasetRepository;
 
     @Mock
     private DatasetProcessingRepository datasetProcessingRepository;
@@ -122,7 +131,7 @@ class SeriesInstanceUIDHandlerTest {
 
         GenericDataset dataset = createDataset(new GenericDataset(), 500L,
                 "/studies/1.4.9.12.34.1.8527.42/series/" + SERIES_UID_SEG + "/instances/1.2.3");
-        when(datasetService.findById(500L)).thenReturn(dataset);
+        when(datasetRepository.findById(500L)).thenReturn(Optional.of(dataset));
         assertEquals(SERIES_UID_SEG, handler.resolveSeriesInstanceUID("1.4.9.12.34.1.8527.0.500"));
     }
 
@@ -157,7 +166,7 @@ class SeriesInstanceUIDHandlerTest {
 
     @Test
     void findSeriesToVirtualUIDsMapsAcquisitionsDatasetsAndProcessingOutputs() {
-        when(acquisitionService.findByExamination(42L)).thenReturn(List.of(createAcquisition()));
+        when(acquisitionRepository.findByExaminationIdWithDatasetsAndDatasetFiles(42L)).thenReturn(List.of(createAcquisition()));
         DatasetProcessing processing = new DatasetProcessing();
         processing.setOutputDatasets(List.of(createDataset(new GenericDataset(), 600L,
                 "/studies/1.2.3/series/" + SERIES_UID_OUTPUT + "/instances/1.2.6")));
@@ -173,18 +182,18 @@ class SeriesInstanceUIDHandlerTest {
 
     @Test
     void findSeriesToVirtualUIDsCachesTheMapOfAnExamination() {
-        when(acquisitionService.findByExamination(42L)).thenReturn(List.of(createAcquisition()));
+        when(acquisitionRepository.findByExaminationIdWithDatasetsAndDatasetFiles(42L)).thenReturn(List.of(createAcquisition()));
 
         Map<String, String> first = handler.findSeriesToVirtualUIDs(42L);
         Map<String, String> second = handler.findSeriesToVirtualUIDs(42L);
 
         assertEquals(first, second);
         // the second call within the TTL is served from the cache
-        verify(acquisitionService, times(1)).findByExamination(42L);
+        verify(acquisitionRepository, times(1)).findByExaminationIdWithDatasetsAndDatasetFiles(42L);
 
         handler.clearVirtualUIDCaches();
         handler.findSeriesToVirtualUIDs(42L);
-        verify(acquisitionService, times(2)).findByExamination(42L);
+        verify(acquisitionRepository, times(2)).findByExaminationIdWithDatasetsAndDatasetFiles(42L);
     }
 
     private MrDatasetAcquisition createAcquisition() {

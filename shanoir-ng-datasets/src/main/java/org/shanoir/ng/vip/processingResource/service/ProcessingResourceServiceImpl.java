@@ -66,7 +66,7 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
             HashMap<Long, List<Dataset>> datasetsByEntityId = new HashMap<>();
 
             for (Long id : dto.getDatasetIds()) {
-                Dataset ds = datasetService.findById(id);
+                Dataset ds = datasetService.findByIdWithProcessingAncestorsAndExaminationAndMetadata(id);
 
                 Long entityId = null;
                 switch (dto.getGroupBy()) {

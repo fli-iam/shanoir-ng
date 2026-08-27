@@ -135,11 +135,8 @@ export class DatasetService extends EntityService<Dataset> {
                 .then(dtos => this.datasetDTOService.toEntityList(dtos, [], 'lazy'));
     }
 
-    getByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<Dataset[]> {
-		if (!subjectId) {
-			return this.getByStudyId(studyId);
-		}
-        return firstValueFrom(this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/find/subject/' + subjectId + '/study/' + studyId))
+    getBySubjectId(subjectId: number): Promise<Dataset[]> {
+        return firstValueFrom(this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/find/subject/' + subjectId ))
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
 
@@ -147,10 +144,6 @@ export class DatasetService extends EntityService<Dataset> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', Array.from(ids).join(","));
         return firstValueFrom(this.http.post<DatasetLight[]>(AppUtils.BACKEND_API_DATASET_URL + '/allById', formData));
-    }
-
-    countDatasetsByStudyId(studyId: number): Promise<number> {
-        return firstValueFrom(this.http.get<number>(AppUtils.BACKEND_API_DATASET_URL + '/study/nb-datasets/' + studyId));
     }
 
     public downloadDatasets(ids: number[], format: string, sorting?: string, converter ? : number, state?: TaskState): Observable<TaskState> {

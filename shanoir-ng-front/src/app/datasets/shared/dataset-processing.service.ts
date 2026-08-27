@@ -37,11 +37,6 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
         datasetProcessingDTOService.setDatasetProcessingService(this);
     }
 
-	findAllByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<DatasetProcessing[]> {
-		return firstValueFrom(this.http.get<DatasetProcessingInDTO[]>(this.API_URL + '/study/' + studyId + '/subject/' + subjectId))
-            .then(dtos => this.mapEntityList(dtos));
-	}
-
     findByInputDatasetId(datasetId: number): Promise<DatasetProcessing[]> {
         return firstValueFrom(this.http.get<DatasetProcessingInDTO[]>(this.API_URL + '/inputDataset/' + datasetId))
             .then(dtos => this.mapEntityList(dtos));

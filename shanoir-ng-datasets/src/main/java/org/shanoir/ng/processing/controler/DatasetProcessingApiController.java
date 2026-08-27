@@ -22,16 +22,19 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.processing.service.ProcessingDownloaderService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,10 +68,16 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     private DatasetProcessingService datasetProcessingService;
 
     @Autowired
+    private DatasetProcessingRepository repository;
+
+    @Autowired
     private ProcessingDownloaderService processingDownloaderService;
 
     @Autowired
     private ExaminationService examinationService;
+
+    @Autowired
+    private DatasetService datasetService;
 
     public DatasetProcessingApiController() {
 
@@ -93,59 +102,61 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
     public ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 
-        final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
+        final Optional<DatasetProcessing> datasetProcessing = repository.findByIdWithInputs(datasetProcessingId);
         if (!datasetProcessing.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(datasetProcessing.get()), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingToProcessingDTOWithInputIds(datasetProcessing.get()), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessings() {
-        final List<DatasetProcessing> datasetProcessings = datasetProcessingService.findAll();
+        final List<DatasetProcessing> datasetProcessings = Utils.toList(repository.findAll());
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings, false), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingListToProcessingDTOListWithNullRelations(datasetProcessings), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByInputDataset(@Parameter(description = "id of the input dataset", required = true) @PathVariable("datasetId") Long datasetId) {
-        final List<DatasetProcessing> datasetProcessings = datasetProcessingService.findByInputDatasetId(datasetId);
+        final List<DatasetProcessing> datasetProcessings = repository.findAllByInputDatasets_Id(datasetId);
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings, false), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingListToProcessingDTOListWithNullRelations(datasetProcessings), HttpStatus.OK);
     }
 
     public ResponseEntity<List<DatasetProcessingDTO>> getProcessingsByMonitoring(@Parameter(description = "id of the monitoring", required = true) @PathVariable("monitoringId") Long monitoringId) {
-        final List<DatasetProcessing> datasetProcessings = datasetProcessingService.findByMonitoringId(monitoringId);
+        final List<DatasetProcessing> datasetProcessings = repository.findByMonitoringId(monitoringId);
         if (datasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingsToDatasetProcessingDTOs(datasetProcessings, true), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingListToProcessingDTOListWithNullRelations(datasetProcessings), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<List<DatasetDTO>> getInputDatasets(
-            @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
-        final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
-        List<Dataset> inputDatasets = datasetProcessing.get().getInputDatasets();
-        return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(inputDatasets), HttpStatus.OK);
+            @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) throws EntityNotFoundException {
+        DatasetProcessing datasetProcessing = repository.findByIdWithInputs(datasetProcessingId).orElseThrow(() -> new EntityNotFoundException(DatasetProcessing.class, datasetProcessingId));
+        List<Dataset> inputDatasets = datasetProcessing.getInputDatasets();
+        datasetService.populateInPacs(inputDatasets);
+        datasetService.populateCenterId(inputDatasets);
+        return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOListWithMetadata(inputDatasets), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<List<DatasetDTO>> getOutputDatasets(
-            @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
-        final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
-        List<Dataset> outputDatasets = datasetProcessing.get().getOutputDatasets();
-        return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(outputDatasets), HttpStatus.OK);
+            @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) throws EntityNotFoundException {
+        DatasetProcessing datasetProcessing = repository.findByIdWithOutputs(datasetProcessingId).orElseThrow(() -> new EntityNotFoundException(DatasetProcessing.class, datasetProcessingId));
+        List<Dataset> outputDatasets = datasetProcessing.getOutputDatasets();
+        return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOListWithProcessing(outputDatasets), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(
             @Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
-            final BindingResult result) throws RestServiceException {
+            final BindingResult result) throws RestServiceException, EntityNotFoundException {
         /* set authenticated username */
         datasetProcessing.setUsername(KeycloakUtil.getTokenUserName());
 
@@ -155,14 +166,14 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
         /* Save dataset processing in db. */
         final DatasetProcessing createdDatasetProcessing = datasetProcessingService.create(datasetProcessing);
-        return new ResponseEntity<>(datasetProcessingMapper.datasetProcessingToDatasetProcessingDTO(createdDatasetProcessing), HttpStatus.OK);
+        return new ResponseEntity<>(datasetProcessingMapper.processingToProcessingDTOWithIdRelations(createdDatasetProcessing), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> updateDatasetProcessing(
             @Parameter(description = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
             @Parameter(description = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
-            final BindingResult result) throws RestServiceException {
+            final BindingResult result) throws RestServiceException, EntityNotFoundException {
 
         validate(result);
         datasetProcessingService.validateDatasetProcessing(datasetProcessing);
@@ -192,20 +203,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
             @RequestParam(value = "resultOnly") boolean resultOnly,
             HttpServletResponse response) throws RestServiceException {
 
-        List<DatasetProcessing> processingList = new ArrayList<>();
-        for (Long processingId : processingIds) {
-            DatasetProcessing processing = null;
-            try {
-                if (processingId == null) {
-                    throw new Exception();
-                }
-                processing = datasetProcessingService.findById(processingId).get();
-                processingList.add(processing);
-            } catch (Exception e) {
-                throw new RestServiceException(
-                        new ErrorModel(HttpStatus.FORBIDDEN.value(), processingId + " is not a valid processing id."));
-            }
-        }
+        List<DatasetProcessing> processingList = repository.findByIdsWithInputsAndOutputs(processingIds);
         processingDownloaderService.massiveDownload(processingList, resultOnly, "dcm", response, false, null);
     }
 

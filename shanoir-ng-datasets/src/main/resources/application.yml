@@ -50,6 +50,7 @@ spring:
       ddl-auto: validate
       id:
         db_structure_naming_strategy: legacy
+    open-in-view: false
     properties:
       hibernate:
         format_sql: false
@@ -202,6 +203,7 @@ spring:
     url: jdbc:mysql://localhost:3307/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
   jpa:
     generate-ddl: true
+    open-in-view: false
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
@@ -255,6 +257,7 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create-drop
+      open-in-view: false
       properties:
         hibernate:
           format_sql=true:
