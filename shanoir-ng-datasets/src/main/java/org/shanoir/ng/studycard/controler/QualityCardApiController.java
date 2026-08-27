@@ -159,7 +159,7 @@ public class QualityCardApiController implements QualityCardApi {
         if (qualityCard == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        LOG.info("apply quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
+        LOG.info("Apply quality card: name: " + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
         QualityCardResult results = null;
         try {
             results = cardProcessingService.applyQualityCardOnStudy(qualityCard, true);
@@ -180,7 +180,7 @@ public class QualityCardApiController implements QualityCardApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         QualityCardResult results = null;
-        LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
+        LOG.info("Test quality card: name: " + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
         try {
             results = cardProcessingService.applyQualityCardOnStudy(qualityCard, false);
         } catch (PacsException e) {
@@ -196,12 +196,11 @@ public class QualityCardApiController implements QualityCardApi {
             Long qualityCardId,
             int start,
             int stop) throws RestServiceException, MicroServiceCommunicationException, PacsException {
-
         final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
+        LOG.info("Test quality card: name: " + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
         QualityCardResult results = null;
         try {
             results = cardProcessingService.applyQualityCardOnStudy(qualityCard, start, stop);

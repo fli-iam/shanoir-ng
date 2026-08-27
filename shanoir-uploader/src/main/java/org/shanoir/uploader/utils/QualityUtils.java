@@ -33,7 +33,6 @@ import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.importer.DatasetsCreatorService;
-import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJobBase;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.service.QualityService;
@@ -59,17 +58,13 @@ public class QualityUtils {
 
     private static final QualityService qualityService = new QualityService();
 
-    private static final ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
-
     private static final DatasetsCreatorService datasetsCreatorService = new DatasetsCreatorService();
 
-    public static QualityCardResult checkQualityAtImport(ImportJobBase importJob, boolean isImportFromPACS) throws Exception {
+    public static QualityCardResult checkQualityAtImport(File importJobDir, ImportJobBase importJob, boolean isImportFromPACS) throws Exception {
 
         QualityCardResult qualityCardResult = new QualityCardResult();
         List<QualityCard> qualityCards = new ArrayList<>();
         List<QualityCard> cardsToCheck = new ArrayList<>();
-        final File importJobDir = new File(importJob.getWorkFolder());
-
         // Call Shanoir server to get all quality cards for the selected study
         try {
             qualityCards = ShUpOnloadConfig.getShanoirUploaderServiceClient().findQualityCardsByStudyId(importJob.getStudyId());
@@ -89,22 +84,23 @@ public class QualityUtils {
             LOG.info("Quality Control At Import - " + qualityCards.size() + " quality card(s) found for study id " + importJob.getStudyId() + ", " + cardsToCheck.size() + " to be checked at import.");
         }
 
-        // Convert instances to images with parameter isFromShUpQualityControl set to true to keep absolute filepath for the images
-        imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(importJob, importJobDir.getAbsolutePath(), isImportFromPACS, null, true);
-
         // Construct Dicom datasets from images
         List<Serie> series = importJob.getSeries();
         for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
             Serie serie = seriesIt.next();
             try {
                 serie.setDatasets(new ArrayList<>());
-                datasetsCreatorService.constructDicom(null, serie, true);
+                /**
+                 * Not moving any files into a Dataset specific folder only create
+                 * in memory datasets for QC check. No Dataset separation/splitting.
+                 */
+                datasetsCreatorService.constructDatasets(null, serie, true, importJobDir);
                 org.shanoir.ng.importer.dto.Serie serieDto = SerieMapper.INSTANCE.toDto(serie);
+                
                 AcquisitionAttributes<String> dicomAttributes = DicomProcessing.getDicomAcquisitionAttributes(serieDto);
-
                 DatasetAcquisition datasetAcquisition = generateDatasetAcquisitionForQualityCheck(importJob.getStudy(), serie);
-
                 QualityCardResult serieQualityCardResult = qualityService.checkQuality(datasetAcquisition, dicomAttributes, cardsToCheck);
+                
                 // We retrieve the worst quality tag associated with the datasetAcquisition
                 QualityTag worstTagSet = serieQualityCardResult.getUpdatedDatasetAcquisitions().get(0).getQualityTag();
                 // if quality card result contains an ERROR tag, we remove the serie from the selection
@@ -117,6 +113,7 @@ public class QualityUtils {
                     serie.setQualityTag(worstTagSet);
                 }
                 qualityCardResult.merge(serieQualityCardResult);
+                serie.setDatasets(null);
             } catch (SecurityException e) {
                 LOG.error(e.getMessage());
             }

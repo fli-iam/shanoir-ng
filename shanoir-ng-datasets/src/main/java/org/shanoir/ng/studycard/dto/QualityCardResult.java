@@ -44,6 +44,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class QualityCardResult extends CopyOnWriteArrayList<QualityCardResultEntry> {
 
+    private static final long serialVersionUID = -7739674169094470083L;
+
     private List<DatasetAcquisition> updatedDatasetAcquisitions = new CopyOnWriteArrayList<>();
 
     public List<DatasetAcquisition> getUpdatedDatasetAcquisitions() {

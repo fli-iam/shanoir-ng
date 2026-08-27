@@ -62,7 +62,8 @@ public class AnonymizationTest {
         ArrayList<File> dicomImages = createImageArray();
         long chrono = java.lang.System.currentTimeMillis();
         printDICOMFile(dicomImages.get(0));
-        anonymizationService.anonymizeForShanoir(dicomImages, PROFILE, NAME, ID, "1.4.9.12.34.1.8527.123412341234123412341234");
+        File folder = new File(DICOM_IMAGE_FOLDER_PATH);
+        anonymizationService.anonymizeForShanoir(dicomImages, PROFILE, NAME, ID, "1.4.9.12.34.1.8527.123412341234123412341234", folder);
         printDICOMFile(dicomImages.get(0));
         long chrono2 = java.lang.System.currentTimeMillis();
         long temps = chrono2 - chrono;

@@ -153,7 +153,7 @@ public class ImporterService {
                         .toList();
 
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-                    + " Successfully created " + createdDatasetIds.size() + " dataset(s) for subject [" + importJob.getSubjectName()
+                    + " Created " + createdDatasetIds.size() + " dataset(s) for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
 

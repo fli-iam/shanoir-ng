@@ -17,10 +17,14 @@ package org.shanoir.ng.utils;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
@@ -32,15 +36,19 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import org.shanoir.anonymization.anonymization.AnonymizationResult;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
+import org.shanoir.ng.importer.model.Image;
+import org.shanoir.ng.importer.model.ImportJobBase;
+import org.shanoir.ng.importer.model.Instance;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.dicom.DicomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -61,7 +69,7 @@ public final class ImportUtils {
 
     private static final String ZIP_FILE_SUFFIX = ".zip";
 
-    private static final String FILE_POINT = ".";
+    public static final String SUFFIX_DCM = ".dcm";
 
     private static final String UPLOAD_FILE_SUFFIX = ".upload";
 
@@ -255,7 +263,6 @@ public final class ImportUtils {
      * @throws IOException
      */
     private static void extractFile(ZipEntry zipIn, ZipFile zipFile, String filePath) throws IOException {
-
         try (InputStream in = zipFile.getInputStream(zipIn);
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
             byte[] bytesIn = new byte[BUFFER_SIZE];
@@ -266,49 +273,34 @@ public final class ImportUtils {
         }
     }
 
-    /**
-     * This method stores an uploaded zip file in a temporary file, creates a new
-     * folder with the same name and unzips the content into this folder, and gives
-     * back the folder with the content.
-     *
-     * @param tempFile
-     * @param dicomZipFile
-     * @return
-     * @throws IOException
-     * @throws RestServiceException
-     */
-    public static File saveTempFileCreateFolderAndUnzip(final File tempFile, final MultipartFile dicomZipFile,
-            final boolean fromDicom) throws IOException, RestServiceException {
-        String fileName = tempFile.getName();
-        int pos = fileName.lastIndexOf(FILE_POINT);
-        if (pos > 0) {
-            fileName = fileName.substring(0, pos);
-        }
-        File unzipFolderFile = new File(tempFile.getParentFile().getAbsolutePath() + File.separator + fileName);
-        if (!unzipFolderFile.exists()) {
-            unzipFolderFile.mkdirs();
+    public static File initImportJob(final ImportJobBase importJob, final String importDir) throws IOException {
+        importJob.setUserId(KeycloakUtil.getTokenUserId());
+        importJob.setUsername(KeycloakUtil.getTokenUserName());
+        long n = createRandomLong();
+        importJob.setId(Long.toString(n));
+        File userImportDir = getUserImportDir(importDir);
+        File importJobDir = new File(userImportDir.getAbsolutePath(), importJob.getId());
+        if (!importJobDir.exists()) {
+            importJobDir.mkdirs();
         } else {
-            throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                    "Error while unzipping file: folder already exists.", null));
+            LOG.error("Error in initImportJob: importJobDir/workFolder exists.");
+            throw new IOException("Error in initImportJob: importJobDir/workFolder exists.");
         }
-        ImportUtils.unzip(tempFile.getAbsolutePath(), unzipFolderFile.getAbsolutePath());
-        tempFile.delete();
-        return unzipFolderFile;
+        importJob.setWorkFolder(importJobDir.getAbsolutePath());
+        return importJobDir;
     }
 
-    /**
-     * This method takes a multipart file and stores it in a configured upload
-     * directory in relation with the userId with a random name and the suffix
-     * .upload
-     *
-     * @param file
-     * @throws IOException
-     */
-    public static File saveTempFile(final File userImportDir, final MultipartFile file) throws IOException {
-        long n = createRandomLong();
-        File uploadFile = new File(userImportDir.getAbsolutePath(), Long.toString(n) + UPLOAD_FILE_SUFFIX);
-        file.transferTo(uploadFile);
-        return uploadFile;
+    public static File initImportJob(final ImportJobBase importJob, final String importDir, final MultipartFile file) throws IOException {
+        File importJobDir = initImportJob(importJob, importDir);
+        File uploadedFile = new File(importJobDir.getAbsolutePath() + UPLOAD_FILE_SUFFIX);
+        file.transferTo(uploadedFile);
+        return uploadedFile;
+    }
+
+    public static void cleanUpImportJob(final ImportJobBase importJob) {
+        // Clean up to send smaller json
+        importJob.setPatient(null);
+        importJob.setStudy(null);
     }
 
     /**
@@ -316,7 +308,7 @@ public final class ImportUtils {
      *
      * @return long: random number
      */
-    public static long createRandomLong() {
+    private static long createRandomLong() {
         long n = RANDOM.nextLong();
         if (n == Long.MIN_VALUE) {
             n = 0; // corner case
@@ -324,6 +316,22 @@ public final class ImportUtils {
             n = Math.abs(n);
         }
         return n;
+    }
+
+    public static void moveDirectoryContents(File sourceDir, File targetDir) throws IOException {
+        File[] children = sourceDir.listFiles();
+        if (children == null) {
+            throw new IOException("Not a directory or IO error: " + sourceDir);
+        }
+        for (File child : children) {
+            Path dest = targetDir.toPath().resolve(child.getName());
+            try {
+                Files.move(child.toPath(), dest, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(child.toPath(), dest); // fallback: cross-filesystem
+            }
+        }
+        Files.delete(sourceDir.toPath());
     }
 
     public static String readableFileSize(long size) {
@@ -385,6 +393,95 @@ public final class ImportUtils {
         subject.setSex(sex);
         subject.setImagedObjectCategory(imagedObjectCategory);
         return subject;
+    }
+
+
+    /**
+     * Pseudonymization rewrites StudyInstanceUID, SeriesInstanceUID and
+     * SOPInstanceUID directly inside the DICOM files on disk, in place -- but
+     * importJob's own Patient/Study/Serie/Instance tree was built from those
+     * files BEFORE that rewrite, from the original, vendor-assigned UIDs.
+     *
+     * Left untouched, the importJob written to import-job.json (sent as-is
+     * to ms-import, and later relied on e.g. by UploadServiceJob's
+     * post-import metadata check) would reference UIDs that no longer exist
+     * in the actual DICOM data. Patch the tree here, right after
+     * pseudonymization and before the state switch to START_IMPORT_JOB, so
+     * import-job.json stays consistent with what's really on disk from this
+     * point on.
+     *
+     * SeriesInstanceUID/StudyInstanceUID/SOPInstanceUID are looked up by
+     * their OLD value in the shared old->new maps produced by pseudonymization.
+     * @throws FileNotFoundException
+     */
+    public static void updateImportJobWithPseudonymizedUIDs(final ImportJobBase importJob, final File importJobFolder,
+            final AnonymizationResult anonymizationResult) throws FileNotFoundException {
+        int updatedImages = 0;
+        int missingImages = 0;
+        Study study = importJob.getStudy();
+        String newStudyInstanceUID = anonymizationResult.getStudyInstanceUIDs().get(study.getStudyInstanceUID());
+        if (newStudyInstanceUID != null) {
+            study.setStudyInstanceUID(newStudyInstanceUID);
+        }
+        if (importJob.getSeries() == null) {
+            return;
+        }
+        for (Serie serie : importJob.getSeries()) {
+            String newSeriesInstanceUID = anonymizationResult.getSeriesInstanceUIDs().get(serie.getSeriesInstanceUID());
+            if (newSeriesInstanceUID != null) {
+                serie.setSeriesInstanceUID(newSeriesInstanceUID);
+            }
+            if (serie.getImages() != null) {
+                for (Image image : serie.getImages()) {
+                    String newSopInstanceUID = anonymizationResult.getSopInstanceUIDs().get(image.getSOPInstanceUID());
+                    if (newSopInstanceUID != null) {
+                        image.setSOPInstanceUID(newSopInstanceUID);
+                        /**
+                         * Pseudonymization now streamlines everything to this structure.
+                         */
+                        String path = newSeriesInstanceUID + "/" + newSopInstanceUID + SUFFIX_DCM;
+                        image.setPath(path);
+                        updatedImages++;
+                    } else {
+                        missingImages++;
+                        LOG.warn("{}: no pseudonymized SOPInstanceUID found for image file {}; "
+                                + "importJob keeps its pre-pseudonymization UID for this image.",
+                                importJobFolder.getName(), image.getSOPInstanceUID());
+                    }
+                }
+            }
+        }
+        LOG.info("{}: importJobUIDs updated for {} image(s){}.",
+                importJobFolder.getName(),
+                updatedImages,
+                missingImages > 0 ? (", " + missingImages + " image(s) could not be matched") : "");
+    }
+
+    public static File getInstanceFileByReferencedFileID(Instance instance, String folderFileAbsolutePath)
+            throws FileNotFoundException {
+        String instanceFilePath = DicomUtils.referencedFileIDToPath(folderFileAbsolutePath, instance.getReferencedFileID());
+        return getFileFromPath(instanceFilePath);
+    }
+
+    public static File getInstanceFileByUIDs(Instance instance, Serie serie, String folderFileAbsolutePath) throws FileNotFoundException {
+        StringBuilder instanceFilePathBuilder = new StringBuilder();
+        instanceFilePathBuilder.append(folderFileAbsolutePath)
+                .append(File.separator)
+                .append(serie.getSeriesInstanceUID())
+                .append(File.separator)
+                .append(instance.getSopInstanceUID())
+                .append(SUFFIX_DCM);
+        return getFileFromPath(instanceFilePathBuilder.toString());
+    }
+
+    private static File getFileFromPath(String instanceFilePath) throws FileNotFoundException {
+        File instanceFile = new File(instanceFilePath);
+        if (instanceFile.exists()) {
+            return instanceFile;
+        } else {
+            throw new FileNotFoundException(
+                    "instanceFilePath: missing file: " + instanceFilePath);
+        }
     }
 
 }
