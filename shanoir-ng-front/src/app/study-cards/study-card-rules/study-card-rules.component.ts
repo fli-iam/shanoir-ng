@@ -285,7 +285,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             });
         }
 
-        return errors;
+        return Object.keys(errors).length > 0 ? errors : null;
     }
 
     clickRule(i: number) {
