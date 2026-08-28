@@ -52,6 +52,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -75,6 +76,9 @@ public class BidsImporterApiController implements BidsImporterApi {
 
     @Autowired
     private ShanoirEventService eventService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private ImportJobStatusService importJobStatusService;
@@ -243,11 +247,11 @@ public class BidsImporterApiController implements BidsImporterApi {
         if (dataTypeFile.isDirectory()) {
             importJob.setWorkFolder(dataTypeFile.getAbsolutePath());
             LOG.debug("We found a data folder " + dataTypeFile.getName());
-            rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, importJob);
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, objectMapper.writeValueAsString(importJob));
         } else {
             LOG.debug("We found an examination extra-data " + dataTypeFile.getAbsolutePath());
             IdName extraData = new IdName(importJob.getExaminationId(), dataTypeFile.getAbsolutePath());
-            this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, extraData);
+            this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, objectMapper.writeValueAsString(extraData));
         }
     }
 
