@@ -40,6 +40,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
+import { extractPatternPrefix, extractPatternSeparator } from '../../utils/regex-example.util';
 
 @Directive()
 export abstract class AbstractClinicalContextComponent implements OnDestroy, OnInit {
@@ -448,7 +449,9 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;;
             }
             if (this.subjectNamePrefix) {
-                this.subjectNamePrefix = this.study.name + '-' + this.subjectNamePrefix;
+                const separator = extractPatternSeparator(this.study.subjectNamePattern) ?? '-';
+                const namePrefix = extractPatternPrefix(this.study.subjectNamePattern, this.study.studyCenterList) ?? this.study.name;
+                this.subjectNamePrefix = namePrefix + separator + this.subjectNamePrefix + separator;
             }
             this.acquisitionEquipmentOptions = this.getEquipmentOptions(this.center);
             this.selectDefaultEquipment(this.acquisitionEquipmentOptions);

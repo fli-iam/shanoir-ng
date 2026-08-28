@@ -43,6 +43,7 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { User } from '../../users/shared/user.model';
 import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
+import { escapeRegex, matchPatternSuffix, splitTopLevelAlternation, unescapeRegex } from '../../utils/regex-example.util';
 import { SuperPromise } from "../../utils/super-promise";
 import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
@@ -136,44 +137,6 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     /**
-     * Takes a subpart of the pattern to replace any of its regex special characters
-     * so that this subpart is interpreted only as raw text in the regex pattern. 
-     * @param str 
-     * @returns 
-     */
-    private escapeRegex(str: string): string {
-        return (str ?? '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    /**
-     * Does the opposite as escapeRegex(), turns a regex into raw text elements to
-     * be used as pattern example.
-     * @param str 
-     * @returns 
-     */
-    private unescapeRegex(str: string): string {
-        return (str ?? '').replace(/\\(.)/g, '$1');
-    }
-
-    private splitTopLevelAlternation(s: string): string[] {
-        const parts: string[] = [];
-        let depth = 0;
-        let last = 0;
-        for (let idx = 0; idx < s.length; idx++) {
-            const ch = s[idx];
-            if (ch == '\\') { idx++; continue; }
-            if (ch == '(' || ch == '[') depth++;
-            else if (ch == ')' || ch == ']') depth--;
-            else if (ch == '|' && depth == 0) {
-                parts.push(s.slice(last, idx));
-                last = idx + 1;
-            }
-        }
-        parts.push(s.slice(last));
-        return parts;
-    }
-
-    /**
      * Reconstructs the pattern-builder fields (namePrefixOption, customNamePrefixes, separator,
      * idLength, idType) from a persisted subjectNamePattern regex, so the "Subject Name Pattern"
      * fieldset reflects what's actually saved instead of resetting to its default values every
@@ -189,26 +152,27 @@ export class StudyComponent extends EntityComponent<Study> {
         this.idType = 'string';
         if (!pattern) return;
 
-        const suffixMatch = pattern.match(/(\\.|[^\\])(\[[^\]]*\])\{(\d+)\}\$$/);
+        const suffixMatch = matchPatternSuffix(pattern);
         if (!suffixMatch) return;
 
-        const [fullSuffixMatch, rawSeparator, charClass, lengthStr] = suffixMatch;
-        this.separator = this.unescapeRegex(rawSeparator);
-        this.idType = /[A-Za-z]/.test(charClass) ? 'string' : 'numeric';
-        this.idLength = parseInt(lengthStr, 10) || 4;
+        this.separator = suffixMatch.separator;
+        this.idType = /[A-Za-z]/.test(suffixMatch.charClass) ? 'string' : 'numeric';
+        this.idLength = suffixMatch.length || 4;
 
-        let front = pattern.slice(1, pattern.length - fullSuffixMatch.length);
+        // fullMatch.length is used to know how many characters to remove
+        // to isolate the prefix + center prefix (if exists)
+        let front = pattern.slice(1, pattern.length - suffixMatch.fullMatch.length);
         const expectedCenterSegment = this.buildCenterPrefixSegment();
         if (expectedCenterSegment && front.endsWith(expectedCenterSegment)) {
             front = front.slice(0, front.length - expectedCenterSegment.length);
         }
 
         if (front.startsWith('(') && front.endsWith(')')) {
-            const alternatives = this.splitTopLevelAlternation(front.slice(1, -1)).map(a => this.unescapeRegex(a));
+            const alternatives = splitTopLevelAlternation(front.slice(1, -1)).map(a => unescapeRegex(a));
             this.namePrefixOption = 'custom_name';
             this.customNamePrefixes = alternatives.length ? alternatives : [''];
         } else {
-            const literal = this.unescapeRegex(front);
+            const literal = unescapeRegex(front);
             if (literal && literal !== this.study?.name) {
                 this.namePrefixOption = 'custom_name';
                 this.customNamePrefixes = [literal];
@@ -243,8 +207,8 @@ export class StudyComponent extends EntityComponent<Study> {
         const centerPrefixes = this.getDistinctCenterPrefixes();
         if (!centerPrefixes.length) return '';
         const someCenterHasNoPrefix = this.study.studyCenterList.some(studyCenter => !studyCenter.subjectNamePrefix?.length);
-        const alternation = '(' + centerPrefixes.map(prefix => this.escapeRegex(prefix)).join('|') + ')';
-        const unit = this.escapeRegex(this.separator) + alternation;
+        const alternation = '(' + centerPrefixes.map(prefix => escapeRegex(prefix)).join('|') + ')';
+        const unit = escapeRegex(this.separator) + alternation;
         return someCenterHasNoPrefix ? '(' + unit + ')?' : unit;
     }
 
@@ -253,10 +217,10 @@ export class StudyComponent extends EntityComponent<Study> {
             ? this.customNamePrefixes.filter(prefix => prefix?.length > 0)
             : [this.study?.name];
         if (!prefixes.length) return null;
-        const escapedPrefixes = prefixes.map(prefix => this.escapeRegex(prefix));
+        const escapedPrefixes = prefixes.map(prefix => escapeRegex(prefix));
         const prefixPart = escapedPrefixes.length == 1 ? escapedPrefixes[0] : '(' + escapedPrefixes.join('|') + ')';
         const charClass = this.idType == 'numeric' ? '[0-9]' : '[A-Za-z0-9]';
-        return '^' + prefixPart + this.buildCenterPrefixSegment() + this.escapeRegex(this.separator) + charClass + '{' + this.idLength + '}$';
+        return '^' + prefixPart + this.buildCenterPrefixSegment() + escapeRegex(this.separator) + charClass + '{' + this.idLength + '}$';
     }
 
     /**

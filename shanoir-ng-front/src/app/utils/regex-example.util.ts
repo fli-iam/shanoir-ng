@@ -12,10 +12,123 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-// Alphanumeric or digital pool of characters to pick from 
+// Alphanumeric or digital pool of characters to pick from
 // when creating the Subject common name pattern example
 const DIGIT_POOL = '84271937';
 const ALNUM_POOL = 'A8f2K5qZAe93Bq7Ff1';
+
+export interface PatternSuffixMatch {
+    fullMatch: string;
+    separator: string;
+    charClass: string;
+    length: number;
+}
+
+/**
+ * Matches the trailing "SEPARATOR[CHARCLASS]{LENGTH}$" produced by
+ * study.component.ts's buildSubjectNamePatternRegex(), and unescapes the
+ * separator back to its literal form. Returns null if pattern is empty or
+ * doesn't have this exact shape (e.g. a hand-written regex).
+ */
+export function matchPatternSuffix(pattern: string): PatternSuffixMatch | null {
+    if (!pattern) return null;
+    const match = pattern.match(/(\\.|[^\\])(\[[^\]]*\])\{(\d+)\}\$$/);
+    if (!match) return null;
+    const [fullMatch, rawSeparator, charClass, lengthStr] = match;
+    return {
+        fullMatch,
+        separator: rawSeparator.replace(/\\(.)/g, '$1'),
+        charClass,
+        length: parseInt(lengthStr, 10)
+    };
+}
+
+/**
+ * Convenience wrapper around matchPatternSuffix() for callers that only need
+ * the separator (e.g. prefilling a subject name during import).
+ */
+export function extractPatternSeparator(pattern: string): string | null {
+    return matchPatternSuffix(pattern)?.separator ?? null;
+}
+
+/**
+     * Takes a subpart of the pattern to replace any of its regex special characters
+     * so that this subpart is interpreted only as raw text in the regex pattern. 
+     * @param str 
+     * @returns 
+     */
+export function escapeRegex(str: string): string {
+    return (str ?? '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+     * Does the opposite as escapeRegex(), turns a regex into raw text elements to
+     * be used as pattern example.
+     * @param str 
+     * @returns 
+     */
+export function unescapeRegex(str: string): string {
+    return (str ?? '').replace(/\\(.)/g, '$1');
+}
+
+export function splitTopLevelAlternation(s: string): string[] {
+    const parts: string[] = [];
+    let depth = 0;
+    let last = 0;
+    for (let idx = 0; idx < s.length; idx++) {
+        const ch = s[idx];
+        if (ch == '\\') { idx++; continue; }
+        if (ch == '(' || ch == '[') depth++;
+        else if (ch == ')' || ch == ']') depth--;
+        else if (ch == '|' && depth == 0) {
+            parts.push(s.slice(last, idx));
+            last = idx + 1;
+        }
+    }
+    parts.push(s.slice(last));
+    return parts;
+}
+
+export interface CenterPrefixSource {
+    subjectNamePrefix?: string;
+}
+
+/**
+ * Mirrors study.component.ts's buildCenterPrefixSegment(), as a pure function so it can be
+ * reused to strip the center-prefix segment back out when decoding an existing pattern.
+ */
+function buildCenterPrefixSegment(separator: string, centers: CenterPrefixSource[]): string {
+    const centerPrefixes = Array.from(new Set(centers.map(c => c.subjectNamePrefix).filter(p => p?.length > 0)));
+    if (!centerPrefixes.length) return '';
+    const someCenterHasNoPrefix = centers.some(c => !c.subjectNamePrefix?.length);
+    const alternation = '(' + centerPrefixes.map(p => escapeRegex(p)).join('|') + ')';
+    const unit = escapeRegex(separator) + alternation;
+    return someCenterHasNoPrefix ? '(' + unit + ')?' : unit;
+}
+
+/**
+ * Extracts the "Subject name prefix" literal from a persisted subjectNamePattern - the study
+ * name, or the first configured custom prefix if that option was used instead - i.e. everything
+ * before the optional center-prefix segment and the final separator+identifier. Needs the
+ * study's center list to know what to strip, since the center segment isn't distinguishable
+ * from the prefix segment by shape alone. Returns null if pattern is empty/unrecognized.
+ */
+export function extractPatternPrefix(pattern: string, centers: CenterPrefixSource[] = []): string | null {
+    const suffix = matchPatternSuffix(pattern);
+    if (!suffix) return null;
+
+    let front = pattern.slice(1, pattern.length - suffix.fullMatch.length);
+    const expectedCenterSegment = buildCenterPrefixSegment(suffix.separator, centers);
+    if (expectedCenterSegment && front.endsWith(expectedCenterSegment)) {
+        front = front.slice(0, front.length - expectedCenterSegment.length);
+    }
+
+    if (front.startsWith('(') && front.endsWith(')')) {
+        const alternatives = splitTopLevelAlternation(front.slice(1, -1));
+        return unescapeRegex(alternatives[0] ?? '');
+    }
+    return unescapeRegex(front);
+}
 
 /**
  * Builds one human-readable string matching the given regex, for display to users who
@@ -29,24 +142,6 @@ export function regexExample(pattern: string): string {
     if (!pattern) return '';
 
     let i = 0;
-
-    function splitTopLevelAlternation(s: string): string[] {
-        const parts: string[] = [];
-        let depth = 0;
-        let last = 0;
-        for (let idx = 0; idx < s.length; idx++) {
-            const ch = s[idx];
-            if (ch == '\\') { idx++; continue; }
-            if (ch == '(' || ch == '[') depth++;
-            else if (ch == ')' || ch == ']') depth--;
-            else if (ch == '|' && depth == 0) {
-                parts.push(s.slice(last, idx));
-                last = idx + 1;
-            }
-        }
-        parts.push(s.slice(last));
-        return parts;
-    }
 
     function parseGroup(): string {
         // called with `i` positioned right after the opening '('
