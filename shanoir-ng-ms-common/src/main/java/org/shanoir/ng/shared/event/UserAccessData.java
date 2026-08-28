@@ -22,6 +22,8 @@ public class UserAccessData {
 
     private LocalDate expirationDate;
 
+    public UserAccessData() {
+    }
 
     public UserAccessData(String userName, LocalDate expirationDate) {
         this.userName = userName;
@@ -43,4 +45,5 @@ public class UserAccessData {
     public void setExpirationDate(LocalDate expirationDate) {
         this.expirationDate = expirationDate;
     }
+
 }
