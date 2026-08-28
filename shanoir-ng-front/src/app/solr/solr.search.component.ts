@@ -16,6 +16,7 @@ import { Component, AfterViewChecked, AfterContentInit, ViewChild, ViewChildren,
 import { HttpParams } from '@angular/common/http';
 import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { formatDate } from '@angular/common';
 import { Subscription } from 'rxjs';
 
 import { environment } from "../../environments/environment";
@@ -48,7 +49,6 @@ import { SolrService } from "./solr.service";
 import { SolrRangeCriterionComponent } from './criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './text-search/solr.text-search.component';
 import { SolrTextSearchModeComponent } from './text-search/solr.text-search-mode.component';
-import { formatDate } from '@angular/common';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed', 'dataReuseAgreement', 'qualityTag'];
 export type TextualFacet = typeof TextualFacetNames[number];
