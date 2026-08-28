@@ -135,8 +135,85 @@ export class StudyComponent extends EntityComponent<Study> {
         }
     }
 
+    /**
+     * Takes a subpart of the pattern to replace any of its regex special characters
+     * so that this subpart is interpreted only as raw text in the regex pattern. 
+     * @param str 
+     * @returns 
+     */
     private escapeRegex(str: string): string {
         return (str ?? '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    /**
+     * Does the opposite as escapeRegex(), turns a regex into raw text elements to
+     * be used as pattern example.
+     * @param str 
+     * @returns 
+     */
+    private unescapeRegex(str: string): string {
+        return (str ?? '').replace(/\\(.)/g, '$1');
+    }
+
+    private splitTopLevelAlternation(s: string): string[] {
+        const parts: string[] = [];
+        let depth = 0;
+        let last = 0;
+        for (let idx = 0; idx < s.length; idx++) {
+            const ch = s[idx];
+            if (ch == '\\') { idx++; continue; }
+            if (ch == '(' || ch == '[') depth++;
+            else if (ch == ')' || ch == ']') depth--;
+            else if (ch == '|' && depth == 0) {
+                parts.push(s.slice(last, idx));
+                last = idx + 1;
+            }
+        }
+        parts.push(s.slice(last));
+        return parts;
+    }
+
+    /**
+     * Reconstructs the pattern-builder fields (namePrefixOption, customNamePrefixes, separator,
+     * idLength, idType) from a persisted subjectNamePattern regex, so the "Subject Name Pattern"
+     * fieldset reflects what's actually saved instead of resetting to its default values every
+     * time the study entity is (re)loaded (e.g. right after Update). The center-prefix segment
+     * doesn't need decomposing: it's already re-derived live from study.studyCenterList by
+     * buildCenterPrefixSegment(), so it's only stripped off here, not parsed.
+     */
+    private parseSubjectNamePatternIntoFields(pattern: string): void {
+        this.namePrefixOption = 'study_name';
+        this.customNamePrefixes = [''];
+        this.separator = '-';
+        this.idLength = 4;
+        this.idType = 'string';
+        if (!pattern) return;
+
+        const suffixMatch = pattern.match(/(\\.|[^\\])(\[[^\]]*\])\{(\d+)\}\$$/);
+        if (!suffixMatch) return;
+
+        const [fullSuffixMatch, rawSeparator, charClass, lengthStr] = suffixMatch;
+        this.separator = this.unescapeRegex(rawSeparator);
+        this.idType = /[A-Za-z]/.test(charClass) ? 'string' : 'numeric';
+        this.idLength = parseInt(lengthStr, 10) || 4;
+
+        let front = pattern.slice(1, pattern.length - fullSuffixMatch.length);
+        const expectedCenterSegment = this.buildCenterPrefixSegment();
+        if (expectedCenterSegment && front.endsWith(expectedCenterSegment)) {
+            front = front.slice(0, front.length - expectedCenterSegment.length);
+        }
+
+        if (front.startsWith('(') && front.endsWith(')')) {
+            const alternatives = this.splitTopLevelAlternation(front.slice(1, -1)).map(a => this.unescapeRegex(a));
+            this.namePrefixOption = 'custom_name';
+            this.customNamePrefixes = alternatives.length ? alternatives : [''];
+        } else {
+            const literal = this.unescapeRegex(front);
+            if (literal && literal !== this.study?.name) {
+                this.namePrefixOption = 'custom_name';
+                this.customNamePrefixes = [literal];
+            }
+        }
     }
 
     onIdLengthChange(value: string) {
@@ -158,8 +235,8 @@ export class StudyComponent extends EntityComponent<Study> {
 
     /**
      * The "(separator + centerPrefix)" segment of the pattern. Made optional as a whole
-     * (rather than just the centerPrefix alone) when at least one center has no prefix
-     * configured yet, so subjects for those centers aren't blocked - and so we never end up
+     * when at least one center has no prefix configured yet, 
+     * so subjects for those centers aren't blocked - and so we never end up
      * with a duplicated separator when the center prefix is skipped.
      */
     private buildCenterPrefixSegment(): string {
@@ -280,6 +357,7 @@ export class StudyComponent extends EntityComponent<Study> {
         super.entity = study;
         this.updateSubjectTagsInUse();
         this.useSubjectNamePattern = !!study?.subjectNamePattern;
+        this.parseSubjectNamePatternIntoFields(study?.subjectNamePattern);
     }
 
     public get entity(): Study {
