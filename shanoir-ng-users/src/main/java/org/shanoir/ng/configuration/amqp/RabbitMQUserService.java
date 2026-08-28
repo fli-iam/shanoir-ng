@@ -119,9 +119,10 @@ public class RabbitMQUserService {
             exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
                 autoDelete = "false", durable = "true", type = ExchangeTypes.TOPIC)), containerFactory = "singleConsumerFactory"
     )
-    public void receiveEvent(ShanoirEvent event) throws AmqpRejectAndDontRequeueException {
-        LOG.info("Receiving event: " + event.toString());
+    public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
+        LOG.info("Receiving event: " + eventAsString);
         try {
+            ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
             eventsService.addEvent(event);
         } catch (Exception e) {
             LOG.error("Something went wrong deserializing the event.", e);
