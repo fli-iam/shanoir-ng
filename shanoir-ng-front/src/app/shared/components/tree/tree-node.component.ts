@@ -24,7 +24,7 @@ import {
   ChangeDetectionStrategy
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { QualityTag } from '@app/study-cards/shared/quality-card.model';
 
@@ -80,7 +80,7 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges, After
     private onTouchedCallback: () => void = () => { return; };
     private onChangeCallback: (_: any) => void = () => { return; };
 
-    constructor(private cdr: ChangeDetectorRef) {
+    constructor(private cdr: ChangeDetectorRef, private router: Router) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -135,6 +135,13 @@ export class TreeNodeComponent implements ControlValueAccessor, OnChanges, After
         if (this.isOpen) this.close();
         else {
             this.open();
+        }
+    }
+
+    onCheckboxChange(value: boolean | 'indeterminate') {
+        this.chkbxChange.emit(value);
+        if (value === true && this.route) {
+            this.router.navigate([this.route]);
         }
     }
 
