@@ -21,6 +21,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Service to send every event created.
  *
@@ -34,6 +36,9 @@ public class ShanoirEventService {
     private RabbitTemplate rabbitTemplate;
 
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventService.class);
+
+    @Autowired
+    private ObjectMapper mapper;
 
     /**
      * Publishes an event to user microservice.
@@ -51,7 +56,8 @@ public class ShanoirEventService {
                 .append("progress=").append(event.getProgress()).append("]");
         LOG.info(builder.toString());
         try {
-            rabbitTemplate.convertAndSend(RabbitMQConfiguration.EVENTS_EXCHANGE, event.getEventType(), event);
+            String str = mapper.writeValueAsString(event);
+            rabbitTemplate.convertAndSend(RabbitMQConfiguration.EVENTS_EXCHANGE, event.getEventType(), str);
         } catch (Exception e) {
             LOG.error("Error while sending event: event {}, user: {}, reference: {}", event.getEventType(), event.getUserId(), event.getObjectId());
             LOG.error("Thrown exception: {}", e);
