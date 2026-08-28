@@ -86,7 +86,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     @Output() selectedRulesChange: EventEmitter<(StudyCardRule | QualityCardRule)[]> = new EventEmitter();
     selectedRules: Map<number, (StudyCardRule | QualityCardRule)> = new Map();
     rulesToAnimate: Set<number> = new Set();
-    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
+    @Input() addSubForm: (subForm: FormGroup, previousForm?: FormGroup) => FormGroup;
 
 
     constructor(
