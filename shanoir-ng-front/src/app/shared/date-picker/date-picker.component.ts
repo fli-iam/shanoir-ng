@@ -23,6 +23,7 @@ import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErr
                 [class.empty]="!this.dateString || this.dateString == ''"
                 [disabled]="disabled"
                 [ngModel]="dateString"
+                [ngModelOptions]="{ standalone: true }"
                 (ngModelChange)="onModelChange($event)"
                 (focusout)="onTouch()"
                 [min]="min ? (min | date:'yyyy-MM-dd') : null"/>

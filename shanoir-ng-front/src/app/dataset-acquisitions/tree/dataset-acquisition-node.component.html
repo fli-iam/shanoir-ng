@@ -29,6 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (labelClick)="menuOpened = withMenu && !menuOpened"
         [hasBox]="hasBox"
         [(ngModel)]="node.selected"
+        [ngModelOptions]="{ standalone: true }"
         (chkbxChange)="selectedChange.emit()"
         [route]="node.route"
         [hasChildren]="hasChildren()"
