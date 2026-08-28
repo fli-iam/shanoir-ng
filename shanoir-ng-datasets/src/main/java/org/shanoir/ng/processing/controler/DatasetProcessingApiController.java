@@ -35,6 +35,7 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.vip.executionMonitoring.model.ExecutionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,12 +154,10 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
         return new ResponseEntity<>(datasetMapper.datasetListToDatasetDTOListWithProcessing(outputDatasets), HttpStatus.OK);
     }
 
-    @Override
-    public ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(
-            @Parameter(description = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
-            final BindingResult result) throws RestServiceException, EntityNotFoundException {
+    public ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(DatasetProcessing datasetProcessing, BindingResult result) throws RestServiceException, EntityNotFoundException {
         /* set authenticated username */
         datasetProcessing.setUsername(KeycloakUtil.getTokenUserName());
+        datasetProcessing.setProcessingStatus(ExecutionStatus.FINISHED);
 
         /* Validation */
         validate(result);
