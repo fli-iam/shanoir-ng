@@ -35,11 +35,6 @@ public class ShanoirEventService {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    @PostConstruct
-    public void debugConverter() {
-        LOG.info("RabbitTemplate converter in use: {}", rabbitTemplate.getMessageConverter().getClass());
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventService.class);
 
     /**
