@@ -343,16 +343,25 @@ public class QualityCardServiceImpl implements QualityCardService {
 
         // In case a rule was added without condition (= set as Always in gui)
         if (rule.getConditions() == null || rule.getConditions().isEmpty()) {
+            // Several concurrently applicable rules must never let evaluation order decide the
+            // final tag: only apply this rule's tag if it's at least as severe as whatever is
+            // already set (ERROR > WARNING > VALID wins regardless of rule order).
+            boolean applied = rule.getQualityTag().isMoreSevereThan(datasetAcquisition.getQualityTag());
             QualityCardResultEntry resultEntry = initResult(datasetAcquisition);
             resultEntry.setTagSet(rule.getQualityTag());
-            resultEntry.setMessage("Tag " + rule.getQualityTag().name() + " was set by the quality card rule without any condition.");
+            if (applied) {
+                resultEntry.setMessage("Tag " + rule.getQualityTag().name() + " was set by the quality card rule without any condition.");
+                datasetAcquisition.setQualityTag(rule.getQualityTag());
+                result.addUpdatedDatasetAcquisition(datasetAcquisition);
+            } else {
+                resultEntry.setMessage("Tag " + rule.getQualityTag().name() + " was not set by the quality card rule without any condition, "
+                        + "because the more severe tag " + datasetAcquisition.getQualityTag().name() + " already applies.");
+            }
             result.add(resultEntry);
-
-            datasetAcquisition.setQualityTag(rule.getQualityTag());
-            result.addUpdatedDatasetAcquisition(datasetAcquisition);
         } else {
             ConditionResult conditionResult = conditionsfulfilled(rule, acquisitionDicomAttributes, datasetAcquisition);
-            if (conditionResult.isFulfilled()) {
+            boolean applied = conditionResult.isFulfilled() && rule.getQualityTag().isMoreSevereThan(datasetAcquisition.getQualityTag());
+            if (applied) {
                 datasetAcquisition.setQualityTag(rule.getQualityTag());
                 result.addUpdatedDatasetAcquisition(datasetAcquisition);
             }
@@ -366,9 +375,13 @@ public class QualityCardServiceImpl implements QualityCardService {
                 resultEntry.setTagSet(rule.getQualityTag());
                 // Here we use the seriesDescription attribute or the dataset acquisition ID to clearly identify the dataset acquisition concerned by the quality card result message.
                 String seriesDescription = acquisitionDicomAttributes.getFirstDatasetAttributes() != null ? acquisitionDicomAttributes.getFirstDatasetAttributes().getString(Tag.SeriesDescription) : datasetAcquisition.getId().toString();
-                if (conditionResult.isFulfilled()) {
+                if (conditionResult.isFulfilled() && applied) {
                     resultEntry.setMessage("Tag " + rule.getQualityTag().name() + " was set on acquisition " + seriesDescription
                             + " because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
+                } else if (conditionResult.isFulfilled()) {
+                    resultEntry.setMessage("Tag " + rule.getQualityTag().name() + " conditions were fulfilled on acquisition " + seriesDescription
+                            + " but the more severe tag " + datasetAcquisition.getQualityTag().name() + " already applies : "
+                            + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));
                 } else {
                     resultEntry.setMessage("Tag " + rule.getQualityTag().name() + " could not be set on acquisition " + seriesDescription
                             + " because those conditions failed : " + StringUtils.join(conditionResult.getUnfulfilledConditionsMsgList(), ", "));
