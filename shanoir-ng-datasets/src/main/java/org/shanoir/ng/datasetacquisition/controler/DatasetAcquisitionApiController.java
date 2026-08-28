@@ -153,7 +153,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
     @RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, containerFactory = "multipleConsumersFactory")
     @RabbitHandler
     @WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
-    public void createNewDatasetAcquisitionRabbitMQ(ImportJob importJob) throws IOException, AmqpRejectAndDontRequeueException {
+    public void createNewDatasetAcquisition(Message importJobStr) throws IOException, AmqpRejectAndDontRequeueException {
+        ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
         try {
             createAllDatasetAcquisitions(importJob, importJob.getUserId());
         } catch (Exception e) {
