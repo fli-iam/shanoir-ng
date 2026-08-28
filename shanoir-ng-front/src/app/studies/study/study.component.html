@@ -338,6 +338,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 </span>
                             }
                         </li>
+                        @if (mode == 'view' && userExpiration) {
+                            <li>
+                                <label>My access expiration date</label>
+                                <span class="right-col" [style.color]="userExpirationColor">
+                                    {{ userExpiration | localDateFormatPipe }} ({{ userExpiration | daysLeftPipe }} days left)
+                                    <button class="right-button" (click)="accessRequestService.openAccessExtensionModal(userExpiration, study)">Ask extension</button>
+                                </span>
+                            </li>
+                        }
                         <li>
                             <label i18n="Study detail|Clinical label@@studyDetailClinical">Is clinical</label>
                             <span class="right-col">

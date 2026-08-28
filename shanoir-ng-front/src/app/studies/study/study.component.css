@@ -60,3 +60,4 @@ td.volume-storage-total { border-top: 1px solid var(--grey); }
 .multi-value { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .one-value-row { display: flex; align-items: center; gap: 8px; }
 .one-value-row .pattern-separator-label { font-style: italic; }
+.right-button { margin-left: 4px !important; }

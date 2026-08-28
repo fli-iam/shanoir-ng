@@ -55,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -62,6 +63,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DatasetDownloaderServiceImpl {
@@ -110,6 +112,10 @@ public class DatasetDownloaderServiceImpl {
     @Autowired
     private StorageService storageService;
 
+    @Qualifier("datasetDownloaderServiceImpl")
+    @Autowired
+    private DatasetDownloaderServiceImpl self;
+
     @PostConstruct
     protected void initialize() {
         // Set timeout to 5mn (consider nifti reconversion can take some time)
@@ -121,7 +127,7 @@ public class DatasetDownloaderServiceImpl {
     }
 
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId) throws RestServiceException {
-        massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, null);
+        self.massiveDownload(outputFormat, datasets, response, withManifest, converterId, withShanoirId, null);
     }
 
     public void massiveDownload(String outputFormat, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId, Boolean withShanoirId, String sorting) throws RestServiceException {
@@ -132,12 +138,15 @@ public class DatasetDownloaderServiceImpl {
         // Prepare the HTTP response for a zip download
         response.setContentType("application/zip");
         response.setHeader("Content-Disposition", "attachment;filename=\"" + getFileName(datasets) + "\"");
+        // Flush headers immediately so the client sees the response start before
+        // the (potentially slow) per-dataset DB/PACS work below produces any bytes,
+        // otherwise a client-side read timeout can fire while nothing has been sent yet.
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
             Map<String, List<String>> datasetDownloadNameListPerPath = new HashMap<>();
             datasetDownloadPath = new HashMap<>();
             if (Objects.nonNull(sorting)) {
-                datasetDownloadPath = getDatasetDownloadPath(datasets, sorting);
+                datasetDownloadPath = self.getDatasetDownloadPath(datasets, sorting);
             }
 
             for (Dataset dataset : datasets) {
@@ -212,6 +221,7 @@ public class DatasetDownloaderServiceImpl {
         }
     }
 
+    @Transactional(readOnly = true)
     protected Map<Long, String> getDatasetDownloadPath(List<Dataset> datasets, String sorting) {
         HashMap<Long, String> datasetDownloadPath = new HashMap<>();
 
@@ -219,8 +229,8 @@ public class DatasetDownloaderServiceImpl {
             String path = "";
             Dataset relevantDataset = dataset;
 
-            if (Objects.nonNull(dataset.getDatasetProcessing())) {
-                relevantDataset = dataset.getFirstRealInput();
+            if (Objects.nonNull(dataset.getDatasetProcessing().getId())) {
+                relevantDataset = datasetService.getFirstRealInput(dataset);
             }
 
             if (sorting.contains("study")) {

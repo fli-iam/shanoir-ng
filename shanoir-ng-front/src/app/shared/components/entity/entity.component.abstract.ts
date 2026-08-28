@@ -13,6 +13,7 @@
  */
 import { Location } from '@angular/common';
 import {
+    ChangeDetectorRef,
     Directive,
     ElementRef,
     HostListener,
@@ -70,6 +71,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private form$: SuperPromise<void> = new SuperPromise<void>();
     protected showTreeByDefault: boolean = true;
     protected abstract getRoutingName(): string;
+    private changeDetectorRef: ChangeDetectorRef;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -102,6 +104,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.consoleService = inject(ConsoleService);
         this.breadcrumbsService = inject(BreadcrumbsService);
         this.treeService = inject(TreeService);
+        this.changeDetectorRef = inject(ChangeDetectorRef);
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
 
@@ -275,6 +278,10 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 }
             }
             this.entity = this._entity; // to wrap it as proxy after form is set
+            // The zone flush after this promise chain doesn't reliably schedule a tick
+            // (observed on @angular/core 22.1.3), so the initial form/entity render can be
+            // silently skipped unless we force it explicitly here.
+            this.changeDetectorRef.detectChanges();
         });
 
         // load called tab

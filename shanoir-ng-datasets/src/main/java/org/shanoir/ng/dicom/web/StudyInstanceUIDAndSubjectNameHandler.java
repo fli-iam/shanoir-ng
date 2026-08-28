@@ -45,6 +45,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The StudyInstanceUIDAndSubjectNameHandler component manages the translation
@@ -293,6 +294,7 @@ public class StudyInstanceUIDAndSubjectNameHandler {
      * @param examinationUID
      * @return
      */
+    @Transactional(readOnly = true)
     public String findStudyInstanceUIDFromCacheOrDatabase(String examinationUID) {
         String studyInstanceUID = examinationUIDToStudyInstanceUIDCache.get(examinationUID);
         if (studyInstanceUID == null) {

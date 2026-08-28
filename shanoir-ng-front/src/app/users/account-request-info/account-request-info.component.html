@@ -46,6 +46,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </li>
         }
         <li>
+            <label>Study access expiration</label>
+            <span class="right-col">
+                @if (editMode) {
+                    <datepicker formControlName="studyExpiration"></datepicker>
+                } @else {
+                    <span>{{ info.studyExpirationDate | date:'shortDate' }}</span>
+                }
+            </span>
+        </li>
+        <li>
             <label i18n="Edit user|Institution label@@editUserInstitution" [class.required-label]="editMode">Institution / Employer</label>
             <span class="right-col">
                 @if (editMode) {

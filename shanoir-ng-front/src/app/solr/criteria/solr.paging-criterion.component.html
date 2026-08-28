@@ -71,7 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         }
         <div>
             <div class="filter-frame">
-                <input [(ngModel)]="filterText" (ngModelChange)="onFilterChange()" class="filter" placeholder="filter..." />
+                <input [(ngModel)]="filterText" [ngModelOptions]="{ standalone: true }" (ngModelChange)="onFilterChange()" class="filter" placeholder="filter..." />
                 <span class="left-icon clickable clear" (click)="clearFilter()">
                     <i class="fas fa-times"></i>
                     clear
@@ -97,7 +97,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     @for (item of displayedFacets; track item) {
                         @if (!item.hidden) {
                             <li>
-                                <checkbox [(ngModel)]="item.checked" (ngModelChange)="onCheckChange(item)"></checkbox>
+                                <checkbox [(ngModel)]="item.checked" [ngModelOptions]="{ standalone: true }" (ngModelChange)="onCheckChange(item)"></checkbox>
                                 <span class="facet" [title]="item.value">{{ item.value }}</span>
                                 @if (item.valueCount > 0) {
                                     <span class="facet-count">{{ item.valueCount }}</span>

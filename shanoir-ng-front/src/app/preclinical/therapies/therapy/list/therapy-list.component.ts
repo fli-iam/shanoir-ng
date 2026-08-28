@@ -78,8 +78,7 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
     protected openDeleteConfirmDialog = (entity: Therapy) => {
         this.subjectTherapyService.getAllSubjectForTherapy(entity.id).then(subjectTherapies => {
     		if (subjectTherapies){
-    			let hasSubjects: boolean  = false;
-    			hasSubjects = subjectTherapies.length > 0;
+    			const hasSubjects: boolean = subjectTherapies.length > 0;
     			if (hasSubjects){
     				this.confirmDialogService
                 		.confirm('Delete therapy', 'This therapy is linked to subjects, it can not be deleted')

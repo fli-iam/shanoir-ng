@@ -15,16 +15,14 @@
 package org.shanoir.ng.dataset.dto.mapper;
 
 import org.mapstruct.*;
-import org.shanoir.ng.dataset.dto.DatasetWithDependenciesDTO;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
-import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -33,8 +31,7 @@ import java.util.stream.Collectors;
  * @author msimon
  *
  */
-@Mapper(componentModel = "spring", uses = { DatasetMetadataMapper.class, DatasetProcessingMapper.class, DatasetAcquisitionMapper.class })
-@DecoratedWith(DatasetDecorator.class)
+@Mapper(componentModel = "spring", config = DatasetMappingConfig.class)
 public interface DatasetMapper {
 
     /**
@@ -47,76 +44,117 @@ public interface DatasetMapper {
     List<IdName> datasetsToIdNameDTOs(List<Dataset> datasets);
 
     /**
-     * Map a @Dataset to a @DatasetDTO.
-     *
-     * @param datasets
-     *            dataset.
-     * @return dataset DTO.
-     */
-    @Named(value = "standard")
-    DatasetDTO datasetToDatasetDTO(Dataset dataset);
-
-    /**
-     * Map a @Dataset to a @DatasetDTO.
-     *
-     * @param datasets
-     *            dataset.
-     * @return dataset DTO.
-     */
-    @Named(value = "withProcessings")
-    @Mapping(target = "copies", expression = "java(mapCopiesFromDataset(dataset.getCopies()))")
-    @Mapping(target = "source", expression = "java(mapSourceFromDataset(dataset.getSource()))")
-    DatasetWithDependenciesDTO datasetToDatasetWithParentsAndProcessingsDTO(Dataset dataset);
-
-    /**
-     * Map a @Dataset list to a @DatasetDTO list.
-     *
-     * @param datasets
-     *            dataset.
-     * @return dataset DTO.
-     */
-    @IterableMapping(qualifiedByName = "standard")
-    List<DatasetDTO> datasetToDatasetDTO(List<Dataset> datasets);
-
-
-    /**
-     * Map a @Dataset to a @DatasetDTO.
-     *
-     * @param datasets
-     *            dataset.
-     * @return dataset DTO.
-     */
-    @IterableMapping(qualifiedByName = "standard")
-    public PageImpl<DatasetDTO> datasetToDatasetDTO(Page<Dataset> page);
-
-    /**
      * Map a @Dataset to a @IdNameDTO.
      *
-     * @param dataset
-     *            dataset to map.
+     * @param dataset dataset to map.
+     *
      * @return dataset DTO.
      */
     IdName datasetToIdNameDTO(Dataset dataset);
 
-    default List<Long> mapCopiesFromDataset(List<Dataset> copies) {
-        if (copies == null) {
+
+    ////// Entity to DTO
+
+    @Named("id")
+    default Long datasetToLongId(Dataset dataset) {
+        if (dataset == null) {
             return null;
         }
-        return copies.stream()
-                .map(Dataset::getId)
-                .collect(Collectors.toList());
+        return dataset.getId();
     }
 
-    default Long mapSourceFromDataset(Dataset source) {
-        return source != null ? source.getId() : null;
+    @Named("id")
+    default List<Long> datasetsToLongIds(List<Dataset> datasets) {
+        if (datasets == null) {
+            return null;
+        }
+        return datasets.stream().filter(Objects::nonNull).map(Dataset::getId).collect(Collectors.toList());
     }
 
-
-    default List<Dataset> mapCopiesFromLong(List<Long> copies) {
-        return null;
+    @Named("idOnly")
+    default DatasetDTO datasetToId(Dataset dataset) {
+        if (dataset == null) {
+            return null;
+        }
+        DatasetDTO dtoId = new DatasetDTO();
+        dtoId.setId(dataset.getId());
+        return dtoId;
     }
 
-    default Dataset mapSourceFromLong(Long source) {
-        return null;
+    @Named("idOnly")
+    default List<DatasetDTO> datasetsToIds(List<Dataset> datasets) {
+        if (datasets == null) {
+            return null;
+        }
+        return datasets.stream().filter(Objects::nonNull).map(dto -> {
+            DatasetDTO dtoId = new DatasetDTO();
+            dtoId.setId(dto.getId());
+            return dtoId;
+        }).collect(Collectors.toList());
     }
+
+    //Single entity
+
+    /**
+     * Some context of usage :
+     */
+    @Named("withMetadata")
+    @InheritConfiguration(name = "datasetToDatasetDTOWithMetadataPrototype")
+    DatasetDTO datasetToDatasetDTOWithMetadata(Dataset dataset);
+
+    /**
+     * Some context of usage :
+     * - When opening a dataset form
+     */
+    @Named("withProcessingAncestorsAndExamination")
+    @InheritConfiguration(name = "datasetToDatasetDTOWithProcessingAncestorsAndExaminationPrototype")
+    DatasetDTO datasetToDatasetDTOWithProcessingAncestorsAndExamination(Dataset dataset);
+
+    /**
+     * Some context of usage :
+     */
+    @Named("withProcessing")
+    @InheritConfiguration(name = "datasetToDatasetDTOWithProcessingPrototype")
+    DatasetDTO datasetToDatasetDTOWithProcessing(Dataset dataset);
+
+    /**
+     * Some context of usage :
+     * -
+     */
+    @Named("idRelations")
+    @InheritConfiguration(name = "datasetToDatasetDTOWithIdRelationsPrototype")
+    DatasetDTO datasetToDatasetDTOWithIdRelations(Dataset dataset);
+
+    //Entity list
+
+    /**
+     * Some context of usage :
+     * -
+     */
+    @IterableMapping(qualifiedByName = "withProcessingAncestorsAndExamination")
+    List<DatasetDTO> datasetListToDatasetDTOListWithProcessingAncestorsAndExamination(List<Dataset> datasets);
+
+    /**
+     * Some context of usage :
+     */
+    @IterableMapping(qualifiedByName = "withMetadata")
+    List<DatasetDTO> datasetListToDatasetDTOListWithMetadata(List<Dataset> dataset);
+
+    /**
+     * Some context of usage :
+     * - When listing outputs of a processing in the tree
+     */
+    @IterableMapping(qualifiedByName = "withProcessing")
+    List<DatasetDTO> datasetListToDatasetDTOListWithProcessing(List<Dataset> dataset);
+
+    //////
+
+    ////// Pageable
+
+    /**
+     * Some context of usage :
+     * -
+     */
+    @IterableMapping(qualifiedByName = "idRelations")
+    PageImpl<DatasetDTO> datasetPageToDatasetIdRelationsDTOPage(Page<Dataset> page);
 }
