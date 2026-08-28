@@ -239,6 +239,11 @@ public class QualityCardServiceImpl implements QualityCardService {
     }
 
     public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags) throws PacsException {
+        return applyQualityCardOnStudy(qualityCard, updateTags, null, null);
+    }
+
+    @Override
+    public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer from, Integer to) throws PacsException {
         long startTs = new Date().getTime();
         if (qualityCard == null)
             throw new IllegalArgumentException("qualityCard can't be null");
@@ -263,6 +268,11 @@ public class QualityCardServiceImpl implements QualityCardService {
         loadRulesLazyCollections(qualityCard.getRules(), event);
 
         List<Examination> examinations = study.getExaminations();
+        if (from != null && to != null) {
+            int start = Math.max(0, from);
+            int end = Math.min(to, examinations.size());
+            examinations = start < end ? examinations.subList(start, end) : Collections.emptyList();
+        }
 
         QualityCardResult result = new QualityCardResult();
         AtomicInteger examinationIndex = new AtomicInteger(0);
