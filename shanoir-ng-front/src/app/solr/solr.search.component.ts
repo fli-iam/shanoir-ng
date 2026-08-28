@@ -12,9 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Clipboard } from '@angular/cdk/clipboard';
-import { formatDate } from '@angular/common';
+import { Component, AfterViewChecked, AfterContentInit, ViewChild, ViewChildren, QueryList, ChangeDetectionStrategy } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
-import { AfterContentInit, AfterViewChecked, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -49,6 +48,7 @@ import { SolrService } from "./solr.service";
 import { SolrRangeCriterionComponent } from './criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './text-search/solr.text-search.component';
 import { SolrTextSearchModeComponent } from './text-search/solr.text-search-mode.component';
+import { formatDate } from '@angular/common';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags', 'processed', 'dataReuseAgreement', 'qualityTag'];
 export type TextualFacet = typeof TextualFacetNames[number];
@@ -56,6 +56,7 @@ export type TextualFacet = typeof TextualFacetNames[number];
     selector: 'solr-search',
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, SolrPagingCriterionComponent, DatepickerComponent, SolrRangeCriterionComponent, SolrTextSearchComponent,
         SolrTextSearchModeComponent, LoadingBarComponent, TableComponent]
 })

@@ -13,7 +13,7 @@
  */
 
 import { NgClass } from '@angular/common';
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
@@ -42,7 +42,6 @@ import { ExtraDataService } from '../../extraData/extraData/shared/extradata.ser
 import { PhysiologicalDataFormComponent } from '../../extraData/physiologicalData/add/physiologicalData-form.component';
 import { PhysiologicalDataFile } from '../../extraData/physiologicalData/shared/physiologicalDataFile.model';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
-import { AnimalExaminationService } from '../shared/animal-examination.service';
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -71,7 +70,6 @@ export class AnimalExaminationFormComponent extends ExaminationComponent {
             studyRightsService: StudyRightsService,
             breadcrumbsService: BreadcrumbsService,
             downloadService: MassDownloadService,
-            private animalExaminationService: AnimalExaminationService,
             private examAnestheticService: ExaminationAnestheticService,
             private extradatasService: ExtraDataService,
             private animalSubjectService: AnimalSubjectService,
