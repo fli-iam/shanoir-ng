@@ -135,7 +135,7 @@ public class RabbitMQStudiesService {
             Long examinationId = Long.valueOf(event.getObjectId());
             Long studyId = event.getStudyId();
             String message = event.getMessage();
-            Pattern pat = Pattern.compile("centerId:(\\d+);subjectId:(\\d+)");
+            Pattern pat = Pattern.compile(".*?centerId:(\\d+);subjectId:(\\d+)");
             Matcher mat = pat.matcher(message);
 
             Long centerId = null;
