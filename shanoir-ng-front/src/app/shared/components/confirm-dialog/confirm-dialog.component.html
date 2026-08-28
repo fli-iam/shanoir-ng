@@ -31,7 +31,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
                 @if (mode == 'extendDate') {
                     <label>Ask access extension until : </label>
-                    <datepicker [(ngModel)]="date" [min]="minDate"></datepicker>
+                    <datepicker [(ngModel)]="date" [ngModelOptions]="{ standalone: true }" [min]="minDate"></datepicker>
                 }
             </div>
         }

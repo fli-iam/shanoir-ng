@@ -33,6 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         class="studies-select-box"
                         [optionArr]="studies"
                         [(ngModel)]="selectedStudy"
+                        [ngModelOptions]="{ standalone: true }"
                         (ngModelChange)="pickStudy($event)"
                         placeholder="Select a study to copy datasets to"></select-box>
                 </span>

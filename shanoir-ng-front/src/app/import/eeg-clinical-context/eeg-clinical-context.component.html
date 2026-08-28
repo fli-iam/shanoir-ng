@@ -34,6 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span class="right-col">
                     <select-box
                         [(ngModel)]="study"
+                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onSelectStudy()"
                         [viewRoute]="'/study/details/' + $safeNavigationMigration(study?.id)"
                         [viewDisabled]="!study"
@@ -47,6 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <select-box
                         [disabled]="!study || loading != 0"
                         [(ngModel)]="center"
+                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onSelectCenter()"
                         [viewRoute]="'/center/details/' + $safeNavigationMigration(center?.id)"
                         [viewDisabled]="!center"
@@ -77,6 +79,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <select-box
                         [disabled]="!center || loading != 0"
                         [(ngModel)]="acquisitionEquipment"
+                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onContextChange()"
                         [viewRoute]="'/acquisition-equipment/details/' + $safeNavigationMigration(acquisitionEquipment?.id)"
                         [viewDisabled]="!acquisitionEquipment"
@@ -113,6 +116,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <select-box
                         [disabled]="loading != 0 || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
+                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onSelectSubject()"
                         [viewRoute]="'/subject/details/' + $safeNavigationMigration(subject?.id)"
                         [viewDisabled]="!subject"
@@ -139,6 +143,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <select-box
                         [disabled]="!study || !subject || loading != 0"
                         [(ngModel)]="examination"
+                        [ngModelOptions]="{ standalone: true }"
                         (userChange)="onSelectExam()"
                         [viewRoute]="'/examination/details/' + $safeNavigationMigration(examination?.id)"
                         [viewDisabled]="!examination"
