@@ -17,13 +17,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="info-txt">
             <h3>Invite a new user</h3>
             Username or email address :
-            <input type="text" [(ngModel)]="invitationMail" placeholder="email address / username" />
+            <input type="text" [(ngModel)]="invitationMail" [ngModelOptions]="{ standalone: true }" placeholder="email address / username" />
             <tool-tip>
                 If an user with such email/username already exists, he will be directly added to the study, otherwise an email with an invitation will be sent.
             </tool-tip>
             <br />
             Function in the study (researcher, mri manipulator, ...) :
-            <input type="text" [(ngModel)]="invitationFunction" placeholder="function in the study" />
+            <input type="text" [(ngModel)]="invitationFunction" [ngModelOptions]="{ standalone: true }" placeholder="function in the study" />
             <br />
             <button type="button" class="invite-button right-icon" (click)="inviteUser()">
                 Invite & Add
@@ -76,6 +76,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <checkbox
                                             [mode]="mode == 'view' ? mode : 'edit'"
                                             [(ngModel)]="panelStudyUser.receiveNewImportReport"
+                                            [ngModelOptions]="{ standalone: true }"
                                             (userChange)="onStudyUserEdit()"
                                             [falseTimes]="true"></checkbox>
                                     </span>
@@ -86,6 +87,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         <checkbox
                                             [mode]="mode == 'view' ? mode : 'edit'"
                                             [(ngModel)]="panelStudyUser.receiveStudyUserReport"
+                                            [ngModelOptions]="{ standalone: true }"
                                             (userChange)="onStudyUserEdit()"
                                             [falseTimes]="true"></checkbox>
                                     </span>
@@ -139,7 +141,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                                 </button>
                                             }
                                         } @else {
-                                            <datepicker [ngModel]="panelStudyUser.expirationDate" (ngModelChange)="onExpirationChange(panelStudyUser, $event)" [min]="minExpirationDate"></datepicker>
+                                            <datepicker [ngModel]="panelStudyUser.expirationDate" [ngModelOptions]="{ standalone: true }" (ngModelChange)="onExpirationChange(panelStudyUser, $event)" [min]="minExpirationDate"></datepicker>
                                         }
                                     </span>
                                 </li>
@@ -150,6 +152,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)"
+                                        [ngModelOptions]="{ standalone: true }"
                                         (userChange)="onEditRight(StudyUserRight.CAN_SEE_ALL, panelStudyUser, $event)"
                                         [disabled]="
                                             newUser.includes(panelStudyUser.user) ||
@@ -166,6 +169,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)"
+                                        [ngModelOptions]="{ standalone: true }"
                                         (userChange)="onEditRight(StudyUserRight.CAN_DOWNLOAD, panelStudyUser, $event)"
                                         [disabled]="study.isDraft"
                                         [falseTimes]="true"></checkbox>
@@ -177,6 +181,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_IMPORT)"
+                                        [ngModelOptions]="{ standalone: true }"
                                         (userChange)="onEditRight(StudyUserRight.CAN_IMPORT, panelStudyUser, $event)"
                                         [disabled]="study.isDraft"
                                         [falseTimes]="true"></checkbox>
@@ -188,6 +193,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_EXECUTE)"
+                                        [ngModelOptions]="{ standalone: true }"
                                         (userChange)="onEditRight(StudyUserRight.CAN_EXECUTE, panelStudyUser, $event)"
                                         [disabled]="study.isDraft"
                                         [falseTimes]="true"></checkbox>
@@ -199,6 +205,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ANNOTATE)"
+                                        [ngModelOptions]="{ standalone: true }"
                                         (userChange)="onEditRight(StudyUserRight.CAN_ANNOTATE, panelStudyUser, $event)"
                                         [disabled]="study.isDraft"
                                         [falseTimes]="true"></checkbox>
@@ -210,6 +217,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ANNOTATE_REVIEW)"
+                                        [ngModelOptions]="{ standalone: true }"
                                         (userChange)="onEditRight(StudyUserRight.CAN_ANNOTATE_REVIEW, panelStudyUser, $event)"
                                         [disabled]="study.isDraft"
                                         [falseTimes]="true"></checkbox>
@@ -221,6 +229,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="panelStudyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)"
+                                        [ngModelOptions]="{ standalone: true }"
                                         (userChange)="onEditRight(StudyUserRight.CAN_ADMINISTRATE, panelStudyUser, $event)"
                                         [disabled]="study.isDraft"
                                         [falseTimes]="true"></checkbox>
@@ -237,6 +246,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     <checkbox
                                         [mode]="mode == 'view' ? mode : 'edit'"
                                         [ngModel]="!(panelStudyUser.centers?.length > 0)"
+                                        [ngModelOptions]="{ standalone: true }"
                                         (userChange)="onToggleAllCenters($event)"
                                         [disabled]="study.isDraft"
                                         [falseTimes]="true"></checkbox>
@@ -252,6 +262,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                             <checkbox
                                                 [mode]="mode == 'view' ? mode : 'edit'"
                                                 [ngModel]="hasCenter(center, panelStudyUser)"
+                                                [ngModelOptions]="{ standalone: true }"
                                                 (userChange)="onEditCenter(center, panelStudyUser, $event)"
                                                 [disabled]="study.isDraft"
                                                 [falseTimes]="true"></checkbox>

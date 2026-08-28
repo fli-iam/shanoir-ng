@@ -126,7 +126,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         }
                                     }
                                     @default {
-                                        <checkbox [(ngModel)]="qualityCard.toCheckAtImport" formControlName="toCheckAtImport"></checkbox>
+                                        <checkbox formControlName="toCheckAtImport"></checkbox>
                                         @if (qualityCard.toCheckAtImport) {
                                             <div class="info left-icon import-info">
                                                 <i class="fa-solid fa-triangle-exclamation"></i>

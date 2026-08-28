@@ -65,7 +65,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     }
                     <span class="filter">
                         filter :
-                        <input type="text" [(ngModel)]="filter" (ngModelChange)="onFilterChange()" />
+                        <input type="text" [(ngModel)]="filter" [ngModelOptions]="{ standalone: true }" (ngModelChange)="onFilterChange()" />
                         <span (click)="resetFilter()">&nbsp;x&nbsp;</span>
                     </span>
                 </div>
