@@ -12,14 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.studycard.model;
+package org.shanoir.ng.examination.dto.mapper;
 
-public interface Card {
+import org.mapstruct.Mapper;
 
-    public Long getId();
+@Mapper(componentModel = "spring")
+public interface InstrumentBasedAssessmentMapper {
 
-    public Long getStudyId();
-
-    public String getName();
 
 }

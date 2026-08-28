@@ -10,7 +10,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-create table overall_statistics (
+CREATE TABLE IF NOT EXISTS overall_statistics (
     stats_date DATE PRIMARY KEY,
     studies_count BIGINT NOT NULL,
     subjects_count BIGINT NOT NULL,

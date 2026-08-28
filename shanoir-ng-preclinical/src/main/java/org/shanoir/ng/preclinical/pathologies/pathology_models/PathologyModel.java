@@ -37,7 +37,6 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 @Table(name = "pathology_model")
 @JsonPropertyOrder({"_links", "type", "value"})
-//@JsonIdentityInfo(generator =ObjectIdGenerators.IntSequenceGenerator.class,property="@id", scope = PathologyModel.class)
 public class PathologyModel extends HalEntity {
 
     @JsonProperty("name")
@@ -55,8 +54,6 @@ public class PathologyModel extends HalEntity {
     private String filepath;
 
     @ManyToOne
-    //fetch = FetchType.LAZY, optional = false)
-    //@JoinColumn(name = "building_id")
     @NotNull
     @JsonProperty("pathology")
     private Pathology pathology;

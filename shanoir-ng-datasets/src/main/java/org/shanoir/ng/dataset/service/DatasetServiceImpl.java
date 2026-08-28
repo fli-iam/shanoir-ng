@@ -18,17 +18,18 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.mail.MessagingException;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.hibernate.Hibernate;
 import org.shanoir.ng.dataset.dto.DatasetDownloadData;
 import org.shanoir.ng.dataset.dto.DatasetLight;
 import org.shanoir.ng.dataset.dto.DatasetStudyCenter;
@@ -38,10 +39,12 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.OverallStatistics;
+import org.shanoir.ng.dataset.repository.DatasetExpressionRepository;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.datasetfile.DatasetFileRepository;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDAndSubjectNameHandler;
 import org.shanoir.ng.download.DatasetDownloadError;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -55,14 +58,15 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.paging.PageImpl;
-import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.shared.service.SubjectService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.study.rights.UserRights;
-import org.shanoir.ng.studycard.dto.DicomTag;
+import org.shanoir.ng.studycard.model.DicomTag;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -84,8 +88,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Dataset service implementation.
@@ -125,7 +129,8 @@ public class DatasetServiceImpl implements DatasetService {
     private DatasetProcessingService processingService;
 
     @Autowired
-    private DatasetTransactionalServiceImpl datasetTransactionalService;
+    @Lazy
+    private DatasetService datasetService;
 
     @Autowired
     private DatasetAsyncService datasetAsyncService;
@@ -144,7 +149,14 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Autowired
     @Lazy
-    private SubjectRepository subjectRepository;
+    private DatasetExpressionRepository deRepository;
+
+    @Autowired
+    private StudyInstanceUIDAndSubjectNameHandler studyInstanceUIDAndSubjectNameHandler;
+
+    @Autowired
+    private SubjectService subjectService;
+
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
 
@@ -206,11 +218,8 @@ public class DatasetServiceImpl implements DatasetService {
      * @throws RestServiceException
      */
     public void deleteByIdCascade(final Long id) throws ShanoirException, SolrServerException, IOException, RestServiceException {
-        final Dataset dataset = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
-
         // Do not delete entity if it is the source (or if it has copies). If getSourceId() is not null, it means it's a copy
-        if (!CollectionUtils.isEmpty(dataset.getCopies())) {
+        if (repository.existsBySourceId(id)) {
             throw new RestServiceException(
                     new ErrorModel(
                             HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -218,7 +227,7 @@ public class DatasetServiceImpl implements DatasetService {
                     ));
         }
 
-        delete(dataset);
+        datasetService.deleteById(id);
     }
 
     public void deleteDatasetFilesFromDiskAndPacs(Dataset dataset) throws ShanoirException {
@@ -248,8 +257,39 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
-    public Dataset findById(final Long id) {
-        return repository.findById(id).orElse(null);
+    @Transactional(readOnly = true)
+    public Dataset findByIdWithProcessingAncestorsAndExaminationAndMetadata(final Long id) throws EntityNotFoundException {
+        Dataset dataset = repository.findByIdWithProcessingAncestorsAndExaminationAndMetadata(id).orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+        if (dataset.getDatasetProcessing() != null) {
+            dataset.setDatasetAcquisition(dataset.getDatasetProcessing().getInputDatasets().stream().map(Dataset::getDatasetAcquisition).filter(Objects::nonNull).findFirst().orElse(null));
+            if (dataset.getDatasetAcquisition() != null) {
+                Hibernate.initialize(dataset.getDatasetAcquisition().getExamination());
+
+            }
+        }
+        populateInPacs(List.of(dataset));
+        populateCenterId(List.of(dataset));
+        return dataset;
+    }
+
+    @Transactional(readOnly = true)
+    public Dataset findByIdWithDatasetFilesAndExaminationAndMetadata(final Long id) throws EntityNotFoundException {
+        return repository.findByIdWithDatasetFilesAndExaminationAndMetadata(id).orElseThrow(() -> new EntityNotFoundException(Dataset.class, id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Dataset> findByAcquisitionIdWithDatasetFilesAndExaminationAndMetadata(final Long id) {
+        return repository.findByAcquisitionIdWithDatasetFilesAndExaminationAndMetadata(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Dataset> findByExaminationIdWithDatasetFilesAndExaminationAndMetadata(final Long id) {
+        return repository.findByExaminationIdWithDatasetFilesAndExaminationAndMetadata(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Dataset> findByStudyIdWithDatasetFilesAndExaminationAndMetadata(final Long id) {
+        return repository.findByStudyIdWithDatasetFilesAndExaminationAndMetadata(id);
     }
 
     @Override
@@ -259,7 +299,10 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     public List<Dataset> findByIdIn(List<Long> ids) {
-        return Utils.toList(repository.findAllById(ids));
+        List<Dataset> datasets = Utils.toList(repository.findByIdsWithProcessingAncestorsAndExamination(ids));
+        populateInPacs(datasets);
+        populateCenterId(datasets);
+        return datasets;
     }
 
     @Override
@@ -289,8 +332,9 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     @Override
+    @Transactional
     public Dataset update(final Dataset dataset) throws EntityNotFoundException {
-        final Dataset datasetDb = repository.findById(dataset.getId()).orElse(null);
+        final Dataset datasetDb = repository.findByIdWithDatasetProcessing(dataset.getId()).orElse(null);
         if (datasetDb == null) {
             throw new EntityNotFoundException(Dataset.class, dataset.getId());
         }
@@ -339,7 +383,10 @@ public class DatasetServiceImpl implements DatasetService {
     @Override
     public Page<Dataset> findPage(final Pageable pageable) {
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            return repository.findAll(pageable);
+            Page<Dataset> page = repository.findAllWithProcessingAncestorsAndExamination(pageable);
+            populateInPacs(page.getContent());
+            populateCenterId(page.getContent());
+            return page;
         }
 
         Long userId = KeycloakUtil.getTokenUserId();
@@ -362,11 +409,14 @@ public class DatasetServiceImpl implements DatasetService {
         }
 
         if (!hasRestrictions) {
-            return repository.findByDatasetAcquisitionExaminationStudy_IdIn(accessibleStudyIds, pageable);
+            Page<Dataset> page = repository.findByStudyIdsWithProcessingAncestorsAndExamination(accessibleStudyIds, pageable);
+            populateInPacs(page.getContent());
+            populateCenterId(page.getContent());
+            return page;
         }
 
         // If yes, get all examinations and filter by centers
-        List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudy_IdIn(accessibleStudyIds, pageable.getSort()));
+        List<Dataset> datasets = Utils.toList(repository.findByStudyIdsWithProcessingAncestorsAndExamination(accessibleStudyIds, pageable.getSort()));
 
         if (CollectionUtils.isEmpty(datasets)) {
             return new PageImpl<>(datasets);
@@ -378,6 +428,8 @@ public class DatasetServiceImpl implements DatasetService {
         int size = datasets.size();
 
         datasets = datasets.subList(pageable.getPageSize() * pageable.getPageNumber(), Math.min(datasets.size(), pageable.getPageSize() * (pageable.getPageNumber() + 1)));
+        populateInPacs(datasets);
+        populateCenterId(datasets);
 
         Page<Dataset> page = new PageImpl<>(datasets, pageable, size);
         return page;
@@ -386,6 +438,13 @@ public class DatasetServiceImpl implements DatasetService {
     @Override
     public List<Dataset> findByStudyId(Long studyId) {
         return Utils.toList(repository.findByDatasetAcquisition_Examination_Study_Id(studyId));
+    }
+
+    @Override
+    public List<Dataset> findBySubjectId(Long subjectId) {
+        List<Dataset> datasets = Utils.toList(repository.findBySubjectId(subjectId));
+        populateInPacs(datasets);
+        return datasets;
     }
 
     @Override
@@ -421,29 +480,43 @@ public class DatasetServiceImpl implements DatasetService {
 
     @Override
     public List<Dataset> findByAcquisition(Long acquisitionId) {
-        return Utils.toList(repository.findByDatasetAcquisitionId(acquisitionId));
+        List<Dataset> datasets = Utils.toList(repository.findByAcquisitionIdWithProcessingAncestorsAndExamination(acquisitionId));
+        populateInPacs(datasets);
+        populateCenterId(datasets);
+        return datasets;
     }
 
     @Override
     public List<Dataset> findByStudycard(Long studycardId) {
+        List<Dataset> datasets;
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            return Utils.toList(repository.findBydatasetAcquisitionStudyCardId(studycardId));
+            datasets = repository.findByStudyCardIdWithProcessingAncestorsAndExamination(studycardId);
         } else {
             Long userId = KeycloakUtil.getTokenUserId();
             List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 
-            return Utils.toList(repository.findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(studycardId, studyIds));
+            datasets = repository.findByStudyCardIdAndStudyIdsWithProcessingAncestorsAndExamination(
+                    +studycardId, studyIds);
         }
+        populateInPacs(datasets);
+        populateCenterId(datasets);
+        return datasets;
     }
 
     @Override
     public List<Dataset> findByExaminationId(Long examinationId) {
-        return Utils.toList(repository.findByDatasetAcquisitionExaminationId(examinationId));
+        List<Dataset> datasets = repository.findByExaminationIdWithProcessingAncestorsAndExamination(examinationId);
+        populateInPacs(datasets);
+        populateCenterId(datasets);
+        return datasets;
     }
 
     @Override
     public List<Dataset> findDatasetAndOutputByExaminationId(Long examinationId) {
-        return StreamSupport.stream(repository.findAllById(repository.findDatasetAndOutputByExaminationId(examinationId)).spliterator(), false).toList();
+        List<Dataset> datasets = repository.findByIdsWithProcessingAncestorsAndExamination(repository.findDatasetAndOutputByExaminationId(examinationId));
+        populateInPacs(datasets);
+        populateCenterId(datasets);
+        return datasets;
     }
 
     @Async
@@ -456,7 +529,7 @@ public class DatasetServiceImpl implements DatasetService {
             int total = datasets.size();
             updateEvent(0f, event, studyId);
             for (List<Long> partition : ListUtils.partition(datasets, 1000)) {
-                datasetTransactionalService.deletePartitionOfNiftis(partition, total, event).get();
+                datasetService.deletePartitionOfNiftis(partition, total, event).get();
             }
             updateEvent(1f, event, studyId);
         } catch (Exception e) {
@@ -495,12 +568,12 @@ public class DatasetServiceImpl implements DatasetService {
      * @return
      */
     @Override
-    public Long getStudyId(Dataset dataset) {
+    public Long getStudyId(Dataset dataset) throws EntityNotFoundException {
         if (dataset.getStudyId() != null) {
             return dataset.getStudyId();
         }
         if (dataset.getDatasetProcessing() != null) {
-            return dataset.getDatasetProcessing().getStudyId();
+            return repository.findByIdWithDatasetProcessing(dataset.getId()).orElseThrow(() -> new EntityNotFoundException(Dataset.class, dataset.getId())).getDatasetProcessing().getStudyId();
         }
         if (dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null) {
             return dataset.getDatasetAcquisition().getExamination().getStudyId();
@@ -533,8 +606,9 @@ public class DatasetServiceImpl implements DatasetService {
         if (dataset.getDatasetAcquisition() != null) {
             return dataset.getDatasetAcquisition();
         }
-        if (dataset.getDatasetProcessing().getInputDatasets() != null) {
-            for (Dataset ds : dataset.getDatasetProcessing().getInputDatasets()) {
+        Dataset loadedDataset = repository.findByIdWithProcessingAncestors(dataset.getId());
+        if (loadedDataset.getDatasetProcessing().getInputDatasets() != null) {
+            for (Dataset ds : loadedDataset.getDatasetProcessing().getInputDatasets()) {
                 DatasetAcquisition acq = this.getAcquisition(ds);
                 if (acq != null) {
                     return acq;
@@ -562,6 +636,7 @@ public class DatasetServiceImpl implements DatasetService {
         return stats;
     }
 
+    @Transactional(readOnly = true)
     public List<DatasetDownloadData> getDownloadDataByAcquisitionAndExaminationIds(List<Long> acquisitionIds,
             List<Long> examinationIds) {
 
@@ -607,6 +682,57 @@ public class DatasetServiceImpl implements DatasetService {
         return results;
     }
 
+    @Transactional
+    public Future<Void> deletePartitionOfNiftis(List<Long> partition, float total, ShanoirEvent event) {
+
+        float progress = event.getProgress();
+        for (Dataset dataset : repository.findAllById(partition)) {
+            progress += 1f / total;
+            updateEvent(progress, event);
+            deleteNifti(dataset);
+        }
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Transactional(readOnly = true)
+    public String getDicomMetadataByDatasetId(Long datasetId) throws IOException, MessagingException, EntityNotFoundException {
+        final Dataset dataset = datasetService.findByIdWithProcessingAncestorsAndExaminationAndMetadata(datasetId);
+        Optional<URL> firstWADOURL = DatasetFileUtils.getFirstDatasetFilePathURL(dataset,
+                DatasetExpressionFormat.DICOM);
+        if (firstWADOURL.isPresent()) {
+            String dicomJson = downloader.downloadDicomMetadataForURL(firstWADOURL.orElseThrow());
+            if (dataset.getSource() != null) {
+                Optional<Subject> subjectOpt = subjectService.findById(dataset.getSubjectId());
+                String subjectName = subjectOpt.get().getName();
+                JsonNode root = objectMapper.readTree(dicomJson);
+                studyInstanceUIDAndSubjectNameHandler.replacePatientInfo(root, subjectName);
+                dicomJson = objectMapper.writeValueAsString(root);
+            }
+            return dicomJson;
+        } else {
+            return null;
+        }
+    }
+
+    public Dataset getFirstRealInput(Dataset dataset) {
+        if (dataset.getDatasetProcessing() != null) {
+            return getFirstRealInput(repository.findByIdWithProcessingAncestors(dataset.getId()).getDatasetProcessing().getInputDatasets().get(0));
+        } else {
+            return dataset;
+        }
+    }
+
+    public void populateInPacs(List<Dataset> datasets) {
+        if (datasets == null || datasets.isEmpty()) return;
+        List<Long> ids = datasets.stream().map(Dataset::getId).collect(Collectors.toList());
+        Set<Long> withExpressions = repository.findDatasetIdsHavingExpressions(ids);
+        datasets.forEach(d -> d.setInPacs(withExpressions.contains(d.getId())));
+    }
+
+    public void  populateCenterId(List<Dataset> datasets) {
+        datasets.forEach(d -> d.setCenterId(resolveCenterId(d)));
+    }
+
     protected void fillMetadataFile(File metadataFile, List<Long> datasetIds, List<String> metadataKeys) throws Exception {
         LOG.info("Filling metadata file.");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(metadataFile, true))) {
@@ -623,9 +749,9 @@ public class DatasetServiceImpl implements DatasetService {
         }
     }
 
-    protected String shapeMetadataLinesForOneDicom(List<String> metadataKeys, Long datasetId, ObjectMapper mapper) {
+    protected String shapeMetadataLinesForOneDicom(List<String> metadataKeys, Long datasetId, ObjectMapper mapper) throws EntityNotFoundException {
         String metadataLine = datasetId.toString();
-        final Dataset dataset = findById(datasetId);
+        final Dataset dataset = findByIdWithProcessingAncestorsAndExaminationAndMetadata(datasetId);
         metadataLine += ";" + (Objects.nonNull(dataset.getDatasetAcquisition()) ? dataset.getDatasetAcquisition().getId().toString() : "");
         JsonNode metadatas = null;
         try {
@@ -643,6 +769,7 @@ public class DatasetServiceImpl implements DatasetService {
         return metadataLine;
     }
 
+    @Transactional(readOnly = true)
     protected String getMetadataFromDicom(Dataset dataset) throws Exception {
         DatasetDownloadError result = new DatasetDownloadError();
         List<URL> pathURLs = new ArrayList<>();
@@ -684,5 +811,56 @@ public class DatasetServiceImpl implements DatasetService {
         }
         LOG.info("Metadata file created");
         return metadataFile;
+    }
+
+    /**
+     * Deletes nifti on file server
+     * @param dataset
+     */
+    protected void deleteNifti(Dataset dataset) {
+        Set<DatasetExpression> expressionsToDelete = new HashSet<>();
+
+        for (Iterator<DatasetExpression> iterex = dataset.getDatasetExpressions().iterator(); iterex.hasNext();) {
+            DatasetExpression expression = iterex.next();
+            if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
+                continue;
+            }
+            for (Iterator<DatasetFile> iter = expression.getDatasetFiles().iterator(); iter.hasNext();) {
+                DatasetFile file = iter.next();
+                URL url = null;
+                try {
+                    url = new URL(file.getPath().replaceAll("%20", " "));
+                    File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
+                    if (srcFile.exists()) {
+                        LOG.error("Deleting: " + srcFile.getAbsolutePath());
+                        FileUtils.delete(srcFile);
+                    }
+                    // We are forced to detach elements here to be able to delete them from DB
+                    file.setDatasetExpression(null);
+                    iter.remove();
+                } catch (Exception e) {
+                    LOG.error("Could not delete nifti file: {}", file.getPath(), e);
+                }
+            }
+            expression.setDataset(null);
+            iterex.remove();
+            expressionsToDelete.add(expression);
+        }
+        if (expressionsToDelete.isEmpty()) {
+            return;
+        }
+        deRepository.deleteAll(expressionsToDelete);
+    }
+
+
+    protected Long resolveCenterId(Dataset dataset) {
+        if (dataset.getDatasetAcquisition() == null || dataset.getDatasetAcquisition().getExamination() == null) {
+            if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null
+                    && !dataset.getDatasetProcessing().getInputDatasets().isEmpty()) {
+                return resolveCenterId(dataset.getDatasetProcessing().getInputDatasets().get(0));
+            }
+            return null;
+        }
+        return dataset.getDatasetAcquisition().getExamination().getCenterId();
     }
 }

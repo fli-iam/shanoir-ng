@@ -84,7 +84,7 @@ export class DownloadSetupAltComponent implements OnInit, OnDestroy {
             let fetchDatasets: Promise<Dataset[] | DatasetLight[]>;
             if (this.inputIds.studyId) {
                 if (this.inputIds.subjectId) {
-                    fetchDatasets = this.datasetService.getByStudyIdAndSubjectId(this.inputIds.studyId, this.inputIds.subjectId);
+                    fetchDatasets = this.datasetService.getBySubjectId(this.inputIds.subjectId);
                 } else {
                     fetchDatasets = this.datasetService.getByStudyId(this.inputIds.studyId);
                 }

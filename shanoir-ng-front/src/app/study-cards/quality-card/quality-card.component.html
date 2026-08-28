@@ -103,17 +103,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <span class="right-col">
                                 @switch (mode) {
                                     @case ('view') {
-                                        <a [routerLink]="['/study/details/', $safeNavigationMigration(qualityCard.study?.id)]" (click)="breadcrumbsService.markMilestone()">
+                                        <a [routerLink]="['/study/details/', $safeNavigationMigration(qualityCard.study?.id)]">
                                             {{ qualityCard.study.name }}
                                         </a>
                                     }
                                     @default {
-                                        <select-box
-                                            [readOnly]="forceStudyId != null && forceStudyId != undefined"
-                                            formControlName="study"
-                                            (userChange)="onStudyChange()"
-                                            [optionArr]="studies"
-                                            [disabled]="lockStudy"></select-box>
+                                        <select-box formControlName="study" [optionArr]="studies" [disabled]="lockStudy"></select-box>
                                     }
                                 }
                             </span>
@@ -171,7 +166,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [formGroup]="form"
                         cardType="qualitycard"
                         formControlName="rules"
-                        [(ngModel)]="qualityCard.rules"
                         [mode]="selectMode ? 'select' : mode"
                         [allCoils]="allCoils"
                         [studyId]="$safeNavigationMigration(qualityCard.study?.id)"

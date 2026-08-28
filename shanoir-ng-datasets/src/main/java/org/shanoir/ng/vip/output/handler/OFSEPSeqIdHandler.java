@@ -23,12 +23,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.property.model.DatasetProperty;
 import org.shanoir.ng.property.service.DatasetPropertyService;
@@ -40,11 +42,12 @@ import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
 import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.shanoir.ng.vip.executionMonitoring.model.ExecutionMonitoring;
 import org.shanoir.ng.vip.output.exception.ResultHandlerException;
-import org.shanoir.ng.vip.processingResource.repository.ProcessingResourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -129,10 +132,11 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     private SolrService solrService;
 
     @Autowired
-    private StudyService studyService;
+    private StudyRepository studyRepository;
 
     @Autowired
-    private ProcessingResourceRepository processingResourceRepository;
+    @Lazy
+    private DatasetService datasetService;
 
     public boolean canProcess(String pipelineIdentifier) throws ResultHandlerException {
         if (Objects.isNull(pipelineIdentifier)) {
@@ -312,17 +316,19 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     /**
      * Process all series / acquisitions found in output JSON
      */
-    private void processSeries(JSONArray series, ExecutionMonitoring monitoring, String resourceId) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
+    @Transactional(readOnly = true)
+    protected void processSeries(JSONArray series, ExecutionMonitoring monitoring, String resourceId) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
         Long examinationId = null;
 
         for (int i = 0; i < series.length(); i++) {
             JSONObject serie = series.getJSONObject(i);
             Long serieId = serie.getLong(ID);
 
-            List<Dataset> datasets = processingResourceRepository.findDatasetsByResourceId(resourceId)
-                        .stream().filter(ds -> ds.getDatasetAcquisition() != null
-                                && ds.getDatasetAcquisition().getId().equals(serieId))
-                        .collect(Collectors.toList());
+
+            List<Dataset> datasets = datasetRepository.findByResourceId(resourceId)
+                    .stream().filter(ds -> ds.getDatasetAcquisition() != null
+                            && ds.getDatasetAcquisition().getId().equals(serieId))
+                    .collect(Collectors.toList());
 
             if (datasets.isEmpty()) {
                 LOG.error("No dataset found for serie/acquisition [" + serieId + "]");
@@ -330,7 +336,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             }
 
             if (Objects.isNull(examinationId)) {
-                examinationId = datasets.get(0).getFirstRealInput().getDatasetAcquisition().getExamination().getId();
+                examinationId = datasetService.getFirstRealInput(datasets.get(0)).getDatasetAcquisition().getExamination().getId();
             }
 
             for (Dataset ds : datasets) {
@@ -374,7 +380,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             JSONObject serie = series.getJSONObject(i);
             Long serieId = serie.getLong(ID);
 
-            List<Dataset> datasets = datasetRepository.findDatasetsByProcessingIdIn(List.of(processing.getId()));
+            List<Dataset> datasets = datasetRepository.findByProcessingIdIn(List.of(processing.getId()));
 
             if (datasets.isEmpty()) {
                 LOG.error("No dataset found for serie/acquisition [" + serieId + "]");
@@ -382,7 +388,7 @@ public class OFSEPSeqIdHandler extends OutputHandler {
             }
 
             if (Objects.isNull(examinationId)) {
-                examinationId = datasets.get(0).getFirstRealInput().getDatasetAcquisition().getExamination().getId();
+                examinationId = datasetService.getFirstRealInput(datasets.get(0)).getDatasetAcquisition().getExamination().getId();
             }
 
             for (Dataset ds : datasets) {
@@ -440,8 +446,9 @@ public class OFSEPSeqIdHandler extends OutputHandler {
     /**
      * Add tags to a dataset
      */
-    private void addDatasetTags(Dataset ds, List<DatasetProperty> properties) {
-        Map<String, StudyTag> studyTagsByName = studyService.findById(ds.getStudyId()).getStudyTags().stream()
+    private void addDatasetTags(Dataset ds, List<DatasetProperty> properties) throws EntityNotFoundException {
+        Study study = studyRepository.findByIdWithStudyTags(ds.getStudyId()).orElseThrow(() -> new EntityNotFoundException(Study.class, ds.getStudyId()));
+        Map<String, StudyTag> studyTagsByName = study.getStudyTags().stream()
                 .collect(Collectors.toMap(StudyTag::getName, Function.identity()));
 
         for (DatasetProperty property : properties) {

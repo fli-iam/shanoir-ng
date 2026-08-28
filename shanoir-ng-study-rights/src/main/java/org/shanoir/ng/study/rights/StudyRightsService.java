@@ -19,11 +19,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.Hibernate;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 @Service
@@ -180,9 +182,13 @@ public class StudyRightsService {
         List<StudyUser> studyUsers = repo
                 .findAllByUserId(userId)
                 .orElseGet(Collections::emptyList);
+        studyUsers.forEach(studyUser -> {
+            Hibernate.initialize(studyUser.getCenterIds());
+        });
         return new UserRights(studyUsers);
     }
 
+    @Transactional(readOnly = true)
     public UserRights getUserRights() {
         Long userId = KeycloakUtil.getTokenUserId();
         return getUserRights(userId);

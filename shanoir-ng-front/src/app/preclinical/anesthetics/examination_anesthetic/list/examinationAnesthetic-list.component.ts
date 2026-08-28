@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import {Component, ViewChild} from '@angular/core'
+import {Component, ViewChild, ChangeDetectionStrategy} from '@angular/core'
 
 import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
 
@@ -26,6 +26,7 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
     selector: 'examination-anesthetics-list',
     templateUrl: 'examinationAnesthetic-list.component.html',
     styleUrls: ['examinationAnesthetic-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TableComponent]
 })
 export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityListComponent<ExaminationAnesthetic>{
