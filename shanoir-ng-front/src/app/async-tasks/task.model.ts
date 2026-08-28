@@ -105,6 +105,9 @@ export class Task extends Entity {
 
     private buildRoute(): string {
         if (this.eventType === 'importDataset.event' && this.status != -1) {
+            if (!this.message) {
+                return null;
+            }
             if (this.message.lastIndexOf('examination [') != -1) {
                 const substring = this.message.match(/examination \[\d+\]/g)[0];
                 return '/examination/details/' + substring.slice(substring.lastIndexOf("[") + 1, substring.lastIndexOf("]"));
@@ -160,4 +163,9 @@ export class Task extends Entity {
         if (task.hasReport != undefined) this.hasReport = task.hasReport;
         return this;
     }
+
+    public recomputeRoute(): void {
+        this.route = this.buildRoute();
+    }
+
 }
