@@ -72,7 +72,7 @@ public class OutputServiceImpl implements OutputService {
     @Lazy
     private DatasetProcessingRepository processingRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public void process(ExecutionMonitoring monitoring) throws ResultHandlerException, EntityNotFoundException {
         process(monitoring, outputHandlers);
     }
