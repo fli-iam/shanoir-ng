@@ -141,7 +141,7 @@ if [ -n "$build" ] ; then
 			-e HOME="/src/tmp/home" \
 			-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository" \
 			-w /src "$DEV_IMG" sh -c \
-			'cd shanoir-ng-parent && mvn -pl shanoir-ng-users -Pnative spring-boot:build-image -DskipTests'
+			'cd shanoir-ng-users && mvn -Pnative spring-boot:build-image -DskipTests'
 	fi
 
 	# 4. build the (remaining) docker images
