@@ -36,6 +36,7 @@ import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.rule.QualityCardRule;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.service.QualityCardServiceImpl;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -82,6 +83,10 @@ public class QualityCardServiceTest {
 
     @BeforeEach
     public void setup() throws Exception {
+        // applyQualityCardOnStudy() reads the authenticated user via KeycloakUtil.getTokenUserId() to
+        // build its ShanoirEvent; in production this comes from the request's JWT, but here there's no
+        // real HTTP request, so the security context needs to be seeded manually.
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         given(qualityCardRepository.findAll()).willReturn(Arrays.asList(createQualityCard()));
         given(qualityCardRepository.findById(QUALITY_CARD_ID)).willReturn(Optional.of(createQualityCard()));
         given(qualityCardRepository.findByStudyId(STUDY_ID)).willReturn(Arrays.asList(createQualityCard()));
