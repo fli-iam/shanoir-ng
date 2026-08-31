@@ -459,7 +459,13 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         } else if (this.condition.values.length == 0) {
             this.resetValues();
         }
-        this.onConditionChange(); 
+        this.onConditionChange();
+    }
+
+    // SMALLER_THAN/BIGGER_THAN compare against a single threshold value, so offering to add
+    // several (OR-combined) values would be misleading.
+    get allowsMultipleValues(): boolean {
+        return this.condition?.operation != 'SMALLER_THAN' && this.condition?.operation != 'BIGGER_THAN';
     }
 
     private computeConditionOptions() {
