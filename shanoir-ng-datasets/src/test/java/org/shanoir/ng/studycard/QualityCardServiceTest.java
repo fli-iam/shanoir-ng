@@ -44,6 +44,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.BDDMockito.given;
@@ -176,8 +177,8 @@ public class QualityCardServiceTest {
     private Study createStudyWithAcquisition(DatasetAcquisition acquisition) {
         final Study study = new Study();
         study.setId(STUDY_ID);
-        acquisition.getExamination().setDatasetAcquisitions(Collections.singletonList(acquisition));
-        study.setExaminations(Collections.singletonList(acquisition.getExamination()));
+        acquisition.getExamination().setDatasetAcquisitions(new ArrayList<>(List.of(acquisition)));
+        study.setExaminations(new ArrayList<>(List.of(acquisition.getExamination())));
         return study;
     }
 
