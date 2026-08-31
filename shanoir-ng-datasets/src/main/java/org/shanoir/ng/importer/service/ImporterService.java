@@ -167,6 +167,12 @@ public class ImporterService {
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
                     + " Successfully created " + createdDatasetIds.size() + " dataset(s) for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
+            // Some (but not all) series may have been excluded because a quality card tagged them ERROR:
+            // we set the report so the user knows which acquisitions were skipped and why (all-excluded
+            // is already reported via the QualityException branch below).
+            if (acquisitionsResult.qualityResult().hasError()) {
+                event.setReport(acquisitionsResult.qualityResult().toString());
+            }
             eventService.publishEvent(event);
 
             datasetsImportStatusService.markFinished(importJob.getExaminationId(), createdDatasetIds);

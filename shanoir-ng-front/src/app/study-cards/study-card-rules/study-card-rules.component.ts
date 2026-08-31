@@ -86,7 +86,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     @Output() selectedRulesChange: EventEmitter<(StudyCardRule | QualityCardRule)[]> = new EventEmitter();
     selectedRules: Map<number, (StudyCardRule | QualityCardRule)> = new Map();
     rulesToAnimate: Set<number> = new Set();
-    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
+    @Input() addSubForm: (subForm: FormGroup, previousForm?: FormGroup) => FormGroup;
 
 
     constructor(
@@ -155,9 +155,17 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     }
 
     addNewRule(scope: MetadataFieldScope) {
-        const rule: StudyCardRule = new StudyCardRule(scope);
-        rule.conditions = [];
-        rule.assignments = [];
+        let rule: StudyCardRule | QualityCardRule;
+        if (this.cardType == 'qualitycard') {
+            const qualityRule: QualityCardRule = new QualityCardRule();
+            qualityRule.conditions = [];
+            rule = qualityRule;
+        } else {
+            const studyRule: StudyCardRule = new StudyCardRule(scope);
+            studyRule.conditions = [];
+            studyRule.assignments = [];
+            rule = studyRule;
+        }
         this.rules.push(rule);
         this.animateRule(this.rules.length - 1);
         this.onChangeCallback(this.rules);
@@ -255,10 +263,10 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
                 if (rule.conditions?.find(cond => cond.scope == null)) {
                     errors.noType = true;
                 }
-                if (rule.conditions?.find(cond => cond.scope.includes('DICOMCondition') && !cond.dicomTag)) {
+                if (rule.conditions?.find(cond => cond.scope?.includes('DICOMCondition') && !cond.dicomTag)) {
                     errors.missingField = 'condition dicomTag';
                 }
-                if (rule.conditions?.find(cond => !cond.scope.includes('DICOMCondition') && !cond.shanoirField)) {
+                if (rule.conditions?.find(cond => cond.scope && !cond.scope.includes('DICOMCondition') && !cond.shanoirField)) {
                     errors.missingField = 'condition shanoirField';
                 }
                 if (rule.conditions?.find(cond => !cond.operation)) {
