@@ -139,13 +139,16 @@ if [ -n "$build" ] ; then
 	# build-image requires a Docker engine to run and produce the native image
 	# Mounting the host-docker inside the image resulted in permission problem
 	# or rights problems with re-execution of the script, so we do it locally
-	if [ -n "$native" ] ; then
-		  step "build shanoir native images locally"
-		  		command -v mvn >/dev/null 2>&1 \
-			|| die "mvn not found on PATH: --native builds the 'users' native image locally (see comment above); install a local Maven + matching JDK, or drop --native"
-			m2repo="$PWD/tmp/home/.m2/repository"
-		  /shanoir-ng-users/MAVEN_OPTS="-Dmaven.repo.local=$m2repo" mvn -Pnative spring-boot:build-image -DskipTests \
-		  ${build_sql_init_mode:+-Dspring.sql.init.mode="$build_sql_init_mode"}
+	if [ -n "$native" ]; then
+    step "build shanoir native images locally"
+    command -v mvn >/dev/null 2>&1 \
+        || die "mvn not found on PATH: --native builds the 'users' native image locally (see comment above); install a local Maven + matching JDK, or drop --native"
+    m2repo="$PWD/tmp/home/.m2/repository"
+    MAVEN_OPTS="-Dmaven.repo.local=$m2repo" \
+        mvn -f ./shanoir-ng-users/pom.xml \
+        -Pnative spring-boot:build-image \
+        -DskipTests \
+        ${build_sql_init_mode:+-Dspring.sql.init.mode="$build_sql_init_mode"}
 	fi
 
 	# Build the (remaining) docker images
