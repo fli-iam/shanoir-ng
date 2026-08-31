@@ -75,7 +75,7 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
 
             this.subscriptions.push(
                 this.notificationsService.getNotifications().subscribe(tasks => {
-                    // Live SSE updates only ever carry a "light" task (hasReport flag, never the
+                    // Live updates only ever carry a "light" task (hasReport flag, never the
                     // actual report content - cf. ShanoirEvent.toLightEvent()). 
                     // Merge in place via updateWith() rather than replacing the reference : it
                     // only overwrites report when the incoming value is truthy, so it can never
