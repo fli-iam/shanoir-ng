@@ -109,7 +109,7 @@ public class QualityCardApiController implements QualityCardApi {
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
 
-    public ResponseEntity<QualityCardResult> testQualityCardOnStudy(Long qualityCardId) throws RestServiceException {
+    public ResponseEntity<QualityCardResult> testQualityCardOnStudy(Long qualityCardId, Integer from, Integer to) throws RestServiceException {
         QualityCard qualityCard = repository.findById(qualityCardId).orElse(null);
         if (qualityCard == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -117,7 +117,7 @@ public class QualityCardApiController implements QualityCardApi {
         QualityCardResult results = null;
         LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
         try {
-            results = service.applyQualityCardOnStudy(qualityCard, false);
+            results = service.applyQualityCardOnStudy(qualityCard, false, from, to);
         } catch (PacsException e) {
             LOG.error(PACS_COMMUNICATION_ERROR, e);
             throw new RestServiceException(

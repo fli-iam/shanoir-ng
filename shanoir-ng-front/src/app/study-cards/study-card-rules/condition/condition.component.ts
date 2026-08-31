@@ -77,8 +77,13 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     shanoirFieldTouched: boolean = false;
     private computeConditionOptionsSubscription: Subscription;
     private conditionChangeSubscription: Subscription;
-    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
+    @Input() addSubForm: (subForm: FormGroup, previousForm?: FormGroup) => FormGroup;
     private parentForm: FormGroup;
+    // The form currently registered in the parent's "conditions" FormArray via addSubForm(),
+    // so it can be swapped out (not just added to) whenever this.form is rebuilt from scratch
+    // (buildForm()) - otherwise the old, now-orphaned FormGroup stays in the array forever,
+    // permanently polluting the parent form's validity with whatever state it was frozen in.
+    private registeredForm: FormGroup;
 
     constructor(
             private dicomService: DicomService,
@@ -152,6 +157,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             });
         }
         this.parentForm = this.addSubForm(this.form);
+        this.registeredForm = this.form;
         setTimeout(() => this.init = true);
     }
 
@@ -174,6 +180,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     ngOnDestroy(): void {
         this.computeConditionOptionsSubscription?.unsubscribe();
         this.conditionChangeSubscription?.unsubscribe();
+        this.addSubForm(null, this.registeredForm);
         setTimeout(() => {
             (this.form?.get('values') as FormArray)?.clear();
         });
@@ -250,8 +257,12 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                     this.shanoirFieldOptions = null;
                 }
                 this.form = this.buildForm();
+                if (this.registeredForm) {
+                    this.parentForm = this.addSubForm(this.form, this.registeredForm);
+                    this.registeredForm = this.form;
+                }
                 this.filterOperations();
-                this.previousField = this.condition.dicomTag; 
+                this.previousField = this.condition.dicomTag;
             }
         }
     }
@@ -427,6 +438,10 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             this.filterOperations();
             this.resetValues();
             this.form = this.buildForm();
+            if (this.registeredForm) {
+                this.parentForm = this.addSubForm(this.form, this.registeredForm);
+                this.registeredForm = this.form;
+            }
             this.onConditionChange();
             if (value.endsWith('OnDataset') || value.endsWith('OnDatasets')) {
                 this.fieldOptions.forEach(opt => opt.disabled = opt.section != 'Dataset');
@@ -444,7 +459,13 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         } else if (this.condition.values.length == 0) {
             this.resetValues();
         }
-        this.onConditionChange(); 
+        this.onConditionChange();
+    }
+
+    // SMALLER_THAN/BIGGER_THAN compare against a single threshold value, so offering to add
+    // several (OR-combined) values would be misleading.
+    get allowsMultipleValues(): boolean {
+        return this.condition?.operation != 'SMALLER_THAN' && this.condition?.operation != 'BIGGER_THAN';
     }
 
     private computeConditionOptions() {

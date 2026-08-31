@@ -227,10 +227,15 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
         });
     }
 
-    addConditionForm(form: FormGroup): FormGroup {
+    addConditionForm(form: FormGroup, previousForm?: FormGroup): FormGroup {
         if (this.mode != 'view') {
             setTimeout(() => { // prevent "changed after check" error
-                (this.form.get('conditions') as FormArray).push(form);
+                const conditions = this.form.get('conditions') as FormArray;
+                if (previousForm) {
+                    const previousIndex = conditions.controls.indexOf(previousForm);
+                    if (previousIndex > -1) conditions.removeAt(previousIndex);
+                }
+                if (form) conditions.push(form);
             });
         }
         return this.form;
