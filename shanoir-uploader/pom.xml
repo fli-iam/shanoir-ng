@@ -223,7 +223,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
-			<version>5.1</version>
+			<version>5.6.3</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
