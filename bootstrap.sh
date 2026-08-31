@@ -116,42 +116,39 @@ if [ -n "$build" ] ; then
 	#
 	# Build stage
 	#
-	step "build shanoir"
-  
-  # Attention: process-aot fixes the Spring config during
-	# Maven build-time already
+	step "Build Shanoir Maven projects"
+
+  # Attention: process-aot requires the Spring configuration
+  # already during Maven build-time, as it fixes/defines it
 	build_sql_init_mode=
 	case "${SHANOIR_MIGRATION:-dev}" in
 		dev|init)	build_sql_init_mode=always ;;
 	esac
-
-	# 1. build a docker image with the java toolchain
+  
+	# Build a docker image with the java toolchain
 	DEV_IMG=shanoir-ng-dev
 	docker build -t "$DEV_IMG" --target=jdk docker-compose
-
+  # Compile all Maven projects inside the Docker image
 	mkdir -p /tmp/home
 	docker run --rm -t -i -v "$PWD:/src" -u "`id -u`:`id -g`" -e HOME="/src/tmp/home" \
 		-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository"	\
+		${build_sql_init_mode:+-e SPRING_SQL_INIT_MODE="$build_sql_init_mode"} \
 		-w /src "$DEV_IMG" sh -c 'cd shanoir-ng-parent && mvn clean install -DskipTests'
 
-	# 3. build the native images (paketo/buildpacks), if requested
-	#
-	# spring-boot:build-image talks to the *host* docker daemon (it drives
-	# buildpacks builds through docker itself), so the socket is mounted into
-	# the build container. Depending on your local docker setup this may need
-	# root inside the container rather than "-u `id -u`:`id -g`" to have
-	# permission to talk to the socket -- adjust if you hit a permission
-	# denied error here.
+	# Build the native images (paketo/buildpacks), if requested
+	# build-image requires a Docker engine to run and produce the native image
+	# Mounting the host-docker inside the image resulted in permission problem
+	# or rights problems with re-execution of the script, so we do it locally
 	if [ -n "$native" ] ; then
-		step "build shanoir (native: users)"
-		docker run --rm -t -i -v "$PWD:/src" -u "`id -u`:`id -g`"	-e HOME="/src/tmp/home" \
-			-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository" \
-			${build_sql_init_mode:+-e SPRING_SQL_INIT_MODE="$build_sql_init_mode"} \
-			-w /src "$DEV_IMG" sh -c \
-			'cd shanoir-ng-users && mvn -Pnative spring-boot:build-image -DskipTests'
+		  step "build shanoir native images locally"
+		  		command -v mvn >/dev/null 2>&1 \
+			|| die "mvn not found on PATH: --native builds the 'users' native image locally (see comment above); install a local Maven + matching JDK, or drop --native"
+			m2repo="$PWD/tmp/home/.m2/repository"
+		  /shanoir-ng-users/MAVEN_OPTS="-Dmaven.repo.local=$m2repo" mvn -Pnative spring-boot:build-image -DskipTests \
+		  ${build_sql_init_mode:+-Dspring.sql.init.mode="$build_sql_init_mode"}
 	fi
 
-	# 4. build the (remaining) docker images
+	# Build the (remaining) docker images
 	#
 	# When --native is set, the merged config points 'users' at the
 	# natively-built image rather than a build context, so `docker compose
