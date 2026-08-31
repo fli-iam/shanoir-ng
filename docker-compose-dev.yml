@@ -98,6 +98,7 @@ services:
     environment:
       - MARIADB_ROOT_PASSWORD=password
       - MARIADB_AUTO_UPGRADE=1
+      - SHANOIR_MIGRATION
     ulimits:
       nofile:
         soft: 262144
