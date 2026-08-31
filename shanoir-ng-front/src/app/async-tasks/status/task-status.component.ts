@@ -66,27 +66,59 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
         private consoleService: ConsoleService
     ) {}
 
+    private reportFetchInFlight: boolean = false;
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.task && this.task) {
-            this.report = null;
-            if (this.task) {
-                let reportArray: [];
-                try {
-                    reportArray = JSON.parse(this.task.report);
-                } catch {
-                    reportArray = null;
-                }
-                if (reportArray && Array.isArray(reportArray)) {
-                    this.report = new BrowserPaging(reportArray, this.reportColumns);
-                    if (this.tableRefresh) this.tableRefresh();
-                }
-            }
+            this.updateReport();
+            this.fetchReportIfNeeded();
 
             this.subscriptions.push(
                 this.notificationsService.getNotifications().subscribe(tasks => {
-                    this.task = tasks.find(task => task.id == this.task.id);
+                    // Live SSE updates only ever carry a "light" task (hasReport flag, never the
+                    // actual report content - cf. ShanoirEvent.toLightEvent()). 
+                    // Merge in place via updateWith() rather than replacing the reference : it
+                    // only overwrites report when the incoming value is truthy, so it can never
+                    // erase a report already fetched below via taskService.get().
+                    const liveTask = tasks.find(task => task.id == this.task.id);
+                    if (liveTask) this.task.updateWith(liveTask);
+                    this.updateReport();
+                    this.fetchReportIfNeeded();
                 })
             );
+        }
+    }
+
+    /**
+     * The task's report becomes available only once the job is done, but the live SSE stream
+     * never carries its actual content (only the hasReport flag) - so as soon as that flag turns
+     * true, fetch the full task once to get the real report, instead of waiting for a page reload.
+     */
+    private fetchReportIfNeeded(): void {
+        if (this.task?.hasReport && !this.task.report && !this.reportFetchInFlight) {
+            this.reportFetchInFlight = true;
+            this.taskService.get(this.task.completeId)
+                .then(fullTask => {
+                    this.task.updateWith(fullTask);
+                    this.updateReport();
+                })
+                .finally(() => this.reportFetchInFlight = false);
+        }
+    }
+
+    private updateReport(): void {
+        this.report = null;
+        if (this.task) {
+            let reportArray: [];
+            try {
+                reportArray = JSON.parse(this.task.report);
+            } catch {
+                reportArray = null;
+            }
+            if (reportArray && Array.isArray(reportArray)) {
+                this.report = new BrowserPaging(reportArray, this.reportColumns);
+                if (this.tableRefresh) this.tableRefresh();
+            }
         }
     }
 
