@@ -59,7 +59,7 @@ export class StudyCardRuleComponent implements OnChanges {
     touched: boolean = false;
     assignmentFieldOptions: Option<string>[];
     conditionFieldOptions: Option<string>[];
-    @Input() addSubForm: (subForm: FormGroup) => FormGroup;
+    @Input() addSubForm: (subForm: FormGroup, previousForm?: FormGroup) => FormGroup;
 
     constructor(public elementRef: ElementRef) { }
 
