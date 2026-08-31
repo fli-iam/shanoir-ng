@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,9 +37,11 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
@@ -147,7 +150,13 @@ public class DICOMWebApiControllerTest {
     private DatasetAcquisitionService datasetAcquisitionServiceMock;
 
     @MockBean
+    private DatasetAcquisitionRepository acquisitionRepository;
+
+    @MockBean
     private DatasetService datasetServiceMock;
+
+    @MockBean
+    private DatasetRepository datasetRepository;
 
     @MockBean
     private DatasetProcessingRepository datasetProcessingRepositoryMock;
@@ -193,15 +202,16 @@ public class DICOMWebApiControllerTest {
         acquisition101.setSeriesInstanceUID(SERIES_UID_ACQ_101);
         acquisition101.setDatasets(List.of(dataset400, dataset500, dataset700));
 
-        given(datasetAcquisitionServiceMock.findByExamination(42L))
+        given(acquisitionRepository.findByExaminationIdWithDatasetsAndDatasetFiles(42L))
                 .willReturn(List.of(acquisition100, acquisition101));
         given(datasetAcquisitionServiceMock.findById(100L)).willReturn(acquisition100);
         given(datasetAcquisitionServiceMock.findById(101L)).willReturn(acquisition101);
-        given(datasetServiceMock.findById(500L)).willReturn(dataset500);
-        given(datasetServiceMock.findById(700L)).willReturn(dataset700);
+        given(acquisitionRepository.findByIdWithDatasetsAndDatasetFiles(101L)).willReturn(Optional.of(acquisition101));
+        given(datasetRepository.findById(500L)).willReturn(Optional.of(dataset500));
+        given(datasetRepository.findById(700L)).willReturn(Optional.of(dataset700));
 
         GenericDataset dataset600 = createDataset(new GenericDataset(), 600L, SERIES_UID_OUTPUT_DATASET_600, "601");
-        given(datasetServiceMock.findById(600L)).willReturn(dataset600);
+        given(datasetRepository.findById(600L)).willReturn(Optional.of(dataset600));
         DatasetProcessing processing = new DatasetProcessing();
         processing.setOutputDatasets(List.of(dataset600));
         given(datasetProcessingRepositoryMock

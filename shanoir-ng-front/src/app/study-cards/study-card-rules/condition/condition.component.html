@@ -16,9 +16,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 @if (mode == 'view') {
     <span class="view">
         @if (['DatasetDICOMConditionOnDataset', 'DatasetMetadataCondOnDataset'].includes(condition.scope)) {
-            <span>for a dataset</span>
+            <span>for a dataset,&nbsp;</span>
         } @else if ('AcqMetadataCondOnAcq' == condition.scope) {
-            <span>for an acquisition</span>
+            <span>for an acquisition,&nbsp;</span>
         } @else {
             @if (condition.cardinality == -1) {
                 <span class="cardinality-type">for every</span>
@@ -60,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         }
         @if (condition.scope?.includes('DICOMCondition')) {
             <span class="var" title="{{ condition.dicomTag | dicomTagLabel }}">
-                {{ condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag?.code | dicomTagLabel) }}
+                {{ condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag | dicomTagLabel) }}
             </span>
         }
         @if (!condition.scope?.includes('DICOMCondition')) {
@@ -114,20 +114,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <select-box
             class="cardinality-type auto-width"
             [(ngModel)]="cardinalityType"
+            [ngModelOptions]="{ standalone: true }"
             (userChange)="onCardinalityTypeChange()"
             [clear]="false"
             placeholder="select cardinality"
             [search]="false"
-            [options]="[
-                { label: 'for no', value: 'NONE' },
-                { label: 'for every', value: 'ALL' },
-                { label: 'for at least', value: 'AT_LEAST' },
-            ]"></select-box>
+            [options]="cardinalityTypeOptions"></select-box>
         @if (cardinalityType == 'AT_LEAST') {
             <input
                 type="number"
                 class="cardinality auto-width"
                 [(ngModel)]="condition.cardinality"
+                [ngModelOptions]="{ standalone: true }"
                 [class.error]="cardinalityError"
                 min="1"
                 [style.width]="(condition.cardinality ? (condition.cardinality + '').length + 3 : '4') + 'ch'" />
@@ -161,6 +159,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <select-box
         class="type auto-width"
         [ngModel]="condition.scope"
+        [ngModelOptions]="{ standalone: true }"
         (userChange)="onConditionTypeChange($event)"
         [options]="conditionTypeOptions"
         placeholder="select conditition type"
@@ -170,6 +169,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             class="var auto-width"
             [class.error]="tagError"
             [(ngModel)]="condition.dicomTag"
+            [ngModelOptions]="{ standalone: true }"
             (userChange)="onDicomFieldChange($event)"
             [options]="tagOptions"
             placeholder="select dicom tag"
@@ -181,8 +181,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             class="var auto-width"
             [class.error]="shanoirFieldError"
             [(ngModel)]="condition.shanoirField"
+            [ngModelOptions]="{ standalone: true }"
             (userChange)="onFieldChange()"
             [options]="fieldOptions"
+            [listLength]="fieldOptions?.length || 16"
             placeholder="select shanoir metadata field"
             (focusout)="shanoirFieldTouched = true"
             [clear]="false"></select-box>
@@ -192,6 +194,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         class="method auto-width"
         [class.error]="operationError"
         [(ngModel)]="condition.operation"
+        [ngModelOptions]="{ standalone: true }"
         (userChange)="onOperationChange()"
         [options]="operations"
         placeholder="select operation"

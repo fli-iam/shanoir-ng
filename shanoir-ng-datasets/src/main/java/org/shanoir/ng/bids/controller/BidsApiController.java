@@ -37,7 +37,7 @@ import org.shanoir.ng.bids.service.BidsValidationPublisher;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.service.StudyService;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ public class BidsApiController implements BidsApi {
     private BidsDeserializer bidsDeserializer;
 
     @Autowired
-    private StudyService studyService;
+    private StudyRepository studyRepository;
 
     @Autowired
     private BidsValidationPublisher bidsValidationPublisher;
@@ -178,7 +178,7 @@ public class BidsApiController implements BidsApi {
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId)
             throws RestServiceException, IOException {
         BidsElement studyBidsElement;
-        Study study = studyService.findById(studyId);
+        Study study = studyRepository.findById(studyId).orElse(null);
         if (study != null) {
             boolean unlocked = bidsTreeSemaphore.awaitUnlock(studyId, 30, java.util.concurrent.TimeUnit.SECONDS);
             if (!unlocked) { // still locked after timeout

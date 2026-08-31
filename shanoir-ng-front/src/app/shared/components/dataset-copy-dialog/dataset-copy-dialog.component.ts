@@ -13,11 +13,11 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { CopyData, CopyDataService } from 'src/app/studies/shared/copy-data.service';
-import { StudyService } from 'src/app/studies/shared/study.service';
+import { CopyData, CopyDataService } from '@app/studies/shared/copy-data.service';
+import { StudyService } from '@app/studies/shared/study.service';
 
 import { StudyRightsService } from "../../../studies/shared/study-rights.service";
 import { StudyUserRight } from "../../../studies/shared/study-user-right.enum";
@@ -38,6 +38,7 @@ export type InputDataset = {
     selector: 'user-action-dialog',
     templateUrl: 'dataset-copy-dialog.component.html',
     styleUrls: ['dataset-copy-dialog.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SelectBoxComponent, FormsModule]
 })
 export class DatasetCopyDialogComponent {

@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <div [hidden]="!progressStatus?.progress">
     <progress-bar
-        [progress]="progressStatus?.progress"
+        [progress]="$safeNavigationMigration(progressStatus?.progress)"
         [text]="'Preparing download'"
         [unknownDownload]="true"
         [class.error]="progressStatus?.status == -1"
@@ -29,12 +29,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (labelClick)="menuOpened = withMenu && !menuOpened"
         [hasBox]="hasBox"
         [(ngModel)]="node.selected"
+        [ngModelOptions]="{ standalone: true }"
         (chkbxChange)="selectedChange.emit()"
         [route]="node.route"
         [hasChildren]="hasChildren()"
         (firstOpen)="loadDatasets()"
         [dataLoading]="loading"
-        [title]="node.title + ' n°' + node.id">
+        [title]="node.title + ' n°' + node.id"
+        [qualityTag]="node.qualityTag">
+
         @if (menuOpened && withMenu && withMenu && node.id != null) {
             <dropdown-menu [(openInput)]="menuOpened">
                 <a [routerLink]="detailsPath + node.id" class="open-new-tab">
@@ -50,7 +53,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 }
             </dropdown-menu>
         }
-        @if (node.open && node.datasets && node.datasets != $any('UNLOADED')) {
+        @if (node.open && node.datasets && node.datasets != UNLOADED) {
             @for (dsNode of node.datasets; track dsNode; let i = $index) {
                 <dataset-node
                     node
@@ -62,11 +65,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [withMenu]="withMenu"></dataset-node>
             }
         }
-        @if (!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0) {
+        @if (!!node.extraDataFilePathList && node.extraDataFilePathList != UNLOADED && node.extraDataFilePathList.length > 0) {
             <node
                 label="Extra data files"
                 awesome="fa-regular fa-folder-open"
-                [hasChildren]="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
+                [hasChildren]="true"
                 [(opened)]="node.extraDataOpen">
                 @for (file of node.extraDataFilePathList; track file) {
                     <node

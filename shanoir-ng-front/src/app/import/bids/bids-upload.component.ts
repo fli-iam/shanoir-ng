@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -33,6 +33,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     selector: 'bids-upload',
     templateUrl: 'bids-upload.component.html',
     styleUrls: ['bids-upload.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TooltipComponent, SelectBoxComponent, FormsModule, UploaderComponent]
 })
 export class BidsUploadComponent {

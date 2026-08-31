@@ -15,7 +15,6 @@
 package org.shanoir.ng.importer.service;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -82,7 +81,7 @@ public class EegImporterService {
      * @param importJob the import job from importer MS.
      */
     @Transactional
-    public void createEegDataset(final EegImportJob importJob) throws IOException {
+    public void createEegDataset(final EegImportJob importJob) {
         Long userId = KeycloakUtil.getTokenUserId();
         ShanoirEvent event;
         if (Objects.isNull(importJob.getShanoirEvent())) {
@@ -223,12 +222,12 @@ public class EegImporterService {
             event.setStatus(ShanoirEvent.SUCCESS);
             // This message is important for email service
             event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
-                    + " Successfully created datasets for subject [" + importJob.getSubjectName()
+                    + " Successfully created " + datasets.size() + " dataset(s) for subject [" + importJob.getSubjectName()
                     + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
 
-            // Send mail
-            mailService.sendImportEmail(importJob, userId, examination, Collections.singleton(datasetAcquisition));
+            // Send mail (Quality Cards are not yet implemented for EEG)
+            mailService.sendImportEmail(importJob, userId, examination, Collections.singleton(datasetAcquisition), null);
         } catch (Exception e) {
             LOG.error("Error while importing EEG: ", e);
             event.setStatus(ShanoirEvent.ERROR);

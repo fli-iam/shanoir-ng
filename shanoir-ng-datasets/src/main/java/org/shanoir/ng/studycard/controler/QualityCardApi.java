@@ -17,6 +17,7 @@ package org.shanoir.ng.studycard.controler;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
@@ -70,7 +71,7 @@ public interface QualityCardApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/byStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterQualityCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<QualityCard>> findQualityCardByStudyId(
             @Parameter(description = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
@@ -82,7 +83,7 @@ public interface QualityCardApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterQualityCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
     ResponseEntity<List<QualityCard>> findQualityCards();
 
     @Operation(summary = "", description = "Saves a new quality card")
@@ -136,21 +137,5 @@ public interface QualityCardApi {
     @RequestMapping(value = "/test/{qualityCardId}", method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<QualityCardResult> testQualityCardOnStudy(
-            @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
-
-    @Operation(summary = "", description = "Test a quality card on a study for quality control")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "applied a quality card on its study for quality control"),
-        @ApiResponse(responseCode = "401", description = "unauthorized"),
-        @ApiResponse(responseCode = "403", description = "forbidden"),
-        @ApiResponse(responseCode = "422", description = "bad parameters"),
-        @ApiResponse(responseCode = "500", description = "unexpected error")
-    })
-
-    @RequestMapping(value = "/test/{qualityCardId}/{start}/{stop}", method = RequestMethod.GET)
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
-    ResponseEntity<QualityCardResult> testQualityCardOnStudy(
-            @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
-            @Parameter(description = "examination number start ", required = true) @PathVariable("start") int start,
-            @Parameter(description = "examination number stop", required = true) @PathVariable("stop") int stop) throws RestServiceException, MicroServiceCommunicationException;
+            @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException, PacsException;
 }

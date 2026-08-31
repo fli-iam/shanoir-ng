@@ -27,6 +27,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
     </div>
 }
+@if (expiringStudies?.length > 0) {
+    @for (study of expiringStudies; track study) {
+        <div class="block expiring-studies">
+            <table>
+                <tr>
+                    <td class="icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="block-title">Expiring Study</div>
+                    </td>
+                    <td>
+                        <div class="panel">
+                            <div>Your access to study <span class="study-name">{{ study.name }}</span> is expiring soon !</div>
+                            <div>Expires on: <span class="date">{{ expiringDates.get(study.id) | date: 'dd/MM/yyyy' }}</span></div>
+                            <div><button class="right-button" (click)="accessRequestService.openAccessExtensionModal(expiringDates.get(study.id), study)">Ask extension</button></div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    }
+}
 
 @if (loaded && (admin || !challengeDua)) {
     <div>
@@ -39,9 +60,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <td class="icon link" routerLink="/solr-search">
                         <i class="fa-regular fa-sun"></i>
                         <div class="block-title">Solr Search</div>
+                        <div class="block-desc">Search across all datasets</div>
                     </td>
                     <!-- <td>
-        <div class="pannel">
+        <div class="panel">
           <input type="text" [(ngModel)]="solrInput" placeholder="Search in Shanoir..." />
           <div routerLink="/solr-search" [state]="{ input: solrInput }" class="link">
             <i class="fas fa-search"></i>Go
@@ -58,9 +80,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <td class="icon">
                             <i class="far fa-flag"></i>
                             <div class="block-title">Notifications</div>
+                            <div class="block-desc">Items needing your action</div>
                         </td>
                         <td>
-                            <div class="pannel">
+                            <div class="panel">
                                 <table>
                                     @for (notif of notifications; track notif) {
                                         <tr routerLink="/dua" class="notification-list link">
@@ -88,9 +111,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <td class="icon link" routerLink="/task">
                             <i class="fas fa-tasks"></i>
                             <div class="block-title">My Jobs</div>
+                            <div class="block-desc">Track your background tasks</div>
                         </td>
                         <td>
-                            <div class="pannel">
+                            <div class="panel">
                                 <table>
                                     @for (job of jobs; track job) {
                                         <tr>
@@ -107,24 +131,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </div>
         }
         <div class="block import">
-            <div class="import-link link dicom" routerLink="/imports/upload">
+            <div class="import-link link dicom" routerLink="/imports/upload" title="Upload DICOM series from your workstation">
                 <i class="fas fa-compact-disc"></i>
                 <div class="title">Import Dicom</div>
             </div>
-            <div class="import-link link bruker" routerLink="/imports/bruker">
+            <div class="import-link link bruker" routerLink="/imports/bruker" title="Upload preclinical Bruker MR data">
                 <i class="fas fa-atom"></i>
                 <div class="title">Import Bruker</div>
             </div>
-            <div class="import-link link eeg" routerLink="/imports/eeg">
+            <div class="import-link link eeg" routerLink="/imports/eeg" title="Upload EEG recordings">
                 <i class="fas fa-bolt"></i>
                 <div class="title">Import EEG</div>
             </div>
-            <div class="import-link link bids" routerLink="/imports/bids">
+            <div class="import-link link bids" routerLink="/imports/bids" title="Upload BIDS-formatted datasets">
                 <i class="fas fa-brain"></i>
                 <div class="title">Import BIDS</div>
             </div>
             @if (canUserImportFromPACS()) {
-                <div class="import-link link pacs" routerLink="/imports/pacs">
+                <div class="import-link link pacs" routerLink="/imports/pacs" title="Query and import from the Neurinfo PACS">
                     <i class="fas fa-server"></i>
                     <div class="title">Import from Neurinfo PACS</div>
                 </div>
@@ -136,9 +160,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <td class="icon link" routerLink="/study/list">
                         <i class="fa-regular fa-folder-open"></i>
                         <div class="block-title">My Studies</div>
+                        <div class="block-desc">Studies you belong to</div>
                     </td>
                     <td>
-                        <div class="pannel">
+                        <div class="panel">
                             <table>
                                 <tr>
                                     <th></th>
@@ -164,9 +189,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <td class="icon">
                         <i class="fas fa-book"></i>
                         <div class="block-title">Ressources</div>
+                        <div class="block-desc">Guides &amp; API references</div>
                     </td>
                     <td>
-                        <ul class="pannel">
+                        <ul class="panel">
                             <li>
                                 <a href="https://github.com/fli-iam/shanoir-ng/wiki/User-Tutorial" target="_blank">
                                     <i class="fas fa-graduation-cap"></i>

@@ -11,13 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnDestroy, ViewChild} from '@angular/core';
 import { FormArray, FormGroup, UntypedFormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { Selection } from 'src/app/studies/study/tree.service';
-import { DUAAssistantComponent } from 'src/app/dua/dua-assistant.component';
+import { EntityService } from '@app/shared/components/entity/entity.abstract.service';
+import { Selection } from '@app/studies/study/tree.service';
+import { DUAAssistantComponent } from '@app/dua/dua-assistant.component';
+import {QualityCardRule} from "@app/study-cards/shared/quality-card.model";
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
@@ -27,7 +28,6 @@ import { CenterService } from '../../centers/shared/center.service';
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option, SelectBoxComponent } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
@@ -45,6 +45,7 @@ import { TooltipComponent } from '../../shared/components/tooltip/tooltip.compon
     selector: 'study-card',
     templateUrl: 'study-card.component.html',
     styleUrls: ['study-card.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, ReactiveFormsModule, FormFooterComponent, RouterLink, SelectBoxComponent, TooltipComponent, StudyCardRulesComponent, AcquisitionEquipmentPipe]
 })
 export class StudyCardComponent extends EntityComponent<StudyCard> implements OnDestroy {
@@ -55,7 +56,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
     public niftiConverters: IdName[] = [];
     showRulesErrors: boolean = false;
     selectMode: boolean;
-    selectedRules: StudyCardRule[] = [];
+    selectedRules: (StudyCardRule | QualityCardRule)[] = [];
     hasAdministrateRightPromise: Promise<boolean>;
     lockStudy: boolean = false;
     @ViewChild(StudyCardRulesComponent) rulesComponent: StudyCardRulesComponent;
@@ -69,7 +70,6 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
             private acqEqService: AcquisitionEquipmentService,
             private studyRightsService: StudyRightsService,
             private acqEqptLabelPipe: AcquisitionEquipmentPipe,
-            keycloakService: KeycloakService,
             private centerService: CenterService,
             coilService: CoilService) {
         super(route);
@@ -286,4 +286,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> implements On
         this.navigateToAttributeCreateStep('/acquisition-equipment/create', 'acquisitionEquipment', options);
     }
 
+    onSelectedRulesChange(rules: (StudyCardRule | QualityCardRule)[]) {
+        this.selectedRules = rules as StudyCardRule[];
+    }
 }

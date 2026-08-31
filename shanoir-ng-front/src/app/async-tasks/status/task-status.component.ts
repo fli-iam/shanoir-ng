@@ -11,17 +11,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HttpClient } from "@angular/common/http";
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
-import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
-import { FilterablePageable, Page } from 'src/app/shared/components/table/pageable.model';
-import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { QualityCardComponent } from 'src/app/study-cards/quality-card/quality-card.component';
+import { BrowserPaging } from '@app/shared/components/table/browser-paging.model';
+import { ColumnDefinition } from '@app/shared/components/table/column.definition.type';
+import { FilterablePageable, Page } from '@app/shared/components/table/pageable.model';
+import { MassDownloadService } from '@app/shared/mass-download/mass-download.service';
+import { QualityCardComponent } from '@app/study-cards/quality-card/quality-card.component';
 
 import { NotificationsService } from '../../shared/notifications/notifications.service';
 import {Task} from '../task.model';
@@ -36,6 +36,7 @@ import { LocalDateFormatPipe } from '../../shared/localLanguage/localDateFormat.
     selector: 'task-status',
     templateUrl: 'task-status.component.html',
     styleUrls: ['task-status.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [FormsModule, LoadingBarComponent, RouterLink, TableComponent, LocalDateFormatPipe]
 })
 export class TaskStatusComponent implements OnDestroy, OnChanges {

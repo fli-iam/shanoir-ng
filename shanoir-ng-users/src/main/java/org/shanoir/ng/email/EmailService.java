@@ -14,17 +14,20 @@
 
 package org.shanoir.ng.email;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.accessrequest.model.AccessRequest;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.email.DuaDraftWrapper;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
+import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
-import org.shanoir.ng.shared.email.EmailStudy;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
+import org.springframework.mail.MailException;
 
 /**
  * Email service.
@@ -41,6 +44,19 @@ public interface EmailService {
      *            user.
      */
     void notifyAccountWillExpire(User user);
+
+    /**
+     * Send an email to user if study access will expire soon.
+     *
+     * @param study
+     *            study.
+     * @param user
+     *            user.
+     * @param expiration
+     *            expiration date.
+     * @throws MailException
+     */
+    void notifyStudyUserWillExpire(IdName study, User user, LocalDate expiration) throws MailException;
 
     /**
      * Send an email to administrators to indicate an account extension request.
@@ -154,6 +170,13 @@ public interface EmailService {
 
     public void notifyDuaDraftCreation(DuaDraftWrapper mail);
 
+    void notifyUserAccessRequestExtensionGranted(User user, IdName study, LocalDate extensionDate);
+
+    void notifyAdminsAccessRequestExtensionGranted(User user, IdName study, LocalDate extensionDate);
+
+    void notifyUserAccessRequestExtensionRefused(User user, IdName study);
+
+    void notifyAdminsAccessRequestExtensionRequest(IdName user, IdName study, LocalDate extensionDate);
     /**
      * Send an announcement to each of the given users as an individual email.
      * A failure on one recipient is logged and does not prevent sending to the

@@ -22,6 +22,7 @@ import org.dcm4che3.data.UID;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetType;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
@@ -78,8 +79,10 @@ public class DefaultHandler extends OutputHandler {
     @Autowired
     private ProcessedDatasetImporterService processedDatasetImporterService;
 
-    @Override
-    public boolean canProcess(ExecutionMonitoring processing) {
+    @Autowired
+    private DatasetRepository datasetRepository;
+
+    public boolean canProcess(String pipelineIdentifier) {
         return true;
     }
 
@@ -112,7 +115,7 @@ public class DefaultHandler extends OutputHandler {
                 }
             }
 
-            List<Dataset> inputDatasets = new ArrayList<>(processingResourceRepository.findDatasetsByResourceId(resourceId));
+            List<Dataset> inputDatasets = new ArrayList<>(datasetRepository.findByResourceId(resourceId));
 
             if (inputDatasets.isEmpty()) {
                 throw new ResultHandlerException("No input datasets found.", null);
@@ -127,6 +130,10 @@ public class DefaultHandler extends OutputHandler {
             throw new ResultHandlerException("An error occured while extracting result from result archive.", e);
         }
     }
+
+    @Override
+    public void manageDelayedOutput(List<File> resultFiles, DatasetProcessing processing) { }
+
 
     /**
      * Creates a list of processed dataset and a dataset processing associated to the list of files given in entry.

@@ -16,6 +16,7 @@ package org.shanoir.ng.processing.repository;
 
 import java.util.List;
 import java.util.Optional;
+
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
@@ -29,12 +30,24 @@ import org.springframework.data.repository.CrudRepository;
 public interface DatasetProcessingRepository extends CrudRepository<DatasetProcessing, Long> {
 
     /**
-     * Find dataset processing by name.
+     * Find dataset processings by ids.
      *
-     * @param comment comment.
-     * @return a dataset processing.
+     * @param ids list of id.
+     * @return a list of dataset processing.
      */
-    Optional<DatasetProcessing> findByComment(String comment);
+    @Query("SELECT processing FROM DatasetProcessing processing "
+            + "WHERE processing.id IN :ids ")
+    List<DatasetProcessing> findByIds(List<Long> ids);
+
+    /**
+     * Find dataset processings by monitoring id.
+     *
+     * @param id monitoring id.
+     * @return a list of dataset processing.
+     */
+    @Query("SELECT processing FROM DatasetProcessing processing "
+            + "WHERE processing.parent.id = :id ")
+    List<DatasetProcessing> findByMonitoringId(Long id);
 
     /**
      * Find all processings that are linked to given dataset through INPUT_OF_DATASET_PROCESSING table
@@ -53,6 +66,37 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
      */
     @EntityGraph(attributePaths = "outputDatasets")
     List<DatasetProcessing> findAllByInputDatasets_IdIn(List<Long> datasetIds);
+
+    /**
+     * Find all dataset processing by comment and type.
+     *
+     * @param comment Comment.
+     * @param type Dataset processing type.
+     * @return List of dataset processing.
+     */
+    @Query(value = "WITH candidates AS ( "
+            + "SELECT processing.id AS id "
+            + "FROM dataset_processing AS processing "
+            + "    INNER JOIN execution_monitoring AS monitoring ON monitoring.id = processing.id "
+            + "WHERE processing.dataset_processing_type = :type "
+            + "    AND processing.comment LIKE :comment "
+            + "    AND monitoring.name LIKE '%post_processing' "
+            + "    AND monitoring.status = 1), "
+            + "processing_inputs AS ( "
+            + "SELECT proc.id AS processing_id, "
+            + "    proc.parent_id AS monitoring_id, "
+            + "    GROUP_CONCAT(inputs.dataset_id ORDER BY inputs.dataset_id) AS input_signature "
+            + "FROM input_of_dataset_processing AS inputs "
+            + "    INNER JOIN dataset_processing proc ON proc.id = inputs.processing_id"
+            + "    INNER JOIN candidates c ON c.id = proc.parent_id "
+            + "GROUP BY proc.id ), "
+            + "ranked AS ( "
+            + "SELECT pi.processing_id AS id, "
+            + "    ROW_NUMBER() OVER (PARTITION BY pi.input_signature ORDER BY monitoring.start_date DESC) AS rn "
+            + "FROM processing_inputs pi "
+            + "    INNER JOIN execution_monitoring monitoring ON monitoring.id = pi.monitoring_id) "
+            + "SELECT id FROM ranked WHERE rn = 1 ORDER BY id", nativeQuery = true)
+    List<Long> findIdsByCommentAndDatasetProcessingTypeWithStatusFinished(String comment, int type);
 
     /**
      * Find all processings that are linked to given monitoring through parent_id column
@@ -78,6 +122,33 @@ public interface DatasetProcessingRepository extends CrudRepository<DatasetProce
             + "INNER JOIN dataset_acquisition as acquisition ON acquisition.id=dataset.dataset_acquisition_id "
             + "WHERE acquisition.examination_id IN (:examinationIds)", nativeQuery = true)
     List<Long> findAllIdsByExaminationIds(List<Long> examinationIds);
+
+    @Query("SELECT processing FROM DatasetProcessing processing "
+            + "JOIN FETCH processing.inputDatasets "
+            + "WHERE processing.id = :id")
+    Optional<DatasetProcessing> findByIdWithInputs(Long id);
+
+    @Query("SELECT processing FROM DatasetProcessing processing "
+            + "JOIN FETCH processing.outputDatasets "
+            + "WHERE processing.id = :id")
+    Optional<DatasetProcessing> findByIdWithOutputs(Long id);
+
+    @Query("SELECT processing FROM DatasetProcessing processing "
+            + "JOIN FETCH processing.outputDatasets "
+            + "JOIN FETCH processing.inputDatasets "
+            + "WHERE processing.id = :id")
+    Optional<DatasetProcessing> findByIdWithInputsAndOutputs(Long id);
+
+    @Query("SELECT processing FROM DatasetProcessing processing "
+            + "JOIN FETCH processing.outputDatasets "
+            + "JOIN FETCH processing.inputDatasets "
+            + "WHERE processing.id IN :ids")
+    List<DatasetProcessing> findByIdsWithInputsAndOutputs(List<Long> ids);
+
+    @Query("SELECT DISTINCT p FROM DatasetProcessing p "
+            + "JOIN FETCH p.inputDatasets "
+            + "WHERE EXISTS (SELECT i FROM p.inputDatasets i WHERE i.id = :inputId)")
+    List<DatasetProcessing> findByInputIdWithInputs(Long inputId);
 
     /**
      * Find all identifying fields for a given processing id

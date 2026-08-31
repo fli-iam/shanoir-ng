@@ -22,7 +22,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <span class="select-wrapper">
     <span class="open-icon"><i class="fa-solid fa-plus"></i></span>
     @if (!readOnly) {
-        <select [disabled]="disabled" [ngModel]="null" (ngModelChange)="onSelectOption($event)">
+        <select [disabled]="disabled" [ngModel]="null" [ngModelOptions]="{ standalone: true }" (ngModelChange)="onSelectOption($event)">
             @for (option of options; track option) {
                 <option
                     [class.disabled]="option.disabled"

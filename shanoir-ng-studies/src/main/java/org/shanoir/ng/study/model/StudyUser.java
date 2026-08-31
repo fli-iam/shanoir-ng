@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.study.model;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,6 +68,10 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
      * The default is true, in case no DUA is existing.
      */
     private boolean confirmed = true;
+
+    private LocalDate expirationDate;
+
+    private boolean receivedExpirationNotification = false;
 
     /** Study id. */
     @ManyToOne
@@ -131,6 +136,18 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 
     public void setConfirmed(boolean confirmed) {
         this.confirmed = confirmed;
+    }
+
+    public boolean canAccessStudy() {
+        return isConfirmed() && (getExpirationDate() == null || getExpirationDate().isAfter(LocalDate.now()));
+    }
+
+    public LocalDate getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     /**
@@ -230,4 +247,11 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
         }
     }
 
+    public boolean isReceivedExpirationNotification() {
+        return receivedExpirationNotification;
+    }
+
+    public void setReceivedExpirationNotification(boolean receivedExpirationNotification) {
+        this.receivedExpirationNotification = receivedExpirationNotification;
+    }
 }
