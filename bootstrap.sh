@@ -117,6 +117,13 @@ if [ -n "$build" ] ; then
 	# Build stage
 	#
 	step "build shanoir"
+  
+  # Attention: process-aot fixes the Spring config during
+	# Maven build-time already
+	build_sql_init_mode=
+	case "${SHANOIR_MIGRATION:-dev}" in
+		dev|init)	build_sql_init_mode=always ;;
+	esac
 
 	# 1. build a docker image with the java toolchain
 	DEV_IMG=shanoir-ng-dev
@@ -137,9 +144,9 @@ if [ -n "$build" ] ; then
 	# denied error here.
 	if [ -n "$native" ] ; then
 		step "build shanoir (native: users)"
-		docker run --rm -t -i -v "$PWD:/src" -v /var/run/docker.sock:/var/run/docker.sock \
-			-e HOME="/src/tmp/home" \
+		docker run --rm -t -i -v "$PWD:/src" -u "`id -u`:`id -g`"	-e HOME="/src/tmp/home" \
 			-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository" \
+			${build_sql_init_mode:+-e SPRING_SQL_INIT_MODE="$build_sql_init_mode"} \
 			-w /src "$DEV_IMG" sh -c \
 			'cd shanoir-ng-users && mvn -Pnative spring-boot:build-image -DskipTests'
 	fi
