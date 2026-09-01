@@ -120,35 +120,38 @@ if [ -n "$build" ] ; then
 
   # Attention: process-aot requires the Spring configuration
   # already during Maven build-time, as it fixes/defines it
-	build_sql_init_mode=
+  build_sql_init_mode=
 	case "${SHANOIR_MIGRATION:-dev}" in
 		dev|init)	build_sql_init_mode=always ;;
 	esac
-  
-	# Build a docker image with the java toolchain
+
+	# Maven build: within a Docker image, with the java toolchain
 	DEV_IMG=shanoir-ng-dev
 	docker build -t "$DEV_IMG" --target=jdk docker-compose
-  # Compile all Maven projects inside the Docker image
+  step "Compile all Maven projects (inside a Docker image)"
 	mkdir -p /tmp/home
 	docker run --rm -t -i -v "$PWD:/src" -u "`id -u`:`id -g`" -e HOME="/src/tmp/home" \
 		-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository"	\
 		${build_sql_init_mode:+-e SPRING_SQL_INIT_MODE="$build_sql_init_mode"} \
 		-w /src "$DEV_IMG" sh -c 'cd shanoir-ng-parent && mvn clean install -DskipTests'
 
-	# Build the native images (paketo/buildpacks), if requested
-	# build-image requires a Docker engine to run and produce the native image
-	# Mounting the host-docker inside the image resulted in permission problem
-	# or rights problems with re-execution of the script, so we do it locally
+  # Always build base images, users included
+	step "build all base docker images"
+  docker compose $compose_files_base build
+
+	# Build the native images (paketo/buildpacks), if requested;
+	# build-image requires a Docker engine to run and produce the native image.
+	# Mounting the host-docker inside the image resulted in permissions denied
+	# or clean cache problems with the re-execution of the script, so we do it locally
 	if [ -n "$native" ]; then
-    step "build shanoir native images locally"
+    step "Compile Shanoir native images locally"
     command -v mvn >/dev/null 2>&1 \
         || die "mvn not found on PATH: --native builds the 'users' native image locally (see comment above); install a local Maven + matching JDK, or drop --native"
     m2repo="$PWD/tmp/home/.m2/repository"
     MAVEN_OPTS="-Dmaven.repo.local=$m2repo" \
         mvn -f ./shanoir-ng-users/pom.xml \
         -Pnative spring-boot:build-image \
-        -DskipTests \
-        ${build_sql_init_mode:+-Dspring.sql.init.mode="$build_sql_init_mode"}
+        -DskipTests
 	fi
 
 	# Build the (remaining) docker images
@@ -160,14 +163,10 @@ if [ -n "$build" ] ; then
 	# via compose_files_base, because it's needed to run the
 	# SHANOIR_MIGRATION=init oneshot step (see the deploy loop below): the
 	# native image has no /bin/entrypoint wrapper to do that itself.
-	step "build docker images"
 	if [ -n "$native" ] ; then
-		other_services="`docker compose $compose_files config --services | grep -v '^users$'`"
-		docker compose $compose_files build $other_services
-		docker compose $compose_files_base build users
-	else
-		docker compose $compose_files build
+		docker compose $compose_files build users
 	fi
+
 fi
 if [ -n "$deploy" ] ; then
 	#
