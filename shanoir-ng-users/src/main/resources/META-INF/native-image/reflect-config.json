@@ -2,10 +2,17 @@
     {
         "name": "org.shanoir.ng.study.rights.command.StudyUserCommand",
         "allDeclaredConstructors": true,
-        "allDeclaredMethods": true
+        "allDeclaredMethods": true,
+        "allDeclaredFields": true
     },
     {
         "name": "org.shanoir.ng.shared.email.EmailStudyUsersAdded",
+        "allDeclaredConstructors": true,
+        "allDeclaredMethods": true,
+        "allDeclaredFields": true
+    },
+    {
+        "name": "org.shanoir.ng.shared.event.ShanoirEvent",
         "allDeclaredConstructors": true,
         "allDeclaredMethods": true,
         "allDeclaredFields": true
