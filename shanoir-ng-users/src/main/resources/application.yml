@@ -152,7 +152,7 @@ spring:
       matching-strategy: ANT_PATH_MATCHER
   sql:
     init:
-      data-locations: classpath:/scripts/import.sql
+      data-locations: classpath:/scripts/data.sql
       mode: always
   threads:
     virtual:

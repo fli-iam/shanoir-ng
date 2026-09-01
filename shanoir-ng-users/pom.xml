@@ -207,7 +207,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <profiles>
-                        <profile>${spring.active.profile}</profile>
+                        <profile>default</profile>
                     </profiles>
                     <image>
                         <name>${project.name}-native</name>
