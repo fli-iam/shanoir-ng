@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.email.EmailService;
@@ -192,6 +193,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
         LOG.info(SYNC_ALL_USERS_TO_KEYCLOAK);
         final String token = getAdminToken();
         final Iterable<User> users = userRepository.findAll();
+        LOG.info("Existing user(s) found: " + StreamSupport.stream(users.spliterator(), false).count());
         for (final User user : users) {
             List<?> existing = searchUserByUsername(user.getUsername(), token);
             if (existing != null && !existing.isEmpty()) {
