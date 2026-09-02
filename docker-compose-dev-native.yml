@@ -15,7 +15,7 @@ services:
   # Users microservice - native
   #
   users-native:
-    container_name: "${SHANOIR_PREFIX}users"
+    container_name: "${SHANOIR_PREFIX}users-native"
     image: "shanoir-ng-users-native:latest"
     entrypoint: ["/workspace/org.shanoir.ng.ShanoirUsersApplication",
                  "-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts",
