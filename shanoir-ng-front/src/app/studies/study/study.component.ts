@@ -192,7 +192,7 @@ export class StudyComponent extends EntityComponent<Study> {
     initView(): Promise<void> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin()
-                || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_DOWNLOAD));
+                || rights.includes(StudyUserRight.CAN_DOWNLOAD);
             this.hasCopyRight = this.keycloakService.isUserAdmin()
                 || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
             // mirrors the backend rule: an administrator, or any study administrator, for their own study
