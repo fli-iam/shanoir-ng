@@ -218,7 +218,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             }
                         </span>
                     }
-                    @if (!(condition.values[condition.values.length - 1]?.toString().length == 0)) {
+                    @if (allowsMultipleValues && !(condition.values[condition.values.length - 1]?.toString().length == 0)) {
                         <div class="add-cond-value-frame">
                             <span class="add-cond-value" (click)="onTextValueAdd()">
                                 <i class="fa-solid fa-circle-plus"></i>
@@ -242,7 +242,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             placeholder="select value"
                             (focusout)="valueTouched = true"></select-box>
                     }
-                    @if (condition.values[condition.values.length - 1] && condition.values.length < shanoirFieldOptions.length) {
+                    @if (allowsMultipleValues && condition.values[condition.values.length - 1] && condition.values.length < shanoirFieldOptions.length) {
                         <div class="add-cond-value-frame">
                             <span class="add-cond-value" (click)="condition.values?.push(null)">
                                 <i class="fa-solid fa-plus"></i>

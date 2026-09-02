@@ -134,8 +134,10 @@ public interface QualityCardApi {
         @ApiResponse(responseCode = "422", description = "bad parameters"),
         @ApiResponse(responseCode = "500", description = "unexpected error")
     })
-    @RequestMapping(value = "/test/{qualityCardId}", method = RequestMethod.GET)
+    @RequestMapping(value = { "/test/{qualityCardId}", "/test/{qualityCardId}/{from}/{to}" }, method = RequestMethod.GET)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<QualityCardResult> testQualityCardOnStudy(
-            @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException, PacsException;
+            @Parameter(description = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
+            @Parameter(description = "index of the first examination to test, when testing a sample") @PathVariable(value = "from", required = false) Integer from,
+            @Parameter(description = "index of the last examination to test, when testing a sample") @PathVariable(value = "to", required = false) Integer to) throws RestServiceException, MicroServiceCommunicationException, PacsException;
 }
