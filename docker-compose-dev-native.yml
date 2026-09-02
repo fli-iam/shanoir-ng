@@ -12,9 +12,9 @@
 
 services:
   #
-  # Users microservice
+  # Users microservice - native
   #
-  users:
+  users-native:
     container_name: "${SHANOIR_PREFIX}users"
     image: "shanoir-ng-users-native:latest"
     entrypoint: ["/workspace/org.shanoir.ng.ShanoirUsersApplication",
