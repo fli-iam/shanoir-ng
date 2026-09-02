@@ -101,17 +101,6 @@ if [ -z "$clean$force" ] && [ -n "$deploy" ] ; then
 	die "you must provide at least --clean, --force or --no-deploy"
 fi
 
-# Compose file sets used for the 'docker compose' invocations below.
-# - compose_files_base never includes the native overlay: it always resolves
-#   to the regular (buildable, entrypoint-wrapper-having) JVM image.
-# - compose_files layers docker-compose-dev-native.yml on top when --native is
-#   given.
-compose_files_base="-f docker-compose-dev.yml"
-compose_files="$compose_files_base"
-if [ -n "$native" ] ; then
-	compose_files="$compose_files -f docker-compose-dev-native.yml"
-fi
-
 if [ -n "$build" ] ; then
 	#
 	# Build stage
@@ -137,7 +126,7 @@ if [ -n "$build" ] ; then
 
   # Always build base images, users included
 	step "build all base docker images"
-  docker compose $compose_files_base build
+  docker compose -f docker-compose-dev.yml build
 
 	# Build the native images (paketo/buildpacks), if requested;
 	# build-image requires a Docker engine to run and produce the native image.
@@ -164,7 +153,7 @@ if [ -n "$build" ] ; then
 	# SHANOIR_MIGRATION=init oneshot step (see the deploy loop below): the
 	# native image has no /bin/entrypoint wrapper to do that itself.
 	if [ -n "$native" ] ; then
-		docker compose $compose_files build users
+		docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml build users-native
 	fi
 
 fi
@@ -176,7 +165,7 @@ if [ -n "$deploy" ] ; then
 		# full clean (--clean)
 		# -> destroy all external volumes
 		step "clean"
-		docker compose $compose_files down -v
+		docker compose -f docker-compose-dev.yml down -v
 	else
 		# overwrite (--force)
 		# -> just remove all existing containers
@@ -187,7 +176,7 @@ if [ -n "$deploy" ] ; then
 		# - 'docker compose logs' may display old logs if the container
 		#   is not destroyed
 		step "stop shanoir"
-		docker compose $compose_files down
+		docker compose -f docker-compose-dev.yml down
 	fi
 
 	#
@@ -196,26 +185,26 @@ if [ -n "$deploy" ] ; then
 
 	# 1. database
 	step "init: database"
-	docker compose $compose_files up -d database
+	docker compose -f docker-compose-dev.yml up -d database
 	wait_tcp_ready database 3306
 
 	# 2. keycloak-database + keycloak + init-cert-and-logs
 	if [ -n "$keycloak" ] ; then
 		step "init: keycloak-database"
-		docker compose $compose_files up -d keycloak-database
+		docker compose -f docker-compose-dev.yml up -d keycloak-database
 		wait_tcp_ready keycloak-database 3306
 		
 		step "init: keycloak"
-		docker compose $compose_files run --rm -e SHANOIR_MIGRATION=init keycloak
+		docker compose -f docker-compose-dev.yml run --rm -e SHANOIR_MIGRATION=init keycloak
 
 		step "start: keycloak"
-		docker compose $compose_files up -d keycloak
+		docker compose -f docker-compose-dev.yml up -d keycloak
 		docker-compose/common/oneshot --pgrp '\| *'				\
 				' INFO  \[io.quarkus\] .* Keycloak .* started in [0-9]*'	\
 				-- docker compose logs --no-color --follow keycloak >/dev/null
 
 		step "start and stop: init-cert-and-logs"
-		docker compose $compose_files up -d init-cert-and-logs
+		docker compose -f docker-compose-dev.yml up -d init-cert-and-logs
 	fi
 
 	# 3. infrastructure services: dcm4chee
@@ -224,7 +213,7 @@ if [ -n "$deploy" ] ; then
 		for infra_ms_dcm4chee in ldap dcm4chee-database dcm4chee-arc
 		do
 			step "start: $infra_ms_dcm4chee infrastructure microservices dcm4chee"
-			docker compose $compose_files up -d "$infra_ms_dcm4chee"
+			docker compose -f docker-compose-dev.yml up -d "$infra_ms_dcm4chee"
 		done
 	fi
 	
@@ -233,31 +222,24 @@ if [ -n "$deploy" ] ; then
 	for infra_ms in rabbitmq solr
 	do
 		step "start: $infra_ms infrastructure microservice"
-		docker compose $compose_files up -d "$infra_ms"
+		docker compose -f docker-compose-dev.yml up -d "$infra_ms"
 	done
 	
 	# 5. Shanoir microservices
 	step "start: shanoir microservices"
 	for ms in users studies datasets import preclinical nifti-conversion
 	do
-		# The native 'users' image has no /bin/entrypoint wrapper (it's built
-		# from a paketo runtime base, not our base-microservice image), so it
-		# can't run the SHANOIR_MIGRATION=init oneshot dance itself. Instead,
-		# run init against the regular (non-native) JVM image first -- this
-		# creates the schema on a fresh volume and is a no-op if it already
-		# exists -- then start the actual 'users' service as the native image.
 		if [ -n "$native" ] && [ "$ms" = "users" ] ; then
 			step "init: $ms microservice (via non-native image)"
-			docker compose $compose_files_base run --rm -e SHANOIR_MIGRATION=init "$ms"
+			docker compose -f docker-compose-dev.yml run --rm -e SHANOIR_MIGRATION=init "$ms"
 			step "start: $ms microservice (native)"
-			docker compose $compose_files up -d "$ms"
+			docker compose -f docker-compose-dev.yml -f docker-compose-dev-native.yml up -d users-native
 			continue
 		fi
-
 		step "init: $ms microservice"
-		docker compose $compose_files run --rm -e SHANOIR_MIGRATION=init "$ms"
+		docker compose -f docker-compose-dev.yml run --rm -e SHANOIR_MIGRATION=init "$ms"
 		step "start: $ms microservice"
-		docker compose $compose_files up -d "$ms"
+		docker compose -f docker-compose-dev.yml up -d "$ms"
 	done
 
 	# 6. nginx
