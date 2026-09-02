@@ -17,17 +17,17 @@ const eslint = require('@eslint/js');
 const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
 const unusedImports = require('eslint-plugin-unused-imports');
-const importPlugin = require('eslint-plugin-import');
+const importPlugin = require('eslint-plugin-import-x');
 
 module.exports = tseslint.config(
     {
         files: ['**/*.ts'],
         plugins: {
             'unused-imports': unusedImports,
-            import: importPlugin,
+            'import-x': importPlugin,
         },
         settings: {
-            'import/resolver': {
+            'import-x/resolver': {
                 typescript: {
                     project: './tsconfig.json',
                 },
@@ -57,9 +57,9 @@ module.exports = tseslint.config(
             'unused-imports/no-unused-imports': 'error',
 
             // Import plugin
-            'import/no-unresolved': 'error',
-            'import/no-duplicates': 'error',
-            'import/order': [
+            'import-x/no-unresolved': 'error',
+            'import-x/no-duplicates': 'error',
+            'import-x/order': [
                 'error',
                 {
                     groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
@@ -88,7 +88,7 @@ module.exports = tseslint.config(
         // Fix false positives in this file for dev env
         files: ['src/app/shared/side-menu/side-menu.component.ts'],
         rules: {
-            'import/no-unresolved': 'off',
+            'import-x/no-unresolved': 'off',
         },
     },
 );

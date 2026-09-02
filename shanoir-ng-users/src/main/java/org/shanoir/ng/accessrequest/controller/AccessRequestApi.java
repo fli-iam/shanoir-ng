@@ -14,17 +14,21 @@
 
 package org.shanoir.ng.accessrequest.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.accessrequest.model.AccessRequest;
+import org.shanoir.ng.accessrequest.model.ValidationDTO;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.amqp.AmqpException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,10 +74,24 @@ public interface AccessRequestApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PutMapping(value = "resolve/{accessRequestId}", produces = { "application/json" }, consumes = {
             "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @userSecurityService.hasRightOnAccessRequest(#accessRequestId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<Void> resolveNewAccessRequest(
             @Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
-            @Parameter(name = "Accept or refuse the request", required = true) @RequestBody boolean validation,
+            @Parameter(name = "Accept or refuse the request", required = true) @RequestBody ValidationDTO validation,
             BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException;
+
+    @Operation(summary = "extension", description = "Request an extension for the given study")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "extension requested"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "extension", produces = { "application/json" }, consumes = { "application/json" })
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    ResponseEntity<Void> requestExtension(
+            @Parameter(name = "id of the study to extend", required = true) @RequestParam("studyId") Long studyId,
+            @Parameter(name = "new extension date", required = true) @RequestParam("extensionDate") LocalDate extensionDate) throws RestServiceException;
 
     @Operation(summary = "byAdmin", description = "Find all the access request managed by the given adminstrator")
     @ApiResponses(value = {
@@ -106,6 +124,7 @@ public interface AccessRequestApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "byStudy/{studyId}", produces = { "application/json" }, consumes = {
             "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @userSecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<List<AccessRequest>> findAllByStudyId(
             @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId
             ) throws RestServiceException;
@@ -119,7 +138,8 @@ public interface AccessRequestApi {
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/{accessRequestId}", produces = { "application/json" }, consumes = {
             "application/json" })
-    ResponseEntity<AccessRequest> getByid(@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException;
+    @PreAuthorize("hasRole('ADMIN') or (@userSecurityService.hasRightOnAccessRequest(#accessRequestId, 'CAN_ADMINISTRATE'))")
+    ResponseEntity<AccessRequest> getById(@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException;
 
     @Operation(summary = "", description = "Invite an user to a study")
     @ApiResponses(value = {
@@ -129,6 +149,7 @@ public interface AccessRequestApi {
             @ApiResponse(responseCode = "422", description = "bad parameters"),
             @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PutMapping(value = "/invitation/")
+@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @userSecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE'))")
     ResponseEntity<AccessRequest> inviteUserToStudy(
             @Parameter(name = "Study the user is invited in", required = true)
                 @RequestParam(value = "studyId", required = true) Long studyId,

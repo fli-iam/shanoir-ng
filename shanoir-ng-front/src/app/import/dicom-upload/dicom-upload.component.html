@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="header command-zone">1. Select DICOM archive</div>
 <fieldset class="step dicom">
-    <checkbox [(ngModel)]="multipleExamImport" [disabled]="archiveStatus != 'none'"></checkbox>
+    <checkbox [(ngModel)]="multipleExamImport" [disabled]="archiveStatus != 'none'" [ngModelOptions]="{ standalone: true }"></checkbox>
     <label>Multi-examination import</label>
     @if (!multipleExamImport) {
         <div>
@@ -65,14 +65,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <li>
                     <label class="required-label">Select a research study</label>
                     <span class="right-col">
-                        <select-box [(ngModel)]="study" (userChange)="onSelectStudy()" [viewDisabled]="!study" [options]="studyOptions"></select-box>
+                        <select-box [(ngModel)]="study" [ngModelOptions]="{ standalone: true }" (userChange)="onSelectStudy()" [viewDisabled]="!study" [options]="studyOptions"></select-box>
                     </span>
                 </li>
                 @if (useStudyCard) {
                     <li>
                         <label class="required-label">Default study card</label>
                         <span class="right-col">
-                            <select-box [(ngModel)]="studyCard" (userChange)="onSelectStudyCard()" [options]="studycardOptions"></select-box>
+                            <select-box [(ngModel)]="studyCard" [ngModelOptions]="{ standalone: true }" (userChange)="onSelectStudyCard()" [options]="studycardOptions"></select-box>
                         </span>
                     </li>
                 }
@@ -87,6 +87,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                     [disabled]="!useStudyCard && (!study || !centerOptions)"
                                     [readOnly]="useStudyCard"
                                     [(ngModel)]="center"
+                                    [ngModelOptions]="{ standalone: true }"
                                     (userChange)="onSelectCenter()"
                                     [viewRoute]="'/center/details/' + $safeNavigationMigration(center?.id)"
                                     [viewDisabled]="!center"
@@ -105,7 +106,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <select-box
                                     [disabled]="!useStudyCard && (!center || !acquisitionEquipmentOptions)"
                                     [readOnly]="useStudyCard"
-                                    [(ngModel)]="acquisitionEquipment"
+                                    [(ngModel)]="acquisitionEquipment" [ngModelOptions]="{ standalone: true }"
                                     [viewRoute]="'/acquisition-equipment/details/' + $safeNavigationMigration(acquisitionEquipment?.id)"
                                     [viewDisabled]="!acquisitionEquipment"
                                     [options]="acquisitionEquipmentOptions"

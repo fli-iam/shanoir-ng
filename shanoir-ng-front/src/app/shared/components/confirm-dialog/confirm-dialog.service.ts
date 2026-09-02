@@ -56,5 +56,14 @@ export class ConfirmDialogService {
             return answer;
         });
     }
+
+    public extendDate(title: string, message?: string, button?: string, date?: Date): Promise<{response: boolean, date: Date}> {
+        const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.createComponent(ConfirmDialogComponent);
+        const dialog: ConfirmDialogComponent = ref.instance;
+        return dialog.openExtendDate(title, message, button, date).then(answer => {
+            ref.destroy();
+            return answer;
+        });
+    }
     
 }

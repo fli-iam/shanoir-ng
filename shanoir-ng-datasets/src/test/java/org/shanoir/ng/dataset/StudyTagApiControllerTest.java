@@ -206,7 +206,7 @@ public class StudyTagApiControllerTest {
         datasetToReturn.getDatasetAcquisition().setExamination(exam);
         datasetToReturn.getDatasetAcquisition().getExamination().setStudy(study);
 
-        given(datasetServiceMock.findById(1L)).willReturn(datasetToReturn);
+        given(datasetServiceMock.findByIdWithProcessingAncestorsAndExaminationAndMetadata(1L)).willReturn(datasetToReturn);
         doNothing().when(datasetServiceMock).deleteById(1L);
         given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
         given(studyRepo.findById(Mockito.anyLong())).willReturn(Optional.of(study));
@@ -295,7 +295,7 @@ public class StudyTagApiControllerTest {
         for (int i = 0; i < 501; i++) {
             hugeList.add(new MrDataset());
         }
-        Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(hugeList);
+        Mockito.when(datasetServiceMock.findByStudyIdWithDatasetFilesAndExaminationAndMetadata(1L)).thenReturn(hugeList);
 
         try {
         // WHEN we export all the datasets

@@ -210,6 +210,12 @@ public abstract class Dataset extends AbstractEntity {
     @Transient
     private String sopInstanceUID;
 
+    @Transient
+    private Boolean inPacs;
+
+    @Transient
+    private Long centerId;
+
     public Dataset() {
     }
 
@@ -440,31 +446,12 @@ public abstract class Dataset extends AbstractEntity {
         return getDatasetAcquisition().getExamination().getStudyId();
     }
 
-    /**
-     * @return the centerId
-     */
-    @Transient
     public Long getCenterId() {
-        if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
-            if (getDatasetProcessing() != null && getDatasetProcessing().getInputDatasets() != null) {
-                return getDatasetProcessing().getInputDatasets().get(0).getCenterId();
-            }
-            return null;
-        }
-        return getDatasetAcquisition().getExamination().getCenterId();
+        return centerId;
     }
 
-    /**
-     * @return The first original (non-derived) Dataset in the chain.
-     */
-    @JsonIgnore
-    @Transient
-    public Dataset getFirstRealInput() {
-        if (this.datasetProcessing != null) {
-            return this.datasetProcessing.getInputDatasets().get(0).getFirstRealInput();
-        } else {
-            return this;
-        }
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
     }
 
     /**
@@ -555,7 +542,14 @@ public abstract class Dataset extends AbstractEntity {
     }
 
     public boolean getInPacs() {
-        return getDatasetExpressions() != null && getDatasetExpressions().size() > 0;
+        if (inPacs != null) {
+            return inPacs;
+        }
+        return datasetExpressions != null && !datasetExpressions.isEmpty();
+    }
+
+    public void setInPacs(Boolean inPacs) {
+        this.inPacs = inPacs;
     }
 
     public List<StudyTag> getTags() {

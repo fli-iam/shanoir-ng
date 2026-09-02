@@ -74,23 +74,31 @@ public class AcqMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcqu
     }
 
     /**
-     * Check if the condition is fulfilled for the given acquisition and append a message if not
-     * Used in QualityCardRule to check the condition and set the msg in quality report
+     * Check if the condition is fulfilled for the given acquisition and append a message describing
+     * the outcome (fulfilled or not) - the caller (QualityCardServiceImpl.conditionsfulfilled()) relies
+     * on this message being non-empty in both cases to build the quality card report.
      * @param acquisition the acquisition to check
-     * @param msg the message to append if the condition is not fulfilled
+     * @param report the message to append, describing whether/why the condition was fulfilled
      * @return true if the condition is fulfilled, false otherwise
      * @throws CheckedIllegalClassException
      */
     public boolean fulfilled(DatasetAcquisition acquisition, StringBuffer report) {
         boolean fulfilled = fulfilled(acquisition);
-        if (!fulfilled) {
-            try {
-                report.append("Condition not fulfilled for acquisition ").append(acquisition.getId()).append(" : ");
-                report.append("field ").append(this.getShanoirField().get(acquisition)).append(" value is not in ").append(this.getValues());
-            } catch (CheckedIllegalClassException e) {
-                report.append("Error occurred while checking condition for acquisition ").append(acquisition.getId());
-                LOG.error("Error occurred while checking condition for acquisition {}", acquisition.getId(), e);
+        try {
+            String fieldValue = this.getShanoirField().get(acquisition);
+            if (fulfilled) {
+                report.append("field ").append(this.getShanoirField().name()).append(", the found value ").append(fieldValue)
+                        .append(" satisfies operator ").append(this.getOperation())
+                        .append(" against the expected value(s) ").append(this.getValues());
+            } else {
+                report.append("Condition not fulfilled for acquisition id ").append(acquisition.getId()).append(" : ");
+                report.append("field ").append(this.getShanoirField().name()).append(", the found value ").append(fieldValue)
+                        .append(" does not satisfy operator ").append(this.getOperation())
+                        .append(" against the expected value(s) ").append(this.getValues());
             }
+        } catch (CheckedIllegalClassException e) {
+            report.append("Error occurred while checking condition for acquisition ").append(acquisition.getId());
+            LOG.error("Error occurred while checking condition for acquisition {}", acquisition.getId(), e);
         }
         return fulfilled;
     }

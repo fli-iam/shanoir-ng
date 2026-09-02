@@ -25,9 +25,10 @@ import { StudyLight } from '../studies/shared/study.dto';
 import { StudyService } from '../studies/shared/study.service';
 import { AccessRequest } from '../users/access-request/access-request.model';
 import { User } from '../users/shared/user.model';
-import { UserService } from '../users/shared/user.service';
 import { DUASigningComponent } from '../dua/dua-signing/dua-signing.component';
 import { EventTypePipe } from '../async-tasks/event.pipe';
+import { AccessRequestService } from '../users/access-request/access-request.service';
+import { UserService } from '../users/shared/user.service';
 
 import { ChallengeBlockComponent } from './challenge/challenge-block.component';
 
@@ -54,12 +55,15 @@ export class HomeComponent {
     nbExtensionRequests: number;
     accessRequests: AccessRequest[] = [];
     protected downloadState: TaskState = new TaskState();
+    protected expiringStudies: StudyLight[] = [];
+    protected expiringDates: Map<number, Date> = new Map<number, Date>();
 
 
     constructor(
             private breadcrumbsService: BreadcrumbsService,
             private studyService: StudyService,
             private keycloakService: KeycloakService,
+            protected accessRequestService: AccessRequestService,
             private userService: UserService,
             private taskService: TaskService) {
         this.breadcrumbsService.nameStep('Home');
@@ -83,7 +87,9 @@ export class HomeComponent {
         }).then(() => {
             this.loaded = true;
             if (this.admin || !this.challengeDua) {
-                this.fetchChallengeStudies()
+                this.fetchChallengeStudies().then(() => {
+                    this.computeExpiringStudies();
+                });
                 if (this.admin) {
                     this.fetchAccountRequests();
                 }
@@ -92,7 +98,7 @@ export class HomeComponent {
         });
         // Load access requests
         if (this.isUserAtLeastExpert()) {
-            this.userService.getAccessRequestsForAdmin().then(acs => {
+            this.accessRequestService.getAccessRequestsForAdmin().then(acs => {
                 this.accessRequests = acs;
             });
         }
@@ -102,8 +108,8 @@ export class HomeComponent {
         this.load();
     }
 
-    private fetchChallengeStudies() {
-        this.studyService.getStudiesLight().then(studies => {
+    private fetchChallengeStudies(): Promise<void> {
+        return this.studyService.getStudiesLight().then(studies => {
             this.challengeStudies = [];
             if (studies) {
                 this.allStudies = studies;
@@ -113,6 +119,25 @@ export class HomeComponent {
                         this.challengeStudies.push(study);
                     }
                 }
+            }
+        });
+    }
+
+    private computeExpiringStudies() {
+        this.studyService.fetchCurrentUserStudyDates().then(expirationDates => {
+            this.expiringDates = expirationDates;
+            if (expirationDates) {
+                this.expiringStudies = this.studies.filter(study => {
+                    const expDate = expirationDates.get(study.id);
+                    if (expDate) {
+                        const today = new Date();
+                        const diffTime = expDate.getTime() - today.getTime();
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        return diffDays <= 15; // Expiring in 15 days or less
+                    } else {
+                        return false;
+                    }
+                });
             }
         });
     }
