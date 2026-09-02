@@ -226,8 +226,7 @@ jobs:
       # <image><name>${project.name}-native</name></image> configuration.
       - name: Build users-native image (buildpacks)
         run: >
-          mvn -f ./shanoir-ng-users/pom.xml
-          spring-boot:build-image -DskipTests
+          mvn -f ./shanoir-ng-users/pom.xml -Pnative spring-boot:build-image -DskipTests
 
       - name: Tag and push users-native image
         run: |
