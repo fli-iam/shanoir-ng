@@ -244,5 +244,5 @@ if [ -n "$deploy" ] ; then
 
 	# 6. nginx
 	step "start: nginx"
-	docker compose $compose_files up -d nginx
+	docker compose -f docker-compose-dev.yml up -d nginx
 fi
